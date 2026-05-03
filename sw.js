@@ -1,7 +1,7 @@
 // HABIT Training Hub — Service Worker
 // Caches the app shell for offline use
 
-const CACHE = 'habit-v23';
+const CACHE = 'habit-v24';
 const ASSETS = [
   '/app.html',
   '/manifest.json',

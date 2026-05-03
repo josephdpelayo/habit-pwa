@@ -709,9 +709,9 @@ function showMainSb(){
   });
   document.querySelectorAll('.bnb').forEach((b,i)=>b.classList.toggle('active',i===0));
   if('Notification' in window&&Notification.permission==='default')Notification.requestPermission().catch(()=>{});
-  try{renderMembershipStatus();}catch(e){console.error(e);}
-  try{renderAccess();}catch(e){console.error(e);}
-  try{renderActiveBookings();}catch(e){console.error(e);}
+  renderMembershipStatus();
+  renderAccess();
+  renderActiveBookings().catch(console.error);
   startTimer();
 }
 
@@ -925,10 +925,20 @@ function sendNotif(title, body){
 // Track notification state to avoid repeating
 let _notifSent={};
 
-function renderAccess(){
+async function renderAccess(){
   const el=document.getElementById('access-main');
-  if(!curUser){el.innerHTML='';return;}
-  const res=nextBk(curUser),now=new Date();
+  if(!curUser||!sbUser){if(el)el.innerHTML='';return;}
+  // Always load fresh bookings from Supabase
+  try{
+    const{data:bks}=await sb.from('bookings')
+      .select('*').eq('user_id',sbUser.id).eq('status','active')
+      .gte('ds',mazToday()).order('ds').order('start_idx').limit(10);
+    curUser.bookings=(bks||[]).map(b=>({
+      id:b.id,ds:b.ds,startIdx:b.start_idx,slotsUsed:b.slots_used||3,
+      isGroup:b.is_group,grupalSpots:b.grupal_spots,timeStr:b.time_str,durMin:b.dur_min||90
+    }));
+  }catch(e){console.warn('renderAccess load:',e);}
+  const res=nextBk(curUser),now=mazNow();
   if(!res){
     _notifSent={};
     el.innerHTML='<div class="ac-card ac-off"><div class="ac-status">Sin acceso activo</div><div class="ac-code">'+curUser.accessCode+'#</div><div class="ac-info">Reserva un turno para activar tu acceso</div><div class="ac-hint">Tu código personal · Introdúcelo en el teclado seguido de # · Solo activo durante tu reserva</div></div>';
@@ -1105,7 +1115,7 @@ const ALL_VIEWS=['inicio','book','planes','rutinas','comunidad','historial','per
 function sv(v){
   document.querySelectorAll('.bnb').forEach((b,i)=>b.classList.toggle('active',['inicio','book','planes','rutinas','comunidad','historial'][i]===v));
   ALL_VIEWS.forEach(n=>{const el=document.getElementById('v-'+n);if(el)el.classList.toggle('active',n===v);});
-  if(v==='inicio'){renderMembershipStatus();renderAccess();renderActiveBookings();}
+  if(v==='inicio'){renderMembershipStatus();renderAccess().catch(console.error);renderActiveBookings().catch(console.error);}
   if(v==='book')renderBook();
   if(v==='planes')renderPlans();
   if(v==='rutinas'){renderRutinas().catch(console.error);}
@@ -1174,27 +1184,43 @@ function savePerfil(){
 }
 
 // ── ACTIVE BOOKINGS in Inicio ──
-function renderActiveBookings(){
+async function renderActiveBookings(){
   const el=document.getElementById('active-bookings-wrap');
-  if(!el||!curUser)return;
-  const ds0=dk(new Date()),ds1=dk(new Date(Date.now()+86400000));
-  const upcoming=(curUser.bookings||[])
-    .filter(b=>b.ds===ds0||b.ds===ds1)
-    .filter(b=>new Date(b.ds+'T00:00:00').getTime()+b.startIdx*30*60000>Date.now())
-    .sort((a,b2)=>a.ds===b2.ds?a.startIdx-b2.startIdx:a.ds.localeCompare(b2.ds));
-  if(!upcoming.length){el.innerHTML='';return;}
-  const dlMap={[ds0]:'Hoy',[ds1]:'Mañana'};
-  el.innerHTML='<div class="divider" style="margin:.5rem 0"></div><p class="slbl">Mis reservas activas</p>'+
-    upcoming.map(b=>{
-      const dl=dlMap[b.ds]||fmtDS(b.ds);
-      const canC=canCancelBk(b);
-      return '<div style="background:var(--card);border:1px solid var(--border);border-radius:6px;padding:12px 14px;margin-bottom:8px;display:flex;align-items:center;gap:10px">'+
-        '<div style="flex:1"><div style="font-size:14px;font-weight:600;color:var(--white)">'+dl+' · '+b.timeStr+'</div>'+
-        '<div style="font-size:11px;color:var(--gray);margin-top:2px">'+(b.isGroup?'Grupal · '+(b.grupalSpots||4)+' personas · ':'Individual · ')+'90 min</div></div>'+
-        (canC?'<button class="btn-sm bred" data-bid="'+b.id+'" onclick="handleCancelInicio(this)">Cancelar</button>':
-              '<span class="badge bg-amber" style="font-size:9px">-12h</span>')+
-        '</div>';
-    }).join('');
+  if(!el||!curUser||!sbUser)return;
+  el.innerHTML='';
+  try{
+    const{data:bks}=await sb.from('bookings')
+      .select('*')
+      .eq('user_id',sbUser.id)
+      .eq('status','active')
+      .gte('ds',mazToday())
+      .order('ds').order('start_idx');
+    if(!bks||!bks.length)return;
+    // Update local cache
+    curUser.bookings=bks.map(b=>({
+      id:b.id,ds:b.ds,startIdx:b.start_idx,slotsUsed:b.slots_used||3,
+      isGroup:b.is_group,grupalSpots:b.grupal_spots,timeStr:b.time_str,durMin:b.dur_min||90
+    }));
+    const today=mazToday();
+    const upcoming=bks.filter(b=>b.ds>=today);
+    if(!upcoming.length)return;
+    el.innerHTML='<p class="slbl" style="margin-bottom:10px">Mis reservas activas</p>';
+    upcoming.forEach(b=>{
+      const dl=b.ds===today?'Hoy':'Mañana';
+      const slotsUsed=b.slots_used||3;
+      const aw=getAW({ds:b.ds,startIdx:b.start_idx,slotsUsed});
+      const canC=(aw.sessionStart-mazNow())/3600000>=CANCEL_H;
+      const div=document.createElement('div');
+      div.className='active-bk-card';
+      div.innerHTML='<div style="flex:1">'
+        +'<div style="font-size:14px;font-weight:600;color:var(--white)">'+dl+' · '+b.time_str+'</div>'
+        +'<div style="font-size:11px;color:var(--gray);margin-top:2px">'+(b.is_group?'Grupal':'Individual')+' · '+(b.dur_min||90)+' min</div>'
+        +'</div>'
+        +(canC?'<button class="btn-sm bred" data-bid="'+b.id+'" onclick="handleCancelBk(this)">Cancelar</button>'
+               :'<span class="badge bg-amber" style="font-size:9px">-12h</span>');
+      el.appendChild(div);
+    });
+  }catch(e){console.error('renderActiveBookings:',e);}
 }
 
 function cancelFromInicio(bid){
@@ -2765,6 +2791,17 @@ async function loadSlotOccupancyFromSb(ds){
   }catch(e){console.error('loadSlots error:',e);}
 }
 
+
+function handleCancelBk(btn){
+  const bid=btn.dataset.bid;
+  if(!bid)return;
+  cancelBooking(bid).then(()=>{
+    renderActiveBookings();
+    renderAccess();
+    renderMembershipStatus();
+  }).catch(e=>toast('Error: '+e.message,'err'));
+}
+
 initApp();
 </script>
 </body>
@@ -3290,6 +3327,17 @@ async function loadSlotOccupancyFromSb(ds){
       slots30[ds][r.slot_idx].push({userId:r.user_id,isGroup:r.is_group,bookingId:r.booking_id});
     });
   }catch(e){console.error('loadSlots error:',e);}
+}
+
+
+function handleCancelBk(btn){
+  const bid=btn.dataset.bid;
+  if(!bid)return;
+  cancelBooking(bid).then(()=>{
+    renderActiveBookings();
+    renderAccess();
+    renderMembershipStatus();
+  }).catch(e=>toast('Error: '+e.message,'err'));
 }
 
 initApp();
