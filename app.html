@@ -1200,16 +1200,21 @@ async function renderActiveBookings(){
   if(!el||!curUser||!sbUser)return;
   el.innerHTML='';
   try{
-    // Get yesterday too in case timezone causes date mismatch
     const maz=mazNow();
     const yesterday=new Date(maz);yesterday.setDate(yesterday.getDate()-1);
     const yesterdayStr=dk(yesterday);
-    const{data:bks}=await sb.from('bookings')
+    const{data:bks,error:bkErr}=await sb.from('bookings')
       .select('*')
       .eq('user_id',sbUser.id)
       .eq('status','active')
       .gte('ds',yesterdayStr)
       .order('ds').order('start_idx');
+    // DEBUG — muestra lo que Supabase devuelve
+    const dbg=document.createElement('div');
+    dbg.style.cssText='font-size:10px;color:#666;padding:4px 8px;background:#111;border-radius:4px;margin-bottom:8px;word-break:break-all';
+    dbg.textContent='DEBUG: uid='+sbUser.id.slice(0,8)+'... ayer='+yesterdayStr+' bks='+(bks?bks.length:'null')+' err='+(bkErr?bkErr.message:'none');
+    el.appendChild(dbg);
+    if(bkErr){console.error('bookings error:',bkErr);return;}
     if(!bks||!bks.length){
       el.innerHTML='';
       return;
