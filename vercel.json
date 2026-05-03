@@ -1,0 +1,21 @@
+{
+  "rewrites": [
+    { "source": "/", "destination": "/app.html" },
+    { "source": "/((?!app\\.html|sw\\.js|manifest\\.json|icons/).*)", "destination": "/app.html" }
+  ],
+  "headers": [
+    {
+      "source": "/sw.js",
+      "headers": [
+        { "key": "Cache-Control", "value": "no-cache" },
+        { "key": "Content-Type", "value": "application/javascript" }
+      ]
+    },
+    {
+      "source": "/manifest.json",
+      "headers": [
+        { "key": "Content-Type", "value": "application/manifest+json" }
+      ]
+    }
+  ]
+}

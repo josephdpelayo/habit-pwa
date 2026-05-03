@@ -1451,31 +1451,80 @@ function renderConfPanel(ds,isGrupal){
   }
 }
 
-function doConfirm(){
+async function doConfirm(){
   if(!hasActive(curUser)){sv('planes');return;}
   if(selStartIdx===null)return;
+  if(!sbUser){toast('Debes iniciar sesion','err');return;}
   const ds=dk(curDate);
   const isGrupal=curUser.planType==='grupal';
   const slotsUsed=selShort?BOOKING_SLOTS_SHORT:BOOKING_SLOTS;
   const check=canStartAt(ds,selStartIdx,isGrupal,slotsUsed);
-  if(!check.ok){toast('Este horario ya no est\u00e1 disponible','err');renderBook();return;}
-  const day=getDaySlots(ds);
-  const grupalSpots=isGrupal?(check.grupalSpots||CAP):1;
-  const entry={userId:curUser.id,name:curUser.name,phone:curUser.phone||'',isGroup:isGrupal};
-  for(let i=0;i<slotsUsed;i++){
-    const si=selStartIdx+i;
-    if(!day[si])day[si]=[];
-    if(isGrupal){for(let j=0;j<grupalSpots;j++) day[si].push({...entry,spot:j});}
-    else day[si].push(entry);
+  if(!check.ok){toast('Este horario ya no esta disponible','err');renderBook();return;}
+  showLoading('Confirmando reserva...');
+  try{
+    const grupalSpots=isGrupal?(check.grupalSpots||CAP):1;
+    const durMin=slotsUsed*30;
+    const timeStr=fmtSlot(selStartIdx)+' - '+fmtSlot(selStartIdx+slotsUsed);
+    const bookingId='bk'+Date.now();
+
+    // 1. Save booking to Supabase
+    const{data:bk,error:bkErr}=await sb.from('bookings').insert({
+      id:bookingId,
+      user_id:sbUser.id,
+      ds:ds,
+      start_idx:selStartIdx,
+      slots_used:slotsUsed,
+      is_group:isGrupal,
+      grupal_spots:grupalSpots,
+      time_str:timeStr,
+      dur_min:durMin,
+      status:'active'
+    }).select().single();
+    if(bkErr)throw bkErr;
+
+    // 2. Save slot occupancy to Supabase
+    const occRows=[];
+    for(let i=0;i<slotsUsed;i++){
+      const si=selStartIdx+i;
+      if(isGrupal){
+        for(let j=0;j<grupalSpots;j++)
+          occRows.push({ds,slot_idx:si,user_id:sbUser.id,booking_id:bk.id,is_group:true,spot:j});
+      }else{
+        occRows.push({ds,slot_idx:si,user_id:sbUser.id,booking_id:bk.id,is_group:false});
+      }
+    }
+    const{error:occErr}=await sb.from('slot_occupancy').insert(occRows);
+    if(occErr)console.warn('slot_occupancy error:',occErr);
+
+    // 3. Deduct credit in Supabase
+    const newCredits=curUser.credits>=999?999:Math.max(0,curUser.credits-1);
+    await sb.from('profiles').update({credits:newCredits}).eq('id',sbUser.id);
+
+    // 4. Update local state
+    const day=getDaySlots(ds);
+    const entry={userId:curUser.id,name:curUser.name,phone:curUser.phone||'',isGroup:isGrupal,bookingId:bk.id};
+    for(let i=0;i<slotsUsed;i++){
+      const si=selStartIdx+i;
+      if(!day[si])day[si]=[];
+      if(isGrupal){for(let j=0;j<grupalSpots;j++)day[si].push({...entry,spot:j});}
+      else day[si].push(entry);
+    }
+    curUser.credits=newCredits;
+    curUser.bookings=curUser.bookings||[];
+    curUser.bookings.push({id:bk.id,ds,startIdx:selStartIdx,slotsUsed,isGroup:isGrupal,grupalSpots,timeStr,durMin});
+
+    // 5. Notify admin
+    try{await sb.from('admin_notifs').insert({message:'Reserva: '+curUser.name+' - '+fmtDS(ds)+' '+timeStr+(isGrupal?' (grupal)':'')});}catch(e){}
+
+    hideLoading();
+    addN('Reserva confirmada - '+fmtDS(ds)+' '+timeStr+'. Codigo: '+curUser.accessCode+'#','success');
+    clearSel();
+    toast('Reserva confirmada','ok');
+  }catch(e){
+    hideLoading();
+    toast('Error al confirmar: '+e.message,'err');
+    console.error('doConfirm error:',e);
   }
-  if(curUser.credits<999)curUser.credits--;
-  curUser.bookings=curUser.bookings||[];
-  const durMin=slotsUsed*30;
-  const timeStr=fmtSlot(selStartIdx)+' \u2013 '+fmtSlot(selStartIdx+slotsUsed);
-  curUser.bookings.push({id:'bk'+Date.now(),ds,startIdx:selStartIdx,slotsUsed,isGroup:isGrupal,grupalSpots,ts:new Date().toISOString(),timeStr,durMin});
-  addN('Reserva confirmada \u00b7 '+fmtDS(ds)+' '+timeStr+(isGrupal&&grupalSpots<CAP?' \u00b7 '+grupalSpots+' personas':'')+'. C\u00f3digo: '+curUser.accessCode+' #','success');
-  addAdminNotif('\ud83d\udcc5 Nueva reserva: '+curUser.name+' \u00b7 '+fmtDS(ds)+' '+timeStr+(isGrupal?' (grupal '+grupalSpots+'p)':''));
-  clearSel();toast('Reserva confirmada','ok');
 }
 
 function doWaitlist(){
@@ -1492,23 +1541,32 @@ function canCancelBk(b){
   const sessionMs=new Date(b.ds+'T00:00:00').getTime()+b.startIdx*30*60000;
   return(sessionMs-Date.now())/3600000>=CANCEL_H;
 }
-function cancelBooking(bid){
+async function cancelBooking(bid){
   const b=(curUser.bookings||[]).find(x=>x.id===bid);
   if(!b){toast('No encontrada','err');return;}
-  if(!canCancelBk(b)){toast('Solo puedes cancelar con m\u00e1s de 12h de anticipaci\u00f3n','err');return;}
-  const day=getDaySlots(b.ds);
-  const slotsUsed=b.slotsUsed||BOOKING_SLOTS;
-  for(let i=0;i<slotsUsed;i++){
-    const si=b.startIdx+i;
-    if(day[si])day[si]=day[si].filter(x=>x.userId!==curUser.id);
+  if(!canCancelBk(b)){toast('Solo puedes cancelar con mas de 12h de anticipacion','err');return;}
+  showLoading('Cancelando...');
+  try{
+    await sb.from('bookings').update({status:'cancelled'}).eq('id',bid);
+    await sb.from('slot_occupancy').delete().eq('booking_id',bid);
+    const newCredits=curUser.credits>=999?999:curUser.credits+1;
+    await sb.from('profiles').update({credits:newCredits}).eq('id',sbUser.id);
+    // Update local state
+    const day=getDaySlots(b.ds);
+    const slotsUsed=b.slotsUsed||BOOKING_SLOTS;
+    for(let i=0;i<slotsUsed;i++){
+      const si=b.startIdx+i;
+      if(day[si])day[si]=day[si].filter(x=>x.userId!==curUser.id);
+    }
+    curUser.bookings=curUser.bookings.filter(x=>x.id!==bid);
+    curUser.credits=newCredits;
+    hideLoading();
+    addN('Reserva cancelada - '+fmtDS(b.ds)+' '+b.timeStr+'. Visita devuelta.','warn');
+    toast('Reserva cancelada - Visita devuelta','warn');
+  }catch(e){
+    hideLoading();
+    toast('Error: '+e.message,'err');
   }
-  curUser.bookings=curUser.bookings.filter(x=>x.id!==bid);
-  if(curUser.credits<999)curUser.credits++;
-  addN('Reserva cancelada \u00b7 '+fmtDS(b.ds)+' '+b.timeStr+'. Visita devuelta.','warn');
-  const wk=b.ds+'_'+b.startIdx;
-  const wlist=waitlists[wk]||[];
-  if(wlist.length)addAdminNotif('\ud83d\udd14 Espacio liberado: '+fmtDS(b.ds)+' '+b.timeStr+'. '+wlist[0].name+' est\u00e1 en espera.');
-  toast('Reserva cancelada \u00b7 Visita devuelta','warn');
 }
 
 function setPT(t,btn){selPT=t;selPlan=null;document.querySelectorAll('.ptype-btn').forEach(b=>b.classList.remove('active'));btn.classList.add('active');document.getElementById('pt-sub').textContent=t==='individual'?'Un espacio · entrenas solo':'Bloquea los 4 espacios · gym exclusivo';document.getElementById('stripe-sec').style.display='none';renderPlans();}
@@ -2694,6 +2752,19 @@ async function addBoardSb(){
   }catch(e){hideLoading();toast('Error: '+e.message,'err');}
 }
 
+
+async function loadSlotOccupancyFromSb(ds){
+  try{
+    const{data:rows}=await sb.from('slot_occupancy').select('slot_idx,user_id,is_group,booking_id').eq('ds',ds);
+    if(!slots30[ds]) slots30[ds]=Array.from({length:TOTAL_SLOTS},()=>[]);
+    else slots30[ds]=Array.from({length:TOTAL_SLOTS},()=>[]);
+    (rows||[]).forEach(r=>{
+      if(!slots30[ds][r.slot_idx]) slots30[ds][r.slot_idx]=[];
+      slots30[ds][r.slot_idx].push({userId:r.user_id,isGroup:r.is_group,bookingId:r.booking_id});
+    });
+  }catch(e){console.error('loadSlots error:',e);}
+}
+
 initApp();
 </script>
 </body>
@@ -3206,6 +3277,19 @@ async function addBoardSb(){
     toast('Pizarron creado: '+name,'ok');
     renderBoardsAdmin();
   }catch(e){hideLoading();toast('Error: '+e.message,'err');}
+}
+
+
+async function loadSlotOccupancyFromSb(ds){
+  try{
+    const{data:rows}=await sb.from('slot_occupancy').select('slot_idx,user_id,is_group,booking_id').eq('ds',ds);
+    if(!slots30[ds]) slots30[ds]=Array.from({length:TOTAL_SLOTS},()=>[]);
+    else slots30[ds]=Array.from({length:TOTAL_SLOTS},()=>[]);
+    (rows||[]).forEach(r=>{
+      if(!slots30[ds][r.slot_idx]) slots30[ds][r.slot_idx]=[];
+      slots30[ds][r.slot_idx].push({userId:r.user_id,isGroup:r.is_group,bookingId:r.booking_id});
+    });
+  }catch(e){console.error('loadSlots error:',e);}
 }
 
 initApp();
