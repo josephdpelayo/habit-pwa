@@ -1640,8 +1640,8 @@ async function doConfirm(){
     toast('Reserva confirmada','ok');
   }catch(e){
     if(createdBookingId){
-      await sb.from('bookings').delete().eq('id',createdBookingId).catch(()=>{});
-      await sb.from('slot_occupancy').delete().eq('booking_id',createdBookingId).catch(()=>{});
+      try{await sb.from('bookings').delete().eq('id',createdBookingId);}catch(_){}
+      try{await sb.from('slot_occupancy').delete().eq('booking_id',createdBookingId);}catch(_){}
     }
     hideLoading();
     toast('Error al confirmar: '+e.message,'err');
@@ -2043,7 +2043,9 @@ async function adminCancelBookingSb(bid){
     if(currentCredits<999){
       await sb.from('profiles').update({credits:currentCredits+1}).eq('id',b.user_id);
     }
-    await sb.from('admin_notifs').insert({message:'Reserva cancelada (admin): '+(b.profiles?.name||'Usuario')+' - '+fmtDS(b.ds)+' '+b.time_str+(b.is_group?' (grupal)':'')}).catch(()=>{});
+    try{
+      await sb.from('admin_notifs').insert({message:'Reserva cancelada (admin): '+(b.profiles?.name||'Usuario')+' - '+fmtDS(b.ds)+' '+b.time_str+(b.is_group?' (grupal)':'')});
+    }catch(_){}
     hideLoading();
     toast('Reserva cancelada · visita devuelta','ok');
     await loadSlotOccupancyFromSb(document.getElementById('adm-date').value||mazToday());
@@ -2200,9 +2202,9 @@ async function renderBoardsAdmin(){
 async function toggleAssignSb(cb){
   const bid=cb.dataset.bid,uid=cb.dataset.uid;
   if(cb.checked){
-    await sb.from('board_assignments').insert({board_id:bid,user_id:uid}).catch(()=>{});
+    try{await sb.from('board_assignments').insert({board_id:bid,user_id:uid});}catch(_){}
   }else{
-    await sb.from('board_assignments').delete().eq('board_id',bid).eq('user_id',uid).catch(()=>{});
+    try{await sb.from('board_assignments').delete().eq('board_id',bid).eq('user_id',uid);}catch(_){}
   }
   // Update local boards
   const b=boards.find(x=>x.id===bid);
