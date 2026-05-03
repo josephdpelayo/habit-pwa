@@ -930,9 +930,11 @@ async function renderAccess(){
   if(!curUser||!sbUser){if(el)el.innerHTML='';return;}
   // Always load fresh bookings from Supabase
   try{
+    const maz2=mazNow();
+    const yday2=new Date(maz2);yday2.setDate(yday2.getDate()-1);
     const{data:bks}=await sb.from('bookings')
       .select('*').eq('user_id',sbUser.id).eq('status','active')
-      .gte('ds',mazToday()).order('ds').order('start_idx').limit(10);
+      .gte('ds',dk(yday2)).order('ds').order('start_idx').limit(10);
     curUser.bookings=(bks||[]).map(b=>({
       id:b.id,ds:b.ds,startIdx:b.start_idx,slotsUsed:b.slots_used||3,
       isGroup:b.is_group,grupalSpots:b.grupal_spots,timeStr:b.time_str,durMin:b.dur_min||90
@@ -1116,12 +1118,12 @@ function sv(v){
   document.querySelectorAll('.bnb').forEach((b,i)=>b.classList.toggle('active',['inicio','book','planes','rutinas','comunidad','historial'][i]===v));
   ALL_VIEWS.forEach(n=>{const el=document.getElementById('v-'+n);if(el)el.classList.toggle('active',n===v);});
   if(v==='inicio'){renderMembershipStatus();renderAccess().catch(console.error);renderActiveBookings().catch(console.error);}
-  if(v==='book')renderBook();
+  if(v==='book'){const _ds=dk(curDate);loadSlotOccupancyFromSb(_ds).then(()=>renderBook().catch(console.error));}
   if(v==='planes')renderPlans();
   if(v==='rutinas'){renderRutinas().catch(console.error);}
   if(v==='comunidad'){renderFeedSb().catch(console.error);}
   if(v==='historial'){renderHistorial().catch(console.error);}
-  if(v==='perfil'){renderPerfil();}
+  if(v==='perfil'){renderPerfil().catch(console.error);}
 }
 function admTab(t){
   document.querySelectorAll('.adm-tab').forEach((b,i)=>b.classList.toggle('active',
@@ -1148,21 +1150,30 @@ function planLbl(u){
 }
 
 // ── PERFIL ──
-function renderPerfil(){
-  if(!curUser)return;
-  document.getElementById('perfil-av').textContent=inits(curUser.name);
-  const a=hasActive(curUser);
-  document.getElementById('perfil-info').innerHTML=
-    '<div style="text-align:center;margin-bottom:.75rem">'+
-    '<div style="font-size:16px;font-weight:600;color:var(--white)">'+curUser.name+'</div>'+
-    '<div style="font-size:12px;color:var(--gray);margin-top:2px">'+curUser.email+'</div>'+
-    '<div style="margin-top:6px;display:flex;justify-content:center;gap:8px">'+
-    '<span class="badge '+(a?'bg-green':'bg-gray')+'">'+(a?'Membresía activa':'Sin membresía')+'</span>'+
-    (curUser.accessCode?'<span class="badge bg-blue">Código: '+curUser.accessCode+'#</span>':'')+
-    '</div></div>';
-  document.getElementById('pf-name').value=curUser.name||'';
-  document.getElementById('pf-phone').value=curUser.phone||'';
-  ['pf-oldpass','pf-newpass','pf-newpass2'].forEach(id=>document.getElementById(id).value='');
+async function renderPerfil(){
+  const el=document.getElementById('v-perfil');
+  if(!el||!curUser)return;
+  // Reload fresh profile from Supabase
+  if(sbUser){
+    try{
+      const{data:prof}=await sb.from('profiles').select('*').eq('id',sbUser.id).single();
+      if(prof){
+        sbProfile=prof;
+        curUser.name=prof.name;curUser.phone=prof.phone||'';
+        curUser.credits=prof.credits||0;curUser.plan=prof.plan_id;
+        curUser.planType=prof.plan_type;curUser.planExpiry=prof.plan_expiry;
+        curUser.accessCode=prof.access_code;
+      }
+    }catch(e){console.warn('renderPerfil load:',e);}
+  }
+  const pfName=el.querySelector('#pf-name');
+  const pfPhone=el.querySelector('#pf-phone');
+  const pfCode=el.querySelector('#pf-code');
+  const pfPlan=el.querySelector('#pf-plan');
+  if(pfName)pfName.value=curUser.name||'';
+  if(pfPhone)pfPhone.value=curUser.phone||'';
+  if(pfCode)pfCode.textContent=curUser.accessCode||'????';
+  if(pfPlan)pfPlan.textContent=curUser.plan?[...PLANS.individual,...PLANS.grupal].find(p=>p.id===curUser.plan)?.name||curUser.plan:'Sin plan';
 }
 function savePerfil(){
   if(!curUser)return;
@@ -1189,21 +1200,32 @@ async function renderActiveBookings(){
   if(!el||!curUser||!sbUser)return;
   el.innerHTML='';
   try{
+    // Get yesterday too in case timezone causes date mismatch
+    const maz=mazNow();
+    const yesterday=new Date(maz);yesterday.setDate(yesterday.getDate()-1);
+    const yesterdayStr=dk(yesterday);
     const{data:bks}=await sb.from('bookings')
       .select('*')
       .eq('user_id',sbUser.id)
       .eq('status','active')
-      .gte('ds',mazToday())
+      .gte('ds',yesterdayStr)
       .order('ds').order('start_idx');
-    if(!bks||!bks.length)return;
+    if(!bks||!bks.length){
+      el.innerHTML='';
+      return;
+    }
+    // Filter: only show bookings that haven't ended yet
+    const nowMaz=mazNow();
+    const upcoming=bks.filter(b=>{
+      const sessionEndMs=new Date(b.ds+'T07:00:00Z').getTime()+(b.start_idx+(b.slots_used||3))*30*60000;
+      return sessionEndMs > nowMaz.getTime();
+    });
     // Update local cache
     curUser.bookings=bks.map(b=>({
       id:b.id,ds:b.ds,startIdx:b.start_idx,slotsUsed:b.slots_used||3,
       isGroup:b.is_group,grupalSpots:b.grupal_spots,timeStr:b.time_str,durMin:b.dur_min||90
     }));
-    const today=mazToday();
-    const upcoming=bks.filter(b=>b.ds>=today);
-    if(!upcoming.length)return;
+    if(!upcoming.length){el.innerHTML='';return;}
     el.innerHTML='<p class="slbl" style="margin-bottom:10px">Mis reservas activas</p>';
     upcoming.forEach(b=>{
       const dl=b.ds===today?'Hoy':'Mañana';
@@ -1301,7 +1323,7 @@ function changeDay(delta){
 }
 function clearSel(){selStartIdx=null;selShort=false;renderBook();}
 
-function renderBook(){
+async function renderBook(){
   const maz0=mazNow();maz0.setHours(0,0,0,0);
   document.getElementById('pb').disabled=curDate<=maz0;
   document.getElementById('nb').disabled=curDate>=maxD();
@@ -1648,48 +1670,61 @@ async function doPay(){
 
 // ── HISTORIAL ──
 async function renderHistorial(){
-  const el=document.getElementById('historial-content');
-  if(!el)return;
-  el.innerHTML='<div class="empty">Cargando...</div>';
+  const hbEl=document.getElementById('hb');
+  const hpEl=document.getElementById('hp');
+  if(!hbEl||!sbUser)return;
+  hbEl.innerHTML='<div class="empty">Cargando...</div>';
+  if(hpEl)hpEl.innerHTML='';
   try{
     const[bkRes,payRes]=await Promise.allSettled([
-      sb.from('bookings').select('*').eq('user_id',sbUser.id).order('ds',{ascending:false}).order('start_idx',{ascending:false}).limit(50),
-      sb.from('payments').select('*').eq('user_id',sbUser.id).order('created_at',{ascending:false}).limit(20)
+      sb.from('bookings').select('*').eq('user_id',sbUser.id)
+        .order('ds',{ascending:false}).order('start_idx',{ascending:false}).limit(30),
+      sb.from('payments').select('*').eq('user_id',sbUser.id)
+        .order('created_at',{ascending:false}).limit(20)
     ]);
     const bks=bkRes.status==='fulfilled'?(bkRes.value.data||[]):[];
     const pays=payRes.status==='fulfilled'?(payRes.value.data||[]):[];
-    let html='';
+
+    // Render bookings
     if(bks.length){
-      html+='<p class="slbl" style="margin-bottom:10px">Mis reservas</p>';
+      hbEl.innerHTML='';
       bks.forEach(b=>{
         const isPast=b.ds<mazToday()||(b.ds===mazToday()&&b.start_idx<mazCurrentSlotIdx());
-        const status=b.status==='cancelled'?'Cancelada':isPast?'Completada':'Activa';
-        const color=b.status==='cancelled'?'var(--gray)':isPast?'var(--gray)':'var(--green)';
-        html+='<div class="brow" style="margin-bottom:6px">'
-          +'<div class="brow-info">'
+        const isCancelled=b.status==='cancelled';
+        const status=isCancelled?'Cancelada':isPast?'Completada':'Activa';
+        const color=isCancelled||isPast?'var(--gray)':'var(--green)';
+        const div=document.createElement('div');div.className='brow';div.style.marginBottom='6px';
+        div.innerHTML='<div class="brow-info">'
           +'<div class="brow-name">'+fmtDS(b.ds)+' · '+b.time_str+'</div>'
           +'<div class="brow-meta">'+(b.is_group?'Grupal':'Individual')+' · '+(b.dur_min||90)+' min</div>'
           +'</div>'
-          +'<span class="badge" style="background:'+color+'22;color:'+color+'">'+status+'</span>'
-          +'</div>';
+          +'<span class="badge" style="background:'+color+'22;color:'+color+'">'+status+'</span>';
+        hbEl.appendChild(div);
       });
+    }else{
+      hbEl.innerHTML='<div class="empty">Sin reservas aun.</div>';
     }
-    if(pays.length){
-      html+='<div class="divider"></div><p class="slbl" style="margin-bottom:10px">Mis pagos</p>';
-      pays.forEach(p=>{
-        html+='<div class="brow" style="margin-bottom:6px">'
-          +'<div class="brow-info">'
-          +'<div class="brow-name">'+p.plan_name+'</div>'
-          +'<div class="brow-meta">'+new Date(p.created_at).toLocaleDateString('es-MX')+' · **** '+(p.last4||'----')+'</div>'
-          +'</div>'
-          +'<div style="font-weight:700;color:var(--green)">'+MXN(p.amount)+'</div>'
-          +'</div>';
-      });
+
+    // Render payments
+    if(hpEl){
+      if(pays.length){
+        hpEl.innerHTML='';
+        pays.forEach(p=>{
+          const div=document.createElement('div');div.className='brow';div.style.marginBottom='6px';
+          div.innerHTML='<div class="brow-info">'
+            +'<div class="brow-name">'+p.plan_name+'</div>'
+            +'<div class="brow-meta">'+new Date(p.created_at).toLocaleDateString('es-MX')+' · **** '+(p.last4||'----')+'</div>'
+            +'</div>'
+            +'<div style="font-weight:700;color:var(--green)">'+MXN(p.amount)+'</div>';
+          hpEl.appendChild(div);
+        });
+      }else{
+        hpEl.innerHTML='<div class="empty">Sin pagos aun.</div>';
+      }
     }
-    el.innerHTML=html||'<div class="empty">Sin historial aun.</div>';
   }catch(e){
-    el.innerHTML='<div class="empty">Error cargando historial.</div>';
-    console.error(e);
+    hbEl.innerHTML='<div class="empty">Error: '+e.message+'</div>';
+    console.error('renderHistorial:',e);
   }
 }
 
@@ -1711,15 +1746,16 @@ function submitScore(){
   logScoreCtx=null;toast('Score guardado 💪','ok');renderRutinas();
 }
 async function renderRutinas(){
-  const el=document.getElementById('rutinas-content');
+  const el=document.getElementById('rut-content');
   if(!el)return;
   el.innerHTML='<div class="empty">Cargando rutinas...</div>';
+  if(!sbUser){el.innerHTML='<div class="empty">Inicia sesion para ver tus rutinas.</div>';return;}
   try{
     // Get boards assigned to this user
     const{data:assignments}=await sb.from('board_assignments').select('board_id').eq('user_id',sbUser.id);
     const boardIds=(assignments||[]).map(a=>a.board_id);
     if(!boardIds.length){
-      el.innerHTML='<div class="empty">No tienes rutinas asignadas aun.<br>Preguntale a tu entrenador.</div>';
+      el.innerHTML='<div class="empty">No tienes rutinas asignadas.<br>Pide a tu entrenador que te asigne un pizarron.</div>';
       return;
     }
     const{data:myBoards}=await sb.from('boards').select('*').in('id',boardIds);
@@ -1729,26 +1765,33 @@ async function renderRutinas(){
     }
     el.innerHTML='';
     myBoards.forEach(board=>{
-      const div=document.createElement('div');div.className='board-card';
-      div.innerHTML='<div style="display:flex;align-items:center;gap:8px;margin-bottom:12px">'
+      const div=document.createElement('div');
+      div.className='board-card';
+      div.style.marginBottom='1rem';
+      let exHtml='';
+      if(board.exercises&&board.exercises.length){
+        exHtml=board.exercises.map((ex,i)=>
+          '<div class="ex-row">'
+          +'<div class="ex-info"><div class="ex-name">'+ex.name+'</div>'
+          +(ex.sets?'<div class="ex-meta">'+ex.sets+' series · '+ex.reps+' reps'+(ex.notes?' · '+ex.notes:'')+'</div>':'')
+          +'</div>'
+          +'<button class="btn-sm bblue" data-bid="'+board.id+'" data-idx="'+i+'" data-name="'+ex.name+'" onclick="openLogScore(this)">Log</button>'
+          +'</div>'
+        ).join('');
+      }else{
+        exHtml='<div style="font-size:12px;color:var(--gray);padding:8px">Sin ejercicios en este pizarron.</div>';
+      }
+      div.innerHTML=
+        '<div style="display:flex;align-items:center;gap:8px;margin-bottom:12px">'
         +'<div style="width:10px;height:10px;border-radius:50%;background:'+board.color+'"></div>'
         +'<span class="board-name">'+board.name+'</span>'
         +'</div>'
-        +(board.exercises&&board.exercises.length
-          ? board.exercises.map((ex,i)=>
-              '<div class="ex-row">'
-              +'<div class="ex-info"><div class="ex-name">'+ex.name+'</div>'
-              +(ex.sets?'<div class="ex-meta">'+ex.sets+' series · '+ex.reps+' reps'+(ex.notes?' · '+ex.notes:'')+'</div>':'')
-              +'</div>'
-              +'<button class="btn-sm bblue" data-bid="'+board.id+'" data-idx="'+i+'" data-name="'+ex.name+'" onclick="openLogScore(this)">Log</button>'
-              +'</div>'
-            ).join('')
-          : '<div class="empty" style="font-size:12px">Sin ejercicios en este pizarron.</div>');
+        +exHtml;
       el.appendChild(div);
     });
   }catch(e){
-    el.innerHTML='<div class="empty">Error cargando rutinas.</div>';
-    console.error(e);
+    el.innerHTML='<div class="empty">Error cargando rutinas: '+e.message+'</div>';
+    console.error('renderRutinas:',e);
   }
 }
 
@@ -2679,7 +2722,7 @@ async function createPostSb(){
 
 async function renderFeedSb(){
   const el=document.getElementById('feed-content');
-  if(!el)return;
+  if(!el||!sbUser)return;
   el.innerHTML='<div class="empty">Cargando...</div>';
   try{
     const{data:posts}=await sb.from('posts').select('*,post_reactions(user_id,reaction_type)').order('created_at',{ascending:false}).limit(50);
@@ -3217,7 +3260,7 @@ async function createPostSb(){
 
 async function renderFeedSb(){
   const el=document.getElementById('feed-content');
-  if(!el)return;
+  if(!el||!sbUser)return;
   el.innerHTML='<div class="empty">Cargando...</div>';
   try{
     const{data:posts}=await sb.from('posts').select('*,post_reactions(user_id,reaction_type)').order('created_at',{ascending:false}).limit(50);
