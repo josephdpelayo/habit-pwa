@@ -53,6 +53,7 @@ create table if not exists public.slot_blocks (
   ds            date not null,
   slot_idx      integer not null check (slot_idx >= 0 and slot_idx < 48),
   spots         integer not null default 1 check (spots between 1 and 4),
+  reason        text not null default 'Sin motivo registrado',
   created_by    uuid references public.profiles(id) on delete set null,
   created_at    timestamptz not null default now(),
   primary key (ds, slot_idx)

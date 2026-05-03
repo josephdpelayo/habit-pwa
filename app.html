@@ -6,12 +6,12 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="HABIT">
 <meta name="application-name" content="HABIT">
-<link rel="manifest" href="/manifest.json?v=20260503-7">
-<link rel="apple-touch-icon" sizes="120x120" href="/icons/icon-120.png?v=20260503-7">
-<link rel="apple-touch-icon" sizes="152x152" href="/icons/icon-152.png?v=20260503-7">
-<link rel="apple-touch-icon" sizes="167x167" href="/icons/icon-167.png?v=20260503-7">
-<link rel="apple-touch-icon" sizes="180x180" href="/icons/icon-180.png?v=20260503-7">
-<link rel="icon" type="image/png" sizes="32x32" href="/icons/icon-32.png?v=20260503-7">
+<link rel="manifest" href="/manifest.json?v=20260503-8">
+<link rel="apple-touch-icon" sizes="120x120" href="/icons/icon-120.png?v=20260503-8">
+<link rel="apple-touch-icon" sizes="152x152" href="/icons/icon-152.png?v=20260503-8">
+<link rel="apple-touch-icon" sizes="167x167" href="/icons/icon-167.png?v=20260503-8">
+<link rel="apple-touch-icon" sizes="180x180" href="/icons/icon-180.png?v=20260503-8">
+<link rel="icon" type="image/png" sizes="32x32" href="/icons/icon-32.png?v=20260503-8">
 <title>HABIT</title>
 <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700;800&family=Barlow:wght@300;400;500;600&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
@@ -689,7 +689,7 @@ input,select,button,textarea{font-family:'Barlow',sans-serif}
 
 const SUPABASE_URL='https://pmpjteuqjusbiduevbwq.supabase.co';
 const SUPABASE_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBtcGp0ZXVxanVzYmlkdWV2YndxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc2OTI1NjUsImV4cCI6MjA5MzI2ODU2NX0.XbMzZoo2yqtrD8znLnyo_1zDfrdJAvAPj1lqGOyXnLw';
-const APP_VERSION='20260503-7';
+const APP_VERSION='20260503-8';
 const sb=supabase.createClient(SUPABASE_URL,SUPABASE_KEY,{auth:{autoRefreshToken:true,persistSession:true,detectSessionInUrl:false}});
 let sbUser=null,sbProfile=null;
 
@@ -2068,9 +2068,10 @@ async function renderAdmSlots(){
       const idx=Number(b.slot_idx);
       if(idx<0||idx>=TOTAL_SLOTS)return;
       const spots=Math.min(CAP,Number(b.spots)||1);
+      const reason=b.reason||'Sin motivo registrado';
       slotRows[idx].blocked=Math.min(CAP,slotRows[idx].blocked+spots);
       slotRows[idx].taken=Math.min(CAP,slotRows[idx].taken+spots);
-      slotRows[idx].items.push({name:'Bloqueado admin',isBlocked:true,spots});
+      slotRows[idx].items.push({name:'Bloqueado admin',isBlocked:true,spots,reason});
     });
     bookings.forEach(b=>{
       const slotsUsed=b.slots_used||BOOKING_SLOTS;
@@ -2116,13 +2117,14 @@ async function renderAdmSlots(){
     slotRows.forEach((row,idx)=>{
       const free=Math.max(0,CAP-row.taken);
       const isFull=free===0;
-      const itemText=row.items.length?row.items.map(it=>esc(it.name)+(it.isBlocked?' · bloqueado '+it.spots:it.isGroup?' · G'+it.spots:'')).join(' · '):'Sin reservas';
+      const itemText=row.items.length?row.items.map(it=>esc(it.name)+(it.isBlocked?' · bloqueado '+it.spots+' · '+esc(it.reason||'Sin motivo'):it.isGroup?' · G'+it.spots:'')).join(' · '):'Sin reservas';
       html+='<div class="brow">'
         +'<div class="slot-time">'+fmtSlot(idx)+'</div>'
         +'<div class="brow-info"><div class="brow-meta">'+itemText+'</div></div>'
         +'<span class="slot-badge '+(isFull?'sb-full':'sb-open')+'">'+free+' libre'+(free===1?'':'s')+'</span>'
         +'<select id="blk-'+idx+'" style="width:54px;background:var(--card2);border:1px solid var(--border);border-radius:3px;color:var(--white);padding:5px;font-size:12px;color-scheme:dark"><option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4">4</option></select>'
-        +'<button class="btn-sm bblue" data-ds="'+ds+'" data-idx="'+idx+'" onclick="blockSlotSb(this.dataset.ds,parseInt(this.dataset.idx),parseInt(document.getElementById(&quot;blk-'+idx+'&quot;).value))">Bloq.</button>'
+        +'<input id="blk-r-'+idx+'" type="text" placeholder="Motivo" style="width:110px;background:var(--card2);border:1px solid var(--border);border-radius:3px;color:var(--white);padding:6px;font-size:12px;outline:none">'
+        +'<button class="btn-sm bblue" data-ds="'+ds+'" data-idx="'+idx+'" onclick="blockSlotSb(this.dataset.ds,parseInt(this.dataset.idx),parseInt(document.getElementById(&quot;blk-'+idx+'&quot;).value),document.getElementById(&quot;blk-r-'+idx+'&quot;).value)">Bloq.</button>'
         +(row.blocked?'<button class="btn-sm bred" data-ds="'+ds+'" data-idx="'+idx+'" onclick="unblockSlotSb(this.dataset.ds,parseInt(this.dataset.idx))">Abrir</button>':'')
         +'</div>';
     });
@@ -2130,11 +2132,14 @@ async function renderAdmSlots(){
   }catch(e){el.innerHTML='<div class="empty">Error: '+e.message+'</div>';}
 }
 
-async function blockSlotSb(ds,idx,spots){
+async function blockSlotSb(ds,idx,spots,reason){
   spots=Math.min(CAP,Math.max(1,Number(spots)||1));
+  reason=(reason||'').trim();
+  if(!reason){toast('Agrega el motivo del bloqueo','err');return;}
   try{
-    const{error}=await sb.from('slot_blocks').upsert({ds,slot_idx:idx,spots},{onConflict:'ds,slot_idx'});
+    const{error}=await sb.from('slot_blocks').upsert({ds,slot_idx:idx,spots,reason,created_by:sbUser?.id||null},{onConflict:'ds,slot_idx'});
     if(error)throw error;
+    addAdminNotif('🚫 Slot bloqueado: '+fmtDS(ds)+' '+fmtSlot(idx)+' · '+spots+' espacio'+(spots>1?'s':'')+' · Motivo: '+reason);
     toast('Slot bloqueado','ok');
     renderAdmSlots();
   }catch(e){toast('Error al bloquear: '+(e.message||e),'err');}
@@ -2144,6 +2149,7 @@ async function unblockSlotSb(ds,idx){
   try{
     const{error}=await sb.from('slot_blocks').delete().eq('ds',ds).eq('slot_idx',idx);
     if(error)throw error;
+    addAdminNotif('🔓 Slot abierto: '+fmtDS(ds)+' '+fmtSlot(idx));
     toast('Slot abierto','ok');
     renderAdmSlots();
   }catch(e){toast('Error al abrir: '+(e.message||e),'err');}
