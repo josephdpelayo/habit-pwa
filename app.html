@@ -2157,7 +2157,7 @@ let chartRevenue=null,chartBookings=null,chartPlans=null;
 
 async function renderDashboard(){
   try{
-    const today=mazToday();
+    const _hoy=mazToday();
     const monthStart=today.slice(0,7);
     const[{data:allU},{data:pays},{data:bks},{data:logs}]=await Promise.all([
       sb.from('profiles').select('id,credits,plan_expiry,plan_id,role,name,phone').neq('role','admin'),
@@ -2214,7 +2214,7 @@ async function renderDashboard(){
 function renderDashKPIs(){
   const allU=Object.values(users).filter(u=>u.role!=='admin');
   const active=allU.filter(u=>hasActive(u));
-  const today=mazToday();
+  const _hoy=mazToday();
   const totalRev=payments.reduce((s,p)=>s+p.amount,0);
   const monthStart=today.slice(0,7);
   const monthRev=payments.filter(p=>p.ts.startsWith(monthStart)).reduce((s,p)=>s+p.amount,0);
@@ -2616,7 +2616,7 @@ async function renderStatsSb(){
       sb.from('access_log').select('id')
     ]);
     const active=(allU||[]).filter(u=>u.credits>0&&(!u.plan_expiry||new Date(u.plan_expiry)>new Date()));
-    const today=mazToday();
+    const _hoy=mazToday();
     const monthStart=today.slice(0,7);
     const monthRev=(pays||[]).filter(p=>p.created_at.startsWith(monthStart)).reduce((s,p)=>s+Number(p.amount),0);
     const totalRev=(pays||[]).reduce((s,p)=>s+Number(p.amount),0);
@@ -3154,7 +3154,7 @@ async function renderStatsSb(){
       sb.from('access_log').select('id')
     ]);
     const active=(allU||[]).filter(u=>u.credits>0&&(!u.plan_expiry||new Date(u.plan_expiry)>new Date()));
-    const today=mazToday();
+    const _hoy=mazToday();
     const monthStart=today.slice(0,7);
     const monthRev=(pays||[]).filter(p=>p.created_at.startsWith(monthStart)).reduce((s,p)=>s+Number(p.amount),0);
     const totalRev=(pays||[]).reduce((s,p)=>s+Number(p.amount),0);
