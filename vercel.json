@@ -1,14 +1,19 @@
 {
   "rewrites": [
-    { "source": "/", "destination": "/app.html" },
-    { "source": "/((?!app\\.html|sw\\.js|manifest\\.json|icons/).*)", "destination": "/app.html" }
+    { "source": "/", "destination": "/app.html" }
   ],
   "headers": [
     {
       "source": "/sw.js",
       "headers": [
-        { "key": "Cache-Control", "value": "no-cache" },
+        { "key": "Cache-Control", "value": "no-cache, no-store, must-revalidate" },
         { "key": "Content-Type", "value": "application/javascript" }
+      ]
+    },
+    {
+      "source": "/app.html",
+      "headers": [
+        { "key": "Cache-Control", "value": "no-cache, no-store, must-revalidate" }
       ]
     },
     {
