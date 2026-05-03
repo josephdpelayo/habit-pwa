@@ -273,6 +273,11 @@ input,select,button,textarea{font-family:'Barlow',sans-serif}
 .assign-row:last-child{border-bottom:none}
 .assign-uname{font-size:13px;color:var(--white)}
 .assign-check{width:18px;height:18px;cursor:pointer;accent-color:var(--blue)}
+.assign-head{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:8px}
+.assign-chipbar{display:flex;flex-wrap:wrap;gap:4px;margin-bottom:10px}
+.assign-list{max-height:220px;overflow-y:auto;border:1px solid var(--border);border-radius:4px;padding:0 10px;background:rgba(0,0,0,.12)}
+.board-assign-search{margin-bottom:8px}
+.assign-empty{display:none;padding:10px 0;font-size:12px;color:var(--gray)}
 .user-row{display:flex;align-items:center;gap:10px;padding:12px 0;border-bottom:1px solid var(--border)}
 .user-row:last-child{border-bottom:none}
 .adm-notif{background:var(--card);border:1px solid var(--border);border-radius:4px;padding:11px 12px;margin-bottom:8px;display:flex;gap:10px;align-items:flex-start}
@@ -2150,6 +2155,35 @@ function renderStats(){
 }
 
 // ── ADMIN PIZARRONES ──
+function renderAssignChipsFromBox(box){
+  if(!box)return;
+  const checked=[...box.querySelectorAll('.board-assignee-row input[type="checkbox"]:checked')];
+  const countEl=box.querySelector('.assign-count');
+  const chipbar=box.querySelector('.assign-chipbar');
+  if(countEl)countEl.textContent=checked.length+' asignado'+(checked.length===1?'':'s');
+  if(chipbar){
+    chipbar.innerHTML=checked.length
+      ? checked.map(cb=>'<span class="perk">'+esc(cb.dataset.uname||'Socio')+'</span>').join('')
+      : '<span style="font-size:11px;color:var(--gray)">Sin socios asignados</span>';
+  }
+}
+
+function filterBoardAssignees(input){
+  const box=input.closest('[data-board-assign]');
+  if(!box)return;
+  const q=(input.value||'').trim().toLowerCase();
+  const rows=[...box.querySelectorAll('.board-assignee-row')];
+  let visible=0;
+  rows.forEach(row=>{
+    const cb=row.querySelector('input[type="checkbox"]');
+    const show=!q||(row.dataset.name||'').includes(q)||!!cb?.checked;
+    row.style.display=show?'flex':'none';
+    if(show)visible++;
+  });
+  const empty=box.querySelector('.assign-empty');
+  if(empty)empty.style.display=visible?'none':'block';
+}
+
 async function renderBoardsAdmin(){
   await loadBoardsSb();
   const{data:allU}=await sb.from('profiles').select('id,name').neq('role','admin').order('name');
@@ -2168,13 +2202,25 @@ async function renderBoardsAdmin(){
       +'<button class="btn-sm bred" data-bid="'+board.id+'" data-idx="'+i+'" onclick="removeExerciseSb(this.dataset.bid,parseInt(this.dataset.idx))">x</button>'
       +'</div>'
     ).join('');
-    const userOpts='<div style="max-height:160px;overflow-y:auto;border:1px solid var(--border);border-radius:4px">'
+    const assignedUsers=users.filter(u=>board.assignedTo.includes(u.id));
+    const userOpts='<div class="assign-box" data-board-assign="'+esc(board.id)+'">'
+      +'<div class="assign-head">'
+      +'<div class="assign-title" style="margin-bottom:0">Asignar rutina</div>'
+      +'<span class="badge bg-blue assign-count">'+assignedUsers.length+' asignado'+(assignedUsers.length===1?'':'s')+'</span>'
+      +'</div>'
+      +'<div class="assign-chipbar">'
+      +(assignedUsers.length?assignedUsers.map(u=>'<span class="perk">'+esc(u.name||'Socio')+'</span>').join(''):'<span style="font-size:11px;color:var(--gray)">Sin socios asignados</span>')
+      +'</div>'
+      +'<input class="adm-search board-assign-search" placeholder="Buscar socio para asignar..." oninput="filterBoardAssignees(this)">'
+      +'<div class="assign-list">'
       +(users.length?users.map(u=>
-        '<label style="display:flex;align-items:center;gap:8px;padding:8px 10px;border-bottom:1px solid rgba(255,255,255,.05);cursor:pointer">'
-        +'<input type="checkbox" data-bid="'+board.id+'" data-uid="'+u.id+'" '+(board.assignedTo.includes(u.id)?'checked':'')+' onchange="toggleAssignSb(this)">'
-        +'<span style="font-size:13px;color:var(--white)">'+u.name+'</span>'
+        '<label class="assign-row board-assignee-row" data-name="'+esc((u.name||'').toLowerCase())+'" style="cursor:pointer">'
+        +'<span class="assign-uname">'+esc(u.name||'Socio')+'</span>'
+        +'<input class="assign-check" type="checkbox" data-bid="'+esc(board.id)+'" data-uid="'+esc(u.id)+'" data-uname="'+esc(u.name||'Socio')+'" '+(board.assignedTo.includes(u.id)?'checked':'')+' onchange="toggleAssignSb(this)">'
         +'</label>'
       ).join(''):'<div style="padding:8px;font-size:12px;color:var(--gray)">Sin socios registrados</div>')
+      +'<div class="assign-empty">Sin resultados.</div>'
+      +'</div>'
       +'</div>';
     card.innerHTML=
       '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">'
@@ -2193,7 +2239,6 @@ async function renderBoardsAdmin(){
       +'</div>'
       +'<button class="btn-sm bblue" style="margin-top:6px;width:100%" data-bid="'+board.id+'" onclick="addExerciseSb(this.dataset.bid)">+ Agregar ejercicio</button>'
       +'</div>'
-      +'<p class="slbl" style="margin-bottom:6px">Asignar a socios</p>'
       +userOpts;
     el.appendChild(card);
   });
@@ -2201,14 +2246,25 @@ async function renderBoardsAdmin(){
 
 async function toggleAssignSb(cb){
   const bid=cb.dataset.bid,uid=cb.dataset.uid;
-  if(cb.checked){
-    try{await sb.from('board_assignments').insert({board_id:bid,user_id:uid});}catch(_){}
-  }else{
-    try{await sb.from('board_assignments').delete().eq('board_id',bid).eq('user_id',uid);}catch(_){}
+  const checked=cb.checked;
+  try{
+    const res=checked
+      ? await sb.from('board_assignments').insert({board_id:bid,user_id:uid})
+      : await sb.from('board_assignments').delete().eq('board_id',bid).eq('user_id',uid);
+    if(res.error)throw res.error;
+  }catch(e){
+    cb.checked=!checked;
+    toast('Error al asignar rutina: '+(e.message||e),'err');
+    return;
   }
   // Update local boards
   const b=boards.find(x=>x.id===bid);
-  if(b){if(cb.checked){if(!b.assignedTo.includes(uid))b.assignedTo.push(uid);}else{b.assignedTo=b.assignedTo.filter(x=>x!==uid);}}
+  if(b){if(checked){if(!b.assignedTo.includes(uid))b.assignedTo.push(uid);}else{b.assignedTo=b.assignedTo.filter(x=>x!==uid);}}
+  const box=cb.closest('[data-board-assign]');
+  renderAssignChipsFromBox(box);
+  const search=box?.querySelector('.board-assign-search');
+  if(search)filterBoardAssignees(search);
+  toast(checked?'Rutina asignada':'Rutina removida','ok');
 }
 
 async function addExerciseSb(bid){
