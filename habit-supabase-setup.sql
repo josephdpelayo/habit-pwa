@@ -48,6 +48,16 @@ create table if not exists public.slot_occupancy (
   unique(ds, slot_idx, user_id)
 );
 
+-- ── TABLA: slot_blocks (bloqueos manuales admin) ──
+create table if not exists public.slot_blocks (
+  ds            date not null,
+  slot_idx      integer not null check (slot_idx >= 0 and slot_idx < 48),
+  spots         integer not null default 1 check (spots between 1 and 4),
+  created_by    uuid references public.profiles(id) on delete set null,
+  created_at    timestamptz not null default now(),
+  primary key (ds, slot_idx)
+);
+
 -- ── TABLA: waitlists ──
 create table if not exists public.waitlists (
   id            uuid primary key default uuid_generate_v4(),
@@ -169,6 +179,7 @@ create table if not exists public.admin_notifs (
 create index if not exists idx_bookings_user on public.bookings(user_id);
 create index if not exists idx_bookings_ds on public.bookings(ds);
 create index if not exists idx_slot_occ_ds on public.slot_occupancy(ds, slot_idx);
+create index if not exists idx_slot_blocks_ds on public.slot_blocks(ds, slot_idx);
 create index if not exists idx_payments_user on public.payments(user_id);
 create index if not exists idx_scores_board on public.scores(board_id, exercise_idx);
 create index if not exists idx_posts_created on public.posts(created_at desc);
@@ -182,6 +193,7 @@ create index if not exists idx_access_log_user on public.access_log(user_id);
 alter table public.profiles enable row level security;
 alter table public.bookings enable row level security;
 alter table public.slot_occupancy enable row level security;
+alter table public.slot_blocks enable row level security;
 alter table public.waitlists enable row level security;
 alter table public.payments enable row level security;
 alter table public.access_log enable row level security;
@@ -235,6 +247,12 @@ create policy "Users delete own slots"
   on public.slot_occupancy for delete using (auth.uid() = user_id);
 create policy "Admin all slots"
   on public.slot_occupancy for all using (
+    exists(select 1 from public.profiles where id=auth.uid() and role='admin')
+  );
+create policy "All users read slot blocks"
+  on public.slot_blocks for select using (auth.uid() is not null);
+create policy "Admin manage slot blocks"
+  on public.slot_blocks for all using (
     exists(select 1 from public.profiles where id=auth.uid() and role='admin')
   );
 
