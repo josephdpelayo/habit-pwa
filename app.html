@@ -771,6 +771,7 @@ const MAZ_UTC_OFFSET_H=7;
 const dk=d=>d.toISOString().slice(0,10);
 const inits=n=>n.split(' ').map(w=>w[0]).join('').slice(0,2).toUpperCase();
 const isUrl=u=>u&&(u.startsWith('http')||u.startsWith('https'));
+const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const timeSince=ts=>{const m=Math.floor((Date.now()-new Date(ts))/60000);if(m<1)return'Ahora';if(m<60)return m+'m';const h=Math.floor(m/60);if(h<24)return h+'h';return Math.floor(h/24)+'d';};
 const daysUntil=iso=>{if(!iso)return null;return Math.ceil((new Date(iso)-Date.now())/86400000);};
 const MO=['ene','feb','mar','abr','may','jun','jul','ago','sep','oct','nov','dic'];
@@ -1963,33 +1964,95 @@ function renderAdmNotifs(){
 
 async function renderAdmSlots(){
   const ds=document.getElementById('adm-date').value||mazToday();
-  const el=document.getElementById('adm-slots-list');
+  const el=document.getElementById('adm-slot-content');
   el.innerHTML='<div class="empty">Cargando...</div>';
   try{
-    const{data:bks}=await sb.from('bookings')
+    const{data:bks,error}=await sb.from('bookings')
       .select('*,profiles(name,phone,access_code)')
       .eq('ds',ds).eq('status','active').order('start_idx');
-    if(!bks||!bks.length){el.innerHTML='<div class="empty">Sin reservas para este dia.</div>';return;}
-    el.innerHTML='';
-    bks.forEach(b=>{
-      const div=document.createElement('div');div.className='brow';
-      div.innerHTML='<div class="brow-info">'
-        +'<div class="brow-name">'+(b.profiles?.name||'Usuario')+'</div>'
-        +'<div class="brow-meta">'+b.time_str+' · '+(b.dur_min||90)+'min · '+( b.is_group?'Grupal':'Individual')+'</div>'
-        +'<div class="brow-meta">Tel: '+(b.profiles?.phone||'-')+' · Codigo: '+(b.profiles?.access_code||'-')+'#</div>'
-        +'</div>'
-        +'<button class="btn-sm bred" data-bid="'+b.id+'" onclick="adminCancelBookingSb(this.dataset.bid)">Cancelar</button>';
-      el.appendChild(div);
+    if(error)throw error;
+    const bookings=bks||[];
+    const slotRows=Array.from({length:TOTAL_SLOTS},()=>({taken:0,items:[]}));
+    bookings.forEach(b=>{
+      const slotsUsed=b.slots_used||BOOKING_SLOTS;
+      const spots=b.is_group?Math.min(CAP,Number(b.grupal_spots)||CAP):1;
+      for(let i=0;i<slotsUsed;i++){
+        const si=b.start_idx+i;
+        if(si<0||si>=TOTAL_SLOTS)continue;
+        slotRows[si].taken=Math.min(CAP,slotRows[si].taken+spots);
+        slotRows[si].items.push({
+          name:b.profiles?.name||'Usuario',
+          isGroup:b.is_group,
+          spots,
+          bookingId:b.id
+        });
+      }
     });
+    const totalReservations=bookings.length;
+    const groupReservations=bookings.filter(b=>b.is_group).length;
+    const occupiedHalfHours=slotRows.reduce((s,r)=>s+r.taken,0);
+    let html='<div class="metrics" style="margin-bottom:1rem">'
+      +'<div class="met"><div class="met-l">Reservas</div><div class="met-v">'+totalReservations+'</div></div>'
+      +'<div class="met"><div class="met-l">Grupales</div><div class="met-v" style="color:var(--purple)">'+groupReservations+'</div></div>'
+      +'<div class="met"><div class="met-l">Espacios ocupados</div><div class="met-v" style="color:var(--amber)">'+occupiedHalfHours+'</div></div>'
+      +'<div class="met"><div class="met-l">Fecha</div><div class="met-v" style="font-size:18px">'+fmtDS(ds)+'</div></div>'
+      +'</div>';
+    if(!bookings.length){
+      html+='<div class="empty">Sin reservas activas para este día.</div>';
+      el.innerHTML=html;
+      return;
+    }
+    html+='<p class="slbl" style="margin-bottom:10px">Reservas activas</p>';
+    bks.forEach(b=>{
+      const spots=b.is_group?Math.min(CAP,Number(b.grupal_spots)||CAP):1;
+      html+='<div class="brow">'
+        +'<div class="brow-info">'
+        +'<div class="brow-name">'+esc(b.profiles?.name||'Usuario')+'</div>'
+        +'<div class="brow-meta">'+esc(b.time_str)+' · '+(b.dur_min||90)+'min · '+(b.is_group?'Grupal · '+spots+' espacio'+(spots>1?'s':''):'Individual')+'</div>'
+        +'<div class="brow-meta">Tel: '+esc(b.profiles?.phone||'-')+' · Código: '+esc(b.profiles?.access_code||'-')+'#</div>'
+        +'</div>'
+        +'<button class="btn-sm bred" data-bid="'+b.id+'" onclick="adminCancelBookingSb(this.dataset.bid)">Cancelar</button>'
+        +'</div>';
+    });
+    html+='<div class="divider"></div><p class="slbl" style="margin-bottom:10px">Disponibilidad por horario</p>';
+    slotRows.forEach((row,idx)=>{
+      const free=Math.max(0,CAP-row.taken);
+      const isFull=free===0;
+      const itemText=row.items.length?row.items.map(it=>esc(it.name)+(it.isGroup?' · G'+it.spots:'')).join(' · '):'Sin reservas';
+      html+='<div class="brow">'
+        +'<div class="slot-time">'+fmtSlot(idx)+'</div>'
+        +'<div class="brow-info"><div class="brow-meta">'+itemText+'</div></div>'
+        +'<span class="slot-badge '+(isFull?'sb-full':'sb-open')+'">'+free+' libre'+(free===1?'':'s')+'</span>'
+        +'</div>';
+    });
+    el.innerHTML=html;
   }catch(e){el.innerHTML='<div class="empty">Error: '+e.message+'</div>';}
 }
 
 async function adminCancelBookingSb(bid){
   if(!confirm('Cancelar esta reserva?'))return;
-  await sb.from('bookings').update({status:'cancelled'}).eq('id',bid);
-  await sb.from('slot_occupancy').delete().eq('booking_id',bid);
-  toast('Reserva cancelada','ok');
-  renderAdmSlots();
+  showLoading('Cancelando reserva...');
+  try{
+    const{data:b,error}=await sb.from('bookings')
+      .select('id,user_id,ds,time_str,is_group,profiles(name,credits)')
+      .eq('id',bid).single();
+    if(error)throw error;
+    await sb.from('bookings').update({status:'cancelled'}).eq('id',bid);
+    await sb.from('slot_occupancy').delete().eq('booking_id',bid);
+    const currentCredits=Number(b.profiles?.credits)||0;
+    if(currentCredits<999){
+      await sb.from('profiles').update({credits:currentCredits+1}).eq('id',b.user_id);
+    }
+    await sb.from('admin_notifs').insert({message:'Reserva cancelada (admin): '+(b.profiles?.name||'Usuario')+' - '+fmtDS(b.ds)+' '+b.time_str+(b.is_group?' (grupal)':'')}).catch(()=>{});
+    hideLoading();
+    toast('Reserva cancelada · visita devuelta','ok');
+    await loadSlotOccupancyFromSb(document.getElementById('adm-date').value||mazToday());
+    renderAdmSlots();
+    renderStatsSb();
+  }catch(e){
+    hideLoading();
+    toast('Error: '+e.message,'err');
+  }
 }
 
 function admDelFromSlot(ds,idx,userId){
