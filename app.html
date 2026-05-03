@@ -894,7 +894,7 @@ function canStartAt(ds,idx,isGrupal,slotsNeeded){
 function addN(msg,t){notifs.unshift({msg,t,ts:new Date()});if(notifs.length>10)notifs.pop();}
 async function addAdminNotif(msg){
   // Save to Supabase
-  try{await sb.from('admin_notifs').insert({message:msg});}catch(e){console.warn(e);}
+  try{const{error}=await sb.from('admin_notifs').insert({message:msg});if(error)console.warn('notif:',error.message);}catch(e){console.warn(e);}
   // Update local dot
   const el=document.getElementById('notif-dot');
   if(el)el.style.display='flex';
@@ -993,7 +993,7 @@ async function renderAccess(){
       user_id:curUser.id,user_name:curUser.name,
       access_code:curUser.accessCode,
       slot_str:timeStr,accessed_at:new Date().toISOString()
-    }).catch(e=>console.warn('logAccess:',e));
+    }).then(()=>{}).then(()=>{}).catch(()=>{});
       addAdminNotif('🔓 '+curUser.name+' accedió al gym · código '+curUser.accessCode+' · '+timeStr);
     }
     // Timer color based on remaining time
@@ -1217,38 +1217,28 @@ async function renderActiveBookings(){
   try{
     const maz=mazNow();
     const yesterday=new Date(maz);yesterday.setDate(yesterday.getDate()-1);
-    const yesterdayStr=dk(yesterday);
-    const{data:bks,error:bkErr}=await sb.from('bookings')
-      .select('*')
-      .eq('user_id',sbUser.id)
-      .eq('status','active')
-      .gte('ds',yesterdayStr)
-      .order('ds').order('start_idx');
-    if(bkErr){console.error('bookings error:',bkErr);return;}
-    if(!bks||!bks.length){
-      el.innerHTML='';
-      return;
-    }
-    // Filter: only show bookings that haven't ended yet
+    const{data:bks,error}=await sb.from('bookings')
+      .select('*').eq('user_id',sbUser.id).eq('status','active')
+      .gte('ds',dk(yesterday)).order('ds').order('start_idx');
+    if(error||!bks||!bks.length)return;
+    const hoy=mazToday();
     const nowMaz=mazNow();
     const upcoming=bks.filter(b=>{
-      const sessionEndMs=new Date(b.ds+'T07:00:00Z').getTime()+(b.start_idx+(b.slots_used||3))*30*60000;
-      return sessionEndMs > nowMaz.getTime();
+      const endMs=new Date(b.ds+'T07:00:00Z').getTime()+(b.start_idx+(b.slots_used||3))*30*60000;
+      return endMs>nowMaz.getTime();
     });
-    // Update local cache
     curUser.bookings=bks.map(b=>({
       id:b.id,ds:b.ds,startIdx:b.start_idx,slotsUsed:b.slots_used||3,
       isGroup:b.is_group,grupalSpots:b.grupal_spots,timeStr:b.time_str,durMin:b.dur_min||90
     }));
-    if(!upcoming.length){el.innerHTML='';return;}
+    if(!upcoming.length)return;
     el.innerHTML='<p class="slbl" style="margin-bottom:10px">Mis reservas activas</p>';
     upcoming.forEach(b=>{
-      const dl=b.ds===today?'Hoy':'Mañana';
+      const dl=b.ds===hoy?'Hoy':'Mañana';
       const slotsUsed=b.slots_used||3;
       const aw=getAW({ds:b.ds,startIdx:b.start_idx,slotsUsed});
-      const canC=(aw.sessionStart-mazNow())/3600000>=CANCEL_H;
-      const div=document.createElement('div');
-      div.className='active-bk-card';
+      const canC=(aw.sessionStart-mazNow())/3600000>=12;
+      const div=document.createElement('div');div.className='active-bk-card';
       div.innerHTML='<div style="flex:1">'
         +'<div style="font-size:14px;font-weight:600;color:var(--white)">'+dl+' · '+b.time_str+'</div>'
         +'<div style="font-size:11px;color:var(--gray);margin-top:2px">'+(b.is_group?'Grupal':'Individual')+' · '+(b.dur_min||90)+' min</div>'
@@ -1881,7 +1871,7 @@ function renderFeed(){
     const div=document.createElement('div');div.className='post-card';
     const rx=[{k:'fire',e:'🔥'},{k:'clap',e:'👏'},{k:'heart',e:'❤️'}];
     const rxBtns=rx.map(r=>'<button class="reaction-btn'+(post.myReactions[r.k]?' active':'')+'" onclick="toggleReaction(\''+post.id+'\',\''+r.k+'\')">'+r.e+(post.reactions[r.k]>0?' '+post.reactions[r.k]:'')+'</button>').join('');
-    div.innerHTML='<div class="post-hdr"><div class="post-av">'+inits(post.userName)+'</div><div><div class="post-user">'+post.userName+'</div><div class="post-time">'+timeSince(post.ts)+'</div></div></div>'+(post.text?'<div class="post-body">'+post.text+'</div>':'')+(post.img_url?'<img src="'+post.img_url+'" style="width:100%;max-height:260px;object-fit:cover;display:block">':'')+'<div class="post-reactions">'+rxBtns+'</div>';
+    div.innerHTML='<div class="post-hdr"><div class="post-av">'+inits(post.userName)+'</div><div><div class="post-user">'+post.userName+'</div><div class="post-time">'+timeSince(post.ts)+'</div></div></div>'+(post.text?'<div class="post-body">'+post.text+'</div>':'')+(post.img_url&&post.img_url.startsWith('http')?'<img src="'+post.img_url+'" style="width:100%;max-height:260px;object-fit:cover;display:block">':'')+'<div class="post-reactions">'+rxBtns+'</div>';
     el.appendChild(div);
   });
 }
@@ -2157,7 +2147,7 @@ let chartRevenue=null,chartBookings=null,chartPlans=null;
 
 async function renderDashboard(){
   try{
-    const _hoy=mazToday();
+    const today=mazToday();
     const monthStart=today.slice(0,7);
     const[{data:allU},{data:pays},{data:bks},{data:logs}]=await Promise.all([
       sb.from('profiles').select('id,credits,plan_expiry,plan_id,role,name,phone').neq('role','admin'),
@@ -2214,7 +2204,7 @@ async function renderDashboard(){
 function renderDashKPIs(){
   const allU=Object.values(users).filter(u=>u.role!=='admin');
   const active=allU.filter(u=>hasActive(u));
-  const _hoy=mazToday();
+  const today=mazToday();
   const totalRev=payments.reduce((s,p)=>s+p.amount,0);
   const monthStart=today.slice(0,7);
   const monthRev=payments.filter(p=>p.ts.startsWith(monthStart)).reduce((s,p)=>s+p.amount,0);
@@ -2616,7 +2606,7 @@ async function renderStatsSb(){
       sb.from('access_log').select('id')
     ]);
     const active=(allU||[]).filter(u=>u.credits>0&&(!u.plan_expiry||new Date(u.plan_expiry)>new Date()));
-    const _hoy=mazToday();
+    const today=mazToday();
     const monthStart=today.slice(0,7);
     const monthRev=(pays||[]).filter(p=>p.created_at.startsWith(monthStart)).reduce((s,p)=>s+Number(p.amount),0);
     const totalRev=(pays||[]).reduce((s,p)=>s+Number(p.amount),0);
@@ -2758,7 +2748,7 @@ async function renderFeedSb(){
         +(isAdmin?'<button data-pid="'+post.id+'" onclick="deletePostSb(this.dataset.pid)" style="background:none;border:none;color:var(--red);cursor:pointer;font-size:18px;padding:4px">🗑</button>':'')
         +'</div>'
         +(post.text_content?'<div class="post-body">'+post.text_content+'</div>':'')
-        +(post.img_url?'<img src="'+post.img_url+'" style="width:100%;max-height:260px;object-fit:cover;display:block">':'')
+        +(post.img_url&&post.img_url.startsWith('http')?'<img src="'+post.img_url+'" style="width:100%;max-height:260px;object-fit:cover;display:block">':'')
         +'<div class="post-reactions">'+rxBtns+'</div>';
       el.appendChild(div);
     });
@@ -2807,7 +2797,7 @@ async function renderAdminFeed(){
         +'<button data-pid="'+post.id+'" onclick="deletePostSb(this.dataset.pid);this.closest(\".post-card\").remove()" style="background:none;border:none;color:var(--red);cursor:pointer;font-size:18px;padding:4px">🗑</button>'
         +'</div>'
         +(post.text_content?'<div class="post-body">'+post.text_content+'</div>':'')
-        +(post.img_url?'<img src="'+post.img_url+'" style="width:100%;max-height:200px;object-fit:cover;display:block">':'')
+        +(post.img_url&&post.img_url.startsWith('http')?'<img src="'+post.img_url+'" style="width:100%;max-height:200px;object-fit:cover;display:block">':'')
         +'<div class="post-reactions" style="pointer-events:none">'
         +'<span class="reaction-btn">🔥 '+counts.fire+'</span>'
         +'<span class="reaction-btn">👏 '+counts.clap+'</span>'
@@ -3058,7 +3048,7 @@ function renderFeed(){
     const div=document.createElement('div');div.className='post-card';
     const rx=[{k:'fire',e:'🔥'},{k:'clap',e:'👏'},{k:'heart',e:'❤️'}];
     const rxBtns=rx.map(r=>'<button class="reaction-btn'+(post.myReactions[r.k]?' active':'')+'" onclick="toggleReaction(\''+post.id+'\',\''+r.k+'\')">'+r.e+(post.reactions[r.k]>0?' '+post.reactions[r.k]:'')+'</button>').join('');
-    div.innerHTML='<div class="post-hdr"><div class="post-av">'+inits(post.userName)+'</div><div><div class="post-user">'+post.userName+'</div><div class="post-time">'+timeSince(post.ts)+'</div></div></div>'+(post.text?'<div class="post-body">'+post.text+'</div>':'')+(post.img_url?'<img src="'+post.img_url+'" style="width:100%;max-height:260px;object-fit:cover;display:block">':'')+'<div class="post-reactions">'+rxBtns+'</div>';
+    div.innerHTML='<div class="post-hdr"><div class="post-av">'+inits(post.userName)+'</div><div><div class="post-user">'+post.userName+'</div><div class="post-time">'+timeSince(post.ts)+'</div></div></div>'+(post.text?'<div class="post-body">'+post.text+'</div>':'')+(post.img_url&&post.img_url.startsWith('http')?'<img src="'+post.img_url+'" style="width:100%;max-height:260px;object-fit:cover;display:block">':'')+'<div class="post-reactions">'+rxBtns+'</div>';
     el.appendChild(div);
   });
 }
@@ -3154,7 +3144,7 @@ async function renderStatsSb(){
       sb.from('access_log').select('id')
     ]);
     const active=(allU||[]).filter(u=>u.credits>0&&(!u.plan_expiry||new Date(u.plan_expiry)>new Date()));
-    const _hoy=mazToday();
+    const today=mazToday();
     const monthStart=today.slice(0,7);
     const monthRev=(pays||[]).filter(p=>p.created_at.startsWith(monthStart)).reduce((s,p)=>s+Number(p.amount),0);
     const totalRev=(pays||[]).reduce((s,p)=>s+Number(p.amount),0);
@@ -3296,7 +3286,7 @@ async function renderFeedSb(){
         +(isAdmin?'<button data-pid="'+post.id+'" onclick="deletePostSb(this.dataset.pid)" style="background:none;border:none;color:var(--red);cursor:pointer;font-size:18px;padding:4px">🗑</button>':'')
         +'</div>'
         +(post.text_content?'<div class="post-body">'+post.text_content+'</div>':'')
-        +(post.img_url?'<img src="'+post.img_url+'" style="width:100%;max-height:260px;object-fit:cover;display:block">':'')
+        +(post.img_url&&post.img_url.startsWith('http')?'<img src="'+post.img_url+'" style="width:100%;max-height:260px;object-fit:cover;display:block">':'')
         +'<div class="post-reactions">'+rxBtns+'</div>';
       el.appendChild(div);
     });
@@ -3345,7 +3335,7 @@ async function renderAdminFeed(){
         +'<button data-pid="'+post.id+'" onclick="deletePostSb(this.dataset.pid);this.closest(\".post-card\").remove()" style="background:none;border:none;color:var(--red);cursor:pointer;font-size:18px;padding:4px">🗑</button>'
         +'</div>'
         +(post.text_content?'<div class="post-body">'+post.text_content+'</div>':'')
-        +(post.img_url?'<img src="'+post.img_url+'" style="width:100%;max-height:200px;object-fit:cover;display:block">':'')
+        +(post.img_url&&post.img_url.startsWith('http')?'<img src="'+post.img_url+'" style="width:100%;max-height:200px;object-fit:cover;display:block">':'')
         +'<div class="post-reactions" style="pointer-events:none">'
         +'<span class="reaction-btn">🔥 '+counts.fire+'</span>'
         +'<span class="reaction-btn">👏 '+counts.clap+'</span>'
