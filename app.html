@@ -124,6 +124,7 @@ input,select,button,textarea{font-family:'Barlow',sans-serif}
 .next-val{font-size:15px;font-weight:600;color:var(--white)}
 .next-sub{font-size:12px;color:var(--gray);margin-top:3px}
 .notif-item{background:var(--card);border:1px solid var(--border);border-radius:4px;padding:11px 12px;display:flex;gap:10px;align-items:flex-start;margin-bottom:8px}
+.notif-item.unread{border-left:3px solid var(--blue)}
 .ndot{width:7px;height:7px;border-radius:50%;flex-shrink:0;margin-top:5px}
 .ntext{font-size:12px;color:var(--gl);line-height:1.5}
 .ntime{font-size:10px;color:#555;margin-top:2px}
@@ -239,6 +240,16 @@ input,select,button,textarea{font-family:'Barlow',sans-serif}
 .post-reactions{display:flex;gap:6px;padding:10px 14px;border-top:1px solid var(--border)}
 .reaction-btn{display:flex;align-items:center;gap:4px;padding:5px 10px;border:1px solid var(--border);border-radius:99px;font-size:12px;cursor:pointer;background:transparent;color:var(--gray)}
 .reaction-btn.active{border-color:var(--blue);background:rgba(37,99,235,.12);color:var(--bl)}
+.post-comments{border-top:1px solid var(--border);padding:10px 14px;background:rgba(255,255,255,.015)}
+.comment-row{display:flex;gap:8px;margin-bottom:8px}
+.comment-av{width:24px;height:24px;border-radius:50%;background:var(--bdim);border:1px solid var(--blue);display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;color:var(--bl);flex-shrink:0}
+.comment-body{flex:1;min-width:0}
+.comment-meta{font-size:11px;font-weight:600;color:var(--white);margin-bottom:2px}
+.comment-time{font-size:10px;color:#555;font-weight:400;margin-left:4px}
+.comment-text{font-size:12px;color:var(--gl);line-height:1.45;word-break:break-word}
+.comment-form{display:flex;gap:6px;margin-top:8px}
+.comment-form input{flex:1;min-width:0;background:var(--card2);border:1px solid var(--border);border-radius:4px;padding:8px 10px;font-size:13px;color:var(--white);outline:none}
+.comment-form input:focus{border-color:var(--blue)}
 .new-post-box{background:var(--card);border:1px solid var(--border);border-radius:6px;padding:1rem;margin-bottom:1rem}
 .new-post-box textarea{width:100%;background:var(--card2);border:1px solid var(--border);border-radius:4px;padding:10px 12px;font-size:14px;color:var(--white);outline:none;resize:none;line-height:1.5;min-height:70px}
 .new-post-box textarea::placeholder{color:#555}
@@ -725,6 +736,7 @@ function showMainSb(){
   renderMembershipStatus();
   renderAccess();
   renderActiveBookings().catch(console.error);
+  startUserNotifPolling();
   startTimer();
 }
 
@@ -896,7 +908,7 @@ let slots30={};
 let waitlists={}; // waitlists[ds+'_'+slotIdx] = [{userId,name,...}]
 let payments=[], boards=[], scores={}, posts=[], accessLog=[], adminNotifs=[];
 let curUser=null, curDate=dateObjFromDS(mazToday()), selStartIdx=null, selShort=false, selPlan=null, selPT='individual';
-let accInt=null, notifs=[], expandedVideos={}, logScoreCtx=null;
+let accInt=null, userNotifInt=null, userNotifBootstrapped=false, userNotifSeen=new Set(), notifs=[], expandedVideos={}, logScoreCtx=null;
 
 // ── SLOT DATA ACCESS ──
 function getDaySlots(ds){
@@ -967,6 +979,49 @@ async function addAdminNotif(msg){
   // Update local dot
   const el=document.getElementById('notif-dot');
   if(el)el.style.display='flex';
+}
+async function addUserNotif(userId,type,message,postId){
+  if(!userId||!sbUser||userId===sbUser.id)return;
+  try{
+    await sb.from('user_notifications').insert({
+      user_id:userId,
+      actor_id:sbUser.id,
+      actor_name:curUser?.name||'Socio',
+      post_id:postId||null,
+      type,
+      message
+    });
+  }catch(e){console.warn('user notif:',e);}
+}
+async function renderUserNotifsSb(){
+  const el=document.getElementById('notif-wrap');
+  if(!el||!sbUser)return;
+  try{
+    const{data}=await sb.from('user_notifications').select('*').eq('user_id',sbUser.id).order('created_at',{ascending:false}).limit(5);
+    if(!data||!data.length){el.innerHTML='';return;}
+    data.forEach(n=>{
+      if(!userNotifSeen.has(n.id)){
+        if(userNotifBootstrapped&&!n.is_read)sendNotif('HABIT Comunidad',n.message);
+        userNotifSeen.add(n.id);
+      }
+    });
+    userNotifBootstrapped=true;
+    el.innerHTML='<p class="slbl" style="margin-bottom:10px">Notificaciones</p>'+
+      data.map(n=>'<div class="notif-item'+(n.is_read?'':' unread')+'" data-nid="'+esc(n.id)+'" onclick="markUserNotifRead(this)">'
+        +'<div class="ndot" style="background:'+(n.type==='comment'?'var(--blue)':'var(--green)')+'"></div>'
+        +'<div class="ntext">'+esc(n.message)+'<div class="ntime">'+timeSince(n.created_at)+'</div></div></div>').join('');
+  }catch(e){console.warn('load user notifs:',e);}
+}
+async function markUserNotifRead(el){
+  const id=el.dataset.nid;
+  if(!id)return;
+  el.classList.remove('unread');
+  try{await sb.from('user_notifications').update({is_read:true}).eq('id',id).eq('user_id',sbUser.id);}catch(e){}
+}
+function startUserNotifPolling(){
+  if(userNotifInt)clearInterval(userNotifInt);
+  renderUserNotifsSb();
+  userNotifInt=setInterval(()=>{if(sbUser)renderUserNotifsSb();},30000);
 }
 function nextBk(u){
   if(!u||!u.bookings||!u.bookings.length)return null;
@@ -1167,6 +1222,8 @@ async function doLogout(){
   curUser=null;sbUser=null;sbProfile=null;
   selStartIdx=null;selShort=false;selPlan=null;notifs=[];
   if(accInt){clearInterval(accInt);accInt=null;}
+  if(userNotifInt){clearInterval(userNotifInt);userNotifInt=null;}
+  userNotifBootstrapped=false;userNotifSeen=new Set();
   await sb.auth.signOut().catch(()=>{});
   document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
   document.getElementById('s-auth').classList.add('active');
@@ -1185,7 +1242,7 @@ const ALL_VIEWS=['inicio','book','planes','rutinas','comunidad','historial','per
 function sv(v){
   document.querySelectorAll('.bnb').forEach((b,i)=>b.classList.toggle('active',['inicio','book','planes','rutinas','comunidad','historial'][i]===v));
   ALL_VIEWS.forEach(n=>{const el=document.getElementById('v-'+n);if(el)el.classList.toggle('active',n===v);});
-  if(v==='inicio'){renderMembershipStatus();renderAccess().catch(console.error);renderActiveBookings().catch(console.error);}
+  if(v==='inicio'){renderMembershipStatus();renderAccess().catch(console.error);renderActiveBookings().catch(console.error);renderUserNotifsSb().catch(console.error);}
   if(v==='book'){const _ds=dk(curDate);loadSlotOccupancyFromSb(_ds).then(()=>renderBook().catch(console.error));}
   if(v==='planes')renderPlans();
   if(v==='rutinas'){renderRutinas().catch(console.error);}
@@ -2232,11 +2289,11 @@ async function renderBoardsAdmin(){
       +'</div>';
     card.innerHTML=
       '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">'
-      +'<div style="display:flex;align-items:center;gap:8px">'
+      +'<div style="display:flex;align-items:center;gap:8px;flex:1;min-width:0">'
       +'<div style="width:10px;height:10px;border-radius:50%;background:'+board.color+'"></div>'
-      +'<span class="board-name">'+board.name+'</span>'
+      +'<input id="bn-'+board.id+'" value="'+esc(board.name)+'" style="flex:1;min-width:0;background:var(--card2);border:1px solid var(--border);border-radius:4px;padding:8px 10px;font-size:14px;font-weight:700;color:var(--white);outline:none" onkeydown="if(event.key===&quot;Enter&quot;)updateBoardNameSb(&quot;'+board.id+'&quot;)">'
       +'</div>'
-      +'<button class="btn-sm bred" data-bid="'+board.id+'" onclick="deleteBoardSb(this.dataset.bid)">Eliminar</button>'
+      +'<div style="display:flex;gap:6px;margin-left:8px"><button class="btn-sm bblue" data-bid="'+board.id+'" onclick="updateBoardNameSb(this.dataset.bid)">Guardar</button><button class="btn-sm bred" data-bid="'+board.id+'" onclick="deleteBoardSb(this.dataset.bid)">Eliminar</button></div>'
       +'</div>'
       +(exHtml?'<div class="ex-list" style="margin-bottom:12px">'+exHtml+'</div>':'<div class="empty" style="font-size:12px;margin-bottom:12px">Sin ejercicios.</div>')
       +'<div style="margin-bottom:12px">'
@@ -2273,6 +2330,22 @@ async function toggleAssignSb(cb){
   const search=box?.querySelector('.board-assign-search');
   if(search)filterBoardAssignees(search);
   toast(checked?'Rutina asignada':'Rutina removida','ok');
+}
+
+async function updateBoardNameSb(bid){
+  const input=document.getElementById('bn-'+bid);
+  const name=(input?.value||'').trim();
+  if(!name){toast('El nombre del pizarron no puede estar vacio','err');return;}
+  const b=boards.find(x=>x.id===bid);
+  if(!b)return;
+  try{
+    const{error}=await sb.from('boards').update({name}).eq('id',bid);
+    if(error)throw error;
+    b.name=name;
+    toast('Nombre actualizado','ok');
+  }catch(e){
+    toast('Error al guardar nombre: '+(e.message||e),'err');
+  }
 }
 
 async function addExerciseSb(bid){
@@ -2927,7 +3000,10 @@ async function renderFeedSb(){
   if(!el||!sbUser)return;
   el.innerHTML='<div class="empty">Cargando...</div>';
   try{
-    const{data:posts}=await sb.from('posts').select('*,post_reactions(user_id,reaction_type)').order('created_at',{ascending:false}).limit(50);
+    const{data:posts,error}=await sb.from('posts')
+      .select('*,post_reactions(user_id,reaction_type),post_comments(id,user_id,user_name,text_content,created_at)')
+      .order('created_at',{ascending:false}).limit(50);
+    if(error)throw error;
     if(!posts||!posts.length){el.innerHTML='<div class="empty">Sin publicaciones aun. Se el primero!</div>';return;}
     el.innerHTML='';
     const isAdmin=sbProfile&&sbProfile.role==='admin';
@@ -2935,6 +3011,14 @@ async function renderFeedSb(){
       const myReactions=new Set((post.post_reactions||[]).filter(r=>r.user_id===sbUser.id).map(r=>r.reaction_type));
       const counts={fire:0,clap:0,heart:0};
       (post.post_reactions||[]).forEach(r=>{if(counts[r.reaction_type]!==undefined)counts[r.reaction_type]++;});
+      const comments=(post.post_comments||[]).slice().sort((a,b)=>(a.created_at||'').localeCompare(b.created_at||''));
+      const commentsHtml=comments.length
+        ? comments.map(c=>'<div class="comment-row">'
+          +'<div class="comment-av">'+inits(c.user_name)+'</div>'
+          +'<div class="comment-body"><div class="comment-meta">'+esc(c.user_name)+'<span class="comment-time">'+timeSince(c.created_at)+'</span></div>'
+          +'<div class="comment-text">'+esc(c.text_content)+'</div></div>'
+          +'</div>').join('')
+        : '<div style="font-size:12px;color:var(--gray);margin-bottom:8px">Sin comentarios aun.</div>';
       const div=document.createElement('div');div.className='post-card';
       const rxBtns=[{k:'fire',e:'🔥'},{k:'clap',e:'👏'},{k:'heart',e:'❤️'}].map(r=>
         '<button class="reaction-btn'+(myReactions.has(r.k)?' active':'')+'" data-post="'+post.id+'" data-type="'+r.k+'" onclick="toggleReactionSb(this)">'
@@ -2942,15 +3026,19 @@ async function renderFeedSb(){
       div.innerHTML=
         '<div class="post-hdr">'
         +'<div class="post-av">'+inits(post.user_name)+'</div>'
-        +'<div style="flex:1"><div class="post-user">'+post.user_name+'</div><div class="post-time">'+timeSince(post.created_at)+'</div></div>'
+        +'<div style="flex:1"><div class="post-user">'+esc(post.user_name)+'</div><div class="post-time">'+timeSince(post.created_at)+'</div></div>'
         +(isAdmin?'<button data-pid="'+post.id+'" onclick="deletePostSb(this.dataset.pid)" style="background:none;border:none;color:var(--red);cursor:pointer;font-size:18px;padding:4px">🗑</button>':'')
         +'</div>'
-        +(post.text_content?'<div class="post-body">'+post.text_content+'</div>':'')
-        +(post.img_url?'<img src="'+post.img_url+'" style="width:100%;max-height:260px;object-fit:cover;display:block">':'')
-        +'<div class="post-reactions">'+rxBtns+'</div>';
+        +(post.text_content?'<div class="post-body">'+esc(post.text_content)+'</div>':'')
+        +(post.img_url?'<img src="'+esc(post.img_url)+'" style="width:100%;max-height:260px;object-fit:cover;display:block">':'')
+        +'<div class="post-reactions">'+rxBtns+'<span style="margin-left:auto;font-size:12px;color:var(--gray);align-self:center">'+comments.length+' coment.</span></div>'
+        +'<div class="post-comments">'+commentsHtml
+        +'<div class="comment-form"><input type="text" maxlength="300" data-post="'+esc(post.id)+'" data-owner="'+esc(post.user_id)+'" placeholder="Escribe un comentario..." onkeydown="if(event.key===&quot;Enter&quot;)addCommentSb(this)">'
+        +'<button class="btn-sm bblue" data-post="'+esc(post.id)+'" data-owner="'+esc(post.user_id)+'" onclick="addCommentSb(this.previousElementSibling)">Enviar</button></div>'
+        +'</div>';
       el.appendChild(div);
     });
-  }catch(e){el.innerHTML='<div class="empty">Error cargando feed.</div>';console.error(e);}
+  }catch(e){el.innerHTML='<div class="empty">Error cargando comunidad. Revisa que el SQL de comentarios este aplicado.</div>';console.error(e);}
 }
 
 async function toggleReactionSb(btn){
@@ -2962,13 +3050,41 @@ async function toggleReactionSb(btn){
       await sb.from('post_reactions').delete().eq('post_id',postId).eq('user_id',sbUser.id).eq('reaction_type',type);
     }else{
       await sb.from('post_reactions').insert({post_id:postId,user_id:sbUser.id,reaction_type:type});
+      const{data:post}=await sb.from('posts').select('user_id').eq('id',postId).single();
+      const label={fire:'reaccionó a tu publicación',clap:'aplaudió tu publicación',heart:'le gustó tu publicación'}[type]||'reaccionó a tu publicación';
+      await addUserNotif(post?.user_id,'reaction',(curUser?.name||'Alguien')+' '+label,postId);
     }
     renderFeedSb();
   }catch(e){console.error(e);}
 }
 
+async function addCommentSb(input){
+  const postId=input.dataset.post,ownerId=input.dataset.owner,text=(input.value||'').trim();
+  if(!postId||!text)return;
+  if(text.length>300){toast('Comentario maximo 300 caracteres','err');return;}
+  input.disabled=true;
+  try{
+    const{error}=await sb.from('post_comments').insert({
+      post_id:postId,
+      user_id:sbUser.id,
+      user_name:curUser.name,
+      text_content:text
+    });
+    if(error)throw error;
+    input.value='';
+    await addUserNotif(ownerId,'comment',(curUser?.name||'Alguien')+' comentó tu publicación',postId);
+    renderFeedSb();
+  }catch(e){
+    console.error(e);
+    toast('Error al comentar: '+(e.message||e),'err');
+  }finally{
+    input.disabled=false;
+  }
+}
+
 async function deletePostSb(postId){
   if(!confirm('Eliminar esta publicacion?'))return;
+  await sb.from('post_comments').delete().eq('post_id',postId);
   await sb.from('post_reactions').delete().eq('post_id',postId);
   await sb.from('posts').delete().eq('id',postId);
   toast('Publicacion eliminada','ok');

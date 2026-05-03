@@ -132,6 +132,29 @@ create table if not exists public.post_reactions (
   primary key (post_id, user_id, reaction_type)
 );
 
+-- ── TABLA: post_comments ──
+create table if not exists public.post_comments (
+  id            uuid primary key default uuid_generate_v4(),
+  post_id       uuid references public.posts(id) on delete cascade not null,
+  user_id       uuid references public.profiles(id) on delete cascade not null,
+  user_name     text not null,
+  text_content  text not null check (char_length(trim(text_content)) between 1 and 300),
+  created_at    timestamptz not null default now()
+);
+
+-- ── TABLA: user_notifications ──
+create table if not exists public.user_notifications (
+  id            uuid primary key default uuid_generate_v4(),
+  user_id       uuid references public.profiles(id) on delete cascade not null,
+  actor_id      uuid references public.profiles(id) on delete set null,
+  actor_name    text not null,
+  post_id       uuid references public.posts(id) on delete cascade,
+  type          text not null check (type in ('reaction','comment')),
+  message       text not null,
+  is_read       boolean not null default false,
+  created_at    timestamptz not null default now()
+);
+
 -- ── TABLA: admin_notifs ──
 create table if not exists public.admin_notifs (
   id            uuid primary key default uuid_generate_v4(),
@@ -149,6 +172,8 @@ create index if not exists idx_slot_occ_ds on public.slot_occupancy(ds, slot_idx
 create index if not exists idx_payments_user on public.payments(user_id);
 create index if not exists idx_scores_board on public.scores(board_id, exercise_idx);
 create index if not exists idx_posts_created on public.posts(created_at desc);
+create index if not exists idx_post_comments_post on public.post_comments(post_id, created_at asc);
+create index if not exists idx_user_notifications_user on public.user_notifications(user_id, created_at desc);
 create index if not exists idx_access_log_user on public.access_log(user_id);
 
 -- ═══════════════════════════════════
@@ -165,6 +190,8 @@ alter table public.board_assignments enable row level security;
 alter table public.scores enable row level security;
 alter table public.posts enable row level security;
 alter table public.post_reactions enable row level security;
+alter table public.post_comments enable row level security;
+alter table public.user_notifications enable row level security;
 alter table public.admin_notifs enable row level security;
 
 -- ── POLÍTICAS: profiles ──
@@ -262,6 +289,22 @@ create policy "Auth read reactions"
   on public.post_reactions for select using (auth.uid() is not null);
 create policy "Users manage own reactions"
   on public.post_reactions for all using (auth.uid() = user_id);
+create policy "Auth read comments"
+  on public.post_comments for select using (auth.uid() is not null);
+create policy "Users insert own comments"
+  on public.post_comments for insert with check (auth.uid() = user_id);
+create policy "Users delete own comments"
+  on public.post_comments for delete using (auth.uid() = user_id);
+create policy "Admin delete comments"
+  on public.post_comments for delete using (
+    exists(select 1 from public.profiles where id=auth.uid() and role='admin')
+  );
+create policy "Users read own notifications"
+  on public.user_notifications for select using (auth.uid() = user_id);
+create policy "Auth create user notifications"
+  on public.user_notifications for insert with check (auth.uid() is not null);
+create policy "Users update own notifications"
+  on public.user_notifications for update using (auth.uid() = user_id);
 
 -- ── POLÍTICAS: access_log ──
 create policy "Users read own log"
