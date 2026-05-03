@@ -688,7 +688,6 @@ input,select,button,textarea{font-family:'Barlow',sans-serif}
 
 const SUPABASE_URL='https://pmpjteuqjusbiduevbwq.supabase.co';
 const SUPABASE_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBtcGp0ZXVxanVzYmlkdWV2YndxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc2OTI1NjUsImV4cCI6MjA5MzI2ODU2NX0.XbMzZoo2yqtrD8znLnyo_1zDfrdJAvAPj1lqGOyXnLw';
-const PUSH_PUBLIC_KEY='';
 const sb=supabase.createClient(SUPABASE_URL,SUPABASE_KEY,{auth:{autoRefreshToken:true,persistSession:true,detectSessionInUrl:false}});
 let sbUser=null,sbProfile=null;
 
@@ -1054,21 +1053,6 @@ function sendNotif(title, body){
   } else if(Notification.permission!=='denied'){
     Notification.requestPermission().then(p=>{if(p==='granted') new Notification(title,{body,icon:'/icons/icon-192.png',badge:'/icons/icon-192.png'});});
   }
-}
-function urlBase64ToUint8Array(base64String){
-  const padding='='.repeat((4-base64String.length%4)%4);
-  const base64=(base64String+padding).replace(/-/g,'+').replace(/_/g,'/');
-  const rawData=atob(base64);
-  return Uint8Array.from([...rawData].map(ch=>ch.charCodeAt(0)));
-}
-async function setupPushNotifications(){
-  if(!PUSH_PUBLIC_KEY||!('serviceWorker' in navigator)||!('PushManager' in window)||!sbUser)return false;
-  const reg=await navigator.serviceWorker.ready;
-  const perm=await Notification.requestPermission();
-  if(perm!=='granted')return false;
-  const sub=await reg.pushManager.subscribe({userVisibleOnly:true,applicationServerKey:urlBase64ToUint8Array(PUSH_PUBLIC_KEY)});
-  await sb.from('push_subscriptions').upsert({user_id:sbUser.id,subscription:sub.toJSON(),user_agent:navigator.userAgent});
-  return true;
 }
 
 // Track notification state to avoid repeating

@@ -1,7 +1,7 @@
-// HABIT Training Hub — Service Worker v30
+// HABIT Training Hub — Service Worker v31
 // Strategy: Network first for app.html, cache only for icons/fonts
 
-const CACHE = 'habit-static-v30';
+const CACHE = 'habit-static-v31';
 const STATIC = [
   '/icons/icon-192.png',
   '/icons/icon-512.png',
@@ -64,28 +64,4 @@ self.addEventListener('fetch', e => {
   e.respondWith(
     fetch(e.request, {cache: 'no-store'}).catch(() => caches.match(e.request))
   );
-});
-
-self.addEventListener('push', e => {
-  let data = {};
-  try { data = e.data ? e.data.json() : {}; } catch (_) { data = { title: 'HABIT', body: e.data ? e.data.text() : '' }; }
-  const title = data.title || 'HABIT';
-  const options = {
-    body: data.body || 'Tienes una nueva notificacion.',
-    icon: '/icons/icon-192.png',
-    badge: '/icons/icon-192.png',
-    data: { url: data.url || '/app.html' }
-  };
-  e.waitUntil(self.registration.showNotification(title, options));
-});
-
-self.addEventListener('notificationclick', e => {
-  e.notification.close();
-  const url = e.notification.data?.url || '/app.html';
-  e.waitUntil(clients.matchAll({ type: 'window', includeUncontrolled: true }).then(list => {
-    for (const client of list) {
-      if ('focus' in client) return client.focus();
-    }
-    return clients.openWindow(url);
-  }));
 });
