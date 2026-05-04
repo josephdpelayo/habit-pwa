@@ -6,12 +6,12 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="HABIT">
 <meta name="application-name" content="HABIT">
-<link rel="manifest" href="/manifest.json?v=20260503-13">
-<link rel="apple-touch-icon" sizes="120x120" href="/icons/icon-120.png?v=20260503-13">
-<link rel="apple-touch-icon" sizes="152x152" href="/icons/icon-152.png?v=20260503-13">
-<link rel="apple-touch-icon" sizes="167x167" href="/icons/icon-167.png?v=20260503-13">
-<link rel="apple-touch-icon" sizes="180x180" href="/icons/icon-180.png?v=20260503-13">
-<link rel="icon" type="image/png" sizes="32x32" href="/icons/icon-32.png?v=20260503-13">
+<link rel="manifest" href="/manifest.json?v=20260503-14">
+<link rel="apple-touch-icon" sizes="120x120" href="/icons/icon-120.png?v=20260503-14">
+<link rel="apple-touch-icon" sizes="152x152" href="/icons/icon-152.png?v=20260503-14">
+<link rel="apple-touch-icon" sizes="167x167" href="/icons/icon-167.png?v=20260503-14">
+<link rel="apple-touch-icon" sizes="180x180" href="/icons/icon-180.png?v=20260503-14">
+<link rel="icon" type="image/png" sizes="32x32" href="/icons/icon-32.png?v=20260503-14">
 <title>HABIT</title>
 <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700;800&family=Barlow:wght@300;400;500;600&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
@@ -115,6 +115,20 @@ input,select,button,textarea{font-family:'Barlow',sans-serif}
 .terms-check{display:flex;align-items:flex-start;gap:10px;margin-bottom:12px;cursor:pointer}
 .terms-check input{width:18px;height:18px;margin-top:2px;accent-color:var(--blue);flex-shrink:0;cursor:pointer}
 .terms-check span{font-size:13px;color:var(--gl);line-height:1.5}
+.install-hint{font-size:11px;color:var(--gray);line-height:1.55;text-align:center;margin-top:12px}
+.install-box{background:var(--dark);border:1px solid var(--border);border-radius:12px 12px 0 0;max-height:86vh;width:100%;max-width:430px;display:flex;flex-direction:column;overflow:hidden}
+.install-hdr{padding:1rem 1rem .5rem;border-bottom:1px solid var(--border)}
+.install-hdr h2{font-family:'Barlow Condensed',sans-serif;font-size:20px;font-weight:800;letter-spacing:.09em;text-transform:uppercase}
+.install-hdr p{font-size:12px;color:var(--gray);line-height:1.6;margin-top:6px}
+.install-body{padding:1rem;overflow-y:auto}
+.install-steps{display:grid;gap:10px}
+.install-step{display:grid;grid-template-columns:48px 1fr;gap:12px;align-items:center;background:var(--card);border:1px solid var(--border);border-radius:8px;padding:12px}
+.install-icon{width:48px;height:48px;border-radius:12px;background:#0f172a;border:1px solid rgba(59,130,246,.45);display:flex;align-items:center;justify-content:center;color:var(--white);flex-shrink:0}
+.install-icon svg{width:26px;height:26px;stroke:currentColor;stroke-width:2;fill:none;stroke-linecap:round;stroke-linejoin:round}
+.install-step-title{font-size:13px;font-weight:800;color:var(--white);letter-spacing:.04em;text-transform:uppercase}
+.install-step-copy{font-size:12px;color:var(--gray);line-height:1.5;margin-top:3px}
+.install-note{font-size:11px;color:var(--gl);line-height:1.6;background:rgba(37,99,235,.08);border:1px solid rgba(37,99,235,.28);border-radius:8px;padding:10px 12px;margin-top:12px}
+.install-actions{padding:0 1rem 1rem}
 .ac-status{font-size:10px;font-weight:700;letter-spacing:.15em;text-transform:uppercase;margin-bottom:.7rem}
 .ac-off .ac-status{color:var(--gray)}.ac-soon .ac-status{color:var(--amber)}.ac-on .ac-status{color:var(--bl)}
 .ac-code{font-family:'Barlow Condensed',sans-serif;font-size:56px;font-weight:800;letter-spacing:.35em;margin:.5rem 0;padding-left:.35em}
@@ -381,6 +395,7 @@ input,select,button,textarea{font-family:'Barlow',sans-serif}
         </div>
       </div>
       <button class="btn" onclick="doRegister()">Crear cuenta</button>
+      <div class="install-hint">Al terminar tu registro te mostraremos como guardar HABIT en tu inicio y abrirla como app.</div>
     </div>
   </div>
 </div>
@@ -706,12 +721,58 @@ input,select,button,textarea{font-family:'Barlow',sans-serif}
       <button class="btn" id="terms-accept-btn" onclick="acceptTerms()" disabled style="opacity:.35">Aceptar y continuar</button>
     </div>
   </div>
+</div>
+
+<!-- INSTALL GUIDE MODAL -->
+<div id="install-guide-modal" class="terms-modal" style="display:none">
+  <div class="install-box">
+    <div class="install-hdr">
+      <h2>Guarda HABIT en tu inicio</h2>
+      <p>Ya con tu cuenta lista, puedes abrir HABIT como app desde la pantalla de inicio.</p>
+    </div>
+    <div class="install-body">
+      <div class="install-steps">
+        <div class="install-step">
+          <div class="install-icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24"><circle cx="5" cy="12" r="1.6"></circle><circle cx="12" cy="12" r="1.6"></circle><circle cx="19" cy="12" r="1.6"></circle></svg>
+          </div>
+          <div>
+            <div class="install-step-title">Abre el menu</div>
+            <div class="install-step-copy">En Chrome o Android toca los 3 puntitos. En iPhone usa el boton de compartir.</div>
+          </div>
+        </div>
+        <div class="install-step">
+          <div class="install-icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24"><path d="M12 15V3"></path><path d="M8 7l4-4 4 4"></path><path d="M5 11v8a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-8"></path></svg>
+          </div>
+          <div>
+            <div class="install-step-title">Toca compartir</div>
+            <div class="install-step-copy">En Safari busca el icono de compartir en la barra inferior.</div>
+          </div>
+        </div>
+        <div class="install-step">
+          <div class="install-icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24"><rect x="7" y="3" width="10" height="18" rx="2"></rect><path d="M12 7v6"></path><path d="M9 10h6"></path><path d="M11 18h2"></path></svg>
+          </div>
+          <div>
+            <div class="install-step-title">Agregar a inicio</div>
+            <div class="install-step-copy">Selecciona "Agregar a pantalla de inicio" y confirma el nombre HABIT.</div>
+          </div>
+        </div>
+      </div>
+      <div class="install-note">Tip: si no aparece la opcion, abre HABIT desde Safari en iPhone o Chrome en Android y vuelve a intentar.</div>
+    </div>
+    <div class="install-actions">
+      <button class="btn" onclick="closeInstallGuide()">Entendido</button>
+    </div>
+  </div>
+</div>
 
 <script>
 
 const SUPABASE_URL='https://pmpjteuqjusbiduevbwq.supabase.co';
 const SUPABASE_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBtcGp0ZXVxanVzYmlkdWV2YndxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc2OTI1NjUsImV4cCI6MjA5MzI2ODU2NX0.XbMzZoo2yqtrD8znLnyo_1zDfrdJAvAPj1lqGOyXnLw';
-const APP_VERSION='20260503-13';
+const APP_VERSION='20260503-14';
 const sb=supabase.createClient(SUPABASE_URL,SUPABASE_KEY,{auth:{autoRefreshToken:true,persistSession:true,detectSessionInUrl:false}});
 let sbUser=null,sbProfile=null;
 
@@ -1221,6 +1282,14 @@ function togglePw(inputId,btnId){
   if(inp.type==='password'){inp.type='text';btn.textContent='🙈';}
   else{inp.type='password';btn.textContent='👁';}
 }
+function showInstallGuide(){
+  const modal=document.getElementById('install-guide-modal');
+  if(modal)modal.style.display='flex';
+}
+function closeInstallGuide(){
+  const modal=document.getElementById('install-guide-modal');
+  if(modal)modal.style.display='none';
+}
 async function doRegister(){
   const name=document.getElementById('rn').value.trim();
   const email=document.getElementById('re').value.trim();
@@ -1244,6 +1313,7 @@ async function doRegister(){
     hideLoading();
     addN('Bienvenido/a a HABIT. Tu codigo: '+sbProfile.access_code+'#','success');
     showMainSb();
+    setTimeout(showInstallGuide,350);
     toast('Cuenta creada. Codigo: '+sbProfile.access_code,'ok');
   }catch(e){
     hideLoading();
