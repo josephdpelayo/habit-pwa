@@ -6,12 +6,12 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="HABIT">
 <meta name="application-name" content="HABIT">
-<link rel="manifest" href="/manifest.json?v=20260504-12">
-<link rel="apple-touch-icon" sizes="120x120" href="/icons/icon-120.png?v=20260504-12">
-<link rel="apple-touch-icon" sizes="152x152" href="/icons/icon-152.png?v=20260504-12">
-<link rel="apple-touch-icon" sizes="167x167" href="/icons/icon-167.png?v=20260504-12">
-<link rel="apple-touch-icon" sizes="180x180" href="/icons/icon-180.png?v=20260504-12">
-<link rel="icon" type="image/png" sizes="32x32" href="/icons/icon-32.png?v=20260504-12">
+<link rel="manifest" href="/manifest.json?v=20260504-13">
+<link rel="apple-touch-icon" sizes="120x120" href="/icons/icon-120.png?v=20260504-13">
+<link rel="apple-touch-icon" sizes="152x152" href="/icons/icon-152.png?v=20260504-13">
+<link rel="apple-touch-icon" sizes="167x167" href="/icons/icon-167.png?v=20260504-13">
+<link rel="apple-touch-icon" sizes="180x180" href="/icons/icon-180.png?v=20260504-13">
+<link rel="icon" type="image/png" sizes="32x32" href="/icons/icon-32.png?v=20260504-13">
 <title>HABIT</title>
 <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
@@ -811,7 +811,7 @@ input,select,button,textarea{font-family:'Montserrat',sans-serif}
 
 const SUPABASE_URL='https://pmpjteuqjusbiduevbwq.supabase.co';
 const SUPABASE_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBtcGp0ZXVxanVzYmlkdWV2YndxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc2OTI1NjUsImV4cCI6MjA5MzI2ODU2NX0.XbMzZoo2yqtrD8znLnyo_1zDfrdJAvAPj1lqGOyXnLw';
-const APP_VERSION='20260504-12';
+const APP_VERSION='20260504-13';
 const PUBLIC_APP_URL='https://habittraininghub.app/app.html';
 const sb=supabase.createClient(SUPABASE_URL,SUPABASE_KEY,{auth:{autoRefreshToken:true,persistSession:true,detectSessionInUrl:true}});
 let sbUser=null,sbProfile=null;
@@ -3178,7 +3178,7 @@ async function renderUsersSb(){
       const expired=u.plan_expiry&&new Date(u.plan_expiry)<new Date();
       const active=u.credits>0&&!expired;
       const plan=[...PLANS.individual,...PLANS.grupal].find(p=>p.id===u.plan_id);
-      const planName=plan?plan.name:'Sin plan';
+      const planName=plan?plan.name:((u.credits||0)>0?'Visitas manuales':'Sin plan');
       const days=daysUntil(u.plan_expiry);
       const isUnlimited=u.credits>=999;
       const noCredits=!isUnlimited&&(u.credits||0)<=0;
@@ -3200,10 +3200,11 @@ async function renderUsersSb(){
         +'</div>'
         +'<span class="badge '+statusCls+'">'+statusTxt+'</span>'
         +'</div>'
-        +'<div style="display:flex;gap:6px;width:100%">'
-        +'<button class="btn-sm bblue" style="flex:1" data-uid="'+u.id+'" data-name="'+u.name+'" onclick="adminEditUserSb(this.dataset.uid,this.dataset.name)">Editar</button>'
-        +'<button class="btn-sm bgreen" data-uid="'+u.id+'" onclick="adminAddCreditsSb(this.dataset.uid)">+Visita</button>'
-        +'<button class="btn-sm bred" data-uid="'+u.id+'" data-name="'+u.name+'" onclick="adminGrantPlanSb(this.dataset.uid,this.dataset.name)">Plan</button>'
+        +'<div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;width:100%">'
+        +'<button class="btn-sm bblue" data-uid="'+u.id+'" data-name="'+esc(u.name)+'" onclick="adminOpenMembershipModal(this.dataset.uid,this.dataset.name)">Activar membresia</button>'
+        +'<button class="btn-sm bgreen" data-uid="'+u.id+'" data-name="'+esc(u.name)+'" onclick="adminGrantCourtesySb(this.dataset.uid,this.dataset.name)">Cortesia 3</button>'
+        +'<button class="btn-sm bblue" data-uid="'+u.id+'" data-name="'+esc(u.name)+'" onclick="adminEditUserSb(this.dataset.uid,this.dataset.name)">Editar datos</button>'
+        +'<button class="btn-sm bgreen" data-uid="'+u.id+'" onclick="adminAddCreditsSb(this.dataset.uid)">+Visita extra</button>'
         +'</div>';
       list.appendChild(div);
     });
@@ -3213,15 +3214,86 @@ async function renderUsersSb(){
   }
 }
 
-async function adminGrantPlanSb(uid,name){
-  const planId=prompt('Plan ID para '+name+':\ni1=Visita $110\ni8=Pack8 $439\ni12=Pack12 $559\nim=Mensual $759\ng1=Grupal $399\ngm=Mensual grupal $2800');
-  if(!planId)return;
+function adminOpenMembershipModal(uid,name){
+  const existing=document.getElementById('membership-grant-modal');
+  if(existing)existing.remove();
+  const planOptions=[...PLANS.individual,...PLANS.grupal].map(p=>
+    '<option value="'+p.id+'">'+p.name+' · '+(p.credits>=999?'Mensual':p.credits+' visita'+(p.credits===1?'':'s'))+(p.days?' · '+p.days+' dias':'')+'</option>'
+  ).join('');
+  const modal=document.createElement('div');
+  modal.id='membership-grant-modal';
+  modal.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,.85);z-index:9999;display:flex;align-items:flex-end;justify-content:center';
+  modal.innerHTML=
+    '<div style="background:var(--dark);border:1px solid var(--border);border-radius:12px 12px 0 0;width:100%;max-width:430px;display:flex;flex-direction:column;overflow:hidden">'
+    +'<div style="padding:1rem;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between">'
+    +'<span style="font-size:17px;font-weight:800;letter-spacing:.08em">ACTIVAR MEMBRESIA</span>'
+    +'<button onclick="document.getElementById(&quot;membership-grant-modal&quot;).remove()" style="background:none;border:none;color:var(--gray);font-size:22px;cursor:pointer">x</button>'
+    +'</div>'
+    +'<div style="padding:1rem">'
+    +'<div class="brow-name" style="margin-bottom:12px">'+esc(name)+'</div>'
+    +'<div class="field"><label>Plan</label><select id="grant-plan-id" onchange="adminFillGrantAmount()" style="width:100%;background:var(--card2);border:1px solid var(--border);border-radius:4px;padding:12px;font-size:16px;color:var(--white);outline:none;-webkit-appearance:none">'+planOptions+'</select></div>'
+    +'<div class="field"><label>Metodo</label><select id="grant-method" style="width:100%;background:var(--card2);border:1px solid var(--border);border-radius:4px;padding:12px;font-size:16px;color:var(--white);outline:none;-webkit-appearance:none"><option value="cash">Efectivo</option><option value="courtesy">Cortesia</option><option value="adjustment">Ajuste manual</option></select></div>'
+    +'<div class="field"><label>Monto cobrado</label><input type="number" id="grant-amount" min="0" step="1" value="0" style="width:100%;background:var(--card2);border:1px solid var(--border);border-radius:4px;padding:12px;font-size:16px;color:var(--white);outline:none"></div>'
+    +'<div class="field"><label>Nota</label><textarea id="grant-note" placeholder="Ej: pago en efectivo, cortesia, convenio..." style="width:100%;background:var(--card2);border:1px solid var(--border);border-radius:4px;padding:12px;font-size:13px;color:var(--white);outline:none;resize:none;min-height:62px"></textarea></div>'
+    +'</div>'
+    +'<div style="padding:1rem;border-top:1px solid var(--border)"><button class="btn" data-uid="'+uid+'" data-name="'+esc(name)+'" onclick="adminGrantSelectedPlanSb(this.dataset.uid,this.dataset.name)">Activar membresia</button></div>'
+    +'</div>';
+  document.body.appendChild(modal);
+  adminFillGrantAmount();
+}
+
+function adminFillGrantAmount(){
+  const planId=(document.getElementById('grant-plan-id')||{}).value;
+  const amount=document.getElementById('grant-amount');
   const plan=[...PLANS.individual,...PLANS.grupal].find(p=>p.id===planId);
-  if(!plan){toast('Plan no encontrado','err');return;}
-  const expiry=mazPlanExpiryIso(plan.days);
-  await sb.from('profiles').update({plan_id:plan.id,plan_type:plan.type,credits:plan.credits,plan_expiry:expiry}).eq('id',uid);
-  toast('Plan asignado a '+name,'ok');
-  renderUsersSb();
+  if(plan&&amount)amount.value=plan.price;
+}
+
+async function adminLogManualPayment(uid,name,plan,amount,method,note){
+  const methodLabel={cash:'Efectivo',courtesy:'Cortesia',adjustment:'Ajuste manual'}[method]||'Ajuste manual';
+  const paymentPayload={
+    user_id:uid,
+    plan_id:plan?.id||'manual',
+    plan_name:plan?.name||'Ajuste manual',
+    plan_type:plan?.type||'manual',
+    amount:Number(amount)||0,
+    currency:'MXN',
+    last4:method==='cash'?'EFEC':method==='courtesy'?'CORT':'AJUS',
+    status:'completed',
+    payment_method:method,
+    notes:(note?note+' · ':'')+methodLabel+' registrado por admin',
+    created_by:sbUser?sbUser.id:null
+  };
+  const{error:payErr}=await sb.from('payments').insert(paymentPayload);
+  if(payErr)throw payErr;
+  await sb.from('admin_notifs').insert({message:'Registro manual: '+methodLabel+' · '+name+' · '+paymentPayload.plan_name+' · '+MXN(paymentPayload.amount)});
+}
+
+async function adminGrantSelectedPlanSb(uid,name){
+  const planId=(document.getElementById('grant-plan-id')||{}).value;
+  const plan=[...PLANS.individual,...PLANS.grupal].find(p=>p.id===planId);
+  if(!plan){toast('Selecciona un plan','err');return;}
+  const method=(document.getElementById('grant-method')||{value:'adjustment'}).value;
+  const amount=Number((document.getElementById('grant-amount')||{value:0}).value||0);
+  const note=(document.getElementById('grant-note')||{value:''}).value.trim();
+  showLoading('Activando membresia...');
+  try{
+    const expiry=mazPlanExpiryIso(plan.days);
+    const{error}=await sb.from('profiles').update({plan_id:plan.id,plan_type:plan.type,credits:plan.credits,plan_expiry:expiry}).eq('id',uid);
+    if(error)throw error;
+    await adminLogManualPayment(uid,name,plan,amount,method,note);
+    hideLoading();
+    document.getElementById('membership-grant-modal')?.remove();
+    toast('Membresia activada a '+name,'ok');
+    renderUsersSb();
+  }catch(e){
+    hideLoading();
+    toast('Error: '+e.message,'err');
+  }
+}
+
+async function adminGrantPlanSb(uid,name){
+  adminOpenMembershipModal(uid,name);
 }
 
 async function adminEditUserSb(uid,uname){
@@ -3323,22 +3395,7 @@ async function saveUserEditSb(uid){
 
     if(shouldLogManual){
       const methodLabel={cash:'Efectivo',courtesy:'Cortesia',adjustment:'Ajuste manual'}[payMethod]||'Ajuste manual';
-      const paymentPayload={
-        user_id:uid,
-        plan_id:plan?plan.id:'manual',
-        plan_name:plan?plan.name:'Ajuste manual',
-        plan_type:plan?plan.type:'manual',
-        amount:payAmount,
-        currency:'MXN',
-        last4:payMethod==='cash'?'EFEC':payMethod==='courtesy'?'CORT':'AJUS',
-        status:'completed',
-        payment_method:payMethod,
-        notes:(payNote?payNote+' · ':'')+methodLabel+' registrado por admin',
-        created_by:sbUser?sbUser.id:null
-      };
-      const{error:payErr}=await sb.from('payments').insert(paymentPayload);
-      if(payErr)throw payErr;
-      await sb.from('admin_notifs').insert({message:'Registro manual: '+methodLabel+' · '+name+' · '+(plan?plan.name:'Ajuste')+' · '+MXN(payAmount)});
+      await adminLogManualPayment(uid,name,plan,payAmount,payMethod,payNote);
     }
 
     hideLoading();
@@ -3355,19 +3412,46 @@ async function adminAddCreditsSb(uid){
   showLoading('Agregando visita...');
   try{
     // Read current credits first
-    const{data:prof,error}=await sb.from('profiles').select('credits,name,plan_id,plan_type').eq('id',uid).single();
+    const{data:prof,error}=await sb.from('profiles').select('credits,name,plan_id,plan_type,plan_expiry').eq('id',uid).single();
     if(error)throw error;
     const newCredits=Math.min(999,(prof.credits||0)+1);
     const patch={credits:newCredits};
-    if(!prof.plan_id){
+    const expired=prof.plan_expiry&&new Date(prof.plan_expiry)<new Date();
+    if(!prof.plan_id||expired){
       patch.plan_id='i1';
       patch.plan_type='individual';
-      patch.plan_expiry=null;
+      patch.plan_expiry=mazPlanExpiryIso(30);
     }
     const{error:e2}=await sb.from('profiles').update(patch).eq('id',uid);
     if(e2)throw e2;
+    await sb.from('admin_notifs').insert({message:'Visita extra agregada · '+prof.name+' · '+newCredits+' visitas'});
     hideLoading();
     toast(prof.name+': '+newCredits+' visitas','ok');
+    renderUsersSb();
+  }catch(e){
+    hideLoading();
+    toast('Error: '+e.message,'err');
+  }
+}
+
+async function adminGrantCourtesySb(uid,name){
+  if(!confirm('Activar 3 visitas de cortesia para '+name+' por 30 dias?'))return;
+  showLoading('Activando cortesia...');
+  try{
+    const{data:prof,error}=await sb.from('profiles').select('credits,name').eq('id',uid).single();
+    if(error)throw error;
+    const newCredits=Math.min(999,(prof.credits||0)+3);
+    const expiry=mazPlanExpiryIso(30);
+    const{error:e2}=await sb.from('profiles').update({
+      plan_id:'i1',
+      plan_type:'individual',
+      credits:newCredits,
+      plan_expiry:expiry
+    }).eq('id',uid);
+    if(e2)throw e2;
+    await adminLogManualPayment(uid,name,{id:'courtesy3',name:'Cortesia 3 visitas',type:'individual'},0,'courtesy','3 visitas de cortesia por 30 dias');
+    hideLoading();
+    toast('Cortesia activada: '+newCredits+' visitas','ok');
     renderUsersSb();
   }catch(e){
     hideLoading();
