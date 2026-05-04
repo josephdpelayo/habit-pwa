@@ -2,7 +2,7 @@
   "name": "HABIT",
   "short_name": "HABIT",
   "description": "Tu gym autónomo 24/7 en Mazatlán",
-  "start_url": "/app.html?v=20260503-8",
+  "start_url": "/app.html?v=20260503-9",
   "scope": "/",
   "display": "standalone",
   "orientation": "portrait",

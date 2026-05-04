@@ -6,12 +6,12 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="HABIT">
 <meta name="application-name" content="HABIT">
-<link rel="manifest" href="/manifest.json?v=20260503-8">
-<link rel="apple-touch-icon" sizes="120x120" href="/icons/icon-120.png?v=20260503-8">
-<link rel="apple-touch-icon" sizes="152x152" href="/icons/icon-152.png?v=20260503-8">
-<link rel="apple-touch-icon" sizes="167x167" href="/icons/icon-167.png?v=20260503-8">
-<link rel="apple-touch-icon" sizes="180x180" href="/icons/icon-180.png?v=20260503-8">
-<link rel="icon" type="image/png" sizes="32x32" href="/icons/icon-32.png?v=20260503-8">
+<link rel="manifest" href="/manifest.json?v=20260503-9">
+<link rel="apple-touch-icon" sizes="120x120" href="/icons/icon-120.png?v=20260503-9">
+<link rel="apple-touch-icon" sizes="152x152" href="/icons/icon-152.png?v=20260503-9">
+<link rel="apple-touch-icon" sizes="167x167" href="/icons/icon-167.png?v=20260503-9">
+<link rel="apple-touch-icon" sizes="180x180" href="/icons/icon-180.png?v=20260503-9">
+<link rel="icon" type="image/png" sizes="32x32" href="/icons/icon-32.png?v=20260503-9">
 <title>HABIT</title>
 <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700;800&family=Barlow:wght@300;400;500;600&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
@@ -164,6 +164,23 @@ input,select,button,textarea{font-family:'Barlow',sans-serif}
 .sb-full{background:rgba(156,163,175,.1);color:var(--gray)}
 .sb-wait{background:rgba(245,158,11,.12);color:var(--amber)}
 .sb-grp{background:rgba(124,58,237,.15);color:#a78bfa}
+.adm-slot-row{display:grid;grid-template-columns:64px 1fr auto;gap:10px;align-items:flex-start}
+.adm-slot-main{min-width:0}
+.adm-slot-head{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:4px}
+.adm-slot-list{display:flex;flex-direction:column;gap:4px;margin-top:4px}
+.adm-slot-person{font-size:12px;color:var(--white);line-height:1.2}
+.adm-slot-note{font-size:11px;color:var(--amber);margin-top:4px;line-height:1.25}
+.adm-block-panel{display:none;grid-column:1/-1;background:var(--card2);border:1px solid var(--border);border-radius:4px;padding:8px;gap:6px;align-items:center}
+.adm-block-panel.open{display:flex}
+.adm-block-panel input{background:var(--card);border:1px solid var(--border);border-radius:3px;color:var(--white);padding:7px;font-size:12px;outline:none}
+.adm-block-panel select{background:var(--card);border:1px solid var(--border);border-radius:3px;color:var(--white);padding:7px;font-size:12px;color-scheme:dark}
+.adm-slot-actions{display:flex;gap:6px;align-items:center}
+@media(max-width:520px){
+  .adm-slot-row{grid-template-columns:58px 1fr;gap:8px}
+  .adm-slot-actions{grid-column:2;justify-content:flex-start}
+  .adm-block-panel{grid-column:1/-1;flex-wrap:wrap}
+  .adm-block-panel select{flex:0 0 110px}
+}
 
 /* Selected slots summary strip */
 .sel-strip{background:rgba(37,99,235,.12);border:1px solid rgba(37,99,235,.3);border-radius:4px;padding:8px 12px;margin:0 1rem 8px;font-size:12px;color:var(--bl);flex-shrink:0}
@@ -689,7 +706,7 @@ input,select,button,textarea{font-family:'Barlow',sans-serif}
 
 const SUPABASE_URL='https://pmpjteuqjusbiduevbwq.supabase.co';
 const SUPABASE_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBtcGp0ZXVxanVzYmlkdWV2YndxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc2OTI1NjUsImV4cCI6MjA5MzI2ODU2NX0.XbMzZoo2yqtrD8znLnyo_1zDfrdJAvAPj1lqGOyXnLw';
-const APP_VERSION='20260503-8';
+const APP_VERSION='20260503-9';
 const sb=supabase.createClient(SUPABASE_URL,SUPABASE_KEY,{auth:{autoRefreshToken:true,persistSession:true,detectSessionInUrl:false}});
 let sbUser=null,sbProfile=null;
 
@@ -2117,19 +2134,32 @@ async function renderAdmSlots(){
     slotRows.forEach((row,idx)=>{
       const free=Math.max(0,CAP-row.taken);
       const isFull=free===0;
-      const itemText=row.items.length?row.items.map(it=>esc(it.name)+(it.isBlocked?' · bloqueado '+it.spots+' · '+esc(it.reason||'Sin motivo'):it.isGroup?' · G'+it.spots:'')).join(' · '):'Sin reservas';
-      html+='<div class="brow">'
+      const people=row.items.filter(it=>!it.isBlocked);
+      const blocks=row.items.filter(it=>it.isBlocked);
+      const peopleHtml=people.length
+        ? '<div class="adm-slot-list">'+people.map(it=>'<div class="adm-slot-person">'+esc(it.name)+(it.isGroup?' · grupal '+it.spots:'')+'</div>').join('')+'</div>'
+        : '<div class="brow-meta">Sin reservas</div>';
+      const blockHtml=blocks.length
+        ? blocks.map(it=>'<div class="adm-slot-note">Bloqueado: '+it.spots+' espacio'+(it.spots>1?'s':'')+' · '+esc(it.reason||'Sin motivo')+'</div>').join('')
+        : '';
+      html+='<div class="brow adm-slot-row">'
         +'<div class="slot-time">'+fmtSlot(idx)+'</div>'
-        +'<div class="brow-info"><div class="brow-meta">'+itemText+'</div></div>'
-        +'<span class="slot-badge '+(isFull?'sb-full':'sb-open')+'">'+free+' libre'+(free===1?'':'s')+'</span>'
-        +'<select id="blk-'+idx+'" style="width:54px;background:var(--card2);border:1px solid var(--border);border-radius:3px;color:var(--white);padding:5px;font-size:12px;color-scheme:dark"><option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4">4</option></select>'
-        +'<input id="blk-r-'+idx+'" type="text" placeholder="Motivo" style="width:110px;background:var(--card2);border:1px solid var(--border);border-radius:3px;color:var(--white);padding:6px;font-size:12px;outline:none">'
-        +'<button class="btn-sm bblue" data-ds="'+ds+'" data-idx="'+idx+'" onclick="blockSlotSb(this.dataset.ds,parseInt(this.dataset.idx),parseInt(document.getElementById(&quot;blk-'+idx+'&quot;).value),document.getElementById(&quot;blk-r-'+idx+'&quot;).value)">Bloq.</button>'
-        +(row.blocked?'<button class="btn-sm bred" data-ds="'+ds+'" data-idx="'+idx+'" onclick="unblockSlotSb(this.dataset.ds,parseInt(this.dataset.idx))">Abrir</button>':'')
+        +'<div class="adm-slot-main"><div class="adm-slot-head"><span class="slot-badge '+(isFull?'sb-full':'sb-open')+'">'+free+' libre'+(free===1?'':'s')+'</span>'+(blocks.length?'<span class="badge bg-amber">Bloqueado</span>':'')+'</div>'+peopleHtml+blockHtml+'</div>'
+        +'<div class="adm-slot-actions"><button class="btn-sm bblue" data-idx="'+idx+'" onclick="toggleBlockPanel(parseInt(this.dataset.idx))">Bloq.</button>'
+        +(row.blocked?'<button class="btn-sm bred" data-ds="'+ds+'" data-idx="'+idx+'" onclick="unblockSlotSb(this.dataset.ds,parseInt(this.dataset.idx))">Abrir</button>':'')+'</div>'
+        +'<div id="blk-panel-'+idx+'" class="adm-block-panel">'
+        +'<select id="blk-'+idx+'"><option value="1">1 espacio</option><option value="2">2 espacios</option><option value="3">3 espacios</option><option value="4">4 espacios</option></select>'
+        +'<input id="blk-r-'+idx+'" type="text" placeholder="Motivo del bloqueo" style="flex:1;min-width:140px">'
+        +'<button class="btn-sm bblue" data-ds="'+ds+'" data-idx="'+idx+'" onclick="blockSlotSb(this.dataset.ds,parseInt(this.dataset.idx),parseInt(document.getElementById(&quot;blk-'+idx+'&quot;).value),document.getElementById(&quot;blk-r-'+idx+'&quot;).value)">Guardar</button>'
         +'</div>';
     });
     el.innerHTML=html;
   }catch(e){el.innerHTML='<div class="empty">Error: '+e.message+'</div>';}
+}
+
+function toggleBlockPanel(idx){
+  const el=document.getElementById('blk-panel-'+idx);
+  if(el)el.classList.toggle('open');
 }
 
 async function blockSlotSb(ds,idx,spots,reason){
