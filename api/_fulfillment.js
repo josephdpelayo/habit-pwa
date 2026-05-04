@@ -72,6 +72,11 @@ async function activateMembership(session) {
 
   const last4 = await getLast4(session);
   const paidAmount = typeof session.amount_total === 'number' ? session.amount_total / 100 : plan.price;
+  const { data: profile } = await supabase
+    .from('profiles')
+    .select('name')
+    .eq('id', userId)
+    .maybeSingle();
   await insertPayment({
     user_id: userId,
     plan_id: plan.id,
@@ -84,6 +89,9 @@ async function activateMembership(session) {
     payment_method: 'stripe',
     status: 'completed',
     notes: 'Pago con TDC registrado por Stripe',
+  });
+  await supabase.from('admin_notifs').insert({
+    message: `Pago Stripe: ${profile && profile.name ? profile.name : 'Usuario'} · ${plan.name} · $${paidAmount.toLocaleString('es-MX')}`,
   });
 
   return { activated: true, recorded: true, duplicate: false };

@@ -6,12 +6,12 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="HABIT">
 <meta name="application-name" content="HABIT">
-<link rel="manifest" href="/manifest.json?v=20260504-16">
-<link rel="apple-touch-icon" sizes="120x120" href="/icons/icon-120.png?v=20260504-16">
-<link rel="apple-touch-icon" sizes="152x152" href="/icons/icon-152.png?v=20260504-16">
-<link rel="apple-touch-icon" sizes="167x167" href="/icons/icon-167.png?v=20260504-16">
-<link rel="apple-touch-icon" sizes="180x180" href="/icons/icon-180.png?v=20260504-16">
-<link rel="icon" type="image/png" sizes="32x32" href="/icons/icon-32.png?v=20260504-16">
+<link rel="manifest" href="/manifest.json?v=20260504-17">
+<link rel="apple-touch-icon" sizes="120x120" href="/icons/icon-120.png?v=20260504-17">
+<link rel="apple-touch-icon" sizes="152x152" href="/icons/icon-152.png?v=20260504-17">
+<link rel="apple-touch-icon" sizes="167x167" href="/icons/icon-167.png?v=20260504-17">
+<link rel="apple-touch-icon" sizes="180x180" href="/icons/icon-180.png?v=20260504-17">
+<link rel="icon" type="image/png" sizes="32x32" href="/icons/icon-32.png?v=20260504-17">
 <title>HABIT</title>
 <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
@@ -811,7 +811,7 @@ input,select,button,textarea{font-family:'Montserrat',sans-serif}
 
 const SUPABASE_URL='https://pmpjteuqjusbiduevbwq.supabase.co';
 const SUPABASE_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBtcGp0ZXVxanVzYmlkdWV2YndxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc2OTI1NjUsImV4cCI6MjA5MzI2ODU2NX0.XbMzZoo2yqtrD8znLnyo_1zDfrdJAvAPj1lqGOyXnLw';
-const APP_VERSION='20260504-16';
+const APP_VERSION='20260504-17';
 const PUBLIC_APP_URL='https://habittraininghub.app/app.html';
 const sb=supabase.createClient(SUPABASE_URL,SUPABASE_KEY,{auth:{autoRefreshToken:true,persistSession:true,detectSessionInUrl:true}});
 let sbUser=null,sbProfile=null;
@@ -2926,8 +2926,8 @@ async function renderDashboard(){
     let html='<div class="metrics" style="margin-bottom:1rem">'
       +'<div class="met"><div class="met-l">Socios activos</div><div class="met-v" style="color:var(--green)">'+active.length+'</div></div>'
       +'<div class="met"><div class="met-l">Total socios</div><div class="met-v">'+(allU||[]).length+'</div></div>'
-      +'<div class="met"><div class="met-l">Ingresos mes</div><div class="met-v" style="color:var(--bl)">'+MXN(monthRev)+'</div></div>'
-      +'<div class="met"><div class="met-l">Ingresos total</div><div class="met-v" style="color:var(--bl)">'+MXN(totalRev)+'</div></div>'
+      +'<button class="met" onclick="admTab(&quot;payments&quot;)" style="text-align:left;cursor:pointer"><div class="met-l">Ingresos mes</div><div class="met-v" style="color:var(--bl)">'+MXN(monthRev)+'</div></button>'
+      +'<button class="met" onclick="admTab(&quot;payments&quot;)" style="text-align:left;cursor:pointer"><div class="met-l">Ingresos total</div><div class="met-v" style="color:var(--bl)">'+MXN(totalRev)+'</div></button>'
       +'<div class="met"><div class="met-l">Reservas hoy</div><div class="met-v" style="color:var(--amber)">'+todayBks+'</div></div>'
       +'<div class="met"><div class="met-l">Accesos gym</div><div class="met-v" style="color:var(--green)">'+(logs||[]).length+'</div></div>'
       +'</div>';
@@ -3527,12 +3527,26 @@ async function renderPaymentsSb(){
     },{total:0,stripe:0,cash:0,courtesy:0,adjustment:0});
     const summary=document.createElement('div');
     summary.style.cssText='display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px';
+    const today=mazToday();
+    const month=today.slice(0,7);
+    const todayTotal=pays.filter(p=>dsFromIsoMaz(p.created_at)===today).reduce((s,p)=>s+Number(p.amount||0),0);
+    const monthTotal=pays.filter(p=>dsFromIsoMaz(p.created_at).startsWith(month)).reduce((s,p)=>s+Number(p.amount||0),0);
     summary.innerHTML=
-      '<div class="met"><div class="met-l">Total cobrado</div><div class="met-v" style="color:var(--green)">'+MXN(sums.total)+'</div></div>'
+      '<div class="met"><div class="met-l">Hoy</div><div class="met-v" style="color:var(--green)">'+MXN(todayTotal)+'</div></div>'
+      +'<div class="met"><div class="met-l">Mes actual</div><div class="met-v" style="color:var(--green)">'+MXN(monthTotal)+'</div></div>'
+      +'<div class="met"><div class="met-l">Total cobrado</div><div class="met-v" style="color:var(--green)">'+MXN(sums.total)+'</div></div>'
       +'<div class="met"><div class="met-l">Stripe / TDC</div><div class="met-v" style="color:var(--bl)">'+MXN(sums.stripe)+'</div></div>'
       +'<div class="met"><div class="met-l">Efectivo</div><div class="met-v" style="color:var(--amber)">'+MXN(sums.cash)+'</div></div>'
       +'<div class="met"><div class="met-l">Cortesias / ajustes</div><div class="met-v">'+MXN((sums.courtesy||0)+(sums.adjustment||0))+'</div></div>';
+    const title=document.createElement('div');
+    title.innerHTML='<p class="slbl" style="margin-bottom:10px">Finanzas</p>';
+    list.appendChild(title);
     list.appendChild(summary);
+    const recent=document.createElement('p');
+    recent.className='slbl';
+    recent.style.margin='14px 0 10px';
+    recent.textContent='Movimientos';
+    list.appendChild(recent);
     pays.forEach(p=>{
       const method={stripe:'TDC / Stripe',cash:'Efectivo',courtesy:'Cortesia',adjustment:'Ajuste manual'}[p.payment_method||'stripe']||p.payment_method||'Pago';
       const ref=p.last4?' · '+(p.payment_method==='stripe'?'**** ':'')+(p.last4||'----'):'';
