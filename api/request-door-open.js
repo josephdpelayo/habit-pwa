@@ -6,6 +6,7 @@ const BEFORE_MIN = 10;
 const DEFAULT_RADIUS_M = 120;
 const DEFAULT_MAX_ACCURACY_M = 150;
 const SHELLY_DEFAULT_TURN = 'off';
+const SHELLY_DEFAULT_RELEASE_SECONDS = 5;
 
 const supabase = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_SERVICE_ROLE_KEY);
 
@@ -75,19 +76,32 @@ function getShellyConfig() {
   const deviceId = String(process.env.SHELLY_DEVICE_ID || '');
   const channel = String(process.env.SHELLY_CHANNEL || '0');
   const turn = String(process.env.SHELLY_TURN || SHELLY_DEFAULT_TURN).toLowerCase();
+  const releaseSecondsRaw = Number(process.env.SHELLY_RELEASE_SECONDS || SHELLY_DEFAULT_RELEASE_SECONDS);
+  const releaseSeconds = Number.isFinite(releaseSecondsRaw) && releaseSecondsRaw > 0 ? releaseSecondsRaw : SHELLY_DEFAULT_RELEASE_SECONDS;
   if (!server || !authKey || !deviceId) return null;
-  return { server, authKey, deviceId, channel, turn: turn === 'on' ? 'on' : 'off' };
+  const normalizedTurn = turn === 'on' ? 'on' : 'off';
+  const relockTurn = String(process.env.SHELLY_RELOCK_TURN || (normalizedTurn === 'on' ? 'off' : 'on')).toLowerCase();
+  return {
+    server,
+    authKey,
+    deviceId,
+    channel,
+    turn: normalizedTurn,
+    relockTurn: relockTurn === 'off' ? 'off' : 'on',
+    releaseSeconds,
+  };
 }
 
-async function triggerShellyDoor() {
-  const cfg = getShellyConfig();
-  if (!cfg) return { configured: false, opened: false };
+function sleep(ms) {
+  return new Promise(resolve => setTimeout(resolve, ms));
+}
 
+async function sendShellyRelay(cfg, turn) {
   const body = new URLSearchParams({
     id: cfg.deviceId,
     auth_key: cfg.authKey,
     channel: cfg.channel,
-    turn: cfg.turn,
+    turn,
   });
 
   const response = await fetch(`${cfg.server}/device/relay/control`, {
@@ -107,8 +121,20 @@ async function triggerShellyDoor() {
     const message = payload && payload.errors ? JSON.stringify(payload.errors) : text || response.statusText;
     throw new Error(`Shelly no abrio: ${message}`);
   }
+  return payload;
+}
 
-  return { configured: true, opened: true, payload };
+async function triggerShellyDoor() {
+  const cfg = getShellyConfig();
+  if (!cfg) return { configured: false, opened: false };
+
+  const payload = await sendShellyRelay(cfg, cfg.turn);
+  if (cfg.releaseSeconds > 0) {
+    await sleep(cfg.releaseSeconds * 1000);
+    await sendShellyRelay(cfg, cfg.relockTurn);
+  }
+
+  return { configured: true, opened: true, payload, release_seconds: cfg.releaseSeconds };
 }
 
 module.exports = async function handler(req, res) {
