@@ -6,12 +6,12 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="HABIT">
 <meta name="application-name" content="HABIT">
-<link rel="manifest" href="/manifest.json?v=20260503-18">
-<link rel="apple-touch-icon" sizes="120x120" href="/icons/icon-120.png?v=20260503-18">
-<link rel="apple-touch-icon" sizes="152x152" href="/icons/icon-152.png?v=20260503-18">
-<link rel="apple-touch-icon" sizes="167x167" href="/icons/icon-167.png?v=20260503-18">
-<link rel="apple-touch-icon" sizes="180x180" href="/icons/icon-180.png?v=20260503-18">
-<link rel="icon" type="image/png" sizes="32x32" href="/icons/icon-32.png?v=20260503-18">
+<link rel="manifest" href="/manifest.json?v=20260503-19">
+<link rel="apple-touch-icon" sizes="120x120" href="/icons/icon-120.png?v=20260503-19">
+<link rel="apple-touch-icon" sizes="152x152" href="/icons/icon-152.png?v=20260503-19">
+<link rel="apple-touch-icon" sizes="167x167" href="/icons/icon-167.png?v=20260503-19">
+<link rel="apple-touch-icon" sizes="180x180" href="/icons/icon-180.png?v=20260503-19">
+<link rel="icon" type="image/png" sizes="32x32" href="/icons/icon-32.png?v=20260503-19">
 <title>HABIT</title>
 <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
@@ -773,7 +773,7 @@ input,select,button,textarea{font-family:'Montserrat',sans-serif}
 
 const SUPABASE_URL='https://pmpjteuqjusbiduevbwq.supabase.co';
 const SUPABASE_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBtcGp0ZXVxanVzYmlkdWV2YndxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc2OTI1NjUsImV4cCI6MjA5MzI2ODU2NX0.XbMzZoo2yqtrD8znLnyo_1zDfrdJAvAPj1lqGOyXnLw';
-const APP_VERSION='20260503-18';
+const APP_VERSION='20260503-19';
 const sb=supabase.createClient(SUPABASE_URL,SUPABASE_KEY,{auth:{autoRefreshToken:true,persistSession:true,detectSessionInUrl:false}});
 let sbUser=null,sbProfile=null;
 
@@ -1914,6 +1914,13 @@ function renderPlans(){
   const ss=document.getElementById('stripe-sec');if(ss)ss.style.display=selPlan?'block':'none';
 }
 function choosePlan(p){selPlan=p;renderPlans();document.getElementById('stripe-sec').style.display='block';document.getElementById('pay-sum').innerHTML='<strong>'+p.name+'</strong> · '+MXN(p.price)+'<br><span style="font-size:11px;color:var(--gray)">'+p.perks.join(' · ')+'</span>';}
+function adminFillManualAmount(){
+  const planId=(document.getElementById('eu-plan')||{}).value;
+  const amount=document.getElementById('eu-pay-amount');
+  if(!amount||amount.value)return;
+  const plan=planId?[...PLANS.individual,...PLANS.grupal].find(p=>p.id===planId):null;
+  if(plan)amount.value=plan.price;
+}
 async function handleStripeReturn(){
   const params=new URLSearchParams(location.search);
   if(params.get('stripe_cancel')){
@@ -3044,12 +3051,20 @@ async function adminEditUserSb(uid,uname){
       +'<div class="divider"></div>'
       +'<p class="slbl" style="margin-bottom:8px">Membresia</p>'
       +'<div class="field"><label>Plan</label>'
-      +'<select id="eu-plan" style="width:100%;background:var(--card2);border:1px solid var(--border);border-radius:4px;padding:12px;font-size:16px;color:var(--white);outline:none;-webkit-appearance:none">'
+      +'<select id="eu-plan" onchange="adminFillManualAmount()" style="width:100%;background:var(--card2);border:1px solid var(--border);border-radius:4px;padding:12px;font-size:16px;color:var(--white);outline:none;-webkit-appearance:none">'
       +'<option value="">Sin plan</option>'
       +[...PLANS.individual,...PLANS.grupal].map(p=>'<option value="'+p.id+'" '+(prof.plan_id===p.id?'selected':'')+'>'+p.name+' ('+p.type+')</option>').join('')
       +'</select></div>'
       +'<div class="field"><label>Visitas restantes</label><input type="number" id="eu-credits" value="'+(prof.credits||0)+'" min="0" max="999" style="width:100%;background:var(--card2);border:1px solid var(--border);border-radius:4px;padding:12px;font-size:16px;color:var(--white);outline:none"></div>'
       +'<div class="field"><label>Vencimiento</label><input type="date" id="eu-expiry" value="'+(prof.plan_expiry?prof.plan_expiry.slice(0,10):'')+'" style="width:100%;background:var(--card2);border:1px solid var(--border);border-radius:4px;padding:12px;font-size:16px;color:var(--white);outline:none;color-scheme:dark"></div>'
+      +'<div class="divider"></div>'
+      +'<p class="slbl" style="margin-bottom:8px">Registro manual</p>'
+      +'<label style="display:flex;align-items:flex-start;gap:9px;margin-bottom:10px;color:var(--gl);font-size:12px;line-height:1.45">'
+      +'<input type="checkbox" id="eu-log-manual" style="width:18px;height:18px;accent-color:var(--blue);margin-top:1px">'
+      +'<span>Guardar este cambio en pagos/bitacora manual.</span></label>'
+      +'<div class="field"><label>Metodo</label><select id="eu-pay-method" style="width:100%;background:var(--card2);border:1px solid var(--border);border-radius:4px;padding:12px;font-size:16px;color:var(--white);outline:none;-webkit-appearance:none"><option value="cash">Efectivo</option><option value="courtesy">Cortesia</option><option value="adjustment">Ajuste manual</option></select></div>'
+      +'<div class="field"><label>Monto</label><input type="number" id="eu-pay-amount" min="0" step="1" placeholder="0" style="width:100%;background:var(--card2);border:1px solid var(--border);border-radius:4px;padding:12px;font-size:16px;color:var(--white);outline:none"></div>'
+      +'<div class="field"><label>Nota</label><textarea id="eu-pay-note" placeholder="Ej: pago en efectivo recibido, cortesia por invitado, ajuste por error..." style="width:100%;background:var(--card2);border:1px solid var(--border);border-radius:4px;padding:12px;font-size:13px;color:var(--white);outline:none;resize:none;min-height:62px"></textarea></div>'
       +'<div class="divider"></div>'
       +'<p class="slbl" style="margin-bottom:8px">Pizarrones asignados</p>'
       +'<div style="max-height:200px;overflow-y:auto;border:1px solid var(--border);border-radius:4px;padding:0 12px">'
@@ -3077,6 +3092,10 @@ async function saveUserEditSb(uid){
     const expiryVal=document.getElementById('eu-expiry').value;
     const expiry=expiryVal?mazEndOfDayIso(expiryVal):null;
     const plan=planId?[...PLANS.individual,...PLANS.grupal].find(p=>p.id===planId):null;
+    const shouldLogManual=!!(document.getElementById('eu-log-manual')||{}).checked;
+    const payMethod=(document.getElementById('eu-pay-method')||{value:'adjustment'}).value;
+    const payAmount=Number((document.getElementById('eu-pay-amount')||{value:0}).value||0);
+    const payNote=(document.getElementById('eu-pay-note')||{value:''}).value.trim();
 
     // Update profile
     await sb.from('profiles').update({
@@ -3093,6 +3112,26 @@ async function saveUserEditSb(uid){
     await sb.from('board_assignments').delete().eq('user_id',uid);
     if(selectedBoards.length){
       await sb.from('board_assignments').insert(selectedBoards.map(bid=>({board_id:bid,user_id:uid})));
+    }
+
+    if(shouldLogManual){
+      const methodLabel={cash:'Efectivo',courtesy:'Cortesia',adjustment:'Ajuste manual'}[payMethod]||'Ajuste manual';
+      const paymentPayload={
+        user_id:uid,
+        plan_id:plan?plan.id:'manual',
+        plan_name:plan?plan.name:'Ajuste manual',
+        plan_type:plan?plan.type:'manual',
+        amount:payAmount,
+        currency:'MXN',
+        last4:payMethod==='cash'?'EFEC':payMethod==='courtesy'?'CORT':'AJUS',
+        status:'completed',
+        payment_method:payMethod,
+        notes:(payNote?payNote+' · ':'')+methodLabel+' registrado por admin',
+        created_by:sbUser?sbUser.id:null
+      };
+      const{error:payErr}=await sb.from('payments').insert(paymentPayload);
+      if(payErr)throw payErr;
+      await sb.from('admin_notifs').insert({message:'Registro manual: '+methodLabel+' · '+name+' · '+(plan?plan.name:'Ajuste')+' · '+MXN(payAmount)});
     }
 
     hideLoading();
@@ -3131,9 +3170,12 @@ async function renderPaymentsSb(){
     if(!pays||!pays.length){list.innerHTML='<div class="empty">Sin pagos.</div>';return;}
     list.innerHTML='';
     pays.forEach(p=>{
+      const method={stripe:'TDC / Stripe',cash:'Efectivo',courtesy:'Cortesia',adjustment:'Ajuste manual'}[p.payment_method||'stripe']||p.payment_method||'Pago';
+      const ref=p.last4?' · '+(p.payment_method==='stripe'?'**** ':'')+(p.last4||'----'):'';
       const d=document.createElement('div');d.className='brow';
       d.innerHTML='<div class="brow-info"><div class="brow-name">'+(p.profiles?.name||'Usuario')+'</div>'
-        +'<div class="brow-meta">'+p.plan_name+' · '+fmtDateTimeMaz(p.created_at)+' · **** '+(p.last4||'----')+'</div></div>'
+        +'<div class="brow-meta">'+p.plan_name+' · '+method+' · '+fmtDateTimeMaz(p.created_at)+ref+'</div>'
+        +(p.notes?'<div class="brow-meta">'+p.notes+'</div>':'')+'</div>'
         +'<div style="font-size:16px;font-weight:700">'+MXN(p.amount)+'</div>';
       list.appendChild(d);
     });

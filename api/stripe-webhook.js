@@ -76,6 +76,7 @@ async function activateMembership(session) {
     currency: 'MXN',
     last4,
     stripe_id: session.id,
+    payment_method: 'stripe',
     status: 'completed',
   });
   if (paymentError) throw paymentError;
