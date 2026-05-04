@@ -6,12 +6,12 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="HABIT">
 <meta name="application-name" content="HABIT">
-<link rel="manifest" href="/manifest.json?v=20260503-17">
-<link rel="apple-touch-icon" sizes="120x120" href="/icons/icon-120.png?v=20260503-17">
-<link rel="apple-touch-icon" sizes="152x152" href="/icons/icon-152.png?v=20260503-17">
-<link rel="apple-touch-icon" sizes="167x167" href="/icons/icon-167.png?v=20260503-17">
-<link rel="apple-touch-icon" sizes="180x180" href="/icons/icon-180.png?v=20260503-17">
-<link rel="icon" type="image/png" sizes="32x32" href="/icons/icon-32.png?v=20260503-17">
+<link rel="manifest" href="/manifest.json?v=20260503-18">
+<link rel="apple-touch-icon" sizes="120x120" href="/icons/icon-120.png?v=20260503-18">
+<link rel="apple-touch-icon" sizes="152x152" href="/icons/icon-152.png?v=20260503-18">
+<link rel="apple-touch-icon" sizes="167x167" href="/icons/icon-167.png?v=20260503-18">
+<link rel="apple-touch-icon" sizes="180x180" href="/icons/icon-180.png?v=20260503-18">
+<link rel="icon" type="image/png" sizes="32x32" href="/icons/icon-32.png?v=20260503-18">
 <title>HABIT</title>
 <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
@@ -493,15 +493,10 @@ input,select,button,textarea{font-family:'Montserrat',sans-serif}
         <p class="slbl">Pago con tarjeta</p>
         <div class="stripe-box">
           <div class="stripe-logo">stripe</div>
-          <div class="field"><label>Número de tarjeta</label><input type="text" id="cn" placeholder="4242 4242 4242 4242" maxlength="19" inputmode="numeric"></div>
-          <div class="srow">
-            <div class="field" style="flex:1"><label>Vencimiento</label><input type="text" id="ce" placeholder="MM/AA" maxlength="5" inputmode="numeric" oninput="autoSlash(this)"></div>
-            <div class="field" style="flex:1"><label>CVV</label><input type="text" id="cv" placeholder="•••" maxlength="3" inputmode="numeric"></div>
-          </div>
-          <div class="field"><label>Nombre en tarjeta</label><input type="text" id="cna" placeholder="Como aparece en la tarjeta"></div>
+          <div style="font-size:13px;color:var(--gl);line-height:1.6">El pago se procesa de forma segura en Stripe. HABIT no guarda datos de tu tarjeta.</div>
         </div>
         <div id="pay-sum" class="sbox sn" style="margin-bottom:.75rem"></div>
-        <button class="btn" onclick="doPay()">Pagar y activar membresía</button>
+        <button class="btn" onclick="doPay()">Pagar con tarjeta</button>
       </div>
     </div>
   </div>
@@ -778,7 +773,7 @@ input,select,button,textarea{font-family:'Montserrat',sans-serif}
 
 const SUPABASE_URL='https://pmpjteuqjusbiduevbwq.supabase.co';
 const SUPABASE_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBtcGp0ZXVxanVzYmlkdWV2YndxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc2OTI1NjUsImV4cCI6MjA5MzI2ODU2NX0.XbMzZoo2yqtrD8znLnyo_1zDfrdJAvAPj1lqGOyXnLw';
-const APP_VERSION='20260503-17';
+const APP_VERSION='20260503-18';
 const sb=supabase.createClient(SUPABASE_URL,SUPABASE_KEY,{auth:{autoRefreshToken:true,persistSession:true,detectSessionInUrl:false}});
 let sbUser=null,sbProfile=null;
 
@@ -852,7 +847,10 @@ async function initApp(){
       await loadUserData();
       hideLoading();
       if(sbProfile.role==='admin')showAdmin();
-      else showMainSb();
+      else{
+        showMainSb();
+        handleStripeReturn();
+      }
     }
   }catch(e){
     hideLoading();
@@ -1916,41 +1914,43 @@ function renderPlans(){
   const ss=document.getElementById('stripe-sec');if(ss)ss.style.display=selPlan?'block':'none';
 }
 function choosePlan(p){selPlan=p;renderPlans();document.getElementById('stripe-sec').style.display='block';document.getElementById('pay-sum').innerHTML='<strong>'+p.name+'</strong> · '+MXN(p.price)+'<br><span style="font-size:11px;color:var(--gray)">'+p.perks.join(' · ')+'</span>';}
+async function handleStripeReturn(){
+  const params=new URLSearchParams(location.search);
+  if(params.get('stripe_cancel')){
+    toast('Pago cancelado','warn');
+    history.replaceState({},'',location.pathname);
+    return;
+  }
+  if(!params.get('stripe_success'))return;
+  toast('Pago recibido. Activando membresia...','ok');
+  history.replaceState({},'',location.pathname);
+  setTimeout(async()=>{
+    try{
+      await loadUserData();
+      renderMembershipStatus();
+      renderHistorial();
+      toast('Membresia activada','ok');
+    }catch(e){
+      toast('Pago recibido. Si no aparece tu membresia, espera unos segundos y recarga.','warn');
+    }
+  },2500);
+}
 async function doPay(){
   if(!selPlan){toast('Selecciona un plan','err');return;}
-  const num=document.getElementById('cn').value.replace(/\s/g,'');
-  const exp=document.getElementById('ce').value.trim();
-  const cvv=document.getElementById('cv').value.trim();
-  const name=document.getElementById('cna').value.trim();
-  if(num.length<15){toast('Numero de tarjeta invalido','err');return;}
-  if(!/^\d{2}\/\d{2}$/.test(exp)){toast('Vencimiento invalido (MM/AA)','err');return;}
-  if(cvv.length<3){toast('CVV invalido','err');return;}
-  if(!name){toast('Ingresa el nombre en la tarjeta','err');return;}
-  showLoading('Procesando pago...');
+  showLoading('Abriendo Stripe...');
   try{
-    const expiry=mazPlanExpiryIso(selPlan.days);
-    // Save payment to Supabase
-    if(sbUser){
-      await sb.from('payments').insert({
-        user_id:sbUser.id,plan_id:selPlan.id,plan_name:selPlan.name,
-        plan_type:selPlan.type,amount:selPlan.price,last4:num.slice(-4),status:'completed'
-      });
-      await sb.from('profiles').update({
-        plan_id:selPlan.id,plan_type:selPlan.type,
-        credits:selPlan.credits,plan_expiry:expiry
-      }).eq('id',sbUser.id);
-    }
-    curUser.plan=selPlan.id;curUser.planType=selPlan.type;
-    curUser.credits=selPlan.credits;curUser.planExpiry=expiry;
-    curUser.payments=curUser.payments||[];
-    curUser.payments.unshift({plan:selPlan.name,planType:selPlan.type,amount:selPlan.price,ts:new Date().toISOString(),last4:num.slice(-4)});
-    addN('Pago exitoso · '+selPlan.name+' · '+MXN(selPlan.price),'success');
-    ['cn','ce','cv','cna'].forEach(id=>document.getElementById(id).value='');
-    selPlan=null;
-    document.getElementById('stripe-sec').style.display='none';
-    renderPlans();
-    hideLoading();
-    toast('Pago exitoso · Membresia activada','ok');
+    const{data}=await sb.auth.getSession();
+    const token=data&&data.session&&data.session.access_token;
+    if(!token)throw new Error('Inicia sesion para pagar');
+    const res=await fetch('/api/create-checkout-session',{
+      method:'POST',
+      headers:{'Content-Type':'application/json',Authorization:'Bearer '+token},
+      body:JSON.stringify({planId:selPlan.id})
+    });
+    const out=await res.json().catch(()=>({}));
+    if(!res.ok)throw new Error(out.error||'No se pudo crear el pago');
+    if(!out.url)throw new Error('Stripe no regreso URL de pago');
+    window.location.href=out.url;
   }catch(e){
     hideLoading();
     toast('Error: '+e.message,'err');

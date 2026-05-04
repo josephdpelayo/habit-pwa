@@ -1,0 +1,12 @@
+{
+  "name": "habit-pwa",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "check": "node --check api/create-checkout-session.js && node --check api/stripe-webhook.js && node --check sw.js"
+  },
+  "dependencies": {
+    "@supabase/supabase-js": "^2.49.4",
+    "stripe": "^17.7.0"
+  }
+}

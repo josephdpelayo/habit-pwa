@@ -7,12 +7,39 @@
 3. Copia y pega TODO el contenido del archivo `habit-supabase-setup.sql`
 4. Click **Run** (▶)
 5. Debe aparecer: "Schema creado correctamente ✓"
+6. Copia y corre tambien `stripe-payments.sql` para evitar pagos duplicados de Stripe
 
-## PASO 2 — Publicar en Netlify
+## PASO 2 — Publicar en Vercel
 
-1. Ve a netlify.com → crea cuenta gratis
-2. Dashboard → arrastra la carpeta `habit-pwa-v2` completa
-3. Netlify te da un link como: `https://habit-xxx.netlify.app`
+1. Ve a vercel.com → crea cuenta gratis
+2. Importa el repo de GitHub `habit-pwa`
+3. Vercel te da un link como: `https://habit-pwa.vercel.app`
+
+## PASO 2.1 — Configurar Stripe
+
+En Vercel → Project Settings → Environment Variables agrega:
+
+```txt
+STRIPE_SECRET_KEY=sk_live_...
+STRIPE_WEBHOOK_SECRET=whsec_...
+SUPABASE_URL=https://pmpjteuqjusbiduevbwq.supabase.co
+SUPABASE_SERVICE_ROLE_KEY=eyJ...
+PUBLIC_APP_URL=https://tu-dominio.com
+```
+
+En Stripe → Developers → Webhooks crea un endpoint:
+
+```txt
+https://tu-dominio.com/api/stripe-webhook
+```
+
+Selecciona el evento:
+
+```txt
+checkout.session.completed
+```
+
+Despues copia el `Signing secret` del webhook y ponlo en `STRIPE_WEBHOOK_SECRET`.
 
 ## PASO 3 — Crear tu cuenta de admin
 
@@ -29,7 +56,7 @@
 
 ## PASO 4 — Compartir con clientes
 
-Manda el link de Netlify por WhatsApp a tus clientes.
+Manda el link de Vercel o tu dominio por WhatsApp a tus clientes.
 
 ### iPhone:
 Safari → botón compartir ↑ → "Agregar a pantalla de inicio"
@@ -44,8 +71,8 @@ Chrome → banner automático "Instalar app"
 ✅ Slots de horarios (todos ven disponibilidad en tiempo real)
 ✅ Cancelación de reservas
 ✅ Membresías y créditos
+✅ Pagos reales con Stripe Checkout
 
 ## ¿Qué sigue? (próximas fases)
-- Pagos reales con Stripe
 - Notificaciones push con OneSignal
 - Control de puerta Shelly automático
