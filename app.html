@@ -6,14 +6,14 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="HABIT">
 <meta name="application-name" content="HABIT">
-<link rel="manifest" href="/manifest.json?v=20260503-16">
-<link rel="apple-touch-icon" sizes="120x120" href="/icons/icon-120.png?v=20260503-16">
-<link rel="apple-touch-icon" sizes="152x152" href="/icons/icon-152.png?v=20260503-16">
-<link rel="apple-touch-icon" sizes="167x167" href="/icons/icon-167.png?v=20260503-16">
-<link rel="apple-touch-icon" sizes="180x180" href="/icons/icon-180.png?v=20260503-16">
-<link rel="icon" type="image/png" sizes="32x32" href="/icons/icon-32.png?v=20260503-16">
+<link rel="manifest" href="/manifest.json?v=20260503-17">
+<link rel="apple-touch-icon" sizes="120x120" href="/icons/icon-120.png?v=20260503-17">
+<link rel="apple-touch-icon" sizes="152x152" href="/icons/icon-152.png?v=20260503-17">
+<link rel="apple-touch-icon" sizes="167x167" href="/icons/icon-167.png?v=20260503-17">
+<link rel="apple-touch-icon" sizes="180x180" href="/icons/icon-180.png?v=20260503-17">
+<link rel="icon" type="image/png" sizes="32x32" href="/icons/icon-32.png?v=20260503-17">
 <title>HABIT</title>
-<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700;800&family=Barlow:wght@300;400;500;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
@@ -25,8 +25,8 @@
   --green:#10b981;--amber:#f59e0b;--red:#ef4444;--purple:#8b5cf6
 }
 html,body{height:100%;background:var(--black);overflow:hidden}
-.app{font-family:'Barlow',sans-serif;max-width:430px;margin:0 auto;background:var(--black);height:100vh;display:flex;flex-direction:column;color:var(--white);overflow:hidden}
-input,select,button,textarea{font-family:'Barlow',sans-serif}
+.app{font-family:'Montserrat',sans-serif;max-width:430px;margin:0 auto;background:var(--black);height:100vh;display:flex;flex-direction:column;color:var(--white);overflow:hidden}
+input,select,button,textarea{font-family:'Montserrat',sans-serif}
 .screen{display:none;flex-direction:column;height:100%;overflow:hidden}
 .screen.active{display:flex}
 .scroll-area{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:1rem}
@@ -36,7 +36,8 @@ input,select,button,textarea{font-family:'Barlow',sans-serif}
 .logo-wrap{display:flex;align-items:center;gap:8px;flex:1}
 .lmark{width:24px;height:24px;border-radius:50%;border:2px solid var(--white);display:flex;align-items:center;justify-content:center}
 .lmark-in{width:10px;height:10px;border-radius:50%;background:var(--white)}
-.ltxt{font-family:'Barlow Condensed',sans-serif;font-size:17px;font-weight:800;letter-spacing:.1em}
+.header-logo-img{width:30px;height:30px;object-fit:contain;display:block;flex-shrink:0}
+.ltxt{font-family:'Montserrat',sans-serif;font-size:17px;font-weight:800;letter-spacing:.1em}
 .lsub{font-size:7px;letter-spacing:.15em;color:var(--bl);display:block;margin-top:-2px}
 .logout-btn{font-size:11px;color:var(--gray);cursor:pointer;background:none;border:none;font-weight:600;letter-spacing:.05em;text-transform:uppercase;margin-left:auto;padding:4px}
 /* BOTTOM NAV */
@@ -88,8 +89,8 @@ input,select,button,textarea{font-family:'Barlow',sans-serif}
 
 /* AUTH */
 .auth-logo{text-align:center;margin-bottom:2rem;padding-top:1rem}
-.big-logo{font-family:'Barlow Condensed',sans-serif;font-size:52px;font-weight:800;letter-spacing:.12em;line-height:1}
-.auth-brand{font-family:'Barlow Condensed',sans-serif;font-size:34px;font-weight:800;color:var(--white);letter-spacing:.12em;line-height:1;margin-top:.25rem}
+.big-logo{font-family:'Montserrat',sans-serif;font-size:52px;font-weight:800;letter-spacing:.12em;line-height:1}
+.auth-brand{font-family:'Montserrat',sans-serif;font-size:34px;font-weight:800;color:var(--white);letter-spacing:.12em;line-height:1;margin-top:.25rem}
 .blue-line{width:60px;height:2px;background:var(--blue);margin:.5rem auto}
 .auth-sub{font-size:12px;letter-spacing:.2em;color:var(--gray)}
 .auth-tabs{display:flex;border-bottom:1px solid var(--border);margin-bottom:1.5rem}
@@ -106,9 +107,9 @@ input,select,button,textarea{font-family:'Barlow',sans-serif}
 .terms-modal{position:fixed;inset:0;background:rgba(0,0,0,.85);z-index:9999;display:flex;align-items:flex-end;justify-content:center}
 .terms-box{background:var(--dark);border:1px solid var(--border);border-radius:12px 12px 0 0;max-height:80vh;width:100%;max-width:430px;display:flex;flex-direction:column;overflow:hidden}
 .terms-hdr{padding:1rem;border-bottom:1px solid var(--border);flex-shrink:0;display:flex;align-items:center;justify-content:space-between}
-.terms-hdr h2{font-family:'Barlow Condensed',sans-serif;font-size:17px;font-weight:800;letter-spacing:.08em;text-transform:uppercase}
+.terms-hdr h2{font-family:'Montserrat',sans-serif;font-size:17px;font-weight:800;letter-spacing:.08em;text-transform:uppercase}
 .terms-body{overflow-y:auto;padding:1rem;font-size:13px;color:var(--gl);line-height:1.8;flex:1}
-.terms-body h3{font-family:'Barlow Condensed',sans-serif;font-size:14px;font-weight:700;letter-spacing:.06em;color:var(--white);margin:1rem 0 .4rem;text-transform:uppercase}
+.terms-body h3{font-family:'Montserrat',sans-serif;font-size:14px;font-weight:700;letter-spacing:.06em;color:var(--white);margin:1rem 0 .4rem;text-transform:uppercase}
 .terms-body p{margin-bottom:.75rem;color:var(--gray)}
 .terms-body strong{color:var(--white)}
 .terms-footer{padding:1rem;border-top:1px solid var(--border);flex-shrink:0}
@@ -119,9 +120,9 @@ input,select,button,textarea{font-family:'Barlow',sans-serif}
 .install-box{background:linear-gradient(180deg,#050505 0%,#0b0f18 100%);border:1px solid rgba(59,130,246,.42);border-radius:14px 14px 0 0;max-height:90vh;width:100%;max-width:430px;display:flex;flex-direction:column;overflow:hidden;box-shadow:0 -18px 60px rgba(37,99,235,.22)}
 .install-hdr{padding:1.25rem 1rem .8rem;border-bottom:1px solid rgba(59,130,246,.24);text-align:center}
 .install-mark{width:78px;height:78px;margin:0 auto .85rem;border-radius:22px;background:#050505;border:1px solid rgba(255,255,255,.12);display:flex;align-items:center;justify-content:center;box-shadow:0 12px 28px rgba(0,0,0,.45)}
-.install-mark .logo-ring{width:42px;height:42px;border:10px solid var(--white);border-radius:50%;box-shadow:inset 0 0 0 10px #050505}
+.install-mark img{width:62px;height:62px;object-fit:contain;display:block}
 .install-kicker{font-size:10px;font-weight:900;letter-spacing:.22em;text-transform:uppercase;color:var(--blue);margin-bottom:5px}
-.install-hdr h2{font-family:'Barlow Condensed',sans-serif;font-size:34px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;line-height:.96}
+.install-hdr h2{font-family:'Montserrat',sans-serif;font-size:34px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;line-height:.96}
 .install-hdr p{font-size:13px;color:var(--gl);line-height:1.55;margin:10px auto 0;max-width:330px}
 .install-body{padding:1rem;overflow-y:auto}
 .install-steps{display:grid;gap:10px}
@@ -134,9 +135,9 @@ input,select,button,textarea{font-family:'Barlow',sans-serif}
 .install-actions{padding:0 1rem 1rem}
 .ac-status{font-size:10px;font-weight:700;letter-spacing:.15em;text-transform:uppercase;margin-bottom:.7rem}
 .ac-off .ac-status{color:var(--gray)}.ac-soon .ac-status{color:var(--amber)}.ac-on .ac-status{color:var(--bl)}
-.ac-code{font-family:'Barlow Condensed',sans-serif;font-size:56px;font-weight:800;letter-spacing:.35em;margin:.5rem 0;padding-left:.35em}
+.ac-code{font-family:'Montserrat',sans-serif;font-size:56px;font-weight:800;letter-spacing:.35em;margin:.5rem 0;padding-left:.35em}
 .ac-off .ac-code{color:var(--gray);filter:blur(7px);user-select:none}
-.ac-timer{font-family:'Barlow Condensed',sans-serif;font-size:28px;font-weight:700;margin:.25rem 0}
+.ac-timer{font-family:'Montserrat',sans-serif;font-size:28px;font-weight:700;margin:.25rem 0}
 .ac-soon .ac-timer{color:var(--amber)}.ac-on .ac-timer{color:var(--bl)}
 .ac-info{font-size:13px;color:var(--gray);margin-top:.5rem;line-height:1.6}
 .ac-on .ac-info{color:rgba(147,197,253,.8)}
@@ -154,7 +155,7 @@ input,select,button,textarea{font-family:'Barlow',sans-serif}
 /* PERFIL */
 .perfil-section{background:var(--card);border:1px solid var(--border);border-radius:6px;padding:1rem;margin-bottom:1rem}
 .perfil-section h3{font-size:15px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;margin-bottom:.75rem}
-.perfil-avatar{width:60px;height:60px;border-radius:50%;background:var(--bdim);border:2px solid var(--blue);display:flex;align-items:center;justify-content:center;font-family:'Barlow Condensed',sans-serif;font-size:22px;font-weight:800;color:var(--bl);margin:0 auto 1rem}
+.perfil-avatar{width:60px;height:60px;border-radius:50%;background:var(--bdim);border:2px solid var(--blue);display:flex;align-items:center;justify-content:center;font-family:'Montserrat',sans-serif;font-size:22px;font-weight:800;color:var(--bl);margin:0 auto 1rem}
 
 /* BOOK — SLOT GRID */
 .date-nav{display:flex;align-items:center;gap:6px;margin-bottom:1rem}
@@ -210,7 +211,7 @@ input,select,button,textarea{font-family:'Barlow',sans-serif}
 /* Confirm panel */
 .conf-panel{padding:0 1rem 1rem;flex-shrink:0}
 .conf-card{background:var(--card);border:1px solid var(--border);border-radius:6px;padding:1rem}
-.conf-card h3{font-family:'Barlow Condensed',sans-serif;font-size:16px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;margin-bottom:.75rem}
+.conf-card h3{font-family:'Montserrat',sans-serif;font-size:16px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;margin-bottom:.75rem}
 .sbox{border-radius:4px;padding:10px 12px;font-size:13px;margin-bottom:.75rem;line-height:1.7}
 .sn{background:rgba(255,255,255,.04);color:var(--gray)}.sn strong{color:var(--white);font-weight:600}
 .warn-box{background:rgba(245,158,11,.08);border:1px solid rgba(245,158,11,.25);border-radius:4px;padding:10px 12px;font-size:13px;color:var(--amber);margin-bottom:.75rem;line-height:1.5}
@@ -224,8 +225,8 @@ input,select,button,textarea{font-family:'Barlow',sans-serif}
 .plan-card.sel{border:1.5px solid var(--blue);background:rgba(37,99,235,.08)}
 .plan-card.feat{border-color:rgba(37,99,235,.4)}
 .prow{display:flex;align-items:center;justify-content:space-between}
-.pname{font-family:'Barlow Condensed',sans-serif;font-size:17px;font-weight:700;letter-spacing:.04em}
-.pprice{font-family:'Barlow Condensed',sans-serif;font-size:21px;font-weight:800;color:var(--bl)}
+.pname{font-family:'Montserrat',sans-serif;font-size:17px;font-weight:700;letter-spacing:.04em}
+.pprice{font-family:'Montserrat',sans-serif;font-size:21px;font-weight:800;color:var(--bl)}
 .pdesc{font-size:11px;color:var(--gray);margin-top:4px}
 .pperks{display:flex;flex-wrap:wrap;gap:4px;margin-top:8px}
 .perk{font-size:10px;background:rgba(255,255,255,.05);color:var(--gl);padding:3px 8px;border-radius:2px}
@@ -242,7 +243,7 @@ input,select,button,textarea{font-family:'Barlow',sans-serif}
 /* RUTINAS */
 .board-card{background:var(--card);border:1px solid var(--border);border-radius:6px;margin-bottom:12px;overflow:hidden}
 .board-hdr{display:flex;align-items:center;justify-content:space-between;padding:12px 14px;background:rgba(255,255,255,.025)}
-.board-title{font-family:'Barlow Condensed',sans-serif;font-size:16px;font-weight:700;letter-spacing:.05em}
+.board-title{font-family:'Montserrat',sans-serif;font-size:16px;font-weight:700;letter-spacing:.05em}
 .board-body{padding:12px 14px}
 .routine-tabs{display:flex;gap:8px;overflow-x:auto;padding-bottom:10px;margin-bottom:12px;-webkit-overflow-scrolling:touch}
 .routine-tab{flex:0 0 auto;border:1px solid var(--border);background:var(--card);color:var(--gray);border-radius:4px;padding:10px 12px;font-size:12px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;cursor:pointer;max-width:180px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
@@ -251,7 +252,7 @@ input,select,button,textarea{font-family:'Barlow',sans-serif}
 .exercise-detail-head{padding:12px 14px;border-bottom:1px solid var(--border)}
 .ex-card{background:var(--card2);border:1px solid var(--border);border-radius:5px;margin-bottom:8px;overflow:hidden}
 .ex-card-top{display:flex;align-items:flex-start;gap:10px;padding:11px 12px}
-.ex-num{font-family:'Barlow Condensed',sans-serif;font-size:14px;font-weight:700;color:var(--bl);min-width:22px;padding-top:1px}
+.ex-num{font-family:'Montserrat',sans-serif;font-size:14px;font-weight:700;color:var(--bl);min-width:22px;padding-top:1px}
 .ex-body{flex:1;min-width:0}
 .ex-name{font-size:14px;font-weight:600;color:var(--white)}
 .ex-detail{font-size:12px;color:var(--gray);margin-top:3px;line-height:1.5}
@@ -271,7 +272,7 @@ input,select,button,textarea{font-family:'Barlow',sans-serif}
 .score-ex-row:last-child{border-bottom:none}
 .score-ex-name{font-size:13px;font-weight:600;color:var(--white);margin-bottom:6px}
 .score-entry{display:flex;align-items:center;gap:8px;padding:4px 0}
-.score-rank{font-family:'Barlow Condensed',sans-serif;font-size:14px;font-weight:700;min-width:24px;color:var(--gray)}
+.score-rank{font-family:'Montserrat',sans-serif;font-size:14px;font-weight:700;min-width:24px;color:var(--gray)}
 .score-rank.gold{color:#f59e0b}.score-rank.silver{color:#9ca3af}.score-rank.bronze{color:#b45309}
 .score-user{font-size:13px;color:var(--white);flex:1}
 .score-weight{font-size:15px;font-weight:700;color:var(--bl)}
@@ -282,7 +283,7 @@ input,select,button,textarea{font-family:'Barlow',sans-serif}
 /* COMUNIDAD */
 .post-card{background:var(--card);border:1px solid var(--border);border-radius:6px;margin-bottom:10px;overflow:hidden}
 .post-hdr{display:flex;align-items:center;gap:10px;padding:12px 14px}
-.post-av{width:34px;height:34px;border-radius:50%;background:var(--bdim);border:1.5px solid var(--blue);display:flex;align-items:center;justify-content:center;font-family:'Barlow Condensed',sans-serif;font-size:13px;font-weight:700;color:var(--bl);flex-shrink:0}
+.post-av{width:34px;height:34px;border-radius:50%;background:var(--bdim);border:1.5px solid var(--blue);display:flex;align-items:center;justify-content:center;font-family:'Montserrat',sans-serif;font-size:13px;font-weight:700;color:var(--bl);flex-shrink:0}
 .post-user{font-size:13px;font-weight:600;color:var(--white)}
 .post-time{font-size:10px;color:var(--gray);margin-top:1px}
 .post-body{padding:0 14px 12px;font-size:14px;color:var(--gl);line-height:1.6}
@@ -313,20 +314,20 @@ input,select,button,textarea{font-family:'Barlow',sans-serif}
 .metrics{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:1.25rem}
 .met{background:var(--card);border:1px solid var(--border);border-radius:4px;padding:12px}
 .met-l{font-size:10px;color:var(--gray);margin-bottom:4px;font-weight:600;letter-spacing:.06em;text-transform:uppercase}
-.met-v{font-family:'Barlow Condensed',sans-serif;font-size:24px;font-weight:700}
+.met-v{font-family:'Montserrat',sans-serif;font-size:24px;font-weight:700}
 .met-v.bg-green{color:var(--green)}
 .met-v.bg-blue{color:var(--bl)}
 .met-v.bg-amber{color:var(--amber)}
 .met-v.bg-gray{color:var(--gray)}
 .admin-slot{border:1px solid var(--border);border-radius:6px;margin-bottom:10px;overflow:hidden}
 .ash{display:flex;align-items:center;justify-content:space-between;padding:10px 12px;background:rgba(255,255,255,.02)}
-.ash span{font-family:'Barlow Condensed',sans-serif;font-size:14px;font-weight:700;letter-spacing:.04em}
+.ash span{font-family:'Montserrat',sans-serif;font-size:14px;font-weight:700;letter-spacing:.04em}
 .asb{padding:0 12px}
 .wsec{font-size:10px;font-weight:700;color:var(--amber);letter-spacing:.1em;text-transform:uppercase;padding:8px 0 4px}
 .adm-search{width:100%;background:var(--card);border:1px solid var(--border);border-radius:4px;padding:12px;font-size:16px;color:var(--white);outline:none;margin-bottom:1rem;-webkit-appearance:none}
 .adm-date{width:100%;background:var(--card);border:1px solid var(--border);border-radius:4px;padding:12px;font-size:16px;color:var(--white);outline:none;margin-bottom:1rem;color-scheme:dark;-webkit-appearance:none}
 .new-board-form{background:var(--card);border:1px solid var(--border);border-radius:6px;padding:1rem;margin-bottom:1rem}
-.new-board-form h3{font-family:'Barlow Condensed',sans-serif;font-size:16px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;margin-bottom:.75rem}
+.new-board-form h3{font-family:'Montserrat',sans-serif;font-size:16px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;margin-bottom:.75rem}
 .ex-add-row{display:flex;gap:6px}
 .ex-add-row .field{flex:1;margin-bottom:0}
 .adm-ex-row{display:flex;align-items:flex-start;gap:8px;padding:10px 0;border-bottom:1px solid var(--border)}
@@ -563,7 +564,7 @@ input,select,button,textarea{font-family:'Barlow',sans-serif}
 <!-- ADMIN -->
 <div id="s-admin" class="screen">
   <div class="hdr">
-    <div class="logo-wrap"><div class="lmark"><div class="lmark-in"></div></div><div><span class="ltxt">HABIT</span><span class="lsub">ADMIN PANEL</span></div></div>
+    <div class="logo-wrap"><img src="icons/logo-original.png" class="header-logo-img" alt=""><div><span class="ltxt">HABIT</span><span class="lsub">ADMIN PANEL</span></div></div>
     <button class="logout-btn" onclick="doLogout()">Salir</button>
   </div>
   <div class="adm-nav" style="overflow-x:auto">
@@ -730,7 +731,7 @@ input,select,button,textarea{font-family:'Barlow',sans-serif}
 <div id="install-guide-modal" class="terms-modal" style="display:none">
   <div class="install-box">
     <div class="install-hdr">
-      <div class="install-mark" aria-hidden="true"><div class="logo-ring"></div></div>
+      <div class="install-mark" aria-hidden="true"><img src="icons/logo-original.png" alt=""></div>
       <div class="install-kicker">Cuenta creada</div>
       <h2>Instala HABIT como app</h2>
       <p>Guardala en tu pantalla de inicio para reservar, ver rutinas y entrar mas rapido sin buscar el link.</p>
@@ -777,7 +778,7 @@ input,select,button,textarea{font-family:'Barlow',sans-serif}
 
 const SUPABASE_URL='https://pmpjteuqjusbiduevbwq.supabase.co';
 const SUPABASE_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBtcGp0ZXVxanVzYmlkdWV2YndxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc2OTI1NjUsImV4cCI6MjA5MzI2ODU2NX0.XbMzZoo2yqtrD8znLnyo_1zDfrdJAvAPj1lqGOyXnLw';
-const APP_VERSION='20260503-16';
+const APP_VERSION='20260503-17';
 const sb=supabase.createClient(SUPABASE_URL,SUPABASE_KEY,{auth:{autoRefreshToken:true,persistSession:true,detectSessionInUrl:false}});
 let sbUser=null,sbProfile=null;
 
@@ -2375,7 +2376,7 @@ function renderUsers(){
     div.style.flexDirection='column';div.style.alignItems='flex-start';div.style.gap='8px';
     // Header row
     const hdr=document.createElement('div');hdr.style.cssText='display:flex;align-items:center;gap:10px;width:100%';
-    hdr.innerHTML='<div style="width:36px;height:36px;border-radius:50%;background:var(--bdim);border:1.5px solid var(--blue);display:flex;align-items:center;justify-content:center;font-family:\'Barlow Condensed\',sans-serif;font-size:14px;font-weight:700;color:var(--bl);flex-shrink:0">'+inits(u.name)+'</div>'+
+    hdr.innerHTML='<div style="width:36px;height:36px;border-radius:50%;background:var(--bdim);border:1.5px solid var(--blue);display:flex;align-items:center;justify-content:center;font-family:\'Montserrat\',sans-serif;font-size:14px;font-weight:700;color:var(--bl);flex-shrink:0">'+inits(u.name)+'</div>'+
       '<div style="flex:1;min-width:0"><div class="brow-name">'+u.name+'</div><div class="brow-meta">'+u.email+(u.phone?' · '+u.phone:'')+'</div><div class="brow-meta">Código: <strong style="color:var(--bl)">'+u.accessCode+'#</strong></div></div>'+
       '<div style="display:flex;flex-direction:column;align-items:flex-end;gap:4px"><span class="badge '+(a?'bg-green':'bg-gray')+'">'+(a?'Activo':'Sin plan')+'</span>'+(expiryWarn?'<span class="badge bg-amber">'+days+'d</span>':'')+'</div>';
     div.appendChild(hdr);
@@ -2404,7 +2405,7 @@ function renderPayments(){
   const list=document.getElementById('payment-list');
   if(!payments.length){list.innerHTML='<div class="empty">Sin pagos.</div>';return;}
   list.innerHTML='';
-  payments.slice().reverse().forEach(p=>{const d=document.createElement('div');d.className='brow';d.innerHTML='<div class="brow-info"><div class="brow-name">'+p.userName+'</div><div class="brow-meta">'+fmtDateTimeMaz(p.ts)+' · **** '+p.last4+'</div></div><div style="font-family:\'Barlow Condensed\',sans-serif;font-size:16px;font-weight:700">'+MXN(p.amount)+'</div>';list.appendChild(d);});
+  payments.slice().reverse().forEach(p=>{const d=document.createElement('div');d.className='brow';d.innerHTML='<div class="brow-info"><div class="brow-name">'+p.userName+'</div><div class="brow-meta">'+fmtDateTimeMaz(p.ts)+' · **** '+p.last4+'</div></div><div style="font-family:\'Montserrat\',sans-serif;font-size:16px;font-weight:700">'+MXN(p.amount)+'</div>';list.appendChild(d);});
 }
 
 function renderStats(){
@@ -2424,7 +2425,7 @@ function renderStats(){
   if(expiring.length||expired.length){
     eHtml='<div class="divider"></div><p class="slbl" style="margin-bottom:10px">Membresías — retención</p>';
     expired.forEach(u=>{eHtml+='<div class="expiry-card"><div style="display:flex;justify-content:space-between;align-items:center"><div class="expiry-name">'+u.name+'</div><span class="badge bg-red">VENCIDA</span></div><div class="expiry-info">'+planLbl(u)+' · venció '+fmtDateMaz(u.planExpiry)+'</div></div>';});
-    expiring.forEach(u=>{const d=daysUntil(u.planExpiry);eHtml+='<div class="expiry-card"><div style="display:flex;justify-content:space-between;align-items:center"><div class="expiry-name">'+u.name+'</div><span style="font-family:\'Barlow Condensed\',sans-serif;font-size:18px;font-weight:700;color:var(--amber)">'+d+'d</span></div><div class="expiry-info">'+planLbl(u)+' · vence '+fmtDateMaz(u.planExpiry)+'</div></div>';});
+    expiring.forEach(u=>{const d=daysUntil(u.planExpiry);eHtml+='<div class="expiry-card"><div style="display:flex;justify-content:space-between;align-items:center"><div class="expiry-name">'+u.name+'</div><span style="font-family:\'Montserrat\',sans-serif;font-size:18px;font-weight:700;color:var(--amber)">'+d+'d</span></div><div class="expiry-info">'+planLbl(u)+' · vence '+fmtDateMaz(u.planExpiry)+'</div></div>';});
   }
   document.getElementById('expiry-section').innerHTML=eHtml;
 }
