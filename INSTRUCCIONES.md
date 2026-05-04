@@ -8,6 +8,7 @@
 4. Click **Run** (▶)
 5. Debe aparecer: "Schema creado correctamente ✓"
 6. Copia y corre tambien `stripe-payments.sql` para evitar pagos duplicados de Stripe
+7. Copia y corre tambien `door-commands.sql` para activar solicitudes de apertura de puerta
 
 ## PASO 2 — Publicar en Vercel
 
@@ -47,9 +48,15 @@ En Vercel → Project Settings → Environment Variables agrega:
 
 ```txt
 ACCESS_API_SECRET=un_codigo_largo_privado
+GYM_LAT=23.000000
+GYM_LNG=-106.000000
+GYM_RADIUS_METERS=120
+GYM_MAX_ACCURACY_METERS=150
 ```
 
 Ese valor no se comparte con clientes. Es la llave privada que usara el teclado, controlador o relay para consultar si el codigo `1234#` puede abrir en ese momento.
+
+`GYM_LAT` y `GYM_LNG` son la ubicacion exacta del gym. El boton "Abrir puerta" solo crea la solicitud si el usuario esta dentro del radio configurado en `GYM_RADIUS_METERS` y si la lectura del GPS es suficientemente precisa segun `GYM_MAX_ACCURACY_METERS`.
 
 Endpoint para el controlador:
 

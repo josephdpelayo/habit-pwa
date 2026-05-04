@@ -6,12 +6,12 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="HABIT">
 <meta name="application-name" content="HABIT">
-<link rel="manifest" href="/manifest.json?v=20260503-20">
-<link rel="apple-touch-icon" sizes="120x120" href="/icons/icon-120.png?v=20260503-20">
-<link rel="apple-touch-icon" sizes="152x152" href="/icons/icon-152.png?v=20260503-20">
-<link rel="apple-touch-icon" sizes="167x167" href="/icons/icon-167.png?v=20260503-20">
-<link rel="apple-touch-icon" sizes="180x180" href="/icons/icon-180.png?v=20260503-20">
-<link rel="icon" type="image/png" sizes="32x32" href="/icons/icon-32.png?v=20260503-20">
+<link rel="manifest" href="/manifest.json?v=20260503-21">
+<link rel="apple-touch-icon" sizes="120x120" href="/icons/icon-120.png?v=20260503-21">
+<link rel="apple-touch-icon" sizes="152x152" href="/icons/icon-152.png?v=20260503-21">
+<link rel="apple-touch-icon" sizes="167x167" href="/icons/icon-167.png?v=20260503-21">
+<link rel="apple-touch-icon" sizes="180x180" href="/icons/icon-180.png?v=20260503-21">
+<link rel="icon" type="image/png" sizes="32x32" href="/icons/icon-32.png?v=20260503-21">
 <title>HABIT</title>
 <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
@@ -142,6 +142,9 @@ input,select,button,textarea{font-family:'Montserrat',sans-serif}
 .ac-info{font-size:13px;color:var(--gray);margin-top:.5rem;line-height:1.6}
 .ac-on .ac-info{color:rgba(147,197,253,.8)}
 .ac-hint{font-size:11px;color:#555;margin-top:.75rem}
+.door-open-btn{margin-top:14px;width:100%;padding:14px;border-radius:6px;border:1px solid rgba(16,185,129,.65);background:rgba(16,185,129,.16);color:var(--green);font-size:13px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;cursor:pointer}
+.door-open-btn:disabled{opacity:.45;cursor:wait}
+.door-open-note{font-size:10px;color:var(--gray);line-height:1.5;margin-top:8px}
 .next-box{background:var(--card);border:1px solid var(--border);border-radius:4px;padding:12px 14px;margin-bottom:1rem}
 .next-lbl{font-size:10px;font-weight:700;color:var(--gray);letter-spacing:.1em;text-transform:uppercase;margin-bottom:6px}
 .next-val{font-size:15px;font-weight:600;color:var(--white)}
@@ -773,7 +776,7 @@ input,select,button,textarea{font-family:'Montserrat',sans-serif}
 
 const SUPABASE_URL='https://pmpjteuqjusbiduevbwq.supabase.co';
 const SUPABASE_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBtcGp0ZXVxanVzYmlkdWV2YndxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc2OTI1NjUsImV4cCI6MjA5MzI2ODU2NX0.XbMzZoo2yqtrD8znLnyo_1zDfrdJAvAPj1lqGOyXnLw';
-const APP_VERSION='20260503-20';
+const APP_VERSION='20260503-21';
 const sb=supabase.createClient(SUPABASE_URL,SUPABASE_KEY,{auth:{autoRefreshToken:true,persistSession:true,detectSessionInUrl:false}});
 let sbUser=null,sbProfile=null;
 
@@ -1146,6 +1149,55 @@ function sendNotif(title, body){
 
 // Track notification state to avoid repeating
 let _notifSent={};
+let doorOpening=false;
+
+function getGeoPosition(){
+  return new Promise((resolve,reject)=>{
+    if(!navigator.geolocation)return reject(new Error('Tu navegador no permite leer ubicacion'));
+    navigator.geolocation.getCurrentPosition(resolve,reject,{
+      enableHighAccuracy:true,
+      timeout:12000,
+      maximumAge:15000
+    });
+  });
+}
+
+async function requestDoorOpen(btn){
+  if(!sbUser){toast('Debes iniciar sesion','err');return;}
+  if(doorOpening)return;
+  doorOpening=true;
+  const oldTxt=btn?btn.textContent:'';
+  if(btn){btn.disabled=true;btn.textContent='Verificando...';}
+  try{
+    const pos=await getGeoPosition();
+    const{data}=await sb.auth.getSession();
+    const token=data&&data.session&&data.session.access_token;
+    if(!token)throw new Error('Sesion expirada');
+    const res=await fetch('/api/request-door-open',{
+      method:'POST',
+      headers:{'Content-Type':'application/json',Authorization:'Bearer '+token},
+      body:JSON.stringify({
+        lat:pos.coords.latitude,
+        lng:pos.coords.longitude,
+        accuracy:pos.coords.accuracy
+      })
+    });
+    const out=await res.json().catch(()=>({}));
+    if(!res.ok||!out.ok)throw new Error(out.message||out.error||'No se pudo abrir');
+    toast(out.message||'Apertura solicitada','ok');
+    addN('Apertura solicitada · distancia '+(out.distance_m||0)+' m','success');
+  }catch(e){
+    const code=e&&e.code;
+    let msg=e&&e.message?e.message:'No se pudo solicitar apertura';
+    if(code===1)msg='Activa permisos de ubicacion para abrir la puerta';
+    if(code===2)msg='No pudimos obtener tu ubicacion';
+    if(code===3)msg='La ubicacion tardo demasiado';
+    toast(msg,'err');
+  }finally{
+    doorOpening=false;
+    if(btn){btn.disabled=false;btn.textContent=oldTxt||'Abrir puerta';}
+  }
+}
 
 async function renderAccess(){
   const el=document.getElementById('access-main');
@@ -1224,6 +1276,8 @@ async function renderAccess(){
       '<div class="ac-code">'+curUser.accessCode+'#</div>'+
       '<div class="ac-timer" style="color:'+timerColor+'">'+fmtCd(msToClose)+'</div>'+
       '<div class="ac-info">'+dl+' · '+timeStr+'<br>Teclea tu código + # en la puerta</div>'+
+      '<button class="door-open-btn" onclick="requestDoorOpen(this)" '+(doorOpening?'disabled':'')+'>'+(doorOpening?'Verificando...':'Abrir puerta')+'</button>'+
+      '<div class="door-open-note">Verificamos tu ubicacion antes de enviar la apertura.</div>'+
       (minLeft<=30&&minLeft>10?'<div class="ac-hint" style="color:var(--amber)">⚠️ Faltan menos de 30 minutos</div>':'')+
       (minLeft<=10?'<div class="ac-hint" style="color:var(--red)">🔴 Menos de 10 minutos · Prepárate para salir</div>':'')+
       '</div>';

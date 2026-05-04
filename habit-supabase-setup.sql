@@ -94,6 +94,25 @@ create table if not exists public.access_log (
   accessed_at   timestamptz not null default now()
 );
 
+-- ── TABLA: door_commands (cola para abrir puerta) ──
+create table if not exists public.door_commands (
+  id            uuid primary key default uuid_generate_v4(),
+  user_id       uuid references public.profiles(id) on delete cascade not null,
+  user_name     text not null,
+  booking_id    uuid references public.bookings(id) on delete set null,
+  access_code   text not null,
+  slot_str      text,
+  status        text not null default 'pending' check (status in ('pending','processing','opened','failed','expired')),
+  lat           double precision,
+  lng           double precision,
+  accuracy_m    integer,
+  distance_m    integer,
+  requested_at  timestamptz not null default now(),
+  processed_at  timestamptz,
+  processed_by  text,
+  error_message text
+);
+
 -- ── TABLA: boards (pizarrones de rutinas) ──
 create table if not exists public.boards (
   id            uuid primary key default uuid_generate_v4(),
@@ -187,6 +206,8 @@ create index if not exists idx_posts_created on public.posts(created_at desc);
 create index if not exists idx_post_comments_post on public.post_comments(post_id, created_at asc);
 create index if not exists idx_user_notifications_user on public.user_notifications(user_id, created_at desc);
 create index if not exists idx_access_log_user on public.access_log(user_id);
+create index if not exists idx_door_commands_status on public.door_commands(status, requested_at);
+create index if not exists idx_door_commands_user on public.door_commands(user_id, requested_at desc);
 
 -- ═══════════════════════════════════
 -- ROW LEVEL SECURITY (RLS)
@@ -198,6 +219,7 @@ alter table public.slot_blocks enable row level security;
 alter table public.waitlists enable row level security;
 alter table public.payments enable row level security;
 alter table public.access_log enable row level security;
+alter table public.door_commands enable row level security;
 alter table public.boards enable row level security;
 alter table public.board_assignments enable row level security;
 alter table public.scores enable row level security;
@@ -332,6 +354,14 @@ create policy "Users insert log"
   on public.access_log for insert with check (auth.uid() = user_id);
 create policy "Admin all log"
   on public.access_log for all using (
+    exists(select 1 from public.profiles where id=auth.uid() and role='admin')
+  );
+
+-- ── POLÍTICAS: door_commands ──
+create policy "Users read own door commands"
+  on public.door_commands for select using (auth.uid() = user_id);
+create policy "Admin all door commands"
+  on public.door_commands for all using (
     exists(select 1 from public.profiles where id=auth.uid() and role='admin')
   );
 
