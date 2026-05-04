@@ -6,12 +6,12 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="HABIT">
 <meta name="application-name" content="HABIT">
-<link rel="manifest" href="/manifest.json?v=20260503-21">
-<link rel="apple-touch-icon" sizes="120x120" href="/icons/icon-120.png?v=20260503-21">
-<link rel="apple-touch-icon" sizes="152x152" href="/icons/icon-152.png?v=20260503-21">
-<link rel="apple-touch-icon" sizes="167x167" href="/icons/icon-167.png?v=20260503-21">
-<link rel="apple-touch-icon" sizes="180x180" href="/icons/icon-180.png?v=20260503-21">
-<link rel="icon" type="image/png" sizes="32x32" href="/icons/icon-32.png?v=20260503-21">
+<link rel="manifest" href="/manifest.json?v=20260504-01">
+<link rel="apple-touch-icon" sizes="120x120" href="/icons/icon-120.png?v=20260504-01">
+<link rel="apple-touch-icon" sizes="152x152" href="/icons/icon-152.png?v=20260504-01">
+<link rel="apple-touch-icon" sizes="167x167" href="/icons/icon-167.png?v=20260504-01">
+<link rel="apple-touch-icon" sizes="180x180" href="/icons/icon-180.png?v=20260504-01">
+<link rel="icon" type="image/png" sizes="32x32" href="/icons/icon-32.png?v=20260504-01">
 <title>HABIT</title>
 <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
@@ -135,8 +135,8 @@ input,select,button,textarea{font-family:'Montserrat',sans-serif}
 .install-actions{padding:0 1rem 1rem}
 .ac-status{font-size:10px;font-weight:700;letter-spacing:.15em;text-transform:uppercase;margin-bottom:.7rem}
 .ac-off .ac-status{color:var(--gray)}.ac-soon .ac-status{color:var(--amber)}.ac-on .ac-status{color:var(--bl)}
-.ac-code{font-family:'Montserrat',sans-serif;font-size:56px;font-weight:800;letter-spacing:.35em;margin:.5rem 0;padding-left:.35em}
-.ac-off .ac-code{color:var(--gray);filter:blur(7px);user-select:none}
+.ac-door-icon{width:54px;height:54px;border-radius:10px;margin:0 auto 12px;border:1px solid rgba(59,130,246,.28);background:rgba(37,99,235,.1);display:flex;align-items:center;justify-content:center;color:var(--bl)}
+.ac-door-icon svg{width:30px;height:30px;stroke:currentColor;fill:none;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
 .ac-timer{font-family:'Montserrat',sans-serif;font-size:28px;font-weight:700;margin:.25rem 0}
 .ac-soon .ac-timer{color:var(--amber)}.ac-on .ac-timer{color:var(--bl)}
 .ac-info{font-size:13px;color:var(--gray);margin-top:.5rem;line-height:1.6}
@@ -776,7 +776,7 @@ input,select,button,textarea{font-family:'Montserrat',sans-serif}
 
 const SUPABASE_URL='https://pmpjteuqjusbiduevbwq.supabase.co';
 const SUPABASE_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBtcGp0ZXVxanVzYmlkdWV2YndxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc2OTI1NjUsImV4cCI6MjA5MzI2ODU2NX0.XbMzZoo2yqtrD8znLnyo_1zDfrdJAvAPj1lqGOyXnLw';
-const APP_VERSION='20260503-21';
+const APP_VERSION='20260504-01';
 const sb=supabase.createClient(SUPABASE_URL,SUPABASE_KEY,{auth:{autoRefreshToken:true,persistSession:true,detectSessionInUrl:false}});
 let sbUser=null,sbProfile=null;
 
@@ -1150,6 +1150,7 @@ function sendNotif(title, body){
 // Track notification state to avoid repeating
 let _notifSent={};
 let doorOpening=false;
+const DOOR_ICON='<div class="ac-door-icon"><svg viewBox="0 0 24 24"><path d="M8 21h8"/><path d="M10 21V5a2 2 0 0 1 2-2h5v18"/><path d="M14 12h.01"/></svg></div>';
 
 function getGeoPosition(){
   return new Promise((resolve,reject)=>{
@@ -1216,7 +1217,7 @@ async function renderAccess(){
   const res=nextBk(curUser),now=mazNow();
   if(!res){
     _notifSent={};
-    el.innerHTML='<div class="ac-card ac-off"><div class="ac-status">Sin acceso activo</div><div class="ac-code">'+curUser.accessCode+'#</div><div class="ac-info">Reserva un turno para activar tu acceso</div><div class="ac-hint">Tu código personal · Introdúcelo en el teclado seguido de # · Solo activo durante tu reserva</div></div>';
+    el.innerHTML='<div class="ac-card ac-off">'+DOOR_ICON+'<div class="ac-status">Sin acceso activo</div><div class="ac-info">Reserva un turno para activar tu acceso desde la app.</div><div class="ac-hint">El boton de puerta aparece cuando estes dentro de tu ventana de acceso.</div></div>';
     return;
   }
 
@@ -1238,7 +1239,7 @@ async function renderAccess(){
       sendNotif('¡Sesión terminada! 💪','Gracias por entrenar en HABIT. ¡Hasta la próxima!');
       addN('Tu sesión de '+timeStr+' ha terminado. ¡Buen entrenamiento! 💪','success');
     }
-    el.innerHTML='<div class="ac-card ac-off"><div class="ac-status">Sesión finalizada</div><div class="ac-code">'+curUser.accessCode+'#</div><div class="ac-info">Tu sesión de '+timeStr+' ha concluido.<br>¡Gracias por entrenar en HABIT! 💪</div></div>';
+    el.innerHTML='<div class="ac-card ac-off">'+DOOR_ICON+'<div class="ac-status">Sesión finalizada</div><div class="ac-info">Tu sesión de '+timeStr+' ha concluido.<br>¡Gracias por entrenar en HABIT! 💪</div></div>';
     return;
   }
 
@@ -1272,10 +1273,10 @@ async function renderAccess(){
       cardClass='ac-on ac-warn';
     }
     el.innerHTML='<div class="ac-card '+cardClass+'">'+
+      DOOR_ICON+
       '<div class="ac-status" style="color:'+timerColor+'">● Sesión activa</div>'+
-      '<div class="ac-code">'+curUser.accessCode+'#</div>'+
       '<div class="ac-timer" style="color:'+timerColor+'">'+fmtCd(msToClose)+'</div>'+
-      '<div class="ac-info">'+dl+' · '+timeStr+'<br>Teclea tu código + # en la puerta</div>'+
+      '<div class="ac-info">'+dl+' · '+timeStr+'<br>Abre la puerta desde HABIT cuando estes en la entrada.</div>'+
       '<button class="door-open-btn" onclick="requestDoorOpen(this)" '+(doorOpening?'disabled':'')+'>'+(doorOpening?'Verificando...':'Abrir puerta')+'</button>'+
       '<div class="door-open-note">Verificamos tu ubicacion antes de enviar la apertura.</div>'+
       (minLeft<=30&&minLeft>10?'<div class="ac-hint" style="color:var(--amber)">⚠️ Faltan menos de 30 minutos</div>':'')+
@@ -1287,19 +1288,19 @@ async function renderAccess(){
   // Before session — code visible 1 hour before
   if(msToCodeVisible<=0){
     el.innerHTML='<div class="ac-card ac-soon">'+
+      DOOR_ICON+
       '<div class="ac-status">Acceso en '+fmtCd(msToOpen)+'</div>'+
-      '<div class="ac-code">'+curUser.accessCode+'#</div>'+
       '<div class="ac-timer">'+fmtCd(msToOpen)+'</div>'+
       '<div class="ac-info">'+dl+' · '+timeStr+'</div>'+
-      '<div class="ac-hint">'+(msToOpen<=BEFORE_MIN*60000?'Código listo · Dirígete al gym':'Código disponible · La puerta se activa 10 min antes')+'</div>'+
+      '<div class="ac-hint">'+(msToOpen<=BEFORE_MIN*60000?'Acceso listo · Dirigete al gym':'El boton de puerta se activa 10 min antes')+'</div>'+
       '</div>';
   } else {
     // Code still hidden (more than 1 hour away)
     el.innerHTML='<div class="ac-card ac-off">'+
+      DOOR_ICON+
       '<div class="ac-status">Reserva confirmada</div>'+
-      '<div class="ac-code" style="filter:blur(7px);user-select:none">'+curUser.accessCode+'#</div>'+
-      '<div class="ac-info">'+dl+' · '+timeStr+'<br>Código visible 1 hora antes</div>'+
-      '<div class="ac-hint">'+fmtCd(msToCodeVisible)+' para ver tu código</div>'+
+      '<div class="ac-info">'+dl+' · '+timeStr+'<br>Tu acceso por app se activa 10 min antes.</div>'+
+      '<div class="ac-hint">'+fmtCd(msToOpen)+' para activar el boton de puerta</div>'+
       '</div>';
   }
 }
@@ -1403,10 +1404,10 @@ async function completeRegister(reg){
     await new Promise(r=>setTimeout(r,1500));
     await loadUserData();
     hideLoading();
-    addN('Bienvenido/a a HABIT. Tu codigo: '+sbProfile.access_code+'#','success');
+    addN('Bienvenido/a a HABIT. Tu acceso se activa desde la app durante tu reserva.','success');
     showMainSb();
     setTimeout(showInstallGuide,350);
-    toast('Cuenta creada. Codigo: '+sbProfile.access_code,'ok');
+    toast('Cuenta creada','ok');
   }catch(e){
     hideLoading();
     toast(e.message||'Error al crear cuenta','err');
@@ -1903,7 +1904,7 @@ async function doConfirm(){
     try{await sb.from('admin_notifs').insert({message:'Reserva: '+curUser.name+' - '+fmtDS(ds)+' '+timeStr+(isGrupal?' (grupal)':'')});}catch(e){}
 
     hideLoading();
-    addN('Reserva confirmada - '+fmtDS(ds)+' '+timeStr+'. Codigo: '+curUser.accessCode+'#','success');
+    addN('Reserva confirmada - '+fmtDS(ds)+' '+timeStr+'. Abre la puerta desde la app al llegar.','success');
     clearSel();
     toast('Reserva confirmada','ok');
   }catch(e){
@@ -2431,7 +2432,7 @@ function admPromote(ds,idx,i){
   const entry={userId:p.userId,name:p.name,phone:p.phone||'',isGroup:false};
   for(let j=0;j<BOOKING_SLOTS;j++){const si=idx+j;if(!day[si])day[si]=[];day[si].push(entry);}
   const wu=users[p.userId];
-  if(wu){addN('Tu lista de espera fue confirmada. Código: '+wu.accessCode,'success');}
+  if(wu){addN('Tu lista de espera fue confirmada. Abre la puerta desde la app al llegar.','success');}
   addAdminNotif('✅ '+p.name+' promovido desde lista de espera');
   toast(p.name+' confirmado/a','ok');renderAdmSlots();
 }
