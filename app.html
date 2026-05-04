@@ -6,12 +6,12 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="HABIT">
 <meta name="application-name" content="HABIT">
-<link rel="manifest" href="/manifest.json?v=20260504-11">
-<link rel="apple-touch-icon" sizes="120x120" href="/icons/icon-120.png?v=20260504-11">
-<link rel="apple-touch-icon" sizes="152x152" href="/icons/icon-152.png?v=20260504-11">
-<link rel="apple-touch-icon" sizes="167x167" href="/icons/icon-167.png?v=20260504-11">
-<link rel="apple-touch-icon" sizes="180x180" href="/icons/icon-180.png?v=20260504-11">
-<link rel="icon" type="image/png" sizes="32x32" href="/icons/icon-32.png?v=20260504-11">
+<link rel="manifest" href="/manifest.json?v=20260504-12">
+<link rel="apple-touch-icon" sizes="120x120" href="/icons/icon-120.png?v=20260504-12">
+<link rel="apple-touch-icon" sizes="152x152" href="/icons/icon-152.png?v=20260504-12">
+<link rel="apple-touch-icon" sizes="167x167" href="/icons/icon-167.png?v=20260504-12">
+<link rel="apple-touch-icon" sizes="180x180" href="/icons/icon-180.png?v=20260504-12">
+<link rel="icon" type="image/png" sizes="32x32" href="/icons/icon-32.png?v=20260504-12">
 <title>HABIT</title>
 <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
@@ -272,7 +272,7 @@ input,select,button,textarea{font-family:'Montserrat',sans-serif}
 .ex-video-btn{display:flex;align-items:center;gap:8px;padding:10px 12px;background:rgba(37,99,235,.12);border-top:1px solid rgba(37,99,235,.2);cursor:pointer;color:var(--bl);font-size:12px;font-weight:600;letter-spacing:.04em;text-transform:uppercase}
 .play-icon{width:20px;height:20px;border-radius:50%;background:var(--blue);display:flex;align-items:center;justify-content:center;flex-shrink:0}
 .play-tri{width:0;height:0;border-top:4px solid transparent;border-bottom:4px solid transparent;border-left:8px solid white;margin-left:2px}
-.video-shell{display:flex;justify-content:flex-start;align-items:center;background:#050505;border-top:1px solid var(--border);border-bottom:1px solid var(--border);padding:14px 14px 14px 18%;overflow:hidden}
+.video-shell{display:flex;justify-content:flex-start;align-items:center;background:#050505;border-top:1px solid var(--border);border-bottom:1px solid var(--border);padding:14px 14px 14px 9%;overflow:hidden}
 .video-frame{width:min(54vw,210px);aspect-ratio:9/16;background:#000;border:1px solid var(--border);overflow:hidden}
 .video-embed{width:100%;height:100%;border:none;display:block;background:#000}
 .video-help{font-size:10px;color:var(--gray);line-height:1.5;padding:7px 10px;border-top:1px solid var(--border);background:rgba(255,255,255,.03)}
@@ -811,7 +811,7 @@ input,select,button,textarea{font-family:'Montserrat',sans-serif}
 
 const SUPABASE_URL='https://pmpjteuqjusbiduevbwq.supabase.co';
 const SUPABASE_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBtcGp0ZXVxanVzYmlkdWV2YndxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc2OTI1NjUsImV4cCI6MjA5MzI2ODU2NX0.XbMzZoo2yqtrD8znLnyo_1zDfrdJAvAPj1lqGOyXnLw';
-const APP_VERSION='20260504-11';
+const APP_VERSION='20260504-12';
 const PUBLIC_APP_URL='https://habittraininghub.app/app.html';
 const sb=supabase.createClient(SUPABASE_URL,SUPABASE_KEY,{auth:{autoRefreshToken:true,persistSession:true,detectSessionInUrl:true}});
 let sbUser=null,sbProfile=null;
@@ -1587,8 +1587,9 @@ function admTab(t){
 }
 
 // ── HELPERS ──
-function hasActive(u){if(!u||!u.plan||u.credits<=0)return false;if(u.planExpiry&&new Date(u.planExpiry)<new Date())return false;return true;}
+function hasActive(u){if(!u||u.credits<=0)return false;if(u.planExpiry&&new Date(u.planExpiry)<new Date())return false;return true;}
 function planLbl(u){
+  if(!u.plan&&u.credits>0)return'Individual · '+u.credits+' visita'+(u.credits===1?'':'s');
   if(!u.plan)return'Sin membresía';
   const all=[...PLANS.individual,...PLANS.grupal],p=all.find(x=>x.id===u.plan);
   if(!p)return'Sin membresía';
@@ -1734,14 +1735,14 @@ function handleAdminCancelBk(btn){
 function renderMembershipStatus(){
   const el=document.getElementById('membership-status-wrap');
   if(!el||!curUser)return;
-  if(!curUser.plan){
+  if(!curUser.plan&&curUser.credits<=0){
     el.innerHTML='<div style="background:rgba(156,163,175,.08);border:1px solid var(--border);border-radius:6px;padding:10px 14px;display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">'+
       '<div style="font-size:12px;color:var(--gray)">Sin membresía activa</div>'+
       '<button class="btn-sm bblue" onclick="sv(&apos;planes&apos;)">Ver planes</button></div>';
     return;
   }
   const all=[...PLANS.individual,...PLANS.grupal];
-  const p=all.find(x=>x.id===curUser.plan);
+  const p=all.find(x=>x.id===curUser.plan)||{id:'manual',name:'Visitas manuales',type:'individual'};
   if(!p){el.innerHTML='';return;}
   const expired=curUser.planExpiry&&new Date(curUser.planExpiry)<new Date();
   const days=daysUntil(curUser.planExpiry);
@@ -3296,7 +3297,8 @@ async function saveUserEditSb(uid){
     const credits=parseInt(document.getElementById('eu-credits').value)||0;
     const expiryVal=document.getElementById('eu-expiry').value;
     const expiry=expiryVal?mazEndOfDayIso(expiryVal):null;
-    const plan=planId?[...PLANS.individual,...PLANS.grupal].find(p=>p.id===planId):null;
+    const manualPlanId=!planId&&credits>0?'i1':planId;
+    const plan=manualPlanId?[...PLANS.individual,...PLANS.grupal].find(p=>p.id===manualPlanId):null;
     const shouldLogManual=!!(document.getElementById('eu-log-manual')||{}).checked;
     const payMethod=(document.getElementById('eu-pay-method')||{value:'adjustment'}).value;
     const payAmount=Number((document.getElementById('eu-pay-amount')||{value:0}).value||0);
@@ -3305,7 +3307,7 @@ async function saveUserEditSb(uid){
     // Update profile
     await sb.from('profiles').update({
       name,phone,
-      plan_id:planId||null,
+      plan_id:manualPlanId||null,
       plan_type:plan?plan.type:null,
       credits,
       plan_expiry:expiry
@@ -3353,10 +3355,16 @@ async function adminAddCreditsSb(uid){
   showLoading('Agregando visita...');
   try{
     // Read current credits first
-    const{data:prof,error}=await sb.from('profiles').select('credits,name').eq('id',uid).single();
+    const{data:prof,error}=await sb.from('profiles').select('credits,name,plan_id,plan_type').eq('id',uid).single();
     if(error)throw error;
     const newCredits=Math.min(999,(prof.credits||0)+1);
-    const{error:e2}=await sb.from('profiles').update({credits:newCredits}).eq('id',uid);
+    const patch={credits:newCredits};
+    if(!prof.plan_id){
+      patch.plan_id='i1';
+      patch.plan_type='individual';
+      patch.plan_expiry=null;
+    }
+    const{error:e2}=await sb.from('profiles').update(patch).eq('id',uid);
     if(e2)throw e2;
     hideLoading();
     toast(prof.name+': '+newCredits+' visitas','ok');
