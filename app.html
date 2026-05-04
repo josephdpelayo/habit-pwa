@@ -6,12 +6,12 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="HABIT">
 <meta name="application-name" content="HABIT">
-<link rel="manifest" href="/manifest.json?v=20260504-14">
-<link rel="apple-touch-icon" sizes="120x120" href="/icons/icon-120.png?v=20260504-14">
-<link rel="apple-touch-icon" sizes="152x152" href="/icons/icon-152.png?v=20260504-14">
-<link rel="apple-touch-icon" sizes="167x167" href="/icons/icon-167.png?v=20260504-14">
-<link rel="apple-touch-icon" sizes="180x180" href="/icons/icon-180.png?v=20260504-14">
-<link rel="icon" type="image/png" sizes="32x32" href="/icons/icon-32.png?v=20260504-14">
+<link rel="manifest" href="/manifest.json?v=20260504-15">
+<link rel="apple-touch-icon" sizes="120x120" href="/icons/icon-120.png?v=20260504-15">
+<link rel="apple-touch-icon" sizes="152x152" href="/icons/icon-152.png?v=20260504-15">
+<link rel="apple-touch-icon" sizes="167x167" href="/icons/icon-167.png?v=20260504-15">
+<link rel="apple-touch-icon" sizes="180x180" href="/icons/icon-180.png?v=20260504-15">
+<link rel="icon" type="image/png" sizes="32x32" href="/icons/icon-32.png?v=20260504-15">
 <title>HABIT</title>
 <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
@@ -811,7 +811,7 @@ input,select,button,textarea{font-family:'Montserrat',sans-serif}
 
 const SUPABASE_URL='https://pmpjteuqjusbiduevbwq.supabase.co';
 const SUPABASE_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBtcGp0ZXVxanVzYmlkdWV2YndxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc2OTI1NjUsImV4cCI6MjA5MzI2ODU2NX0.XbMzZoo2yqtrD8znLnyo_1zDfrdJAvAPj1lqGOyXnLw';
-const APP_VERSION='20260504-14';
+const APP_VERSION='20260504-15';
 const PUBLIC_APP_URL='https://habittraininghub.app/app.html';
 const sb=supabase.createClient(SUPABASE_URL,SUPABASE_KEY,{auth:{autoRefreshToken:true,persistSession:true,detectSessionInUrl:true}});
 let sbUser=null,sbProfile=null;
@@ -3362,7 +3362,7 @@ async function adminEditUserSb(uid,uname){
       +'<p class="slbl" style="margin-bottom:8px">Registro manual</p>'
       +'<label style="display:flex;align-items:flex-start;gap:9px;margin-bottom:10px;color:var(--gl);font-size:12px;line-height:1.45">'
       +'<input type="checkbox" id="eu-log-manual" style="width:18px;height:18px;accent-color:var(--blue);margin-top:1px">'
-      +'<span>Guardar este cambio en pagos/bitacora manual.</span></label>'
+      +'<span>Guardar en pagos/bitacora. Si cambias plan, visitas o vencimiento, el movimiento se registra automaticamente.</span></label>'
       +'<div class="field"><label>Metodo</label><select id="eu-pay-method" style="width:100%;background:var(--card2);border:1px solid var(--border);border-radius:4px;padding:12px;font-size:16px;color:var(--white);outline:none;-webkit-appearance:none"><option value="cash">Efectivo</option><option value="courtesy">Cortesia</option><option value="adjustment">Ajuste manual</option></select></div>'
       +'<div class="field"><label>Monto</label><input type="number" id="eu-pay-amount" min="0" step="1" placeholder="0" style="width:100%;background:var(--card2);border:1px solid var(--border);border-radius:4px;padding:12px;font-size:16px;color:var(--white);outline:none"></div>'
       +'<div class="field"><label>Nota</label><textarea id="eu-pay-note" placeholder="Ej: pago en efectivo recibido, cortesia por invitado, ajuste por error..." style="width:100%;background:var(--card2);border:1px solid var(--border);border-radius:4px;padding:12px;font-size:13px;color:var(--white);outline:none;resize:none;min-height:62px"></textarea></div>'
@@ -3387,6 +3387,8 @@ async function adminEditUserSb(uid,uname){
 async function saveUserEditSb(uid){
   showLoading('Guardando...');
   try{
+    const{data:before,error:beforeErr}=await sb.from('profiles').select('name,phone,plan_id,plan_type,credits,plan_expiry').eq('id',uid).single();
+    if(beforeErr)throw beforeErr;
     const name=document.getElementById('eu-name').value.trim();
     const phone=document.getElementById('eu-phone').value.trim();
     const planId=document.getElementById('eu-plan').value;
@@ -3399,6 +3401,10 @@ async function saveUserEditSb(uid){
     const payMethod=(document.getElementById('eu-pay-method')||{value:'adjustment'}).value;
     const payAmount=Number((document.getElementById('eu-pay-amount')||{value:0}).value||0);
     const payNote=(document.getElementById('eu-pay-note')||{value:''}).value.trim();
+    const oldExpiry=(before.plan_expiry||'').slice(0,10);
+    const membershipChanged=(before.plan_id||'')!==(manualPlanId||'')
+      || Number(before.credits||0)!==credits
+      || oldExpiry!==(expiryVal||'');
 
     // Update profile
     await sb.from('profiles').update({
@@ -3417,9 +3423,14 @@ async function saveUserEditSb(uid){
       await sb.from('board_assignments').insert(selectedBoards.map(bid=>({board_id:bid,user_id:uid})));
     }
 
-    if(shouldLogManual){
+    if(shouldLogManual||membershipChanged){
       const methodLabel={cash:'Efectivo',courtesy:'Cortesia',adjustment:'Ajuste manual'}[payMethod]||'Ajuste manual';
-      await adminLogManualPayment(uid,name,plan,payAmount,payMethod,payNote);
+      const changeNote=[
+        membershipChanged?'Cambio membresia: '+((before.plan_id||'sin plan')+' -> '+(manualPlanId||'sin plan')):'',
+        membershipChanged?'Visitas: '+Number(before.credits||0)+' -> '+credits:'',
+        membershipChanged?'Vence: '+(oldExpiry||'sin fecha')+' -> '+(expiryVal||'sin fecha'):''
+      ].filter(Boolean).join(' · ');
+      await adminLogManualPayment(uid,name,plan||{id:'manual',name:'Ajuste manual',type:'manual'},payAmount,payMethod,(payNote?payNote+' · ':'')+changeNote);
     }
 
     hideLoading();
@@ -3497,6 +3508,21 @@ async function renderPaymentsSb(){
       nameMap=Object.fromEntries((profRows||[]).map(p=>[p.id,p.name]));
     }
     list.innerHTML='';
+    const sums=pays.reduce((acc,p)=>{
+      const method=p.payment_method||'stripe';
+      const amount=Number(p.amount)||0;
+      acc.total+=amount;
+      acc[method]=(acc[method]||0)+amount;
+      return acc;
+    },{total:0,stripe:0,cash:0,courtesy:0,adjustment:0});
+    const summary=document.createElement('div');
+    summary.style.cssText='display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px';
+    summary.innerHTML=
+      '<div class="met"><div class="met-l">Total cobrado</div><div class="met-v" style="color:var(--green)">'+MXN(sums.total)+'</div></div>'
+      +'<div class="met"><div class="met-l">Stripe / TDC</div><div class="met-v" style="color:var(--bl)">'+MXN(sums.stripe)+'</div></div>'
+      +'<div class="met"><div class="met-l">Efectivo</div><div class="met-v" style="color:var(--amber)">'+MXN(sums.cash)+'</div></div>'
+      +'<div class="met"><div class="met-l">Cortesias / ajustes</div><div class="met-v">'+MXN((sums.courtesy||0)+(sums.adjustment||0))+'</div></div>';
+    list.appendChild(summary);
     pays.forEach(p=>{
       const method={stripe:'TDC / Stripe',cash:'Efectivo',courtesy:'Cortesia',adjustment:'Ajuste manual'}[p.payment_method||'stripe']||p.payment_method||'Pago';
       const ref=p.last4?' · '+(p.payment_method==='stripe'?'**** ':'')+(p.last4||'----'):'';

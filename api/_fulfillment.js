@@ -71,17 +71,19 @@ async function activateMembership(session) {
   if (existing) return { activated: true, recorded: false, duplicate: true };
 
   const last4 = await getLast4(session);
+  const paidAmount = typeof session.amount_total === 'number' ? session.amount_total / 100 : plan.price;
   await insertPayment({
     user_id: userId,
     plan_id: plan.id,
     plan_name: plan.name,
     plan_type: plan.type,
-    amount: plan.price,
+    amount: paidAmount,
     currency: 'MXN',
     last4,
     stripe_id: session.id,
     payment_method: 'stripe',
     status: 'completed',
+    notes: 'Pago con TDC registrado por Stripe',
   });
 
   return { activated: true, recorded: true, duplicate: false };

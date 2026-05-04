@@ -80,6 +80,9 @@ create table if not exists public.payments (
   currency      text not null default 'MXN',
   last4         text,
   stripe_id     text,
+  payment_method text not null default 'stripe',
+  notes         text,
+  created_by    uuid references public.profiles(id),
   status        text not null default 'completed',
   created_at    timestamptz not null default now()
 );
