@@ -6,12 +6,12 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="HABIT">
 <meta name="application-name" content="HABIT">
-<link rel="manifest" href="/manifest.json?v=20260504-04">
-<link rel="apple-touch-icon" sizes="120x120" href="/icons/icon-120.png?v=20260504-04">
-<link rel="apple-touch-icon" sizes="152x152" href="/icons/icon-152.png?v=20260504-04">
-<link rel="apple-touch-icon" sizes="167x167" href="/icons/icon-167.png?v=20260504-04">
-<link rel="apple-touch-icon" sizes="180x180" href="/icons/icon-180.png?v=20260504-04">
-<link rel="icon" type="image/png" sizes="32x32" href="/icons/icon-32.png?v=20260504-04">
+<link rel="manifest" href="/manifest.json?v=20260504-05">
+<link rel="apple-touch-icon" sizes="120x120" href="/icons/icon-120.png?v=20260504-05">
+<link rel="apple-touch-icon" sizes="152x152" href="/icons/icon-152.png?v=20260504-05">
+<link rel="apple-touch-icon" sizes="167x167" href="/icons/icon-167.png?v=20260504-05">
+<link rel="apple-touch-icon" sizes="180x180" href="/icons/icon-180.png?v=20260504-05">
+<link rel="icon" type="image/png" sizes="32x32" href="/icons/icon-32.png?v=20260504-05">
 <title>HABIT</title>
 <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
@@ -788,7 +788,7 @@ input,select,button,textarea{font-family:'Montserrat',sans-serif}
 
 const SUPABASE_URL='https://pmpjteuqjusbiduevbwq.supabase.co';
 const SUPABASE_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBtcGp0ZXVxanVzYmlkdWV2YndxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc2OTI1NjUsImV4cCI6MjA5MzI2ODU2NX0.XbMzZoo2yqtrD8znLnyo_1zDfrdJAvAPj1lqGOyXnLw';
-const APP_VERSION='20260504-04';
+const APP_VERSION='20260504-05';
 const sb=supabase.createClient(SUPABASE_URL,SUPABASE_KEY,{auth:{autoRefreshToken:true,persistSession:true,detectSessionInUrl:true}});
 let sbUser=null,sbProfile=null;
 
@@ -3390,8 +3390,8 @@ function showAdmin(){
   document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
   const adm=document.getElementById('s-admin');
   if(adm)adm.classList.add('active');
-  const d=document.getElementById('adm-date');if(d)d.value=mazToday();
-  admTab('notifs');
+  const d=document.getElementById('adm-date');if(d){d.value=mazToday();d.min=mazToday();d.max=addDaysDS(mazToday(),7);}
+  admTab('dash');
   // Load boards from Supabase
   loadBoardsSb();
 }
