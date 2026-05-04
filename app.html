@@ -6,12 +6,12 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="HABIT">
 <meta name="application-name" content="HABIT">
-<link rel="manifest" href="/manifest.json?v=20260503-19">
-<link rel="apple-touch-icon" sizes="120x120" href="/icons/icon-120.png?v=20260503-19">
-<link rel="apple-touch-icon" sizes="152x152" href="/icons/icon-152.png?v=20260503-19">
-<link rel="apple-touch-icon" sizes="167x167" href="/icons/icon-167.png?v=20260503-19">
-<link rel="apple-touch-icon" sizes="180x180" href="/icons/icon-180.png?v=20260503-19">
-<link rel="icon" type="image/png" sizes="32x32" href="/icons/icon-32.png?v=20260503-19">
+<link rel="manifest" href="/manifest.json?v=20260503-20">
+<link rel="apple-touch-icon" sizes="120x120" href="/icons/icon-120.png?v=20260503-20">
+<link rel="apple-touch-icon" sizes="152x152" href="/icons/icon-152.png?v=20260503-20">
+<link rel="apple-touch-icon" sizes="167x167" href="/icons/icon-167.png?v=20260503-20">
+<link rel="apple-touch-icon" sizes="180x180" href="/icons/icon-180.png?v=20260503-20">
+<link rel="icon" type="image/png" sizes="32x32" href="/icons/icon-32.png?v=20260503-20">
 <title>HABIT</title>
 <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
@@ -773,7 +773,7 @@ input,select,button,textarea{font-family:'Montserrat',sans-serif}
 
 const SUPABASE_URL='https://pmpjteuqjusbiduevbwq.supabase.co';
 const SUPABASE_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBtcGp0ZXVxanVzYmlkdWV2YndxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc2OTI1NjUsImV4cCI6MjA5MzI2ODU2NX0.XbMzZoo2yqtrD8znLnyo_1zDfrdJAvAPj1lqGOyXnLw';
-const APP_VERSION='20260503-19';
+const APP_VERSION='20260503-20';
 const sb=supabase.createClient(SUPABASE_URL,SUPABASE_KEY,{auth:{autoRefreshToken:true,persistSession:true,detectSessionInUrl:false}});
 let sbUser=null,sbProfile=null;
 
@@ -1930,17 +1930,29 @@ async function handleStripeReturn(){
   }
   if(!params.get('stripe_success'))return;
   toast('Pago recibido. Activando membresia...','ok');
+  const sessionId=params.get('session_id');
   history.replaceState({},'',location.pathname);
-  setTimeout(async()=>{
-    try{
-      await loadUserData();
-      renderMembershipStatus();
-      renderHistorial();
-      toast('Membresia activada','ok');
-    }catch(e){
-      toast('Pago recibido. Si no aparece tu membresia, espera unos segundos y recarga.','warn');
+  try{
+    const{data}=await sb.auth.getSession();
+    const token=data&&data.session&&data.session.access_token;
+    if(sessionId&&token){
+      const res=await fetch('/api/confirm-checkout-session',{
+        method:'POST',
+        headers:{'Content-Type':'application/json',Authorization:'Bearer '+token},
+        body:JSON.stringify({sessionId})
+      });
+      const out=await res.json().catch(()=>({}));
+      if(!res.ok)throw new Error(out.error||'No se pudo confirmar el pago');
+    }else{
+      await new Promise(r=>setTimeout(r,2500));
     }
-  },2500);
+    await loadUserData();
+    renderMembershipStatus();
+    renderHistorial();
+    toast('Membresia activada','ok');
+  }catch(e){
+    toast('Pago recibido. Si no aparece tu membresia, espera unos segundos y recarga.','warn');
+  }
 }
 async function doPay(){
   if(!selPlan){toast('Selecciona un plan','err');return;}
