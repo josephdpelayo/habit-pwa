@@ -6,12 +6,12 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="HABIT">
 <meta name="application-name" content="HABIT">
-<link rel="manifest" href="/manifest.json?v=20260504-10">
-<link rel="apple-touch-icon" sizes="120x120" href="/icons/icon-120.png?v=20260504-10">
-<link rel="apple-touch-icon" sizes="152x152" href="/icons/icon-152.png?v=20260504-10">
-<link rel="apple-touch-icon" sizes="167x167" href="/icons/icon-167.png?v=20260504-10">
-<link rel="apple-touch-icon" sizes="180x180" href="/icons/icon-180.png?v=20260504-10">
-<link rel="icon" type="image/png" sizes="32x32" href="/icons/icon-32.png?v=20260504-10">
+<link rel="manifest" href="/manifest.json?v=20260504-11">
+<link rel="apple-touch-icon" sizes="120x120" href="/icons/icon-120.png?v=20260504-11">
+<link rel="apple-touch-icon" sizes="152x152" href="/icons/icon-152.png?v=20260504-11">
+<link rel="apple-touch-icon" sizes="167x167" href="/icons/icon-167.png?v=20260504-11">
+<link rel="apple-touch-icon" sizes="180x180" href="/icons/icon-180.png?v=20260504-11">
+<link rel="icon" type="image/png" sizes="32x32" href="/icons/icon-32.png?v=20260504-11">
 <title>HABIT</title>
 <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
@@ -117,6 +117,8 @@ input,select,button,textarea{font-family:'Montserrat',sans-serif}
 .terms-check{display:flex;align-items:flex-start;gap:10px;margin-bottom:12px;cursor:pointer}
 .terms-check input{width:18px;height:18px;margin-top:2px;accent-color:var(--blue);flex-shrink:0;cursor:pointer}
 .terms-check span{font-size:13px;color:var(--gl);line-height:1.5}
+.reset-copy{font-size:13px;color:var(--gray);line-height:1.6;margin-bottom:1rem}
+.reset-form{display:flex;flex-direction:column;gap:12px}
 .install-hint{font-size:11px;color:var(--gray);line-height:1.55;text-align:center;margin-top:12px}
 .install-box{background:linear-gradient(180deg,#050505 0%,#0b0f18 100%);border:1px solid rgba(59,130,246,.42);border-radius:14px 14px 0 0;max-height:90vh;width:100%;max-width:430px;display:flex;flex-direction:column;overflow:hidden;box-shadow:0 -18px 60px rgba(37,99,235,.22)}
 .install-hdr{padding:1.25rem 1rem .8rem;border-bottom:1px solid rgba(59,130,246,.24);text-align:center}
@@ -739,6 +741,25 @@ input,select,button,textarea{font-family:'Montserrat',sans-serif}
   </div>
 </div>
 
+<!-- RESET PASSWORD MODAL -->
+<div id="reset-password-modal" class="terms-modal" style="display:none">
+  <div class="terms-box">
+    <div class="terms-hdr">
+      <h2>Nueva contraseña</h2>
+    </div>
+    <div class="terms-body">
+      <p class="reset-copy">Escribe una nueva contraseña para tu cuenta HABIT. Al guardar, podrás iniciar sesión normalmente.</p>
+      <div class="reset-form">
+        <div class="field"><label>Nueva contraseña</label><input type="password" id="reset-pass" placeholder="Mínimo 6 caracteres" autocomplete="new-password"></div>
+        <div class="field"><label>Confirmar contraseña</label><input type="password" id="reset-pass2" placeholder="Repite tu contraseña" autocomplete="new-password"></div>
+      </div>
+    </div>
+    <div class="terms-footer">
+      <button class="btn" onclick="submitResetPassword()">Guardar contraseña</button>
+    </div>
+  </div>
+</div>
+
 <!-- INSTALL GUIDE MODAL -->
 <div id="install-guide-modal" class="terms-modal" style="display:none">
   <div class="install-box">
@@ -790,7 +811,7 @@ input,select,button,textarea{font-family:'Montserrat',sans-serif}
 
 const SUPABASE_URL='https://pmpjteuqjusbiduevbwq.supabase.co';
 const SUPABASE_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBtcGp0ZXVxanVzYmlkdWV2YndxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc2OTI1NjUsImV4cCI6MjA5MzI2ODU2NX0.XbMzZoo2yqtrD8znLnyo_1zDfrdJAvAPj1lqGOyXnLw';
-const APP_VERSION='20260504-10';
+const APP_VERSION='20260504-11';
 const PUBLIC_APP_URL='https://habittraininghub.app/app.html';
 const sb=supabase.createClient(SUPABASE_URL,SUPABASE_KEY,{auth:{autoRefreshToken:true,persistSession:true,detectSessionInUrl:true}});
 let sbUser=null,sbProfile=null;
@@ -862,6 +883,10 @@ async function initApp(){
     const result=await Promise.race([p,t]);
     if(result.data&&result.data.session){
       sbUser=result.data.session.user;
+      if(isPasswordRecoveryUrl()){
+        showResetPasswordModal();
+        return;
+      }
       showLoading('Cargando tu cuenta...');
       await loadUserData();
       hideLoading();
@@ -1387,17 +1412,41 @@ async function forgotPassword(){
   }
 }
 async function promptNewPassword(){
-  const pass=prompt('Nueva contraseña (mínimo 6 caracteres)');
+  showResetPasswordModal();
+}
+function isPasswordRecoveryUrl(){
+  const query=new URLSearchParams(location.search||'');
+  const hash=new URLSearchParams((location.hash||'').replace(/^#/,''));
+  return query.get('reset_password')==='1'||hash.get('type')==='recovery';
+}
+function showResetPasswordModal(){
+  hideLoading();
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  const authEl=document.getElementById('s-auth');
+  if(authEl)authEl.classList.add('active');
+  const modal=document.getElementById('reset-password-modal');
+  if(modal)modal.style.display='flex';
+  setTimeout(()=>document.getElementById('reset-pass')?.focus(),150);
+}
+async function submitResetPassword(){
+  const pass=(document.getElementById('reset-pass')?.value||'').trim();
+  const pass2=(document.getElementById('reset-pass2')?.value||'').trim();
   if(!pass||pass.length<6){toast('La contraseña debe tener mínimo 6 caracteres','err');return;}
-  const pass2=prompt('Confirma la nueva contraseña');
   if(pass!==pass2){toast('Las contraseñas no coinciden','err');return;}
   showLoading('Actualizando contraseña...');
   try{
     const{error}=await sb.auth.updateUser({password:pass});
     if(error)throw error;
+    await sb.auth.signOut().catch(()=>{});
+    sbUser=null;sbProfile=null;curUser=null;
+    const modal=document.getElementById('reset-password-modal');
+    if(modal)modal.style.display='none';
+    document.getElementById('reset-pass').value='';
+    document.getElementById('reset-pass2').value='';
     hideLoading();
-    toast('Contraseña actualizada','ok');
-    history.replaceState({},'',location.pathname);
+    history.replaceState({},'',location.pathname||'/app.html');
+    authTab('login');
+    toast('Contraseña actualizada. Inicia sesión de nuevo.','ok');
   }catch(e){
     hideLoading();
     toast(e.message||'No se pudo actualizar','err');
