@@ -6,12 +6,12 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="HABIT">
 <meta name="application-name" content="HABIT">
-<link rel="manifest" href="/manifest.json?v=20260504-07">
-<link rel="apple-touch-icon" sizes="120x120" href="/icons/icon-120.png?v=20260504-07">
-<link rel="apple-touch-icon" sizes="152x152" href="/icons/icon-152.png?v=20260504-07">
-<link rel="apple-touch-icon" sizes="167x167" href="/icons/icon-167.png?v=20260504-07">
-<link rel="apple-touch-icon" sizes="180x180" href="/icons/icon-180.png?v=20260504-07">
-<link rel="icon" type="image/png" sizes="32x32" href="/icons/icon-32.png?v=20260504-07">
+<link rel="manifest" href="/manifest.json?v=20260504-08">
+<link rel="apple-touch-icon" sizes="120x120" href="/icons/icon-120.png?v=20260504-08">
+<link rel="apple-touch-icon" sizes="152x152" href="/icons/icon-152.png?v=20260504-08">
+<link rel="apple-touch-icon" sizes="167x167" href="/icons/icon-167.png?v=20260504-08">
+<link rel="apple-touch-icon" sizes="180x180" href="/icons/icon-180.png?v=20260504-08">
+<link rel="icon" type="image/png" sizes="32x32" href="/icons/icon-32.png?v=20260504-08">
 <title>HABIT</title>
 <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
@@ -270,8 +270,8 @@ input,select,button,textarea{font-family:'Montserrat',sans-serif}
 .ex-video-btn{display:flex;align-items:center;gap:8px;padding:10px 12px;background:rgba(37,99,235,.12);border-top:1px solid rgba(37,99,235,.2);cursor:pointer;color:var(--bl);font-size:12px;font-weight:600;letter-spacing:.04em;text-transform:uppercase}
 .play-icon{width:20px;height:20px;border-radius:50%;background:var(--blue);display:flex;align-items:center;justify-content:center;flex-shrink:0}
 .play-tri{width:0;height:0;border-top:4px solid transparent;border-bottom:4px solid transparent;border-left:8px solid white;margin-left:2px}
-.video-shell{display:flex;justify-content:center;align-items:center;background:#050505;border-top:1px solid var(--border);border-bottom:1px solid var(--border);padding:12px;overflow:hidden}
-.video-frame{width:min(76%,300px);aspect-ratio:9/16;background:#000;border:1px solid var(--border);overflow:hidden}
+.video-shell{display:flex;justify-content:center;align-items:center;background:#050505;border-top:1px solid var(--border);border-bottom:1px solid var(--border);padding:14px;overflow:hidden}
+.video-frame{width:min(54vw,210px);aspect-ratio:9/16;background:#000;border:1px solid var(--border);overflow:hidden}
 .video-embed{width:100%;height:100%;border:none;display:block;background:#000}
 .video-help{font-size:10px;color:var(--gray);line-height:1.5;padding:7px 10px;border-top:1px solid var(--border);background:rgba(255,255,255,.03)}
 .log-score-btn{display:flex;align-items:center;gap:8px;padding:10px 12px;background:rgba(139,92,246,.1);border-top:1px solid rgba(139,92,246,.2);cursor:pointer;color:var(--purple);font-size:12px;font-weight:600;letter-spacing:.04em;text-transform:uppercase}
@@ -790,7 +790,7 @@ input,select,button,textarea{font-family:'Montserrat',sans-serif}
 
 const SUPABASE_URL='https://pmpjteuqjusbiduevbwq.supabase.co';
 const SUPABASE_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBtcGp0ZXVxanVzYmlkdWV2YndxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc2OTI1NjUsImV4cCI6MjA5MzI2ODU2NX0.XbMzZoo2yqtrD8znLnyo_1zDfrdJAvAPj1lqGOyXnLw';
-const APP_VERSION='20260504-07';
+const APP_VERSION='20260504-08';
 const sb=supabase.createClient(SUPABASE_URL,SUPABASE_KEY,{auth:{autoRefreshToken:true,persistSession:true,detectSessionInUrl:true}});
 let sbUser=null,sbProfile=null;
 
@@ -3493,6 +3493,7 @@ async function renderFeedSb(){
           +'<div class="comment-av">'+inits(c.user_name)+'</div>'
           +'<div class="comment-body"><div class="comment-meta">'+esc(c.user_name)+'<span class="comment-time">'+timeSince(c.created_at)+'</span></div>'
           +'<div class="comment-text">'+esc(c.text_content)+'</div></div>'
+          +(isAdmin?'<button data-cid="'+esc(c.id)+'" onclick="deleteCommentSb(this.dataset.cid)" style="background:none;border:none;color:var(--red);cursor:pointer;font-size:14px;padding:4px">Eliminar</button>':'')
           +'</div>').join('')
         : '<div style="font-size:12px;color:var(--gray);margin-bottom:8px">Sin comentarios aun.</div>';
       const div=document.createElement('div');div.className='post-card';
@@ -3560,11 +3561,47 @@ async function addCommentSb(input){
 
 async function deletePostSb(postId){
   if(!confirm('Eliminar esta publicacion?'))return;
-  await sb.from('post_comments').delete().eq('post_id',postId);
-  await sb.from('post_reactions').delete().eq('post_id',postId);
-  await sb.from('posts').delete().eq('id',postId);
-  toast('Publicacion eliminada','ok');
-  renderFeedSb();
+  showLoading('Eliminando...');
+  try{
+    const{data:sessionData}=await sb.auth.getSession();
+    const token=sessionData?.session?.access_token;
+    const res=await fetch('/api/delete-community-item',{
+      method:'POST',
+      headers:{'Content-Type':'application/json',Authorization:'Bearer '+token},
+      body:JSON.stringify({type:'post',id:postId})
+    });
+    const payload=await res.json().catch(()=>({}));
+    if(!res.ok)throw new Error(payload.error||'No se pudo eliminar');
+    hideLoading();
+    toast('Publicacion eliminada','ok');
+    renderFeedSb();
+    if(document.getElementById('a-comunidad')?.classList.contains('active'))renderAdminFeed();
+  }catch(e){
+    hideLoading();
+    toast('Error al eliminar: '+(e.message||e),'err');
+  }
+}
+
+async function deleteCommentSb(commentId){
+  if(!confirm('Eliminar este comentario?'))return;
+  showLoading('Eliminando...');
+  try{
+    const{data:sessionData}=await sb.auth.getSession();
+    const token=sessionData?.session?.access_token;
+    const res=await fetch('/api/delete-community-item',{
+      method:'POST',
+      headers:{'Content-Type':'application/json',Authorization:'Bearer '+token},
+      body:JSON.stringify({type:'comment',id:commentId})
+    });
+    const payload=await res.json().catch(()=>({}));
+    if(!res.ok)throw new Error(payload.error||'No se pudo eliminar');
+    hideLoading();
+    toast('Comentario eliminado','ok');
+    renderFeedSb();
+  }catch(e){
+    hideLoading();
+    toast('Error al eliminar: '+(e.message||e),'err');
+  }
 }
 
 
@@ -3585,7 +3622,7 @@ async function renderAdminFeed(){
         '<div class="post-hdr">'
         +'<div class="post-av">'+inits(post.user_name)+'</div>'
         +'<div style="flex:1"><div class="post-user">'+esc(post.user_name||'Usuario')+'</div><div class="post-time">'+timeSince(post.created_at)+'</div></div>'
-        +'<button data-pid="'+post.id+'" onclick="deletePostSb(this.dataset.pid);this.closest(\".post-card\").remove()" style="background:none;border:none;color:var(--red);cursor:pointer;font-size:18px;padding:4px">🗑</button>'
+        +'<button data-pid="'+post.id+'" onclick="deletePostSb(this.dataset.pid)" style="background:none;border:none;color:var(--red);cursor:pointer;font-size:18px;padding:4px">🗑</button>'
         +'</div>'
         +(post.text_content?'<div class="post-body">'+esc(post.text_content)+'</div>':'')
         +(post.img_url?'<img src="'+esc(post.img_url)+'" style="width:100%;max-height:200px;object-fit:cover;display:block">':'')
