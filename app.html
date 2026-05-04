@@ -6,12 +6,12 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="HABIT">
 <meta name="application-name" content="HABIT">
-<link rel="manifest" href="/manifest.json?v=20260504-03">
-<link rel="apple-touch-icon" sizes="120x120" href="/icons/icon-120.png?v=20260504-03">
-<link rel="apple-touch-icon" sizes="152x152" href="/icons/icon-152.png?v=20260504-03">
-<link rel="apple-touch-icon" sizes="167x167" href="/icons/icon-167.png?v=20260504-03">
-<link rel="apple-touch-icon" sizes="180x180" href="/icons/icon-180.png?v=20260504-03">
-<link rel="icon" type="image/png" sizes="32x32" href="/icons/icon-32.png?v=20260504-03">
+<link rel="manifest" href="/manifest.json?v=20260504-04">
+<link rel="apple-touch-icon" sizes="120x120" href="/icons/icon-120.png?v=20260504-04">
+<link rel="apple-touch-icon" sizes="152x152" href="/icons/icon-152.png?v=20260504-04">
+<link rel="apple-touch-icon" sizes="167x167" href="/icons/icon-167.png?v=20260504-04">
+<link rel="apple-touch-icon" sizes="180x180" href="/icons/icon-180.png?v=20260504-04">
+<link rel="icon" type="image/png" sizes="32x32" href="/icons/icon-32.png?v=20260504-04">
 <title>HABIT</title>
 <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
@@ -186,7 +186,7 @@ input,select,button,textarea{font-family:'Montserrat',sans-serif}
 .sb-full{background:rgba(156,163,175,.1);color:var(--gray)}
 .sb-wait{background:rgba(245,158,11,.12);color:var(--amber)}
 .sb-grp{background:rgba(124,58,237,.15);color:#a78bfa}
-.adm-slot-row{display:grid;grid-template-columns:64px minmax(0,1fr) auto;gap:8px 10px;align-items:center}
+.adm-slot-row{display:grid;grid-template-columns:64px minmax(0,1fr) auto;gap:8px 10px;align-items:center;min-height:58px}
 .adm-slot-main{min-width:0}
 .adm-slot-head{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:4px}
 .adm-cap-dots{display:flex;align-items:center;gap:5px;min-height:16px}
@@ -204,10 +204,12 @@ input,select,button,textarea{font-family:'Montserrat',sans-serif}
 .adm-slot-actions{grid-column:3;grid-row:1;display:flex;gap:6px;align-items:center;justify-content:flex-end;flex-wrap:nowrap}
 .adm-slot-actions .btn-sm{min-width:68px;text-align:center}
 @media(max-width:520px){
-  .adm-slot-row{grid-template-columns:54px minmax(0,1fr) auto;gap:6px 8px}
+  .adm-slot-row{grid-template-columns:58px minmax(0,1fr) 78px;gap:6px 8px;align-items:center}
+  .adm-slot-row .slot-time{min-width:58px}
   .adm-slot-main{grid-column:2;grid-row:1}
   .adm-slot-actions{grid-column:3;grid-row:1;justify-content:flex-end}
-  .adm-slot-actions .btn-sm{width:auto;min-width:62px;padding-left:6px;padding-right:6px}
+  .adm-slot-actions .btn-sm{width:78px;min-width:78px;padding-left:6px;padding-right:6px}
+  .adm-slot-actions .btn-sm.bred{width:78px;min-width:78px}
   .adm-block-panel{grid-column:1 / 4;grid-row:2;display:none;flex-direction:column}
   .adm-block-panel.open{display:flex}
   .adm-block-panel select,.adm-block-panel input,.adm-block-panel .btn-sm{width:100%;flex:unset}
@@ -786,7 +788,7 @@ input,select,button,textarea{font-family:'Montserrat',sans-serif}
 
 const SUPABASE_URL='https://pmpjteuqjusbiduevbwq.supabase.co';
 const SUPABASE_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBtcGp0ZXVxanVzYmlkdWV2YndxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc2OTI1NjUsImV4cCI6MjA5MzI2ODU2NX0.XbMzZoo2yqtrD8znLnyo_1zDfrdJAvAPj1lqGOyXnLw';
-const APP_VERSION='20260504-03';
+const APP_VERSION='20260504-04';
 const sb=supabase.createClient(SUPABASE_URL,SUPABASE_KEY,{auth:{autoRefreshToken:true,persistSession:true,detectSessionInUrl:true}});
 let sbUser=null,sbProfile=null;
 
@@ -2417,6 +2419,7 @@ async function renderAdmSlots(){
         +'<input id="blk-r-'+idx+'" type="text" placeholder="Motivo del bloqueo" style="flex:1;min-width:140px">'
         +'<button class="btn-sm bblue" data-ds="'+ds+'" data-idx="'+idx+'" onclick="blockSlotSb(this.dataset.ds,parseInt(this.dataset.idx),parseInt(document.getElementById(&quot;blk-'+idx+'&quot;).value),document.getElementById(&quot;blk-r-'+idx+'&quot;).value)">Guardar</button>'
         +'<button class="btn-sm" style="border-color:var(--border);color:var(--gray);background:transparent" data-idx="'+idx+'" onclick="closeBlockPanel(parseInt(this.dataset.idx))">Cancelar</button>'
+        +'</div>'
         +'</div>';
     });
     el.innerHTML=html;
