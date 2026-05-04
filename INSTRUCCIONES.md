@@ -17,7 +17,7 @@
 
 ## PASO 2.1 — Configurar Stripe
 
-En Vercel → Project Settings → Environment Variables agrega:
+En Vercel → Project Settings → Environment Variables agrega en Production y Preview:
 
 ```txt
 STRIPE_SECRET_KEY=sk_live_...
@@ -40,6 +40,39 @@ checkout.session.completed
 ```
 
 Despues copia el `Signing secret` del webhook y ponlo en `STRIPE_WEBHOOK_SECRET`.
+
+## PASO 2.2 — Activar validacion real del codigo de puerta
+
+En Vercel → Project Settings → Environment Variables agrega:
+
+```txt
+ACCESS_API_SECRET=un_codigo_largo_privado
+```
+
+Ese valor no se comparte con clientes. Es la llave privada que usara el teclado, controlador o relay para consultar si el codigo `1234#` puede abrir en ese momento.
+
+Endpoint para el controlador:
+
+```txt
+https://tu-dominio.com/api/validate-access-code
+```
+
+Ejemplo de prueba:
+
+```bash
+curl -X POST https://tu-dominio.com/api/validate-access-code \
+  -H "Authorization: Bearer ACCESS_API_SECRET" \
+  -H "Content-Type: application/json" \
+  -d '{"code":"1234#"}'
+```
+
+La puerta debe abrir solo cuando la respuesta traiga:
+
+```json
+{"allow":true}
+```
+
+Regla actual: el codigo se autoriza desde 10 minutos antes de la reserva hasta que termina la sesion. Cada acceso autorizado se guarda en `access_log` y en notificaciones del admin.
 
 ## PASO 3 — Crear tu cuenta de admin
 
