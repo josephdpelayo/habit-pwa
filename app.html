@@ -6,12 +6,12 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="HABIT">
 <meta name="application-name" content="HABIT">
-<link rel="manifest" href="/manifest.json?v=20260504-15">
-<link rel="apple-touch-icon" sizes="120x120" href="/icons/icon-120.png?v=20260504-15">
-<link rel="apple-touch-icon" sizes="152x152" href="/icons/icon-152.png?v=20260504-15">
-<link rel="apple-touch-icon" sizes="167x167" href="/icons/icon-167.png?v=20260504-15">
-<link rel="apple-touch-icon" sizes="180x180" href="/icons/icon-180.png?v=20260504-15">
-<link rel="icon" type="image/png" sizes="32x32" href="/icons/icon-32.png?v=20260504-15">
+<link rel="manifest" href="/manifest.json?v=20260504-16">
+<link rel="apple-touch-icon" sizes="120x120" href="/icons/icon-120.png?v=20260504-16">
+<link rel="apple-touch-icon" sizes="152x152" href="/icons/icon-152.png?v=20260504-16">
+<link rel="apple-touch-icon" sizes="167x167" href="/icons/icon-167.png?v=20260504-16">
+<link rel="apple-touch-icon" sizes="180x180" href="/icons/icon-180.png?v=20260504-16">
+<link rel="icon" type="image/png" sizes="32x32" href="/icons/icon-32.png?v=20260504-16">
 <title>HABIT</title>
 <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
@@ -811,7 +811,7 @@ input,select,button,textarea{font-family:'Montserrat',sans-serif}
 
 const SUPABASE_URL='https://pmpjteuqjusbiduevbwq.supabase.co';
 const SUPABASE_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBtcGp0ZXVxanVzYmlkdWV2YndxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc2OTI1NjUsImV4cCI6MjA5MzI2ODU2NX0.XbMzZoo2yqtrD8znLnyo_1zDfrdJAvAPj1lqGOyXnLw';
-const APP_VERSION='20260504-15';
+const APP_VERSION='20260504-16';
 const PUBLIC_APP_URL='https://habittraininghub.app/app.html';
 const sb=supabase.createClient(SUPABASE_URL,SUPABASE_KEY,{auth:{autoRefreshToken:true,persistSession:true,detectSessionInUrl:true}});
 let sbUser=null,sbProfile=null;
@@ -917,6 +917,7 @@ const MXN=v=>'$'+Number(v).toLocaleString('es-MX');
 const PLANS={
   individual:[
     {id:'i1',name:'Visita del día',price:110,credits:1,days:null,type:'individual',perks:['1 visita','Sin caducidad']},
+    {id:'test_i8_10',name:'Prueba live 8 visitas',price:10,credits:8,days:30,type:'individual',perks:['8 visitas','30 días','Solo prueba'],testEmail:'josephdpelayo@gmail.com'},
     {id:'i8',name:'Pack 8 visitas',price:439,credits:8,days:30,type:'individual',perks:['8 visitas','30 días','$55/visita']},
     {id:'i12',name:'Pack 12 visitas',price:559,credits:12,days:30,type:'individual',perks:['12 visitas','30 días','$47/visita'],feat:true},
     {id:'im',name:'Mensualidad',price:759,credits:999,days:30,type:'individual',perks:['Ilimitado','30 días']},
@@ -928,6 +929,15 @@ const PLANS={
     {id:'gm',name:'Mensualidad grupal',price:2800,credits:999,days:30,type:'grupal',perks:['4 espacios','Ilimitado','30 días']},
   ]
 };
+
+function canSeePlan(p){
+  if(!p.testEmail)return true;
+  const email=String((sbUser&&sbUser.email)||(curUser&&curUser.email)||'').toLowerCase();
+  return email===String(p.testEmail).toLowerCase();
+}
+function adminPlanList(){
+  return [...PLANS.individual,...PLANS.grupal].filter(p=>!p.testEmail);
+}
 
 // ── helpers ──
 const pad=n=>String(n).padStart(2,'0');
@@ -2090,7 +2100,7 @@ async function cancelBooking(bid){
 
 function setPT(t,btn){selPT=t;selPlan=null;document.querySelectorAll('.ptype-btn').forEach(b=>b.classList.remove('active'));btn.classList.add('active');document.getElementById('pt-sub').textContent=t==='individual'?'Un espacio · entrenas solo':'Bloquea los 4 espacios · gym exclusivo';document.getElementById('stripe-sec').style.display='none';renderPlans();}
 function renderPlans(){
-  const plans=PLANS[selPT],grid=document.getElementById('plan-grid');
+  const plans=PLANS[selPT].filter(canSeePlan),grid=document.getElementById('plan-grid');
   if(!grid)return;
   grid.innerHTML='';
   plans.forEach(p=>{const div=document.createElement('div');div.className='plan-card'+(p.feat?' feat':'')+(selPlan&&selPlan.id===p.id?' sel':'');div.onclick=()=>choosePlan(p);div.innerHTML='<div class="prow"><span class="pname">'+p.name+'</span><span class="pprice">'+MXN(p.price)+'</span></div><div class="pdesc">'+p.perks[0]+(p.days?' · '+p.days+' días':'')+'</div><div class="pperks">'+p.perks.map(k=>'<span class="perk">'+k+'</span>').join('')+'</div>';grid.appendChild(div);});
@@ -3217,7 +3227,7 @@ async function renderUsersSb(){
 function adminOpenMembershipModal(uid,name){
   const existing=document.getElementById('membership-grant-modal');
   if(existing)existing.remove();
-  const planOptions=[...PLANS.individual,...PLANS.grupal].map(p=>
+  const planOptions=adminPlanList().map(p=>
     '<option value="'+p.id+'">'+p.name+' · '+(p.credits>=999?'Mensual':p.credits+' visita'+(p.credits===1?'':'s'))+(p.days?' · '+p.days+' dias':'')+'</option>'
   ).join('');
   const modal=document.createElement('div');
@@ -3245,7 +3255,7 @@ function adminOpenMembershipModal(uid,name){
 function adminFillGrantAmount(){
   const planId=(document.getElementById('grant-plan-id')||{}).value;
   const amount=document.getElementById('grant-amount');
-  const plan=[...PLANS.individual,...PLANS.grupal].find(p=>p.id===planId);
+  const plan=adminPlanList().find(p=>p.id===planId);
   if(plan&&amount)amount.value=plan.price;
 }
 
@@ -3271,7 +3281,7 @@ async function adminLogManualPayment(uid,name,plan,amount,method,note){
 
 async function adminGrantSelectedPlanSb(uid,name){
   const planId=(document.getElementById('grant-plan-id')||{}).value;
-  const plan=[...PLANS.individual,...PLANS.grupal].find(p=>p.id===planId);
+  const plan=adminPlanList().find(p=>p.id===planId);
   if(!plan){toast('Selecciona un plan','err');return;}
   const method=(document.getElementById('grant-method')||{value:'adjustment'}).value;
   const amount=Number((document.getElementById('grant-amount')||{value:0}).value||0);
@@ -3354,7 +3364,7 @@ async function adminEditUserSb(uid,uname){
       +'<div class="field"><label>Plan</label>'
       +'<select id="eu-plan" onchange="adminFillManualAmount()" style="width:100%;background:var(--card2);border:1px solid var(--border);border-radius:4px;padding:12px;font-size:16px;color:var(--white);outline:none;-webkit-appearance:none">'
       +'<option value="">Sin plan</option>'
-      +[...PLANS.individual,...PLANS.grupal].map(p=>'<option value="'+p.id+'" '+(prof.plan_id===p.id?'selected':'')+'>'+p.name+' ('+p.type+')</option>').join('')
+      +adminPlanList().map(p=>'<option value="'+p.id+'" '+(prof.plan_id===p.id?'selected':'')+'>'+p.name+' ('+p.type+')</option>').join('')
       +'</select></div>'
       +'<div class="field"><label>Visitas restantes</label><input type="number" id="eu-credits" value="'+(prof.credits||0)+'" min="0" max="999" style="width:100%;background:var(--card2);border:1px solid var(--border);border-radius:4px;padding:12px;font-size:16px;color:var(--white);outline:none"></div>'
       +'<div class="field"><label>Vencimiento</label><input type="date" id="eu-expiry" value="'+(prof.plan_expiry?prof.plan_expiry.slice(0,10):'')+'" style="width:100%;background:var(--card2);border:1px solid var(--border);border-radius:4px;padding:12px;font-size:16px;color:var(--white);outline:none;color-scheme:dark"></div>'
@@ -3396,7 +3406,7 @@ async function saveUserEditSb(uid){
     const expiryVal=document.getElementById('eu-expiry').value;
     const expiry=expiryVal?mazEndOfDayIso(expiryVal):null;
     const manualPlanId=!planId&&credits>0?'i1':planId;
-    const plan=manualPlanId?[...PLANS.individual,...PLANS.grupal].find(p=>p.id===manualPlanId):null;
+    const plan=manualPlanId?adminPlanList().find(p=>p.id===manualPlanId):null;
     const shouldLogManual=!!(document.getElementById('eu-log-manual')||{}).checked;
     const payMethod=(document.getElementById('eu-pay-method')||{value:'adjustment'}).value;
     const payAmount=Number((document.getElementById('eu-pay-amount')||{value:0}).value||0);

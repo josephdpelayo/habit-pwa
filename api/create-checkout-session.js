@@ -28,6 +28,9 @@ module.exports = async function handler(req, res) {
     const { planId } = req.body || {};
     const plan = getPlan(planId);
     if (!plan) return res.status(400).json({ error: 'Plan no encontrado' });
+    if (plan.allowedEmail && String(authData.user.email || '').toLowerCase() !== plan.allowedEmail) {
+      return res.status(403).json({ error: 'Plan no disponible para esta cuenta' });
+    }
 
     const baseUrl = getBaseUrl(req);
     const session = await stripe.checkout.sessions.create({
