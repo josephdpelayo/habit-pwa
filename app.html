@@ -6,12 +6,12 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="HABIT">
 <meta name="application-name" content="HABIT">
-<link rel="manifest" href="/manifest.json?v=20260504-09">
-<link rel="apple-touch-icon" sizes="120x120" href="/icons/icon-120.png?v=20260504-09">
-<link rel="apple-touch-icon" sizes="152x152" href="/icons/icon-152.png?v=20260504-09">
-<link rel="apple-touch-icon" sizes="167x167" href="/icons/icon-167.png?v=20260504-09">
-<link rel="apple-touch-icon" sizes="180x180" href="/icons/icon-180.png?v=20260504-09">
-<link rel="icon" type="image/png" sizes="32x32" href="/icons/icon-32.png?v=20260504-09">
+<link rel="manifest" href="/manifest.json?v=20260504-10">
+<link rel="apple-touch-icon" sizes="120x120" href="/icons/icon-120.png?v=20260504-10">
+<link rel="apple-touch-icon" sizes="152x152" href="/icons/icon-152.png?v=20260504-10">
+<link rel="apple-touch-icon" sizes="167x167" href="/icons/icon-167.png?v=20260504-10">
+<link rel="apple-touch-icon" sizes="180x180" href="/icons/icon-180.png?v=20260504-10">
+<link rel="icon" type="image/png" sizes="32x32" href="/icons/icon-32.png?v=20260504-10">
 <title>HABIT</title>
 <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
@@ -270,7 +270,7 @@ input,select,button,textarea{font-family:'Montserrat',sans-serif}
 .ex-video-btn{display:flex;align-items:center;gap:8px;padding:10px 12px;background:rgba(37,99,235,.12);border-top:1px solid rgba(37,99,235,.2);cursor:pointer;color:var(--bl);font-size:12px;font-weight:600;letter-spacing:.04em;text-transform:uppercase}
 .play-icon{width:20px;height:20px;border-radius:50%;background:var(--blue);display:flex;align-items:center;justify-content:center;flex-shrink:0}
 .play-tri{width:0;height:0;border-top:4px solid transparent;border-bottom:4px solid transparent;border-left:8px solid white;margin-left:2px}
-.video-shell{display:flex;justify-content:center;align-items:center;background:#050505;border-top:1px solid var(--border);border-bottom:1px solid var(--border);padding:14px;overflow:hidden}
+.video-shell{display:flex;justify-content:flex-start;align-items:center;background:#050505;border-top:1px solid var(--border);border-bottom:1px solid var(--border);padding:14px 14px 14px 18%;overflow:hidden}
 .video-frame{width:min(54vw,210px);aspect-ratio:9/16;background:#000;border:1px solid var(--border);overflow:hidden}
 .video-embed{width:100%;height:100%;border:none;display:block;background:#000}
 .video-help{font-size:10px;color:var(--gray);line-height:1.5;padding:7px 10px;border-top:1px solid var(--border);background:rgba(255,255,255,.03)}
@@ -790,7 +790,7 @@ input,select,button,textarea{font-family:'Montserrat',sans-serif}
 
 const SUPABASE_URL='https://pmpjteuqjusbiduevbwq.supabase.co';
 const SUPABASE_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBtcGp0ZXVxanVzYmlkdWV2YndxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc2OTI1NjUsImV4cCI6MjA5MzI2ODU2NX0.XbMzZoo2yqtrD8znLnyo_1zDfrdJAvAPj1lqGOyXnLw';
-const APP_VERSION='20260504-09';
+const APP_VERSION='20260504-10';
 const PUBLIC_APP_URL='https://habittraininghub.app/app.html';
 const sb=supabase.createClient(SUPABASE_URL,SUPABASE_KEY,{auth:{autoRefreshToken:true,persistSession:true,detectSessionInUrl:true}});
 let sbUser=null,sbProfile=null;
