@@ -52,11 +52,18 @@ GYM_LAT=23.000000
 GYM_LNG=-106.000000
 GYM_RADIUS_METERS=120
 GYM_MAX_ACCURACY_METERS=150
+SHELLY_SERVER_URL=https://shelly-247-eu.shelly.cloud
+SHELLY_AUTH_KEY=tu_shelly_auth_key
+SHELLY_DEVICE_ID=tu_shelly_device_id
+SHELLY_CHANNEL=0
+SHELLY_TURN=off
 ```
 
 Ese valor no se comparte con clientes. Es la llave privada que usara el teclado, controlador o relay para consultar si el codigo `1234#` puede abrir en ese momento.
 
 `GYM_LAT` y `GYM_LNG` son la ubicacion exacta del gym. El boton "Abrir puerta" solo crea la solicitud si el usuario esta dentro del radio configurado en `GYM_RADIUS_METERS` y si la lectura del GPS es suficientemente precisa segun `GYM_MAX_ACCURACY_METERS`.
+
+Las variables `SHELLY_*` conectan HABIT con Shelly Cloud. `SHELLY_TURN=off` debe quedarse igual si esa es la accion que libera el iman en la configuracion actual.
 
 Endpoint para el controlador:
 

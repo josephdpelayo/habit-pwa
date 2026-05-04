@@ -5,6 +5,7 @@ const SLOT_DUR = 30;
 const BEFORE_MIN = 10;
 const DEFAULT_RADIUS_M = 120;
 const DEFAULT_MAX_ACCURACY_M = 150;
+const SHELLY_DEFAULT_TURN = 'off';
 
 const supabase = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_SERVICE_ROLE_KEY);
 
@@ -66,6 +67,48 @@ function getGymLocation() {
 
 function deny(res, status, reason, message, extra = {}) {
   return res.status(status).json({ ok: false, allow: false, reason, message, ...extra });
+}
+
+function getShellyConfig() {
+  const server = String(process.env.SHELLY_SERVER_URL || '').replace(/\/$/, '');
+  const authKey = String(process.env.SHELLY_AUTH_KEY || '');
+  const deviceId = String(process.env.SHELLY_DEVICE_ID || '');
+  const channel = String(process.env.SHELLY_CHANNEL || '0');
+  const turn = String(process.env.SHELLY_TURN || SHELLY_DEFAULT_TURN).toLowerCase();
+  if (!server || !authKey || !deviceId) return null;
+  return { server, authKey, deviceId, channel, turn: turn === 'on' ? 'on' : 'off' };
+}
+
+async function triggerShellyDoor() {
+  const cfg = getShellyConfig();
+  if (!cfg) return { configured: false, opened: false };
+
+  const body = new URLSearchParams({
+    id: cfg.deviceId,
+    auth_key: cfg.authKey,
+    channel: cfg.channel,
+    turn: cfg.turn,
+  });
+
+  const response = await fetch(`${cfg.server}/device/relay/control`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+    body,
+  });
+  const text = await response.text();
+  let payload = null;
+  try {
+    payload = text ? JSON.parse(text) : null;
+  } catch (_) {
+    payload = text;
+  }
+
+  if (!response.ok || (payload && payload.isok === false)) {
+    const message = payload && payload.errors ? JSON.stringify(payload.errors) : text || response.statusText;
+    throw new Error(`Shelly no abrio: ${message}`);
+  }
+
+  return { configured: true, opened: true, payload };
 }
 
 module.exports = async function handler(req, res) {
@@ -161,6 +204,30 @@ module.exports = async function handler(req, res) {
 
     if (commandError) throw commandError;
 
+    let shellyResult = { configured: false, opened: false };
+    try {
+      shellyResult = await triggerShellyDoor();
+      await supabase
+        .from('door_commands')
+        .update({
+          status: shellyResult.opened ? 'opened' : 'pending',
+          processed_at: shellyResult.opened ? new Date().toISOString() : null,
+          processed_by: shellyResult.opened ? 'shelly_cloud' : null,
+        })
+        .eq('id', command.id);
+    } catch (shellyError) {
+      await supabase
+        .from('door_commands')
+        .update({
+          status: 'failed',
+          processed_at: new Date().toISOString(),
+          processed_by: 'shelly_cloud',
+          error_message: shellyError.message || 'Error Shelly',
+        })
+        .eq('id', command.id);
+      throw shellyError;
+    }
+
     await supabase.from('access_log').insert({
       user_id: profile.id,
       user_name: profile.name,
@@ -169,8 +236,9 @@ module.exports = async function handler(req, res) {
       accessed_at: new Date().toISOString(),
     });
 
+    const doorMsg = shellyResult.opened ? 'Puerta abierta' : 'Solicitud de apertura en cola';
     await supabase.from('admin_notifs').insert({
-      message: `Solicitud de apertura: ${profile.name} · ${distance} m · ${label}`,
+      message: `${doorMsg}: ${profile.name} · ${distance} m · ${label}`,
     });
 
     return res.status(200).json({
@@ -181,8 +249,11 @@ module.exports = async function handler(req, res) {
       slot: label,
       distance_m: distance,
       radius_m: gym.radius,
+      opened: shellyResult.opened,
       closes_at: new Date(activeWindow.closesMs).toISOString(),
-      message: 'Apertura solicitada. Espera unos segundos junto a la puerta.',
+      message: shellyResult.opened
+        ? 'Puerta abierta. Entra con cuidado.'
+        : 'Apertura solicitada. Espera unos segundos junto a la puerta.',
     });
   } catch (err) {
     console.error(err);
