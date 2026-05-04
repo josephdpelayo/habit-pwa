@@ -6,12 +6,12 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="HABIT">
 <meta name="application-name" content="HABIT">
-<link rel="manifest" href="/manifest.json?v=20260503-14">
-<link rel="apple-touch-icon" sizes="120x120" href="/icons/icon-120.png?v=20260503-14">
-<link rel="apple-touch-icon" sizes="152x152" href="/icons/icon-152.png?v=20260503-14">
-<link rel="apple-touch-icon" sizes="167x167" href="/icons/icon-167.png?v=20260503-14">
-<link rel="apple-touch-icon" sizes="180x180" href="/icons/icon-180.png?v=20260503-14">
-<link rel="icon" type="image/png" sizes="32x32" href="/icons/icon-32.png?v=20260503-14">
+<link rel="manifest" href="/manifest.json?v=20260503-15">
+<link rel="apple-touch-icon" sizes="120x120" href="/icons/icon-120.png?v=20260503-15">
+<link rel="apple-touch-icon" sizes="152x152" href="/icons/icon-152.png?v=20260503-15">
+<link rel="apple-touch-icon" sizes="167x167" href="/icons/icon-167.png?v=20260503-15">
+<link rel="apple-touch-icon" sizes="180x180" href="/icons/icon-180.png?v=20260503-15">
+<link rel="icon" type="image/png" sizes="32x32" href="/icons/icon-32.png?v=20260503-15">
 <title>HABIT</title>
 <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700;800&family=Barlow:wght@300;400;500;600&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
@@ -715,7 +715,7 @@ input,select,button,textarea{font-family:'Barlow',sans-serif}
     </div>
     <div class="terms-footer">
       <label class="terms-check">
-        <input type="checkbox" id="terms-check">
+        <input type="checkbox" id="terms-check" onchange="updateTermsButton()">
         <span>He leído y acepto el Reglamento y Términos de HABIT Training Hub, incluyendo la exención de responsabilidad por accidentes y mi responsabilidad ante daños al equipo.</span>
       </label>
       <button class="btn" id="terms-accept-btn" onclick="acceptTerms()" disabled style="opacity:.35">Aceptar y continuar</button>
@@ -772,7 +772,7 @@ input,select,button,textarea{font-family:'Barlow',sans-serif}
 
 const SUPABASE_URL='https://pmpjteuqjusbiduevbwq.supabase.co';
 const SUPABASE_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBtcGp0ZXVxanVzYmlkdWV2YndxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc2OTI1NjUsImV4cCI6MjA5MzI2ODU2NX0.XbMzZoo2yqtrD8znLnyo_1zDfrdJAvAPj1lqGOyXnLw';
-const APP_VERSION='20260503-14';
+const APP_VERSION='20260503-15';
 const sb=supabase.createClient(SUPABASE_URL,SUPABASE_KEY,{auth:{autoRefreshToken:true,persistSession:true,detectSessionInUrl:false}});
 let sbUser=null,sbProfile=null;
 
@@ -1290,6 +1290,36 @@ function closeInstallGuide(){
   const modal=document.getElementById('install-guide-modal');
   if(modal)modal.style.display='none';
 }
+let pendingRegistration=null;
+function updateTermsButton(){
+  const chk=document.getElementById('terms-check');
+  const btn=document.getElementById('terms-accept-btn');
+  if(!btn)return;
+  const ok=!!(chk&&chk.checked);
+  btn.disabled=!ok;
+  btn.style.opacity=ok?'1':'.35';
+}
+function showTerms(){
+  const modal=document.getElementById('terms-modal');
+  const chk=document.getElementById('terms-check');
+  if(chk)chk.checked=false;
+  updateTermsButton();
+  if(modal)modal.style.display='flex';
+}
+function closeTerms(){
+  const modal=document.getElementById('terms-modal');
+  if(modal)modal.style.display='none';
+  pendingRegistration=null;
+}
+function acceptTerms(){
+  const chk=document.getElementById('terms-check');
+  if(!chk||!chk.checked){toast('Acepta los terminos para continuar','err');return;}
+  const modal=document.getElementById('terms-modal');
+  if(modal)modal.style.display='none';
+  const data=pendingRegistration;
+  pendingRegistration=null;
+  if(data)completeRegister(data);
+}
 async function doRegister(){
   const name=document.getElementById('rn').value.trim();
   const email=document.getElementById('re').value.trim();
@@ -1300,12 +1330,16 @@ async function doRegister(){
   if(!name||!email||!pass){toast('Completa todos los campos','err');return;}
   if(email2&&email!==email2){toast('Los correos no coinciden','err');return;}
   if(pass2&&pass!==pass2){toast('Las contrasenas no coinciden','err');return;}
+  pendingRegistration={name,email,phone,pass};
+  showTerms();
+}
+async function completeRegister(reg){
   showLoading('Creando cuenta...');
   try{
-    const{error}=await sb.auth.signUp({email,password:pass,options:{data:{name,phone}}});
+    const{error}=await sb.auth.signUp({email:reg.email,password:reg.pass,options:{data:{name:reg.name,phone:reg.phone}}});
     if(error)throw error;
     await new Promise(r=>setTimeout(r,1000));
-    const{data,error:e2}=await sb.auth.signInWithPassword({email,password:pass});
+    const{data,error:e2}=await sb.auth.signInWithPassword({email:reg.email,password:reg.pass});
     if(e2)throw e2;
     sbUser=data.user;
     await new Promise(r=>setTimeout(r,1500));
