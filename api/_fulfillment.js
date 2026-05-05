@@ -33,41 +33,43 @@ async function getLast4(session) {
 }
 
 async function insertPayment(payload) {
-  const { error } = await supabase.from('payments').insert(payload);
-  if (!error) return;
+  const strip = (source, keys) => {
+    const copy = { ...source };
+    keys.forEach(key => delete copy[key]);
+    return copy;
+  };
+  const attempts = [
+    payload,
+    // If Supabase has not run stripe-payments.sql yet, keep activation working.
+    strip(payload, ['payment_method', 'notes', 'created_by']),
+    strip(payload, ['payment_method', 'notes', 'created_by', 'last4']),
+    strip(payload, ['payment_method', 'notes', 'created_by', 'last4', 'currency', 'status']),
+  ];
 
-  // If Supabase has not run stripe-payments.sql yet, keep activation working.
-  const minimal = { ...payload };
-  delete minimal.payment_method;
-  delete minimal.notes;
-  delete minimal.created_by;
-  const { error: retryError } = await supabase.from('payments').insert(minimal);
-  if (retryError) throw retryError;
+  let lastError = null;
+  for (const attempt of attempts) {
+    const { error } = await supabase.from('payments').insert(attempt);
+    if (!error) return { inserted: true };
+    lastError = error;
+    if (/duplicate|unique|stripe_id/i.test(error.message || '')) {
+      return { inserted: false, duplicate: true };
+    }
+  }
+  throw lastError;
 }
 
-async function activateMembership(session) {
+async function recordPaidStripeSession(session) {
   const plan = getPlan(session.metadata && session.metadata.plan_id);
   const userId = session.metadata && session.metadata.user_id;
   if (!plan || !userId) throw new Error('Missing payment metadata');
   if (session.payment_status && session.payment_status !== 'paid') throw new Error('Payment is not paid');
 
-  const expiry = mazEndOfDayIso(plan.days);
-  const { error: profileError } = await supabase
-    .from('profiles')
-    .update({
-      plan_id: plan.id,
-      plan_type: plan.type,
-      credits: plan.credits,
-      plan_expiry: expiry,
-    })
-    .eq('id', userId);
-  if (profileError) throw profileError;
-
-  const { data: existing } = await supabase
+  const { data: existing, error: existingError } = await supabase
     .from('payments')
     .select('id')
     .eq('stripe_id', session.id)
     .maybeSingle();
+  if (existingError && !/stripe_id/i.test(existingError.message || '')) throw existingError;
   if (existing) return { activated: true, recorded: false, duplicate: true };
 
   const last4 = await getLast4(session);
@@ -94,7 +96,29 @@ async function activateMembership(session) {
     message: `Pago Stripe: ${profile && profile.name ? profile.name : 'Usuario'} · ${plan.name} · $${paidAmount.toLocaleString('es-MX')}`,
   });
 
-  return { activated: true, recorded: true, duplicate: false };
+  return { activated: false, recorded: true, duplicate: false };
 }
 
-module.exports = { stripe, supabase, activateMembership };
+async function activateMembership(session) {
+  const plan = getPlan(session.metadata && session.metadata.plan_id);
+  const userId = session.metadata && session.metadata.user_id;
+  if (!plan || !userId) throw new Error('Missing payment metadata');
+  if (session.payment_status && session.payment_status !== 'paid') throw new Error('Payment is not paid');
+
+  const expiry = mazEndOfDayIso(plan.days);
+  const { error: profileError } = await supabase
+    .from('profiles')
+    .update({
+      plan_id: plan.id,
+      plan_type: plan.type,
+      credits: plan.credits,
+      plan_expiry: expiry,
+    })
+    .eq('id', userId);
+  if (profileError) throw profileError;
+
+  const recorded = await recordPaidStripeSession(session);
+  return { activated: true, recorded: !!recorded.recorded, duplicate: !!recorded.duplicate };
+}
+
+module.exports = { stripe, supabase, activateMembership, recordPaidStripeSession };

@@ -1,7 +1,7 @@
-// HABIT Training Hub — Service Worker v69
+// HABIT Training Hub — Service Worker v70
 // Strategy: Network first for app.html, cache only for icons/fonts
 
-const CACHE = 'habit-static-v69';
+const CACHE = 'habit-static-v70';
 const STATIC = [
   '/icons/icon-192.png',
   '/icons/icon-512.png',

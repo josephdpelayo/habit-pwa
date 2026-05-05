@@ -880,7 +880,7 @@ input,select,button,textarea{font-family:'Montserrat',sans-serif}
 
 const SUPABASE_URL='https://pmpjteuqjusbiduevbwq.supabase.co';
 const SUPABASE_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBtcGp0ZXVxanVzYmlkdWV2YndxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc2OTI1NjUsImV4cCI6MjA5MzI2ODU2NX0.XbMzZoo2yqtrD8znLnyo_1zDfrdJAvAPj1lqGOyXnLw';
-const APP_VERSION='20260505-11';
+const APP_VERSION='20260505-12';
 const PUBLIC_APP_URL='https://habittraininghub.app/app.html';
 const PUBLIC_API_ORIGIN='https://www.habittraininghub.app';
 const sb=supabase.createClient(SUPABASE_URL,SUPABASE_KEY,{auth:{autoRefreshToken:true,persistSession:true,detectSessionInUrl:true}});
@@ -3462,7 +3462,7 @@ async function renderDashboard(){
     const monthStart=today.slice(0,7);
     const[{data:allU},{data:pays},{data:bks},{data:logs}]=await Promise.all([
       sb.from('profiles').select('id,credits,plan_expiry,plan_id,role,name,phone').neq('role','admin'),
-      sb.from('payments').select('amount,created_at,plan_name,profiles(name)'),
+      sb.from('payments').select('amount,created_at,plan_name,user_id').order('created_at',{ascending:false}),
       sb.from('bookings').select('ds,status').eq('status','active'),
       sb.from('access_log').select('id')
     ]);
@@ -3498,10 +3498,16 @@ async function renderDashboard(){
 
     // Recent payments
     if(pays&&pays.length){
+      const payUserIds=[...new Set(pays.map(p=>p.user_id).filter(Boolean))];
+      let payNameMap={};
+      if(payUserIds.length){
+        const{data:payProfiles}=await sb.from('profiles').select('id,name').in('id',payUserIds);
+        payNameMap=Object.fromEntries((payProfiles||[]).map(p=>[p.id,p.name]));
+      }
       html+='<div class="divider"></div><p class="slbl" style="margin-bottom:8px">Ultimos pagos</p>';
       pays.slice(0,5).forEach(p=>{
         html+='<div class="brow" style="margin-bottom:6px">'
-          +'<div class="brow-info"><div class="brow-name">'+(p.profiles?.name||'Usuario')+'</div>'
+          +'<div class="brow-info"><div class="brow-name">'+esc(payNameMap[p.user_id]||'Usuario')+'</div>'
           +'<div class="brow-meta">'+p.plan_name+' · '+fmtDateTimeMaz(p.created_at)+'</div></div>'
           +'<div style="font-weight:700;color:var(--green)">'+MXN(p.amount)+'</div>'
           +'</div>';
@@ -4089,14 +4095,26 @@ async function renderPaymentsSb(){
   try{
     const{data:pays,error}=await sb.from('payments').select('*').order('created_at',{ascending:false});
     if(error)throw error;
-    if(!pays||!pays.length){list.innerHTML='<div class="empty">Sin pagos.</div>';return;}
+    list.innerHTML='';
+    const title=document.createElement('div');
+    title.innerHTML='<div style="display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:10px">'
+      +'<p class="slbl" style="margin:0">Finanzas</p>'
+      +'<button class="btn-sm bblue" onclick="adminSyncStripePaymentsSb()">Sincronizar Stripe</button>'
+      +'</div>';
+    list.appendChild(title);
+    if(!pays||!pays.length){
+      const empty=document.createElement('div');
+      empty.className='empty';
+      empty.textContent='Sin pagos.';
+      list.appendChild(empty);
+      return;
+    }
     const userIds=[...new Set(pays.map(p=>p.user_id).filter(Boolean))];
     let nameMap={};
     if(userIds.length){
       const{data:profRows}=await sb.from('profiles').select('id,name').in('id',userIds);
       nameMap=Object.fromEntries((profRows||[]).map(p=>[p.id,p.name]));
     }
-    list.innerHTML='';
     const sums=pays.reduce((acc,p)=>{
       const method=p.payment_method||'stripe';
       const amount=Number(p.amount)||0;
@@ -4117,9 +4135,6 @@ async function renderPaymentsSb(){
       +'<div class="met"><div class="met-l">Stripe / TDC</div><div class="met-v" style="color:var(--bl)">'+MXN(sums.stripe)+'</div></div>'
       +'<div class="met"><div class="met-l">Efectivo</div><div class="met-v" style="color:var(--amber)">'+MXN(sums.cash)+'</div></div>'
       +'<div class="met"><div class="met-l">Cortesias / ajustes</div><div class="met-v">'+MXN((sums.courtesy||0)+(sums.adjustment||0))+'</div></div>';
-    const title=document.createElement('div');
-    title.innerHTML='<p class="slbl" style="margin-bottom:10px">Finanzas</p>';
-    list.appendChild(title);
     list.appendChild(summary);
     const recent=document.createElement('p');
     recent.className='slbl';
@@ -4162,6 +4177,29 @@ async function adminDeletePaymentSb(paymentId){
   }catch(e){
     hideLoading();
     toast('Error al eliminar pago: '+(e.message||e),'err');
+  }
+}
+
+async function adminSyncStripePaymentsSb(){
+  showLoading('Sincronizando Stripe...');
+  try{
+    const{data:sessionData}=await sb.auth.getSession();
+    const token=sessionData?.session?.access_token;
+    const res=await fetch('/api/sync-stripe-payments',{
+      method:'POST',
+      headers:{'Content-Type':'application/json',Authorization:'Bearer '+token},
+      body:JSON.stringify({limit:75})
+    });
+    const payload=await res.json().catch(()=>({}));
+    if(!res.ok)throw new Error(payload.error||'No se pudo sincronizar Stripe');
+    hideLoading();
+    toast('Stripe sincronizado: '+(payload.recorded||0)+' nuevo(s), '+(payload.duplicate||0)+' ya estaban','ok');
+    renderPaymentsSb();
+    renderDashboard();
+    if(document.getElementById('a-notifs')?.classList.contains('active'))renderAdminNotifsSb();
+  }catch(e){
+    hideLoading();
+    toast('Error al sincronizar Stripe: '+(e.message||e),'err');
   }
 }
 
