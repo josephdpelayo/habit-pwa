@@ -97,9 +97,30 @@ function sleep(ms) {
   return new Promise(resolve => setTimeout(resolve, ms));
 }
 
-async function sendShellyRelay(cfg, turn) {
+function shellyDeviceIdVariants(deviceId) {
+  const raw = String(deviceId || '').trim();
+  const ids = [raw];
+  const suffix = raw.includes('-') ? raw.split('-').pop() : '';
+  if (suffix) ids.push(suffix);
+  const hex = suffix || raw;
+  if (/^[a-f0-9]+$/i.test(hex)) {
+    ids.push(String(parseInt(hex, 16)));
+  }
+  return [...new Set(ids.filter(Boolean))];
+}
+
+function shellyErrorMessage(payload, text, response) {
+  if (payload && payload.errors) return JSON.stringify(payload.errors);
+  return text || response.statusText;
+}
+
+function isWrongShellyDeviceId(message) {
+  return /wrong_device_id/i.test(String(message || ''));
+}
+
+async function sendShellyRelay(cfg, turn, deviceId) {
   const body = new URLSearchParams({
-    id: cfg.deviceId,
+    id: deviceId,
     auth_key: cfg.authKey,
     channel: cfg.channel,
     turn,
@@ -119,23 +140,38 @@ async function sendShellyRelay(cfg, turn) {
   }
 
   if (!response.ok || (payload && payload.isok === false)) {
-    const message = payload && payload.errors ? JSON.stringify(payload.errors) : text || response.statusText;
+    const message = shellyErrorMessage(payload, text, response);
     throw new Error(`Shelly no abrio: ${message}`);
   }
   return payload;
+}
+
+async function sendShellyRelayWithFallback(cfg, turn) {
+  const ids = shellyDeviceIdVariants(cfg.deviceId);
+  let lastError = null;
+  for (const id of ids) {
+    try {
+      const payload = await sendShellyRelay(cfg, turn, id);
+      return { payload, deviceId: id };
+    } catch (error) {
+      lastError = error;
+      if (!isWrongShellyDeviceId(error.message)) throw error;
+    }
+  }
+  throw new Error(`${lastError ? lastError.message : 'Shelly no abrio'} · IDs probados: ${ids.join(', ')}`);
 }
 
 async function triggerShellyDoor() {
   const cfg = getShellyConfig();
   if (!cfg) throw new Error('Shelly no configurado en Vercel. Revisa SHELLY_SERVER_URL, SHELLY_AUTH_KEY y SHELLY_DEVICE_ID en Production.');
 
-  const payload = await sendShellyRelay(cfg, cfg.turn);
+  const opened = await sendShellyRelayWithFallback(cfg, cfg.turn);
   if (cfg.releaseSeconds > 0) {
     await sleep(cfg.releaseSeconds * 1000);
-    await sendShellyRelay(cfg, cfg.relockTurn);
+    await sendShellyRelay(cfg, cfg.relockTurn, opened.deviceId);
   }
 
-  return { configured: true, opened: true, payload, release_seconds: cfg.releaseSeconds };
+  return { configured: true, opened: true, payload: opened.payload, device_id: opened.deviceId, release_seconds: cfg.releaseSeconds };
 }
 
 module.exports = async function handler(req, res) {
