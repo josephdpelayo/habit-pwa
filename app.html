@@ -149,6 +149,9 @@ input,select,button,textarea{font-family:'Montserrat',sans-serif}
 .door-open-btn:disabled{opacity:.45;cursor:wait}
 .door-open-note{font-size:10px;color:var(--gray);line-height:1.5;margin-top:8px}
 .guest-card{background:var(--card);border:1px solid rgba(37,99,235,.35);border-radius:6px;margin-bottom:12px;overflow:hidden}
+.guest-toggle{width:100%;background:var(--card);border:1px solid rgba(37,99,235,.35);border-radius:6px;padding:13px 14px;margin-bottom:12px;display:flex;align-items:center;justify-content:space-between;gap:10px;color:var(--white);cursor:pointer}
+.guest-toggle-title{font-size:13px;font-weight:800;letter-spacing:.1em;text-transform:uppercase}
+.guest-toggle-icon{width:30px;height:30px;border-radius:5px;border:1px solid var(--border);display:flex;align-items:center;justify-content:center;color:var(--bl);font-size:18px;font-weight:800;flex-shrink:0}
 .guest-head{padding:12px 14px;border-bottom:1px solid var(--border);display:flex;align-items:flex-start;justify-content:space-between;gap:10px}
 .guest-title{font-size:13px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--white)}
 .guest-sub{font-size:11px;color:var(--gray);line-height:1.45;margin-top:4px}
@@ -162,6 +165,8 @@ input,select,button,textarea{font-family:'Montserrat',sans-serif}
 .guest-row:hover{border-color:rgba(59,130,246,.65)}
 .guest-row.active-pass{background:rgba(37,99,235,.16);border-color:rgba(59,130,246,.85)}
 .guest-row.off{opacity:.86}
+.guest-row.disabled{cursor:default}
+.guest-row.disabled:hover{border-color:var(--border)}
 .guest-check{width:22px;height:22px;border-radius:4px;border:1px solid var(--blue);display:flex;align-items:center;justify-content:center;color:var(--bl);font-size:13px;font-weight:900;flex-shrink:0}
 .guest-row.off .guest-check{border-color:var(--border);color:transparent}
 .guest-row.active-pass .guest-check{background:rgba(37,99,235,.35)}
@@ -172,6 +177,7 @@ input,select,button,textarea{font-family:'Montserrat',sans-serif}
 .guest-remove:disabled{opacity:.25;cursor:not-allowed}
 .guest-save{margin-top:12px;width:100%;padding:13px;border-radius:6px;border:1px solid var(--blue);background:rgba(37,99,235,.24);color:var(--bl);font-size:12px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;cursor:pointer}
 .guest-save:disabled{opacity:.45;cursor:not-allowed}
+.guest-collapse{margin-top:10px;width:100%;padding:11px;border-radius:6px;border:1px solid var(--border);background:transparent;color:var(--gray);font-size:11px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;cursor:pointer}
 .next-box{background:var(--card);border:1px solid var(--border);border-radius:4px;padding:12px 14px;margin-bottom:1rem}
 .next-lbl{font-size:10px;font-weight:700;color:var(--gray);letter-spacing:.1em;text-transform:uppercase;margin-bottom:6px}
 .next-val{font-size:15px;font-weight:600;color:var(--white)}
@@ -844,7 +850,7 @@ input,select,button,textarea{font-family:'Montserrat',sans-serif}
 
 const SUPABASE_URL='https://pmpjteuqjusbiduevbwq.supabase.co';
 const SUPABASE_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBtcGp0ZXVxanVzYmlkdWV2YndxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc2OTI1NjUsImV4cCI6MjA5MzI2ODU2NX0.XbMzZoo2yqtrD8znLnyo_1zDfrdJAvAPj1lqGOyXnLw';
-const APP_VERSION='20260505-06';
+const APP_VERSION='20260505-07';
 const PUBLIC_APP_URL='https://habittraininghub.app/app.html';
 const PUBLIC_API_ORIGIN='https://www.habittraininghub.app';
 const sb=supabase.createClient(SUPABASE_URL,SUPABASE_KEY,{auth:{autoRefreshToken:true,persistSession:true,detectSessionInUrl:true}});
@@ -1152,7 +1158,7 @@ let waitlists={}; // waitlists[ds+'_'+slotIdx] = [{userId,name,...}]
 let payments=[], boards=[], scores={}, posts=[], accessLog=[], adminNotifs=[];
 let curUser=null, curDate=dateObjFromDS(mazToday()), selStartIdx=null, selShort=false, selPlan=null, selPT='individual', selectedRoutineBoardId=null;
 let accInt=null, userNotifInt=null, userNotifBootstrapped=false, userNotifSeen=new Set(), notifs=[], expandedVideos={}, logScoreCtx=null;
-let guestFavorites=[], guestSelected=new Set(), guestSavedActive=new Set(), guestSearchResults=[], guestActiveBookingId=null, guestSearchTimer=null;
+let guestFavorites=[], guestSelected=new Set(), guestSavedActive=new Set(), guestOriginalFavoriteIds=new Set(), guestDeletedIds=new Set(), guestSearchResults=[], guestActiveBookingId=null, guestSearchTimer=null, guestDirty=false, guestCollapsed=true;
 
 // ── SLOT DATA ACCESS ──
 function getDaySlots(ds){
@@ -1392,13 +1398,29 @@ function futureOwnGroupBooking(){
   bks.sort((a,b)=>a.ds===b.ds?a.startIdx-b.startIdx:a.ds.localeCompare(b.ds));
   return bks.find(b=>getAW(b).closes>now)||null;
 }
+function setGuestCollapsed(v){
+  guestCollapsed=!!v;
+  paintGuestGroup();
+}
+function hasGuestChanges(){
+  if(guestDirty)return true;
+  if(guestSelected.size!==guestSavedActive.size)return true;
+  for(const id of guestSelected){if(!guestSavedActive.has(id))return true;}
+  return false;
+}
 function mergeGuestCandidate(g,selectIt){
   if(!g||!g.id||g.id===sbUser.id)return;
-  if(!guestFavorites.some(x=>x.id===g.id))guestFavorites.unshift({id:g.id,name:g.name||'Usuario',email:g.email||''});
+  if(!guestFavorites.some(x=>x.id===g.id)){
+    guestFavorites.unshift({id:g.id,name:g.name||'Usuario',email:g.email||''});
+    guestDeletedIds.delete(g.id);
+    guestDirty=true;
+  }
   if(selectIt){
     if(!guestSelected.has(g.id)&&guestSelected.size>=4){toast('Maximo 4 invitados','warn');return;}
     guestSelected.add(g.id);
+    guestDirty=true;
   }
+  guestSearchResults=[];
   paintGuestGroup();
 }
 async function queueGuestSearch(q){
@@ -1427,22 +1449,25 @@ async function searchGuests(q){
   }
 }
 function toggleGuest(id){
+  if(!guestActiveBookingId){toast('Reserva grupal para seleccionar invitados','warn');return;}
   if(guestSelected.has(id))guestSelected.delete(id);
   else{
     if(guestSelected.size>=4){toast('Maximo 4 invitados','warn');return;}
     guestSelected.add(id);
   }
+  guestDirty=true;
   paintGuestGroup();
 }
 function addGuestById(id){
   const g=guestSearchResults.find(x=>x.id===id)||guestFavorites.find(x=>x.id===id);
-  if(g)mergeGuestCandidate(g,!!guestActiveBookingId);
+  if(g)mergeGuestCandidate(g,false);
 }
 function guestRow(g,fromSearch){
   const checked=guestSelected.has(g.id);
   const activeSaved=guestSavedActive.has(g.id);
-  const click=(fromSearch?'addGuestById':'toggleGuest')+'(\''+esc(g.id)+'\')';
-  return '<div class="guest-row '+(checked?'':'off')+' '+(activeSaved?'active-pass':'')+'" onclick="'+click+'">'+
+  const canSelect=!fromSearch&&!!guestActiveBookingId;
+  const click=fromSearch?'addGuestById(\''+esc(g.id)+'\')':(canSelect?'toggleGuest(\''+esc(g.id)+'\')':'');
+  return '<div class="guest-row '+(checked?'':'off')+' '+(activeSaved?'active-pass':'')+' '+(!fromSearch&&!canSelect?'disabled':'')+'" '+(click?'onclick="'+click+'"':'')+'>'+
     '<div class="guest-check">✓</div>'+
     '<div class="guest-info"><div class="guest-name">'+esc(g.name||'Usuario')+'</div><div class="guest-email">'+esc(g.email||'')+'</div></div>'+
     (fromSearch?'<div class="guest-count">Agregar</div>':'<button class="guest-remove" '+(activeSaved?'disabled':'')+' onclick="event.stopPropagation();removeGuestFavorite(\''+esc(g.id)+'\')" title="Eliminar invitado">-</button>')+
@@ -1452,8 +1477,9 @@ async function removeGuestFavorite(id){
   if(guestSavedActive.has(id)){toast('Primero deselecciona y guarda el grupo','warn');return;}
   guestFavorites=guestFavorites.filter(g=>g.id!==id);
   guestSelected.delete(id);
+  if(guestOriginalFavoriteIds.has(id))guestDeletedIds.add(id);
+  guestDirty=true;
   paintGuestGroup();
-  try{await sb.from('group_guest_favorites').delete().eq('host_user_id',sbUser.id).eq('guest_user_id',id);}catch(e){console.warn('removeGuestFavorite:',e);}
 }
 function paintGuestGroup(){
   const el=document.getElementById('guest-group-wrap');
@@ -1464,13 +1490,23 @@ function paintGuestGroup(){
   const sub=active
     ? 'Selecciona hasta 4 cuentas existentes para '+esc(active.timeStr||fmtTimeRange(active.startIdx,active.slotsUsed||3))+'.'
     : 'Arma tu lista frecuente. Los accesos se envian cuando tengas una reserva grupal activa y guardes tu grupo.';
+  if(guestCollapsed){
+    el.innerHTML='<button class="guest-toggle" onclick="setGuestCollapsed(false)">'+
+      '<div><div class="guest-toggle-title">Invitados</div><div class="guest-sub">'+guestFavorites.length+' guardado'+(guestFavorites.length===1?'':'s')+(active?' · '+guestSelected.size+'/4 seleccionados':'')+'</div></div>'+
+      '<div class="guest-toggle-icon">+</div>'+
+      '</button>';
+    return;
+  }
+  const dirty=hasGuestChanges();
+  const saveText=active?'Guardar Grupo':'Guardar Lista';
   el.innerHTML='<div class="guest-card">'+
     '<div class="guest-head"><div><div class="guest-title">Grupo de invitados</div><div class="guest-sub">'+sub+'</div></div><div class="guest-count">'+guestSelected.size+'/4</div></div>'+
     '<div class="guest-body">'+
       '<div class="guest-search"><input type="search" placeholder="Buscar por nombre o correo" oninput="queueGuestSearch(this.value)"></div>'+
       '<div class="guest-results">'+(results.length?results.map(g=>guestRow(g,true)).join(''):'')+'</div>'+
       '<div class="guest-list">'+(guestFavorites.length?guestFavorites.map(g=>guestRow(g,false)).join(''):'<div class="guest-sub">Busca y agrega tus invitados frecuentes.</div>')+'</div>'+
-      '<button class="guest-save" onclick="saveGuestGroup()" '+(!active?'disabled':'')+'>'+(active?'Guardar Grupo':'Reserva grupal para enviar accesos')+'</button>'+
+      '<button class="guest-save" onclick="saveGuestGroup()" '+(!dirty?'disabled':'')+'>'+saveText+'</button>'+
+      '<button class="guest-collapse" onclick="setGuestCollapsed(true)">Contraer lista</button>'+
     '</div></div>';
 }
 async function renderGuestGroup(reload=true){
@@ -1486,12 +1522,16 @@ async function renderGuestGroup(reload=true){
       const favIds=(favRes.data||[]).map(f=>f.guest_user_id).filter(Boolean);
       let profs=[];
       if(favIds.length){
-        const profRes=await sb.from('profiles').select('id,name').in('id',favIds);
+        const profRes=await sb.from('profiles').select('id,name,email').in('id',favIds);
         if(profRes.error)throw profRes.error;
         profs=profRes.data||[];
       }
       const profById=new Map(profs.map(p=>[p.id,p]));
-      guestFavorites=favIds.map(id=>({id,name:(profById.get(id)||{}).name||'Usuario',email:''}));
+      guestFavorites=favIds.map(id=>({id,name:(profById.get(id)||{}).name||'Usuario',email:(profById.get(id)||{}).email||''}));
+      guestOriginalFavoriteIds=new Set(favIds);
+      guestDeletedIds=new Set();
+      guestDirty=false;
+      guestSearchResults=[];
       if(guestActiveBookingId){
         const passRes=await sb.from('booking_guest_passes').select('guest_user_id,status').eq('booking_id',guestActiveBookingId).eq('host_user_id',sbUser.id).eq('status','active');
         if(passRes.error)throw passRes.error;
@@ -1512,24 +1552,31 @@ async function renderGuestGroup(reload=true){
   paintGuestGroup();
 }
 async function saveGuestGroup(){
-  if(!guestActiveBookingId){toast('Primero reserva una sesion grupal','warn');return;}
+  if(!hasGuestChanges())return;
   const ids=[...guestSelected].slice(0,4);
   try{
-    const favRows=ids.map(id=>({host_user_id:sbUser.id,guest_user_id:id}));
+    const favRows=guestFavorites.map(g=>({host_user_id:sbUser.id,guest_user_id:g.id}));
     const passRows=ids.map(id=>({booking_id:guestActiveBookingId,host_user_id:sbUser.id,guest_user_id:id,status:'active'}));
     const active=futureOwnGroupBooking();
+    const deletes=[...guestDeletedIds].filter(id=>!guestSavedActive.has(id));
+    if(deletes.length)await sb.from('group_guest_favorites').delete().eq('host_user_id',sbUser.id).in('guest_user_id',deletes);
     if(favRows.length)await sb.from('group_guest_favorites').upsert(favRows,{onConflict:'host_user_id,guest_user_id'});
-    await sb.from('booking_guest_passes').delete().eq('booking_id',guestActiveBookingId).eq('host_user_id',sbUser.id);
-    if(passRows.length){
-      const passRes=await sb.from('booking_guest_passes').insert(passRows);
-      if(passRes.error)throw passRes.error;
-      const note=(curUser.name||'Un socio')+' te ha invitado a entrenar. Tu pase de puerta se activa durante su reserva '+(active?(active.timeStr||fmtTimeRange(active.startIdx,active.slotsUsed||3)):'grupal')+'.';
-      await sb.from('user_notifications').insert(ids.map(id=>({user_id:id,actor_id:sbUser.id,type:'comment',message:note})));
+    if(guestActiveBookingId){
+      await sb.from('booking_guest_passes').delete().eq('booking_id',guestActiveBookingId).eq('host_user_id',sbUser.id);
+      if(passRows.length){
+        const passRes=await sb.from('booking_guest_passes').insert(passRows);
+        if(passRes.error)throw passRes.error;
+        const note=(curUser.name||'Un socio')+' te ha invitado a entrenar. Tu pase de puerta se activa durante su reserva '+(active?(active.timeStr||fmtTimeRange(active.startIdx,active.slotsUsed||3)):'grupal')+'.';
+        await sb.from('user_notifications').insert(ids.map(id=>({user_id:id,actor_id:sbUser.id,type:'comment',message:note})));
+      }
+      try{await sb.from('admin_notifs').insert({message:'Grupo guardado: '+curUser.name+' · '+ids.length+' invitado'+(ids.length===1?'':'s')});}catch(_){}
+      guestSavedActive=new Set(ids);
     }
-    try{await sb.from('admin_notifs').insert({message:'Grupo guardado: '+curUser.name+' · '+ids.length+' invitado'+(ids.length===1?'':'s')});}catch(_){}
-    guestSavedActive=new Set(ids);
-    toast('Grupo guardado','ok');
-    renderGuestGroup().catch(console.error);
+    guestOriginalFavoriteIds=new Set(guestFavorites.map(g=>g.id));
+    guestDeletedIds=new Set();
+    guestDirty=false;
+    toast(guestActiveBookingId?'Grupo guardado':'Lista guardada','ok');
+    paintGuestGroup();
   }catch(e){
     toast('No se pudo guardar grupo: '+(e.message||'error'),'err');
   }
