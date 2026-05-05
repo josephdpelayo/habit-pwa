@@ -6,12 +6,12 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="HABIT">
 <meta name="application-name" content="HABIT">
-<link rel="manifest" href="/manifest.json?v=20260504-18">
-<link rel="apple-touch-icon" sizes="120x120" href="/icons/icon-120.png?v=20260504-18">
-<link rel="apple-touch-icon" sizes="152x152" href="/icons/icon-152.png?v=20260504-18">
-<link rel="apple-touch-icon" sizes="167x167" href="/icons/icon-167.png?v=20260504-18">
-<link rel="apple-touch-icon" sizes="180x180" href="/icons/icon-180.png?v=20260504-18">
-<link rel="icon" type="image/png" sizes="32x32" href="/icons/icon-32.png?v=20260504-18">
+<link rel="manifest" href="/manifest.json?v=20260504-19">
+<link rel="apple-touch-icon" sizes="120x120" href="/icons/icon-120.png?v=20260504-19">
+<link rel="apple-touch-icon" sizes="152x152" href="/icons/icon-152.png?v=20260504-19">
+<link rel="apple-touch-icon" sizes="167x167" href="/icons/icon-167.png?v=20260504-19">
+<link rel="apple-touch-icon" sizes="180x180" href="/icons/icon-180.png?v=20260504-19">
+<link rel="icon" type="image/png" sizes="32x32" href="/icons/icon-32.png?v=20260504-19">
 <title>HABIT</title>
 <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
@@ -811,7 +811,7 @@ input,select,button,textarea{font-family:'Montserrat',sans-serif}
 
 const SUPABASE_URL='https://pmpjteuqjusbiduevbwq.supabase.co';
 const SUPABASE_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBtcGp0ZXVxanVzYmlkdWV2YndxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc2OTI1NjUsImV4cCI6MjA5MzI2ODU2NX0.XbMzZoo2yqtrD8znLnyo_1zDfrdJAvAPj1lqGOyXnLw';
-const APP_VERSION='20260504-18';
+const APP_VERSION='20260504-19';
 const PUBLIC_APP_URL='https://habittraininghub.app/app.html';
 const sb=supabase.createClient(SUPABASE_URL,SUPABASE_KEY,{auth:{autoRefreshToken:true,persistSession:true,detectSessionInUrl:true}});
 let sbUser=null,sbProfile=null;
@@ -951,6 +951,7 @@ const timeSince=ts=>{const m=Math.floor((Date.now()-new Date(ts))/60000);if(m<1)
 const daysUntil=iso=>{if(!iso)return null;return Math.ceil((new Date(iso)-Date.now())/86400000);};
 const MO=['ene','feb','mar','abr','may','jun','jul','ago','sep','oct','nov','dic'];
 const DN=['Dom','Lun','Mar','Mié','Jue','Vie','Sáb'];
+let bookingSubmitting=false;
 
 function fmtSlot(idx){
   // idx 0-47 → "HH:MM"
@@ -1672,24 +1673,27 @@ async function renderActiveBookings(){
       .eq('status','active')
       .gte('ds',yesterdayStr)
       .order('ds').order('start_idx');
-    // DEBUG — muestra lo que Supabase devuelve
-    const dbg=document.createElement('div');
-    dbg.style.cssText='font-size:10px;color:#666;padding:4px 8px;background:#111;border-radius:4px;margin-bottom:8px;word-break:break-all';
-    dbg.textContent='DEBUG: uid='+sbUser.id.slice(0,8)+'... ayer='+yesterdayStr+' bks='+(bks?bks.length:'null')+' err='+(bkErr?bkErr.message:'none');
-    el.appendChild(dbg);
     if(bkErr){console.error('bookings error:',bkErr);return;}
     if(!bks||!bks.length){
       el.innerHTML='';
       return;
     }
+    const seen=new Set();
+    const uniqueBks=[];
+    (bks||[]).forEach(b=>{
+      const key=[b.ds,b.start_idx,b.slots_used||3,b.is_group?'g':'i'].join('|');
+      if(seen.has(key))return;
+      seen.add(key);
+      uniqueBks.push(b);
+    });
     // Filter: only show bookings that haven't ended yet
     const nowMaz=mazNow();
-    const upcoming=bks.filter(b=>{
+    const upcoming=uniqueBks.filter(b=>{
       const sessionEndMs=mazDateMs(b.ds,b.start_idx+(b.slots_used||3));
       return sessionEndMs > nowMaz.getTime();
     });
     // Update local cache
-    curUser.bookings=bks.map(b=>({
+    curUser.bookings=uniqueBks.map(b=>({
       id:b.id,ds:b.ds,startIdx:b.start_idx,slotsUsed:b.slots_used||3,
       isGroup:b.is_group,grupalSpots:b.grupal_spots,timeStr:b.time_str,durMin:b.dur_min||90
     }));
@@ -1982,15 +1986,43 @@ function renderConfPanel(ds,isGrupal){
 }
 
 async function doConfirm(){
+  if(bookingSubmitting)return;
   if(!hasActive(curUser)){sv('planes');return;}
   if(selStartIdx===null)return;
   if(!sbUser){toast('Debes iniciar sesion','err');return;}
+  bookingSubmitting=true;
   const ds=dk(curDate);
   const isGrupal=curUser.planType==='grupal';
   const slotsUsed=selShort?BOOKING_SLOTS_SHORT:BOOKING_SLOTS;
-  await loadSlotOccupancyFromSb(ds);
+  let existing=[],existingErr=null;
+  try{
+    await loadSlotOccupancyFromSb(ds);
+    const result=await sb.from('bookings')
+      .select('id')
+      .eq('user_id',sbUser.id)
+      .eq('ds',ds)
+      .eq('start_idx',selStartIdx)
+      .eq('status','active')
+      .limit(1);
+    existing=result.data||[];
+    existingErr=result.error;
+  }catch(e){
+    existingErr=e;
+  }
+  if(existingErr){
+    bookingSubmitting=false;
+    toast('No se pudo validar tu reserva','err');
+    return;
+  }
+  if(existing&&existing.length){
+    bookingSubmitting=false;
+    toast('Ya tienes esa reserva activa','warn');
+    clearSel();
+    renderActiveBookings();
+    return;
+  }
   const check=canStartAt(ds,selStartIdx,isGrupal,slotsUsed);
-  if(!check.ok){toast('Este horario ya no esta disponible','err');renderBook();return;}
+  if(!check.ok){bookingSubmitting=false;toast('Este horario ya no esta disponible','err');renderBook();return;}
   showLoading('Confirmando reserva...');
   let createdBookingId=null;
   try{
@@ -2060,6 +2092,8 @@ async function doConfirm(){
     hideLoading();
     toast('Error al confirmar: '+e.message,'err');
     console.error('doConfirm error:',e);
+  }finally{
+    bookingSubmitting=false;
   }
 }
 

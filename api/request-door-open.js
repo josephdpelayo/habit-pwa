@@ -77,8 +77,8 @@ function getShellyConfig() {
   const deviceId = String(process.env.SHELLY_DEVICE_ID || '');
   const channel = String(process.env.SHELLY_CHANNEL || '0');
   const turn = String(process.env.SHELLY_TURN || SHELLY_DEFAULT_TURN).toLowerCase();
-  const releaseSecondsRaw = Number(process.env.SHELLY_RELEASE_SECONDS || SHELLY_DEFAULT_RELEASE_SECONDS);
-  const releaseSeconds = Number.isFinite(releaseSecondsRaw) && releaseSecondsRaw > 0 ? releaseSecondsRaw : SHELLY_DEFAULT_RELEASE_SECONDS;
+  // Keep the magnetic lock released for exactly 5 seconds before relocking.
+  const releaseSeconds = SHELLY_DEFAULT_RELEASE_SECONDS;
   if (!server || !authKey || !deviceId) return null;
   const normalizedTurn = turn === 'on' ? 'on' : 'off';
   const relockTurn = String(process.env.SHELLY_RELOCK_TURN || (normalizedTurn === 'on' ? 'off' : 'on')).toLowerCase();
