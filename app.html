@@ -158,7 +158,9 @@ input,select,button,textarea{font-family:'Montserrat',sans-serif}
 .guest-count{font-size:10px;color:var(--bl);font-weight:800;letter-spacing:.08em;text-transform:uppercase;white-space:nowrap}
 .guest-body{padding:12px 14px}
 .guest-search{margin-bottom:10px}
-.guest-search input{width:100%;background:var(--card2);border:1px solid var(--border);border-radius:5px;padding:11px;color:var(--white);font-size:14px;outline:none}
+.guest-search{display:flex;gap:8px}
+.guest-search input{flex:1;min-width:0;background:var(--card2);border:1px solid var(--border);border-radius:5px;padding:11px;color:var(--white);font-size:14px;outline:none}
+.guest-search button{width:92px;border-radius:5px;border:1px solid var(--blue);background:rgba(37,99,235,.22);color:var(--bl);font-size:11px;font-weight:800;letter-spacing:.06em;text-transform:uppercase}
 .guest-results,.guest-list{display:flex;flex-direction:column;gap:8px}
 .guest-results{margin-bottom:10px}
 .guest-row{display:flex;align-items:center;gap:10px;background:rgba(255,255,255,.03);border:1px solid var(--border);border-radius:5px;padding:9px 10px;cursor:pointer}
@@ -178,6 +180,9 @@ input,select,button,textarea{font-family:'Montserrat',sans-serif}
 .guest-save{margin-top:12px;width:100%;padding:13px;border-radius:6px;border:1px solid var(--blue);background:rgba(37,99,235,.24);color:var(--bl);font-size:12px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;cursor:pointer}
 .guest-save:disabled{opacity:.45;cursor:not-allowed}
 .guest-collapse{margin-top:10px;width:100%;padding:11px;border-radius:6px;border:1px solid var(--border);background:transparent;color:var(--gray);font-size:11px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;cursor:pointer}
+.bnb.locked{opacity:.38}
+.locked-panel{background:var(--card);border:1px solid rgba(245,158,11,.45);border-radius:6px;padding:22px 18px;text-align:center;color:var(--gray);line-height:1.5}
+.locked-panel h3{font-size:16px;color:var(--white);letter-spacing:.08em;text-transform:uppercase;margin-bottom:8px}
 .next-box{background:var(--card);border:1px solid var(--border);border-radius:4px;padding:12px 14px;margin-bottom:1rem}
 .next-lbl{font-size:10px;font-weight:700;color:var(--gray);letter-spacing:.1em;text-transform:uppercase;margin-bottom:6px}
 .next-val{font-size:15px;font-weight:600;color:var(--white)}
@@ -850,7 +855,7 @@ input,select,button,textarea{font-family:'Montserrat',sans-serif}
 
 const SUPABASE_URL='https://pmpjteuqjusbiduevbwq.supabase.co';
 const SUPABASE_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBtcGp0ZXVxanVzYmlkdWV2YndxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc2OTI1NjUsImV4cCI6MjA5MzI2ODU2NX0.XbMzZoo2yqtrD8znLnyo_1zDfrdJAvAPj1lqGOyXnLw';
-const APP_VERSION='20260505-07';
+const APP_VERSION='20260505-08';
 const PUBLIC_APP_URL='https://habittraininghub.app/app.html';
 const PUBLIC_API_ORIGIN='https://www.habittraininghub.app';
 const sb=supabase.createClient(SUPABASE_URL,SUPABASE_KEY,{auth:{autoRefreshToken:true,persistSession:true,detectSessionInUrl:true}});
@@ -1158,7 +1163,7 @@ let waitlists={}; // waitlists[ds+'_'+slotIdx] = [{userId,name,...}]
 let payments=[], boards=[], scores={}, posts=[], accessLog=[], adminNotifs=[];
 let curUser=null, curDate=dateObjFromDS(mazToday()), selStartIdx=null, selShort=false, selPlan=null, selPT='individual', selectedRoutineBoardId=null;
 let accInt=null, userNotifInt=null, userNotifBootstrapped=false, userNotifSeen=new Set(), notifs=[], expandedVideos={}, logScoreCtx=null;
-let guestFavorites=[], guestSelected=new Set(), guestSavedActive=new Set(), guestOriginalFavoriteIds=new Set(), guestDeletedIds=new Set(), guestSearchResults=[], guestActiveBookingId=null, guestSearchTimer=null, guestDirty=false, guestCollapsed=true;
+let guestFavorites=[], guestSelected=new Set(), guestSavedActive=new Set(), guestOriginalFavoriteIds=new Set(), guestDeletedIds=new Set(), guestSearchResults=[], guestActiveBookingId=null, guestSearchTimer=null, guestDirty=false, guestCollapsed=true, guestQuery='';
 
 // ── SLOT DATA ACCESS ──
 function getDaySlots(ds){
@@ -1427,8 +1432,14 @@ async function queueGuestSearch(q){
   clearTimeout(guestSearchTimer);
   guestSearchTimer=setTimeout(()=>searchGuests(q),250);
 }
+function triggerGuestSearch(){
+  const input=document.getElementById('guest-search-input');
+  guestQuery=input?input.value:guestQuery;
+  searchGuests(guestQuery);
+}
 async function searchGuests(q){
   q=String(q||'').trim();
+  guestQuery=q;
   if(q.length<2){guestSearchResults=[];paintGuestGroup();return;}
   try{
     const{data}=await sb.auth.getSession();
@@ -1502,7 +1513,7 @@ function paintGuestGroup(){
   el.innerHTML='<div class="guest-card">'+
     '<div class="guest-head"><div><div class="guest-title">Grupo de invitados</div><div class="guest-sub">'+sub+'</div></div><div class="guest-count">'+guestSelected.size+'/4</div></div>'+
     '<div class="guest-body">'+
-      '<div class="guest-search"><input type="search" placeholder="Buscar por nombre o correo" oninput="queueGuestSearch(this.value)"></div>'+
+      '<div class="guest-search"><input id="guest-search-input" type="search" placeholder="Buscar por nombre o correo" value="'+esc(guestQuery)+'" oninput="guestQuery=this.value" onkeydown="if(event.key===&quot;Enter&quot;){event.preventDefault();triggerGuestSearch()}"><button onclick="triggerGuestSearch()">Buscar</button></div>'+
       '<div class="guest-results">'+(results.length?results.map(g=>guestRow(g,true)).join(''):'')+'</div>'+
       '<div class="guest-list">'+(guestFavorites.length?guestFavorites.map(g=>guestRow(g,false)).join(''):'<div class="guest-sub">Busca y agrega tus invitados frecuentes.</div>')+'</div>'+
       '<button class="guest-save" onclick="saveGuestGroup()" '+(!dirty?'disabled':'')+'>'+saveText+'</button>'+
@@ -1532,6 +1543,7 @@ async function renderGuestGroup(reload=true){
       guestDeletedIds=new Set();
       guestDirty=false;
       guestSearchResults=[];
+      guestQuery='';
       if(guestActiveBookingId){
         const passRes=await sb.from('booking_guest_passes').select('guest_user_id,status').eq('booking_id',guestActiveBookingId).eq('host_user_id',sbUser.id).eq('status','active');
         if(passRes.error)throw passRes.error;
@@ -1891,13 +1903,25 @@ function showAdmin(){
 
 // ── NAVIGATION ──
 const ALL_VIEWS=['inicio','book','planes','rutinas','comunidad','historial','perfil'];
+const MEMBER_LOCKED_VIEWS=['book','rutinas','comunidad'];
+function canUseMemberViews(){
+  return !!(curUser&&hasActive(curUser));
+}
 function updateTopActions(v){
   document.querySelectorAll('.top-action[data-top-view]').forEach(btn=>{
     btn.classList.toggle('primary',btn.dataset.topView===v);
   });
 }
 function sv(v){
-  document.querySelectorAll('.bnb').forEach((b,i)=>b.classList.toggle('active',['inicio','book','rutinas','comunidad'][i]===v));
+  if(MEMBER_LOCKED_VIEWS.includes(v)&&!canUseMemberViews()){
+    toast('Activa una membresia vigente para usar esta seccion','warn');
+    v='inicio';
+  }
+  document.querySelectorAll('.bnb').forEach((b,i)=>{
+    const name=['inicio','book','rutinas','comunidad'][i];
+    b.classList.toggle('active',name===v);
+    b.classList.toggle('locked',MEMBER_LOCKED_VIEWS.includes(name)&&!canUseMemberViews());
+  });
   updateTopActions(v);
   ALL_VIEWS.forEach(n=>{const el=document.getElementById('v-'+n);if(el)el.classList.toggle('active',n===v);});
   if(v==='inicio'){renderMembershipStatus();renderAccess().catch(console.error);renderGuestGroup().catch(console.error);renderActiveBookings().catch(console.error);renderUserNotifsSb().catch(console.error);}
