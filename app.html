@@ -6,12 +6,12 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="HABIT">
 <meta name="application-name" content="HABIT">
-<link rel="manifest" href="/manifest.json?v=20260504-20">
-<link rel="apple-touch-icon" sizes="120x120" href="/icons/icon-120.png?v=20260504-20">
-<link rel="apple-touch-icon" sizes="152x152" href="/icons/icon-152.png?v=20260504-20">
-<link rel="apple-touch-icon" sizes="167x167" href="/icons/icon-167.png?v=20260504-20">
-<link rel="apple-touch-icon" sizes="180x180" href="/icons/icon-180.png?v=20260504-20">
-<link rel="icon" type="image/png" sizes="32x32" href="/icons/icon-32.png?v=20260504-20">
+<link rel="manifest" href="/manifest.json?v=20260504-21">
+<link rel="apple-touch-icon" sizes="120x120" href="/icons/icon-120.png?v=20260504-21">
+<link rel="apple-touch-icon" sizes="152x152" href="/icons/icon-152.png?v=20260504-21">
+<link rel="apple-touch-icon" sizes="167x167" href="/icons/icon-167.png?v=20260504-21">
+<link rel="apple-touch-icon" sizes="180x180" href="/icons/icon-180.png?v=20260504-21">
+<link rel="icon" type="image/png" sizes="32x32" href="/icons/icon-32.png?v=20260504-21">
 <title>HABIT</title>
 <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
@@ -270,6 +270,8 @@ input,select,button,textarea{font-family:'Montserrat',sans-serif}
 .ex-detail{font-size:12px;color:var(--gray);margin-top:3px;line-height:1.5}
 .ex-note{font-size:12px;color:var(--amber);margin-top:3px;font-style:italic}
 .ex-video-btn{display:flex;align-items:center;gap:8px;padding:10px 12px;background:rgba(37,99,235,.12);border-top:1px solid rgba(37,99,235,.2);cursor:pointer;color:var(--bl);font-size:12px;font-weight:600;letter-spacing:.04em;text-transform:uppercase}
+.ex-video-title{flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ex-video-min{width:34px;height:30px;border:1px solid rgba(59,130,246,.45);background:rgba(7,12,24,.55);color:var(--bl);border-radius:4px;font-size:18px;font-weight:900;line-height:1;display:flex;align-items:center;justify-content:center;flex-shrink:0}
 .play-icon{width:20px;height:20px;border-radius:50%;background:var(--blue);display:flex;align-items:center;justify-content:center;flex-shrink:0}
 .play-tri{width:0;height:0;border-top:4px solid transparent;border-bottom:4px solid transparent;border-left:8px solid white;margin-left:2px}
 .video-shell{display:flex;justify-content:center;align-items:center;background:#050505;border-top:1px solid var(--border);border-bottom:1px solid var(--border);padding:12px;overflow:hidden}
@@ -817,7 +819,7 @@ input,select,button,textarea{font-family:'Montserrat',sans-serif}
 
 const SUPABASE_URL='https://pmpjteuqjusbiduevbwq.supabase.co';
 const SUPABASE_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBtcGp0ZXVxanVzYmlkdWV2YndxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc2OTI1NjUsImV4cCI6MjA5MzI2ODU2NX0.XbMzZoo2yqtrD8znLnyo_1zDfrdJAvAPj1lqGOyXnLw';
-const APP_VERSION='20260504-20';
+const APP_VERSION='20260504-21';
 const PUBLIC_APP_URL='https://habittraininghub.app/app.html';
 const sb=supabase.createClient(SUPABASE_URL,SUPABASE_KEY,{auth:{autoRefreshToken:true,persistSession:true,detectSessionInUrl:true}});
 let sbUser=null,sbProfile=null;
@@ -2352,7 +2354,7 @@ async function renderRutinas(){
         +(ex.note||ex.notes||ex.description?'<div class="ex-note">'+esc(ex.note||ex.notes||ex.description)+'</div>':'')
         +'</div><button class="btn-sm bblue" data-bid="'+esc(selected.id)+'" data-idx="'+i+'" data-name="'+esc(ex.name)+'" onclick="openLogScore(this)">Log</button></div>'
         +'</div>'
-        +(video?'<div class="ex-video-btn" onclick="toggleVideo(&quot;'+vKey+'&quot;)"><span class="play-icon"><span class="play-tri"></span></span>'+esc(videoLabel)+'</div>':'')
+        +(video?'<div class="ex-video-btn" onclick="toggleVideo(&quot;'+vKey+'&quot;)"><span class="play-icon"><span class="play-tri"></span></span><span class="ex-video-title">'+esc(videoLabel)+'</span>'+(expandedVideos[vKey]?'<button class="ex-video-min" onclick="event.stopPropagation();toggleVideo(&quot;'+vKey+'&quot;)" aria-label="Minimizar video">−</button>':'')+'</div>':'')
         +(video&&expandedVideos[vKey]?videoHtml:'')
         +'</div>';
     }).join(''):'<div class="empty">Sin ejercicios en esta rutina.</div>';
