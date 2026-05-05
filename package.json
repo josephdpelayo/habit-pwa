@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "private": true,
   "scripts": {
-    "check": "node --check api/create-checkout-session.js && node --check api/confirm-checkout-session.js && node --check api/stripe-webhook.js && node --check api/validate-access-code.js && node --check api/request-door-open.js && node --check api/delete-community-item.js && node --check api/get-user-email.js && node --check api/search-users.js && node --check sw.js"
+    "check": "node --check api/create-checkout-session.js && node --check api/confirm-checkout-session.js && node --check api/stripe-webhook.js && node --check api/validate-access-code.js && node --check api/request-door-open.js && node --check api/delete-community-item.js && node --check api/get-user-email.js && node --check api/search-users.js && node --check api/guest-access.js && node --check sw.js"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.49.4",
