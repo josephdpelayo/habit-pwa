@@ -6,12 +6,12 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="HABIT">
 <meta name="application-name" content="HABIT">
-<link rel="manifest" href="/manifest.json?v=20260504-19">
-<link rel="apple-touch-icon" sizes="120x120" href="/icons/icon-120.png?v=20260504-19">
-<link rel="apple-touch-icon" sizes="152x152" href="/icons/icon-152.png?v=20260504-19">
-<link rel="apple-touch-icon" sizes="167x167" href="/icons/icon-167.png?v=20260504-19">
-<link rel="apple-touch-icon" sizes="180x180" href="/icons/icon-180.png?v=20260504-19">
-<link rel="icon" type="image/png" sizes="32x32" href="/icons/icon-32.png?v=20260504-19">
+<link rel="manifest" href="/manifest.json?v=20260504-20">
+<link rel="apple-touch-icon" sizes="120x120" href="/icons/icon-120.png?v=20260504-20">
+<link rel="apple-touch-icon" sizes="152x152" href="/icons/icon-152.png?v=20260504-20">
+<link rel="apple-touch-icon" sizes="167x167" href="/icons/icon-167.png?v=20260504-20">
+<link rel="apple-touch-icon" sizes="180x180" href="/icons/icon-180.png?v=20260504-20">
+<link rel="icon" type="image/png" sizes="32x32" href="/icons/icon-32.png?v=20260504-20">
 <title>HABIT</title>
 <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
@@ -272,10 +272,16 @@ input,select,button,textarea{font-family:'Montserrat',sans-serif}
 .ex-video-btn{display:flex;align-items:center;gap:8px;padding:10px 12px;background:rgba(37,99,235,.12);border-top:1px solid rgba(37,99,235,.2);cursor:pointer;color:var(--bl);font-size:12px;font-weight:600;letter-spacing:.04em;text-transform:uppercase}
 .play-icon{width:20px;height:20px;border-radius:50%;background:var(--blue);display:flex;align-items:center;justify-content:center;flex-shrink:0}
 .play-tri{width:0;height:0;border-top:4px solid transparent;border-bottom:4px solid transparent;border-left:8px solid white;margin-left:2px}
-.video-shell{display:flex;justify-content:flex-start;align-items:center;background:#050505;border-top:1px solid var(--border);border-bottom:1px solid var(--border);padding:14px 14px 14px 9%;overflow:hidden}
-.video-frame{width:min(54vw,210px);aspect-ratio:9/16;background:#000;border:1px solid var(--border);overflow:hidden}
+.video-shell{display:flex;justify-content:center;align-items:center;background:#050505;border-top:1px solid var(--border);border-bottom:1px solid var(--border);padding:12px;overflow:hidden}
+.video-frame{width:min(100%,360px);max-width:calc(100vw - 70px);aspect-ratio:9/16;background:#000;border:1px solid var(--border);overflow:hidden}
 .video-embed{width:100%;height:100%;border:none;display:block;background:#000}
 .video-help{font-size:10px;color:var(--gray);line-height:1.5;padding:7px 10px;border-top:1px solid var(--border);background:rgba(255,255,255,.03)}
+.video-actions{display:flex;gap:8px;padding:8px 10px;background:#050505;border-top:1px solid var(--border)}
+.video-open-btn{flex:1;border:1px solid rgba(59,130,246,.45);background:rgba(37,99,235,.12);color:var(--bl);border-radius:4px;padding:10px;font-size:11px;font-weight:800;letter-spacing:.06em;text-transform:uppercase}
+.video-modal{position:fixed;inset:0;background:rgba(0,0,0,.96);z-index:10000;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:18px}
+.video-modal-head{position:absolute;top:calc(env(safe-area-inset-top,0px) + 12px);left:16px;right:16px;display:flex;align-items:center;justify-content:space-between;gap:12px;color:var(--white);font-size:13px;font-weight:800;letter-spacing:.06em;text-transform:uppercase}
+.video-modal-close{border:1px solid var(--border);background:var(--card);color:var(--white);border-radius:6px;padding:10px 12px;font-size:12px;font-weight:800}
+.video-modal-frame{width:min(92vw,430px);height:min(78vh,760px);aspect-ratio:9/16;background:#000;border:1px solid var(--border);overflow:hidden}
 .log-score-btn{display:flex;align-items:center;gap:8px;padding:10px 12px;background:rgba(139,92,246,.1);border-top:1px solid rgba(139,92,246,.2);cursor:pointer;color:var(--purple);font-size:12px;font-weight:600;letter-spacing:.04em;text-transform:uppercase}
 
 /* SCORES */
@@ -811,7 +817,7 @@ input,select,button,textarea{font-family:'Montserrat',sans-serif}
 
 const SUPABASE_URL='https://pmpjteuqjusbiduevbwq.supabase.co';
 const SUPABASE_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBtcGp0ZXVxanVzYmlkdWV2YndxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc2OTI1NjUsImV4cCI6MjA5MzI2ODU2NX0.XbMzZoo2yqtrD8znLnyo_1zDfrdJAvAPj1lqGOyXnLw';
-const APP_VERSION='20260504-19';
+const APP_VERSION='20260504-20';
 const PUBLIC_APP_URL='https://habittraininghub.app/app.html';
 const sb=supabase.createClient(SUPABASE_URL,SUPABASE_KEY,{auth:{autoRefreshToken:true,persistSession:true,detectSessionInUrl:true}});
 let sbUser=null,sbProfile=null;
@@ -1063,7 +1069,24 @@ function getVideoHtml(url){
   if(!embed)return'';
   const isDrive=!!getDriveId(s);
   return '<div class="video-shell"><div class="video-frame"><iframe class="video-embed" src="'+esc(embed)+'" allow="autoplay; encrypted-media; picture-in-picture; fullscreen" allowfullscreen referrerpolicy="no-referrer-when-downgrade"></iframe></div></div>'
+    +'<div class="video-actions"><button class="video-open-btn" data-embed="'+esc(embed)+'" onclick="openVideoModal(this.dataset.embed)">Ver grande</button></div>'
     +(isDrive?'<div class="video-help">Si Drive se queda negro, comparte el video como "Cualquiera con el enlace puede ver".</div>':'');
+}
+
+function openVideoModal(embed){
+  if(!embed)return;
+  const old=document.getElementById('video-modal');
+  if(old)old.remove();
+  const modal=document.createElement('div');
+  modal.id='video-modal';
+  modal.className='video-modal';
+  modal.innerHTML='<div class="video-modal-head"><span>Video</span><button class="video-modal-close" onclick="closeVideoModal()">Cerrar</button></div>'
+    +'<div class="video-modal-frame"><iframe class="video-embed" src="'+esc(embed)+'" allow="autoplay; encrypted-media; picture-in-picture; fullscreen" allowfullscreen referrerpolicy="no-referrer-when-downgrade"></iframe></div>';
+  document.body.appendChild(modal);
+}
+function closeVideoModal(){
+  const modal=document.getElementById('video-modal');
+  if(modal)modal.remove();
 }
 
 function toast(msg,t){const el=document.getElementById('toast');el.textContent=msg;el.className='toast show'+(t?' '+t:'');setTimeout(()=>el.className='toast',3200);}
