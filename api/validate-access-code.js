@@ -22,7 +22,8 @@ function slotMs(ds, slotIdx) {
 }
 
 function fmtSlot(idx) {
-  const totalMin = Number(idx || 0) * SLOT_DUR;
+  const slot = ((Number(idx || 0) % 48) + 48) % 48;
+  const totalMin = slot * SLOT_DUR;
   const h = String(Math.floor(totalMin / 60)).padStart(2, '0');
   const m = String(totalMin % 60).padStart(2, '0');
   return `${h}:${m}`;

@@ -6,12 +6,12 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="HABIT">
 <meta name="application-name" content="HABIT">
-<link rel="manifest" href="/manifest.json?v=20260504-23">
-<link rel="apple-touch-icon" sizes="120x120" href="/icons/icon-120.png?v=20260504-23">
-<link rel="apple-touch-icon" sizes="152x152" href="/icons/icon-152.png?v=20260504-23">
-<link rel="apple-touch-icon" sizes="167x167" href="/icons/icon-167.png?v=20260504-23">
-<link rel="apple-touch-icon" sizes="180x180" href="/icons/icon-180.png?v=20260504-23">
-<link rel="icon" type="image/png" sizes="32x32" href="/icons/icon-32.png?v=20260504-23">
+<link rel="manifest" href="/manifest.json?v=20260504-24">
+<link rel="apple-touch-icon" sizes="120x120" href="/icons/icon-120.png?v=20260504-24">
+<link rel="apple-touch-icon" sizes="152x152" href="/icons/icon-152.png?v=20260504-24">
+<link rel="apple-touch-icon" sizes="167x167" href="/icons/icon-167.png?v=20260504-24">
+<link rel="apple-touch-icon" sizes="180x180" href="/icons/icon-180.png?v=20260504-24">
+<link rel="icon" type="image/png" sizes="32x32" href="/icons/icon-32.png?v=20260504-24">
 <title>HABIT</title>
 <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
@@ -819,7 +819,7 @@ input,select,button,textarea{font-family:'Montserrat',sans-serif}
 
 const SUPABASE_URL='https://pmpjteuqjusbiduevbwq.supabase.co';
 const SUPABASE_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBtcGp0ZXVxanVzYmlkdWV2YndxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc2OTI1NjUsImV4cCI6MjA5MzI2ODU2NX0.XbMzZoo2yqtrD8znLnyo_1zDfrdJAvAPj1lqGOyXnLw';
-const APP_VERSION='20260504-23';
+const APP_VERSION='20260504-24';
 const PUBLIC_APP_URL='https://habittraininghub.app/app.html';
 const sb=supabase.createClient(SUPABASE_URL,SUPABASE_KEY,{auth:{autoRefreshToken:true,persistSession:true,detectSessionInUrl:true}});
 let sbUser=null,sbProfile=null;
@@ -961,10 +961,27 @@ const MO=['ene','feb','mar','abr','may','jun','jul','ago','sep','oct','nov','dic
 const DN=['Dom','Lun','Mar','Mié','Jue','Vie','Sáb'];
 let bookingSubmitting=false;
 
+function normSlotIdx(idx){
+  return ((Number(idx)||0)%TOTAL_SLOTS+TOTAL_SLOTS)%TOTAL_SLOTS;
+}
+function slotDayOffset(idx){
+  return Math.floor((Number(idx)||0)/TOTAL_SLOTS);
+}
+function slotPoint(ds,idx){
+  return{ds:addDaysDS(ds,slotDayOffset(idx)),idx:normSlotIdx(idx)};
+}
+function slotRange(ds,startIdx,slotsUsed){
+  const rows=[];
+  for(let i=0;i<(slotsUsed||BOOKING_SLOTS);i++)rows.push(slotPoint(ds,startIdx+i));
+  return rows;
+}
 function fmtSlot(idx){
-  // idx 0-47 → "HH:MM"
-  const totalMin=idx*30;
+  // idx wraps after 23:30, so cross-midnight ranges display as 23:00 - 00:30.
+  const totalMin=normSlotIdx(idx)*30;
   return pad(Math.floor(totalMin/60))+':'+pad(totalMin%60);
+}
+function fmtTimeRange(startIdx,slotsUsed){
+  return fmtSlot(startIdx)+' - '+fmtSlot(startIdx+(slotsUsed||BOOKING_SLOTS));
 }
 
 // Mazatlán is UTC-7 (no DST). Keep real instants in UTC, read wall-clock parts through Intl.
@@ -1138,23 +1155,21 @@ function isGroupBlocked(ds,idx){return getSlotOccupancy(ds,idx).isGroup;}
 function canStartAt(ds,idx,isGrupal,slotsNeeded){
   slotsNeeded=slotsNeeded||BOOKING_SLOTS;
   if(isSlotPast(ds,idx)) return{ok:false,reason:'past'};
-  if(idx+slotsNeeded>TOTAL_SLOTS) return{ok:false,reason:'overflow'};
   if(curUser&&curUser.bookings){
-    const newSlots=[];
-    for(let i=0;i<slotsNeeded;i++) newSlots.push(idx+i);
-    for(const bk of curUser.bookings.filter(b=>b.ds===ds)){
+    const newStart=mazDateMs(ds,idx);
+    const newEnd=newStart+slotsNeeded*SLOT_DUR*60000;
+    for(const bk of curUser.bookings||[]){
       const bkLen=bk.slotsUsed||BOOKING_SLOTS;
-      const bkSlots=[];
-      for(let i=0;i<bkLen;i++) bkSlots.push(bk.startIdx+i);
-      if(newSlots.some(s=>bkSlots.includes(s))) return{ok:false,reason:'duplicate'};
+      const bkStart=mazDateMs(bk.ds,bk.startIdx);
+      const bkEnd=bkStart+bkLen*SLOT_DUR*60000;
+      if(newStart<bkEnd&&newEnd>bkStart) return{ok:false,reason:'duplicate'};
     }
     if(curUser.bookings.filter(b=>b.ds===ds).length>=1) return{ok:false,reason:'max1'};
   }
   if(isGrupal){
     let minFree=CAP;
-    for(let i=0;i<slotsNeeded;i++){
-      const si=idx+i;
-      const occ=getSlotOccupancy(ds,si);
+    for(const part of slotRange(ds,idx,slotsNeeded)){
+      const occ=getSlotOccupancy(part.ds,part.idx);
       if(occ.isGroup) return{ok:false,reason:'blocked'};
       const free=CAP-occ.count;
       if(free<minFree) minFree=free;
@@ -1162,11 +1177,10 @@ function canStartAt(ds,idx,isGrupal,slotsNeeded){
     if(minFree===0) return{ok:false,reason:'full'};
     return{ok:true,grupalSpots:minFree};
   } else {
-    for(let i=0;i<slotsNeeded;i++){
-      const si=idx+i;
-      const occ=getSlotOccupancy(ds,si);
+    for(const part of slotRange(ds,idx,slotsNeeded)){
+      const occ=getSlotOccupancy(part.ds,part.idx);
       if(occ.isGroup) return{ok:false,reason:'blocked'};
-      if(CAP-occ.count<1) return{ok:false,reason:'full_slot',slotTime:fmtSlot(si)};
+      if(CAP-occ.count<1) return{ok:false,reason:'full_slot',slotTime:fmtSlot(part.idx)};
     }
     return{ok:true};
   }
@@ -1343,7 +1357,7 @@ async function renderAccess(){
   const msToCodeVisible=codeVisible-now;
   const dl=b.ds===mazToday()?'Hoy':'Mañana';
   const slotsUsed=b.slotsUsed||BOOKING_SLOTS;
-  const timeStr=fmtSlot(b.startIdx)+' – '+fmtSlot(b.startIdx+slotsUsed);
+  const timeStr=b.timeStr||fmtTimeRange(b.startIdx,slotsUsed);
   const durMin=slotsUsed*30;
 
   // Session ended
@@ -1740,7 +1754,7 @@ async function renderActiveBookings(){
       const div=document.createElement('div');
       div.className='active-bk-card';
       div.innerHTML='<div style="flex:1">'
-        +'<div style="font-size:14px;font-weight:600;color:var(--white)">'+dl+' · '+b.time_str+'</div>'
+        +'<div style="font-size:14px;font-weight:600;color:var(--white)">'+dl+' · '+(b.time_str||fmtTimeRange(b.start_idx,b.slots_used||3))+'</div>'
         +'<div style="font-size:11px;color:var(--gray);margin-top:2px">'+(b.is_group?'Grupal':'Individual')+' · '+(b.dur_min||90)+' min</div>'
         +'</div>'
         +(canC?'<button class="btn-sm bred" data-bid="'+b.id+'" onclick="handleCancelBk(this)">Cancelar</button>'
@@ -1844,6 +1858,9 @@ async function renderBook(){
   document.getElementById('nb').disabled=curDS>=addDaysDS(mazToday(),3);
   document.getElementById('dp').textContent=fmtD(curDate);
   const ds=curDS;
+  const nextDs=addDaysDS(ds,1);
+  if(!slots30[ds])await loadSlotOccupancyFromSb(ds);
+  if(!slots30[nextDs])await loadSlotOccupancyFromSb(nextDs);
   // Show user's own bookings for this day with cancel option
   const myBkEl=document.getElementById('book-my-bks');
   if(myBkEl&&curUser){
@@ -1935,8 +1952,9 @@ function find60minGap(ds,idx){
   const check2=canStartAt(ds,idx,false,BOOKING_SLOTS_SHORT);
   if(!check2.ok) return false;
   const si3=idx+BOOKING_SLOTS_SHORT;
-  const occ3=getSlotOccupancy(ds,si3);
-  const past3=isSlotPast(ds,si3);
+  const part=slotPoint(ds,si3);
+  const occ3=getSlotOccupancy(part.ds,part.idx);
+  const past3=isSlotPast(part.ds,part.idx);
   return occ3.isGroup||CAP-occ3.count<1||past3;
 }
 
@@ -1947,6 +1965,7 @@ function renderConfPanel(ds,isGrupal){
   const slotsUsed=selShort?BOOKING_SLOTS_SHORT:BOOKING_SLOTS;
   const startTime=fmtSlot(selStartIdx);
   const endTime=fmtSlot(selStartIdx+slotsUsed);
+  const timeStr=fmtTimeRange(selStartIdx,slotsUsed);
   strip.style.display='block';
   strip.innerHTML='Seleccionado: <strong>'+startTime+' \u2013 '+endTime+'</strong> \u00b7 '+(selShort?'60':'90')+' min'+(isGrupal?' \u00b7 <strong>4 espacios</strong>':'');
   panel.style.display='block';
@@ -1954,17 +1973,13 @@ function renderConfPanel(ds,isGrupal){
   const bc=document.getElementById('bc'),bw=document.getElementById('bw'),pt=document.getElementById('pt'),sb=document.getElementById('sb');
   const check=canStartAt(ds,selStartIdx,isGrupal,slotsUsed);
   const active=hasActive(curUser);
-  sb.innerHTML='<strong>'+fmtD(curDate)+'</strong><br>'+startTime+' \u2013 '+endTime+' \u00b7 '+(selShort?'60':'90')+' min'+(isGrupal?'<br>Reserva grupal \u00b7 bloquea los 4 espacios':'');
+  sb.innerHTML='<strong>'+fmtD(curDate)+'</strong><br>'+timeStr+' \u00b7 '+(selShort?'60':'90')+' min'+(isGrupal?'<br>Reserva grupal \u00b7 bloquea los 4 espacios':'');
   // Reset button handlers
   bc.onclick=doConfirm;
   bw.onclick=doWaitlist;
   if(check.reason==='past'){
     pt.textContent='Horario pasado';
     wb.style.display='block';wb.innerHTML='Este horario ya pas\u00f3. Elige un horario futuro.';
-    bc.style.display='none';bw.style.display='none';cb.style.display='none';
-  } else if(check.reason==='overflow'){
-    pt.textContent='Horario no disponible';
-    wb.style.display='block';wb.innerHTML='Este bloque se sale del d\u00eda. Elige un horario m\u00e1s temprano.';
     bc.style.display='none';bw.style.display='none';cb.style.display='none';
   } else if(check.reason==='duplicate'){
     pt.textContent='Ya reservaste este horario';
@@ -2030,6 +2045,7 @@ async function doConfirm(){
   let existing=[],existingErr=null;
   try{
     await loadSlotOccupancyFromSb(ds);
+    await loadSlotOccupancyFromSb(addDaysDS(ds,1));
     const result=await sb.from('bookings')
       .select('id')
       .eq('user_id',sbUser.id)
@@ -2061,7 +2077,7 @@ async function doConfirm(){
   try{
     const grupalSpots=isGrupal?(check.grupalSpots||CAP):1;
     const durMin=slotsUsed*30;
-    const timeStr=fmtSlot(selStartIdx)+' - '+fmtSlot(selStartIdx+slotsUsed);
+    const timeStr=fmtTimeRange(selStartIdx,slotsUsed);
     const bookingId=crypto.randomUUID();
 
     // 1. Save booking to Supabase
@@ -2082,12 +2098,11 @@ async function doConfirm(){
 
     // 2. Save slot occupancy to Supabase
     const occRows=[];
-    for(let i=0;i<slotsUsed;i++){
-      const si=selStartIdx+i;
+    for(const part of slotRange(ds,selStartIdx,slotsUsed)){
       if(isGrupal){
-        occRows.push({ds,slot_idx:si,user_id:sbUser.id,booking_id:bk.id,is_group:true,spot:grupalSpots});
+        occRows.push({ds:part.ds,slot_idx:part.idx,user_id:sbUser.id,booking_id:bk.id,is_group:true,spot:grupalSpots});
       }else{
-        occRows.push({ds,slot_idx:si,user_id:sbUser.id,booking_id:bk.id,is_group:false});
+        occRows.push({ds:part.ds,slot_idx:part.idx,user_id:sbUser.id,booking_id:bk.id,is_group:false});
       }
     }
     const{error:occErr}=await sb.from('slot_occupancy').insert(occRows);
@@ -2098,13 +2113,12 @@ async function doConfirm(){
     await sb.from('profiles').update({credits:newCredits}).eq('id',sbUser.id);
 
     // 4. Update local state
-    const day=getDaySlots(ds);
     const entry={userId:curUser.id,name:curUser.name,phone:curUser.phone||'',isGroup:isGrupal,bookingId:bk.id};
-    for(let i=0;i<slotsUsed;i++){
-      const si=selStartIdx+i;
-      if(!day[si])day[si]=[];
-      if(isGrupal)day[si].push({...entry,spot:grupalSpots});
-      else day[si].push(entry);
+    for(const part of slotRange(ds,selStartIdx,slotsUsed)){
+      const targetDay=getDaySlots(part.ds);
+      if(!targetDay[part.idx])targetDay[part.idx]=[];
+      if(isGrupal)targetDay[part.idx].push({...entry,spot:grupalSpots});
+      else targetDay[part.idx].push(entry);
     }
     curUser.credits=newCredits;
     curUser.bookings=curUser.bookings||[];
