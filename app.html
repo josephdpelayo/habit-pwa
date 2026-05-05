@@ -6,12 +6,12 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="HABIT">
 <meta name="application-name" content="HABIT">
-<link rel="manifest" href="/manifest.json?v=20260505-03">
-<link rel="apple-touch-icon" sizes="120x120" href="/icons/icon-120.png?v=20260505-03">
-<link rel="apple-touch-icon" sizes="152x152" href="/icons/icon-152.png?v=20260505-03">
-<link rel="apple-touch-icon" sizes="167x167" href="/icons/icon-167.png?v=20260505-03">
-<link rel="apple-touch-icon" sizes="180x180" href="/icons/icon-180.png?v=20260505-03">
-<link rel="icon" type="image/png" sizes="32x32" href="/icons/icon-32.png?v=20260505-03">
+<link rel="manifest" href="/manifest.json?v=20260505-04">
+<link rel="apple-touch-icon" sizes="120x120" href="/icons/icon-120.png?v=20260505-04">
+<link rel="apple-touch-icon" sizes="152x152" href="/icons/icon-152.png?v=20260505-04">
+<link rel="apple-touch-icon" sizes="167x167" href="/icons/icon-167.png?v=20260505-04">
+<link rel="apple-touch-icon" sizes="180x180" href="/icons/icon-180.png?v=20260505-04">
+<link rel="icon" type="image/png" sizes="32x32" href="/icons/icon-32.png?v=20260505-04">
 <title>HABIT</title>
 <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
@@ -160,12 +160,16 @@ input,select,button,textarea{font-family:'Montserrat',sans-serif}
 .guest-results{margin-bottom:10px}
 .guest-row{display:flex;align-items:center;gap:10px;background:rgba(255,255,255,.03);border:1px solid var(--border);border-radius:5px;padding:9px 10px;cursor:pointer}
 .guest-row:hover{border-color:rgba(59,130,246,.65)}
+.guest-row.active-pass{background:rgba(37,99,235,.16);border-color:rgba(59,130,246,.85)}
 .guest-row.off{opacity:.86}
 .guest-check{width:22px;height:22px;border-radius:4px;border:1px solid var(--blue);display:flex;align-items:center;justify-content:center;color:var(--bl);font-size:13px;font-weight:900;flex-shrink:0}
 .guest-row.off .guest-check{border-color:var(--border);color:transparent}
+.guest-row.active-pass .guest-check{background:rgba(37,99,235,.35)}
 .guest-info{flex:1;min-width:0}
 .guest-name{font-size:13px;font-weight:700;color:var(--white);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .guest-email{font-size:10px;color:var(--gray);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-top:2px}
+.guest-remove{width:28px;height:28px;border-radius:4px;border:1px solid rgba(239,68,68,.75);background:rgba(239,68,68,.1);color:var(--red);font-size:18px;font-weight:800;line-height:1;display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0}
+.guest-remove:disabled{opacity:.25;cursor:not-allowed}
 .guest-save{margin-top:12px;width:100%;padding:13px;border-radius:6px;border:1px solid var(--blue);background:rgba(37,99,235,.24);color:var(--bl);font-size:12px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;cursor:pointer}
 .guest-save:disabled{opacity:.45;cursor:not-allowed}
 .next-box{background:var(--card);border:1px solid var(--border);border-radius:4px;padding:12px 14px;margin-bottom:1rem}
@@ -840,7 +844,7 @@ input,select,button,textarea{font-family:'Montserrat',sans-serif}
 
 const SUPABASE_URL='https://pmpjteuqjusbiduevbwq.supabase.co';
 const SUPABASE_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBtcGp0ZXVxanVzYmlkdWV2YndxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc2OTI1NjUsImV4cCI6MjA5MzI2ODU2NX0.XbMzZoo2yqtrD8znLnyo_1zDfrdJAvAPj1lqGOyXnLw';
-const APP_VERSION='20260505-03';
+const APP_VERSION='20260505-04';
 const PUBLIC_APP_URL='https://habittraininghub.app/app.html';
 const PUBLIC_API_ORIGIN='https://www.habittraininghub.app';
 const sb=supabase.createClient(SUPABASE_URL,SUPABASE_KEY,{auth:{autoRefreshToken:true,persistSession:true,detectSessionInUrl:true}});
@@ -1148,7 +1152,7 @@ let waitlists={}; // waitlists[ds+'_'+slotIdx] = [{userId,name,...}]
 let payments=[], boards=[], scores={}, posts=[], accessLog=[], adminNotifs=[];
 let curUser=null, curDate=dateObjFromDS(mazToday()), selStartIdx=null, selShort=false, selPlan=null, selPT='individual', selectedRoutineBoardId=null;
 let accInt=null, userNotifInt=null, userNotifBootstrapped=false, userNotifSeen=new Set(), notifs=[], expandedVideos={}, logScoreCtx=null;
-let guestFavorites=[], guestSelected=new Set(), guestSearchResults=[], guestActiveBookingId=null, guestSearchTimer=null;
+let guestFavorites=[], guestSelected=new Set(), guestSavedActive=new Set(), guestSearchResults=[], guestActiveBookingId=null, guestSearchTimer=null;
 
 // ── SLOT DATA ACCESS ──
 function getDaySlots(ds){
@@ -1432,34 +1436,41 @@ function toggleGuest(id){
 }
 function addGuestById(id){
   const g=guestSearchResults.find(x=>x.id===id)||guestFavorites.find(x=>x.id===id);
-  if(g)mergeGuestCandidate(g,true);
+  if(g)mergeGuestCandidate(g,!!guestActiveBookingId);
 }
 function guestRow(g,fromSearch){
   const checked=guestSelected.has(g.id);
+  const activeSaved=guestSavedActive.has(g.id);
   const click=(fromSearch?'addGuestById':'toggleGuest')+'(\''+esc(g.id)+'\')';
-  return '<div class="guest-row '+(checked?'':'off')+'" onclick="'+click+'">'+
+  return '<div class="guest-row '+(checked?'':'off')+' '+(activeSaved?'active-pass':'')+'" onclick="'+click+'">'+
     '<div class="guest-check">✓</div>'+
     '<div class="guest-info"><div class="guest-name">'+esc(g.name||'Usuario')+'</div><div class="guest-email">'+esc(g.email||'')+'</div></div>'+
-    (fromSearch?'<div class="guest-count">Agregar</div>':'')+
+    (fromSearch?'<div class="guest-count">Agregar</div>':'<button class="guest-remove" '+(activeSaved?'disabled':'')+' onclick="event.stopPropagation();removeGuestFavorite(\''+esc(g.id)+'\')" title="Eliminar invitado">-</button>')+
     '</div>';
+}
+async function removeGuestFavorite(id){
+  if(guestSavedActive.has(id)){toast('Primero deselecciona y guarda el grupo','warn');return;}
+  guestFavorites=guestFavorites.filter(g=>g.id!==id);
+  guestSelected.delete(id);
+  paintGuestGroup();
+  try{await sb.from('group_guest_favorites').delete().eq('host_user_id',sbUser.id).eq('guest_user_id',id);}catch(e){console.warn('removeGuestFavorite:',e);}
 }
 function paintGuestGroup(){
   const el=document.getElementById('guest-group-wrap');
   if(!el)return;
   if(!isGroupMember()){el.innerHTML='';return;}
   const active=futureOwnGroupBooking();
-  if(!active){
-    el.innerHTML='<div class="guest-card"><div class="guest-head"><div><div class="guest-title">Grupo de invitados</div><div class="guest-sub">Reserva un horario grupal para activar pases de puerta a tus invitados.</div></div></div></div>';
-    return;
-  }
   const results=guestSearchResults.filter(g=>!guestFavorites.some(f=>f.id===g.id)).slice(0,6);
+  const sub=active
+    ? 'Selecciona hasta 4 cuentas existentes para '+esc(active.timeStr||fmtTimeRange(active.startIdx,active.slotsUsed||3))+'.'
+    : 'Arma tu lista frecuente. Los accesos se envian cuando tengas una reserva grupal activa y guardes tu grupo.';
   el.innerHTML='<div class="guest-card">'+
-    '<div class="guest-head"><div><div class="guest-title">Grupo de invitados</div><div class="guest-sub">Selecciona hasta 4 cuentas existentes para '+esc(active.timeStr||fmtTimeRange(active.startIdx,active.slotsUsed||3))+'.</div></div><div class="guest-count">'+guestSelected.size+'/4</div></div>'+
+    '<div class="guest-head"><div><div class="guest-title">Grupo de invitados</div><div class="guest-sub">'+sub+'</div></div><div class="guest-count">'+guestSelected.size+'/4</div></div>'+
     '<div class="guest-body">'+
       '<div class="guest-search"><input type="search" placeholder="Buscar por nombre o correo" oninput="queueGuestSearch(this.value)"></div>'+
       '<div class="guest-results">'+(results.length?results.map(g=>guestRow(g,true)).join(''):'')+'</div>'+
       '<div class="guest-list">'+(guestFavorites.length?guestFavorites.map(g=>guestRow(g,false)).join(''):'<div class="guest-sub">Busca y agrega tus invitados frecuentes.</div>')+'</div>'+
-      '<button class="guest-save" onclick="saveGuestGroup()">Guardar Grupo</button>'+
+      '<button class="guest-save" onclick="saveGuestGroup()" '+(!active?'disabled':'')+'>'+(active?'Guardar Grupo':'Reserva grupal para enviar accesos')+'</button>'+
     '</div></div>';
 }
 async function renderGuestGroup(reload=true){
@@ -1485,7 +1496,11 @@ async function renderGuestGroup(reload=true){
         const passRes=await sb.from('booking_guest_passes').select('guest_user_id,status').eq('booking_id',guestActiveBookingId).eq('host_user_id',sbUser.id).eq('status','active');
         if(passRes.error)throw passRes.error;
         guestSelected=new Set((passRes.data||[]).map(p=>p.guest_user_id));
-      }else guestSelected=new Set();
+        guestSavedActive=new Set(guestSelected);
+      }else{
+        guestSelected=new Set();
+        guestSavedActive=new Set();
+      }
     }catch(e){
       console.warn('renderGuestGroup:',e);
       if(String(e.message||'').includes('group_guest_favorites')||String(e.message||'').includes('booking_guest_passes')){
@@ -1512,6 +1527,7 @@ async function saveGuestGroup(){
       await sb.from('user_notifications').insert(ids.map(id=>({user_id:id,actor_id:sbUser.id,type:'comment',message:note})));
     }
     try{await sb.from('admin_notifs').insert({message:'Grupo guardado: '+curUser.name+' · '+ids.length+' invitado'+(ids.length===1?'':'s')});}catch(_){}
+    guestSavedActive=new Set(ids);
     toast('Grupo guardado','ok');
     renderGuestGroup().catch(console.error);
   }catch(e){
