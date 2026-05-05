@@ -120,6 +120,7 @@ function shellyDeviceIdVariants(deviceId) {
 
 function shellyErrorMessage(payload, text, response) {
   if (payload && payload.errors) return JSON.stringify(payload.errors);
+  if (payload && payload.error) return JSON.stringify(payload.error);
   return text || response.statusText;
 }
 
@@ -159,6 +160,33 @@ async function sendShellyRelay(cfg, turn, deviceId) {
   return payload;
 }
 
+async function sendShellySwitchV2(cfg, turn, deviceId) {
+  const on = turn === 'on';
+  const response = await fetch(`${cfg.server}/v2/devices/api/set/switch?auth_key=${encodeURIComponent(cfg.authKey)}`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      id: deviceId,
+      channel: Number(cfg.channel || 0),
+      on,
+      toggle_after: cfg.releaseSeconds > 0 ? cfg.releaseSeconds : undefined,
+    }),
+  });
+  const text = await response.text();
+  let payload = null;
+  try {
+    payload = text ? JSON.parse(text) : null;
+  } catch (_) {
+    payload = text;
+  }
+
+  if (!response.ok || (payload && payload.isok === false)) {
+    const message = shellyErrorMessage(payload, text, response);
+    throw new Error(`Shelly no abrio: ${message}`);
+  }
+  return payload;
+}
+
 async function sendShellyRelayWithFallback(cfg, turn) {
   const ids = shellyDeviceIdVariants(cfg.deviceId);
   let lastError = null;
@@ -177,6 +205,11 @@ async function sendShellyRelayWithFallback(cfg, turn) {
 async function triggerShellyDoor() {
   const cfg = getShellyConfig();
   if (!cfg) throw new Error('Shelly no configurado en Vercel. Revisa SHELLY_SERVER_URL, SHELLY_AUTH_KEY y SHELLY_DEVICE_ID en Production.');
+
+  if (cfg.deviceId.includes('-')) {
+    const payload = await sendShellySwitchV2(cfg, cfg.turn, cfg.deviceId);
+    return { configured: true, opened: true, payload, device_id: cfg.deviceId, release_seconds: cfg.releaseSeconds, api: 'v2' };
+  }
 
   const opened = await sendShellyRelayWithFallback(cfg, cfg.turn);
   if (cfg.releaseSeconds > 0) {
