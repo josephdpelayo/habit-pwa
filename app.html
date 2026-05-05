@@ -200,7 +200,11 @@ input,select,button,textarea{font-family:'Montserrat',sans-serif}
 /* PERFIL */
 .perfil-section{background:var(--card);border:1px solid var(--border);border-radius:6px;padding:1rem;margin-bottom:1rem}
 .perfil-section h3{font-size:15px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;margin-bottom:.75rem}
-.perfil-avatar{width:60px;height:60px;border-radius:50%;background:var(--bdim);border:2px solid var(--blue);display:flex;align-items:center;justify-content:center;font-family:'Montserrat',sans-serif;font-size:22px;font-weight:800;color:var(--bl);margin:0 auto 1rem}
+.perfil-avatar{width:60px;height:60px;border-radius:50%;background:var(--bdim);border:2px solid var(--blue);display:flex;align-items:center;justify-content:center;font-family:'Montserrat',sans-serif;font-size:22px;font-weight:800;color:var(--bl);margin:0 auto 1rem;overflow:hidden}
+.perfil-avatar img,.post-av img,.comment-av img{width:100%;height:100%;object-fit:cover;display:block}
+.avatar-picker{display:grid;grid-template-columns:1fr auto;gap:8px;align-items:center;margin-bottom:12px}
+.avatar-picker input{display:none}
+.avatar-picker .btn-sm{height:38px}
 
 /* BOOK — SLOT GRID */
 .date-nav{display:flex;align-items:center;gap:6px;margin-bottom:1rem}
@@ -345,7 +349,7 @@ input,select,button,textarea{font-family:'Montserrat',sans-serif}
 /* COMUNIDAD */
 .post-card{background:var(--card);border:1px solid var(--border);border-radius:6px;margin-bottom:10px;overflow:hidden}
 .post-hdr{display:flex;align-items:center;gap:10px;padding:12px 14px}
-.post-av{width:34px;height:34px;border-radius:50%;background:var(--bdim);border:1.5px solid var(--blue);display:flex;align-items:center;justify-content:center;font-family:'Montserrat',sans-serif;font-size:13px;font-weight:700;color:var(--bl);flex-shrink:0}
+.post-av{width:34px;height:34px;border-radius:50%;background:var(--bdim);border:1.5px solid var(--blue);display:flex;align-items:center;justify-content:center;font-family:'Montserrat',sans-serif;font-size:13px;font-weight:700;color:var(--bl);flex-shrink:0;overflow:hidden}
 .post-user{font-size:13px;font-weight:600;color:var(--white)}
 .post-time{font-size:10px;color:var(--gray);margin-top:1px}
 .post-body{padding:0 14px 12px;font-size:14px;color:var(--gl);line-height:1.6}
@@ -361,7 +365,7 @@ input,select,button,textarea{font-family:'Montserrat',sans-serif}
 .reaction-btn.active{border-color:var(--blue);background:rgba(37,99,235,.12);color:var(--bl)}
 .post-comments{border-top:1px solid var(--border);padding:10px 14px;background:rgba(255,255,255,.015)}
 .comment-row{display:flex;gap:8px;margin-bottom:8px}
-.comment-av{width:24px;height:24px;border-radius:50%;background:var(--bdim);border:1px solid var(--blue);display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;color:var(--bl);flex-shrink:0}
+.comment-av{width:24px;height:24px;border-radius:50%;background:var(--bdim);border:1px solid var(--blue);display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;color:var(--bl);flex-shrink:0;overflow:hidden}
 .comment-body{flex:1;min-width:0}
 .comment-meta{font-size:11px;font-weight:600;color:var(--white);margin-bottom:2px}
 .comment-time{font-size:10px;color:#555;font-weight:400;margin-left:4px}
@@ -510,6 +514,11 @@ input,select,button,textarea{font-family:'Montserrat',sans-serif}
         <div id="perfil-info"></div>
         <div class="divider" style="margin:.75rem 0"></div>
         <p class="slbl">Editar datos</p>
+        <div class="avatar-picker">
+          <button class="btn-sm bblue" onclick="document.getElementById('pf-avatar').click()">Subir foto de perfil</button>
+          <button class="btn-sm bred" id="pf-avatar-clear" onclick="clearProfilePhoto()" style="display:none">Quitar</button>
+          <input type="file" id="pf-avatar" accept="image/*" onchange="previewProfilePhoto(this)">
+        </div>
         <div class="field"><label>Nombre</label><input type="text" id="pf-name" placeholder="Tu nombre"></div>
         <div class="field"><label>Teléfono</label><input type="tel" id="pf-phone" placeholder="+52 55 0000 0000"></div>
         <div class="divider" style="margin:.75rem 0"></div>
@@ -871,10 +880,11 @@ input,select,button,textarea{font-family:'Montserrat',sans-serif}
 
 const SUPABASE_URL='https://pmpjteuqjusbiduevbwq.supabase.co';
 const SUPABASE_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBtcGp0ZXVxanVzYmlkdWV2YndxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc2OTI1NjUsImV4cCI6MjA5MzI2ODU2NX0.XbMzZoo2yqtrD8znLnyo_1zDfrdJAvAPj1lqGOyXnLw';
-const APP_VERSION='20260505-10';
+const APP_VERSION='20260505-11';
 const PUBLIC_APP_URL='https://habittraininghub.app/app.html';
 const PUBLIC_API_ORIGIN='https://www.habittraininghub.app';
 const sb=supabase.createClient(SUPABASE_URL,SUPABASE_KEY,{auth:{autoRefreshToken:true,persistSession:true,detectSessionInUrl:true}});
+let pendingProfilePhoto=null;
 let sbUser=null,sbProfile=null;
 
 function showLoading(msg){
@@ -895,7 +905,7 @@ function profileToLocal(p){
   return{id:p.id,name:p.name,email:sbUser?sbUser.email:'',phone:p.phone,
     role:p.role,plan:p.plan_id,planType:p.plan_type,
     credits:p.credits||0,planExpiry:p.plan_expiry,
-    accessCode:p.access_code,bookings:[],guestBookings:[],payments:[]};
+    accessCode:p.access_code,avatarUrl:p.avatar_url||'',bookings:[],guestBookings:[],payments:[]};
 }
 
 async function loadUserData(){
@@ -1009,6 +1019,9 @@ const dk=d=>d.toISOString().slice(0,10);
 const inits=n=>n.split(' ').map(w=>w[0]).join('').slice(0,2).toUpperCase();
 const isUrl=u=>u&&(u.startsWith('http')||u.startsWith('https'));
 const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+function avatarHtml(name,url,cls){
+  return '<div class="'+cls+'">'+(url?'<img src="'+esc(url)+'" alt="">':inits(name||'?'))+'</div>';
+}
 const timeSince=ts=>{const m=Math.floor((Date.now()-new Date(ts))/60000);if(m<1)return'Ahora';if(m<60)return m+'m';const h=Math.floor(m/60);if(h<24)return h+'h';return Math.floor(h/24)+'d';};
 const daysUntil=iso=>{if(!iso)return null;return Math.ceil((new Date(iso)-Date.now())/86400000);};
 const MO=['ene','feb','mar','abr','may','jun','jul','ago','sep','oct','nov','dic'];
@@ -1999,9 +2012,14 @@ async function renderPerfil(){
         curUser.credits=prof.credits||0;curUser.plan=prof.plan_id;
         curUser.planType=prof.plan_type;curUser.planExpiry=prof.plan_expiry;
         curUser.accessCode=prof.access_code;
+        curUser.avatarUrl=prof.avatar_url||'';
       }
     }catch(e){console.warn('renderPerfil load:',e);}
   }
+  const av=document.getElementById('perfil-av');
+  if(av)av.innerHTML=curUser.avatarUrl?'<img src="'+esc(curUser.avatarUrl)+'" alt="">':inits(curUser.name||'?');
+  const clearBtn=document.getElementById('pf-avatar-clear');
+  if(clearBtn)clearBtn.style.display=curUser.avatarUrl?'block':'none';
   const pfName=el.querySelector('#pf-name');
   const pfPhone=el.querySelector('#pf-phone');
   const pfCode=el.querySelector('#pf-code');
@@ -2011,7 +2029,56 @@ async function renderPerfil(){
   if(pfCode)pfCode.textContent=curUser.accessCode||'????';
   if(pfPlan)pfPlan.textContent=curUser.plan?[...PLANS.individual,...PLANS.grupal].find(p=>p.id===curUser.plan)?.name||curUser.plan:'Sin plan';
 }
-function savePerfil(){
+function prepareSquareImage(file,size=420,quality=.86){
+  return new Promise((resolve,reject)=>{
+    const reader=new FileReader();
+    reader.onload=e=>{
+      const img=new Image();
+      img.onload=()=>{
+        const side=Math.min(img.width,img.height);
+        const sx=Math.max(0,(img.width-side)/2);
+        const sy=Math.max(0,(img.height-side)/2);
+        const canvas=document.createElement('canvas');
+        canvas.width=size;canvas.height=size;
+        const ctx=canvas.getContext('2d');
+        ctx.drawImage(img,sx,sy,side,side,0,0,size,size);
+        resolve(canvas.toDataURL('image/jpeg',quality));
+      };
+      img.onerror=()=>reject(new Error('No se pudo preparar la foto'));
+      img.src=e.target.result;
+    };
+    reader.onerror=()=>reject(new Error('No se pudo leer la foto'));
+    reader.readAsDataURL(file);
+  });
+}
+async function previewProfilePhoto(input){
+  if(!input.files||!input.files[0])return;
+  const file=input.files[0];
+  if(file.size>6*1024*1024){toast('La foto no debe superar 6MB','err');input.value='';return;}
+  try{
+    pendingProfilePhoto=await prepareSquareImage(file);
+    const av=document.getElementById('perfil-av');
+    if(av)av.innerHTML='<img src="'+pendingProfilePhoto+'" alt="">';
+    const clearBtn=document.getElementById('pf-avatar-clear');
+    if(clearBtn)clearBtn.style.display='block';
+    toast('Foto lista. Presiona Guardar cambios','ok');
+  }catch(e){
+    pendingProfilePhoto=null;
+    toast(e.message||'No se pudo cargar la foto','err');
+  }
+}
+function clearProfilePhoto(){
+  pendingProfilePhoto='';
+  curUser.avatarUrl='';
+  const av=document.getElementById('perfil-av');
+  if(av)av.innerHTML=inits(curUser.name||'?');
+  const input=document.getElementById('pf-avatar');
+  if(input)input.value='';
+  const clearBtn=document.getElementById('pf-avatar-clear');
+  if(clearBtn)clearBtn.style.display='none';
+  toast('Foto quitada. Presiona Guardar cambios','ok');
+}
+async function savePerfil(){
   if(!curUser)return;
   const name=document.getElementById('pf-name').value.trim();
   const phone=document.getElementById('pf-phone').value.trim();
@@ -2026,6 +2093,22 @@ function savePerfil(){
     if(newpass!==newpass2){toast('Las contraseñas no coinciden','err');return;}
     curUser.pass=newpass;
     ['pf-oldpass','pf-newpass','pf-newpass2'].forEach(id=>document.getElementById(id).value='');
+  }
+  if(sbUser){
+    showLoading('Guardando perfil...');
+    try{
+      const patch={name,phone};
+      if(pendingProfilePhoto!==null)patch.avatar_url=pendingProfilePhoto||null;
+      const{error}=await sb.from('profiles').update(patch).eq('id',sbUser.id);
+      if(error)throw error;
+      if(pendingProfilePhoto!==null)curUser.avatarUrl=pendingProfilePhoto||'';
+      pendingProfilePhoto=null;
+      hideLoading();
+    }catch(e){
+      hideLoading();
+      toast('Error: '+e.message,'err');
+      return;
+    }
   }
   renderPerfil();toast('Cambios guardados','ok');
 }
@@ -2803,7 +2886,7 @@ async function createPost(){
   if(!text&&!imgData){toast('Escribe algo o añade una foto','err');return;}
   if(text.length>500){toast('Máximo 500 caracteres','err');return;}
   const cropped=imgData?await cropPostImage():null;
-  posts.unshift({id:'p'+Date.now(),userId:curUser.id,userName:curUser.name,ts:new Date().toISOString(),text,img:cropped||null,reactions:{fire:0,clap:0,heart:0},myReactions:{}});
+  posts.unshift({id:'p'+Date.now(),userId:curUser.id,userName:curUser.name,userAvatar:curUser.avatarUrl||'',ts:new Date().toISOString(),text,img:cropped||null,reactions:{fire:0,clap:0,heart:0},myReactions:{}});
   document.getElementById('post-text').value='';
   clearPostImg();
   renderFeed();toast('Publicado','ok');
@@ -2822,7 +2905,7 @@ function renderFeed(){
     const div=document.createElement('div');div.className='post-card';
     const rx=[{k:'fire',e:'🔥'},{k:'clap',e:'👏'},{k:'heart',e:'❤️'}];
     const rxBtns=rx.map(r=>'<button class="reaction-btn'+(post.myReactions[r.k]?' active':'')+'" onclick="toggleReaction(\''+post.id+'\',\''+r.k+'\')">'+r.e+(post.reactions[r.k]>0?' '+post.reactions[r.k]:'')+'</button>').join('');
-    div.innerHTML='<div class="post-hdr"><div class="post-av">'+inits(post.userName)+'</div><div><div class="post-user">'+post.userName+'</div><div class="post-time">'+timeSince(post.ts)+'</div></div></div>'+(post.text?'<div class="post-body">'+post.text+'</div>':'')+(post.img?'<img class="post-img-vertical" src="'+post.img+'">':'')+'<div class="post-reactions">'+rxBtns+'</div>';
+    div.innerHTML='<div class="post-hdr">'+avatarHtml(post.userName,post.userAvatar,'post-av')+'<div><div class="post-user">'+post.userName+'</div><div class="post-time">'+timeSince(post.ts)+'</div></div></div>'+(post.text?'<div class="post-body">'+post.text+'</div>':'')+(post.img?'<img class="post-img-vertical" src="'+post.img+'">':'')+'<div class="post-reactions">'+rxBtns+'</div>';
     el.appendChild(div);
   });
 }
@@ -3670,7 +3753,7 @@ async function renderUsersSb(){
       div.style.cssText='flex-direction:column;align-items:flex-start;gap:8px';
       div.innerHTML=
         '<div style="display:flex;align-items:center;gap:10px;width:100%">'
-        +'<div style="width:36px;height:36px;border-radius:50%;background:var(--bdim);border:1.5px solid var(--blue);display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:700;color:var(--bl);flex-shrink:0">'+inits(u.name)+'</div>'
+        +avatarHtml(u.name,u.avatar_url,'post-av')
         +'<div style="flex:1;min-width:0">'
         +'<div class="brow-name">'+u.name+'</div>'
         +'<div class="brow-meta">'+(u.phone||'Sin telefono')+'</div>'
@@ -4223,6 +4306,12 @@ async function renderFeedSb(){
       .order('created_at',{ascending:false}).limit(50);
     if(error)throw error;
     if(!posts||!posts.length){el.innerHTML='<div class="empty">Sin publicaciones aun. Se el primero!</div>';return;}
+    const profileIds=[...new Set((posts||[]).flatMap(p=>[p.user_id,...(p.post_comments||[]).map(c=>c.user_id)].filter(Boolean)))];
+    let avatarMap={};
+    if(profileIds.length){
+      const{data:profileRows}=await sb.from('profiles').select('id,avatar_url').in('id',profileIds);
+      avatarMap=Object.fromEntries((profileRows||[]).map(p=>[p.id,p.avatar_url||'']));
+    }
     el.innerHTML='';
     const isAdmin=sbProfile&&sbProfile.role==='admin';
     posts.forEach(post=>{
@@ -4232,7 +4321,7 @@ async function renderFeedSb(){
       const comments=(post.post_comments||[]).slice().sort((a,b)=>(a.created_at||'').localeCompare(b.created_at||''));
       const commentsHtml=comments.length
         ? comments.map(c=>'<div class="comment-row">'
-          +'<div class="comment-av">'+inits(c.user_name)+'</div>'
+          +avatarHtml(c.user_name,avatarMap[c.user_id],'comment-av')
           +'<div class="comment-body"><div class="comment-meta">'+esc(c.user_name)+'<span class="comment-time">'+timeSince(c.created_at)+'</span></div>'
           +'<div class="comment-text">'+esc(c.text_content)+'</div></div>'
           +(isAdmin?'<button data-cid="'+esc(c.id)+'" onclick="deleteCommentSb(this.dataset.cid)" style="background:none;border:none;color:var(--red);cursor:pointer;font-size:14px;padding:4px">Eliminar</button>':'')
@@ -4244,7 +4333,7 @@ async function renderFeedSb(){
         +r.e+(counts[r.k]>0?' '+counts[r.k]:'')+'</button>').join('');
       div.innerHTML=
         '<div class="post-hdr">'
-        +'<div class="post-av">'+inits(post.user_name)+'</div>'
+        +avatarHtml(post.user_name,avatarMap[post.user_id],'post-av')
         +'<div style="flex:1"><div class="post-user">'+esc(post.user_name)+'</div><div class="post-time">'+timeSince(post.created_at)+'</div></div>'
         +(isAdmin?'<button data-pid="'+post.id+'" onclick="deletePostSb(this.dataset.pid)" style="background:none;border:none;color:var(--red);cursor:pointer;font-size:18px;padding:4px">🗑</button>':'')
         +'</div>'
@@ -4355,6 +4444,12 @@ async function renderAdminFeed(){
     const{data:posts,error}=await sb.from('posts').select('*,post_reactions(user_id,reaction_type)').order('created_at',{ascending:false}).limit(100);
     if(error)throw error;
     if(!posts||!posts.length){el.innerHTML='<div class="empty">Sin publicaciones.</div>';return;}
+    const profileIds=[...new Set((posts||[]).map(p=>p.user_id).filter(Boolean))];
+    let avatarMap={};
+    if(profileIds.length){
+      const{data:profileRows}=await sb.from('profiles').select('id,avatar_url').in('id',profileIds);
+      avatarMap=Object.fromEntries((profileRows||[]).map(p=>[p.id,p.avatar_url||'']));
+    }
     el.innerHTML='<p class="slbl" style="margin-bottom:10px">'+posts.length+' publicaciones</p>';
     posts.forEach(post=>{
       const counts={fire:0,clap:0,heart:0};
@@ -4362,7 +4457,7 @@ async function renderAdminFeed(){
       const div=document.createElement('div');div.className='post-card';
       div.innerHTML=
         '<div class="post-hdr">'
-        +'<div class="post-av">'+inits(post.user_name)+'</div>'
+        +avatarHtml(post.user_name,avatarMap[post.user_id],'post-av')
         +'<div style="flex:1"><div class="post-user">'+esc(post.user_name||'Usuario')+'</div><div class="post-time">'+timeSince(post.created_at)+'</div></div>'
         +'<button data-pid="'+post.id+'" onclick="deletePostSb(this.dataset.pid)" style="background:none;border:none;color:var(--red);cursor:pointer;font-size:18px;padding:4px">🗑</button>'
         +'</div>'

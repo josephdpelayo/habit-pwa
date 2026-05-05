@@ -17,6 +17,7 @@ create table if not exists public.profiles (
   plan_type     text check (plan_type in ('individual','grupal') or plan_type is null),
   credits       integer not null default 0,
   plan_expiry   timestamptz,
+  avatar_url    text,
   created_at    timestamptz not null default now(),
   updated_at    timestamptz not null default now()
 );
