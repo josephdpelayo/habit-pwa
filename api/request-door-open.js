@@ -285,7 +285,7 @@ module.exports = async function handler(req, res) {
 
     const { data: bookings, error: bookingError } = await supabase
       .from('bookings')
-      .select('id,ds,start_idx,slots_used,time_str,status')
+      .select('id,user_id,ds,start_idx,slots_used,time_str,status,is_group,grupal_spots')
       .eq('user_id', profile.id)
       .eq('status', 'active')
       .order('ds', { ascending: true })
@@ -293,10 +293,45 @@ module.exports = async function handler(req, res) {
       .limit(20);
     if (bookingError) throw bookingError;
 
+    let accessBookings = bookings || [];
+    const { data: passes, error: passError } = await supabase
+      .from('booking_guest_passes')
+      .select('booking_id,host_user_id,status')
+      .eq('guest_user_id', profile.id)
+      .eq('status', 'active')
+      .limit(20);
+    if (passError && !String(passError.message || '').includes('booking_guest_passes')) throw passError;
+    const passRows = passError ? [] : (passes || []);
+    const passBookingIds = [...new Set(passRows.map(pass => pass.booking_id).filter(Boolean))];
+    if (passBookingIds.length) {
+      const { data: passBookings, error: passBookingError } = await supabase
+        .from('bookings')
+        .select('id,user_id,ds,start_idx,slots_used,time_str,status,is_group,grupal_spots')
+        .in('id', passBookingIds)
+        .eq('status', 'active');
+      if (passBookingError) throw passBookingError;
+      const hostIds = [...new Set(passRows.map(pass => pass.host_user_id).filter(Boolean))];
+      const { data: hosts, error: hostsError } = hostIds.length
+        ? await supabase.from('profiles').select('id,name').in('id', hostIds)
+        : { data: [], error: null };
+      if (hostsError) throw hostsError;
+      const passByBooking = new Map(passRows.map(pass => [pass.booking_id, pass]));
+      const hostById = new Map((hosts || []).map(host => [host.id, host.name || 'Un socio']));
+      accessBookings = accessBookings.concat((passBookings || []).filter(booking => booking.is_group).map(booking => {
+        const pass = passByBooking.get(booking.id) || {};
+        return {
+          ...booking,
+          guest_pass: true,
+          host_user_id: pass.host_user_id,
+          host_name: hostById.get(pass.host_user_id) || 'Un socio',
+        };
+      }));
+    }
+
     const nowMs = Date.now();
     let activeBooking = null;
     let activeWindow = null;
-    for (const booking of bookings || []) {
+    for (const booking of accessBookings || []) {
       const window = accessWindow(booking);
       if (nowMs >= window.opensMs && nowMs <= window.closesMs) {
         activeBooking = booking;
@@ -373,7 +408,7 @@ module.exports = async function handler(req, res) {
         })
         .eq('id', command.id);
       await supabase.from('admin_notifs').insert({
-        message: `Error Shelly: ${profile.name} · ${shellyError.message || 'No se pudo abrir'} · ${label}`,
+        message: `Error Shelly: ${profile.name}${activeBooking.guest_pass ? ` invitado de ${activeBooking.host_name}` : ''} · ${shellyError.message || 'No se pudo abrir'} · ${label}`,
       });
       throw shellyError;
     }
@@ -388,7 +423,7 @@ module.exports = async function handler(req, res) {
 
     const doorMsg = shellyResult.opened ? 'Puerta abierta' : 'Solicitud de apertura en cola';
     await supabase.from('admin_notifs').insert({
-      message: `${doorMsg}: ${profile.name} · ${locationExempt ? 'ubicacion omitida' : `${distance} m`} · ${label}`,
+      message: `${doorMsg}: ${profile.name}${activeBooking.guest_pass ? ` invitado de ${activeBooking.host_name}` : ''} · ${locationExempt ? 'ubicacion omitida' : `${distance} m`} · ${label}`,
     });
 
     return res.status(200).json({
@@ -403,7 +438,7 @@ module.exports = async function handler(req, res) {
       opened: shellyResult.opened,
       closes_at: new Date(activeWindow.closesMs).toISOString(),
       message: shellyResult.opened
-        ? 'Puerta abierta. Entra con cuidado.'
+        ? `Puerta abierta. ${activeBooking.guest_pass ? `Entrena con ${activeBooking.host_name}.` : 'Entra con cuidado.'}`
         : 'Apertura solicitada. Espera unos segundos junto a la puerta.',
     });
   } catch (err) {
@@ -411,6 +446,9 @@ module.exports = async function handler(req, res) {
     const msg = err && err.message ? err.message : '';
     if (msg.includes('door_commands')) {
       return res.status(500).json({ error: 'Falta correr door-commands.sql en Supabase.' });
+    }
+    if (msg.includes('booking_guest_passes')) {
+      return res.status(500).json({ error: 'Falta correr group-guest-passes.sql en Supabase.' });
     }
     if (isShellyRateLimited(msg)) {
       return res.status(429).json({
