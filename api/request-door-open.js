@@ -187,6 +187,21 @@ async function sendShellySwitchV2(cfg, turn, deviceId) {
   return payload;
 }
 
+async function sendShellySwitchV2WithFallback(cfg, turn) {
+  const ids = shellyDeviceIdVariants(cfg.deviceId);
+  let lastError = null;
+  for (const id of ids) {
+    try {
+      const payload = await sendShellySwitchV2(cfg, turn, id);
+      return { payload, deviceId: id };
+    } catch (error) {
+      lastError = error;
+      if (!isWrongShellyDeviceId(error.message)) throw error;
+    }
+  }
+  throw new Error(`${lastError ? lastError.message : 'Shelly no abrio'} · IDs probados: ${ids.join(', ')}`);
+}
+
 async function sendShellyRelayWithFallback(cfg, turn) {
   const ids = shellyDeviceIdVariants(cfg.deviceId);
   let lastError = null;
@@ -207,8 +222,8 @@ async function triggerShellyDoor() {
   if (!cfg) throw new Error('Shelly no configurado en Vercel. Revisa SHELLY_SERVER_URL, SHELLY_AUTH_KEY y SHELLY_DEVICE_ID en Production.');
 
   if (cfg.deviceId.includes('-')) {
-    const payload = await sendShellySwitchV2(cfg, cfg.turn, cfg.deviceId);
-    return { configured: true, opened: true, payload, device_id: cfg.deviceId, release_seconds: cfg.releaseSeconds, api: 'v2' };
+    const opened = await sendShellySwitchV2WithFallback(cfg, cfg.turn);
+    return { configured: true, opened: true, payload: opened.payload, device_id: opened.deviceId, release_seconds: cfg.releaseSeconds, api: 'v2' };
   }
 
   const opened = await sendShellyRelayWithFallback(cfg, cfg.turn);
