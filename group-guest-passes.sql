@@ -92,3 +92,18 @@ create policy "Admin all booking guest passes"
   on public.booking_guest_passes for all
   using (exists(select 1 from public.profiles where id=auth.uid() and role='admin'))
   with check (exists(select 1 from public.profiles where id=auth.uid() and role='admin'));
+
+-- Permite que un invitado lea la reserva grupal del titular.
+-- Sin esto el pase existe, pero la app del invitado no puede calcular su ventana de puerta.
+drop policy if exists "Guests read invited group bookings" on public.bookings;
+create policy "Guests read invited group bookings"
+  on public.bookings for select
+  using (
+    exists(
+      select 1
+      from public.booking_guest_passes p
+      where p.booking_id = public.bookings.id
+        and p.guest_user_id = auth.uid()
+        and p.status = 'active'
+    )
+  );
