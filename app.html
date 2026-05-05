@@ -6,12 +6,12 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="HABIT">
 <meta name="application-name" content="HABIT">
-<link rel="manifest" href="/manifest.json?v=20260504-17">
-<link rel="apple-touch-icon" sizes="120x120" href="/icons/icon-120.png?v=20260504-17">
-<link rel="apple-touch-icon" sizes="152x152" href="/icons/icon-152.png?v=20260504-17">
-<link rel="apple-touch-icon" sizes="167x167" href="/icons/icon-167.png?v=20260504-17">
-<link rel="apple-touch-icon" sizes="180x180" href="/icons/icon-180.png?v=20260504-17">
-<link rel="icon" type="image/png" sizes="32x32" href="/icons/icon-32.png?v=20260504-17">
+<link rel="manifest" href="/manifest.json?v=20260504-18">
+<link rel="apple-touch-icon" sizes="120x120" href="/icons/icon-120.png?v=20260504-18">
+<link rel="apple-touch-icon" sizes="152x152" href="/icons/icon-152.png?v=20260504-18">
+<link rel="apple-touch-icon" sizes="167x167" href="/icons/icon-167.png?v=20260504-18">
+<link rel="apple-touch-icon" sizes="180x180" href="/icons/icon-180.png?v=20260504-18">
+<link rel="icon" type="image/png" sizes="32x32" href="/icons/icon-32.png?v=20260504-18">
 <title>HABIT</title>
 <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
@@ -811,7 +811,7 @@ input,select,button,textarea{font-family:'Montserrat',sans-serif}
 
 const SUPABASE_URL='https://pmpjteuqjusbiduevbwq.supabase.co';
 const SUPABASE_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBtcGp0ZXVxanVzYmlkdWV2YndxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc2OTI1NjUsImV4cCI6MjA5MzI2ODU2NX0.XbMzZoo2yqtrD8znLnyo_1zDfrdJAvAPj1lqGOyXnLw';
-const APP_VERSION='20260504-17';
+const APP_VERSION='20260504-18';
 const PUBLIC_APP_URL='https://habittraininghub.app/app.html';
 const sb=supabase.createClient(SUPABASE_URL,SUPABASE_KEY,{auth:{autoRefreshToken:true,persistSession:true,detectSessionInUrl:true}});
 let sbUser=null,sbProfile=null;
@@ -1224,7 +1224,13 @@ function sendNotif(title, body){
 // Track notification state to avoid repeating
 let _notifSent={};
 let doorOpening=false;
+const DOOR_LOCATION_EXEMPT_EMAILS=['josephdpelayo@gmail.com'];
 const DOOR_ICON='<div class="ac-door-icon"><svg viewBox="0 0 24 24"><path d="M8 21h8"/><path d="M10 21V5a2 2 0 0 1 2-2h5v18"/><path d="M14 12h.01"/></svg></div>';
+
+function isDoorLocationExempt(){
+  const email=String((sbUser&&sbUser.email)||(curUser&&curUser.email)||'').toLowerCase();
+  return DOOR_LOCATION_EXEMPT_EMAILS.includes(email);
+}
 
 function getGeoPosition(){
   return new Promise((resolve,reject)=>{
@@ -1244,14 +1250,15 @@ async function requestDoorOpen(btn){
   const oldTxt=btn?btn.textContent:'';
   if(btn){btn.disabled=true;btn.textContent='Verificando...';}
   try{
-    const pos=await getGeoPosition();
+    const exempt=isDoorLocationExempt();
+    const pos=exempt?null:await getGeoPosition();
     const{data}=await sb.auth.getSession();
     const token=data&&data.session&&data.session.access_token;
     if(!token)throw new Error('Sesion expirada');
     const res=await fetch('/api/request-door-open',{
       method:'POST',
       headers:{'Content-Type':'application/json',Authorization:'Bearer '+token},
-      body:JSON.stringify({
+      body:JSON.stringify(exempt?{skipLocation:true}:{
         lat:pos.coords.latitude,
         lng:pos.coords.longitude,
         accuracy:pos.coords.accuracy
@@ -1260,7 +1267,7 @@ async function requestDoorOpen(btn){
     const out=await res.json().catch(()=>({}));
     if(!res.ok||!out.ok)throw new Error(out.message||out.error||'No se pudo abrir');
     toast(out.message||'Apertura solicitada','ok');
-    addN('Apertura solicitada · distancia '+(out.distance_m||0)+' m','success');
+    addN(out.location_exempt?'Apertura solicitada · ubicacion omitida':'Apertura solicitada · distancia '+(out.distance_m||0)+' m','success');
   }catch(e){
     const code=e&&e.code;
     let msg=e&&e.message?e.message:'No se pudo solicitar apertura';
@@ -1352,7 +1359,7 @@ async function renderAccess(){
       '<div class="ac-timer" style="color:'+timerColor+'">'+fmtCd(msToClose)+'</div>'+
       '<div class="ac-info">'+dl+' · '+timeStr+'<br>Abre la puerta desde HABIT cuando estes en la entrada.</div>'+
       '<button class="door-open-btn" onclick="requestDoorOpen(this)" '+(doorOpening?'disabled':'')+'>'+(doorOpening?'Verificando...':'Abrir puerta')+'</button>'+
-      '<div class="door-open-note">Verificamos tu ubicacion antes de enviar la apertura.</div>'+
+      '<div class="door-open-note">'+(isDoorLocationExempt()?'Cuenta de prueba: no se valida ubicacion.':'Verificamos tu ubicacion antes de enviar la apertura.')+'</div>'+
       (minLeft<=30&&minLeft>10?'<div class="ac-hint" style="color:var(--amber)">⚠️ Faltan menos de 30 minutos</div>':'')+
       (minLeft<=10?'<div class="ac-hint" style="color:var(--red)">🔴 Menos de 10 minutos · Prepárate para salir</div>':'')+
       '</div>';

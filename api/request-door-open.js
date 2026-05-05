@@ -7,6 +7,7 @@ const DEFAULT_RADIUS_M = 120;
 const DEFAULT_MAX_ACCURACY_M = 150;
 const SHELLY_DEFAULT_TURN = 'off';
 const SHELLY_DEFAULT_RELEASE_SECONDS = 5;
+const LOCATION_EXEMPT_EMAILS = ['josephdpelayo@gmail.com'];
 
 const supabase = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_SERVICE_ROLE_KEY);
 
@@ -149,27 +150,28 @@ module.exports = async function handler(req, res) {
 
     const { data: authData, error: authError } = await supabase.auth.getUser(token);
     if (authError || !authData.user) return res.status(401).json({ error: 'Sesion invalida' });
+    const locationExempt = LOCATION_EXEMPT_EMAILS.includes(String(authData.user.email || '').toLowerCase());
 
     const gym = getGymLocation();
-    if (!gym) {
+    if (!gym && !locationExempt) {
       return deny(res, 500, 'gym_location_missing', 'Falta configurar GYM_LAT y GYM_LNG en Vercel.');
     }
 
     const lat = Number(req.body && req.body.lat);
     const lng = Number(req.body && req.body.lng);
     const accuracy = Number(req.body && req.body.accuracy);
-    if (!Number.isFinite(lat) || !Number.isFinite(lng)) {
+    if (!locationExempt && (!Number.isFinite(lat) || !Number.isFinite(lng))) {
       return deny(res, 400, 'location_missing', 'No pudimos leer tu ubicacion.');
     }
-    if (Number.isFinite(accuracy) && accuracy > gym.maxAccuracy) {
+    if (!locationExempt && Number.isFinite(accuracy) && accuracy > gym.maxAccuracy) {
       return deny(res, 403, 'location_not_precise', 'Tu ubicacion no es suficientemente precisa. Acercate a la puerta e intenta de nuevo.', {
         accuracy_m: Math.round(accuracy),
         max_accuracy_m: gym.maxAccuracy,
       });
     }
 
-    const distance = Math.round(distanceMeters(lat, lng, gym.lat, gym.lng));
-    if (distance > gym.radius) {
+    const distance = locationExempt ? null : Math.round(distanceMeters(lat, lng, gym.lat, gym.lng));
+    if (!locationExempt && distance > gym.radius) {
       return deny(res, 403, 'too_far', `Estas a ${distance} m. Acercate a la puerta para abrir.`, {
         distance_m: distance,
         radius_m: gym.radius,
@@ -219,8 +221,8 @@ module.exports = async function handler(req, res) {
         access_code: profile.access_code,
         slot_str: label,
         status: 'pending',
-        lat,
-        lng,
+        lat: Number.isFinite(lat) ? lat : null,
+        lng: Number.isFinite(lng) ? lng : null,
         accuracy_m: Number.isFinite(accuracy) ? Math.round(accuracy) : null,
         distance_m: distance,
         requested_at: new Date().toISOString(),
@@ -264,7 +266,7 @@ module.exports = async function handler(req, res) {
 
     const doorMsg = shellyResult.opened ? 'Puerta abierta' : 'Solicitud de apertura en cola';
     await supabase.from('admin_notifs').insert({
-      message: `${doorMsg}: ${profile.name} · ${distance} m · ${label}`,
+      message: `${doorMsg}: ${profile.name} · ${locationExempt ? 'ubicacion omitida' : `${distance} m`} · ${label}`,
     });
 
     return res.status(200).json({
@@ -274,7 +276,8 @@ module.exports = async function handler(req, res) {
       user_name: profile.name,
       slot: label,
       distance_m: distance,
-      radius_m: gym.radius,
+      radius_m: gym ? gym.radius : null,
+      location_exempt: locationExempt,
       opened: shellyResult.opened,
       closes_at: new Date(activeWindow.closesMs).toISOString(),
       message: shellyResult.opened
