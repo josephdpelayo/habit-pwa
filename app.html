@@ -880,7 +880,7 @@ input,select,button,textarea{font-family:'Montserrat',sans-serif}
 
 const SUPABASE_URL='https://pmpjteuqjusbiduevbwq.supabase.co';
 const SUPABASE_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBtcGp0ZXVxanVzYmlkdWV2YndxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc2OTI1NjUsImV4cCI6MjA5MzI2ODU2NX0.XbMzZoo2yqtrD8znLnyo_1zDfrdJAvAPj1lqGOyXnLw';
-const APP_VERSION='20260505-12';
+const APP_VERSION='20260505-13';
 const PUBLIC_APP_URL='https://habittraininghub.app/app.html';
 const PUBLIC_API_ORIGIN='https://www.habittraininghub.app';
 const sb=supabase.createClient(SUPABASE_URL,SUPABASE_KEY,{auth:{autoRefreshToken:true,persistSession:true,detectSessionInUrl:true}});
@@ -4283,18 +4283,20 @@ async function adminCreateUserSb(){
   if(pass.length<6){toast('Contrasena minimo 6 caracteres','err');return;}
   showLoading('Creando socio...');
   try{
-    // Create auth user via Supabase Admin (uses anon key - will send confirmation email)
-    const{data,error}=await sb.auth.signUp({
-      email,password:pass,
-      options:{data:{name,phone}}
+    const{data:sessionData}=await sb.auth.getSession();
+    const token=sessionData?.session?.access_token;
+    const res=await fetch('/api/create-user',{
+      method:'POST',
+      headers:{'Content-Type':'application/json',Authorization:'Bearer '+token},
+      body:JSON.stringify({name,email,phone,password:pass})
     });
-    if(error)throw error;
-    // Wait for trigger to create profile
-    await new Promise(r=>setTimeout(r,2000));
+    const payload=await res.json().catch(()=>({}));
+    if(!res.ok)throw new Error(payload.error||'No se pudo crear el socio');
     hideLoading();
     ['nu-name','nu-email','nu-phone','nu-pass'].forEach(id=>document.getElementById(id).value='');
-    toast('Socio creado: '+name,'ok');
+    toast('Socio creado: '+name+(payload.profile?.access_code?' · '+payload.profile.access_code+'#':''),'ok');
     renderUsersSb();
+    if(document.getElementById('a-notifs')?.classList.contains('active'))renderAdminNotifsSb();
   }catch(e){
     hideLoading();
     toast('Error: '+e.message,'err');
