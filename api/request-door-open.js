@@ -127,7 +127,7 @@ async function sendShellyRelay(cfg, turn) {
 
 async function triggerShellyDoor() {
   const cfg = getShellyConfig();
-  if (!cfg) return { configured: false, opened: false };
+  if (!cfg) throw new Error('Shelly no configurado en Vercel. Revisa SHELLY_SERVER_URL, SHELLY_AUTH_KEY y SHELLY_DEVICE_ID en Production.');
 
   const payload = await sendShellyRelay(cfg, cfg.turn);
   if (cfg.releaseSeconds > 0) {
@@ -253,6 +253,9 @@ module.exports = async function handler(req, res) {
           error_message: shellyError.message || 'Error Shelly',
         })
         .eq('id', command.id);
+      await supabase.from('admin_notifs').insert({
+        message: `Error Shelly: ${profile.name} · ${shellyError.message || 'No se pudo abrir'} · ${label}`,
+      });
       throw shellyError;
     }
 
@@ -289,6 +292,9 @@ module.exports = async function handler(req, res) {
     const msg = err && err.message ? err.message : '';
     if (msg.includes('door_commands')) {
       return res.status(500).json({ error: 'Falta correr door-commands.sql en Supabase.' });
+    }
+    if (msg.includes('Shelly')) {
+      return res.status(500).json({ error: msg });
     }
     return res.status(500).json({ error: 'No se pudo solicitar apertura.' });
   }

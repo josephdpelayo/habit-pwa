@@ -6,12 +6,12 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="HABIT">
 <meta name="application-name" content="HABIT">
-<link rel="manifest" href="/manifest.json?v=20260504-21">
-<link rel="apple-touch-icon" sizes="120x120" href="/icons/icon-120.png?v=20260504-21">
-<link rel="apple-touch-icon" sizes="152x152" href="/icons/icon-152.png?v=20260504-21">
-<link rel="apple-touch-icon" sizes="167x167" href="/icons/icon-167.png?v=20260504-21">
-<link rel="apple-touch-icon" sizes="180x180" href="/icons/icon-180.png?v=20260504-21">
-<link rel="icon" type="image/png" sizes="32x32" href="/icons/icon-32.png?v=20260504-21">
+<link rel="manifest" href="/manifest.json?v=20260504-22">
+<link rel="apple-touch-icon" sizes="120x120" href="/icons/icon-120.png?v=20260504-22">
+<link rel="apple-touch-icon" sizes="152x152" href="/icons/icon-152.png?v=20260504-22">
+<link rel="apple-touch-icon" sizes="167x167" href="/icons/icon-167.png?v=20260504-22">
+<link rel="apple-touch-icon" sizes="180x180" href="/icons/icon-180.png?v=20260504-22">
+<link rel="icon" type="image/png" sizes="32x32" href="/icons/icon-32.png?v=20260504-22">
 <title>HABIT</title>
 <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
@@ -819,7 +819,7 @@ input,select,button,textarea{font-family:'Montserrat',sans-serif}
 
 const SUPABASE_URL='https://pmpjteuqjusbiduevbwq.supabase.co';
 const SUPABASE_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBtcGp0ZXVxanVzYmlkdWV2YndxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc2OTI1NjUsImV4cCI6MjA5MzI2ODU2NX0.XbMzZoo2yqtrD8znLnyo_1zDfrdJAvAPj1lqGOyXnLw';
-const APP_VERSION='20260504-21';
+const APP_VERSION='20260504-22';
 const PUBLIC_APP_URL='https://habittraininghub.app/app.html';
 const sb=supabase.createClient(SUPABASE_URL,SUPABASE_KEY,{auth:{autoRefreshToken:true,persistSession:true,detectSessionInUrl:true}});
 let sbUser=null,sbProfile=null;
@@ -1250,6 +1250,7 @@ function sendNotif(title, body){
 // Track notification state to avoid repeating
 let _notifSent={};
 let doorOpening=false;
+let doorCooldownUntil=0;
 const DOOR_LOCATION_EXEMPT_EMAILS=['josephdpelayo@gmail.com'];
 const DOOR_ICON='<div class="ac-door-icon"><svg viewBox="0 0 24 24"><path d="M8 21h8"/><path d="M10 21V5a2 2 0 0 1 2-2h5v18"/><path d="M14 12h.01"/></svg></div>';
 
@@ -1271,8 +1272,11 @@ function getGeoPosition(){
 
 async function requestDoorOpen(btn){
   if(!sbUser){toast('Debes iniciar sesion','err');return;}
+  const now=Date.now();
+  if(now<doorCooldownUntil){toast('Espera unos segundos antes de intentar otra vez','warn');return;}
   if(doorOpening)return;
   doorOpening=true;
+  doorCooldownUntil=now+12000;
   const oldTxt=btn?btn.textContent:'';
   if(btn){btn.disabled=true;btn.textContent='Verificando...';}
   try{
