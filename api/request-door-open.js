@@ -7,6 +7,8 @@ const DEFAULT_RADIUS_M = 120;
 const DEFAULT_MAX_ACCURACY_M = 150;
 const SHELLY_DEFAULT_TURN = 'off';
 const SHELLY_DEFAULT_RELEASE_SECONDS = 5;
+const DOOR_REQUEST_COOLDOWN_MS = 45 * 1000;
+const SHELLY_RATE_LIMIT_WAIT_SECONDS = 60;
 const LOCATION_EXEMPT_EMAILS = ['josephdpelayo@gmail.com'];
 
 const supabase = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_SERVICE_ROLE_KEY);
@@ -123,6 +125,10 @@ function shellyErrorMessage(payload, text, response) {
 
 function isWrongShellyDeviceId(message) {
   return /wrong_device_id/i.test(String(message || ''));
+}
+
+function isShellyRateLimited(message) {
+  return /max_req|request limit/i.test(String(message || ''));
 }
 
 async function sendShellyRelay(cfg, turn, deviceId) {
@@ -259,6 +265,27 @@ module.exports = async function handler(req, res) {
     }
 
     const label = slotLabel(activeBooking);
+    const cooldownSince = new Date(nowMs - DOOR_REQUEST_COOLDOWN_MS).toISOString();
+    const { data: recentCommand, error: recentError } = await supabase
+      .from('door_commands')
+      .select('id,status,requested_at')
+      .eq('user_id', profile.id)
+      .eq('booking_id', activeBooking.id)
+      .gte('requested_at', cooldownSince)
+      .order('requested_at', { ascending: false })
+      .limit(1)
+      .maybeSingle();
+    if (recentError) throw recentError;
+    if (recentCommand) {
+      return deny(
+        res,
+        429,
+        'door_request_cooldown',
+        'Ya enviamos una solicitud de apertura. Espera unos segundos antes de intentar de nuevo.',
+        { retry_after_seconds: Math.ceil(DOOR_REQUEST_COOLDOWN_MS / 1000) }
+      );
+    }
+
     const { data: command, error: commandError } = await supabase
       .from('door_commands')
       .insert({
@@ -339,6 +366,15 @@ module.exports = async function handler(req, res) {
     const msg = err && err.message ? err.message : '';
     if (msg.includes('door_commands')) {
       return res.status(500).json({ error: 'Falta correr door-commands.sql en Supabase.' });
+    }
+    if (isShellyRateLimited(msg)) {
+      return res.status(429).json({
+        ok: false,
+        allow: false,
+        reason: 'shelly_rate_limited',
+        error: 'Shelly recibio demasiados intentos seguidos. Espera 60 segundos y vuelve a intentar.',
+        retry_after_seconds: SHELLY_RATE_LIMIT_WAIT_SECONDS,
+      });
     }
     if (msg.includes('Shelly')) {
       return res.status(500).json({ error: msg });

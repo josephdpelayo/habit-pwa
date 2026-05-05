@@ -6,12 +6,12 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="HABIT">
 <meta name="application-name" content="HABIT">
-<link rel="manifest" href="/manifest.json?v=20260504-25">
-<link rel="apple-touch-icon" sizes="120x120" href="/icons/icon-120.png?v=20260504-25">
-<link rel="apple-touch-icon" sizes="152x152" href="/icons/icon-152.png?v=20260504-25">
-<link rel="apple-touch-icon" sizes="167x167" href="/icons/icon-167.png?v=20260504-25">
-<link rel="apple-touch-icon" sizes="180x180" href="/icons/icon-180.png?v=20260504-25">
-<link rel="icon" type="image/png" sizes="32x32" href="/icons/icon-32.png?v=20260504-25">
+<link rel="manifest" href="/manifest.json?v=20260505-01">
+<link rel="apple-touch-icon" sizes="120x120" href="/icons/icon-120.png?v=20260505-01">
+<link rel="apple-touch-icon" sizes="152x152" href="/icons/icon-152.png?v=20260505-01">
+<link rel="apple-touch-icon" sizes="167x167" href="/icons/icon-167.png?v=20260505-01">
+<link rel="apple-touch-icon" sizes="180x180" href="/icons/icon-180.png?v=20260505-01">
+<link rel="icon" type="image/png" sizes="32x32" href="/icons/icon-32.png?v=20260505-01">
 <title>HABIT</title>
 <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
@@ -819,7 +819,7 @@ input,select,button,textarea{font-family:'Montserrat',sans-serif}
 
 const SUPABASE_URL='https://pmpjteuqjusbiduevbwq.supabase.co';
 const SUPABASE_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBtcGp0ZXVxanVzYmlkdWV2YndxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc2OTI1NjUsImV4cCI6MjA5MzI2ODU2NX0.XbMzZoo2yqtrD8znLnyo_1zDfrdJAvAPj1lqGOyXnLw';
-const APP_VERSION='20260504-25';
+const APP_VERSION='20260505-01';
 const PUBLIC_APP_URL='https://habittraininghub.app/app.html';
 const PUBLIC_API_ORIGIN='https://www.habittraininghub.app';
 const sb=supabase.createClient(SUPABASE_URL,SUPABASE_KEY,{auth:{autoRefreshToken:true,persistSession:true,detectSessionInUrl:true}});
@@ -1266,6 +1266,8 @@ function sendNotif(title, body){
 let _notifSent={};
 let doorOpening=false;
 let doorCooldownUntil=0;
+const DOOR_OPEN_COOLDOWN_MS=45000;
+const DOOR_RATE_LIMIT_MS=60000;
 const DOOR_LOCATION_EXEMPT_EMAILS=['josephdpelayo@gmail.com'];
 const DOOR_ICON='<div class="ac-door-icon"><svg viewBox="0 0 24 24"><path d="M8 21h8"/><path d="M10 21V5a2 2 0 0 1 2-2h5v18"/><path d="M14 12h.01"/></svg></div>';
 
@@ -1291,10 +1293,14 @@ function getGeoPosition(){
 async function requestDoorOpen(btn){
   if(!sbUser){toast('Debes iniciar sesion','err');return;}
   const now=Date.now();
-  if(now<doorCooldownUntil){toast('Espera unos segundos antes de intentar otra vez','warn');return;}
+  if(now<doorCooldownUntil){
+    const wait=Math.max(1,Math.ceil((doorCooldownUntil-now)/1000));
+    toast('Espera '+wait+'s antes de intentar otra vez','warn');
+    return;
+  }
   if(doorOpening)return;
   doorOpening=true;
-  doorCooldownUntil=now+12000;
+  doorCooldownUntil=now+DOOR_OPEN_COOLDOWN_MS;
   const oldTxt=btn?btn.textContent:'';
   if(btn){btn.disabled=true;btn.textContent='Verificando...';}
   try{
@@ -1313,13 +1319,23 @@ async function requestDoorOpen(btn){
       })
     });
     const out=await res.json().catch(()=>({}));
-    if(!res.ok||!out.ok)throw new Error(out.message||out.error||'No se pudo abrir');
+    if(out.retry_after_seconds){
+      const retryMs=Number(out.retry_after_seconds)*1000;
+      doorCooldownUntil=Date.now()+(Number.isFinite(retryMs)&&retryMs>0?retryMs:DOOR_RATE_LIMIT_MS);
+    }
+    if(!res.ok||!out.ok){
+      const err=new Error(out.message||out.error||'No se pudo abrir');
+      err.reason=out.reason;
+      err.retryAfter=out.retry_after_seconds;
+      throw err;
+    }
     toast(out.message||'Apertura solicitada','ok');
     addN(out.location_exempt?'Apertura solicitada · ubicacion omitida':'Apertura solicitada · distancia '+(out.distance_m||0)+' m','success');
   }catch(e){
     const code=e&&e.code;
     let msg=e&&e.message?e.message:'No se pudo solicitar apertura';
     if(msg==='Failed to fetch'||msg==='Load failed')msg='No pude conectar con el servidor de puerta. Abre https://www.habittraininghub.app y vuelve a intentar.';
+    if(e&&e.retryAfter)msg+=' Intenta otra vez en '+e.retryAfter+'s.';
     if(code===1)msg='Activa permisos de ubicacion para abrir la puerta';
     if(code===2)msg='No pudimos obtener tu ubicacion';
     if(code===3)msg='La ubicacion tardo demasiado';
