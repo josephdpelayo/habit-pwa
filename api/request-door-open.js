@@ -118,6 +118,17 @@ function shellyDeviceIdVariants(deviceId) {
   return [...new Set(ids.filter(Boolean))];
 }
 
+function shellyCloudDeviceId(deviceId) {
+  const raw = String(deviceId || '').trim();
+  if (raw.includes('-')) return raw.split('-').pop();
+  return raw;
+}
+
+function shouldUseShellyV2(deviceId) {
+  const raw = String(deviceId || '').trim();
+  return raw.includes('-') || /[a-f]/i.test(raw);
+}
+
 function shellyErrorMessage(payload, text, response) {
   if (payload && payload.errors) return JSON.stringify(payload.errors);
   if (payload && payload.error) return JSON.stringify(payload.error);
@@ -187,21 +198,6 @@ async function sendShellySwitchV2(cfg, turn, deviceId) {
   return payload;
 }
 
-async function sendShellySwitchV2WithFallback(cfg, turn) {
-  const ids = shellyDeviceIdVariants(cfg.deviceId);
-  let lastError = null;
-  for (const id of ids) {
-    try {
-      const payload = await sendShellySwitchV2(cfg, turn, id);
-      return { payload, deviceId: id };
-    } catch (error) {
-      lastError = error;
-      if (!isWrongShellyDeviceId(error.message)) throw error;
-    }
-  }
-  throw new Error(`${lastError ? lastError.message : 'Shelly no abrio'} · IDs probados: ${ids.join(', ')}`);
-}
-
 async function sendShellyRelayWithFallback(cfg, turn) {
   const ids = shellyDeviceIdVariants(cfg.deviceId);
   let lastError = null;
@@ -221,9 +217,10 @@ async function triggerShellyDoor() {
   const cfg = getShellyConfig();
   if (!cfg) throw new Error('Shelly no configurado en Vercel. Revisa SHELLY_SERVER_URL, SHELLY_AUTH_KEY y SHELLY_DEVICE_ID en Production.');
 
-  if (cfg.deviceId.includes('-')) {
-    const opened = await sendShellySwitchV2WithFallback(cfg, cfg.turn);
-    return { configured: true, opened: true, payload: opened.payload, device_id: opened.deviceId, release_seconds: cfg.releaseSeconds, api: 'v2' };
+  if (shouldUseShellyV2(cfg.deviceId)) {
+    const deviceId = shellyCloudDeviceId(cfg.deviceId);
+    const payload = await sendShellySwitchV2(cfg, cfg.turn, deviceId);
+    return { configured: true, opened: true, payload, device_id: deviceId, release_seconds: cfg.releaseSeconds, api: 'v2' };
   }
 
   const opened = await sendShellyRelayWithFallback(cfg, cfg.turn);
