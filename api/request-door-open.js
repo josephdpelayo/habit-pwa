@@ -9,7 +9,7 @@ const SHELLY_DEFAULT_TURN = 'off';
 const SHELLY_DEFAULT_RELEASE_SECONDS = 5;
 const DOOR_REQUEST_COOLDOWN_MS = 5 * 1000;
 const SHELLY_RATE_LIMIT_WAIT_SECONDS = 60;
-const LOCATION_EXEMPT_EMAILS = ['josephdpelayo@gmail.com'];
+const LOCATION_EXEMPT_EMAILS = ['josephdpelayo@gmail.com', 'habit1@habit.com'];
 
 const supabase = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_SERVICE_ROLE_KEY);
 
