@@ -407,7 +407,7 @@ body.reception-mode{background:#050505}
 .reception-shell{height:100%;display:flex;flex-direction:column;padding:clamp(24px,3vw,48px);gap:clamp(18px,2vw,30px)}
 .reception-top{display:grid;grid-template-columns:1fr auto;gap:28px;align-items:start;border-bottom:1px solid rgba(255,255,255,.08);padding-bottom:clamp(18px,2vw,28px)}
 .reception-brand{display:flex;align-items:center;gap:16px;min-width:0}
-.reception-brand img{width:54px;height:54px;object-fit:contain}
+.reception-brand img{width:auto;height:clamp(100px,11vw,190px);object-fit:contain}
 .reception-brand-title{font-size:clamp(28px,3vw,52px);font-weight:900;letter-spacing:.12em;line-height:1}
 .reception-brand-sub{font-size:clamp(10px,1vw,15px);color:var(--bl);letter-spacing:.22em;font-weight:700;margin-top:6px;text-transform:uppercase}
 .reception-clock{justify-self:end;width:min(68vw,1120px)}
@@ -416,8 +416,8 @@ body.reception-mode{background:#050505}
 .digital-week-list{position:relative;display:flex;flex-direction:column;gap:2px;color:#f4f7fb;font-size:clamp(16px,1.35vw,25px);font-weight:900;line-height:1.05;letter-spacing:.08em}
 .digital-week-list span{opacity:.92}
 .digital-week-list span.active{color:#38ff55;text-shadow:0 0 9px rgba(56,255,85,.72)}
-.digital-time-wrap{position:relative;display:flex;justify-content:center;align-items:center;min-width:0;min-height:clamp(96px,8.2vw,146px)}
-.digital-time-ghost,.digital-time{font-family:'Montserrat',sans-serif;font-size:clamp(78px,7.8vw,148px);font-weight:400;line-height:.82;letter-spacing:.01em;font-variant-numeric:tabular-nums}
+.digital-time-wrap{position:relative;display:flex;justify-content:center;align-items:center;min-width:0;min-height:clamp(120px,11vw,200px)}
+.digital-time-ghost,.digital-time{font-family:'Montserrat',sans-serif;font-size:clamp(110px,11vw,200px);font-weight:400;line-height:.90;letter-spacing:.01em;font-variant-numeric:tabular-nums}
 .digital-time-ghost{position:absolute;color:rgba(255,255,255,.06);text-shadow:none}
 .digital-time{position:relative;color:var(--bl);text-shadow:0 0 10px rgba(59,130,246,.82),0 0 24px rgba(37,99,235,.48)}
 .digital-side{position:relative;display:grid;grid-template-rows:auto auto auto;gap:8px;justify-items:end;align-items:center;color:#38ff55;font-family:'Courier New','Lucida Console',monospace;font-weight:900;text-shadow:0 0 10px rgba(56,255,85,.65)}
@@ -703,10 +703,6 @@ body.reception-mode{background:#050505}
     <div class="reception-top">
       <div class="reception-brand">
         <img src="icons/logo-original.png" alt="">
-        <div>
-          <div class="reception-brand-title">HABIT</div>
-          <div class="reception-brand-sub">Reception Display</div>
-        </div>
       </div>
       <div class="reception-clock">
         <div class="digital-clock-panel">
