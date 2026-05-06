@@ -4298,10 +4298,10 @@ async function adminCreateUserSb(){
   try{
     const{data:sessionData}=await sb.auth.getSession();
     const token=sessionData?.session?.access_token;
-    const res=await fetch('/api/create-user',{
+    const res=await fetch('/api/search-users',{
       method:'POST',
       headers:{'Content-Type':'application/json',Authorization:'Bearer '+token},
-      body:JSON.stringify({name,email,phone,password:pass})
+      body:JSON.stringify({action:'create',name,email,phone,password:pass})
     });
     const payload=await res.json().catch(()=>({}));
     if(!res.ok)throw new Error(payload.error||'No se pudo crear el socio');
