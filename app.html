@@ -982,7 +982,7 @@ async function initApp(){
 // Each slot has capacity 4.
 // No slot affects any other slot's count — they are fully independent.
 
-const CAP=4, SLOTS_PER_HOUR=2, TOTAL_SLOTS=48, SLOT_DUR=30, BOOKING_SLOTS=3, BOOKING_SLOTS_SHORT=2, BOOKING_ADVANCE_DAYS=7; // 3×30=90min, 2×30=60min
+const CAP=4, SLOTS_PER_HOUR=2, TOTAL_SLOTS=48, SLOT_DUR=30, BOOKING_SLOTS=3, BOOKING_SLOTS_SHORT=2, BOOKING_ADVANCE_DAYS=7, ADMIN_BLOCK_ADVANCE_DAYS=14; // 3×30=90min, 2×30=60min
 const BEFORE_MIN=10, CANCEL_H=12;
 const MXN=v=>'$'+Number(v).toLocaleString('es-MX');
 
@@ -1938,7 +1938,7 @@ function showAdmin(){
   document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
   const adm=document.getElementById('s-admin');
   if(adm)adm.classList.add('active');
-  const d=document.getElementById('adm-date');if(d){d.value=mazToday();d.min=mazToday();d.max=addDaysDS(mazToday(),7);}
+  const d=document.getElementById('adm-date');if(d){d.value=mazToday();d.min=mazToday();d.max=addDaysDS(mazToday(),ADMIN_BLOCK_ADVANCE_DAYS);}
   loadBoardsSb().then(()=>admTab('dash'));
 }
 
@@ -4271,7 +4271,7 @@ function showAdmin(){
   document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
   const adm=document.getElementById('s-admin');
   if(adm)adm.classList.add('active');
-  const d=document.getElementById('adm-date');if(d){d.value=mazToday();d.min=mazToday();d.max=addDaysDS(mazToday(),7);}
+  const d=document.getElementById('adm-date');if(d){d.value=mazToday();d.min=mazToday();d.max=addDaysDS(mazToday(),ADMIN_BLOCK_ADVANCE_DAYS);}
   admTab('dash');
   // Load boards from Supabase
   loadBoardsSb();
