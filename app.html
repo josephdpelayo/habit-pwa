@@ -982,7 +982,7 @@ async function initApp(){
 // Each slot has capacity 4.
 // No slot affects any other slot's count — they are fully independent.
 
-const CAP=4, SLOTS_PER_HOUR=2, TOTAL_SLOTS=48, SLOT_DUR=30, BOOKING_SLOTS=3, BOOKING_SLOTS_SHORT=2; // 3×30=90min, 2×30=60min
+const CAP=4, SLOTS_PER_HOUR=2, TOTAL_SLOTS=48, SLOT_DUR=30, BOOKING_SLOTS=3, BOOKING_SLOTS_SHORT=2, BOOKING_ADVANCE_DAYS=7; // 3×30=90min, 2×30=60min
 const BEFORE_MIN=10, CANCEL_H=12;
 const MXN=v=>'$'+Number(v).toLocaleString('es-MX');
 
@@ -1131,7 +1131,7 @@ function fmtD(d){
   return DN[dow]+' '+p.d+' '+MO[p.m-1];
 }
 function fmtDS(ds){const p=parseDS(ds),dow=new Date(Date.UTC(p.y,p.m-1,p.d,12,0,0)).getUTCDay();return DN[dow]+' '+p.d+' '+MO[p.m-1];}
-function maxD(){return dateObjFromDS(addDaysDS(mazToday(),3));}
+function maxD(){return dateObjFromDS(addDaysDS(mazToday(),BOOKING_ADVANCE_DAYS));}
 function getYTId(url){if(!url)return null;const m=String(url).match(/(?:youtu\.be\/|youtube\.com\/(?:watch\?v=|embed\/|shorts\/))([A-Za-z0-9_-]{11})/);return m?m[1]:null;}
 function getDriveId(url){
   if(!url)return null;
@@ -2247,7 +2247,7 @@ function renderMembershipStatus(){
 function changeDay(delta){
   const nd=new Date(curDate);nd.setDate(nd.getDate()+delta);
   const nds=dk(nd);
-  if(nds<mazToday()||nds>addDaysDS(mazToday(),3))return;
+  if(nds<mazToday()||nds>addDaysDS(mazToday(),BOOKING_ADVANCE_DAYS))return;
   curDate=nd;clearSel();renderBook();
 }
 function clearSel(){selStartIdx=null;selShort=false;renderBook();}
@@ -2261,7 +2261,7 @@ async function renderBook(){
     selShort=false;
   }
   document.getElementById('pb').disabled=curDS<=mazToday();
-  document.getElementById('nb').disabled=curDS>=addDaysDS(mazToday(),3);
+  document.getElementById('nb').disabled=curDS>=addDaysDS(mazToday(),BOOKING_ADVANCE_DAYS);
   document.getElementById('dp').textContent=fmtD(curDate);
   const ds=curDS;
   const nextDs=addDaysDS(ds,1);
@@ -3864,6 +3864,16 @@ async function adminLogManualPayment(uid,name,plan,amount,method,note){
   await sb.from('admin_notifs').insert({message:'Registro manual: '+methodLabel+' · '+name+' · '+paymentPayload.plan_name+' · '+MXN(paymentPayload.amount)});
 }
 
+async function adminTryLogManualPayment(uid,name,plan,amount,method,note){
+  try{
+    await adminLogManualPayment(uid,name,plan,amount,method,note);
+    return true;
+  }catch(e){
+    console.warn('Manual payment log failed:',e);
+    return false;
+  }
+}
+
 async function adminGrantSelectedPlanSb(uid,name){
   const planId=(document.getElementById('grant-plan-id')||{}).value;
   const plan=adminPlanList().find(p=>p.id===planId);
@@ -4002,13 +4012,14 @@ async function saveUserEditSb(uid){
       || oldExpiry!==(expiryVal||'');
 
     // Update profile
-    await sb.from('profiles').update({
+    const{error:updateErr}=await sb.from('profiles').update({
       name,phone,
       plan_id:manualPlanId||null,
       plan_type:plan?plan.type:null,
       credits,
       plan_expiry:expiry
     }).eq('id',uid);
+    if(updateErr)throw updateErr;
 
     // Update board assignments
     const checkboxes=document.querySelectorAll('#edit-user-modal .assign-check');
@@ -4025,7 +4036,8 @@ async function saveUserEditSb(uid){
         membershipChanged?'Visitas: '+Number(before.credits||0)+' -> '+credits:'',
         membershipChanged?'Vence: '+(oldExpiry||'sin fecha')+' -> '+(expiryVal||'sin fecha'):''
       ].filter(Boolean).join(' · ');
-      await adminLogManualPayment(uid,name,plan||{id:'manual',name:'Ajuste manual',type:'manual'},payAmount,payMethod,(payNote?payNote+' · ':'')+changeNote);
+      const logged=await adminTryLogManualPayment(uid,name,plan||{id:'manual',name:'Ajuste manual',type:'manual'},payAmount,payMethod,(payNote?payNote+' · ':'')+changeNote);
+      if(!logged)toast('Cambios guardados, pero no se pudo registrar en pagos','warn');
     }
 
     hideLoading();
@@ -4065,23 +4077,24 @@ async function adminAddCreditsSb(uid){
 }
 
 async function adminGrantCourtesySb(uid,name){
-  if(!confirm('Activar 3 visitas de cortesia para '+name+' por 30 dias?'))return;
+  if(!confirm('Agregar 3 visitas de cortesia a '+name+'?'))return;
   showLoading('Activando cortesia...');
   try{
-    const{data:prof,error}=await sb.from('profiles').select('credits,name').eq('id',uid).single();
+    const{data:prof,error}=await sb.from('profiles').select('credits,name,plan_id,plan_type,plan_expiry').eq('id',uid).single();
     if(error)throw error;
     const newCredits=Math.min(999,(prof.credits||0)+3);
-    const expiry=mazPlanExpiryIso(30);
-    const{error:e2}=await sb.from('profiles').update({
-      plan_id:'i1',
-      plan_type:'individual',
-      credits:newCredits,
-      plan_expiry:expiry
-    }).eq('id',uid);
+    const patch={credits:newCredits};
+    const expired=prof.plan_expiry&&new Date(prof.plan_expiry)<new Date();
+    if(!prof.plan_id||expired){
+      patch.plan_id='i1';
+      patch.plan_type='individual';
+      patch.plan_expiry=mazPlanExpiryIso(30);
+    }
+    const{error:e2}=await sb.from('profiles').update(patch).eq('id',uid);
     if(e2)throw e2;
-    await adminLogManualPayment(uid,name,{id:'courtesy3',name:'Cortesia 3 visitas',type:'individual'},0,'courtesy','3 visitas de cortesia por 30 dias');
+    const logged=await adminTryLogManualPayment(uid,name,{id:'courtesy3',name:'Cortesia 3 visitas',type:'individual'},0,'courtesy','3 visitas de cortesia');
     hideLoading();
-    toast('Cortesia activada: '+newCredits+' visitas','ok');
+    toast('Cortesia activada: '+newCredits+' visitas'+(logged?'':' · sin registro en pagos'),'ok');
     renderUsersSb();
   }catch(e){
     hideLoading();
