@@ -399,6 +399,47 @@ input,select,button,textarea{font-family:'Montserrat',sans-serif}
 .wsec{font-size:10px;font-weight:700;color:var(--amber);letter-spacing:.1em;text-transform:uppercase;padding:8px 0 4px}
 .adm-search{width:100%;background:var(--card);border:1px solid var(--border);border-radius:4px;padding:12px;font-size:16px;color:var(--white);outline:none;margin-bottom:1rem;-webkit-appearance:none}
 .adm-date{width:100%;background:var(--card);border:1px solid var(--border);border-radius:4px;padding:12px;font-size:16px;color:var(--white);outline:none;margin-bottom:1rem;color-scheme:dark;-webkit-appearance:none}
+
+/* RECEPTION TV */
+body.reception-mode .app{max-width:none;width:100vw;height:100vh}
+body.reception-mode{background:#050505}
+.reception-screen{background:radial-gradient(circle at 50% -20%,rgba(37,99,235,.18),transparent 46%),var(--black);height:100vh;width:100vw;overflow:hidden}
+.reception-shell{height:100%;display:flex;flex-direction:column;padding:clamp(24px,3vw,48px);gap:clamp(18px,2vw,30px)}
+.reception-top{display:grid;grid-template-columns:1fr auto;gap:28px;align-items:start;border-bottom:1px solid rgba(255,255,255,.08);padding-bottom:clamp(18px,2vw,28px)}
+.reception-brand{display:flex;align-items:center;gap:16px;min-width:0}
+.reception-brand img{width:54px;height:54px;object-fit:contain}
+.reception-brand-title{font-size:clamp(28px,3vw,52px);font-weight:900;letter-spacing:.12em;line-height:1}
+.reception-brand-sub{font-size:clamp(10px,1vw,15px);color:var(--bl);letter-spacing:.22em;font-weight:700;margin-top:6px;text-transform:uppercase}
+.reception-clock{text-align:right}
+.reception-time{font-size:clamp(58px,8vw,132px);font-weight:900;line-height:.9;letter-spacing:.02em;font-variant-numeric:tabular-nums}
+.reception-date{font-size:clamp(16px,1.4vw,26px);color:var(--gray);font-weight:600;margin-top:10px;text-transform:uppercase;letter-spacing:.08em}
+.reception-main{flex:1;min-height:0;display:grid;grid-template-columns:minmax(260px,340px) 1fr;gap:clamp(18px,2vw,30px)}
+.reception-side{border-right:1px solid rgba(255,255,255,.08);padding-right:clamp(18px,2vw,30px);display:flex;flex-direction:column;gap:16px}
+.reception-kpi{background:rgba(255,255,255,.035);border:1px solid rgba(255,255,255,.08);border-radius:8px;padding:20px}
+.reception-kpi-label{font-size:12px;color:var(--gray);font-weight:800;letter-spacing:.14em;text-transform:uppercase}
+.reception-kpi-value{font-size:74px;font-weight:900;line-height:1;margin-top:8px;font-variant-numeric:tabular-nums}
+.reception-legend{display:flex;flex-direction:column;gap:10px;color:var(--gl);font-size:15px;line-height:1.4}
+.reception-legend-row{display:flex;align-items:center;gap:10px}
+.reception-dot{width:10px;height:10px;border-radius:50%;background:var(--green);box-shadow:0 0 18px currentColor}
+.reception-dot.warn{background:var(--amber)}.reception-dot.danger{background:var(--red)}
+.reception-updated{margin-top:auto;color:var(--gray);font-size:13px;line-height:1.5}
+.reception-list-wrap{min-width:0;display:flex;flex-direction:column;gap:14px;overflow:hidden}
+.reception-list-head{display:flex;align-items:end;justify-content:space-between;gap:16px}
+.reception-title{font-size:clamp(22px,2.2vw,38px);font-weight:800;letter-spacing:.04em}
+.reception-status{font-size:clamp(13px,1.1vw,18px);color:var(--gray);font-weight:700;text-transform:uppercase;letter-spacing:.12em}
+.reception-list{overflow:hidden;display:grid;grid-template-columns:repeat(auto-fit,minmax(360px,1fr));align-content:start;gap:14px;padding-right:4px}
+.reception-card{background:rgba(16,185,129,.1);border:1px solid rgba(16,185,129,.36);border-left:7px solid var(--green);border-radius:8px;padding:18px 20px;display:grid;grid-template-columns:1fr auto;gap:18px;align-items:center;min-height:112px}
+.reception-card.warn{background:rgba(245,158,11,.11);border-color:rgba(245,158,11,.42);border-left-color:var(--amber)}
+.reception-card.danger{background:rgba(239,68,68,.12);border-color:rgba(239,68,68,.48);border-left-color:var(--red)}
+.reception-name{font-size:clamp(24px,2.1vw,38px);font-weight:800;line-height:1.12;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.reception-meta{margin-top:8px;color:var(--gl);font-size:clamp(13px,1.1vw,17px);font-weight:600}
+.reception-badge{display:inline-flex;align-items:center;border:1px solid rgba(255,255,255,.16);border-radius:999px;padding:4px 10px;margin-left:8px;color:var(--gray);font-size:12px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;vertical-align:middle}
+.reception-countdown{text-align:right;font-variant-numeric:tabular-nums}
+.reception-min{font-size:clamp(34px,3.5vw,66px);font-weight:900;line-height:1;color:var(--green)}
+.reception-card.warn .reception-min{color:var(--amber)}.reception-card.danger .reception-min{color:var(--red)}
+.reception-min-label{font-size:12px;color:var(--gray);font-weight:800;letter-spacing:.12em;text-transform:uppercase;margin-top:4px}
+.reception-empty{height:100%;display:flex;align-items:center;justify-content:center;text-align:center;color:var(--gray);border:1px dashed rgba(255,255,255,.12);border-radius:10px;font-size:clamp(24px,2.5vw,44px);font-weight:700;line-height:1.35}
+.reception-error{color:var(--red)}
 .new-board-form{background:var(--card);border:1px solid var(--border);border-radius:6px;padding:1rem;margin-bottom:1rem}
 .new-board-form h3{font-family:'Montserrat',sans-serif;font-size:16px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;margin-bottom:.75rem}
 .ex-add-row{display:flex;gap:6px}
@@ -641,6 +682,49 @@ input,select,button,textarea{font-family:'Montserrat',sans-serif}
   </div>
 </div>
 
+<!-- RECEPTION TV -->
+<div id="s-reception" class="screen reception-screen">
+  <div class="reception-shell">
+    <div class="reception-top">
+      <div class="reception-brand">
+        <img src="icons/logo-original.png" alt="">
+        <div>
+          <div class="reception-brand-title">HABIT</div>
+          <div class="reception-brand-sub">Reception Display</div>
+        </div>
+      </div>
+      <div class="reception-clock">
+        <div id="reception-time" class="reception-time">--:--</div>
+        <div id="reception-date" class="reception-date">Cargando</div>
+      </div>
+    </div>
+    <div class="reception-main">
+      <aside class="reception-side">
+        <div class="reception-kpi">
+          <div class="reception-kpi-label">Clientes autorizados</div>
+          <div id="reception-count" class="reception-kpi-value">0</div>
+        </div>
+        <div class="reception-legend">
+          <div class="reception-legend-row"><span class="reception-dot"></span><span>Sesión activa</span></div>
+          <div class="reception-legend-row"><span class="reception-dot warn"></span><span>Menos de 30 min</span></div>
+          <div class="reception-legend-row"><span class="reception-dot danger"></span><span>Menos de 10 min</span></div>
+        </div>
+        <div id="reception-updated" class="reception-updated">Sin sincronizar</div>
+        <button class="btn-ghost" onclick="doLogout()">Salir</button>
+      </aside>
+      <section class="reception-list-wrap">
+        <div class="reception-list-head">
+          <div class="reception-title">Sesiones activas</div>
+          <div id="reception-status" class="reception-status">En vivo</div>
+        </div>
+        <div id="reception-list" class="reception-list">
+          <div class="reception-empty">Cargando sesiones activas...</div>
+        </div>
+      </section>
+    </div>
+  </div>
+</div>
+
 <!-- ADMIN -->
 <div id="s-admin" class="screen">
   <div class="hdr">
@@ -692,7 +776,13 @@ input,select,button,textarea{font-family:'Montserrat',sans-serif}
         <div class="field"><label>Correo</label><input type="email" id="nu-email" placeholder="correo@ejemplo.com"></div>
         <div class="field"><label>Teléfono</label><input type="tel" id="nu-phone" placeholder="+52 55 0000 0000"></div>
         <div class="field"><label>Contraseña temporal</label><input type="text" id="nu-pass" placeholder="Mínimo 6 caracteres"></div>
-        <button class="btn" onclick="adminCreateUser()">Crear socio</button>
+        <button class="btn" onclick="adminCreateUserSb()">Crear socio</button>
+      </div>
+      <div style="background:var(--card);border:1px solid var(--border);border-radius:6px;padding:1rem;margin-bottom:1rem">
+        <p class="slbl" style="margin-bottom:8px">Cuenta recepción</p>
+        <div class="field"><label>Correo</label><input type="email" id="rc-email" placeholder="recepcion@habittraininghub.app"></div>
+        <div class="field"><label>Contraseña</label><input type="text" id="rc-pass" placeholder="Mínimo 6 caracteres"></div>
+        <button class="btn-ghost" onclick="adminCreateReceptionUserSb()">Crear cuenta recepción</button>
       </div>
       <input class="adm-search" id="user-search" placeholder="Buscar por nombre o correo..." oninput="renderUsersSb()">
       <div id="user-list"></div>
@@ -927,6 +1017,8 @@ async function loadUserData(){
 }
 
 function showMainSb(){
+  stopReception();
+  document.body.classList.remove('reception-mode');
   document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
   const main=document.getElementById('s-main');
   if(main)main.classList.add('active');
@@ -963,6 +1055,7 @@ async function initApp(){
       await loadUserData();
       hideLoading();
       if(sbProfile.role==='admin')showAdmin();
+      else if(sbProfile.role==='reception')showReception();
       else{
         showMainSb();
         handleStripeReturn();
@@ -1203,7 +1296,8 @@ let slots30={};
 let waitlists={}; // waitlists[ds+'_'+slotIdx] = [{userId,name,...}]
 let payments=[], boards=[], scores={}, posts=[], accessLog=[], adminNotifs=[];
 let curUser=null, curDate=dateObjFromDS(mazToday()), selStartIdx=null, selShort=false, selPlan=null, selPT='individual', selectedRoutineBoardId=null;
-let accInt=null, userNotifInt=null, userNotifBootstrapped=false, userNotifSeen=new Set(), notifs=[], expandedVideos={}, logScoreCtx=null;
+let accInt=null, userNotifInt=null, receptionClockInt=null, receptionDataInt=null, userNotifBootstrapped=false, userNotifSeen=new Set(), notifs=[], expandedVideos={}, logScoreCtx=null;
+let receptionSessions=[], receptionLastSync=null, receptionLoading=false;
 let guestFavorites=[], guestSelected=new Set(), guestSavedActive=new Set(), guestOriginalFavoriteIds=new Set(), guestDeletedIds=new Set(), guestSearchResults=[], guestActiveBookingId=null, guestSearchTimer=null, guestDirty=false, guestCollapsed=true, guestQuery='';
 
 // ── SLOT DATA ACCESS ──
@@ -1780,6 +1874,7 @@ async function doLogin(){
     await loadUserData();
     hideLoading();
     if(sbProfile.role==='admin')showAdmin();
+    else if(sbProfile.role==='reception')showReception();
     else showMainSb();
   }catch(e){
     hideLoading();
@@ -1926,20 +2021,119 @@ async function completeRegister(reg){
 async function doLogout(){
   curUser=null;sbUser=null;sbProfile=null;
   selStartIdx=null;selShort=false;selPlan=null;notifs=[];
+  stopReception();
   if(accInt){clearInterval(accInt);accInt=null;}
   if(userNotifInt){clearInterval(userNotifInt);userNotifInt=null;}
   userNotifBootstrapped=false;userNotifSeen=new Set();
   await sb.auth.signOut().catch(()=>{});
+  document.body.classList.remove('reception-mode');
   document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
   document.getElementById('s-auth').classList.add('active');
 }
 function showMain(){showMainSb();}
 function showAdmin(){
+  stopReception();
+  document.body.classList.remove('reception-mode');
   document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
   const adm=document.getElementById('s-admin');
   if(adm)adm.classList.add('active');
   const d=document.getElementById('adm-date');if(d){d.value=mazToday();d.min=mazToday();d.max=addDaysDS(mazToday(),ADMIN_BLOCK_ADVANCE_DAYS);}
   loadBoardsSb().then(()=>admTab('dash'));
+}
+
+function stopReception(){
+  if(receptionClockInt){clearInterval(receptionClockInt);receptionClockInt=null;}
+  if(receptionDataInt){clearInterval(receptionDataInt);receptionDataInt=null;}
+  receptionLoading=false;
+}
+
+function showReception(){
+  if(accInt){clearInterval(accInt);accInt=null;}
+  if(userNotifInt){clearInterval(userNotifInt);userNotifInt=null;}
+  document.body.classList.add('reception-mode');
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  const rec=document.getElementById('s-reception');
+  if(rec)rec.classList.add('active');
+  updateReceptionClock();
+  renderReceptionList();
+  loadReceptionSessions();
+  if(receptionClockInt)clearInterval(receptionClockInt);
+  if(receptionDataInt)clearInterval(receptionDataInt);
+  receptionClockInt=setInterval(()=>{updateReceptionClock();renderReceptionList();},1000);
+  receptionDataInt=setInterval(loadReceptionSessions,15000);
+}
+
+function updateReceptionClock(){
+  const now=new Date();
+  const timeEl=document.getElementById('reception-time');
+  const dateEl=document.getElementById('reception-date');
+  if(timeEl)timeEl.textContent=now.toLocaleTimeString('es-MX',{timeZone:MAZ_TZ,hour:'2-digit',minute:'2-digit',hourCycle:'h23'});
+  if(dateEl)dateEl.textContent=now.toLocaleDateString('es-MX',{timeZone:MAZ_TZ,weekday:'long',day:'numeric',month:'long'});
+}
+
+function receptionCardClass(minutesLeft){
+  if(minutesLeft<=10)return'danger';
+  if(minutesLeft<=30)return'warn';
+  return'';
+}
+
+function renderReceptionList(errorMsg){
+  const list=document.getElementById('reception-list');
+  const count=document.getElementById('reception-count');
+  const updated=document.getElementById('reception-updated');
+  const status=document.getElementById('reception-status');
+  if(!list)return;
+  const nowMs=Date.now();
+  const active=(receptionSessions||[]).map(s=>{
+    const endMs=s.ends_at?new Date(s.ends_at).getTime():nowMs+(Number(s.minutes_left)||0)*60000;
+    return{...s,minutes_left:Math.max(0,Math.ceil((endMs-nowMs)/60000))};
+  }).filter(s=>s.minutes_left>0);
+  receptionSessions=active;
+  if(count)count.textContent=String(active.length);
+  if(status)status.textContent=errorMsg?'Sin conexión':'En vivo';
+  if(updated)updated.innerHTML=receptionLastSync
+    ? 'Última sincronización<br>'+fmtDateTimeMaz(receptionLastSync)
+    : 'Sin sincronizar';
+  if(errorMsg){
+    list.innerHTML='<div class="reception-empty reception-error">'+esc(errorMsg)+'</div>';
+    return;
+  }
+  if(!active.length){
+    list.innerHTML='<div class="reception-empty">No hay sesiones activas en este momento.</div>';
+    return;
+  }
+  list.innerHTML=active.map(s=>{
+    const cls=receptionCardClass(s.minutes_left);
+    const badge=s.kind==='guest'?'<span class="reception-badge">Invitado</span>':(s.is_group?'<span class="reception-badge">Grupal</span>':'');
+    return '<div class="reception-card '+cls+'">'
+      +'<div><div class="reception-name">'+esc(s.name||'Socio')+badge+'</div>'
+      +'<div class="reception-meta">'+esc(s.time_str||fmtTimeRange(s.start_idx,s.slots_used||3))+' · '+(s.dur_min||90)+' min</div></div>'
+      +'<div class="reception-countdown"><div class="reception-min">'+s.minutes_left+'</div><div class="reception-min-label">min restantes</div></div>'
+      +'</div>';
+  }).join('');
+}
+
+async function loadReceptionSessions(){
+  if(receptionLoading||!sbUser)return;
+  receptionLoading=true;
+  try{
+    const{data:sessionData}=await sb.auth.getSession();
+    const token=sessionData?.session?.access_token;
+    const res=await fetch('/api/search-users',{
+      method:'POST',
+      headers:{'Content-Type':'application/json',Authorization:'Bearer '+token},
+      body:JSON.stringify({action:'reception-active'})
+    });
+    const payload=await res.json().catch(()=>({}));
+    if(!res.ok)throw new Error(payload.error||'No se pudieron cargar las sesiones');
+    receptionSessions=payload.sessions||[];
+    receptionLastSync=payload.now||new Date().toISOString();
+    renderReceptionList();
+  }catch(e){
+    renderReceptionList(e.message||'No se pudieron cargar las sesiones');
+  }finally{
+    receptionLoading=false;
+  }
 }
 
 // ── NAVIGATION ──
@@ -3736,7 +3930,7 @@ async function renderUsersSb(){
     const{data:allU,error}=await sb.from('profiles').select('*').order('created_at');
     if(error)throw error;
     console.log('Profiles loaded:',allU);
-    const filtered=(allU||[]).filter(u=>u.role!=='admin'&&(!q||((u.name||'').toLowerCase().includes(q)||(u.phone||'').includes(q))));
+    const filtered=(allU||[]).filter(u=>u.role!=='admin'&&u.role!=='reception'&&(!q||((u.name||'').toLowerCase().includes(q)||(u.phone||'').includes(q))));
     if(!filtered.length){
       list.innerHTML='<div class="empty">Sin usuarios'+(allU&&allU.length?' (todos son admin)':' — verifica RLS en Supabase')+'.</div>';
       return;
@@ -4268,6 +4462,8 @@ async function loadBoardsSb(){
 // Override showAdmin to load Supabase data
 const _origShowAdmin=showAdmin;
 function showAdmin(){
+  stopReception();
+  document.body.classList.remove('reception-mode');
   document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
   const adm=document.getElementById('s-admin');
   if(adm)adm.classList.add('active');
@@ -4308,6 +4504,33 @@ async function adminCreateUserSb(){
     hideLoading();
     ['nu-name','nu-email','nu-phone','nu-pass'].forEach(id=>document.getElementById(id).value='');
     toast('Socio creado: '+name+(payload.profile?.access_code?' · '+payload.profile.access_code+'#':''),'ok');
+    renderUsersSb();
+    if(document.getElementById('a-notifs')?.classList.contains('active'))renderAdminNotifsSb();
+  }catch(e){
+    hideLoading();
+    toast('Error: '+e.message,'err');
+  }
+}
+
+async function adminCreateReceptionUserSb(){
+  const email=document.getElementById('rc-email').value.trim();
+  const pass=document.getElementById('rc-pass').value.trim();
+  if(!email||!pass){toast('Completa correo y contraseña de recepción','err');return;}
+  if(pass.length<6){toast('Contraseña mínimo 6 caracteres','err');return;}
+  showLoading('Creando recepción...');
+  try{
+    const{data:sessionData}=await sb.auth.getSession();
+    const token=sessionData?.session?.access_token;
+    const res=await fetch('/api/search-users',{
+      method:'POST',
+      headers:{'Content-Type':'application/json',Authorization:'Bearer '+token},
+      body:JSON.stringify({action:'create',role:'reception',name:'Recepción HABIT',email,phone:'',password:pass})
+    });
+    const payload=await res.json().catch(()=>({}));
+    if(!res.ok)throw new Error(payload.error||'No se pudo crear recepción');
+    hideLoading();
+    ['rc-email','rc-pass'].forEach(id=>document.getElementById(id).value='');
+    toast('Cuenta de recepción lista','ok');
     renderUsersSb();
     if(document.getElementById('a-notifs')?.classList.contains('active'))renderAdminNotifsSb();
   }catch(e){

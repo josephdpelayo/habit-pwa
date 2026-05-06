@@ -11,7 +11,7 @@ create table if not exists public.profiles (
   id            uuid references auth.users(id) on delete cascade primary key,
   name          text not null,
   phone         text,
-  role          text not null default 'user' check (role in ('user','admin')),
+  role          text not null default 'user' check (role in ('user','admin','reception')),
   access_code   text unique not null,
   plan_id       text,
   plan_type     text check (plan_type in ('individual','grupal') or plan_type is null),
