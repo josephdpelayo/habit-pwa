@@ -4133,7 +4133,7 @@ async function renderUsersSb(){
       div.className='user-row';
       div.style.cssText='flex-direction:column;align-items:flex-start;gap:0;padding:0;overflow:hidden;cursor:pointer';
       div.innerHTML=
-        '<div style="display:flex;align-items:center;gap:10px;width:100%;padding:12px 4px" onclick="toggleUserCard(''+u.id+'')">'
+        '<div style="display:flex;align-items:center;gap:10px;width:100%;padding:12px 4px" onclick="toggleUserCard(&quot;'+u.id+'&quot;)">'
         +avatarHtml(u.name,u.avatar_url,'post-av')
         +'<div style="flex:1;min-width:0">'
         +'<div class="brow-name">'+u.name+'</div>'
