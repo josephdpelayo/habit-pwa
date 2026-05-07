@@ -1708,10 +1708,13 @@ function triggerGuestSearch(){
   guestQuery=input?input.value:guestQuery;
   searchGuests(guestQuery);
 }
+let _guestSearching=false;
 async function searchGuests(q){
   q=String(q||'').trim();
   guestQuery=q;
-  if(q.length<2){guestSearchResults=[];paintGuestGroup();return;}
+  if(q.length<2){guestSearchResults=[];_guestSearching=false;paintGuestGroup();return;}
+  _guestSearching=true;
+  paintGuestGroup();
   try{
     const{data}=await sb.auth.getSession();
     const token=data&&data.session&&data.session.access_token;
@@ -1723,11 +1726,15 @@ async function searchGuests(q){
     const out=await res.json().catch(()=>({}));
     if(!res.ok)throw new Error(out.error||'No se pudo buscar');
     guestSearchResults=(out.users||[]).filter(u=>u.id!==sbUser.id);
-    paintGuestGroup();
   }catch(e){
     console.warn('searchGuests:',e);
     guestSearchResults=[];
+  }finally{
+    _guestSearching=false;
     paintGuestGroup();
+    // Re-focus the input after re-render
+    const inp=document.getElementById('guest-search-input');
+    if(inp)inp.focus();
   }
 }
 function toggleGuest(id){
@@ -1785,7 +1792,7 @@ function paintGuestGroup(){
     '<div class="guest-head"><div><div class="guest-title">Grupo de invitados</div><div class="guest-sub">'+sub+'</div></div><div class="guest-count">'+guestSelected.size+'/4</div></div>'+
     '<div class="guest-body">'+
       '<div class="guest-search"><input id="guest-search-input" type="search" placeholder="Buscar por nombre o correo" value="'+esc(guestQuery)+'" oninput="guestQuery=this.value" onkeydown="if(event.key===&quot;Enter&quot;){event.preventDefault();triggerGuestSearch()}"><button onclick="triggerGuestSearch()">Buscar</button></div>'+
-      '<div class="guest-results">'+(results.length?results.map(g=>guestRow(g,true)).join(''):'')+'</div>'+
+      '<div class="guest-results">'+(_guestSearching?'<div style="padding:10px;font-size:12px;color:var(--gray);text-align:center">Buscando...</div>':results.length?results.map(g=>guestRow(g,true)).join(''):guestQuery.length>=2?'<div style="padding:10px;font-size:12px;color:var(--gray)">Sin resultados para "'+esc(guestQuery)+'"</div>':'')+'</div>'+
       '<div class="guest-list">'+(guestFavorites.length?guestFavorites.map(g=>guestRow(g,false)).join(''):'<div class="guest-sub">Busca y agrega tus invitados frecuentes.</div>')+'</div>'+
       '<button class="guest-save" onclick="saveGuestGroup()" '+(!dirty?'disabled':'')+'>'+saveText+'</button>'+
       '<button class="guest-collapse" onclick="setGuestCollapsed(true)">Contraer lista</button>'+
@@ -2632,9 +2639,12 @@ async function renderBook(){
   const day=getDaySlots(ds);
   const isGrupal=curUser&&curUser.planType==='grupal';
   const list=document.getElementById('sl');
+  // Preserve scroll position when re-rendering after slot selection
+  const prevScroll=list.scrollTop;
+  const isFirstRender=list.children.length===0;
   list.innerHTML='';
 
-  // auto-scroll to current Mazatlán time
+  // auto-scroll to current Mazatlán time only on first render
   const nowIdx=mazCurrentSlotIdx();
   let scrollTarget=null;
 
@@ -2675,7 +2685,8 @@ async function renderBook(){
     list.appendChild(row);
     if(scrollTarget===null&&idx>=nowIdx-1)scrollTarget=row;
   }
-  if(scrollTarget)setTimeout(()=>scrollTarget.scrollIntoView({block:'start',behavior:'smooth'}),150);
+  if(scrollTarget&&isFirstRender)setTimeout(()=>scrollTarget.scrollIntoView({block:'start',behavior:'smooth'}),150);
+  else if(!isFirstRender)list.scrollTop=prevScroll;
   renderConfPanel(ds,isGrupal);
 }
 
