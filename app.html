@@ -806,31 +806,28 @@ body.reception-mode{background:#050505}
 
     <!-- SOCIOS -->
     <div id="a-users" class="adm-section">
-      <!-- Create user form -->
-      <div style="background:var(--card);border:1px solid var(--border);border-radius:6px;padding:1rem;margin-bottom:1rem">
-        <p class="slbl" style="margin-bottom:8px">Nuevo socio</p>
+      <!-- Create user form (collapsed) -->
+      <button class="btn" style="width:100%;margin-bottom:1rem;display:flex;align-items:center;justify-content:center;gap:8px" onclick="toggleNewSocioForm()">
+        <span style="font-size:18px;line-height:1">+</span> Crear nuevo socio
+      </button>
+      <div id="new-socio-form" style="display:none;background:var(--card);border:1px solid var(--border);border-radius:6px;padding:1rem;margin-bottom:1rem">
         <div class="field"><label>Nombre</label><input type="text" id="nu-name" placeholder="Nombre completo"></div>
         <div class="field"><label>Correo</label><input type="email" id="nu-email" placeholder="correo@ejemplo.com"></div>
         <div class="field"><label>Teléfono</label><input type="tel" id="nu-phone" placeholder="+52 55 0000 0000"></div>
         <div class="field"><label>Contraseña temporal</label><input type="text" id="nu-pass" placeholder="Mínimo 6 caracteres"></div>
         <button class="btn" onclick="adminCreateUserSb()">Crear socio</button>
       </div>
-      <div style="background:var(--card);border:1px solid var(--border);border-radius:6px;padding:1rem;margin-bottom:1rem">
-        <p class="slbl" style="margin-bottom:8px">Cuenta recepción</p>
-        <div class="field"><label>Correo</label><input type="email" id="rc-email" placeholder="recepcion@habittraininghub.app"></div>
-        <div class="field"><label>Contraseña</label><input type="text" id="rc-pass" placeholder="Mínimo 6 caracteres"></div>
-        <button class="btn-ghost" onclick="adminCreateReceptionUserSb()">Crear cuenta recepción</button>
-      </div>
+
       <input class="adm-search" id="user-search" placeholder="Buscar por nombre, correo o teléfono..." oninput="renderUsersSb()">
-      <div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:8px;align-items:center">
-        <div style="display:flex;gap:4px;flex-wrap:wrap;flex:1">
+      <div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:6px;">
           <button class="filter-chip active" data-filter="todos" onclick="setUserFilter(this)">Todos</button>
           <button class="filter-chip" data-filter="activo" onclick="setUserFilter(this)">✅ Activos</button>
           <button class="filter-chip" data-filter="vencido" onclick="setUserFilter(this)">🔴 Vencidos</button>
           <button class="filter-chip" data-filter="por-vencer" onclick="setUserFilter(this)">⚠️ Por vencer</button>
           <button class="filter-chip" data-filter="sin-plan" onclick="setUserFilter(this)">⬜ Sin plan</button>
-        </div>
-        <select id="user-sort" onchange="renderUsersSb()" style="background:var(--card2);border:1px solid var(--border);color:var(--white);border-radius:4px;padding:5px 8px;font-size:12px;cursor:pointer">
+      </div>
+      <div style="margin-bottom:8px">
+        <select id="user-sort" onchange="renderUsersSb()" style="background:var(--card2);border:1px solid var(--border);color:var(--white);border-radius:4px;padding:6px 10px;font-size:12px;cursor:pointer;width:100%">
           <option value="nombre">A–Z Nombre</option>
           <option value="nombre-z">Z–A Nombre</option>
           <option value="antiguedad">Más antiguo</option>
@@ -1418,7 +1415,7 @@ let slots30={};
 let waitlists={}; // waitlists[ds+'_'+slotIdx] = [{userId,name,...}]
 let payments=[], boards=[], scores={}, posts=[], accessLog=[], adminNotifs=[];
 let curUser=null, curDate=dateObjFromDS(mazToday()), selStartIdx=null, selShort=false, selPlan=null, selPT='individual', selectedRoutineBoardId=null;
-let accInt=null, userNotifInt=null, receptionClockInt=null, receptionDataInt=null, userNotifBootstrapped=false, userNotifSeen=new Set(), notifs=[], expandedVideos={}, logScoreCtx=null;
+let accInt=null, userNotifInt=null, receptionClockInt=null, receptionDataInt=null, userNotifBootstrapped=false, userNotifSeen=new Set(), notifs=[], expandedVideos={}, logScoreCtx=null, expandedUsers=new Set();
 let receptionSessions=[], receptionLastSync=null, receptionLoading=false;
 let guestFavorites=[], guestSelected=new Set(), guestSavedActive=new Set(), guestOriginalFavoriteIds=new Set(), guestDeletedIds=new Set(), guestSearchResults=[], guestActiveBookingId=null, guestSearchTimer=null, guestDirty=false, guestCollapsed=true, guestQuery='';
 
@@ -3057,6 +3054,8 @@ async function renderHistorial(){
 
 // ── RUTINAS ──
 function toggleVideo(k){expandedVideos[k]=!expandedVideos[k];renderRutinas();}
+function toggleUserCard(uid){if(expandedUsers.has(uid))expandedUsers.delete(uid);else expandedUsers.add(uid);renderUsersSb();}
+function toggleNewSocioForm(){const f=document.getElementById('new-socio-form');if(!f)return;const open=f.style.display!=='none';f.style.display=open?'none':'block';}
 function selectRoutineBoard(bid){selectedRoutineBoardId=bid;renderRutinas();}
 function openLogScore(src,exIdx,exName){
   if(src&&src.dataset){logScoreCtx={boardId:src.dataset.bid,exIdx:parseInt(src.dataset.idx),exName:src.dataset.name};}
@@ -3608,11 +3607,10 @@ async function renderBoardsAdmin(){
     card.innerHTML=
       '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">'
       +'<div style="display:flex;align-items:center;gap:8px;flex:1;min-width:0">'
-      +'<div style="width:10px;height:10px;border-radius:50%;background:'+board.color+'"></div>'
+      +'<div style="width:14px;height:14px;border-radius:50%;background:'+board.color+'"></div>'
       +'<input id="bn-'+board.id+'" value="'+esc(board.name)+'" style="flex:1;min-width:0;background:var(--card2);border:1px solid var(--border);border-radius:4px;padding:8px 10px;font-size:14px;font-weight:700;color:var(--white);outline:none" onkeydown="if(event.key===&quot;Enter&quot;)updateBoardNameSb(&quot;'+board.id+'&quot;)">'
       +'</div>'
-      +'<div style="display:flex;gap:6px;margin-left:8px"><button class="btn-sm bblue" data-bid="'+board.id+'" onclick="updateBoardNameSb(this.dataset.bid)">Guardar</button><button class="btn-sm bred" data-bid="'+board.id+'" onclick="deleteBoardSb(this.dataset.bid)">Eliminar</button></div>'
-      +'</div>'
+      +'<div style="display:flex;gap:6px;margin-left:8px"><button class="btn-sm bblue" data-bid="'+board.id+'" onclick="updateBoardNameSb(this.dataset.bid)">Guardar</button><button class="btn-sm bred" data-bid="'+board.id+'" onclick="deleteBoardSb(this.dataset.bid)">Eliminar</button></div>'      +'</div>'      +'<div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px">'      +['#2563eb','#10b981','#f59e0b','#ef4444','#8b5cf6','#ec4899','#f97316','#ffffff'].map(c=>'<div onclick="updateBoardColorSb(&quot;'+board.id+'&quot;,&quot;'+c+'&quot;)" style="width:24px;height:24px;border-radius:50%;background:'+c+';cursor:pointer;box-sizing:border-box;border:2px solid '+(board.color===c?'rgba(255,255,255,.9)':'rgba(255,255,255,.15)')+'" title="'+c+'"></div>').join('')      +'</div>'
       +(exHtml?'<div class="ex-list" style="margin-bottom:12px">'+exHtml+'</div>':'<div class="empty" style="font-size:12px;margin-bottom:12px">Sin ejercicios.</div>')
       +'<div style="margin-bottom:12px">'
       +'<input type="text" placeholder="Ejercicio (ej: Sentadilla)" id="exn-'+board.id+'" style="width:100%;background:var(--card2);border:1px solid var(--border);border-radius:4px;padding:10px;font-size:14px;color:var(--white);outline:none;margin-bottom:6px">'
@@ -3654,6 +3652,18 @@ async function toggleAssignSb(cb){
   const search=box?.querySelector('.board-assign-search');
   if(search)filterBoardAssignees(search);
   toast(checked?'Rutina asignada':'Rutina removida','ok');
+}
+
+async function updateBoardColorSb(bid,color){
+  const b=boards.find(x=>x.id===bid);
+  if(!b)return;
+  try{
+    const{error}=await sb.from('boards').update({color}).eq('id',bid);
+    if(error)throw error;
+    b.color=color;
+    renderBoardsAdmin();
+    toast('Color actualizado','ok');
+  }catch(e){toast('Error: '+(e.message||e),'err');}
 }
 
 async function updateBoardNameSb(bid){
@@ -4118,27 +4128,33 @@ async function renderUsersSb(){
       const expiring=days!==null&&days<=5&&days>=0;
       const statusCls=expired||noCredits?'bg-red':(lowCredits||expiring)?'bg-amber':active?'bg-green':'bg-gray';
       const statusTxt=expired?'Vencida':noCredits?'Sin visitas':lowCredits?'Pocas visitas':expiring?'Por vencer':active?'Activo':'Sin plan';
+      const isOpen=expandedUsers.has(u.id);
       const div=document.createElement('div');
       div.className='user-row';
-      div.style.cssText='flex-direction:column;align-items:flex-start;gap:8px';
+      div.style.cssText='flex-direction:column;align-items:flex-start;gap:0;padding:0;overflow:hidden;cursor:pointer';
       div.innerHTML=
-        '<div style="display:flex;align-items:center;gap:10px;width:100%">'
+        '<div style="display:flex;align-items:center;gap:10px;width:100%;padding:12px 4px" onclick="toggleUserCard(''+u.id+'')">'
         +avatarHtml(u.name,u.avatar_url,'post-av')
         +'<div style="flex:1;min-width:0">'
         +'<div class="brow-name">'+u.name+'</div>'
         +'<div class="brow-meta">'+(u.phone||'Sin telefono')+'</div>'
-        +'<div class="brow-meta">Codigo: <strong style="color:var(--bl)">'+(u.access_code||'???')+'#</strong></div>'
         +'<div class="brow-meta">'+planName+(u.credits>=999?' · Mensual':u.credits?' · '+u.credits+' visitas':' · Sin visitas')+(u.plan_expiry?' · vence '+fmtDateMaz(u.plan_expiry):'')+'</div>'
         +'</div>'
+        +'<div style="display:flex;flex-direction:column;align-items:flex-end;gap:4px">'
         +'<span class="badge '+statusCls+'">'+statusTxt+'</span>'
+        +'<span style="font-size:16px;color:var(--gray);line-height:1">'+(isOpen?'▲':'▼')+'</span>'
         +'</div>'
-        +'<div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;width:100%">'
-        +'<button class="btn-sm bblue" data-uid="'+u.id+'" data-name="'+esc(u.name)+'" onclick="adminOpenMembershipModal(this.dataset.uid,this.dataset.name)">Activar membresia</button>'
-        +'<button class="btn-sm bgreen" data-uid="'+u.id+'" data-name="'+esc(u.name)+'" onclick="adminGrantCourtesySb(this.dataset.uid,this.dataset.name)">Cortesia 3</button>'
-        +'<button class="btn-sm bblue" data-uid="'+u.id+'" data-name="'+esc(u.name)+'" onclick="adminEditUserSb(this.dataset.uid,this.dataset.name)">Editar datos</button>'
-        +'<button class="btn-sm bgreen" data-uid="'+u.id+'" onclick="adminAddCreditsSb(this.dataset.uid)">+Visita extra</button>'
-        +'<button class="btn-sm bred" style="grid-column:1/-1" data-uid="'+u.id+'" data-name="'+esc(u.name)+'" onclick="adminDeleteUserSb(this.dataset.uid,this.dataset.name)">Eliminar socio</button>'
-        +'</div>';
+        +'</div>'
+        +(isOpen?
+          '<div style="padding:0 4px 12px;display:grid;grid-template-columns:1fr 1fr;gap:6px;width:100%;box-sizing:border-box">'
+          +'<div style="grid-column:1/-1;font-size:11px;color:var(--gray);padding:2px 0 6px">Código: <strong style="color:var(--bl)">'+(u.access_code||'???')+'#</strong></div>'
+          +'<button class="btn-sm bblue" data-uid="'+u.id+'" data-name="'+esc(u.name)+'" onclick="adminOpenMembershipModal(this.dataset.uid,this.dataset.name)">Activar membresía</button>'
+          +'<button class="btn-sm bgreen" data-uid="'+u.id+'" data-name="'+esc(u.name)+'" onclick="adminGrantCourtesySb(this.dataset.uid,this.dataset.name)">Cortesía 3</button>'
+          +'<button class="btn-sm bblue" data-uid="'+u.id+'" data-name="'+esc(u.name)+'" onclick="adminEditUserSb(this.dataset.uid,this.dataset.name)">Editar datos</button>'
+          +'<button class="btn-sm bgreen" data-uid="'+u.id+'" onclick="adminAddCreditsSb(this.dataset.uid)">+Visita extra</button>'
+          +'<button class="btn-sm bred" style="grid-column:1/-1" data-uid="'+u.id+'" data-name="'+esc(u.name)+'" onclick="adminDeleteUserSb(this.dataset.uid,this.dataset.name)">Eliminar socio</button>'
+          +'</div>'
+        :'');
       list.appendChild(div);
     });
   }catch(e){
@@ -4675,6 +4691,7 @@ async function adminCreateUserSb(){
     hideLoading();
     ['nu-name','nu-email','nu-phone','nu-pass'].forEach(id=>document.getElementById(id).value='');
     toast('Socio creado: '+name+(payload.profile?.access_code?' · '+payload.profile.access_code+'#':''),'ok');
+    const f=document.getElementById('new-socio-form');if(f)f.style.display='none';
     renderUsersSb();
     if(document.getElementById('a-notifs')?.classList.contains('active'))renderAdminNotifsSb();
   }catch(e){
