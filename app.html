@@ -828,10 +828,10 @@ body.reception-mode{background:#050505}
       </div>
       <div style="margin-bottom:8px">
         <select id="user-sort" onchange="renderUsersSb()" style="background:var(--card2);border:1px solid var(--border);color:var(--white);border-radius:4px;padding:6px 10px;font-size:12px;cursor:pointer;width:100%">
+          <option value="reciente">Más reciente</option>
           <option value="nombre">A–Z Nombre</option>
           <option value="nombre-z">Z–A Nombre</option>
           <option value="antiguedad">Más antiguo</option>
-          <option value="reciente">Más reciente</option>
           <option value="vencimiento">Próx. vencimiento</option>
           <option value="creditos">Más visitas</option>
         </select>
@@ -3055,6 +3055,10 @@ async function renderHistorial(){
 // ── RUTINAS ──
 function toggleVideo(k){expandedVideos[k]=!expandedVideos[k];renderRutinas();}
 function toggleUserCard(uid){if(expandedUsers.has(uid))expandedUsers.delete(uid);else expandedUsers.add(uid);renderUsersSb();}
+let expandedBoards=new Set();
+let editingBoards=new Set();
+function toggleBoardEx(bid){if(expandedBoards.has(bid))expandedBoards.delete(bid);else expandedBoards.add(bid);renderBoardsAdmin();}
+function toggleBoardEdit(bid){if(editingBoards.has(bid))editingBoards.delete(bid);else{editingBoards.add(bid);expandedBoards.add(bid);}renderBoardsAdmin();}
 function toggleNewSocioForm(){const f=document.getElementById('new-socio-form');if(!f)return;const open=f.style.display!=='none';f.style.display=open?'none':'block';}
 function selectRoutineBoard(bid){selectedRoutineBoardId=bid;renderRutinas();}
 function openLogScore(src,exIdx,exName){
@@ -3559,30 +3563,13 @@ async function renderBoardsAdmin(){
   if(!boards.length){el.innerHTML='<div class="empty">Sin pizarrones. Crea el primero.</div>';return;}
   boards.forEach(board=>{
     const card=document.createElement('div');card.className='board-card';
+    const isEditing=editingBoards.has(board.id);
     const exHtml=board.exercises.map((ex,i)=>{
       const vids=getExerciseVideos(ex);
-      return '<div class="ex-row">'
-      +'<div class="ex-info">'
-      +'<input type="text" placeholder="Nombre del ejercicio" id="exedit-name-'+board.id+'-'+i+'" value="'+esc(ex.name||'')+'" style="width:100%;background:var(--card2);border:1px solid var(--border);border-radius:4px;padding:8px;font-size:13px;font-weight:700;color:var(--white);outline:none">'
-      +'<div style="display:flex;gap:5px;margin-top:5px">'
-      +'<input type="text" placeholder="Series" id="exedit-sets-'+board.id+'-'+i+'" value="'+esc(ex.sets||'')+'" style="flex:1;min-width:0;background:var(--card2);border:1px solid var(--border);border-radius:4px;padding:8px;font-size:12px;color:var(--white);outline:none">'
-      +'<input type="text" placeholder="Reps" id="exedit-reps-'+board.id+'-'+i+'" value="'+esc(ex.reps||'')+'" style="flex:1;min-width:0;background:var(--card2);border:1px solid var(--border);border-radius:4px;padding:8px;font-size:12px;color:var(--white);outline:none">'
-      +'<input type="text" placeholder="Descanso" id="exedit-rest-'+board.id+'-'+i+'" value="'+esc(ex.rest||'')+'" style="flex:1;min-width:0;background:var(--card2);border:1px solid var(--border);border-radius:4px;padding:8px;font-size:12px;color:var(--white);outline:none">'
-      +'</div>'
-      +(ex.sets?'<div class="ex-meta">'+esc(ex.sets)+' series · '+esc(ex.reps||'')+' reps'+(ex.rest?' · '+esc(ex.rest):'')+'</div>':'')
-      +(ex.note||ex.notes||ex.description?'<div class="ex-meta">'+esc(ex.note||ex.notes||ex.description)+'</div>':'')
-      +(vids.length?vids.map((v,vi)=>'<div class="adm-ex-video">'+esc(v.title||('Video '+(vi+1)))+' · '+esc(v.url)+'</div>').join(''):'')
-      +'<div style="margin-top:8px">'
-      +'<textarea placeholder="Descripcion / indicaciones" id="exedit-desc-'+board.id+'-'+i+'" style="width:100%;background:var(--card2);border:1px solid var(--border);border-radius:4px;padding:8px;font-size:12px;color:var(--white);outline:none;resize:none;min-height:46px">'+esc(ex.note||ex.notes||ex.description||'')+'</textarea>'
-      +'<input type="url" placeholder="Link de video 1 https://..." id="exedit-video-'+board.id+'-'+i+'-0" value="'+esc((vids[0]||{}).url||'')+'" style="width:100%;background:var(--card2);border:1px solid var(--border);border-radius:4px;padding:8px;font-size:12px;color:var(--white);outline:none;margin-top:5px">'
-      +'<input type="text" placeholder="Nombre visible video 1" id="exedit-title-'+board.id+'-'+i+'-0" value="'+esc((vids[0]||{}).title||'')+'" style="width:100%;background:var(--card2);border:1px solid var(--border);border-radius:4px;padding:8px;font-size:12px;color:var(--white);outline:none;margin-top:5px">'
-      +'<input type="url" placeholder="Link de video 2 https://..." id="exedit-video-'+board.id+'-'+i+'-1" value="'+esc((vids[1]||{}).url||'')+'" style="width:100%;background:var(--card2);border:1px solid var(--border);border-radius:4px;padding:8px;font-size:12px;color:var(--white);outline:none;margin-top:5px">'
-      +'<input type="text" placeholder="Nombre visible video 2" id="exedit-title-'+board.id+'-'+i+'-1" value="'+esc((vids[1]||{}).title||'')+'" style="width:100%;background:var(--card2);border:1px solid var(--border);border-radius:4px;padding:8px;font-size:12px;color:var(--white);outline:none;margin-top:5px">'
-      +'<button class="btn-sm bblue" style="margin-top:5px" data-bid="'+board.id+'" data-idx="'+i+'" onclick="updateExerciseSb(this.dataset.bid,parseInt(this.dataset.idx))">Guardar ejercicio</button>'
-      +'</div>'
-      +'</div>'
-      +'<button class="btn-sm bred" data-bid="'+board.id+'" data-idx="'+i+'" onclick="removeExerciseSb(this.dataset.bid,parseInt(this.dataset.idx))">x</button>'
-      +'</div>';
+      if(!isEditing){
+        return '<div style="padding:8px 0;border-bottom:1px solid var(--border);display:flex;align-items:flex-start;gap:8px">'        +'<span style="font-size:12px;color:var(--bl);font-weight:700;min-width:18px">'+(i+1)+'.</span>'        +'<div style="flex:1;min-width:0">'        +'<div style="font-size:13px;font-weight:700;color:var(--white)">'+esc(ex.name||'Sin nombre')+'</div>'        +(ex.sets?'<div style="font-size:11px;color:var(--gray);margin-top:2px">'+esc(ex.sets)+' series · '+esc(ex.reps||'')+' reps'+(ex.rest?' · '+esc(ex.rest):'')+'</div>':'')        +(ex.note||ex.notes||ex.description?'<div style="font-size:11px;color:var(--gray);margin-top:2px;opacity:.8">'+esc(ex.note||ex.notes||ex.description)+'</div>':'')        +(vids.length?'<div style="font-size:11px;color:var(--bl);margin-top:2px">▶ '+vids.length+' video'+(vids.length>1?'s':'')+'</div>':'')        +'</div></div>';
+      }
+      return '<div class="ex-row">'      +'<div class="ex-info">'      +'<input type="text" placeholder="Nombre del ejercicio" id="exedit-name-'+board.id+'-'+i+'" value="'+esc(ex.name||'')+'" style="width:100%;background:var(--card2);border:1px solid var(--border);border-radius:4px;padding:8px;font-size:13px;font-weight:700;color:var(--white);outline:none">'      +'<div style="display:flex;gap:5px;margin-top:5px">'      +'<input type="text" placeholder="Series" id="exedit-sets-'+board.id+'-'+i+'" value="'+esc(ex.sets||'')+'" style="flex:1;min-width:0;background:var(--card2);border:1px solid var(--border);border-radius:4px;padding:8px;font-size:12px;color:var(--white);outline:none">'      +'<input type="text" placeholder="Reps" id="exedit-reps-'+board.id+'-'+i+'" value="'+esc(ex.reps||'')+'" style="flex:1;min-width:0;background:var(--card2);border:1px solid var(--border);border-radius:4px;padding:8px;font-size:12px;color:var(--white);outline:none">'      +'<input type="text" placeholder="Descanso" id="exedit-rest-'+board.id+'-'+i+'" value="'+esc(ex.rest||'')+'" style="flex:1;min-width:0;background:var(--card2);border:1px solid var(--border);border-radius:4px;padding:8px;font-size:12px;color:var(--white);outline:none">'      +'</div>'      +'<div style="margin-top:8px">'      +'<textarea placeholder="Descripcion / indicaciones" id="exedit-desc-'+board.id+'-'+i+'" style="width:100%;background:var(--card2);border:1px solid var(--border);border-radius:4px;padding:8px;font-size:12px;color:var(--white);outline:none;resize:none;min-height:46px">'+esc(ex.note||ex.notes||ex.description||'')+'</textarea>'      +'<input type="url" placeholder="Link de video 1 https://..." id="exedit-video-'+board.id+'-'+i+'-0" value="'+esc((vids[0]||{}).url||'')+'" style="width:100%;background:var(--card2);border:1px solid var(--border);border-radius:4px;padding:8px;font-size:12px;color:var(--white);outline:none;margin-top:5px">'      +'<input type="text" placeholder="Nombre visible video 1" id="exedit-title-'+board.id+'-'+i+'-0" value="'+esc((vids[0]||{}).title||'')+'" style="width:100%;background:var(--card2);border:1px solid var(--border);border-radius:4px;padding:8px;font-size:12px;color:var(--white);outline:none;margin-top:5px">'      +'<input type="url" placeholder="Link de video 2 https://..." id="exedit-video-'+board.id+'-'+i+'-1" value="'+esc((vids[1]||{}).url||'')+'" style="width:100%;background:var(--card2);border:1px solid var(--border);border-radius:4px;padding:8px;font-size:12px;color:var(--white);outline:none;margin-top:5px">'      +'<input type="text" placeholder="Nombre visible video 2" id="exedit-title-'+board.id+'-'+i+'-1" value="'+esc((vids[1]||{}).title||'')+'" style="width:100%;background:var(--card2);border:1px solid var(--border);border-radius:4px;padding:8px;font-size:12px;color:var(--white);outline:none;margin-top:5px">'      +'<button class="btn-sm bblue" style="margin-top:5px" data-bid="'+board.id+'" data-idx="'+i+'" onclick="updateExerciseSb(this.dataset.bid,parseInt(this.dataset.idx))">Guardar ejercicio</button>'      +'</div>'      +'</div>'      +'<button class="btn-sm bred" data-bid="'+board.id+'" data-idx="'+i+'" onclick="removeExerciseSb(this.dataset.bid,parseInt(this.dataset.idx))">x</button>'      +'</div>';
     }).join('');
     const assignedUsers=users.filter(u=>board.assignedTo.includes(u.id));
     const userOpts='<div class="assign-box" data-board-assign="'+esc(board.id)+'">'
@@ -3611,7 +3598,7 @@ async function renderBoardsAdmin(){
       +'<input id="bn-'+board.id+'" value="'+esc(board.name)+'" style="flex:1;min-width:0;background:var(--card2);border:1px solid var(--border);border-radius:4px;padding:8px 10px;font-size:14px;font-weight:700;color:var(--white);outline:none" onkeydown="if(event.key===&quot;Enter&quot;)updateBoardNameSb(&quot;'+board.id+'&quot;)">'
       +'</div>'
       +'<div style="display:flex;gap:6px;margin-left:8px"><button class="btn-sm bblue" data-bid="'+board.id+'" onclick="updateBoardNameSb(this.dataset.bid)">Guardar</button><button class="btn-sm bred" data-bid="'+board.id+'" onclick="deleteBoardSb(this.dataset.bid)">Eliminar</button></div>'      +'</div>'      +'<div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px">'      +['#2563eb','#10b981','#f59e0b','#ef4444','#8b5cf6','#ec4899','#f97316','#ffffff'].map(c=>'<div onclick="updateBoardColorSb(&quot;'+board.id+'&quot;,&quot;'+c+'&quot;)" style="width:24px;height:24px;border-radius:50%;background:'+c+';cursor:pointer;box-sizing:border-box;border:2px solid '+(board.color===c?'rgba(255,255,255,.9)':'rgba(255,255,255,.15)')+'" title="'+c+'"></div>').join('')      +'</div>'
-      +(exHtml?'<div class="ex-list" style="margin-bottom:12px">'+exHtml+'</div>':'<div class="empty" style="font-size:12px;margin-bottom:12px">Sin ejercicios.</div>')
+      +'<div style="display:flex;gap:6px;margin-bottom:8px;align-items:center">'      +'<button onclick="toggleBoardEx(&quot;'+board.id+'&quot;)" style="flex:1;display:flex;align-items:center;justify-content:space-between;background:var(--card2);border:1px solid var(--border);border-radius:6px;padding:9px 12px;color:var(--white);font-size:13px;font-weight:600;cursor:pointer">'      +'<span>'+(board.exercises.length)+' ejercicio'+(board.exercises.length===1?'':'s')+'</span>'      +'<span>'+(expandedBoards.has(board.id)?'▲':'▼')+'</span>'      +'</button>'      +(expandedBoards.has(board.id)?'<button onclick="toggleBoardEdit(&quot;'+board.id+'&quot;)" style="background:'+(editingBoards.has(board.id)?'rgba(16,185,129,.2)':'rgba(37,99,235,.15)')+';border:1px solid '+(editingBoards.has(board.id)?'var(--green)':'var(--blue)')+';border-radius:6px;padding:9px 14px;color:'+(editingBoards.has(board.id)?'var(--green)':'var(--bl)')+';font-size:12px;font-weight:700;cursor:pointer;white-space:nowrap">'+(editingBoards.has(board.id)?'✓ Listo':'✏️ Editar')+'</button>':'')      +'</div>'      +(expandedBoards.has(board.id)?(exHtml?'<div class="ex-list" style="margin-bottom:12px">'+exHtml+'</div>':'<div class="empty" style="font-size:12px;margin-bottom:12px">Sin ejercicios.</div>'):'')
       +'<div style="margin-bottom:12px">'
       +'<input type="text" placeholder="Ejercicio (ej: Sentadilla)" id="exn-'+board.id+'" style="width:100%;background:var(--card2);border:1px solid var(--border);border-radius:4px;padding:10px;font-size:14px;color:var(--white);outline:none;margin-bottom:6px">'
       +'<div style="display:flex;gap:6px">'
@@ -4082,7 +4069,7 @@ function setUserFilter(btn){
 
 async function renderUsersSb(){
   const q=(document.getElementById('user-search')||{value:''}).value.toLowerCase();
-  const sort=(document.getElementById('user-sort')||{value:'nombre'}).value;
+  const sort=(document.getElementById('user-sort')||{value:'reciente'}).value;
   const list=document.getElementById('user-list');
   const countEl=document.getElementById('user-count');
   if(!list)return;
