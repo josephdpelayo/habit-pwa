@@ -398,6 +398,8 @@ input,select,button,textarea{font-family:'Montserrat',sans-serif}
 .asb{padding:0 12px}
 .wsec{font-size:10px;font-weight:700;color:var(--amber);letter-spacing:.1em;text-transform:uppercase;padding:8px 0 4px}
 .adm-search{width:100%;background:var(--card);border:1px solid var(--border);border-radius:4px;padding:12px;font-size:16px;color:var(--white);outline:none;margin-bottom:1rem;-webkit-appearance:none}
+.filter-chip{background:var(--card2);border:1px solid var(--border);color:var(--gray);border-radius:20px;padding:5px 12px;font-size:11px;font-weight:600;letter-spacing:.04em;cursor:pointer;white-space:nowrap;transition:all .15s}
+.filter-chip.active{background:rgba(37,99,235,.2);border-color:var(--blue);color:var(--bl)}
 .adm-date{width:100%;background:var(--card);border:1px solid var(--border);border-radius:4px;padding:12px;font-size:16px;color:var(--white);outline:none;margin-bottom:1rem;color-scheme:dark;-webkit-appearance:none}
 
 /* RECEPTION TV */
@@ -819,7 +821,25 @@ body.reception-mode{background:#050505}
         <div class="field"><label>Contraseña</label><input type="text" id="rc-pass" placeholder="Mínimo 6 caracteres"></div>
         <button class="btn-ghost" onclick="adminCreateReceptionUserSb()">Crear cuenta recepción</button>
       </div>
-      <input class="adm-search" id="user-search" placeholder="Buscar por nombre o correo..." oninput="renderUsersSb()">
+      <input class="adm-search" id="user-search" placeholder="Buscar por nombre, correo o teléfono..." oninput="renderUsersSb()">
+      <div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:8px;align-items:center">
+        <div style="display:flex;gap:4px;flex-wrap:wrap;flex:1">
+          <button class="filter-chip active" data-filter="todos" onclick="setUserFilter(this)">Todos</button>
+          <button class="filter-chip" data-filter="activo" onclick="setUserFilter(this)">✅ Activos</button>
+          <button class="filter-chip" data-filter="vencido" onclick="setUserFilter(this)">🔴 Vencidos</button>
+          <button class="filter-chip" data-filter="por-vencer" onclick="setUserFilter(this)">⚠️ Por vencer</button>
+          <button class="filter-chip" data-filter="sin-plan" onclick="setUserFilter(this)">⬜ Sin plan</button>
+        </div>
+        <select id="user-sort" onchange="renderUsersSb()" style="background:var(--card2);border:1px solid var(--border);color:var(--white);border-radius:4px;padding:5px 8px;font-size:12px;cursor:pointer">
+          <option value="nombre">A–Z Nombre</option>
+          <option value="nombre-z">Z–A Nombre</option>
+          <option value="antiguedad">Más antiguo</option>
+          <option value="reciente">Más reciente</option>
+          <option value="vencimiento">Próx. vencimiento</option>
+          <option value="creditos">Más visitas</option>
+        </select>
+      </div>
+      <div id="user-count" style="font-size:11px;color:var(--gray);margin-bottom:8px"></div>
       <div id="user-list"></div>
     </div>
 
@@ -3011,8 +3031,6 @@ async function renderRutinas(){
     const exercises=selected.exercises||[];
     const exHtml=exercises.length?exercises.map((ex,i)=>{
       const videos=getExerciseVideos(ex);
-      const gKey=selected.id+'_'+i+'_group';
-      const groupOpen=!!expandedVideos[gKey];
       return '<div class="exercise-detail">'
         +'<div class="exercise-detail-head">'
         +'<div style="display:flex;align-items:flex-start;gap:10px">'
@@ -3020,16 +3038,14 @@ async function renderRutinas(){
         +'<div class="ex-body"><div class="ex-name">'+esc(ex.name)+'</div>'
         +'<div class="ex-detail">'+[ex.sets?esc(ex.sets)+' series':null,ex.reps?esc(ex.reps)+' reps':null,ex.rest?esc(ex.rest)+' descanso':null].filter(Boolean).join(' · ')+'</div>'
         +(ex.note||ex.notes||ex.description?'<div class="ex-note">'+esc(ex.note||ex.notes||ex.description)+'</div>':'')
+        +'</div><button class="btn-sm bblue" data-bid="'+esc(selected.id)+'" data-idx="'+i+'" data-name="'+esc(ex.name)+'" onclick="openLogScore(this)">Log</button></div>'
         +'</div>'
-        +(videos.length?'<button class="btn-sm" style="padding:0 10px;min-width:36px;height:34px;display:flex;align-items:center;justify-content:center;background:rgba(16,185,129,.15);border:1px solid rgba(16,185,129,.4);color:#10b981;border-radius:4px" onclick="toggleVideo(&quot;'+gKey+'&quot;)" aria-label="Ver videos">'+(groupOpen?'<svg width="14" height="14" viewBox="0 0 14 14" fill="currentColor"><rect x="2" y="1" width="3.5" height="12" rx="1"/><rect x="8.5" y="1" width="3.5" height="12" rx="1"/></svg>':'<svg width="14" height="14" viewBox="0 0 14 14" fill="currentColor"><polygon points="2,1 13,7 2,13"/></svg>')+'</button>':'')
-        +'</div>'
-        +'</div>'
-        +(groupOpen?videos.map((vid,vi)=>{
+        +videos.map((vid,vi)=>{
           const vKey=selected.id+'_'+i+'_'+vi;
           const videoLabel=vid.title||('Video '+(vi+1));
           return '<div class="ex-video-btn" onclick="toggleVideo(&quot;'+vKey+'&quot;)"><span class="play-icon"><span class="play-tri"></span></span><span class="ex-video-title">'+esc(videoLabel)+'</span>'+(expandedVideos[vKey]?'<button class="ex-video-min" onclick="event.stopPropagation();toggleVideo(&quot;'+vKey+'&quot;)" aria-label="Minimizar video">−</button>':'')+'</div>'
             +(expandedVideos[vKey]?getVideoHtml(vid.url):'');
-        }).join(''):'')
+        }).join('')
         +'</div>';
     }).join(''):'<div class="empty">Sin ejercicios en esta rutina.</div>';
     el.innerHTML='<div class="routine-tabs">'+tabs+'</div>'
@@ -3971,18 +3987,48 @@ async function renderAdmNotifsSb(){
   }catch(e){el.innerHTML='<div class="empty">Error: '+e.message+'</div>';}
 }
 
-async function renderUsersSb(){
-  const q=(document.getElementById('user-search')||{value:''}).value.toLowerCase();
+let _userFilter='todos';
+function setUserFilter(btn){
+  _userFilter=btn.dataset.filter;
+  document.querySelectorAll('.filter-chip').forEach(c=>c.classList.remove('active'));
+  btn.classList.add('active');
+  renderUsersSb();
+}
+
+async function renderUsersSb(){\n  const q=(document.getElementById('user-search')||{value:''}).value.toLowerCase();
+  const sort=(document.getElementById('user-sort')||{value:'nombre'}).value;
   const list=document.getElementById('user-list');
+  const countEl=document.getElementById('user-count');
   if(!list)return;
   list.innerHTML='<div class="empty">Cargando...</div>';
   try{
     const{data:allU,error}=await sb.from('profiles').select('*').order('created_at');
     if(error)throw error;
-    console.log('Profiles loaded:',allU);
-    const filtered=(allU||[]).filter(u=>u.role!=='admin'&&u.role!=='reception'&&(!q||((u.name||'').toLowerCase().includes(q)||(u.phone||'').includes(q))));
+    let filtered=(allU||[]).filter(u=>u.role!=='admin'&&u.role!=='reception'&&(!q||((u.name||'').toLowerCase().includes(q)||(u.phone||'').includes(q)||(u.email||'').toLowerCase().includes(q))));
+    // Status filter
+    filtered=filtered.filter(u=>{
+      const expired=u.plan_expiry&&new Date(u.plan_expiry)<new Date();
+      const days=daysUntil(u.plan_expiry);
+      const active=(u.credits>=999||u.credits>0)&&!expired;
+      if(_userFilter==='activo') return active&&!(days!==null&&days<=5&&days>=0);
+      if(_userFilter==='vencido') return expired||(u.credits!==undefined&&u.credits!==null&&u.credits<=0&&!u.plan_expiry);
+      if(_userFilter==='por-vencer') return days!==null&&days>=0&&days<=7;
+      if(_userFilter==='sin-plan') return !u.plan_id&&(!u.credits||u.credits<=0);
+      return true;
+    });
+    // Sort
+    filtered.sort((a,b2)=>{
+      if(sort==='nombre') return (a.name||'').localeCompare(b2.name||'');
+      if(sort==='nombre-z') return (b2.name||'').localeCompare(a.name||'');
+      if(sort==='antiguedad') return new Date(a.created_at)-new Date(b2.created_at);
+      if(sort==='reciente') return new Date(b2.created_at)-new Date(a.created_at);
+      if(sort==='vencimiento'){const da=daysUntil(a.plan_expiry)??99999,db=daysUntil(b2.plan_expiry)??99999;return da-db;}
+      if(sort==='creditos') return (b2.credits||0)-(a.credits||0);
+      return 0;
+    });
+    if(countEl) countEl.textContent=filtered.length+' socio'+(filtered.length!==1?'s':'');
     if(!filtered.length){
-      list.innerHTML='<div class="empty">Sin usuarios'+(allU&&allU.length?' (todos son admin)':' — verifica RLS en Supabase')+'.</div>';
+      list.innerHTML='<div class="empty">Sin usuarios'+(allU&&allU.length?' para este filtro':' — verifica RLS en Supabase')+'.</div>';
       return;
     }
     list.innerHTML='';
@@ -3995,9 +4041,9 @@ async function renderUsersSb(){
       const isUnlimited=u.credits>=999;
       const noCredits=!isUnlimited&&(u.credits||0)<=0;
       const lowCredits=!isUnlimited&&(u.credits||0)>0&&(u.credits||0)<=3;
-      const expiring=days!==null&&days<=5&&days>=0;
+      const expiring=days!==null&&days<=7&&days>=0;
       const statusCls=expired||noCredits?'bg-red':(lowCredits||expiring)?'bg-amber':active?'bg-green':'bg-gray';
-      const statusTxt=expired?'Vencida':noCredits?'Sin visitas':lowCredits?'Pocas visitas':expiring?'Por vencer':active?'Activo':'Sin plan';
+      const statusTxt=expired?'Vencida':noCredits?'Sin visitas':lowCredits?'Pocas visitas':expiring?(days+'d'):active?'Activo':'Sin plan';
       const div=document.createElement('div');
       div.className='user-row';
       div.style.cssText='flex-direction:column;align-items:flex-start;gap:8px';
