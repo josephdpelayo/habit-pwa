@@ -1043,28 +1043,36 @@ function urlBase64ToUint8Array(base64String){
 }
 
 function registerPush(role){
-  // Fire and forget — never blocks login flow
-  setTimeout(async()=>{
-    try{
-      if(!('serviceWorker' in navigator)||!('PushManager' in window))return;
-      if(!sbUser)return;
-      const reg=await navigator.serviceWorker.register('/sw.js');
-      let perm=Notification.permission;
-      if(perm==='default') perm=await Notification.requestPermission();
-      if(perm!=='granted')return;
-      const existing=await reg.pushManager.getSubscription();
-      const sub=existing||await reg.pushManager.subscribe({
-        userVisibleOnly:true,
-        applicationServerKey:urlBase64ToUint8Array(VAPID_PUBLIC_KEY)
-      });
-      await sb.from('push_subscriptions').upsert({
+  if(!('serviceWorker' in navigator)||!('PushManager' in window)||!('Notification' in window))return;
+  if(!sbUser)return;
+  navigator.serviceWorker.register('/sw.js').then(reg=>{
+    const perm=Notification.permission;
+    if(perm==='denied')return;
+    if(perm==='granted'){
+      subscribePush(reg,role);
+    } else {
+      Notification.requestPermission().then(p=>{
+        if(p==='granted') subscribePush(reg,role);
+      }).catch(()=>{});
+    }
+  }).catch(e=>console.warn('SW register failed:',e));
+}
+
+function subscribePush(reg,role){
+  if(!sbUser)return;
+  reg.pushManager.getSubscription().then(existing=>{
+    const doSub = existing
+      ? Promise.resolve(existing)
+      : reg.pushManager.subscribe({userVisibleOnly:true,applicationServerKey:urlBase64ToUint8Array(VAPID_PUBLIC_KEY)});
+    doSub.then(sub=>{
+      sb.from('push_subscriptions').upsert({
         user_id:sbUser.id,
         role:role||'user',
         subscription:sub.toJSON(),
         updated_at:new Date().toISOString()
-      },{onConflict:'user_id'});
-    }catch(e){console.warn('Push registration failed (non-critical):',e);}
-  },2000);
+      },{onConflict:'user_id'}).then(()=>console.log('Push OK')).catch(()=>{});
+    }).catch(e=>console.warn('Push subscribe failed:',e));
+  }).catch(e=>console.warn('Push getSubscription failed:',e));
 }
 
 async function sendPush(target,title,body,extra={}){
@@ -1137,7 +1145,7 @@ function showMainSb(){
   renderActiveBookings().catch(console.error);
   startUserNotifPolling();
   startTimer();
-  // checkExpiryPush called after push is registered manually
+  setTimeout(()=>checkExpiryPush(),8000);
 }
 
 function checkExpiryPush(){
@@ -1167,12 +1175,12 @@ async function initApp(){
       showLoading('Cargando tu cuenta...');
       await loadUserData();
       hideLoading();
-      if(sbProfile.role==='admin'){showAdmin();}
+      if(sbProfile.role==='admin'){showAdmin();setTimeout(()=>registerPush('admin'),4000);}
       else if(sbProfile.role==='reception')showReception();
       else{
         showMainSb();
         handleStripeReturn();
-        // push registered manually by user
+        setTimeout(()=>registerPush('user'),4000);
       }
     }
   }catch(e){
