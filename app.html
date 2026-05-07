@@ -3057,6 +3057,8 @@ function toggleVideo(k){expandedVideos[k]=!expandedVideos[k];renderRutinas();}
 function toggleUserCard(uid){if(expandedUsers.has(uid))expandedUsers.delete(uid);else expandedUsers.add(uid);renderUsersSb();}
 let expandedBoards=new Set();
 let editingBoards=new Set();
+let addingExBoards=new Set();
+let assigningBoards=new Set();
 function toggleBoardEx(bid){if(expandedBoards.has(bid))expandedBoards.delete(bid);else expandedBoards.add(bid);renderBoardsAdmin();}
 function toggleBoardEdit(bid){if(editingBoards.has(bid))editingBoards.delete(bid);else{editingBoards.add(bid);expandedBoards.add(bid);}renderBoardsAdmin();}
 function toggleNewSocioForm(){const f=document.getElementById('new-socio-form');if(!f)return;const open=f.style.display!=='none';f.style.display=open?'none':'block';}
@@ -3564,59 +3566,126 @@ async function renderBoardsAdmin(){
   boards.forEach(board=>{
     const card=document.createElement('div');card.className='board-card';
     const isEditing=editingBoards.has(board.id);
+    const isExpanded=expandedBoards.has(board.id);
+    const isAddingEx=addingExBoards&&addingExBoards.has(board.id);
+    const isAssigning=assigningBoards&&assigningBoards.has(board.id);
+    const assignedUsers=users.filter(u=>board.assignedTo.includes(u.id));
+    const COLORS=['#2563eb','#10b981','#f59e0b','#ef4444','#8b5cf6','#ec4899','#f97316','#ffffff'];
+
+    // ── Exercise list HTML ──────────────────────────
     const exHtml=board.exercises.map((ex,i)=>{
       const vids=getExerciseVideos(ex);
       if(!isEditing){
-        return '<div style="padding:8px 0;border-bottom:1px solid var(--border);display:flex;align-items:flex-start;gap:8px">'        +'<span style="font-size:12px;color:var(--bl);font-weight:700;min-width:18px">'+(i+1)+'.</span>'        +'<div style="flex:1;min-width:0">'        +'<div style="font-size:13px;font-weight:700;color:var(--white)">'+esc(ex.name||'Sin nombre')+'</div>'        +(ex.sets?'<div style="font-size:11px;color:var(--gray);margin-top:2px">'+esc(ex.sets)+' series · '+esc(ex.reps||'')+' reps'+(ex.rest?' · '+esc(ex.rest):'')+'</div>':'')        +(ex.note||ex.notes||ex.description?'<div style="font-size:11px;color:var(--gray);margin-top:2px;opacity:.8">'+esc(ex.note||ex.notes||ex.description)+'</div>':'')        +(vids.length?'<div style="font-size:11px;color:var(--bl);margin-top:2px">▶ '+vids.length+' video'+(vids.length>1?'s':'')+'</div>':'')        +'</div></div>';
+        return '<div style="padding:10px 0;border-bottom:1px solid var(--border);display:flex;align-items:flex-start;gap:10px">'
+        +'<span style="font-size:12px;color:var(--bl);font-weight:700;min-width:20px;margin-top:1px">'+(i+1)+'.</span>'
+        +'<div style="flex:1;min-width:0">'
+        +'<div style="font-size:14px;font-weight:700;color:var(--white)">'+esc(ex.name||'Sin nombre')+'</div>'
+        +(ex.sets?'<div style="font-size:12px;color:var(--gray);margin-top:3px">'+esc(ex.sets)+' series · '+esc(ex.reps||'')+' reps'+(ex.rest?' · '+esc(ex.rest):'')+'</div>':'')
+        +(ex.note||ex.notes||ex.description?'<div style="font-size:11px;color:var(--gray);margin-top:2px;opacity:.75;font-style:italic">'+esc(ex.note||ex.notes||ex.description)+'</div>':'')
+        +(vids.length?'<div style="font-size:11px;color:var(--bl);margin-top:3px">▶ '+vids.length+' video'+(vids.length>1?'s':'')+'</div>':'')
+        +'</div></div>';
       }
-      return '<div class="ex-row">'      +'<div class="ex-info">'      +'<input type="text" placeholder="Nombre del ejercicio" id="exedit-name-'+board.id+'-'+i+'" value="'+esc(ex.name||'')+'" style="width:100%;background:var(--card2);border:1px solid var(--border);border-radius:4px;padding:8px;font-size:13px;font-weight:700;color:var(--white);outline:none">'      +'<div style="display:flex;gap:5px;margin-top:5px">'      +'<input type="text" placeholder="Series" id="exedit-sets-'+board.id+'-'+i+'" value="'+esc(ex.sets||'')+'" style="flex:1;min-width:0;background:var(--card2);border:1px solid var(--border);border-radius:4px;padding:8px;font-size:12px;color:var(--white);outline:none">'      +'<input type="text" placeholder="Reps" id="exedit-reps-'+board.id+'-'+i+'" value="'+esc(ex.reps||'')+'" style="flex:1;min-width:0;background:var(--card2);border:1px solid var(--border);border-radius:4px;padding:8px;font-size:12px;color:var(--white);outline:none">'      +'<input type="text" placeholder="Descanso" id="exedit-rest-'+board.id+'-'+i+'" value="'+esc(ex.rest||'')+'" style="flex:1;min-width:0;background:var(--card2);border:1px solid var(--border);border-radius:4px;padding:8px;font-size:12px;color:var(--white);outline:none">'      +'</div>'      +'<div style="margin-top:8px">'      +'<textarea placeholder="Descripcion / indicaciones" id="exedit-desc-'+board.id+'-'+i+'" style="width:100%;background:var(--card2);border:1px solid var(--border);border-radius:4px;padding:8px;font-size:12px;color:var(--white);outline:none;resize:none;min-height:46px">'+esc(ex.note||ex.notes||ex.description||'')+'</textarea>'      +'<input type="url" placeholder="Link de video 1 https://..." id="exedit-video-'+board.id+'-'+i+'-0" value="'+esc((vids[0]||{}).url||'')+'" style="width:100%;background:var(--card2);border:1px solid var(--border);border-radius:4px;padding:8px;font-size:12px;color:var(--white);outline:none;margin-top:5px">'      +'<input type="text" placeholder="Nombre visible video 1" id="exedit-title-'+board.id+'-'+i+'-0" value="'+esc((vids[0]||{}).title||'')+'" style="width:100%;background:var(--card2);border:1px solid var(--border);border-radius:4px;padding:8px;font-size:12px;color:var(--white);outline:none;margin-top:5px">'      +'<input type="url" placeholder="Link de video 2 https://..." id="exedit-video-'+board.id+'-'+i+'-1" value="'+esc((vids[1]||{}).url||'')+'" style="width:100%;background:var(--card2);border:1px solid var(--border);border-radius:4px;padding:8px;font-size:12px;color:var(--white);outline:none;margin-top:5px">'      +'<input type="text" placeholder="Nombre visible video 2" id="exedit-title-'+board.id+'-'+i+'-1" value="'+esc((vids[1]||{}).title||'')+'" style="width:100%;background:var(--card2);border:1px solid var(--border);border-radius:4px;padding:8px;font-size:12px;color:var(--white);outline:none;margin-top:5px">'      +'<button class="btn-sm bblue" style="margin-top:5px" data-bid="'+board.id+'" data-idx="'+i+'" onclick="updateExerciseSb(this.dataset.bid,parseInt(this.dataset.idx))">Guardar ejercicio</button>'      +'</div>'      +'</div>'      +'<button class="btn-sm bred" data-bid="'+board.id+'" data-idx="'+i+'" onclick="removeExerciseSb(this.dataset.bid,parseInt(this.dataset.idx))">x</button>'      +'</div>';
+      // Edit mode
+      return '<div style="background:var(--card2);border:1px solid var(--border);border-radius:8px;padding:12px;margin-bottom:8px">'
+      +'<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">'
+      +'<span style="font-size:12px;font-weight:700;color:var(--bl)">Ejercicio '+(i+1)+'</span>'
+      +'<button class="btn-sm bred" style="padding:2px 8px" data-bid="'+board.id+'" data-idx="'+i+'" onclick="removeExerciseSb(this.dataset.bid,parseInt(this.dataset.idx))">Eliminar</button>'
+      +'</div>'
+      +'<input type="text" placeholder="Nombre del ejercicio" id="exedit-name-'+board.id+'-'+i+'" value="'+esc(ex.name||'')+'" style="width:100%;background:var(--card);border:1px solid var(--border);border-radius:4px;padding:9px;font-size:13px;font-weight:700;color:var(--white);outline:none;margin-bottom:6px;box-sizing:border-box">'
+      +'<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:5px;margin-bottom:6px">'
+      +'<input type="text" placeholder="Series" id="exedit-sets-'+board.id+'-'+i+'" value="'+esc(ex.sets||'')+'" style="background:var(--card);border:1px solid var(--border);border-radius:4px;padding:8px;font-size:12px;color:var(--white);outline:none">'
+      +'<input type="text" placeholder="Reps" id="exedit-reps-'+board.id+'-'+i+'" value="'+esc(ex.reps||'')+'" style="background:var(--card);border:1px solid var(--border);border-radius:4px;padding:8px;font-size:12px;color:var(--white);outline:none">'
+      +'<input type="text" placeholder="Descanso" id="exedit-rest-'+board.id+'-'+i+'" value="'+esc(ex.rest||'')+'" style="background:var(--card);border:1px solid var(--border);border-radius:4px;padding:8px;font-size:12px;color:var(--white);outline:none">'
+      +'</div>'
+      +'<textarea placeholder="Indicaciones (opcional)" id="exedit-desc-'+board.id+'-'+i+'" style="width:100%;background:var(--card);border:1px solid var(--border);border-radius:4px;padding:8px;font-size:12px;color:var(--white);outline:none;resize:none;min-height:44px;margin-bottom:6px;box-sizing:border-box">'+esc(ex.note||ex.notes||ex.description||'')+'</textarea>'
+      +'<input type="url" placeholder="Video 1 URL" id="exedit-video-'+board.id+'-'+i+'-0" value="'+esc((getExerciseVideos(ex)[0]||{}).url||'')+'" style="width:100%;background:var(--card);border:1px solid var(--border);border-radius:4px;padding:8px;font-size:12px;color:var(--white);outline:none;margin-bottom:4px;box-sizing:border-box">'
+      +'<input type="text" placeholder="Nombre video 1" id="exedit-title-'+board.id+'-'+i+'-0" value="'+esc((getExerciseVideos(ex)[0]||{}).title||'')+'" style="width:100%;background:var(--card);border:1px solid var(--border);border-radius:4px;padding:8px;font-size:12px;color:var(--white);outline:none;margin-bottom:4px;box-sizing:border-box">'
+      +'<input type="url" placeholder="Video 2 URL (opcional)" id="exedit-video-'+board.id+'-'+i+'-1" value="'+esc((getExerciseVideos(ex)[1]||{}).url||'')+'" style="width:100%;background:var(--card);border:1px solid var(--border);border-radius:4px;padding:8px;font-size:12px;color:var(--white);outline:none;margin-bottom:4px;box-sizing:border-box">'
+      +'<input type="text" placeholder="Nombre video 2" id="exedit-title-'+board.id+'-'+i+'-1" value="'+esc((getExerciseVideos(ex)[1]||{}).title||'')+'" style="width:100%;background:var(--card);border:1px solid var(--border);border-radius:4px;padding:8px;font-size:12px;color:var(--white);outline:none;margin-bottom:6px;box-sizing:border-box">'
+      +'<button class="btn-sm bblue" style="width:100%" data-bid="'+board.id+'" data-idx="'+i+'" onclick="updateExerciseSb(this.dataset.bid,parseInt(this.dataset.idx))">Guardar cambios</button>'
+      +'</div>';
     }).join('');
-    const assignedUsers=users.filter(u=>board.assignedTo.includes(u.id));
-    const userOpts='<div class="assign-box" data-board-assign="'+esc(board.id)+'">'
-      +'<div class="assign-head">'
-      +'<div class="assign-title" style="margin-bottom:0">Asignar rutina</div>'
-      +'<span class="badge bg-blue assign-count">'+assignedUsers.length+' asignado'+(assignedUsers.length===1?'':'s')+'</span>'
+
+    // ── Add exercise form ───────────────────────────
+    const addExForm=isAddingEx?
+      '<div style="background:var(--card2);border:1px solid var(--blue);border-radius:8px;padding:14px;margin-top:8px">'
+      +'<div style="font-size:12px;font-weight:700;color:var(--bl);margin-bottom:10px;letter-spacing:.06em">NUEVO EJERCICIO</div>'
+      +'<input type="text" placeholder="Nombre del ejercicio *" id="exn-'+board.id+'" style="width:100%;background:var(--card);border:1px solid var(--border);border-radius:4px;padding:9px;font-size:13px;color:var(--white);outline:none;margin-bottom:6px;box-sizing:border-box">'
+      +'<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:5px;margin-bottom:6px">'
+      +'<input type="text" placeholder="Series" id="exs-'+board.id+'" style="background:var(--card);border:1px solid var(--border);border-radius:4px;padding:8px;font-size:12px;color:var(--white);outline:none">'
+      +'<input type="text" placeholder="Reps" id="exr-'+board.id+'" style="background:var(--card);border:1px solid var(--border);border-radius:4px;padding:8px;font-size:12px;color:var(--white);outline:none">'
+      +'<input type="text" placeholder="Descanso" id="exrest-'+board.id+'" style="background:var(--card);border:1px solid var(--border);border-radius:4px;padding:8px;font-size:12px;color:var(--white);outline:none">'
       +'</div>'
-      +'<div class="assign-chipbar">'
-      +(assignedUsers.length?assignedUsers.map(u=>'<span class="perk">'+esc(u.name||'Socio')+'</span>').join(''):'<span style="font-size:11px;color:var(--gray)">Sin socios asignados</span>')
+      +'<textarea placeholder="Indicaciones (opcional)" id="exd-'+board.id+'" style="width:100%;background:var(--card);border:1px solid var(--border);border-radius:4px;padding:8px;font-size:12px;color:var(--white);outline:none;resize:none;min-height:44px;margin-bottom:6px;box-sizing:border-box"></textarea>'
+      +'<input type="url" placeholder="Video 1 URL" id="exv-'+board.id+'" style="width:100%;background:var(--card);border:1px solid var(--border);border-radius:4px;padding:8px;font-size:12px;color:var(--white);outline:none;margin-bottom:4px;box-sizing:border-box">'
+      +'<input type="text" placeholder="Nombre video 1" id="ext-'+board.id+'" style="width:100%;background:var(--card);border:1px solid var(--border);border-radius:4px;padding:8px;font-size:12px;color:var(--white);outline:none;margin-bottom:4px;box-sizing:border-box">'
+      +'<input type="url" placeholder="Video 2 URL (opcional)" id="exv2-'+board.id+'" style="width:100%;background:var(--card);border:1px solid var(--border);border-radius:4px;padding:8px;font-size:12px;color:var(--white);outline:none;margin-bottom:4px;box-sizing:border-box">'
+      +'<input type="text" placeholder="Nombre video 2" id="ext2-'+board.id+'" style="width:100%;background:var(--card);border:1px solid var(--border);border-radius:4px;padding:8px;font-size:12px;color:var(--white);outline:none;margin-bottom:8px;box-sizing:border-box">'
+      +'<div style="display:flex;gap:6px">'
+      +'<button class="btn-sm bblue" style="flex:1" data-bid="'+board.id+'" onclick="addExerciseSb(this.dataset.bid)">Agregar</button>'
+      +'<button class="btn-sm" style="background:transparent;border:1px solid var(--border);color:var(--gray)" onclick="addingExBoards.delete(&quot;'+board.id+'&quot;);renderBoardsAdmin()">Cancelar</button>'
       +'</div>'
-      +'<input class="adm-search board-assign-search" placeholder="Buscar socio para asignar..." oninput="filterBoardAssignees(this)">'
+      +'</div>'
+      :'';
+
+    // ── Assign modal panel ──────────────────────────
+    const assignPanel=isAssigning?
+      '<div style="background:var(--card2);border:1px solid var(--blue);border-radius:8px;padding:14px;margin-top:8px">'
+      +'<div style="font-size:12px;font-weight:700;color:var(--bl);margin-bottom:10px;letter-spacing:.06em">ASIGNAR SOCIOS</div>'
+      +'<input class="adm-search board-assign-search" placeholder="Buscar socio..." oninput="filterBoardAssignees(this)" style="margin-bottom:8px" data-board-assign="'+esc(board.id)+'">'
+      +'<div class="assign-box" data-board-assign="'+esc(board.id)+'">'
       +'<div class="assign-list">'
       +(users.length?users.map(u=>
-        '<label class="assign-row board-assignee-row" data-name="'+esc((u.name||'').toLowerCase())+'" style="cursor:pointer">'
-        +'<span class="assign-uname">'+esc(u.name||'Socio')+'</span>'
-        +'<input class="assign-check" type="checkbox" data-bid="'+esc(board.id)+'" data-uid="'+esc(u.id)+'" data-uname="'+esc(u.name||'Socio')+'" '+(board.assignedTo.includes(u.id)?'checked':'')+' onchange="toggleAssignSb(this)">'
+        '<label class="assign-row board-assignee-row" data-name="'+esc((u.name||'').toLowerCase())+'" style="cursor:pointer;display:flex;align-items:center;gap:10px;padding:9px 4px;border-bottom:1px solid var(--border)">'
+        +'<div style="width:32px;height:32px;border-radius:50%;background:var(--bl);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;color:#fff;flex-shrink:0">'+inits(u.name)+'</div>'
+        +'<span class="assign-uname" style="flex:1;font-size:13px;font-weight:600">'+esc(u.name||'Socio')+'</span>'
+        +'<input class="assign-check" type="checkbox" data-bid="'+esc(board.id)+'" data-uid="'+esc(u.id)+'" data-uname="'+esc(u.name||'Socio')+'" '+(board.assignedTo.includes(u.id)?'checked':'')+' onchange="toggleAssignSb(this)" style="width:18px;height:18px;accent-color:var(--blue)">'
         +'</label>'
       ).join(''):'<div style="padding:8px;font-size:12px;color:var(--gray)">Sin socios registrados</div>')
-      +'<div class="assign-empty">Sin resultados.</div>'
+      +'<div class="assign-empty" style="display:none;padding:8px;font-size:12px;color:var(--gray)">Sin resultados.</div>'
+      +'</div></div>'
+      +'<button class="btn-sm" style="margin-top:10px;width:100%;background:transparent;border:1px solid var(--border);color:var(--gray)" onclick="assigningBoards.delete(&quot;'+board.id+'&quot;);renderBoardsAdmin()">Cerrar</button>'
       +'</div>'
-      +'</div>';
+      :'';
+
+    // ── Card HTML ───────────────────────────────────
     card.innerHTML=
-      '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">'
-      +'<div style="display:flex;align-items:center;gap:8px;flex:1;min-width:0">'
-      +'<div style="width:14px;height:14px;border-radius:50%;background:'+board.color+'"></div>'
-      +'<input id="bn-'+board.id+'" value="'+esc(board.name)+'" style="flex:1;min-width:0;background:var(--card2);border:1px solid var(--border);border-radius:4px;padding:8px 10px;font-size:14px;font-weight:700;color:var(--white);outline:none" onkeydown="if(event.key===&quot;Enter&quot;)updateBoardNameSb(&quot;'+board.id+'&quot;)">'
+      // Header: color dot + name + color swatches
+      '<div style="padding:14px 14px 10px">'
+      +'<div style="display:flex;align-items:center;gap:8px;margin-bottom:10px">'
+      +'<div style="width:14px;height:14px;border-radius:50%;background:'+board.color+';flex-shrink:0"></div>'
+      +'<input id="bn-'+board.id+'" value="'+esc(board.name)+'" style="flex:1;min-width:0;background:transparent;border:none;border-bottom:1px solid var(--border);padding:4px 0;font-size:16px;font-weight:700;color:var(--white);outline:none" onkeydown="if(event.key===&quot;Enter&quot;)updateBoardNameSb(&quot;'+board.id+'&quot;)">'
+      +'<button class="btn-sm bblue" style="padding:5px 10px" data-bid="'+board.id+'" onclick="updateBoardNameSb(this.dataset.bid)">Guardar</button>'
       +'</div>'
-      +'<div style="display:flex;gap:6px;margin-left:8px"><button class="btn-sm bblue" data-bid="'+board.id+'" onclick="updateBoardNameSb(this.dataset.bid)">Guardar</button><button class="btn-sm bred" data-bid="'+board.id+'" onclick="deleteBoardSb(this.dataset.bid)">Eliminar</button></div>'      +'</div>'      +'<div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px">'      +['#2563eb','#10b981','#f59e0b','#ef4444','#8b5cf6','#ec4899','#f97316','#ffffff'].map(c=>'<div onclick="updateBoardColorSb(&quot;'+board.id+'&quot;,&quot;'+c+'&quot;)" style="width:24px;height:24px;border-radius:50%;background:'+c+';cursor:pointer;box-sizing:border-box;border:2px solid '+(board.color===c?'rgba(255,255,255,.9)':'rgba(255,255,255,.15)')+'" title="'+c+'"></div>').join('')      +'</div>'
-      +'<div style="display:flex;gap:6px;margin-bottom:8px;align-items:center">'      +'<button onclick="toggleBoardEx(&quot;'+board.id+'&quot;)" style="flex:1;display:flex;align-items:center;justify-content:space-between;background:var(--card2);border:1px solid var(--border);border-radius:6px;padding:9px 12px;color:var(--white);font-size:13px;font-weight:600;cursor:pointer">'      +'<span>'+(board.exercises.length)+' ejercicio'+(board.exercises.length===1?'':'s')+'</span>'      +'<span>'+(expandedBoards.has(board.id)?'▲':'▼')+'</span>'      +'</button>'      +(expandedBoards.has(board.id)?'<button onclick="toggleBoardEdit(&quot;'+board.id+'&quot;)" style="background:'+(editingBoards.has(board.id)?'rgba(16,185,129,.2)':'rgba(37,99,235,.15)')+';border:1px solid '+(editingBoards.has(board.id)?'var(--green)':'var(--blue)')+';border-radius:6px;padding:9px 14px;color:'+(editingBoards.has(board.id)?'var(--green)':'var(--bl)')+';font-size:12px;font-weight:700;cursor:pointer;white-space:nowrap">'+(editingBoards.has(board.id)?'✓ Listo':'✏️ Editar')+'</button>':'')      +'</div>'      +(expandedBoards.has(board.id)?(exHtml?'<div class="ex-list" style="margin-bottom:12px">'+exHtml+'</div>':'<div class="empty" style="font-size:12px;margin-bottom:12px">Sin ejercicios.</div>'):'')
-      +'<div style="margin-bottom:12px">'
-      +'<input type="text" placeholder="Ejercicio (ej: Sentadilla)" id="exn-'+board.id+'" style="width:100%;background:var(--card2);border:1px solid var(--border);border-radius:4px;padding:10px;font-size:14px;color:var(--white);outline:none;margin-bottom:6px">'
-      +'<div style="display:flex;gap:6px">'
-      +'<input type="text" placeholder="Series" id="exs-'+board.id+'" style="flex:1;background:var(--card2);border:1px solid var(--border);border-radius:4px;padding:8px;font-size:13px;color:var(--white);outline:none">'
-      +'<input type="text" placeholder="Reps" id="exr-'+board.id+'" style="flex:1;background:var(--card2);border:1px solid var(--border);border-radius:4px;padding:8px;font-size:13px;color:var(--white);outline:none">'
+      // Color swatches
+      +'<div style="display:flex;gap:7px;flex-wrap:wrap;margin-bottom:12px">'
+      +COLORS.map(c=>'<div onclick="updateBoardColorSb(&quot;'+board.id+'&quot;,&quot;'+c+'&quot;)" style="width:26px;height:26px;border-radius:50%;background:'+c+';cursor:pointer;box-sizing:border-box;border:2.5px solid '+(board.color===c?'rgba(255,255,255,.9)':'rgba(255,255,255,.12)')+'" title="'+c+'"></div>').join('')
       +'</div>'
-      +'<input type="text" placeholder="Descanso (ej: 60s)" id="exrest-'+board.id+'" style="width:100%;background:var(--card2);border:1px solid var(--border);border-radius:4px;padding:8px;font-size:13px;color:var(--white);outline:none;margin-top:6px">'
-      +'<textarea placeholder="Descripción / indicaciones del ejercicio" id="exd-'+board.id+'" style="width:100%;background:var(--card2);border:1px solid var(--border);border-radius:4px;padding:8px;font-size:13px;color:var(--white);outline:none;margin-top:6px;resize:none;min-height:58px"></textarea>'
-      +'<input type="url" placeholder="Link de video (YouTube, Drive, Vimeo o MP4)" id="exv-'+board.id+'" style="width:100%;background:var(--card2);border:1px solid var(--border);border-radius:4px;padding:8px;font-size:13px;color:var(--white);outline:none;margin-top:6px">'
-      +'<input type="text" placeholder="Nombre del video (ej: Técnica correcta)" id="ext-'+board.id+'" style="width:100%;background:var(--card2);border:1px solid var(--border);border-radius:4px;padding:8px;font-size:13px;color:var(--white);outline:none;margin-top:6px">'
-      +'<input type="url" placeholder="Link de video 2 (opcional)" id="exv2-'+board.id+'" style="width:100%;background:var(--card2);border:1px solid var(--border);border-radius:4px;padding:8px;font-size:13px;color:var(--white);outline:none;margin-top:6px">'
-      +'<input type="text" placeholder="Nombre del video 2" id="ext2-'+board.id+'" style="width:100%;background:var(--card2);border:1px solid var(--border);border-radius:4px;padding:8px;font-size:13px;color:var(--white);outline:none;margin-top:6px">'
-      +'<button class="btn-sm bblue" style="margin-top:6px;width:100%" data-bid="'+board.id+'" onclick="addExerciseSb(this.dataset.bid)">+ Agregar ejercicio</button>'
+      // Action buttons row
+      +'<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px">'
+      +'<button onclick="toggleBoardEx(&quot;'+board.id+'&quot;)" style="background:var(--card2);border:1px solid var(--border);border-radius:6px;padding:8px 4px;color:var(--white);font-size:11px;font-weight:700;cursor:pointer;letter-spacing:.04em">'+(isExpanded?'▲ OCULTAR':'▼ VER EJS')+'</button>'
+      +'<button onclick="if(!addingExBoards)addingExBoards=new Set();addingExBoards.has(&quot;'+board.id+'&quot;)?addingExBoards.delete(&quot;'+board.id+'&quot;):addingExBoards.add(&quot;'+board.id+'&quot;);renderBoardsAdmin()" style="background:rgba(37,99,235,.15);border:1px solid var(--blue);border-radius:6px;padding:8px 4px;color:var(--bl);font-size:11px;font-weight:700;cursor:pointer;letter-spacing:.04em">+ EJERCICIO</button>'
+      +'<button onclick="if(!assigningBoards)assigningBoards=new Set();assigningBoards.has(&quot;'+board.id+'&quot;)?assigningBoards.delete(&quot;'+board.id+'&quot;):assigningBoards.add(&quot;'+board.id+'&quot;);renderBoardsAdmin()" style="background:rgba(16,185,129,.12);border:1px solid var(--green);border-radius:6px;padding:8px 4px;color:var(--green);font-size:11px;font-weight:700;cursor:pointer;letter-spacing:.04em">👥 '+assignedUsers.length+'</button>'
       +'</div>'
-      +userOpts;
+      +'</div>'
+      // Exercises
+      +(isExpanded?
+        '<div style="padding:0 14px 4px">'
+        +(isExpanded?'<div style="display:flex;justify-content:flex-end;margin-bottom:6px"><button onclick="toggleBoardEdit(&quot;'+board.id+'&quot;)" style="background:'+(isEditing?'rgba(16,185,129,.15)':'rgba(37,99,235,.08)')+';border:1px solid '+(isEditing?'var(--green)':'var(--border)')+';border-radius:6px;padding:6px 12px;color:'+(isEditing?'var(--green)':'var(--gray)')+';font-size:11px;font-weight:700;cursor:pointer">'+(isEditing?'✓ LISTO':'✏️ EDITAR')+'</button></div>':'')
+        +(exHtml||'<div style="font-size:12px;color:var(--gray);padding:8px 0">Sin ejercicios aún.</div>')
+        +'</div>'
+      :'')
+      +addExForm
+      +assignPanel
+      // Delete button at bottom
+      +'<div style="padding:10px 14px;border-top:1px solid var(--border);margin-top:4px">'
+      +'<button class="btn-sm bred" style="width:100%" data-bid="'+board.id+'" onclick="deleteBoardSb(this.dataset.bid)">🗑 Eliminar pizarrón</button>'
+      +'</div>';
+
     el.appendChild(card);
   });
 }
+
 
 async function toggleAssignSb(cb){
   const bid=cb.dataset.bid,uid=cb.dataset.uid;
