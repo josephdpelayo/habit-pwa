@@ -405,23 +405,23 @@ body.reception-mode .app{max-width:none;width:100vw;height:100vh}
 body.reception-mode{background:#050505}
 .reception-screen{background:radial-gradient(circle at 50% -20%,rgba(37,99,235,.18),transparent 46%),var(--black);height:100vh;width:100vw;overflow:hidden}
 .reception-shell{height:100%;display:flex;flex-direction:column;padding:clamp(24px,3vw,48px);gap:clamp(18px,2vw,30px)}
-.reception-top{display:flex;justify-content:center;align-items:center;border-bottom:1px solid rgba(255,255,255,.08);padding-bottom:clamp(18px,2vw,28px)}
-.reception-brand{display:none}
+.reception-top{display:grid;grid-template-columns:1fr auto;gap:28px;align-items:start;border-bottom:1px solid rgba(255,255,255,.08);padding-bottom:clamp(18px,2vw,28px)}
+.reception-brand{display:flex;align-items:center;gap:16px;min-width:0}
 .reception-brand img{width:54px;height:54px;object-fit:contain}
 .reception-brand-title{font-size:clamp(28px,3vw,52px);font-weight:900;letter-spacing:.12em;line-height:1}
 .reception-brand-sub{font-size:clamp(10px,1vw,15px);color:var(--bl);letter-spacing:.22em;font-weight:700;margin-top:6px;text-transform:uppercase}
-.reception-clock{width:min(82vw,1300px)}
+.reception-clock{justify-self:end;width:min(68vw,1120px)}
 .digital-clock-panel{position:relative;display:grid;grid-template-columns:minmax(54px,76px) minmax(560px,1fr) minmax(136px,180px);gap:clamp(18px,2vw,34px);align-items:center;background:linear-gradient(112deg,#191919 0%,#080808 43%,#121212 44%,#020202 100%);border:2px solid #242424;border-radius:22px;padding:18px 24px;box-shadow:inset 0 1px 0 rgba(255,255,255,.12),inset 0 -18px 42px rgba(0,0,0,.58),0 18px 38px rgba(0,0,0,.34);overflow:hidden}
 .digital-clock-panel:before{content:'';position:absolute;inset:0;background:linear-gradient(105deg,rgba(255,255,255,.12),transparent 33%,rgba(255,255,255,.05) 53%,transparent 72%);pointer-events:none}
 .digital-week-list{position:relative;display:flex;flex-direction:column;gap:2px;color:#f4f7fb;font-size:clamp(16px,1.35vw,25px);font-weight:900;line-height:1.05;letter-spacing:.08em}
 .digital-week-list span{opacity:.92}
 .digital-week-list span.active{color:#38ff55;text-shadow:0 0 9px rgba(56,255,85,.72)}
-.digital-time-wrap{position:relative;display:flex;justify-content:center;align-items:center;min-width:0;min-height:clamp(120px,12vw,210px)}
-.digital-time-ghost,.digital-time{font-family:'Montserrat',sans-serif;font-size:clamp(110px,12vw,210px);font-weight:400;line-height:.90;letter-spacing:.01em;font-variant-numeric:tabular-nums}
+.digital-time-wrap{position:relative;display:flex;justify-content:center;align-items:center;min-width:0;min-height:clamp(96px,8.2vw,146px)}
+.digital-time-ghost,.digital-time{font-family:'Montserrat',sans-serif;font-size:clamp(78px,7.8vw,148px);font-weight:900;line-height:.82;letter-spacing:.01em;font-variant-numeric:tabular-nums}
 .digital-time-ghost{position:absolute;color:rgba(255,255,255,.06);text-shadow:none}
 .digital-time{position:relative;color:var(--bl);text-shadow:0 0 10px rgba(59,130,246,.82),0 0 24px rgba(37,99,235,.48)}
 .digital-side{position:relative;display:grid;grid-template-rows:auto auto auto;gap:8px;justify-items:end;align-items:center;color:#38ff55;font-family:'Courier New','Lucida Console',monospace;font-weight:900;text-shadow:0 0 10px rgba(56,255,85,.65)}
-.digital-alarms{display:flex;flex-direction:column;gap:2px;justify-self:end;color:#f4f7fb;font-family:'Montserrat',sans-serif;font-size:clamp(13px,1vw,18px);font-weight:900;text-shadow:none}
+.digital-alarms{display:flex;flex-direction:column;gap:2px;justify-self:start;color:#f4f7fb;font-family:'Montserrat',sans-serif;font-size:clamp(13px,1vw,18px);font-weight:900;text-shadow:none}
 .digital-temp-value{font-size:clamp(28px,2.8vw,52px);line-height:.88;letter-spacing:-.05em}
 .digital-temp-unit{font-family:'Montserrat',sans-serif;color:#38ff55;font-size:clamp(11px,.9vw,15px);font-weight:900;letter-spacing:0;margin-left:2px;vertical-align:top}
 .digital-date-value{display:flex;justify-content:flex-end;align-items:flex-end;gap:8px;font-size:clamp(28px,2.7vw,50px);line-height:.82;letter-spacing:-.04em}
@@ -437,12 +437,12 @@ body.reception-mode{background:#050505}
 .reception-dot{width:10px;height:10px;border-radius:50%;background:var(--green);box-shadow:0 0 18px currentColor}
 .reception-dot.warn{background:var(--amber)}.reception-dot.danger{background:var(--red)}
 .reception-updated{margin-top:auto;color:var(--gray);font-size:13px;line-height:1.5}
-.reception-list-wrap{min-width:0;display:flex;flex-direction:column;gap:8px;overflow:hidden;flex:1}
+.reception-list-wrap{min-width:0;display:flex;flex-direction:column;gap:14px;overflow:hidden}
 .reception-list-head{display:flex;align-items:end;justify-content:space-between;gap:16px}
 .reception-title{font-size:clamp(22px,2.2vw,38px);font-weight:800;letter-spacing:.04em}
 .reception-status{font-size:clamp(13px,1.1vw,18px);color:var(--gray);font-weight:700;text-transform:uppercase;letter-spacing:.12em}
-.reception-list{overflow:hidden;display:grid;grid-template-columns:repeat(auto-fit,minmax(520px,1fr));align-content:stretch;gap:8px;padding-right:4px;flex:1;height:100%}
-.reception-card{background:rgba(16,185,129,.1);border:1px solid rgba(16,185,129,.36);border-left:7px solid var(--green);border-radius:8px;padding:18px 20px;display:grid;grid-template-columns:minmax(0,1fr) auto;gap:18px;align-items:center;min-height:80px}
+.reception-list{overflow:hidden;display:grid;grid-template-columns:repeat(auto-fit,minmax(520px,1fr));align-content:start;gap:14px;padding-right:4px}
+.reception-card{background:rgba(16,185,129,.1);border:1px solid rgba(16,185,129,.36);border-left:7px solid var(--green);border-radius:8px;padding:18px 20px;display:grid;grid-template-columns:minmax(0,1fr) auto;gap:18px;align-items:center;min-height:112px}
 .reception-card>div:first-child{min-width:0}
 .reception-card.warn{background:rgba(245,158,11,.11);border-color:rgba(245,158,11,.42);border-left-color:var(--amber)}
 .reception-card.danger{background:rgba(239,68,68,.12);border-color:rgba(239,68,68,.48);border-left-color:var(--red)}
@@ -3011,6 +3011,8 @@ async function renderRutinas(){
     const exercises=selected.exercises||[];
     const exHtml=exercises.length?exercises.map((ex,i)=>{
       const videos=getExerciseVideos(ex);
+      const gKey=selected.id+'_'+i+'_group';
+      const groupOpen=!!expandedVideos[gKey];
       return '<div class="exercise-detail">'
         +'<div class="exercise-detail-head">'
         +'<div style="display:flex;align-items:flex-start;gap:10px">'
@@ -3018,14 +3020,16 @@ async function renderRutinas(){
         +'<div class="ex-body"><div class="ex-name">'+esc(ex.name)+'</div>'
         +'<div class="ex-detail">'+[ex.sets?esc(ex.sets)+' series':null,ex.reps?esc(ex.reps)+' reps':null,ex.rest?esc(ex.rest)+' descanso':null].filter(Boolean).join(' · ')+'</div>'
         +(ex.note||ex.notes||ex.description?'<div class="ex-note">'+esc(ex.note||ex.notes||ex.description)+'</div>':'')
-        +'</div><button class="btn-sm bblue" data-bid="'+esc(selected.id)+'" data-idx="'+i+'" data-name="'+esc(ex.name)+'" onclick="openLogScore(this)">Log</button></div>'
         +'</div>'
-        +videos.map((vid,vi)=>{
+        +(videos.length?'<button class="btn-sm bblue" style="font-size:20px;font-weight:700;padding:0 12px;line-height:1" onclick="toggleVideo(&quot;'+gKey+'&quot;)">'+(groupOpen?'−':'+')+'</button>':'')
+        +'</div>'
+        +'</div>'
+        +(groupOpen?videos.map((vid,vi)=>{
           const vKey=selected.id+'_'+i+'_'+vi;
           const videoLabel=vid.title||('Video '+(vi+1));
           return '<div class="ex-video-btn" onclick="toggleVideo(&quot;'+vKey+'&quot;)"><span class="play-icon"><span class="play-tri"></span></span><span class="ex-video-title">'+esc(videoLabel)+'</span>'+(expandedVideos[vKey]?'<button class="ex-video-min" onclick="event.stopPropagation();toggleVideo(&quot;'+vKey+'&quot;)" aria-label="Minimizar video">−</button>':'')+'</div>'
             +(expandedVideos[vKey]?getVideoHtml(vid.url):'');
-        }).join('')
+        }).join(''):'')
         +'</div>';
     }).join(''):'<div class="empty">Sin ejercicios en esta rutina.</div>';
     el.innerHTML='<div class="routine-tabs">'+tabs+'</div>'
