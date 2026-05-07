@@ -398,8 +398,6 @@ input,select,button,textarea{font-family:'Montserrat',sans-serif}
 .asb{padding:0 12px}
 .wsec{font-size:10px;font-weight:700;color:var(--amber);letter-spacing:.1em;text-transform:uppercase;padding:8px 0 4px}
 .adm-search{width:100%;background:var(--card);border:1px solid var(--border);border-radius:4px;padding:12px;font-size:16px;color:var(--white);outline:none;margin-bottom:1rem;-webkit-appearance:none}
-.filter-chip{background:var(--card2);border:1px solid var(--border);color:var(--gray);border-radius:20px;padding:5px 12px;font-size:11px;font-weight:600;letter-spacing:.04em;cursor:pointer;white-space:nowrap;transition:all .15s}
-.filter-chip.active{background:rgba(37,99,235,.2);border-color:var(--blue);color:var(--bl)}
 .adm-date{width:100%;background:var(--card);border:1px solid var(--border);border-radius:4px;padding:12px;font-size:16px;color:var(--white);outline:none;margin-bottom:1rem;color-scheme:dark;-webkit-appearance:none}
 
 /* RECEPTION TV */
@@ -821,25 +819,7 @@ body.reception-mode{background:#050505}
         <div class="field"><label>Contraseña</label><input type="text" id="rc-pass" placeholder="Mínimo 6 caracteres"></div>
         <button class="btn-ghost" onclick="adminCreateReceptionUserSb()">Crear cuenta recepción</button>
       </div>
-      <input class="adm-search" id="user-search" placeholder="Buscar por nombre, correo o teléfono..." oninput="renderUsersSb()">
-      <div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:8px;align-items:center">
-        <div style="display:flex;gap:4px;flex-wrap:wrap;flex:1">
-          <button class="filter-chip active" data-filter="todos" onclick="setUserFilter(this)">Todos</button>
-          <button class="filter-chip" data-filter="activo" onclick="setUserFilter(this)">✅ Activos</button>
-          <button class="filter-chip" data-filter="vencido" onclick="setUserFilter(this)">🔴 Vencidos</button>
-          <button class="filter-chip" data-filter="por-vencer" onclick="setUserFilter(this)">⚠️ Por vencer</button>
-          <button class="filter-chip" data-filter="sin-plan" onclick="setUserFilter(this)">⬜ Sin plan</button>
-        </div>
-        <select id="user-sort" onchange="renderUsersSb()" style="background:var(--card2);border:1px solid var(--border);color:var(--white);border-radius:4px;padding:5px 8px;font-size:12px;cursor:pointer">
-          <option value="nombre">A–Z Nombre</option>
-          <option value="nombre-z">Z–A Nombre</option>
-          <option value="antiguedad">Más antiguo</option>
-          <option value="reciente">Más reciente</option>
-          <option value="vencimiento">Próx. vencimiento</option>
-          <option value="creditos">Más visitas</option>
-        </select>
-      </div>
-      <div id="user-count" style="font-size:11px;color:var(--gray);margin-bottom:8px"></div>
+      <input class="adm-search" id="user-search" placeholder="Buscar por nombre o correo..." oninput="renderUsersSb()">
       <div id="user-list"></div>
     </div>
 
@@ -1032,6 +1012,53 @@ const sb=supabase.createClient(SUPABASE_URL,SUPABASE_KEY,{auth:{autoRefreshToken
 let pendingProfilePhoto=null;
 let sbUser=null,sbProfile=null;
 
+// ── WEB PUSH ───────────────────────────────────────────────
+// Paste your VAPID public key here after generating it (see README)
+const VAPID_PUBLIC_KEY='BDceRbehVWAiv4KcrKTSUf6tu4FH6EpGj1M5Z1xpGk6rJ2-Kfk9WABL6UoQYzbp3fhPnm5HVqLc-BacZLooaiio';
+
+function urlBase64ToUint8Array(base64String){
+  const padding='='.repeat((4-base64String.length%4)%4);
+  const base64=(base64String+padding).replace(/-/g,'+').replace(/_/g,'/');
+  const raw=atob(base64);
+  return Uint8Array.from([...raw].map(c=>c.charCodeAt(0)));
+}
+
+async function registerPush(role){
+  if(!('serviceWorker' in navigator)||!('PushManager' in window))return;
+  try{
+    const reg=await navigator.serviceWorker.register('/sw.js');
+    let perm=Notification.permission;
+    if(perm==='default') perm=await Notification.requestPermission();
+    if(perm!=='granted')return;
+    const existing=await reg.pushManager.getSubscription();
+    const sub=existing||await reg.pushManager.subscribe({
+      userVisibleOnly:true,
+      applicationServerKey:urlBase64ToUint8Array(VAPID_PUBLIC_KEY)
+    });
+    // Save subscription to Supabase
+    await sb.from('push_subscriptions').upsert({
+      user_id:sbUser.id,
+      role:role||'user',
+      subscription:sub.toJSON(),
+      updated_at:new Date().toISOString()
+    },{onConflict:'user_id'});
+    console.log('Push subscription saved');
+  }catch(e){console.warn('Push registration failed:',e);}
+}
+
+async function sendPush(target,title,body,extra={}){
+  // target: "admin" | "user:<uuid>" | "all"
+  try{
+    const{data:session}=await sb.auth.getSession();
+    const token=session?.session?.access_token;
+    await fetch(SUPABASE_URL+'/functions/v1/send-push',{
+      method:'POST',
+      headers:{'Content-Type':'application/json','Authorization':'Bearer '+token},
+      body:JSON.stringify({target,title,body,...extra})
+    });
+  }catch(e){console.warn('sendPush error:',e);}
+}
+
 function showLoading(msg){
   let el=document.getElementById('loading-overlay');
   if(!el){
@@ -1090,6 +1117,18 @@ function showMainSb(){
   renderActiveBookings().catch(console.error);
   startUserNotifPolling();
   startTimer();
+  // Check membership expiry and send push reminder once per day
+  setTimeout(()=>checkExpiryPush(),3000);
+}
+
+function checkExpiryPush(){
+  if(!curUser||!curUser.planExpiry)return;
+  const days=daysUntil(curUser.planExpiry);
+  if(days===null||days<0||days>3)return;
+  const key='habit_expiry_notif_'+curUser.planExpiry;
+  if(localStorage.getItem(key))return; // already sent today
+  localStorage.setItem(key,'1');
+  sendPush('user:'+sbUser.id,'⚠️ Membresía por vencer','Tu membresía vence en '+days+' día'+(days!==1?'s':'')+'. Renuévala para seguir entrenando.',{tag:'expiry-warning'});
 }
 
 async function initApp(){
@@ -1109,11 +1148,12 @@ async function initApp(){
       showLoading('Cargando tu cuenta...');
       await loadUserData();
       hideLoading();
-      if(sbProfile.role==='admin')showAdmin();
+      if(sbProfile.role==='admin'){showAdmin();registerPush('admin').catch(()=>{});}
       else if(sbProfile.role==='reception')showReception();
       else{
         showMainSb();
         handleStripeReturn();
+        registerPush('user').catch(()=>{});
       }
     }
   }catch(e){
@@ -1853,6 +1893,7 @@ async function renderAccess(){
       slot_str:timeStr,accessed_at:new Date().toISOString()
     }).catch(e=>console.warn('logAccess:',e));
       addAdminNotif('🔓 '+curUser.name+' accedió al gym · código '+curUser.accessCode+' · '+timeStr);
+      sendPush('admin','🔓 Acceso al gym',curUser.name+' abrió la puerta · '+timeStr,{tag:'door-open'});
     }
     // Timer color based on remaining time
     const minLeft=Math.floor(msToClose/60000);
@@ -2792,6 +2833,7 @@ async function doConfirm(){
 
     // 5. Notify admin
     try{await sb.from('admin_notifs').insert({message:'Reserva: '+curUser.name+' - '+fmtDS(ds)+' '+timeStr+(isGrupal?' (grupal)':'')});}catch(e){}
+    sendPush('admin','📅 Nueva reserva',curUser.name+' · '+fmtDS(ds)+' '+timeStr+(isGrupal?' (grupal)':''),{tag:'booking-new'});
 
     hideLoading();
     addN('Reserva confirmada - '+fmtDS(ds)+' '+timeStr+'. Abre la puerta desde la app al llegar.','success');
@@ -2847,6 +2889,7 @@ async function cancelBooking(bid){
     hideLoading();
     addN('Reserva cancelada - '+fmtDS(b.ds)+' '+b.timeStr+'. Visita devuelta.','warn');
     toast('Reserva cancelada - Visita devuelta','warn');
+    sendPush('admin','❌ Reserva cancelada',curUser.name+' canceló · '+fmtDS(b.ds)+' '+b.timeStr,{tag:'booking-cancel'});
   }catch(e){
     hideLoading();
     toast('Error: '+e.message,'err');
@@ -3822,6 +3865,7 @@ function adminCreateUser(){
   users[id]={id,name,email,phone,pass,role:'user',plan:null,credits:0,planExpiry:null,planType:null,accessCode:code,bookings:[],payments:[]};
   ['nu-name','nu-email','nu-phone','nu-pass'].forEach(i=>document.getElementById(i).value='');
   addAdminNotif('👤 Socio creado por admin: '+name+' ('+email+') · Código: '+code);
+  sendPush('admin','👤 Nuevo socio',name+' se registró · código '+code,{tag:'new-member'});
   toast('Socio creado · Código: '+code,'ok');
   renderUsers();renderDashboard();
 }
@@ -3987,48 +4031,18 @@ async function renderAdmNotifsSb(){
   }catch(e){el.innerHTML='<div class="empty">Error: '+e.message+'</div>';}
 }
 
-let _userFilter='todos';
-function setUserFilter(btn){
-  _userFilter=btn.dataset.filter;
-  document.querySelectorAll('.filter-chip').forEach(c=>c.classList.remove('active'));
-  btn.classList.add('active');
-  renderUsersSb();
-}
-
-async function renderUsersSb(){\n  const q=(document.getElementById('user-search')||{value:''}).value.toLowerCase();
-  const sort=(document.getElementById('user-sort')||{value:'nombre'}).value;
+async function renderUsersSb(){
+  const q=(document.getElementById('user-search')||{value:''}).value.toLowerCase();
   const list=document.getElementById('user-list');
-  const countEl=document.getElementById('user-count');
   if(!list)return;
   list.innerHTML='<div class="empty">Cargando...</div>';
   try{
     const{data:allU,error}=await sb.from('profiles').select('*').order('created_at');
     if(error)throw error;
-    let filtered=(allU||[]).filter(u=>u.role!=='admin'&&u.role!=='reception'&&(!q||((u.name||'').toLowerCase().includes(q)||(u.phone||'').includes(q)||(u.email||'').toLowerCase().includes(q))));
-    // Status filter
-    filtered=filtered.filter(u=>{
-      const expired=u.plan_expiry&&new Date(u.plan_expiry)<new Date();
-      const days=daysUntil(u.plan_expiry);
-      const active=(u.credits>=999||u.credits>0)&&!expired;
-      if(_userFilter==='activo') return active&&!(days!==null&&days<=5&&days>=0);
-      if(_userFilter==='vencido') return expired||(u.credits!==undefined&&u.credits!==null&&u.credits<=0&&!u.plan_expiry);
-      if(_userFilter==='por-vencer') return days!==null&&days>=0&&days<=7;
-      if(_userFilter==='sin-plan') return !u.plan_id&&(!u.credits||u.credits<=0);
-      return true;
-    });
-    // Sort
-    filtered.sort((a,b2)=>{
-      if(sort==='nombre') return (a.name||'').localeCompare(b2.name||'');
-      if(sort==='nombre-z') return (b2.name||'').localeCompare(a.name||'');
-      if(sort==='antiguedad') return new Date(a.created_at)-new Date(b2.created_at);
-      if(sort==='reciente') return new Date(b2.created_at)-new Date(a.created_at);
-      if(sort==='vencimiento'){const da=daysUntil(a.plan_expiry)??99999,db=daysUntil(b2.plan_expiry)??99999;return da-db;}
-      if(sort==='creditos') return (b2.credits||0)-(a.credits||0);
-      return 0;
-    });
-    if(countEl) countEl.textContent=filtered.length+' socio'+(filtered.length!==1?'s':'');
+    console.log('Profiles loaded:',allU);
+    const filtered=(allU||[]).filter(u=>u.role!=='admin'&&u.role!=='reception'&&(!q||((u.name||'').toLowerCase().includes(q)||(u.phone||'').includes(q))));
     if(!filtered.length){
-      list.innerHTML='<div class="empty">Sin usuarios'+(allU&&allU.length?' para este filtro':' — verifica RLS en Supabase')+'.</div>';
+      list.innerHTML='<div class="empty">Sin usuarios'+(allU&&allU.length?' (todos son admin)':' — verifica RLS en Supabase')+'.</div>';
       return;
     }
     list.innerHTML='';
@@ -4041,9 +4055,9 @@ async function renderUsersSb(){\n  const q=(document.getElementById('user-search
       const isUnlimited=u.credits>=999;
       const noCredits=!isUnlimited&&(u.credits||0)<=0;
       const lowCredits=!isUnlimited&&(u.credits||0)>0&&(u.credits||0)<=3;
-      const expiring=days!==null&&days<=7&&days>=0;
+      const expiring=days!==null&&days<=5&&days>=0;
       const statusCls=expired||noCredits?'bg-red':(lowCredits||expiring)?'bg-amber':active?'bg-green':'bg-gray';
-      const statusTxt=expired?'Vencida':noCredits?'Sin visitas':lowCredits?'Pocas visitas':expiring?(days+'d'):active?'Activo':'Sin plan';
+      const statusTxt=expired?'Vencida':noCredits?'Sin visitas':lowCredits?'Pocas visitas':expiring?'Por vencer':active?'Activo':'Sin plan';
       const div=document.createElement('div');
       div.className='user-row';
       div.style.cssText='flex-direction:column;align-items:flex-start;gap:8px';
@@ -4180,6 +4194,7 @@ async function adminGrantSelectedPlanSb(uid,name){
     hideLoading();
     document.getElementById('membership-grant-modal')?.remove();
     toast('Membresia activada a '+name,'ok');
+    sendPush('user:'+uid,'✅ Membresía activada','Tu membresía '+plan.name+' está activa. ¡A entrenar!',{tag:'membership-active'});
     renderUsersSb();
   }catch(e){
     hideLoading();
