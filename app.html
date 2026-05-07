@@ -1042,25 +1042,29 @@ function urlBase64ToUint8Array(base64String){
   return Uint8Array.from([...raw].map(c=>c.charCodeAt(0)));
 }
 
-async function registerPush(role){
-  if(!('serviceWorker' in navigator)||!('PushManager' in window))return;
-  try{
-    const reg=await navigator.serviceWorker.register('/sw.js');
-    let perm=Notification.permission;
-    if(perm==='default') perm=await Notification.requestPermission();
-    if(perm!=='granted')return;
-    const existing=await reg.pushManager.getSubscription();
-    const sub=existing||await reg.pushManager.subscribe({
-      userVisibleOnly:true,
-      applicationServerKey:urlBase64ToUint8Array(VAPID_PUBLIC_KEY)
-    });
-    await sb.from('push_subscriptions').upsert({
-      user_id:sbUser.id,
-      role:role||'user',
-      subscription:sub.toJSON(),
-      updated_at:new Date().toISOString()
-    },{onConflict:'user_id'});
-  }catch(e){console.warn('Push registration failed:',e);}
+function registerPush(role){
+  // Fire and forget — never blocks login flow
+  setTimeout(async()=>{
+    try{
+      if(!('serviceWorker' in navigator)||!('PushManager' in window))return;
+      if(!sbUser)return;
+      const reg=await navigator.serviceWorker.register('/sw.js');
+      let perm=Notification.permission;
+      if(perm==='default') perm=await Notification.requestPermission();
+      if(perm!=='granted')return;
+      const existing=await reg.pushManager.getSubscription();
+      const sub=existing||await reg.pushManager.subscribe({
+        userVisibleOnly:true,
+        applicationServerKey:urlBase64ToUint8Array(VAPID_PUBLIC_KEY)
+      });
+      await sb.from('push_subscriptions').upsert({
+        user_id:sbUser.id,
+        role:role||'user',
+        subscription:sub.toJSON(),
+        updated_at:new Date().toISOString()
+      },{onConflict:'user_id'});
+    }catch(e){console.warn('Push registration failed (non-critical):',e);}
+  },2000);
 }
 
 async function sendPush(target,title,body,extra={}){
@@ -1133,7 +1137,7 @@ function showMainSb(){
   renderActiveBookings().catch(console.error);
   startUserNotifPolling();
   startTimer();
-  setTimeout(()=>checkExpiryPush(),3000);
+  // checkExpiryPush called after push is registered manually
 }
 
 function checkExpiryPush(){
@@ -1163,12 +1167,12 @@ async function initApp(){
       showLoading('Cargando tu cuenta...');
       await loadUserData();
       hideLoading();
-      if(sbProfile.role==='admin'){showAdmin();registerPush('admin').catch(()=>{});}
+      if(sbProfile.role==='admin'){showAdmin();}
       else if(sbProfile.role==='reception')showReception();
       else{
         showMainSb();
         handleStripeReturn();
-        registerPush('user').catch(()=>{});
+        // push registered manually by user
       }
     }
   }catch(e){
