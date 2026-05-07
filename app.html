@@ -1099,9 +1099,13 @@ function showLoading(msg){
 function hideLoading(){const el=document.getElementById('loading-overlay');if(el)el.style.display='none';}
 
 function profileToLocal(p){
+  const allPlans=[...PLANS.individual,...PLANS.grupal];
+  const plan=allPlans.find(x=>x.id===p.plan_id);
+  // If plan is unlimited (monthly), ensure credits reflect that in memory
+  const credits=(plan&&plan.credits>=999)?999:(p.credits||0);
   return{id:p.id,name:p.name,email:sbUser?sbUser.email:'',phone:p.phone,
     role:p.role,plan:p.plan_id,planType:p.plan_type,
-    credits:p.credits||0,planExpiry:p.plan_expiry,
+    credits,planExpiry:p.plan_expiry,
     accessCode:p.access_code,avatarUrl:p.avatar_url||'',bookings:[],guestBookings:[],payments:[]};
 }
 
@@ -1536,7 +1540,15 @@ function nextBk(u){
   const now=mazNow(),ds0=mazToday(),ds1=addDaysDS(ds0,1);
   const cands=[...(u.bookings||[]),...(u.guestBookings||[])].filter(b=>b.ds===ds0||b.ds===ds1);
   cands.sort((a,b2)=>a.ds===b2.ds?a.startIdx-b2.startIdx:a.ds.localeCompare(b2.ds));
+  // First priority: today's booking that is currently open (session in progress or about to open)
   for(const b of cands){
+    if(b.ds!==ds0)continue;
+    const aw=getAW(b);
+    if(now<aw.closes) return{b,...aw};
+  }
+  // Second priority: tomorrow's booking (only if no active today booking)
+  for(const b of cands){
+    if(b.ds!==ds1)continue;
     const aw=getAW(b);
     if(now<aw.closes) return{b,...aw};
   }
@@ -2157,7 +2169,7 @@ function showAdmin(){
   document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
   const adm=document.getElementById('s-admin');
   if(adm)adm.classList.add('active');
-  const d=document.getElementById('adm-date');if(d){d.value=mazToday();d.min=mazToday();d.max=addDaysDS(mazToday(),ADMIN_BLOCK_ADVANCE_DAYS);}
+  const d=document.getElementById('adm-date');if(d){d.value=mazToday();d.max=addDaysDS(mazToday(),ADMIN_BLOCK_ADVANCE_DAYS);}
   loadBoardsSb().then(()=>admTab('dash'));
 }
 
@@ -2313,14 +2325,14 @@ function admTab(t){
 }
 
 // ── HELPERS ──
-function hasActive(u){if(!u||u.credits<=0)return false;if(u.planExpiry&&new Date(u.planExpiry)<new Date())return false;return true;}
+function hasActive(u){if(!u)return false;const _allP=[...PLANS.individual,...PLANS.grupal],_pl=_allP.find(x=>x.id===u.plan);const _unlim=u.credits>=999||(_pl&&_pl.credits>=999);if(!_unlim&&u.credits<=0)return false;if(u.planExpiry&&new Date(u.planExpiry)<new Date())return false;return true;}
 function planLbl(u){
   if(!u.plan&&u.credits>0)return'Individual · '+u.credits+' visita'+(u.credits===1?'':'s');
   if(!u.plan)return'Sin membresía';
   const all=[...PLANS.individual,...PLANS.grupal],p=all.find(x=>x.id===u.plan);
   if(!p)return'Sin membresía';
   if(u.planExpiry&&new Date(u.planExpiry)<new Date())return'Vencida';
-  return(u.planType==='grupal'?'Grupal':'Individual')+' · '+(u.credits>=999?'Mensual':u.credits+' visita'+(u.credits===1?'':'s'));
+  const _unlim2=u.credits>=999||(p&&p.credits>=999);return(u.planType==='grupal'?'Grupal':'Individual')+' · '+(_unlim2?'Mensual':u.credits+' visita'+(u.credits===1?'':'s'));
 }
 
 // ── PERFIL ──
@@ -2334,7 +2346,7 @@ async function renderPerfil(){
       if(prof){
         sbProfile=prof;
         curUser.name=prof.name;curUser.phone=prof.phone||'';
-        curUser.credits=prof.credits||0;curUser.plan=prof.plan_id;
+        {const allPlans=[...PLANS.individual,...PLANS.grupal];const _p=allPlans.find(x=>x.id===prof.plan_id);curUser.credits=(_p&&_p.credits>=999)?999:(prof.credits||0);}curUser.plan=prof.plan_id;
         curUser.planType=prof.plan_type;curUser.planExpiry=prof.plan_expiry;
         curUser.accessCode=prof.access_code;
         curUser.avatarUrl=prof.avatar_url||'';
@@ -2760,7 +2772,7 @@ function renderConfPanel(ds,isGrupal){
       wb.style.display='none';bc.style.display='block';bw.style.display='none';bc.disabled=false;
       bc.textContent=selShort?'Confirmar 60 minutos':'Confirmar reserva';
     }
-    cb.style.display='block';cb.innerHTML='Members\u00eda activa \u00b7 '+(curUser.credits>=999?'Mensual':curUser.credits+' visita'+(curUser.credits===1?'':'s')+' restantes');
+    {const _allP=[...PLANS.individual,...PLANS.grupal];const _cp=_allP.find(x=>x.id===curUser.plan);const _unlim=curUser.credits>=999||(_cp&&_cp.credits>=999);cb.style.display='block';cb.innerHTML='Members\u00eda activa \u00b7 '+(_unlim?'Mensual ilimitado':curUser.credits+' visita'+(curUser.credits===1?'':'s')+' restantes');}
   }
 }
 
@@ -2839,9 +2851,8 @@ async function doConfirm(){
     const{error:occErr}=await sb.from('slot_occupancy').insert(occRows);
     if(occErr)throw occErr;
 
-    // 3. Deduct credit in Supabase
-    const newCredits=curUser.credits>=999?999:Math.max(0,curUser.credits-1);
-    await sb.from('profiles').update({credits:newCredits}).eq('id',sbUser.id);
+    // 3. Deduct credit in Supabase (skip for unlimited/monthly plans)
+    {const _allP=[...PLANS.individual,...PLANS.grupal];const _cp=_allP.find(x=>x.id===curUser.plan);const _unlim=curUser.credits>=999||(_cp&&_cp.credits>=999);const newCredits=_unlim?curUser.credits:Math.max(0,curUser.credits-1);if(!_unlim)await sb.from('profiles').update({credits:newCredits}).eq('id',sbUser.id);curUser.credits=newCredits;}
 
     // 4. Update local state
     const entry={userId:curUser.id,name:curUser.name,phone:curUser.phone||'',isGroup:isGrupal,bookingId:bk.id};
@@ -2899,8 +2910,7 @@ async function cancelBooking(bid){
   try{
     await sb.from('bookings').update({status:'cancelled'}).eq('id',bid);
     await sb.from('slot_occupancy').delete().eq('booking_id',bid);
-    const newCredits=curUser.credits>=999?999:curUser.credits+1;
-    await sb.from('profiles').update({credits:newCredits}).eq('id',sbUser.id);
+    {const _allP=[...PLANS.individual,...PLANS.grupal];const _cp=_allP.find(x=>x.id===curUser.plan);const _unlim=curUser.credits>=999||(_cp&&_cp.credits>=999);const newCredits=_unlim?curUser.credits:curUser.credits+1;if(!_unlim)await sb.from('profiles').update({credits:newCredits}).eq('id',sbUser.id);curUser.credits=newCredits;}
     // Update local state
     const day=getDaySlots(b.ds);
     const slotsUsed=b.slotsUsed||BOOKING_SLOTS;
@@ -3467,7 +3477,7 @@ function admDelFromSlot(ds,idx,userId){
   // Remove from all 3 slots of this booking
   for(let i=0;i<BOOKING_SLOTS;i++){const si=idx+i;if(day[si])day[si]=day[si].filter(b=>b.userId!==userId);}
   // Restore credit
-  const u=users[userId];if(u&&u.credits<999)u.credits++;
+  const u=users[userId];if(u){const _aP=[...PLANS.individual,...PLANS.grupal],_pp=_aP.find(x=>x.id===u.plan);const _ul=u.credits>=999||(_pp&&_pp.credits>=999);if(!_ul)u.credits++;}
   // Remove from user's bookings array too
   if(u&&u.bookings)u.bookings=u.bookings.filter(b=>!(b.ds===ds&&b.startIdx===idx));
   addAdminNotif('❌ Reserva cancelada (admin): '+(u?u.name:userId)+' · '+fmtDS(ds)+' '+fmtSlot(idx));
@@ -3909,7 +3919,7 @@ async function renderDashboard(){
       sb.from('bookings').select('ds,status').eq('status','active'),
       sb.from('access_log').select('id')
     ]);
-    const active=(allU||[]).filter(u=>u.credits>0&&(!u.plan_expiry||new Date(u.plan_expiry)>new Date()));
+    const active=(allU||[]).filter(u=>{const _aP=[...PLANS.individual,...PLANS.grupal],_pp=_aP.find(x=>x.id===u.plan_id);const _ul=u.credits>=999||(_pp&&_pp.credits>=999);return(_ul||u.credits>0)&&(!u.plan_expiry||new Date(u.plan_expiry)>new Date());});
     const monthRev=(pays||[]).filter(p=>dsFromIsoMaz(p.created_at).startsWith(monthStart)).reduce((s,p)=>s+Number(p.amount),0);
     const totalRev=(pays||[]).reduce((s,p)=>s+Number(p.amount),0);
     const todayBks=(bks||[]).filter(b=>b.ds===today).length;
@@ -4073,7 +4083,7 @@ function adminCancelUserBooking(uid,bid){
   const sl=b.slotsUsed||BOOKING_SLOTS;
   for(let i=0;i<sl;i++){const si=b.startIdx+i;if(day[si])day[si]=day[si].filter(x=>x.userId!==uid);}
   u.bookings=u.bookings.filter(x=>x.id!==bid);
-  if(u.credits<999)u.credits++;
+  {const _aP2=[...PLANS.individual,...PLANS.grupal],_pp2=_aP2.find(x=>x.id===u.plan);const _ul2=u.credits>=999||(_pp2&&_pp2.credits>=999);if(!_ul2)u.credits++;}
   addAdminNotif('❌ Reserva cancelada (admin): '+u.name+' · '+b.timeStr);
   toast('Reserva cancelada · Visita devuelta a '+u.name,'ok');
   renderUsers();
@@ -4217,7 +4227,7 @@ async function renderUsersSb(){
     list.innerHTML='';
     filtered.forEach(u=>{
       const expired=u.plan_expiry&&new Date(u.plan_expiry)<new Date();
-      const active=u.credits>0&&!expired;
+      const active=hasActive({credits:u.credits,plan:u.plan_id,planExpiry:u.plan_expiry,planType:u.plan_type})&&!expired;
       const plan=[...PLANS.individual,...PLANS.grupal].find(p=>p.id===u.plan_id);
       const planName=plan?plan.name:((u.credits||0)>0?'Visitas manuales':'Sin plan');
       const days=daysUntil(u.plan_expiry);
@@ -4704,7 +4714,7 @@ async function renderStatsSb(){
       sb.from('bookings').select('ds').eq('status','active'),
       sb.from('access_log').select('id')
     ]);
-    const active=(allU||[]).filter(u=>u.credits>0&&(!u.plan_expiry||new Date(u.plan_expiry)>new Date()));
+    const active=(allU||[]).filter(u=>{const _aP=[...PLANS.individual,...PLANS.grupal],_pp=_aP.find(x=>x.id===u.plan_id);const _ul=u.credits>=999||(_pp&&_pp.credits>=999);return(_ul||u.credits>0)&&(!u.plan_expiry||new Date(u.plan_expiry)>new Date());});
     const today=mazToday();
     const monthStart=today.slice(0,7);
     const monthRev=(pays||[]).filter(p=>dsFromIsoMaz(p.created_at).startsWith(monthStart)).reduce((s,p)=>s+Number(p.amount),0);
@@ -4753,7 +4763,7 @@ function showAdmin(){
   document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
   const adm=document.getElementById('s-admin');
   if(adm)adm.classList.add('active');
-  const d=document.getElementById('adm-date');if(d){d.value=mazToday();d.min=mazToday();d.max=addDaysDS(mazToday(),ADMIN_BLOCK_ADVANCE_DAYS);}
+  const d=document.getElementById('adm-date');if(d){d.value=mazToday();d.max=addDaysDS(mazToday(),ADMIN_BLOCK_ADVANCE_DAYS);}
   admTab('dash');
   // Load boards from Supabase
   loadBoardsSb();
