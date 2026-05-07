@@ -2545,11 +2545,11 @@ function renderMembershipStatus(){
   if(!p){el.innerHTML='';return;}
   const expired=curUser.planExpiry&&new Date(curUser.planExpiry)<new Date();
   const days=daysUntil(curUser.planExpiry);
-  const isUnlimited=curUser.credits>=999;
+  const isUnlimited=curUser.credits>=999||p.credits>=999;
   const noCredits=!isUnlimited&&curUser.credits<=0;
   const lowCredits=!isUnlimited&&curUser.credits>0&&curUser.credits<=3;
   const expiringSoon=days!==null&&days<=5&&days>=0;
-  const credText=expired?'Vencida':noCredits?'Sin visitas':isUnlimited?'Mensual ilimitado':(curUser.credits+' visita'+(curUser.credits===1?'':'s'));
+  const credText=expired?'Vencida':isUnlimited?'Mensual':noCredits?'Sin visitas':(curUser.credits+' visita'+(curUser.credits===1?'':'s'));
   const expiryText=curUser.planExpiry?fmtDateMaz(curUser.planExpiry,{day:'numeric',month:'short'}):'';
   const urgentColor=expired||noCredits?'var(--red)':(lowCredits||expiringSoon)?'var(--amber)':'var(--green)';
   const borderColor=expired||noCredits?'rgba(239,68,68,.3)':(lowCredits||expiringSoon)?'rgba(245,158,11,.3)':'rgba(16,185,129,.2)';
@@ -3060,7 +3060,36 @@ let editingBoards=new Set();
 let addingExBoards=new Set();
 let assigningBoards=new Set();
 function toggleBoardEx(bid){if(expandedBoards.has(bid))expandedBoards.delete(bid);else expandedBoards.add(bid);renderBoardsAdmin();}
-function toggleBoardEdit(bid){if(editingBoards.has(bid))editingBoards.delete(bid);else{editingBoards.add(bid);expandedBoards.add(bid);}renderBoardsAdmin();}
+let _boardOriginalNames={};
+function toggleBoardEdit(bid){
+  if(editingBoards.has(bid)){
+    // Auto-save name on close
+    const input=document.getElementById('bn-'+bid);
+    if(input&&input.value.trim()) updateBoardNameSb(bid);
+    editingBoards.delete(bid);
+    addingExBoards.delete(bid);
+    assigningBoards.delete(bid);
+    delete _boardOriginalNames[bid];
+  } else {
+    // Store original values before editing
+    const b=boards.find(x=>x.id===bid);
+    if(b) _boardOriginalNames[bid]={name:b.name,color:b.color};
+    editingBoards.add(bid);
+  }
+  renderBoardsAdmin();
+}
+function cancelBoardEdit(bid){
+  const orig=_boardOriginalNames[bid];
+  if(orig){
+    const b=boards.find(x=>x.id===bid);
+    if(b){b.name=orig.name;b.color=orig.color;}
+    delete _boardOriginalNames[bid];
+  }
+  editingBoards.delete(bid);
+  addingExBoards.delete(bid);
+  assigningBoards.delete(bid);
+  renderBoardsAdmin();
+}
 function toggleNewSocioForm(){const f=document.getElementById('new-socio-form');if(!f)return;const open=f.style.display!=='none';f.style.display=open?'none':'block';}
 function selectRoutineBoard(bid){selectedRoutineBoardId=bid;renderRutinas();}
 function openLogScore(src,exIdx,exName){
@@ -3566,13 +3595,12 @@ async function renderBoardsAdmin(){
   boards.forEach(board=>{
     const card=document.createElement('div');card.className='board-card';
     const isEditing=editingBoards.has(board.id);
-    const isExpanded=expandedBoards.has(board.id);
-    const isAddingEx=addingExBoards&&addingExBoards.has(board.id);
-    const isAssigning=assigningBoards&&assigningBoards.has(board.id);
+    const isAddingEx=addingExBoards.has(board.id);
+    const isAssigning=assigningBoards.has(board.id);
     const assignedUsers=users.filter(u=>board.assignedTo.includes(u.id));
     const COLORS=['#2563eb','#10b981','#f59e0b','#ef4444','#8b5cf6','#ec4899','#f97316','#ffffff'];
 
-    // ── Exercise list HTML ──────────────────────────
+    // ── Exercise list ──────────────────────────────
     const exHtml=board.exercises.map((ex,i)=>{
       const vids=getExerciseVideos(ex);
       if(!isEditing){
@@ -3585,13 +3613,12 @@ async function renderBoardsAdmin(){
         +(vids.length?'<div style="font-size:11px;color:var(--bl);margin-top:3px">▶ '+vids.length+' video'+(vids.length>1?'s':'')+'</div>':'')
         +'</div></div>';
       }
-      // Edit mode
       return '<div style="background:var(--card2);border:1px solid var(--border);border-radius:8px;padding:12px;margin-bottom:8px">'
       +'<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">'
       +'<span style="font-size:12px;font-weight:700;color:var(--bl)">Ejercicio '+(i+1)+'</span>'
       +'<button class="btn-sm bred" style="padding:2px 8px" data-bid="'+board.id+'" data-idx="'+i+'" onclick="removeExerciseSb(this.dataset.bid,parseInt(this.dataset.idx))">Eliminar</button>'
       +'</div>'
-      +'<input type="text" placeholder="Nombre del ejercicio" id="exedit-name-'+board.id+'-'+i+'" value="'+esc(ex.name||'')+'" style="width:100%;background:var(--card);border:1px solid var(--border);border-radius:4px;padding:9px;font-size:13px;font-weight:700;color:var(--white);outline:none;margin-bottom:6px;box-sizing:border-box">'
+      +'<input type="text" placeholder="Nombre *" id="exedit-name-'+board.id+'-'+i+'" value="'+esc(ex.name||'')+'" style="width:100%;background:var(--card);border:1px solid var(--border);border-radius:4px;padding:9px;font-size:13px;font-weight:700;color:var(--white);outline:none;margin-bottom:6px;box-sizing:border-box">'
       +'<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:5px;margin-bottom:6px">'
       +'<input type="text" placeholder="Series" id="exedit-sets-'+board.id+'-'+i+'" value="'+esc(ex.sets||'')+'" style="background:var(--card);border:1px solid var(--border);border-radius:4px;padding:8px;font-size:12px;color:var(--white);outline:none">'
       +'<input type="text" placeholder="Reps" id="exedit-reps-'+board.id+'-'+i+'" value="'+esc(ex.reps||'')+'" style="background:var(--card);border:1px solid var(--border);border-radius:4px;padding:8px;font-size:12px;color:var(--white);outline:none">'
@@ -3606,10 +3633,10 @@ async function renderBoardsAdmin(){
       +'</div>';
     }).join('');
 
-    // ── Add exercise form ───────────────────────────
+    // ── Add exercise form ──────────────────────────
     const addExForm=isAddingEx?
-      '<div style="background:var(--card2);border:1px solid var(--blue);border-radius:8px;padding:14px;margin-top:8px">'
-      +'<div style="font-size:12px;font-weight:700;color:var(--bl);margin-bottom:10px;letter-spacing:.06em">NUEVO EJERCICIO</div>'
+      '<div style="background:var(--card2);border:1px solid var(--blue);border-radius:8px;padding:14px;margin-bottom:10px">'
+      +'<div style="font-size:11px;font-weight:700;color:var(--bl);margin-bottom:10px;letter-spacing:.06em">NUEVO EJERCICIO</div>'
       +'<input type="text" placeholder="Nombre del ejercicio *" id="exn-'+board.id+'" style="width:100%;background:var(--card);border:1px solid var(--border);border-radius:4px;padding:9px;font-size:13px;color:var(--white);outline:none;margin-bottom:6px;box-sizing:border-box">'
       +'<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:5px;margin-bottom:6px">'
       +'<input type="text" placeholder="Series" id="exs-'+board.id+'" style="background:var(--card);border:1px solid var(--border);border-radius:4px;padding:8px;font-size:12px;color:var(--white);outline:none">'
@@ -3624,14 +3651,13 @@ async function renderBoardsAdmin(){
       +'<div style="display:flex;gap:6px">'
       +'<button class="btn-sm bblue" style="flex:1" data-bid="'+board.id+'" onclick="addExerciseSb(this.dataset.bid)">Agregar</button>'
       +'<button class="btn-sm" style="background:transparent;border:1px solid var(--border);color:var(--gray)" onclick="addingExBoards.delete(&quot;'+board.id+'&quot;);renderBoardsAdmin()">Cancelar</button>'
-      +'</div>'
-      +'</div>'
+      +'</div></div>'
       :'';
 
-    // ── Assign modal panel ──────────────────────────
+    // ── Assign panel ───────────────────────────────
     const assignPanel=isAssigning?
-      '<div style="background:var(--card2);border:1px solid var(--blue);border-radius:8px;padding:14px;margin-top:8px">'
-      +'<div style="font-size:12px;font-weight:700;color:var(--bl);margin-bottom:10px;letter-spacing:.06em">ASIGNAR SOCIOS</div>'
+      '<div style="background:var(--card2);border:1px solid var(--green);border-radius:8px;padding:14px;margin-bottom:10px">'
+      +'<div style="font-size:11px;font-weight:700;color:var(--green);margin-bottom:10px;letter-spacing:.06em">ASIGNAR SOCIOS · '+assignedUsers.length+' asignado'+(assignedUsers.length===1?'':'s')+'</div>'
       +'<input class="adm-search board-assign-search" placeholder="Buscar socio..." oninput="filterBoardAssignees(this)" style="margin-bottom:8px" data-board-assign="'+esc(board.id)+'">'
       +'<div class="assign-box" data-board-assign="'+esc(board.id)+'">'
       +'<div class="assign-list">'
@@ -3648,38 +3674,55 @@ async function renderBoardsAdmin(){
       +'</div>'
       :'';
 
-    // ── Card HTML ───────────────────────────────────
+    // ── Card ───────────────────────────────────────
     card.innerHTML=
-      // Header: color dot + name + color swatches
-      '<div style="padding:14px 14px 10px">'
+      '<div style="padding:14px">'
+
+      // Header: name + Editar button (no Guardar visible by default)
       +'<div style="display:flex;align-items:center;gap:8px;margin-bottom:10px">'
-      +'<div style="width:14px;height:14px;border-radius:50%;background:'+board.color+';flex-shrink:0"></div>'
-      +'<input id="bn-'+board.id+'" value="'+esc(board.name)+'" style="flex:1;min-width:0;background:transparent;border:none;border-bottom:1px solid var(--border);padding:4px 0;font-size:16px;font-weight:700;color:var(--white);outline:none" onkeydown="if(event.key===&quot;Enter&quot;)updateBoardNameSb(&quot;'+board.id+'&quot;)">'
-      +'<button class="btn-sm bblue" style="padding:5px 10px" data-bid="'+board.id+'" onclick="updateBoardNameSb(this.dataset.bid)">Guardar</button>'
+      +'<div style="width:13px;height:13px;border-radius:50%;background:'+board.color+';flex-shrink:0"></div>'
+      +'<span style="flex:1;font-size:15px;font-weight:700;color:var(--white);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+esc(board.name)+'</span>'
+      +'<span style="font-size:11px;color:var(--gray);margin-right:4px">'+board.exercises.length+' ejs</span>'
+      +(isEditing?
+      '<div style="display:flex;gap:6px">'
+      +'<button onclick="toggleBoardEdit(&quot;'+board.id+'&quot;)" style="background:rgba(16,185,129,.2);border:1px solid var(--green);border-radius:6px;padding:7px 14px;color:var(--green);font-size:12px;font-weight:700;cursor:pointer;white-space:nowrap">✓ Listo</button>'
+      +'<button onclick="cancelBoardEdit(&quot;'+board.id+'&quot;)" style="background:transparent;border:1px solid var(--border);border-radius:6px;padding:7px 12px;color:var(--gray);font-size:12px;font-weight:700;cursor:pointer;white-space:nowrap">✕</button>'
       +'</div>'
-      // Color swatches
-      +'<div style="display:flex;gap:7px;flex-wrap:wrap;margin-bottom:12px">'
-      +COLORS.map(c=>'<div onclick="updateBoardColorSb(&quot;'+board.id+'&quot;,&quot;'+c+'&quot;)" style="width:26px;height:26px;border-radius:50%;background:'+c+';cursor:pointer;box-sizing:border-box;border:2.5px solid '+(board.color===c?'rgba(255,255,255,.9)':'rgba(255,255,255,.12)')+'" title="'+c+'"></div>').join('')
+      :'<button onclick="toggleBoardEdit(&quot;'+board.id+'&quot;)" style="background:rgba(37,99,235,.12);border:1px solid var(--blue);border-radius:6px;padding:7px 14px;color:var(--bl);font-size:12px;font-weight:700;cursor:pointer;white-space:nowrap">✏️ Editar</button>')
       +'</div>'
-      // Action buttons row
-      +'<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px">'
-      +'<button onclick="toggleBoardEx(&quot;'+board.id+'&quot;)" style="background:var(--card2);border:1px solid var(--border);border-radius:6px;padding:8px 4px;color:var(--white);font-size:11px;font-weight:700;cursor:pointer;letter-spacing:.04em">'+(isExpanded?'▲ OCULTAR':'▼ VER EJS')+'</button>'
-      +'<button onclick="if(!addingExBoards)addingExBoards=new Set();addingExBoards.has(&quot;'+board.id+'&quot;)?addingExBoards.delete(&quot;'+board.id+'&quot;):addingExBoards.add(&quot;'+board.id+'&quot;);renderBoardsAdmin()" style="background:rgba(37,99,235,.15);border:1px solid var(--blue);border-radius:6px;padding:8px 4px;color:var(--bl);font-size:11px;font-weight:700;cursor:pointer;letter-spacing:.04em">+ EJERCICIO</button>'
-      +'<button onclick="if(!assigningBoards)assigningBoards=new Set();assigningBoards.has(&quot;'+board.id+'&quot;)?assigningBoards.delete(&quot;'+board.id+'&quot;):assigningBoards.add(&quot;'+board.id+'&quot;);renderBoardsAdmin()" style="background:rgba(16,185,129,.12);border:1px solid var(--green);border-radius:6px;padding:8px 4px;color:var(--green);font-size:11px;font-weight:700;cursor:pointer;letter-spacing:.04em">👥 '+assignedUsers.length+'</button>'
-      +'</div>'
-      +'</div>'
-      // Exercises
-      +(isExpanded?
-        '<div style="padding:0 14px 4px">'
-        +(isExpanded?'<div style="display:flex;justify-content:flex-end;margin-bottom:6px"><button onclick="toggleBoardEdit(&quot;'+board.id+'&quot;)" style="background:'+(isEditing?'rgba(16,185,129,.15)':'rgba(37,99,235,.08)')+';border:1px solid '+(isEditing?'var(--green)':'var(--border)')+';border-radius:6px;padding:6px 12px;color:'+(isEditing?'var(--green)':'var(--gray)')+';font-size:11px;font-weight:700;cursor:pointer">'+(isEditing?'✓ LISTO':'✏️ EDITAR')+'</button></div>':'')
-        +(exHtml||'<div style="font-size:12px;color:var(--gray);padding:8px 0">Sin ejercicios aún.</div>')
+
+      // Expanded edit area
+      +(isEditing?
+        // Name input + color swatches
+        '<div style="background:var(--card2);border:1px solid var(--border);border-radius:8px;padding:12px;margin-bottom:10px">'
+        +'<div style="font-size:11px;color:var(--gray);font-weight:700;letter-spacing:.06em;margin-bottom:6px">NOMBRE</div>'
+        +'<input id="bn-'+board.id+'" value="'+esc(board.name)+'" style="width:100%;background:var(--card);border:1px solid var(--border);border-radius:4px;padding:9px;font-size:14px;font-weight:700;color:var(--white);outline:none;margin-bottom:10px;box-sizing:border-box" onkeydown="if(event.key===&quot;Enter&quot;)updateBoardNameSb(&quot;'+board.id+'&quot;)">'
+        +'<div style="font-size:11px;color:var(--gray);font-weight:700;letter-spacing:.06em;margin-bottom:8px">COLOR</div>'
+        +'<div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:4px">'
+        +COLORS.map(c=>'<div onclick="updateBoardColorSb(&quot;'+board.id+'&quot;,&quot;'+c+'&quot;)" style="width:28px;height:28px;border-radius:50%;background:'+c+';cursor:pointer;box-sizing:border-box;border:2.5px solid '+(board.color===c?'rgba(255,255,255,.9)':'rgba(255,255,255,.12)')+'" title="'+c+'"></div>').join('')
         +'</div>'
+        +'<div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-top:8px">'
+        +'<button class="btn-sm bblue" data-bid="'+board.id+'" onclick="updateBoardNameSb(this.dataset.bid)">Guardar</button>'
+        +'<button class="btn-sm" style="background:transparent;border:1px solid var(--border);color:var(--gray)" onclick="cancelBoardEdit(&quot;'+board.id+'&quot;)">Cancelar</button>'
+        +'</div>'
+        +'</div>'
+
+        // Exercises
+        +'<div style="font-size:11px;color:var(--gray);font-weight:700;letter-spacing:.06em;margin-bottom:8px">EJERCICIOS</div>'
+        +(exHtml||'<div style="font-size:12px;color:var(--gray);padding:4px 0 10px">Sin ejercicios aún.</div>')
+
+        // Add exercise + assign buttons
+        +'<div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-top:4px;margin-bottom:10px">'
+        +'<button onclick="addingExBoards.has(&quot;'+board.id+'&quot;)?addingExBoards.delete(&quot;'+board.id+'&quot;):addingExBoards.add(&quot;'+board.id+'&quot;);renderBoardsAdmin()" style="background:rgba(37,99,235,.12);border:1px solid var(--blue);border-radius:6px;padding:9px;color:var(--bl);font-size:12px;font-weight:700;cursor:pointer">+ Agregar ejercicio</button>'
+        +'<button onclick="assigningBoards.has(&quot;'+board.id+'&quot;)?assigningBoards.delete(&quot;'+board.id+'&quot;):assigningBoards.add(&quot;'+board.id+'&quot;);renderBoardsAdmin()" style="background:rgba(16,185,129,.1);border:1px solid var(--green);border-radius:6px;padding:9px;color:var(--green);font-size:12px;font-weight:700;cursor:pointer">👥 Asignar ('+assignedUsers.length+')</button>'
+        +'</div>'
+
+        +addExForm
+        +assignPanel
+
+        // Delete button just above the "Listo" area
+        +'<button class="btn-sm bred" style="width:100%;margin-top:4px" data-bid="'+board.id+'" onclick="deleteBoardSb(this.dataset.bid)">🗑 Eliminar pizarrón</button>'
       :'')
-      +addExForm
-      +assignPanel
-      // Delete button at bottom
-      +'<div style="padding:10px 14px;border-top:1px solid var(--border);margin-top:4px">'
-      +'<button class="btn-sm bred" style="width:100%" data-bid="'+board.id+'" onclick="deleteBoardSb(this.dataset.bid)">🗑 Eliminar pizarrón</button>'
       +'</div>';
 
     el.appendChild(card);
@@ -4178,12 +4221,12 @@ async function renderUsersSb(){
       const plan=[...PLANS.individual,...PLANS.grupal].find(p=>p.id===u.plan_id);
       const planName=plan?plan.name:((u.credits||0)>0?'Visitas manuales':'Sin plan');
       const days=daysUntil(u.plan_expiry);
-      const isUnlimited=u.credits>=999;
+      const isUnlimited=u.credits>=999||(plan&&plan.credits>=999);
       const noCredits=!isUnlimited&&(u.credits||0)<=0;
       const lowCredits=!isUnlimited&&(u.credits||0)>0&&(u.credits||0)<=3;
       const expiring=days!==null&&days<=5&&days>=0;
       const statusCls=expired||noCredits?'bg-red':(lowCredits||expiring)?'bg-amber':active?'bg-green':'bg-gray';
-      const statusTxt=expired?'Vencida':noCredits?'Sin visitas':lowCredits?'Pocas visitas':expiring?'Por vencer':active?'Activo':'Sin plan';
+      const statusTxt=expired?'Vencida':noCredits?'Sin visitas':isUnlimited&&active?'Mensual':lowCredits?'Pocas visitas':expiring?'Por vencer':active?'Activo':'Sin plan';
       const isOpen=expandedUsers.has(u.id);
       const div=document.createElement('div');
       div.className='user-row';
@@ -4194,7 +4237,7 @@ async function renderUsersSb(){
         +'<div style="flex:1;min-width:0">'
         +'<div class="brow-name">'+u.name+'</div>'
         +'<div class="brow-meta">'+(u.phone||'Sin telefono')+'</div>'
-        +'<div class="brow-meta">'+planName+(u.credits>=999?' · Mensual':u.credits?' · '+u.credits+' visitas':' · Sin visitas')+(u.plan_expiry?' · vence '+fmtDateMaz(u.plan_expiry):'')+'</div>'
+        +'<div class="brow-meta">'+planName+(u.credits>=999?' · Ilimitado':(plan&&plan.credits>=999)?' · Ilimitado':u.credits?' · '+u.credits+' visitas':' · Sin visitas')+(u.plan_expiry?' · vence '+fmtDateMaz(u.plan_expiry):'')+'</div>'
         +'</div>'
         +'<div style="display:flex;flex-direction:column;align-items:flex-end;gap:4px">'
         +'<span class="badge '+statusCls+'">'+statusTxt+'</span>'
