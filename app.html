@@ -1145,7 +1145,7 @@ function showMainSb(){
   renderActiveBookings().catch(console.error);
   startUserNotifPolling();
   startTimer();
-  setTimeout(()=>checkExpiryPush(),8000);
+  
 }
 
 function checkExpiryPush(){
@@ -1175,12 +1175,12 @@ async function initApp(){
       showLoading('Cargando tu cuenta...');
       await loadUserData();
       hideLoading();
-      if(sbProfile.role==='admin'){showAdmin();setTimeout(()=>registerPush('admin'),4000);}
+      if(sbProfile.role==='admin'){showAdmin();}
       else if(sbProfile.role==='reception')showReception();
       else{
         showMainSb();
         handleStripeReturn();
-        setTimeout(()=>registerPush('user'),4000);
+        
       }
     }
   }catch(e){
