@@ -2597,7 +2597,8 @@ function changeDay(delta){
   const nd=new Date(curDate);nd.setDate(nd.getDate()+delta);
   const nds=dk(nd);
   if(nds<mazToday()||nds>addDaysDS(mazToday(),BOOKING_ADVANCE_DAYS))return;
-  curDate=nd;clearSel();renderBook();
+  curDate=nd;const sl=document.getElementById('sl');if(sl)sl.dataset.loaded='';
+  clearSel();renderBook();
 }
 function clearSel(){selStartIdx=null;selShort=false;renderBook();}
 
@@ -2641,7 +2642,8 @@ async function renderBook(){
   const list=document.getElementById('sl');
   // Preserve scroll position when re-rendering after slot selection
   const prevScroll=list.scrollTop;
-  const isFirstRender=list.children.length===0;
+  const isFirstRender=list.children.length===0||prevScroll===0&&list.dataset.loaded!=='1';
+  list.dataset.loaded='1';
   list.innerHTML='';
 
   // auto-scroll to current Mazatlán time only on first render
@@ -2868,7 +2870,8 @@ async function doConfirm(){
     if(occErr)throw occErr;
 
     // 3. Deduct credit in Supabase (skip for unlimited/monthly plans)
-    {const _allP=[...PLANS.individual,...PLANS.grupal];const _cp=_allP.find(x=>x.id===curUser.plan);const _unlim=curUser.credits>=999||(_cp&&_cp.credits>=999);const newCredits=_unlim?curUser.credits:Math.max(0,curUser.credits-1);if(!_unlim)await sb.from('profiles').update({credits:newCredits}).eq('id',sbUser.id);curUser.credits=newCredits;}
+    // 3. Deduct credit (skip for unlimited/monthly plans)
+    {const _allP=[...PLANS.individual,...PLANS.grupal];const _cp=_allP.find(x=>x.id===curUser.plan);const _unlim=curUser.credits>=999||(_cp&&_cp.credits>=999);if(!_unlim){const _nc=Math.max(0,curUser.credits-1);await sb.from('profiles').update({credits:_nc}).eq('id',sbUser.id);curUser.credits=_nc;}}
 
     // 4. Update local state
     const entry={userId:curUser.id,name:curUser.name,phone:curUser.phone||'',isGroup:isGrupal,bookingId:bk.id};
@@ -2878,7 +2881,6 @@ async function doConfirm(){
       if(isGrupal)targetDay[part.idx].push({...entry,spot:grupalSpots});
       else targetDay[part.idx].push(entry);
     }
-    curUser.credits=newCredits;
     curUser.bookings=curUser.bookings||[];
     curUser.bookings.push({id:bk.id,ds,startIdx:selStartIdx,slotsUsed,isGroup:isGrupal,grupalSpots,timeStr,durMin});
 
@@ -2926,7 +2928,7 @@ async function cancelBooking(bid){
   try{
     await sb.from('bookings').update({status:'cancelled'}).eq('id',bid);
     await sb.from('slot_occupancy').delete().eq('booking_id',bid);
-    {const _allP=[...PLANS.individual,...PLANS.grupal];const _cp=_allP.find(x=>x.id===curUser.plan);const _unlim=curUser.credits>=999||(_cp&&_cp.credits>=999);const newCredits=_unlim?curUser.credits:curUser.credits+1;if(!_unlim)await sb.from('profiles').update({credits:newCredits}).eq('id',sbUser.id);curUser.credits=newCredits;}
+    {const _allP=[...PLANS.individual,...PLANS.grupal];const _cp=_allP.find(x=>x.id===curUser.plan);const _unlim=curUser.credits>=999||(_cp&&_cp.credits>=999);if(!_unlim){const _nc=curUser.credits+1;await sb.from('profiles').update({credits:_nc}).eq('id',sbUser.id);curUser.credits=_nc;}}
     // Update local state
     const day=getDaySlots(b.ds);
     const slotsUsed=b.slotsUsed||BOOKING_SLOTS;
