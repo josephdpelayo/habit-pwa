@@ -3021,7 +3021,7 @@ async function renderRutinas(){
         +'<div class="ex-detail">'+[ex.sets?esc(ex.sets)+' series':null,ex.reps?esc(ex.reps)+' reps':null,ex.rest?esc(ex.rest)+' descanso':null].filter(Boolean).join(' · ')+'</div>'
         +(ex.note||ex.notes||ex.description?'<div class="ex-note">'+esc(ex.note||ex.notes||ex.description)+'</div>':'')
         +'</div>'
-        +(videos.length?'<button class="btn-sm bblue" style="font-size:20px;font-weight:700;padding:0 12px;line-height:1" onclick="toggleVideo(&quot;'+gKey+'&quot;)">'+(groupOpen?'−':'+')+'</button>':'')
+        +(videos.length?'<button class="btn-sm" style="padding:0 10px;min-width:36px;height:34px;display:flex;align-items:center;justify-content:center;background:rgba(16,185,129,.15);border:1px solid rgba(16,185,129,.4);color:#10b981;border-radius:4px" onclick="toggleVideo(&quot;'+gKey+'&quot;)" aria-label="Ver videos">'+(groupOpen?'<svg width="14" height="14" viewBox="0 0 14 14" fill="currentColor"><rect x="2" y="1" width="3.5" height="12" rx="1"/><rect x="8.5" y="1" width="3.5" height="12" rx="1"/></svg>':'<svg width="14" height="14" viewBox="0 0 14 14" fill="currentColor"><polygon points="2,1 13,7 2,13"/></svg>')+'</button>':'')
         +'</div>'
         +'</div>'
         +(groupOpen?videos.map((vid,vi)=>{
