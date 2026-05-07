@@ -1537,16 +1537,21 @@ function startUserNotifPolling(){
 }
 function nextBk(u){
   if(!u)return null;
-  const now=mazNow(),ds0=mazToday(),ds1=addDaysDS(ds0,1);
-  const cands=[...(u.bookings||[]),...(u.guestBookings||[])].filter(b=>b.ds===ds0||b.ds===ds1);
-  cands.sort((a,b2)=>a.ds===b2.ds?a.startIdx-b2.startIdx:a.ds.localeCompare(b2.ds));
-  // First priority: today's booking that is currently open (session in progress or about to open)
+  const now=mazNow(),ds0=mazToday(),ds1=addDaysDS(ds0,1),dsY=addDaysDS(ds0,-1);
+  const cands=[...(u.bookings||[]),...(u.guestBookings||[])].filter(b=>b.ds===dsY||b.ds===ds0||b.ds===ds1);
+  // Priority 1: yesterday's late-night booking still open (e.g. 23:30 session ending at 1:00 AM)
+  for(const b of cands){
+    if(b.ds!==dsY)continue;
+    const aw=getAW(b);
+    if(now<aw.closes) return{b,...aw};
+  }
+  // Priority 2: today's booking
   for(const b of cands){
     if(b.ds!==ds0)continue;
     const aw=getAW(b);
     if(now<aw.closes) return{b,...aw};
   }
-  // Second priority: tomorrow's booking (only if no active today booking)
+  // Priority 3: tomorrow's booking
   for(const b of cands){
     if(b.ds!==ds1)continue;
     const aw=getAW(b);
