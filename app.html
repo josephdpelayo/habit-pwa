@@ -3491,39 +3491,62 @@ function adminSelectBookingUser(idx,uid){
 async function adminBookForUser(ds,idx,panelIdx){
   const u=_adminBookingUser[panelIdx];
   if(!u){toast('Selecciona un socio primero','err');return;}
-  const BOOKING_SLOTS=3; // 90 min = 3 slots of 30 min
-  const CAP_CHECK=4;
+  const BOOKING_SLOTS=3; // 90 min = 3 slots
   showLoading('Creando reserva...');
   try{
-    // Check slot availability
+    // Fetch fresh profile to get plan type and credits
+    const{data:prof,error:profErr}=await sb.from('profiles').select('credits,plan_id,plan_type,plan_expiry').eq('id',u.id).single();
+    if(profErr)throw profErr;
+
+    // Determine if grupal based on plan type
+    const allPlans=[...PLANS.individual,...PLANS.grupal];
+    const plan=allPlans.find(p=>p.id===prof.plan_id);
+    const isGrupal=prof.plan_type==='grupal'||(plan&&plan.type==='grupal');
+    const grupalSpots=isGrupal?CAP:1;
+    const isUnlimited=prof.credits>=999||(plan&&plan.credits>=999);
+
+    // Build slot range
     const slotsNeeded=[];
     for(let i=0;i<BOOKING_SLOTS;i++){
       const si=(idx+i)%48;
       const dsi=idx+i>=48?addDaysDS(ds,1):ds;
       slotsNeeded.push({ds:dsi,slot_idx:si});
     }
+
     // Build time string
     const startMin=idx*30;
     const endMin=(idx+BOOKING_SLOTS)*30;
     const pad=n=>String(n).padStart(2,'0');
     const fmtM=m=>pad(Math.floor(m/60))+':'+pad(m%60);
     const timeStr=fmtM(startMin)+' - '+fmtM(endMin%1440);
+
     // Insert booking
     const{data:bk,error:bkErr}=await sb.from('bookings').insert({
       user_id:u.id,ds,start_idx:idx,slots_used:BOOKING_SLOTS,
-      time_str:timeStr,dur_min:90,status:'active',is_group:false
+      time_str:timeStr,dur_min:90,status:'active',
+      is_group:isGrupal,grupal_spots:isGrupal?grupalSpots:null
     }).select().single();
     if(bkErr)throw bkErr;
+
     // Insert occupancy
-    const occRows=slotsNeeded.map(s=>({ds:s.ds,slot_idx:s.slot_idx,user_id:u.id,booking_id:bk.id,is_group:false}));
+    const occRows=slotsNeeded.map(s=>({
+      ds:s.ds,slot_idx:s.slot_idx,user_id:u.id,booking_id:bk.id,
+      is_group:isGrupal,spots:isGrupal?grupalSpots:1
+    }));
     const{error:occErr}=await sb.from('slot_occupancy').insert(occRows);
     if(occErr)throw occErr;
+
+    // Deduct credit (skip if unlimited/monthly)
+    if(!isUnlimited){
+      const newCredits=Math.max(0,prof.credits-1);
+      await sb.from('profiles').update({credits:newCredits}).eq('id',u.id);
+    }
+
     hideLoading();
     closeBlockPanel(panelIdx);
     delete _adminBookingUser[panelIdx];
-    addAdminNotif('📅 Reserva manual: '+u.name+' · '+ds+' '+timeStr);
-    sendPush('admin','📅 Reserva manual','Admin reservó para '+u.name+' · '+timeStr,{tag:'admin-book'});
-    toast('Reserva creada para '+u.name,'ok');
+    addAdminNotif('📅 Reserva manual ('+(isGrupal?'Grupal':'Individual')+'): '+u.name+' · '+ds+' '+timeStr);
+    toast('Reserva '+(isGrupal?'grupal':'individual')+' creada para '+u.name,'ok');
     renderAdmSlots();
   }catch(e){
     hideLoading();
