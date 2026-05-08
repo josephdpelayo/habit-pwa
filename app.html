@@ -2257,13 +2257,48 @@ function renderReceptionList(errorMsg){
     list.innerHTML='<div class="reception-empty">No hay sesiones activas en este momento.</div>';
     return;
   }
-  list.innerHTML=active.map(s=>{
-    const cls=receptionCardClass(s.minutes_left);
-    const badge=s.kind==='guest'?'<span class="reception-badge">Invitado</span>':(s.is_group?'<span class="reception-badge">Grupal</span>':'');
+  // Group sessions by booking_id to cluster instructor + students
+  const grouped={};
+  active.forEach(s=>{
+    const key=s.booking_id;
+    if(!grouped[key]) grouped[key]={host:null,guests:[],minutes_left:s.minutes_left,time_str:s.time_str,dur_min:s.dur_min,slots_used:s.slots_used,start_idx:s.start_idx};
+    if(s.kind==='host') grouped[key].host=s;
+    else grouped[key].guests.push(s);
+  });
+
+  list.innerHTML=Object.values(grouped).map(g=>{
+    const host=g.host||{name:'Socio',minutes_left:g.minutes_left,is_instructor:false};
+    const cls=receptionCardClass(g.minutes_left);
+    const isInstructor=host.is_instructor;
+    const timeStr=esc(g.time_str||fmtTimeRange(g.start_idx,g.slots_used||3));
+    const mins=g.minutes_left;
+
+    if(isInstructor&&g.guests.length>0){
+      // Special instructor layout
+      return '<div class="reception-card '+cls+'" style="flex-direction:column;gap:10px;padding:14px 18px">'
+        +'<div style="display:flex;align-items:center;justify-content:space-between">'
+        +'<div>'
+        +'<div style="font-size:11px;font-weight:700;letter-spacing:.1em;color:#f59e0b;margin-bottom:4px">⭐ CLASE · INSTRUCTOR</div>'
+        +'<div class="reception-name">'+esc(host.name||'Instructor')+'</div>'
+        +'<div class="reception-meta">'+timeStr+' · '+(g.dur_min||90)+' min</div>'
+        +'</div>'
+        +'<div class="reception-countdown"><div class="reception-min">'+mins+'</div><div class="reception-min-label">min restantes</div></div>'
+        +'</div>'
+        +'<div style="border-top:1px solid rgba(255,255,255,.1);padding-top:10px">'
+        +'<div style="font-size:10px;font-weight:700;letter-spacing:.08em;color:var(--gray);margin-bottom:6px">ALUMNOS</div>'
+        +'<div style="display:flex;flex-wrap:wrap;gap:6px">'
+        +g.guests.map(gu=>'<div style="background:rgba(255,255,255,.07);border-radius:4px;padding:4px 10px;font-size:13px;font-weight:600">'+esc(gu.name||'Alumno')+'</div>').join('')
+        +'</div>'
+        +'</div>'
+        +'</div>';
+    }
+    // Normal layout
+    const badge=host.is_group?'<span class="reception-badge">Grupal</span>':'';
+    const guestBadges=g.guests.map(gu=>'<span class="reception-badge">'+esc(gu.name||'Invitado')+'</span>').join('');
     return '<div class="reception-card '+cls+'">'
-      +'<div><div class="reception-name">'+esc(s.name||'Socio')+badge+'</div>'
-      +'<div class="reception-meta">'+esc(s.time_str||fmtTimeRange(s.start_idx,s.slots_used||3))+' · '+(s.dur_min||90)+' min</div></div>'
-      +'<div class="reception-countdown"><div class="reception-min">'+s.minutes_left+'</div><div class="reception-min-label">min restantes</div></div>'
+      +'<div><div class="reception-name">'+esc(host.name||'Socio')+badge+guestBadges+'</div>'
+      +'<div class="reception-meta">'+timeStr+' · '+(g.dur_min||90)+' min</div></div>'
+      +'<div class="reception-countdown"><div class="reception-min">'+mins+'</div><div class="reception-min-label">min restantes</div></div>'
       +'</div>';
   }).join('');
 }
@@ -3092,6 +3127,16 @@ async function renderHistorial(){
 
 // ── RUTINAS ──
 function toggleVideo(k){expandedVideos[k]=!expandedVideos[k];renderRutinas();}
+async function adminToggleInstructor(uid,current){
+  const newVal=!current;
+  try{
+    const{error}=await sb.from('profiles').update({is_instructor:newVal}).eq('id',uid);
+    if(error)throw error;
+    toast(newVal?'Marcado como instructor':'Removido como instructor','ok');
+    renderUsersSb();
+  }catch(e){toast('Error: '+e.message,'err');}
+}
+
 function toggleUserCard(uid){if(expandedUsers.has(uid))expandedUsers.delete(uid);else expandedUsers.add(uid);renderUsersSb();}
 let expandedBoards=new Set();
 let editingBoards=new Set();
@@ -4401,6 +4446,7 @@ async function renderUsersSb(){
           +'<button class="btn-sm bblue" data-uid="'+u.id+'" data-name="'+esc(u.name)+'" onclick="adminOpenMembershipModal(this.dataset.uid,this.dataset.name)">Activar membresía</button>'
           +'<button class="btn-sm bgreen" data-uid="'+u.id+'" data-name="'+esc(u.name)+'" onclick="openCourtesyModal(this.dataset.uid,this.dataset.name)">Cortesía</button>'
           +'<button class="btn-sm bblue" data-uid="'+u.id+'" data-name="'+esc(u.name)+'" onclick="adminEditUserSb(this.dataset.uid,this.dataset.name)">Editar datos</button>'
+
           +'<button class="btn-sm bgreen" data-uid="'+u.id+'" onclick="adminAddCreditsSb(this.dataset.uid)">+Visita extra</button>'
           +'<button class="btn-sm bred" style="grid-column:1/-1" data-uid="'+u.id+'" data-name="'+esc(u.name)+'" onclick="adminDeleteUserSb(this.dataset.uid,this.dataset.name)">Eliminar socio</button>'
           +'</div>'
@@ -4603,6 +4649,25 @@ async function adminEditUserSb(uid,uname){
       +'<div class="field"><label>Monto</label><input type="number" id="eu-pay-amount" min="0" step="1" placeholder="0" style="width:100%;background:var(--card2);border:1px solid var(--border);border-radius:4px;padding:12px;font-size:16px;color:var(--white);outline:none"></div>'
       +'<div class="field"><label>Nota</label><textarea id="eu-pay-note" placeholder="Ej: pago en efectivo recibido, cortesia por invitado, ajuste por error..." style="width:100%;background:var(--card2);border:1px solid var(--border);border-radius:4px;padding:12px;font-size:13px;color:var(--white);outline:none;resize:none;min-height:62px"></textarea></div>'
       +'<div class="divider"></div>'
+      +'<p class="slbl" style="margin-bottom:8px">Instructor</p>'
+      +'<label style="display:flex;align-items:center;gap:10px;padding:10px;background:var(--card2);border:1px solid var(--border);border-radius:6px;margin-bottom:10px;cursor:pointer">'
+      +'<input type="checkbox" id="eu-instructor" '+(prof.is_instructor?'checked':'')+' style="width:20px;height:20px;accent-color:#f59e0b">'
+      +'<div><div style="font-size:14px;font-weight:700;color:var(--white)">Marcar como instructor</div>'
+      +'<div style="font-size:11px;color:var(--gray);margin-top:2px">Su sesión se mostrará de forma especial en recepción</div></div>'
+      +'</label>'
+      +'<div class="field" id="eu-logo-section" style="'+(prof.is_instructor?'':'display:none')+'">'
+      +'<label>Logo del instructor (PNG transparente 1000×1000px)</label>'
+      +'<div style="display:flex;align-items:center;gap:10px;margin-top:6px">'
+      +(prof.avatar_url?'<img src="'+prof.avatar_url+'" style="width:56px;height:56px;border-radius:4px;object-fit:contain;background:var(--card2);border:1px solid var(--border)" id="eu-logo-preview">':'<div id="eu-logo-preview" style="width:56px;height:56px;border-radius:4px;background:var(--card2);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:22px">🖼</div>')
+      +'<div style="flex:1">'
+      +'<input type="file" id="eu-logo-file" accept="image/png" onchange="previewInstructorLogo(this)" style="display:none">'
+      +'<button class="btn-sm bblue" onclick="document.getElementById(&quot;eu-logo-file&quot;).click()" style="margin-bottom:4px">Subir PNG</button>'
+      +'<div style="font-size:10px;color:var(--gray);margin-top:2px">PNG · fondo transparente · 1000×1000px</div>'
+      +'</div>'
+      +'</div>'
+      +'</div>'
+      +'<script>document.getElementById&&document.getElementById("eu-instructor")&&document.getElementById("eu-instructor").addEventListener("change",function(){document.getElementById("eu-logo-section").style.display=this.checked?"":"none";});<\/script>'
+      +'<div class="divider"></div>'
       +'<p class="slbl" style="margin-bottom:8px">Pizarrones asignados</p>'
       +'<div style="max-height:200px;overflow-y:auto;border:1px solid var(--border);border-radius:4px;padding:0 12px">'
       +boardsHtml
@@ -4618,6 +4683,27 @@ async function adminEditUserSb(uid,uname){
     hideLoading();
     toast('Error: '+e.message,'err');
   }
+}
+
+function previewInstructorLogo(input){
+  const file=input.files[0];
+  if(!file)return;
+  if(file.type!=='image/png'){toast('Solo se aceptan archivos PNG','err');input.value='';return;}
+  if(file.size>3*1024*1024){toast('El archivo debe ser menor a 3MB','err');input.value='';return;}
+  const reader=new FileReader();
+  reader.onload=e=>{
+    const prev=document.getElementById('eu-logo-preview');
+    if(prev){prev.src=e.target.result;prev.tagName==='DIV'?prev.innerHTML='':null;}
+    const img=new Image();
+    img.onload=()=>{
+      if(img.width!==1000||img.height!==1000){
+        toast('El logo debe ser 1000×1000px. Tuyo es '+img.width+'×'+img.height+'px','err');
+        input.value='';
+      }
+    };
+    img.src=e.target.result;
+  };
+  reader.readAsDataURL(file);
 }
 
 async function saveUserEditSb(uid){
@@ -4642,14 +4728,32 @@ async function saveUserEditSb(uid){
       || Number(before.credits||0)!==credits
       || oldExpiry!==(expiryVal||'');
 
+    const isInstructor=!!(document.getElementById('eu-instructor')||{}).checked;
+
+    // Upload logo if provided
+    let avatarUrl=null;
+    const logoFile=(document.getElementById('eu-logo-file')||{}).files;
+    if(logoFile&&logoFile[0]){
+      const file=logoFile[0];
+      const ext='png';
+      const path='instructors/'+uid+'.'+ext;
+      const{error:upErr}=await sb.storage.from('avatars').upload(path,file,{upsert:true,contentType:'image/png'});
+      if(upErr)toast('Logo no subió: '+upErr.message,'warn');
+      else{
+        const{data:urlData}=sb.storage.from('avatars').getPublicUrl(path);
+        avatarUrl=urlData.publicUrl+'?t='+Date.now();
+      }
+    }
+
     // Update profile
-    const{error:updateErr}=await sb.from('profiles').update({
-      name,phone,
+    const patch={name,phone,
       plan_id:manualPlanId||null,
       plan_type:plan?plan.type:null,
-      credits,
-      plan_expiry:expiry
-    }).eq('id',uid);
+      credits,plan_expiry:expiry,
+      is_instructor:isInstructor
+    };
+    if(avatarUrl) patch.avatar_url=avatarUrl;
+    const{error:updateErr}=await sb.from('profiles').update(patch).eq('id',uid);
     if(updateErr)throw updateErr;
 
     // Update board assignments
