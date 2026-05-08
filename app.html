@@ -5232,7 +5232,7 @@ async function addBoardSb(){
 async function loadSlotOccupancyFromSb(ds){
   try{
     const[occRes,blockRes]=await Promise.allSettled([
-      sb.from('slot_occupancy').select('slot_idx,user_id,is_group,booking_id,spot,bookings(grupal_spots)').eq('ds',ds),
+      sb.from('slot_occupancy').select('slot_idx,user_id,is_group,booking_id,bookings(is_group,grupal_spots)').eq('ds',ds),
       sb.from('slot_blocks').select('slot_idx,spots').eq('ds',ds)
     ]);
     const rows=occRes.status==='fulfilled'?(occRes.value.data||[]):[];
@@ -5241,7 +5241,8 @@ async function loadSlotOccupancyFromSb(ds){
     else slots30[ds]=Array.from({length:TOTAL_SLOTS},()=>[]);
     (rows||[]).forEach(r=>{
       if(!slots30[ds][r.slot_idx]) slots30[ds][r.slot_idx]=[];
-      const spotCount=Number(r.spot)||Number(r.bookings&&r.bookings.grupal_spots)||1;
+      const bkIsGroup=r.is_group||(r.bookings&&r.bookings.is_group);
+      const spotCount=bkIsGroup?Math.min(CAP,Number(r.bookings&&r.bookings.grupal_spots)||CAP):1;
       slots30[ds][r.slot_idx].push({userId:r.user_id,isGroup:r.is_group,bookingId:r.booking_id,spot:spotCount});
     });
     (blocks||[]).forEach(b=>{
