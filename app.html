@@ -3470,11 +3470,15 @@ async function adminSearchForBooking(idx,q){
   if(q.length<2){resEl.innerHTML='';return;}
   const{data}=await sb.from('profiles').select('id,name,phone,credits,plan_id,plan_expiry').neq('role','admin').neq('role','reception').order('name');
   const matches=(data||[]).filter(u=>(u.name||'').toLowerCase().includes(q)).slice(0,8);
-  resEl.innerHTML=matches.map(u=>'<div onclick="adminSelectBookingUser('+idx+','+JSON.stringify(JSON.stringify(u))+')" style="padding:8px 10px;cursor:pointer;border-bottom:1px solid var(--border);font-size:13px;color:var(--white);background:var(--card2)">'+esc(u.name||'')+'<span style="font-size:11px;color:var(--gray);margin-left:6px">'+(u.phone||'')+'</span></div>').join('');
+  // Store in map for safe retrieval
+  if(!window._adminBookMap)window._adminBookMap={};
+  matches.forEach(u=>window._adminBookMap[u.id]=u);
+  resEl.innerHTML=matches.map(u=>'<div onclick="adminSelectBookingUser('+idx+',&quot;'+u.id+'&quot;)" style="padding:8px 10px;cursor:pointer;border-bottom:1px solid var(--border);font-size:13px;color:var(--white);background:var(--card2)">'+esc(u.name||'')+'<span style="font-size:11px;color:var(--gray);margin-left:6px">'+(u.phone||'')+'</span></div>').join('');
 }
 
-function adminSelectBookingUser(idx,ujson){
-  const u=JSON.parse(ujson);
+function adminSelectBookingUser(idx,uid){
+  const u=(window._adminBookMap&&window._adminBookMap[uid])||null;
+  if(!u){toast('Error al seleccionar socio','err');return;}
   _adminBookingUser[idx]=u;
   const sel=document.getElementById('blk-user-selected-'+idx);
   const res=document.getElementById('blk-user-results-'+idx);
@@ -4369,7 +4373,7 @@ async function renderUsersSb(){
           '<div style="padding:0 4px 12px;display:grid;grid-template-columns:1fr 1fr;gap:6px;width:100%;box-sizing:border-box">'
           +'<div style="grid-column:1/-1;font-size:11px;color:var(--gray);padding:2px 0 6px">Código: <strong style="color:var(--bl)">'+(u.access_code||'???')+'#</strong></div>'
           +'<button class="btn-sm bblue" data-uid="'+u.id+'" data-name="'+esc(u.name)+'" onclick="adminOpenMembershipModal(this.dataset.uid,this.dataset.name)">Activar membresía</button>'
-          +'<button class="btn-sm bgreen" data-uid="'+u.id+'" data-name="'+esc(u.name)+'" onclick="adminGrantCourtesySb(this.dataset.uid,this.dataset.name)">Cortesía 3</button>'
+          +'<button class="btn-sm bgreen" data-uid="'+u.id+'" data-name="'+esc(u.name)+'" onclick="openCourtesyModal(this.dataset.uid,this.dataset.name)">Cortesía</button>'
           +'<button class="btn-sm bblue" data-uid="'+u.id+'" data-name="'+esc(u.name)+'" onclick="adminEditUserSb(this.dataset.uid,this.dataset.name)">Editar datos</button>'
           +'<button class="btn-sm bgreen" data-uid="'+u.id+'" onclick="adminAddCreditsSb(this.dataset.uid)">+Visita extra</button>'
           +'<button class="btn-sm bred" style="grid-column:1/-1" data-uid="'+u.id+'" data-name="'+esc(u.name)+'" onclick="adminDeleteUserSb(this.dataset.uid,this.dataset.name)">Eliminar socio</button>'
@@ -4677,23 +4681,51 @@ async function adminAddCreditsSb(uid){
   }
 }
 
+function openCourtesyModal(uid,name){
+  const existing=document.getElementById('courtesy-modal');
+  if(existing)existing.remove();
+  const m=document.createElement('div');
+  m.id='courtesy-modal';
+  m.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:9999;display:flex;align-items:center;justify-content:center;padding:20px';
+  m.innerHTML='<div style="background:var(--card);border:1px solid var(--border);border-radius:10px;padding:20px;width:100%;max-width:360px">'
+    +'<div style="font-size:16px;font-weight:700;margin-bottom:4px">Cortesía para</div>'
+    +'<div style="font-size:13px;color:var(--bl);margin-bottom:16px">'+esc(name)+'</div>'
+    +'<div style="display:grid;gap:8px;margin-bottom:16px">'
+    +'<div style="font-size:11px;color:var(--gray);font-weight:700;letter-spacing:.06em;margin-bottom:2px">TIPO</div>'
+    +'<label style="display:flex;align-items:center;gap:10px;padding:10px;background:var(--card2);border:1px solid var(--border);border-radius:6px;cursor:pointer"><input type="radio" name="crt" value="individual" checked style="accent-color:var(--blue)"><span style="font-size:14px;font-weight:600">Individual · 3 visitas</span></label>'
+    +'<label style="display:flex;align-items:center;gap:10px;padding:10px;background:var(--card2);border:1px solid var(--border);border-radius:6px;cursor:pointer"><input type="radio" name="crt" value="grupal" style="accent-color:var(--blue)"><span style="font-size:14px;font-weight:600">Grupal · 3 visitas grupales</span></label>'
+    +'</div>'
+    +'<div style="font-size:11px;color:var(--gray);font-weight:700;letter-spacing:.06em;margin-bottom:6px">CANTIDAD</div>'
+    +'<input type="number" id="crt-qty" value="3" min="1" max="20" style="width:100%;background:var(--card2);border:1px solid var(--border);border-radius:4px;padding:10px;font-size:16px;color:var(--white);outline:none;box-sizing:border-box;margin-bottom:16px">'
+    +'<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">'
+    +'<button class="btn-sm" style="background:transparent;border:1px solid var(--border);color:var(--gray);padding:10px" onclick="document.getElementById(&quot;courtesy-modal&quot;).remove()">Cancelar</button>'
+    +'<button class="btn-sm bgreen" style="padding:10px" onclick="adminGrantCourtesySb(&quot;'+uid+'&quot;,&quot;'+esc(name)+'&quot;)">Confirmar</button>'
+    +'</div>'
+    +'</div>';
+  document.body.appendChild(m);
+}
+
 async function adminGrantCourtesySb(uid,name){
-  if(!confirm('Agregar 3 visitas de cortesia a '+name+'?'))return;
+  const modal=document.getElementById('courtesy-modal');
+  const tipo=(document.querySelector('#courtesy-modal input[name=crt]:checked')||{value:'individual'}).value;
+  const qty=Math.min(20,Math.max(1,parseInt((document.getElementById('crt-qty')||{value:3}).value)||3));
+  if(modal)modal.remove();
   showLoading('Activando cortesia...');
   try{
     const{data:prof,error}=await sb.from('profiles').select('credits,name,plan_id,plan_type,plan_expiry').eq('id',uid).single();
     if(error)throw error;
-    const newCredits=Math.min(999,(prof.credits||0)+3);
+    const newCredits=Math.min(999,(prof.credits||0)+qty);
     const patch={credits:newCredits};
     const expired=prof.plan_expiry&&new Date(prof.plan_expiry)<new Date();
     if(!prof.plan_id||expired){
-      patch.plan_id='i1';
-      patch.plan_type='individual';
+      patch.plan_id=tipo==='grupal'?'g1':'i1';
+      patch.plan_type=tipo;
       patch.plan_expiry=mazPlanExpiryIso(30);
     }
     const{error:e2}=await sb.from('profiles').update(patch).eq('id',uid);
     if(e2)throw e2;
-    const logged=await adminTryLogManualPayment(uid,name,{id:'courtesy3',name:'Cortesia 3 visitas',type:'individual'},0,'courtesy','3 visitas de cortesia');
+    const planLabel=tipo==='grupal'?'Cortesia '+qty+' visitas grupales':'Cortesia '+qty+' visitas';
+    const logged=await adminTryLogManualPayment(uid,name,{id:'courtesy'+qty,name:planLabel,type:tipo},0,'courtesy',planLabel);
     hideLoading();
     toast('Cortesia activada: '+newCredits+' visitas'+(logged?'':' · sin registro en pagos'),'ok');
     renderUsersSb();
