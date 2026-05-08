@@ -3511,8 +3511,7 @@ async function adminBookForUser(ds,idx,panelIdx){
     // Insert booking
     const{data:bk,error:bkErr}=await sb.from('bookings').insert({
       user_id:u.id,ds,start_idx:idx,slots_used:BOOKING_SLOTS,
-      time_str:timeStr,dur_min:90,status:'active',is_group:false,
-      created_by_admin:true
+      time_str:timeStr,dur_min:90,status:'active',is_group:false
     }).select().single();
     if(bkErr)throw bkErr;
     // Insert occupancy
