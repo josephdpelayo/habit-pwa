@@ -3423,11 +3423,20 @@ async function renderAdmSlots(){
         +'<div class="adm-slot-main"><div class="adm-slot-head">'+adminCapacityDots(row.taken,row.blocked)+(blocks.length?'<span class="badge bg-amber">Bloqueado</span>':'')+'</div>'+peopleHtml+blockHtml+'</div>'
         +'<div class="adm-slot-actions"><button class="btn-sm bblue" data-idx="'+idx+'" onclick="toggleBlockPanel(parseInt(this.dataset.idx))">Bloq.</button>'
         +(row.blocked?'<button class="btn-sm bred" data-ds="'+ds+'" data-idx="'+idx+'" onclick="unblockSlotSb(this.dataset.ds,parseInt(this.dataset.idx))">Abrir</button>':'')+'</div>'
-        +'<div id="blk-panel-'+idx+'" class="adm-block-panel">'
-        +'<select id="blk-'+idx+'"><option value="1">1 espacio</option><option value="2">2 espacios</option><option value="3">3 espacios</option><option value="4">4 espacios</option></select>'
-        +'<input id="blk-r-'+idx+'" type="text" placeholder="Motivo del bloqueo" style="flex:1;min-width:140px">'
-        +'<button class="btn-sm bblue" data-ds="'+ds+'" data-idx="'+idx+'" onclick="blockSlotSb(this.dataset.ds,parseInt(this.dataset.idx),parseInt(document.getElementById(&quot;blk-'+idx+'&quot;).value),document.getElementById(&quot;blk-r-'+idx+'&quot;).value)">Guardar</button>'
-        +'<button class="btn-sm" style="border-color:var(--border);color:var(--gray);background:transparent" data-idx="'+idx+'" onclick="closeBlockPanel(parseInt(this.dataset.idx))">Cancelar</button>'
+        +'<div id="blk-panel-'+idx+'" class="adm-block-panel" style="flex-direction:column;gap:8px;padding:10px;width:100%;box-sizing:border-box">'
+        +'<div style="display:grid;grid-template-columns:1fr 1fr;gap:6px"><button class="btn-sm bblue" onclick="setSlotPanelMode('+idx+',\'book\')">📅 Reservar</button><button class="btn-sm" style="border:1px solid var(--border);color:var(--gray);background:var(--card2)" onclick="setSlotPanelMode('+idx+',\'block\')">🚫 Bloquear</button></div>'
+        +'<div id="blk-book-'+idx+'" style="display:none;flex-direction:column;gap:6px">'
+        +'<input id="blk-user-search-'+idx+'" type="text" placeholder="Buscar socio..." oninput="adminSearchForBooking('+idx+',this.value)" style="background:var(--card);border:1px solid var(--border);border-radius:4px;padding:8px;font-size:13px;color:var(--white);outline:none;width:100%;box-sizing:border-box">'
+        +'<div id="blk-user-results-'+idx+'" style="max-height:140px;overflow-y:auto;border-radius:4px"></div>'
+        +'<div id="blk-user-selected-'+idx+'" style="display:none;background:rgba(37,99,235,.12);border:1px solid var(--blue);border-radius:4px;padding:8px;font-size:13px;color:var(--white)"></div>'
+        +'<button class="btn-sm bblue" style="width:100%" data-ds="'+ds+'" data-idx="'+idx+'" onclick="adminBookForUser(this.dataset.ds,parseInt(this.dataset.idx),'+idx+')">Confirmar reserva 90 min</button>'
+        +'</div>'
+        +'<div id="blk-block-'+idx+'" style="display:none;flex-direction:column;gap:6px">'
+        +'<select id="blk-'+idx+'" style="background:var(--card);border:1px solid var(--border);border-radius:4px;padding:8px;color:var(--white);outline:none;width:100%"><option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4">4</option></select>'
+        +'<input id="blk-r-'+idx+'" type="text" placeholder="Motivo del bloqueo" style="background:var(--card);border:1px solid var(--border);border-radius:4px;padding:8px;font-size:13px;color:var(--white);outline:none;width:100%;box-sizing:border-box">'
+        +'<button class="btn-sm bred" style="width:100%" data-ds="'+ds+'" data-idx="'+idx+'" onclick="blockSlotSb(this.dataset.ds,parseInt(this.dataset.idx),parseInt(document.getElementById(\'blk-'+idx+'\').value),document.getElementById(\'blk-r-'+idx+'\').value)">Bloquear slot</button>'
+        +'</div>'
+        +'<button class="btn-sm" style="border:1px solid var(--border);color:var(--gray);background:transparent;width:100%" data-idx="'+idx+'" onclick="closeBlockPanel(parseInt(this.dataset.idx))">Cancelar</button>'
         +'</div>'
         +'</div>';
     });
@@ -3443,6 +3452,80 @@ function toggleBlockPanel(idx){
 function closeBlockPanel(idx){
   const el=document.getElementById('blk-panel-'+idx);
   if(el)el.classList.remove('open');
+}
+
+function setSlotPanelMode(idx,mode){
+  const bookEl=document.getElementById('blk-book-'+idx);
+  const blockEl=document.getElementById('blk-block-'+idx);
+  if(bookEl)bookEl.style.display=mode==='book'?'flex':'none';
+  if(blockEl)blockEl.style.display=mode==='block'?'flex':'none';
+  if(mode==='book'){const inp=document.getElementById('blk-user-search-'+idx);if(inp)inp.focus();}
+}
+
+let _adminBookingUser={};
+async function adminSearchForBooking(idx,q){
+  const resEl=document.getElementById('blk-user-results-'+idx);
+  if(!resEl)return;
+  q=(q||'').trim().toLowerCase();
+  if(q.length<2){resEl.innerHTML='';return;}
+  const{data}=await sb.from('profiles').select('id,name,phone,credits,plan_id,plan_expiry').neq('role','admin').neq('role','reception').order('name');
+  const matches=(data||[]).filter(u=>(u.name||'').toLowerCase().includes(q)).slice(0,8);
+  resEl.innerHTML=matches.map(u=>'<div onclick="adminSelectBookingUser('+idx+','+JSON.stringify(JSON.stringify(u))+')" style="padding:8px 10px;cursor:pointer;border-bottom:1px solid var(--border);font-size:13px;color:var(--white);background:var(--card2)">'+esc(u.name||'')+'<span style="font-size:11px;color:var(--gray);margin-left:6px">'+(u.phone||'')+'</span></div>').join('');
+}
+
+function adminSelectBookingUser(idx,ujson){
+  const u=JSON.parse(ujson);
+  _adminBookingUser[idx]=u;
+  const sel=document.getElementById('blk-user-selected-'+idx);
+  const res=document.getElementById('blk-user-results-'+idx);
+  const inp=document.getElementById('blk-user-search-'+idx);
+  if(sel){sel.style.display='block';sel.textContent='✓ '+esc(u.name||'')+(u.phone?' · '+u.phone:'');}
+  if(res)res.innerHTML='';
+  if(inp)inp.value=u.name||'';
+}
+
+async function adminBookForUser(ds,idx,panelIdx){
+  const u=_adminBookingUser[panelIdx];
+  if(!u){toast('Selecciona un socio primero','err');return;}
+  const BOOKING_SLOTS=3; // 90 min = 3 slots of 30 min
+  const CAP_CHECK=4;
+  showLoading('Creando reserva...');
+  try{
+    // Check slot availability
+    const slotsNeeded=[];
+    for(let i=0;i<BOOKING_SLOTS;i++){
+      const si=(idx+i)%48;
+      const dsi=idx+i>=48?addDaysDS(ds,1):ds;
+      slotsNeeded.push({ds:dsi,slot_idx:si});
+    }
+    // Build time string
+    const startMin=idx*30;
+    const endMin=(idx+BOOKING_SLOTS)*30;
+    const pad=n=>String(n).padStart(2,'0');
+    const fmtM=m=>pad(Math.floor(m/60))+':'+pad(m%60);
+    const timeStr=fmtM(startMin)+' - '+fmtM(endMin%1440);
+    // Insert booking
+    const{data:bk,error:bkErr}=await sb.from('bookings').insert({
+      user_id:u.id,ds,start_idx:idx,slots_used:BOOKING_SLOTS,
+      time_str:timeStr,dur_min:90,status:'active',is_group:false,
+      created_by_admin:true
+    }).select().single();
+    if(bkErr)throw bkErr;
+    // Insert occupancy
+    const occRows=slotsNeeded.map(s=>({ds:s.ds,slot_idx:s.slot_idx,user_id:u.id,booking_id:bk.id,is_group:false}));
+    const{error:occErr}=await sb.from('slot_occupancy').insert(occRows);
+    if(occErr)throw occErr;
+    hideLoading();
+    closeBlockPanel(panelIdx);
+    delete _adminBookingUser[panelIdx];
+    addAdminNotif('📅 Reserva manual: '+u.name+' · '+ds+' '+timeStr);
+    sendPush('admin','📅 Reserva manual','Admin reservó para '+u.name+' · '+timeStr,{tag:'admin-book'});
+    toast('Reserva creada para '+u.name,'ok');
+    renderAdmSlots();
+  }catch(e){
+    hideLoading();
+    toast('Error: '+e.message,'err');
+  }
 }
 
 async function blockSlotSb(ds,idx,spots,reason){
