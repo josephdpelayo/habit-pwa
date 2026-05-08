@@ -3538,8 +3538,12 @@ async function adminBookForUser(ds,idx,panelIdx){
 
     // Deduct credit (skip if unlimited/monthly)
     if(!isUnlimited){
-      const newCredits=Math.max(0,prof.credits-1);
-      await sb.from('profiles').update({credits:newCredits}).eq('id',u.id);
+      // Re-fetch to avoid stale value if multiple bookings are made quickly
+      const{data:freshProf}=await sb.from('profiles').select('credits').eq('id',u.id).single();
+      const currentCred=freshProf?freshProf.credits:prof.credits;
+      const newCredits=Math.max(0,currentCred-1);
+      const{error:credErr}=await sb.from('profiles').update({credits:newCredits}).eq('id',u.id);
+      if(credErr)console.warn('Credit deduct error:',credErr.message);
     }
 
     hideLoading();
