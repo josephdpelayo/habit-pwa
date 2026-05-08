@@ -3531,7 +3531,7 @@ async function adminBookForUser(ds,idx,panelIdx){
     // Insert occupancy
     const occRows=slotsNeeded.map(s=>({
       ds:s.ds,slot_idx:s.slot_idx,user_id:u.id,booking_id:bk.id,
-      is_group:isGrupal,spots:isGrupal?grupalSpots:1
+      is_group:isGrupal
     }));
     const{error:occErr}=await sb.from('slot_occupancy').insert(occRows);
     if(occErr)throw occErr;
