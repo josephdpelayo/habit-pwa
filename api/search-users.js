@@ -279,6 +279,7 @@ async function receptionActive(req, res, token) {
         ...base,
         user_id: userId,
         name: profile.name || (idx === 0 ? 'Socio' : 'Invitado'),
+        is_instructor: idx === 0 ? (profile.is_instructor || false) : false,
         phone: profile.phone || '',
         kind: idx === 0 ? 'host' : 'guest',
       };
@@ -288,24 +289,8 @@ async function receptionActive(req, res, token) {
   return res.status(200).json({ now: new Date().toISOString(), sessions });
 }
 
-async function requireAuth(token) {
-  if (!token) {
-    const err = new Error('Sesion requerida');
-    err.statusCode = 401;
-    throw err;
-  }
-  const { data: authData, error: authError } = await supabase.auth.getUser(token);
-  if (authError || !authData.user) {
-    const err = new Error('Sesion invalida');
-    err.statusCode = 401;
-    throw err;
-  }
-  return { authUser: authData.user };
-}
-
 async function searchUsers(req, res, token) {
-  // Allow any authenticated user (needed for group guest invites)
-  const { authUser } = await requireAuth(token);
+  const { authUser } = await requireAdmin(token);
   const q = norm(req.body && req.body.q);
   if (q.length < 2) return res.status(200).json({ users: [] });
 
