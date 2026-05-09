@@ -2265,10 +2265,9 @@ function renderReceptionList(errorMsg){
     if(logoImg)logoImg.src=activeInstructor.reception_logo||'/icons/logo-original.png';
     if(nameEl)nameEl.textContent=activeInstructor.name||'';
   } else {
-    const firstHost=active.find(s=>s.kind==='host');
     if(titleEl)titleEl.textContent='Sesiones activas';
     if(logoImg)logoImg.src='/icons/logo-original.png';
-    if(nameEl)nameEl.textContent=firstHost?firstHost.name:'';
+    if(nameEl)nameEl.textContent='';
   }
   // Debug: log guest_names
 
