@@ -701,17 +701,11 @@ body.reception-mode{background:#050505}
 
 <!-- RECEPTION TV -->
 <div id="s-reception" class="screen reception-screen">
-  <div class="reception-shell">
-    <div id="reception-instructor-title" style="display:none;text-align:center;letter-spacing:.18em;font-size:clamp(11px,1.1vw,18px);font-weight:900;color:#fff;margin-bottom:4px;opacity:.9"></div>
-    <div class="reception-top">
-      <!-- Left: logo + instructor name -->
-      <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;min-width:clamp(90px,11vw,190px);flex-shrink:0">
-        <div id="reception-instructor-logo" style="display:flex;align-items:center;justify-content:center;height:clamp(80px,10vw,170px)">
-          <img id="reception-instructor-logo-img" src="/icons/logo-original.png" alt="" style="height:100%;width:auto;object-fit:contain;max-width:clamp(80px,10vw,170px)">
-        </div>
-        <div id="reception-instructor-name" style="display:none;font-size:clamp(11px,1vw,16px);font-weight:700;color:#fff;text-align:center;letter-spacing:.04em;opacity:.85"></div>
-      </div>
-      <div class="reception-clock" style="flex:1">
+  <div class="reception-shell" style="display:flex;flex-direction:column;height:100vh;padding:clamp(16px,2vw,32px);gap:0">
+
+    <!-- TOP 1/3: CLOCK ONLY -->
+    <div style="flex:0 0 33vh;display:flex;align-items:center;justify-content:center;border-bottom:1px solid rgba(255,255,255,.08);padding-bottom:clamp(12px,1.5vw,24px)">
+      <div class="reception-clock" style="width:100%">
         <div class="digital-clock-panel">
           <div id="reception-week-list" class="digital-week-list">
             <span data-day="Mon">Mon</span>
@@ -736,22 +730,37 @@ body.reception-mode{background:#050505}
         </div>
       </div>
     </div>
-    <div class="reception-main">
-      <aside class="reception-side">
-        <div id="reception-updated" class="reception-updated">Sin sincronizar</div>
-        <button class="btn-ghost" onclick="doLogout()">Salir</button>
-      </aside>
-      <section class="reception-list-wrap">
-        <div class="reception-list-head">
-          <div class="reception-title">Sesiones activas</div>
+
+    <!-- TITLE below clock -->
+    <div id="reception-instructor-title" style="display:none;text-align:center;letter-spacing:.18em;font-size:clamp(12px,1.3vw,22px);font-weight:900;color:#fff;padding:clamp(8px,1vw,16px) 0;opacity:.9;border-bottom:1px solid rgba(255,255,255,.06)"></div>
+
+    <!-- BOTTOM 2/3: LEFT logo+name (1/3) | RIGHT guests (2/3) -->
+    <div style="flex:1;display:grid;grid-template-columns:1fr 2fr;gap:clamp(16px,2vw,32px);padding-top:clamp(12px,1.5vw,24px);min-height:0">
+
+      <!-- LEFT: logo + name + sync/salir -->
+      <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;gap:clamp(8px,1vw,16px)">
+        <div id="reception-instructor-logo" style="display:flex;align-items:center;justify-content:center;max-height:clamp(120px,18vh,260px)">
+          <img id="reception-instructor-logo-img" src="/icons/logo-original.png" alt="" style="max-height:clamp(120px,18vh,260px);max-width:100%;width:auto;object-fit:contain">
+        </div>
+        <div id="reception-instructor-name" style="font-size:clamp(14px,1.4vw,24px);font-weight:700;color:#fff;text-align:center;letter-spacing:.06em;opacity:.9"></div>
+        <div style="margin-top:auto;display:flex;flex-direction:column;align-items:center;gap:6px">
+          <div id="reception-updated" class="reception-updated" style="font-size:10px"></div>
+          <button class="btn-ghost" style="font-size:12px;padding:6px 16px" onclick="doLogout()">Salir</button>
+        </div>
+      </div>
+
+      <!-- RIGHT: sessions / guests -->
+      <div style="display:flex;flex-direction:column;gap:8px;overflow:hidden">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px">
+          <div class="reception-title" style="font-size:clamp(14px,1.4vw,22px)">Sesiones activas</div>
           <div id="reception-status" class="reception-status">En vivo</div>
         </div>
-        <div id="reception-list" class="reception-list">
+        <div id="reception-list" class="reception-list" style="flex:1;overflow-y:auto">
           <div class="reception-empty">Cargando sesiones activas...</div>
         </div>
-      </section>
-    </div>
-  </div>
+      </div><!-- right -->
+    </div><!-- bottom grid -->
+  </div><!-- reception-shell -->
 </div>
 
 <!-- ADMIN -->
@@ -2255,16 +2264,14 @@ function renderReceptionList(errorMsg){
   const logoImg=document.getElementById('reception-instructor-logo-img');
   const nameEl=document.getElementById('reception-instructor-name');
   if(activeInstructor){
-    // Title above clock
     if(titleEl){titleEl.style.display=activeInstructor.reception_title?'block':'none';titleEl.textContent=activeInstructor.reception_title||'';}
-    // Logo (switch to instructor logo or keep HABIT logo)
     if(logoImg){logoImg.src=activeInstructor.reception_logo||'/icons/logo-original.png';}
-    // Instructor name below logo
-    if(nameEl){nameEl.style.display='block';nameEl.textContent=activeInstructor.name||'';}
+    if(nameEl){nameEl.textContent=activeInstructor.name||'';}
   } else {
+    const firstHost=active.find(s=>s.kind==='host');
     if(titleEl)titleEl.style.display='none';
     if(logoImg)logoImg.src='/icons/logo-original.png';
-    if(nameEl)nameEl.style.display='none';
+    if(nameEl){nameEl.textContent=firstHost?firstHost.name:'';}
   }
 
   // Group sessions by booking_id to cluster instructor + students
@@ -2284,23 +2291,24 @@ function renderReceptionList(errorMsg){
     const mins=g.minutes_left;
 
     if(isInstructor){
-      // Get guest names from real guests or from reception_guests profile field
       const guestNames=g.guests.length>0
         ?g.guests.map(gu=>gu.name||'Alumno')
         :(host.guest_names?host.guest_names.split(',').map(s=>s.trim()).filter(Boolean):[]);
-      return '<div class="reception-card '+cls+'" style="flex-direction:column;gap:8px;padding:12px 16px">'
+      return '<div class="reception-card '+cls+'" style="flex-direction:column;gap:10px;padding:14px 18px">'
         +'<div style="display:flex;align-items:center;justify-content:space-between">'
         +'<div>'
-        +'<div style="font-size:11px;font-weight:700;letter-spacing:.1em;color:#f59e0b;margin-bottom:4px">⭐ CLASE</div>'
-        +'<div class="reception-meta" style="font-size:14px">'+timeStr+' · '+(g.dur_min||90)+' min</div>'
+        +'<div style="font-size:11px;font-weight:700;letter-spacing:.1em;color:#f59e0b;margin-bottom:4px">⭐ CLASE EN CURSO</div>'
+        +'<div class="reception-meta" style="font-size:clamp(14px,1.4vw,20px);font-weight:600;color:var(--white)">'+timeStr+'</div>'
         +'</div>'
         +'<div class="reception-countdown"><div class="reception-min">'+mins+'</div><div class="reception-min-label">min restantes</div></div>'
         +'</div>'
-        +(guestNames.length?'<div style="border-top:1px solid rgba(255,255,255,.1);padding-top:8px">'
-          +'<div style="font-size:10px;font-weight:700;letter-spacing:.08em;color:var(--gray);margin-bottom:6px">ALUMNOS</div>'
-          +'<div style="display:flex;flex-wrap:wrap;gap:6px">'
-          +guestNames.map(n=>'<div style="background:rgba(255,255,255,.07);border-radius:4px;padding:4px 10px;font-size:13px;font-weight:600">'+esc(n)+'</div>').join('')
-          +'</div></div>':'')
+        +(guestNames.length
+          ?'<div style="border-top:1px solid rgba(255,255,255,.1);padding-top:10px">'
+            +'<div style="font-size:10px;font-weight:700;letter-spacing:.1em;color:var(--gray);margin-bottom:10px">ALUMNOS</div>'
+            +'<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:8px">'
+            +guestNames.map(n=>'<div style="background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.1);border-radius:6px;padding:8px 12px;font-size:clamp(13px,1.2vw,18px);font-weight:600;color:var(--white)">'+esc(n)+'</div>').join('')
+            +'</div></div>'
+          :'')
         +'</div>';
     }
     // Normal layout
