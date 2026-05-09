@@ -212,7 +212,7 @@ async function receptionActive(req, res, token) {
 
   const { data: bookings, error: bookingError } = await supabase
     .from('bookings')
-    .select('id,user_id,ds,start_idx,slots_used,time_str,dur_min,is_group,grupal_spots,status,guest_names')
+    .select('id,user_id,ds,start_idx,slots_used,time_str,dur_min,is_group,grupal_spots,status')
     .eq('status', 'active')
     .in('ds', days)
     .order('ds')
@@ -246,7 +246,7 @@ async function receptionActive(req, res, token) {
   const guestIds = [...new Set(passRows.map(pass => pass.guest_user_id).filter(Boolean))];
   const profileIds = [...new Set([...hostIds, ...guestIds])];
   const { data: profiles, error: profileError } = profileIds.length
-    ? await supabase.from('profiles').select('id,name,phone,is_instructor,reception_title,reception_logo,avatar_url').in('id', profileIds)
+    ? await supabase.from('profiles').select('id,name,phone,is_instructor,reception_title,reception_logo,reception_guests,avatar_url').in('id', profileIds)
     : { data: [], error: null };
   if (profileError) throw profileError;
   const profileById = new Map((profiles || []).map(profile => [profile.id, profile]));
@@ -280,7 +280,7 @@ async function receptionActive(req, res, token) {
         user_id: userId,
         name: profile.name || (idx === 0 ? 'Socio' : 'Invitado'),
         is_instructor: idx === 0 ? (profile.is_instructor || false) : false,
-        guest_names: idx === 0 ? (booking.guest_names || '') : '',
+        guest_names: idx === 0 ? (profile.reception_guests || '') : '',
         reception_title: idx === 0 ? (profile.reception_title || '') : '',
         reception_logo: idx === 0 ? (profile.reception_logo || profile.avatar_url || '') : '',
         phone: profile.phone || '',
