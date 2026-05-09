@@ -246,7 +246,7 @@ async function receptionActive(req, res, token) {
   const guestIds = [...new Set(passRows.map(pass => pass.guest_user_id).filter(Boolean))];
   const profileIds = [...new Set([...hostIds, ...guestIds])];
   const { data: profiles, error: profileError } = profileIds.length
-    ? await supabase.from('profiles').select('id,name,phone').in('id', profileIds)
+    ? await supabase.from('profiles').select('id,name,phone,is_instructor,reception_title,reception_logo,avatar_url').in('id', profileIds)
     : { data: [], error: null };
   if (profileError) throw profileError;
   const profileById = new Map((profiles || []).map(profile => [profile.id, profile]));
