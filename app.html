@@ -1674,9 +1674,6 @@ function futureOwnGroupBooking(){
 }
 function setGuestCollapsed(v){
   guestCollapsed=!!v;
-  // Force full re-render when collapsing/expanding so shell is rebuilt
-  const panel=document.getElementById('guest-panel-body');
-  if(panel) panel.id=''; // invalidate so paintGuestGroup rebuilds shell
   paintGuestGroup();
 }
 function hasGuestChanges(){
@@ -1715,7 +1712,7 @@ async function searchGuests(q){
   guestQuery=q;
   if(q.length<2){guestSearchResults=[];_guestSearching=false;paintGuestGroup();return;}
   _guestSearching=true;
-  paintGuestGroup(); // paints "Buscando..." in results div without touching input
+  paintGuestGroup();
   try{
     const{data}=await sb.auth.getSession();
     const token=data&&data.session&&data.session.access_token;
@@ -1732,7 +1729,10 @@ async function searchGuests(q){
     guestSearchResults=[];
   }finally{
     _guestSearching=false;
-    paintGuestGroup(); // patches results div only, input untouched
+    paintGuestGroup();
+    // Re-focus the input after re-render
+    const inp=document.getElementById('guest-search-input');
+    if(inp)inp.focus();
   }
 }
 function toggleGuest(id){
@@ -1777,8 +1777,6 @@ function paintGuestGroup(){
   const sub=active
     ? 'Selecciona hasta 4 cuentas existentes para '+esc(active.timeStr||fmtTimeRange(active.startIdx,active.slotsUsed||3))+'.'
     : 'Arma tu lista frecuente. Los accesos se envian cuando tengas una reserva grupal activa y guardes tu grupo.';
-
-  // -- COLLAPSED --
   if(guestCollapsed){
     el.innerHTML='<button class="guest-toggle" onclick="setGuestCollapsed(false)">'+
       '<div><div class="guest-toggle-title">Invitados</div><div class="guest-sub">'+guestFavorites.length+' guardado'+(guestFavorites.length===1?'':'s')+(active?' · '+guestSelected.size+'/4 seleccionados':'')+'</div></div>'+
@@ -1786,64 +1784,17 @@ function paintGuestGroup(){
       '</button>';
     return;
   }
-
   const dirty=hasGuestChanges();
   const saveText=active?'Guardar Grupo':'Guardar Lista';
-
-  // -- EXPANDED: render shell only once, then patch sub-sections --
-  const alreadyOpen=!!document.getElementById('guest-panel-body');
-  if(!alreadyOpen){
-    el.innerHTML=
-      '<div class="guest-card">'+
-        '<div class="guest-head">'+
-          '<div><div class="guest-title">Grupo de invitados</div>'+
-          '<div id="guest-sub-text" class="guest-sub">'+sub+'</div></div>'+
-          '<div id="guest-count-badge" class="guest-count">'+guestSelected.size+'/4</div>'+
-        '</div>'+
-        '<div class="guest-body" id="guest-panel-body">'+
-          '<div class="guest-search">'+
-            '<input id="guest-search-input" type="search" placeholder="Buscar por nombre o correo"'+
-            ' oninput="guestQuery=this.value"'+
-            ' onkeydown="if(event.key===&apos;Enter&apos;){event.preventDefault();triggerGuestSearch()}">'+
-            '<button onclick="triggerGuestSearch()">Buscar</button>'+
-          '</div>'+
-          '<div id="guest-results-wrap" class="guest-results"></div>'+
-          '<div id="guest-list-wrap" class="guest-list"></div>'+
-          '<button id="guest-save-btn" class="guest-save" onclick="saveGuestGroup()">'+saveText+'</button>'+
-          '<button class="guest-collapse" onclick="setGuestCollapsed(true)">Contraer lista</button>'+
-        '</div>'+
-      '</div>';
-  }
-
-  // -- Always patch only the dynamic parts (never touching the input) --
-  const countEl=document.getElementById('guest-count-badge');
-  if(countEl) countEl.textContent=guestSelected.size+'/4';
-
-  const subEl=document.getElementById('guest-sub-text');
-  if(subEl) subEl.textContent=sub;
-
-  const saveBtn=document.getElementById('guest-save-btn');
-  if(saveBtn){saveBtn.disabled=!dirty;saveBtn.textContent=saveText;}
-
-  const resultsEl=document.getElementById('guest-results-wrap');
-  if(resultsEl){
-    if(_guestSearching){
-      resultsEl.innerHTML='<div style="padding:10px;font-size:12px;color:var(--gray);text-align:center">Buscando...</div>';
-    } else if(results.length){
-      resultsEl.innerHTML=results.map(g=>guestRow(g,true)).join('');
-    } else if(guestQuery.length>=2){
-      resultsEl.innerHTML='<div style="padding:10px;font-size:12px;color:var(--gray)">Sin resultados para "'+esc(guestQuery)+'"</div>';
-    } else {
-      resultsEl.innerHTML='';
-    }
-  }
-
-  const listEl=document.getElementById('guest-list-wrap');
-  if(listEl){
-    listEl.innerHTML=guestFavorites.length
-      ?guestFavorites.map(g=>guestRow(g,false)).join('')
-      :'<div class="guest-sub">Busca y agrega tus invitados frecuentes.</div>';
-  }
+  el.innerHTML='<div class="guest-card">'+
+    '<div class="guest-head"><div><div class="guest-title">Grupo de invitados</div><div class="guest-sub">'+sub+'</div></div><div class="guest-count">'+guestSelected.size+'/4</div></div>'+
+    '<div class="guest-body">'+
+      '<div class="guest-search"><input id="guest-search-input" type="search" placeholder="Buscar por nombre o correo" value="'+esc(guestQuery)+'" oninput="guestQuery=this.value" onkeydown="if(event.key===&quot;Enter&quot;){event.preventDefault();triggerGuestSearch()}"><button onclick="triggerGuestSearch()">Buscar</button></div>'+
+      '<div class="guest-results">'+(_guestSearching?'<div style="padding:10px;font-size:12px;color:var(--gray);text-align:center">Buscando...</div>':results.length?results.map(g=>guestRow(g,true)).join(''):guestQuery.length>=2?'<div style="padding:10px;font-size:12px;color:var(--gray)">Sin resultados para "'+esc(guestQuery)+'"</div>':'')+'</div>'+
+      '<div class="guest-list">'+(guestFavorites.length?guestFavorites.map(g=>guestRow(g,false)).join(''):'<div class="guest-sub">Busca y agrega tus invitados frecuentes.</div>')+'</div>'+
+      '<button class="guest-save" onclick="saveGuestGroup()" '+(!dirty?'disabled':'')+'>'+saveText+'</button>'+
+      '<button class="guest-collapse" onclick="setGuestCollapsed(true)">Contraer lista</button>'+
+    '</div></div>';
 }
 async function renderGuestGroup(reload=true){
   const el=document.getElementById('guest-group-wrap');
@@ -3078,7 +3029,7 @@ async function cancelBooking(bid){
       if(day[si])day[si]=day[si].filter(x=>x.userId!==curUser.id);
     }
     curUser.bookings=curUser.bookings.filter(x=>x.id!==bid);
-    curUser.credits=newCredits;
+    // credits already updated inside the block above via curUser.credits=_nc
     hideLoading();
     addN('Reserva cancelada - '+fmtDS(b.ds)+' '+b.timeStr+'. Visita devuelta.','warn');
     toast('Reserva cancelada - Visita devuelta','warn');
@@ -3692,7 +3643,8 @@ async function adminBookForUser(ds,idx,panelIdx){
 
     // Save guest names to this specific booking
     if(guestNames&&bk&&bk.id){
-      await sb.from('bookings').update({guest_names:guestNames}).eq('id',bk.id).catch(e=>console.warn('guest_names:',e.message));
+      const{error:gnErr}=await sb.from('bookings').update({guest_names:guestNames}).eq('id',bk.id);
+      if(gnErr)console.warn('guest_names:',gnErr.message);
     }
     hideLoading();
     closeBlockPanel(panelIdx);
