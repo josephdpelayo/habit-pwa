@@ -702,16 +702,16 @@ body.reception-mode{background:#050505}
 <!-- RECEPTION TV -->
 <div id="s-reception" class="screen reception-screen">
   <div class="reception-shell">
+    <div id="reception-instructor-title" style="display:none;text-align:center;letter-spacing:.18em;font-size:clamp(11px,1.1vw,18px);font-weight:900;color:#fff;margin-bottom:4px;opacity:.9"></div>
     <div class="reception-top">
-      <div class="reception-brand">
-        <img src="icons/logo-original.png" alt="">
-        <div>
-          <div class="reception-brand-title">HABIT</div>
-          <div class="reception-brand-sub">Reception Display</div>
+      <!-- Left: logo + instructor name -->
+      <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;min-width:clamp(90px,11vw,190px);flex-shrink:0">
+        <div id="reception-instructor-logo" style="display:flex;align-items:center;justify-content:center;height:clamp(80px,10vw,170px)">
+          <img id="reception-instructor-logo-img" src="/icons/logo-original.png" alt="" style="height:100%;width:auto;object-fit:contain;max-width:clamp(80px,10vw,170px)">
         </div>
+        <div id="reception-instructor-name" style="display:none;font-size:clamp(11px,1vw,16px);font-weight:700;color:#fff;text-align:center;letter-spacing:.04em;opacity:.85"></div>
       </div>
-      <div id="reception-instructor-logo" style="display:none;align-items:center;height:clamp(100px,11vw,190px);flex-shrink:0;margin-right:16px"><img id="reception-instructor-logo-img" src="" alt="" style="height:100%;width:auto;object-fit:contain;max-width:clamp(100px,11vw,190px)"></div>
-      <div class="reception-clock">
+      <div class="reception-clock" style="flex:1">
         <div class="digital-clock-panel">
           <div id="reception-week-list" class="digital-week-list">
             <span data-day="Mon">Mon</span>
@@ -738,15 +738,6 @@ body.reception-mode{background:#050505}
     </div>
     <div class="reception-main">
       <aside class="reception-side">
-        <div class="reception-kpi">
-          <div class="reception-kpi-label">Clientes autorizados</div>
-          <div id="reception-count" class="reception-kpi-value">0</div>
-        </div>
-        <div class="reception-legend">
-          <div class="reception-legend-row"><span class="reception-dot"></span><span>Sesión activa</span></div>
-          <div class="reception-legend-row"><span class="reception-dot warn"></span><span>Menos de 30 min</span></div>
-          <div class="reception-legend-row"><span class="reception-dot danger"></span><span>Menos de 10 min</span></div>
-        </div>
         <div id="reception-updated" class="reception-updated">Sin sincronizar</div>
         <button class="btn-ghost" onclick="doLogout()">Salir</button>
       </aside>
@@ -2258,20 +2249,22 @@ function renderReceptionList(errorMsg){
     list.innerHTML='<div class="reception-empty">No hay sesiones activas en este momento.</div>';
     return;
   }
-  // Apply instructor branding if any active session has an instructor
+  // Apply instructor branding
   const activeInstructor=active.find(s=>s.kind==='host'&&s.is_instructor);
   const titleEl=document.getElementById('reception-instructor-title');
-  const logoEl=document.getElementById('reception-instructor-logo');
   const logoImg=document.getElementById('reception-instructor-logo-img');
+  const nameEl=document.getElementById('reception-instructor-name');
   if(activeInstructor){
-    if(titleEl){titleEl.style.display='block';titleEl.textContent=activeInstructor.reception_title||'';}
-    if(logoEl&&logoImg&&activeInstructor.reception_logo){
-      logoImg.src=activeInstructor.reception_logo;
-      logoEl.style.display='flex';
-    } else if(logoEl) logoEl.style.display='none';
+    // Title above clock
+    if(titleEl){titleEl.style.display=activeInstructor.reception_title?'block':'none';titleEl.textContent=activeInstructor.reception_title||'';}
+    // Logo (switch to instructor logo or keep HABIT logo)
+    if(logoImg){logoImg.src=activeInstructor.reception_logo||'/icons/logo-original.png';}
+    // Instructor name below logo
+    if(nameEl){nameEl.style.display='block';nameEl.textContent=activeInstructor.name||'';}
   } else {
     if(titleEl)titleEl.style.display='none';
-    if(logoEl)logoEl.style.display='none';
+    if(logoImg)logoImg.src='/icons/logo-original.png';
+    if(nameEl)nameEl.style.display='none';
   }
 
   // Group sessions by booking_id to cluster instructor + students
@@ -2290,29 +2283,24 @@ function renderReceptionList(errorMsg){
     const timeStr=esc(g.time_str||fmtTimeRange(g.start_idx,g.slots_used||3));
     const mins=g.minutes_left;
 
-    if(isInstructor&&(g.guests.length>0||(host.guest_names&&host.guest_names.trim()))){
-      // Special instructor layout
-      return '<div class="reception-card '+cls+'" style="flex-direction:column;gap:10px;padding:14px 18px">'
+    if(isInstructor){
+      // Get guest names from real guests or from reception_guests profile field
+      const guestNames=g.guests.length>0
+        ?g.guests.map(gu=>gu.name||'Alumno')
+        :(host.guest_names?host.guest_names.split(',').map(s=>s.trim()).filter(Boolean):[]);
+      return '<div class="reception-card '+cls+'" style="flex-direction:column;gap:8px;padding:12px 16px">'
         +'<div style="display:flex;align-items:center;justify-content:space-between">'
         +'<div>'
-        +'<div style="font-size:11px;font-weight:700;letter-spacing:.1em;color:#f59e0b;margin-bottom:4px">⭐ CLASE · INSTRUCTOR</div>'
-        +'<div class="reception-name">'+esc(host.name||'Instructor')+'</div>'
-        +'<div class="reception-meta">'+timeStr+' · '+(g.dur_min||90)+' min</div>'
+        +'<div style="font-size:11px;font-weight:700;letter-spacing:.1em;color:#f59e0b;margin-bottom:4px">⭐ CLASE</div>'
+        +'<div class="reception-meta" style="font-size:14px">'+timeStr+' · '+(g.dur_min||90)+' min</div>'
         +'</div>'
         +'<div class="reception-countdown"><div class="reception-min">'+mins+'</div><div class="reception-min-label">min restantes</div></div>'
         +'</div>'
-        +(()=>{
-          // Use real guests if available, otherwise use guest_names from booking
-          const names=g.guests.length>0
-            ?g.guests.map(gu=>gu.name||'Alumno')
-            :(host.guest_names?host.guest_names.split(',').map(s=>s.trim()).filter(Boolean):[]);
-          if(!names.length) return '';
-          return '<div style="border-top:1px solid rgba(255,255,255,.1);padding-top:10px">'
-            +'<div style="font-size:10px;font-weight:700;letter-spacing:.08em;color:var(--gray);margin-bottom:6px">ALUMNOS</div>'
-            +'<div style="display:flex;flex-wrap:wrap;gap:6px">'
-            +names.map(n=>'<div style="background:rgba(255,255,255,.07);border-radius:4px;padding:4px 10px;font-size:13px;font-weight:600">'+esc(n)+'</div>').join('')
-            +'</div></div>';
-        })()
+        +(guestNames.length?'<div style="border-top:1px solid rgba(255,255,255,.1);padding-top:8px">'
+          +'<div style="font-size:10px;font-weight:700;letter-spacing:.08em;color:var(--gray);margin-bottom:6px">ALUMNOS</div>'
+          +'<div style="display:flex;flex-wrap:wrap;gap:6px">'
+          +guestNames.map(n=>'<div style="background:rgba(255,255,255,.07);border-radius:4px;padding:4px 10px;font-size:13px;font-weight:600">'+esc(n)+'</div>').join('')
+          +'</div></div>':'')
         +'</div>';
     }
     // Normal layout
