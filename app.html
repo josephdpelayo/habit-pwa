@@ -3595,8 +3595,7 @@ async function adminBookForUser(ds,idx,panelIdx){
     const{data:bk,error:bkErr}=await sb.from('bookings').insert({
       user_id:u.id,ds,start_idx:idx,slots_used:BOOKING_SLOTS,
       time_str:timeStr,dur_min:90,status:'active',
-      is_group:isGrupal,grupal_spots:isGrupal?grupalSpots:null,
-      guest_names:guestNames||null
+      is_group:isGrupal,grupal_spots:isGrupal?grupalSpots:null
     }).select().single();
     if(bkErr)throw bkErr;
 
@@ -3618,10 +3617,14 @@ async function adminBookForUser(ds,idx,panelIdx){
       if(credErr)console.warn('Credit deduct error:',credErr.message);
     }
 
+    // Save guest names to instructor profile if provided
+    if(guestNames&&u.id){
+      await sb.from('profiles').update({reception_guests:guestNames}).eq('id',u.id).catch(()=>{});
+    }
     hideLoading();
     closeBlockPanel(panelIdx);
     delete _adminBookingUser[panelIdx];
-    addAdminNotif('📅 Reserva manual ('+(isGrupal?'Grupal':'Individual')+'): '+u.name+' · '+ds+' '+timeStr);
+    addAdminNotif('📅 Reserva manual ('+(isGrupal?'Grupal':'Individual')+'): '+u.name+' · '+ds+' '+timeStr+(guestNames?' · Alumnos: '+guestNames:''));
     toast('Reserva '+(isGrupal?'grupal':'individual')+' creada para '+u.name,'ok');
     renderAdmSlots();
   }catch(e){
