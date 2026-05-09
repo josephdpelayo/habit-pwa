@@ -4714,16 +4714,15 @@ function previewInstructorLogo(input){
   if(file.size>3*1024*1024){toast('El archivo debe ser menor a 3MB','err');input.value='';return;}
   const reader=new FileReader();
   reader.onload=e=>{
-    const prev=document.getElementById('eu-logo-preview');
-    if(prev){prev.src=e.target.result;prev.tagName==='DIV'?prev.innerHTML='':null;}
-    const img=new Image();
-    img.onload=()=>{
-      if(img.width!==1000||img.height!==1000){
-        toast('El logo debe ser 1000×1000px. Tuyo es '+img.width+'×'+img.height+'px','err');
-        input.value='';
-      }
-    };
-    img.src=e.target.result;
+    const container=document.getElementById('eu-logo-preview');
+    if(container){
+      // Replace with img tag showing preview
+      const imgEl=document.createElement('img');
+      imgEl.src=e.target.result;
+      imgEl.id='eu-logo-preview';
+      imgEl.style.cssText='width:80px;height:80px;border-radius:6px;object-fit:contain;background:var(--card2);border:1px solid var(--border)';
+      container.parentNode.replaceChild(imgEl,container);
+    }
   };
   reader.readAsDataURL(file);
 }
@@ -4761,10 +4760,14 @@ async function saveUserEditSb(uid){
       const ext='png';
       const path='instructors/'+uid+'.'+ext;
       const{error:upErr}=await sb.storage.from('avatars').upload(path,file,{upsert:true,contentType:'image/png'});
-      if(upErr)toast('Logo no subió: '+upErr.message,'warn');
-      else{
+      if(upErr){
+        console.error('Upload error:',upErr);
+        toast('Error subiendo logo: '+upErr.message,'err');
+      } else{
         const{data:urlData}=sb.storage.from('avatars').getPublicUrl(path);
         avatarUrl=urlData.publicUrl+'?t='+Date.now();
+        console.log('Logo URL:', avatarUrl);
+        toast('Logo subido correctamente','ok');
       }
     }
 
