@@ -2186,7 +2186,36 @@ function showAdmin(){
 function stopReception(){
   if(receptionClockInt){clearInterval(receptionClockInt);receptionClockInt=null;}
   if(receptionDataInt){clearInterval(receptionDataInt);receptionDataInt=null;}
+  stopReceptionWorker();
   receptionLoading=false;
+}
+function stopReceptionWorker(){
+  if(window._receptionWorker){
+    window._receptionWorker.postMessage('stop');
+    window._receptionWorker.terminate();
+    window._receptionWorker=null;
+  }
+}
+function startReceptionWorker(){
+  stopReceptionWorker();
+  // Web Worker runs in a separate thread — browser never throttles it
+  // even when the tab is backgrounded (TV always on)
+  const workerCode=`
+    let t=null;
+    self.onmessage=function(e){
+      if(e.data==='start'){
+        if(t)clearInterval(t);
+        t=setInterval(()=>self.postMessage('tick'),15000);
+      }
+      if(e.data==='stop'){if(t){clearInterval(t);t=null;}}
+    };
+  `;
+  const blob=new Blob([workerCode],{type:'application/javascript'});
+  window._receptionWorker=new Worker(URL.createObjectURL(blob));
+  window._receptionWorker.onmessage=()=>{
+    if(!receptionLoading) loadReceptionSessions();
+  };
+  window._receptionWorker.postMessage('start');
 }
 
 function showReception(){
@@ -2202,7 +2231,7 @@ function showReception(){
   if(receptionClockInt)clearInterval(receptionClockInt);
   if(receptionDataInt)clearInterval(receptionDataInt);
   receptionClockInt=setInterval(()=>{updateReceptionClock();renderReceptionList();},1000);
-  receptionDataInt=setInterval(loadReceptionSessions,10*60*1000);
+  startReceptionWorker();
 }
 
 function updateReceptionClock(){
@@ -2319,7 +2348,8 @@ function renderReceptionList(errorMsg){
 }
 
 async function loadReceptionSessions(){
-  if(receptionLoading||!sbUser)return;
+  if(!sbUser)return;
+  if(receptionLoading)return; // already fetching, skip this tick
   receptionLoading=true;
   try{
     const{data:sessionData}=await sb.auth.getSession();
@@ -3029,7 +3059,7 @@ async function cancelBooking(bid){
       if(day[si])day[si]=day[si].filter(x=>x.userId!==curUser.id);
     }
     curUser.bookings=curUser.bookings.filter(x=>x.id!==bid);
-    // credits already updated inside the block above via curUser.credits=_nc
+    curUser.credits=newCredits;
     hideLoading();
     addN('Reserva cancelada - '+fmtDS(b.ds)+' '+b.timeStr+'. Visita devuelta.','warn');
     toast('Reserva cancelada - Visita devuelta','warn');
@@ -3643,8 +3673,7 @@ async function adminBookForUser(ds,idx,panelIdx){
 
     // Save guest names to this specific booking
     if(guestNames&&bk&&bk.id){
-      const{error:gnErr}=await sb.from('bookings').update({guest_names:guestNames}).eq('id',bk.id);
-      if(gnErr)console.warn('guest_names:',gnErr.message);
+      await sb.from('bookings').update({guest_names:guestNames}).eq('id',bk.id).catch(e=>console.warn('guest_names:',e.message));
     }
     hideLoading();
     closeBlockPanel(panelIdx);
