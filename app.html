@@ -419,7 +419,7 @@ body.reception-mode{background:#050505}
 .digital-week-list span{opacity:.92}
 .digital-week-list span.active{color:#38ff55;text-shadow:0 0 9px rgba(56,255,85,.72)}
 .digital-time-wrap{position:relative;display:flex;justify-content:center;align-items:center;min-width:0;min-height:0;height:100%}
-.digital-time-ghost,.digital-time{font-family:'Share Tech Mono','Courier New',monospace;font-size:clamp(80px,9vw,160px);font-weight:700;line-height:1;letter-spacing:.02em;font-variant-numeric:tabular-nums}
+.digital-time-ghost,.digital-time{font-family:'Montserrat',sans-serif;font-size:clamp(100px,16vh,200px);font-weight:900;line-height:1;letter-spacing:.01em;font-variant-numeric:tabular-nums}
 .digital-time-ghost{position:absolute;color:rgba(255,255,255,.06);text-shadow:none;display:block}
 .digital-time{position:relative;color:var(--bl);text-shadow:0 0 10px rgba(59,130,246,.82),0 0 24px rgba(37,99,235,.48)}
 .digital-side{position:relative;display:grid;grid-template-rows:auto auto auto;gap:8px;justify-items:end;align-items:center;color:#38ff55;font-family:'Courier New','Lucida Console',monospace;font-weight:900;text-shadow:0 0 10px rgba(56,255,85,.65)}
@@ -2336,20 +2336,32 @@ async function loadReceptionSessions(){
     const payload=await res.json().catch(()=>({}));
     if(!res.ok)throw new Error(payload.error||'No se pudieron cargar las sesiones');
     const sessions=payload.sessions||[];
-    // Enrich instructor sessions with reception_guests directly from Supabase
+    // Enrich instructor sessions with data directly from Supabase
     const instructorHosts=sessions.filter(s=>s.kind==='host'&&s.is_instructor);
     if(instructorHosts.length){
+      // Get reception branding from profiles
       const uids=instructorHosts.map(s=>s.user_id).filter(Boolean);
       if(uids.length){
-        const{data:profs}=await sb.from('profiles').select('id,reception_guests,reception_title,reception_logo,avatar_url').in('id',uids);
+        const{data:profs}=await sb.from('profiles').select('id,reception_title,reception_logo,avatar_url').in('id',uids);
         if(profs){
           profs.forEach(p=>{
             sessions.forEach(s=>{
               if(s.user_id===p.id){
-                if(p.reception_guests)s.guest_names=p.reception_guests;
-                if(p.reception_title)s.reception_title=p.reception_title;
-                if(p.reception_logo||p.avatar_url)s.reception_logo=p.reception_logo||p.avatar_url;
+                if(!s.reception_title&&p.reception_title)s.reception_title=p.reception_title;
+                if(!s.reception_logo&&(p.reception_logo||p.avatar_url))s.reception_logo=p.reception_logo||p.avatar_url;
               }
+            });
+          });
+        }
+      }
+      // Get guest_names from bookings
+      const bkIds=instructorHosts.map(s=>s.booking_id).filter(Boolean);
+      if(bkIds.length){
+        const{data:bks}=await sb.from('bookings').select('id,guest_names').in('id',bkIds);
+        if(bks){
+          bks.forEach(b=>{
+            sessions.forEach(s=>{
+              if(s.booking_id===b.id&&b.guest_names)s.guest_names=b.guest_names;
             });
           });
         }
@@ -3633,9 +3645,9 @@ async function adminBookForUser(ds,idx,panelIdx){
       if(credErr)console.warn('Credit deduct error:',credErr.message);
     }
 
-    // Save guest names to instructor profile if provided
-    if(guestNames&&u.id){
-      await sb.from('profiles').update({reception_guests:guestNames}).eq('id',u.id).catch(()=>{});
+    // Save guest names to this specific booking
+    if(guestNames&&bk&&bk.id){
+      await sb.from('bookings').update({guest_names:guestNames}).eq('id',bk.id).catch(e=>console.warn('guest_names:',e.message));
     }
     hideLoading();
     closeBlockPanel(panelIdx);
