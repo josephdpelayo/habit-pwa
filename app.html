@@ -13,7 +13,7 @@
 <link rel="apple-touch-icon" sizes="180x180" href="/icons/icon-180.png?v=20260505-20">
 <link rel="icon" type="image/png" sizes="32x32" href="/icons/icon-32.png?v=20260505-20">
 <title>HABIT</title>
-<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700;800;900&family=Share+Tech+Mono&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
@@ -419,7 +419,7 @@ body.reception-mode{background:#050505}
 .digital-week-list span{opacity:.92}
 .digital-week-list span.active{color:#38ff55;text-shadow:0 0 9px rgba(56,255,85,.72)}
 .digital-time-wrap{position:relative;display:flex;justify-content:center;align-items:center;min-width:0;min-height:clamp(120px,11vw,200px)}
-.digital-time-ghost,.digital-time{font-family:'Montserrat',sans-serif;font-size:clamp(110px,11vw,200px);font-weight:400;line-height:.90;letter-spacing:.01em;font-variant-numeric:tabular-nums}
+.digital-time-ghost,.digital-time{font-family:'Share Tech Mono','Courier New',monospace;font-size:clamp(130px,13vw,240px);font-weight:700;line-height:.88;letter-spacing:.02em;font-variant-numeric:tabular-nums}
 .digital-time-ghost{position:absolute;color:rgba(255,255,255,.06);text-shadow:none;display:block}
 .digital-time{position:relative;color:var(--bl);text-shadow:0 0 10px rgba(59,130,246,.82),0 0 24px rgba(37,99,235,.48)}
 .digital-side{position:relative;display:grid;grid-template-rows:auto auto auto;gap:8px;justify-items:end;align-items:center;color:#38ff55;font-family:'Courier New','Lucida Console',monospace;font-weight:900;text-shadow:0 0 10px rgba(56,255,85,.65)}
@@ -704,7 +704,7 @@ body.reception-mode{background:#050505}
   <div class="reception-shell" style="display:flex;flex-direction:column;height:100vh;padding:clamp(16px,2vw,32px);gap:0">
 
     <!-- TOP: CLOCK - bigger -->
-    <div style="flex:0 0 42vh;display:flex;align-items:center;justify-content:center;border-bottom:1px solid rgba(255,255,255,.08);padding-bottom:clamp(8px,1vw,16px)">
+    <div style="flex:0 0 45vh;display:flex;align-items:center;justify-content:center;border-bottom:1px solid rgba(255,255,255,.08);padding-bottom:clamp(8px,1vw,16px)">
       <div class="reception-clock" style="width:100%">
         <div class="digital-clock-panel">
           <div id="reception-week-list" class="digital-week-list">
@@ -2272,7 +2272,7 @@ function renderReceptionList(errorMsg){
     if(nameEl)nameEl.textContent=firstHost?firstHost.name:'';
   }
   // Debug: log guest_names
-  if(activeInstructor)console.log('instructor guest_names:',activeInstructor.guest_names,'guests:',grouped[activeInstructor.booking_id]?.guests?.length);
+
 
   // Group sessions by booking_id to cluster instructor + students
   const grouped={};
