@@ -419,7 +419,7 @@ body.reception-mode{background:#050505}
 .digital-week-list span{opacity:.92}
 .digital-week-list span.active{color:#38ff55;text-shadow:0 0 9px rgba(56,255,85,.72)}
 .digital-time-wrap{position:relative;display:flex;justify-content:center;align-items:center;min-width:0;min-height:0;height:100%}
-.digital-time-ghost,.digital-time{font-family:'Montserrat',sans-serif;font-size:clamp(130px,20vh,260px);font-weight:900;line-height:1;letter-spacing:.01em;font-variant-numeric:tabular-nums}
+.digital-time-ghost,.digital-time{font-family:'Montserrat',sans-serif;font-size:clamp(260px,40vh,520px);font-weight:400;line-height:1;letter-spacing:.01em;font-variant-numeric:tabular-nums}
 .digital-time-ghost{position:absolute;color:rgba(255,255,255,.06);text-shadow:none;display:block}
 .digital-time{position:relative;color:var(--bl);text-shadow:0 0 10px rgba(59,130,246,.82),0 0 24px rgba(37,99,235,.48)}
 .digital-side{position:relative;display:grid;grid-template-rows:auto auto auto;gap:8px;justify-items:end;align-items:center;color:#38ff55;font-family:'Courier New','Lucida Console',monospace;font-weight:900;text-shadow:0 0 10px rgba(56,255,85,.65)}
@@ -2293,20 +2293,18 @@ function renderReceptionList(errorMsg){
       const guestNames=g.guests.length>0
         ?g.guests.map(gu=>gu.name||'Alumno')
         :(host.guest_names?host.guest_names.split(',').map(s=>s.trim()).filter(Boolean):[]);
-      return '<div class="reception-card '+cls+'" style="flex-direction:column;gap:10px;padding:14px 18px">'
-        +'<div style="display:flex;align-items:center;justify-content:space-between">'
-        +'<div>'
-        +'<div style="font-size:11px;font-weight:700;letter-spacing:.1em;color:#f59e0b;margin-bottom:4px">⭐ CLASE EN CURSO</div>'
-        +'<div class="reception-meta" style="font-size:clamp(14px,1.4vw,20px);font-weight:600;color:var(--white)">'+timeStr+'</div>'
-        +'</div>'
-        +'<div class="reception-countdown"><div class="reception-min">'+mins+'</div><div class="reception-min-label">min restantes</div></div>'
+      const cols=guestNames.length<=2?guestNames.length:2;
+      const rows=Math.ceil(guestNames.length/2);
+      return '<div class="reception-card '+cls+'" style="flex:1;flex-direction:column;gap:0;padding:14px 18px;display:flex">'
+        +'<div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:10px">'
+        +'<div><div style="font-size:11px;font-weight:700;letter-spacing:.1em;color:#f59e0b;margin-bottom:4px">⭐ CLASE EN CURSO</div>'
+        +'<div style="font-size:clamp(16px,1.6vw,24px);font-weight:600;color:var(--white)">'+timeStr+'</div></div>'
+        +'<div class="reception-countdown" style="text-align:right"><div class="reception-min" style="font-size:clamp(56px,7vw,110px)">'+mins+'</div><div class="reception-min-label">min restantes</div></div>'
         +'</div>'
         +(guestNames.length
-          ?'<div style="border-top:1px solid rgba(255,255,255,.1);padding-top:10px">'
-            +'<div style="font-size:clamp(11px,1.2vw,16px);font-weight:700;letter-spacing:.1em;color:var(--gray);margin-bottom:8px">ALUMNOS</div>'
-            +'<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:clamp(6px,1vh,12px)">'
-            +guestNames.map(n=>'<div style="background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.1);border-radius:8px;padding:clamp(10px,1.5vh,18px) 16px;font-size:clamp(18px,2.2vw,34px);font-weight:700;color:var(--white);text-align:center">'+esc(n)+'</div>').join('')
-            +'</div></div>'
+          ?'<div style="flex:1;display:grid;grid-template-columns:repeat('+cols+',1fr);grid-template-rows:repeat('+rows+',1fr);gap:8px;min-height:0">'
+            +guestNames.map(n=>'<div style="background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.12);border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:clamp(24px,3.2vw,52px);font-weight:700;color:var(--white);text-align:center;padding:8px">'+esc(n)+'</div>').join('')
+            +'</div>'
           :'')
         +'</div>';
     }
