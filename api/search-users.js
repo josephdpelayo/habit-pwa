@@ -280,6 +280,8 @@ async function receptionActive(req, res, token) {
         user_id: userId,
         name: profile.name || (idx === 0 ? 'Socio' : 'Invitado'),
         is_instructor: idx === 0 ? (profile.is_instructor || false) : false,
+        reception_title: idx === 0 ? (profile.reception_title || '') : '',
+        reception_logo: idx === 0 ? (profile.reception_logo || profile.avatar_url || '') : '',
         phone: profile.phone || '',
         kind: idx === 0 ? 'host' : 'guest',
       };
