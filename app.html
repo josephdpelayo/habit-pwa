@@ -710,6 +710,7 @@ body.reception-mode{background:#050505}
           <div class="reception-brand-sub">Reception Display</div>
         </div>
       </div>
+      <div id="reception-instructor-logo" style="display:none;align-items:center;height:clamp(100px,11vw,190px);flex-shrink:0;margin-right:16px"><img id="reception-instructor-logo-img" src="" alt="" style="height:100%;width:auto;object-fit:contain;max-width:clamp(100px,11vw,190px)"></div>
       <div class="reception-clock">
         <div class="digital-clock-panel">
           <div id="reception-week-list" class="digital-week-list">
@@ -2257,6 +2258,22 @@ function renderReceptionList(errorMsg){
     list.innerHTML='<div class="reception-empty">No hay sesiones activas en este momento.</div>';
     return;
   }
+  // Apply instructor branding if any active session has an instructor
+  const activeInstructor=active.find(s=>s.kind==='host'&&s.is_instructor);
+  const titleEl=document.getElementById('reception-instructor-title');
+  const logoEl=document.getElementById('reception-instructor-logo');
+  const logoImg=document.getElementById('reception-instructor-logo-img');
+  if(activeInstructor){
+    if(titleEl){titleEl.style.display='block';titleEl.textContent=activeInstructor.reception_title||'';}
+    if(logoEl&&logoImg&&activeInstructor.reception_logo){
+      logoImg.src=activeInstructor.reception_logo;
+      logoEl.style.display='flex';
+    } else if(logoEl) logoEl.style.display='none';
+  } else {
+    if(titleEl)titleEl.style.display='none';
+    if(logoEl)logoEl.style.display='none';
+  }
+
   // Group sessions by booking_id to cluster instructor + students
   const grouped={};
   active.forEach(s=>{
@@ -4655,6 +4672,11 @@ async function adminEditUserSb(uid,uname){
       +'<div><div style="font-size:14px;font-weight:700;color:var(--white)">Marcar como instructor</div>'
       +'<div style="font-size:11px;color:var(--gray);margin-top:2px">Su sesión se mostrará de forma especial en recepción</div></div>'
       +'</label>'
+      +'<div id="eu-instructor-extra" style="'+(prof.is_instructor?'':'display:none')+'">'
+      +'<div class="field"><label>Título en recepción (aparece arriba del reloj)</label>'
+      +'<input type="text" id="eu-reception-title" value="'+esc(prof.reception_title||'')+' " placeholder="Ej: BIODELYS CLASE FUNCIONAL" style="width:100%;background:var(--card2);border:1px solid var(--border);border-radius:4px;padding:10px;font-size:14px;color:var(--white);outline:none;box-sizing:border-box">'
+      +'</div>'
+      +'</div>'
       +'<div class="field" id="eu-logo-section" style="'+(prof.is_instructor?'':'display:none')+'">'
       +'<label>Logo del instructor (PNG transparente 1000×1000px)</label>'
       +'<div style="display:flex;align-items:center;gap:10px;margin-top:6px">'
@@ -4666,7 +4688,7 @@ async function adminEditUserSb(uid,uname){
       +'</div>'
       +'</div>'
       +'</div>'
-      +'<script>document.getElementById&&document.getElementById("eu-instructor")&&document.getElementById("eu-instructor").addEventListener("change",function(){document.getElementById("eu-logo-section").style.display=this.checked?"":"none";});<\/script>'
+      +'<script>document.getElementById&&document.getElementById("eu-instructor")&&document.getElementById("eu-instructor").addEventListener("change",function(){var s=this.checked?"":"none";document.getElementById("eu-logo-section").style.display=s;document.getElementById("eu-instructor-extra").style.display=s;});<\/script>'
       +'<div class="divider"></div>'
       +'<p class="slbl" style="margin-bottom:8px">Pizarrones asignados</p>'
       +'<div style="max-height:200px;overflow-y:auto;border:1px solid var(--border);border-radius:4px;padding:0 12px">'
@@ -4729,6 +4751,7 @@ async function saveUserEditSb(uid){
       || oldExpiry!==(expiryVal||'');
 
     const isInstructor=!!(document.getElementById('eu-instructor')||{}).checked;
+    const receptionTitle=((document.getElementById('eu-reception-title')||{}).value||'').trim();
 
     // Upload logo if provided
     let avatarUrl=null;
@@ -4750,9 +4773,10 @@ async function saveUserEditSb(uid){
       plan_id:manualPlanId||null,
       plan_type:plan?plan.type:null,
       credits,plan_expiry:expiry,
-      is_instructor:isInstructor
+      is_instructor:isInstructor,
+      reception_title:receptionTitle||null
     };
-    if(avatarUrl) patch.avatar_url=avatarUrl;
+    if(avatarUrl){patch.avatar_url=avatarUrl;if(isInstructor)patch.reception_logo=avatarUrl;}
     const{error:updateErr}=await sb.from('profiles').update(patch).eq('id',uid);
     if(updateErr)throw updateErr;
 
