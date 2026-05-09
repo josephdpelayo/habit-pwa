@@ -4728,6 +4728,9 @@ function previewInstructorLogo(input){
 }
 
 async function saveUserEditSb(uid){
+  // Capture file BEFORE showLoading in case it replaces DOM
+  const _logoFileInput=document.getElementById('eu-logo-file');
+  const _logoFile=_logoFileInput&&_logoFileInput.files&&_logoFileInput.files[0]?_logoFileInput.files[0]:null;
   showLoading('Guardando...');
   try{
     const{data:before,error:beforeErr}=await sb.from('profiles').select('name,phone,plan_id,plan_type,credits,plan_expiry').eq('id',uid).single();
@@ -4754,9 +4757,8 @@ async function saveUserEditSb(uid){
 
     // Upload logo if provided
     let avatarUrl=null;
-    const logoFile=(document.getElementById('eu-logo-file')||{}).files;
-    if(logoFile&&logoFile[0]){
-      const file=logoFile[0];
+    if(_logoFile){
+      const file=_logoFile;
       const ext='png';
       const path='instructors/'+uid+'.'+ext;
       const{error:upErr}=await sb.storage.from('avatars').upload(path,file,{upsert:true,contentType:'image/png'});
