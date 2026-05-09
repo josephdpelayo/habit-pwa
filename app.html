@@ -2298,8 +2298,8 @@ function renderReceptionList(errorMsg){
         +'<div style="font-size:11px;font-weight:700;letter-spacing:.1em;color:#f59e0b">⭐ CLASE EN CURSO</div>'
         +'<div style="font-size:clamp(14px,1.6vw,22px);font-weight:600;color:var(--white)">'+timeStr+'</div>'
         +'</div>'
-        +'<div style="grid-column:1;grid-row:1/3;display:grid;grid-template-columns:1fr 1fr;grid-template-rows:repeat('+Math.ceil(guestNames.length/2)+',1fr);gap:8px">'
-        +guestNames.map(n=>'<div style="background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.12);border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:clamp(28px,4.5vw,72px);font-weight:800;color:var(--white);text-align:center;padding:4px">'+esc(n)+'</div>').join('')
+        +'<div style="grid-column:1;grid-row:1/3;display:grid;grid-template-columns:1fr;grid-template-rows:repeat('+guestNames.length+',1fr);gap:8px">'
+        +guestNames.map(n=>'<div style="background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.12);border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:clamp(32px,5vw,80px);font-weight:800;color:var(--white);text-align:center;padding:4px">'+esc(n)+'</div>').join('')
         +'</div>'
         +'<div style="grid-column:2;grid-row:2;display:flex;flex-direction:column;align-items:flex-end;justify-content:flex-end">'
         +'<div class="reception-min" style="font-size:clamp(36px,4vw,64px);line-height:1">'+mins+'</div>'
