@@ -1703,8 +1703,10 @@ async function queueGuestSearch(q){
 }
 function triggerGuestSearch(){
   const input=document.getElementById('guest-search-input');
-  guestQuery=input?input.value:guestQuery;
-  searchGuests(guestQuery);
+  const q=input?input.value.trim():guestQuery;
+  guestQuery=q;
+  clearTimeout(guestSearchTimer);
+  searchGuests(q);
 }
 let _guestSearching=false;
 async function searchGuests(q){
@@ -1789,8 +1791,8 @@ function paintGuestGroup(){
   el.innerHTML='<div class="guest-card">'+
     '<div class="guest-head"><div><div class="guest-title">Grupo de invitados</div><div class="guest-sub">'+sub+'</div></div><div class="guest-count">'+guestSelected.size+'/4</div></div>'+
     '<div class="guest-body">'+
-      '<div class="guest-search"><input id="guest-search-input" type="search" placeholder="Buscar por nombre o correo" value="'+esc(guestQuery)+'" oninput="guestQuery=this.value" onkeydown="if(event.key===&quot;Enter&quot;){event.preventDefault();triggerGuestSearch()}"><button onclick="triggerGuestSearch()">Buscar</button></div>'+
-      '<div class="guest-results">'+(_guestSearching?'<div style="padding:10px;font-size:12px;color:var(--gray);text-align:center">Buscando...</div>':results.length?results.map(g=>guestRow(g,true)).join(''):guestQuery.length>=2?'<div style="padding:10px;font-size:12px;color:var(--gray)">Sin resultados para "'+esc(guestQuery)+'"</div>':'')+'</div>'+
+      '<div class="guest-search"><input id="guest-search-input" type="search" placeholder="Buscar por nombre o correo" value="'+esc(guestQuery)+'" oninput="guestQuery=this.value;queueGuestSearch(this.value)" onkeydown="if(event.key===&quot;Enter&quot;){event.preventDefault();triggerGuestSearch()}"><button onclick="triggerGuestSearch()">Buscar</button></div>'+
+      '<div class="guest-results" id="guest-results-wrap">'+(_guestSearching?'<div style="padding:10px;font-size:12px;color:var(--gray);text-align:center">Buscando...</div>':results.length?results.map(g=>guestRow(g,true)).join(''):guestQuery.length>=2?'<div style="padding:10px;font-size:12px;color:var(--gray)">Sin resultados para "'+esc(guestQuery)+'"</div>':'')+'</div>'+
       '<div class="guest-list">'+(guestFavorites.length?guestFavorites.map(g=>guestRow(g,false)).join(''):'<div class="guest-sub">Busca y agrega tus invitados frecuentes.</div>')+'</div>'+
       '<button class="guest-save" onclick="saveGuestGroup()" '+(!dirty?'disabled':'')+'>'+saveText+'</button>'+
       '<button class="guest-collapse" onclick="setGuestCollapsed(true)">Contraer lista</button>'+
@@ -2265,9 +2267,10 @@ function renderReceptionList(errorMsg){
     if(logoImg)logoImg.src=activeInstructor.reception_logo||'/icons/logo-original.png';
     if(nameEl)nameEl.textContent=activeInstructor.name||'';
   } else {
+    const firstHost=active.find(s=>s.kind==='host');
     if(titleEl)titleEl.textContent='Sesiones activas';
     if(logoImg)logoImg.src='/icons/logo-original.png';
-    if(nameEl)nameEl.textContent='';
+    if(nameEl)nameEl.textContent=firstHost?firstHost.name:'';
   }
   // Debug: log guest_names
 
