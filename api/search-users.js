@@ -212,7 +212,7 @@ async function receptionActive(req, res, token) {
 
   const { data: bookings, error: bookingError } = await supabase
     .from('bookings')
-    .select('id,user_id,ds,start_idx,slots_used,time_str,dur_min,is_group,grupal_spots,status')
+    .select('id,user_id,ds,start_idx,slots_used,time_str,dur_min,is_group,grupal_spots,status,guest_names')
     .eq('status', 'active')
     .in('ds', days)
     .order('ds')
@@ -280,7 +280,7 @@ async function receptionActive(req, res, token) {
         user_id: userId,
         name: profile.name || (idx === 0 ? 'Socio' : 'Invitado'),
         is_instructor: idx === 0 ? (profile.is_instructor || false) : false,
-        guest_names: idx === 0 ? (profile.reception_guests || '') : '',
+        guest_names: idx === 0 ? (booking.guest_names || '') : '',
         reception_title: idx === 0 ? (profile.reception_title || '') : '',
         reception_logo: idx === 0 ? (profile.reception_logo || profile.avatar_url || '') : '',
         phone: profile.phone || '',
