@@ -2,7 +2,7 @@
 <html lang="es">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="HABIT">
 <meta name="application-name" content="HABIT">
@@ -32,7 +32,7 @@ input,select,button,textarea{font-family:'Montserrat',sans-serif}
 .scroll-area{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:1rem}
 .scroll-area::-webkit-scrollbar{width:3px}
 .scroll-area::-webkit-scrollbar-thumb{background:var(--border);border-radius:99px}
-.hdr{padding:.75rem 1rem;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px;min-height:52px;flex-shrink:0;background:var(--black)}
+.hdr{padding:calc(env(safe-area-inset-top,0px) + .75rem) 1rem .75rem;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px;min-height:52px;flex-shrink:0;background:var(--black)}
 .logo-wrap{display:flex;align-items:center;gap:8px;flex:1}
 .lmark{width:24px;height:24px;border-radius:50%;border:2px solid var(--white);display:flex;align-items:center;justify-content:center}
 .lmark-in{width:10px;height:10px;border-radius:50%;background:var(--white)}
