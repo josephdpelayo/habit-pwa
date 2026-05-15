@@ -3066,7 +3066,6 @@ async function cancelBooking(bid){
       if(day[si])day[si]=day[si].filter(x=>x.userId!==curUser.id);
     }
     curUser.bookings=curUser.bookings.filter(x=>x.id!==bid);
-    curUser.credits=newCredits;
     hideLoading();
     addN('Reserva cancelada - '+fmtDS(b.ds)+' '+b.timeStr+'. Visita devuelta.','warn');
     toast('Reserva cancelada - Visita devuelta','warn');
