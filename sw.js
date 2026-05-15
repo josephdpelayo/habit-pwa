@@ -40,18 +40,12 @@ self.addEventListener('fetch', e => {
     return;
   }
 
-  // App shell: stale-while-revalidate — instant load from cache, update in background
-  if (request.mode === 'navigate' || url.pathname.endsWith('.html') || url.pathname === '/') {
+  // Navigation: network-first, serve cached shell only when offline.
+  // We pass the original request through (Vercel rewrites handle it server-side without
+  // a redirect), so Chrome never sees a redirected response from the SW.
+  if (request.mode === 'navigate') {
     e.respondWith(
-      caches.open(CACHE).then(cache =>
-        cache.match('/app.html').then(cached => {
-          const network = fetch('/app.html').then(res => {
-            cache.put('/app.html', res.clone());
-            return res;
-          }).catch(() => null);
-          return cached || network;
-        })
-      )
+      fetch(request).catch(() => caches.match('/app.html'))
     );
   }
 });
