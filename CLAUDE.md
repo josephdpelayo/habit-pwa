@@ -28,7 +28,7 @@ The app has four screens (`#s-auth`, `#s-main`, `#s-admin`, `#s-reception`), tog
 - `sw.js` — service worker for push notifications only; intentionally has **no** fetch handler (no caching/offline support)
 - `manifest.json` — PWA manifest
 
-**Version / cache busting**: `APP_VERSION` is defined in `app.html` (e.g. `'20260505-20'`). When making changes that clients need to pick up, update this constant and the matching `?v=` strings in `index.html` and the `<link>` tags at the top of `app.html`.
+**Version / cache busting**: `APP_VERSION` is defined in `app.html` (e.g. `'20260505-20'`). When making changes that clients need to pick up, update this constant and the matching `?v=` strings in `index.html` and the `<link>` tags at the top of `app.html`. Also update `CACHE_VERSION` in `sw.js` to the same value — this invalidates the old shell cache and forces clients to download the new version.
 
 ### Backend (`api/*.js`)
 Vercel serverless functions. Files prefixed with `_` (`_plans.js`, `_fulfillment.js`) are shared modules, not routes.

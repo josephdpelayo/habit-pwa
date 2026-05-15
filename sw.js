@@ -1,10 +1,60 @@
-// HABIT Training Hub — Service Worker v2
-// Solo maneja push notifications, no intercepta requests
+// HABIT Training Hub — Service Worker
+// Push notifications + app shell caching
 
-self.addEventListener('install', () => self.skipWaiting());
-self.addEventListener('activate', e => e.waitUntil(self.clients.claim()));
+const CACHE_VERSION = '20260505-20'; // keep in sync with APP_VERSION in app.html
+const CACHE = `habit-${CACHE_VERSION}`;
 
-// NO fetch handler — no interceptamos nada
+self.addEventListener('install', e => {
+  e.waitUntil(
+    caches.open(CACHE).then(cache => cache.add('/app.html'))
+  );
+  self.skipWaiting();
+});
+
+self.addEventListener('activate', e => {
+  e.waitUntil(
+    caches.keys()
+      .then(keys => Promise.all(keys.filter(k => k !== CACHE).map(k => caches.delete(k))))
+      .then(() => self.clients.claim())
+  );
+});
+
+self.addEventListener('fetch', e => {
+  const { request } = e;
+  const url = new URL(request.url);
+
+  // Only handle same-origin requests; skip API calls
+  if (url.origin !== self.location.origin || url.pathname.startsWith('/api/')) return;
+
+  // Icons: cache-first (served with versioned URLs so stale entries auto-expire on update)
+  if (url.pathname.startsWith('/icons/')) {
+    e.respondWith(
+      caches.match(request).then(cached => {
+        if (cached) return cached;
+        return fetch(request).then(res => {
+          caches.open(CACHE).then(c => c.put(request, res.clone()));
+          return res;
+        });
+      })
+    );
+    return;
+  }
+
+  // App shell: stale-while-revalidate — instant load from cache, update in background
+  if (request.mode === 'navigate' || url.pathname.endsWith('.html') || url.pathname === '/') {
+    e.respondWith(
+      caches.open(CACHE).then(cache =>
+        cache.match('/app.html').then(cached => {
+          const network = fetch('/app.html').then(res => {
+            cache.put('/app.html', res.clone());
+            return res;
+          }).catch(() => null);
+          return cached || network;
+        })
+      )
+    );
+  }
+});
 
 self.addEventListener('push', e => {
   if (!e.data) return;

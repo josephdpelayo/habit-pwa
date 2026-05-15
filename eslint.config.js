@@ -21,6 +21,7 @@ module.exports = [
         __dirname: 'readonly',
         __filename: 'readonly',
         self: 'readonly',
+        caches: 'readonly',
       },
     },
     rules: {
