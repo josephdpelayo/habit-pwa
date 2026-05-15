@@ -4,11 +4,11 @@
 
 1. Ve a supabase.com → tu proyecto → **SQL Editor**
 2. Click "New query"
-3. Copia y pega TODO el contenido del archivo `habit-supabase-setup.sql`
+3. Copia y pega TODO el contenido del archivo `migrations/001_schema.sql`
 4. Click **Run** (▶)
 5. Debe aparecer: "Schema creado correctamente ✓"
-6. Copia y corre tambien `stripe-payments.sql` para evitar pagos duplicados de Stripe
-7. Copia y corre tambien `door-commands.sql` para activar solicitudes de apertura de puerta
+6. Copia y corre tambien `migrations/002_stripe_payments.sql` para evitar pagos duplicados de Stripe
+7. Copia y corre tambien los archivos restantes en `migrations/` en orden numérico
 
 ## PASO 2 — Publicar en Vercel
 

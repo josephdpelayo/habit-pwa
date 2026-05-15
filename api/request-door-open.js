@@ -1,8 +1,6 @@
 const { createClient } = require('@supabase/supabase-js');
+const { slotLabel, accessWindow } = require('./_slots');
 
-const MAZ_UTC_OFFSET_H = 7;
-const SLOT_DUR = 30;
-const BEFORE_MIN = 10;
 const DEFAULT_RADIUS_M = 120;
 const DEFAULT_MAX_ACCURACY_M = 150;
 const SHELLY_DEFAULT_TURN = 'off';
@@ -12,38 +10,6 @@ const SHELLY_RATE_LIMIT_WAIT_SECONDS = 60;
 const LOCATION_EXEMPT_EMAILS = ['josephdpelayo@gmail.com', 'habit1@habit.com'];
 
 const supabase = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_SERVICE_ROLE_KEY);
-
-function parseDS(ds) {
-  const [y, m, d] = String(ds || '').split('-').map(Number);
-  return { y, m, d };
-}
-
-function slotMs(ds, slotIdx) {
-  const { y, m, d } = parseDS(ds);
-  return Date.UTC(y, m - 1, d, MAZ_UTC_OFFSET_H, 0, 0) + Number(slotIdx || 0) * SLOT_DUR * 60000;
-}
-
-function fmtSlot(idx) {
-  const slot = ((Number(idx || 0) % 48) + 48) % 48;
-  const totalMin = slot * SLOT_DUR;
-  const h = String(Math.floor(totalMin / 60)).padStart(2, '0');
-  const m = String(totalMin % 60).padStart(2, '0');
-  return `${h}:${m}`;
-}
-
-function slotLabel(booking) {
-  const slotsUsed = Number(booking.slots_used || 3);
-  return booking.time_str || `${fmtSlot(booking.start_idx)} - ${fmtSlot(Number(booking.start_idx) + slotsUsed)}`;
-}
-
-function accessWindow(booking) {
-  const slotsUsed = Number(booking.slots_used || 3);
-  const startMs = slotMs(booking.ds, booking.start_idx);
-  return {
-    opensMs: startMs - BEFORE_MIN * 60000,
-    closesMs: startMs + slotsUsed * SLOT_DUR * 60000,
-  };
-}
 
 function distanceMeters(aLat, aLng, bLat, bLng) {
   const toRad = deg => (deg * Math.PI) / 180;
@@ -157,7 +123,7 @@ async function sendShellyRelay(cfg, turn, deviceId) {
     body,
   });
   const text = await response.text();
-  let payload = null;
+  let payload;
   try {
     payload = text ? JSON.parse(text) : null;
   } catch (_) {
@@ -184,7 +150,7 @@ async function sendShellySwitchV2(cfg, turn, deviceId) {
     }),
   });
   const text = await response.text();
-  let payload = null;
+  let payload;
   try {
     payload = text ? JSON.parse(text) : null;
   } catch (_) {

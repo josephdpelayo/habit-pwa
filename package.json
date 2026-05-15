@@ -3,10 +3,20 @@
   "version": "1.0.0",
   "private": true,
   "scripts": {
-    "check": "node --check api/create-checkout-session.js && node --check api/confirm-checkout-session.js && node --check api/stripe-webhook.js && node --check api/validate-access-code.js && node --check api/request-door-open.js && node --check api/delete-community-item.js && node --check api/delete-user.js && node --check api/delete-payment.js && node --check api/get-user-email.js && node --check api/search-users.js && node --check api/guest-access.js && node --check api/sync-stripe-payments.js && node --check sw.js"
+    "check": "node --check api/create-checkout-session.js && node --check api/confirm-checkout-session.js && node --check api/stripe-webhook.js && node --check api/validate-access-code.js && node --check api/request-door-open.js && node --check api/delete-community-item.js && node --check api/delete-user.js && node --check api/delete-payment.js && node --check api/get-user-email.js && node --check api/search-users.js && node --check api/guest-access.js && node --check api/sync-stripe-payments.js && node --check sw.js",
+    "lint": "eslint api/*.js sw.js"
   },
   "dependencies": {
+    "@capacitor/android": "^8.3.4",
+    "@capacitor/cli": "^8.3.4",
+    "@capacitor/core": "^8.3.4",
+    "@capacitor/ios": "^8.3.4",
+    "@capacitor/push-notifications": "^8.0.4",
     "@supabase/supabase-js": "^2.49.4",
     "stripe": "^17.7.0"
+  },
+  "devDependencies": {
+    "@eslint/js": "^10.0.1",
+    "eslint": "^10.3.0"
   }
 }

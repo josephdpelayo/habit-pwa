@@ -1,0 +1,19 @@
+# Vercel
+.vercel
+
+# Dependencies
+node_modules/
+package-lock.json
+
+# macOS
+.DS_Store
+**/.DS_Store
+
+# Capacitor build output
+www/
+ios/
+android/
+
+# IDE / tooling
+AutoImport/
+habit-pwa/
