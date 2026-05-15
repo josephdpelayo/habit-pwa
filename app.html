@@ -2211,7 +2211,7 @@ function startReceptionWorker(){
     self.onmessage=function(e){
       if(e.data==='start'){
         if(t)clearInterval(t);
-        t=setInterval(()=>self.postMessage('tick'),15000);
+        t=setInterval(()=>self.postMessage('tick'),10000);
       }
       if(e.data==='stop'){if(t){clearInterval(t);t=null;}}
     };
@@ -2237,6 +2237,7 @@ function showReception(){
   if(receptionClockInt)clearInterval(receptionClockInt);
   if(receptionDataInt)clearInterval(receptionDataInt);
   receptionClockInt=setInterval(()=>{updateReceptionClock();renderReceptionList();},1000);
+  receptionDataInt=setInterval(()=>{if(!receptionLoading)loadReceptionSessions();},20000);
   startReceptionWorker();
 }
 
