@@ -1021,7 +1021,7 @@ body.reception-mode{background:#050505}
 // ── CONFIG & SUPABASE ───────────────────────────────────────
 const SUPABASE_URL='https://pmpjteuqjusbiduevbwq.supabase.co';
 const SUPABASE_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBtcGp0ZXVxanVzYmlkdWV2YndxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc2OTI1NjUsImV4cCI6MjA5MzI2ODU2NX0.XbMzZoo2yqtrD8znLnyo_1zDfrdJAvAPj1lqGOyXnLw';
-const APP_VERSION='20260505-20';
+const APP_VERSION='20260515-21';
 const PUBLIC_APP_URL='https://habittraininghub.app/app.html';
 const PUBLIC_API_ORIGIN='https://www.habittraininghub.app';
 const sb=supabase.createClient(SUPABASE_URL,SUPABASE_KEY,{auth:{autoRefreshToken:true,persistSession:true,detectSessionInUrl:true}});
@@ -2298,13 +2298,11 @@ function renderReceptionList(errorMsg){
   if(activeInstructor){
     if(titleEl)titleEl.textContent=activeInstructor.reception_title||'Sesiones activas';
     if(logoImg)logoImg.src=activeInstructor.reception_logo||'/icons/logo-original.png';
-    if(nameEl)nameEl.textContent=activeInstructor.name||'';
   } else {
-    const firstHost=active.find(s=>s.kind==='host');
     if(titleEl)titleEl.textContent='Sesiones activas';
     if(logoImg)logoImg.src='/icons/logo-original.png';
-    if(nameEl)nameEl.textContent=firstHost?firstHost.name:'';
   }
+  if(nameEl)nameEl.textContent='';
   // Debug: log guest_names
 
 
