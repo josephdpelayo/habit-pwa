@@ -1018,6 +1018,7 @@ body.reception-mode{background:#050505}
 
 <script>
 
+// ── CONFIG & SUPABASE ───────────────────────────────────────
 const SUPABASE_URL='https://pmpjteuqjusbiduevbwq.supabase.co';
 const SUPABASE_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBtcGp0ZXVxanVzYmlkdWV2YndxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc2OTI1NjUsImV4cCI6MjA5MzI2ODU2NX0.XbMzZoo2yqtrD8znLnyo_1zDfrdJAvAPj1lqGOyXnLw';
 const APP_VERSION='20260505-20';
@@ -1082,6 +1083,7 @@ async function sendPush(target,title,body,extra={}){
   }catch(e){console.warn('sendPush error:',e);}
 }
 
+// ── UI UTILITIES ────────────────────────────────────────────
 function showLoading(msg){
   let el=document.getElementById('loading-overlay');
   if(!el){
@@ -1096,6 +1098,7 @@ function showLoading(msg){
 }
 function hideLoading(){const el=document.getElementById('loading-overlay');if(el)el.style.display='none';}
 
+// ── APP INIT ─────────────────────────────────────────────────
 function profileToLocal(p){
   const allPlans=[...PLANS.individual,...PLANS.grupal];
   const plan=allPlans.find(x=>x.id===p.plan_id);
@@ -1571,6 +1574,7 @@ function sendNotif(title, body){
 
 // Track notification state to avoid repeating
 let _notifSent={};
+// ── DOOR ACCESS ──────────────────────────────────────────────
 let doorOpening=false;
 let doorCooldownUntil=0;
 const DOOR_OPEN_COOLDOWN_MS=5000;
@@ -1663,6 +1667,7 @@ async function requestDoorOpen(btn){
   }
 }
 
+// ── GUEST PASSES ─────────────────────────────────────────────
 function isGroupMember(){
   return !!(curUser&&curUser.planType==='grupal'&&curUser.plan&&hasActive(curUser));
 }
@@ -2172,6 +2177,7 @@ async function doLogout(){
   document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
   document.getElementById('s-auth').classList.add('active');
 }
+// ── SCREEN NAVIGATION ────────────────────────────────────────
 function showMain(){showMainSb();}
 function showAdmin(){
   stopReception();
@@ -2462,7 +2468,7 @@ function planLbl(u){
   const _unlim2=u.credits>=999||(p&&p.credits>=999);return(u.planType==='grupal'?'Grupal':'Individual')+' · '+(_unlim2?'Mensual':u.credits+' visita'+(u.credits===1?'':'s'));
 }
 
-// ── PERFIL ──
+// ── PROFILE ──────────────────────────────────────────────────
 async function renderPerfil(){
   const el=document.getElementById('v-perfil');
   if(!el||!curUser)return;
@@ -2577,7 +2583,7 @@ async function savePerfil(){
   renderPerfil();toast('Cambios guardados','ok');
 }
 
-// ── ACTIVE BOOKINGS in Inicio ──
+// ── INICIO ───────────────────────────────────────────────────
 async function renderActiveBookings(){
   const el=document.getElementById('active-bookings-wrap');
   if(!el||!curUser||!sbUser)return;
@@ -2708,6 +2714,7 @@ function renderMembershipStatus(){
 // ═══════════════════════════════════════════════
 // BOOKING — NEW SLOT MODEL
 // ═══════════════════════════════════════════════
+// ── BOOKING ──────────────────────────────────────────────────
 function changeDay(delta){
   const nd=new Date(curDate);nd.setDate(nd.getDate()+delta);
   const nds=dk(nd);
@@ -3070,6 +3077,7 @@ async function cancelBooking(bid){
   }
 }
 
+// ── PLANS & PAYMENTS ─────────────────────────────────────────
 function setPT(t,btn){selPT=t;selPlan=null;document.querySelectorAll('.ptype-btn').forEach(b=>b.classList.remove('active'));btn.classList.add('active');document.getElementById('pt-sub').textContent=t==='individual'?'Un espacio · entrenas solo':'Bloquea los 4 espacios · gym exclusivo';document.getElementById('stripe-sec').style.display='none';renderPlans();}
 function renderPlans(){
   const plans=PLANS[selPT].filter(canSeePlan),grid=document.getElementById('plan-grid');
@@ -3142,7 +3150,7 @@ async function doPay(){
   }
 }
 
-// ── HISTORIAL ──
+// ── HISTORIAL ────────────────────────────────────────────────
 async function renderHistorial(){
   const hbEl=document.getElementById('hb');
   const hpEl=document.getElementById('hp');
@@ -3202,7 +3210,7 @@ async function renderHistorial(){
   }
 }
 
-// ── RUTINAS ──
+// ── RUTINAS & BOARDS ─────────────────────────────────────────
 function toggleVideo(k){expandedVideos[k]=!expandedVideos[k];renderRutinas();}
 async function adminToggleInstructor(uid,current){
   const newVal=!current;
@@ -3352,7 +3360,7 @@ function renderScoresTop(){
   });
 }
 
-// ── COMUNIDAD ──
+// ── COMMUNITY FEED ───────────────────────────────────────────
 let postImageState=null;
 function previewPostImg(input){
   if(!input.files||!input.files[0])return;
@@ -3438,7 +3446,7 @@ function renderFeed(){
   });
 }
 
-// ── ADMIN ──
+// ── ADMIN: NOTIFICATIONS ────────────────────────────────────
 function renderAdmNotifs(){
   const el=document.getElementById('adm-notif-content');
   let html='';
@@ -3454,6 +3462,7 @@ function renderAdmNotifs(){
   el.innerHTML=html;
 }
 
+// ── ADMIN: SLOTS ─────────────────────────────────────────────
 function adminCapacityDots(taken,blocked){
   taken=Math.min(CAP,Math.max(0,Number(taken)||0));
   blocked=Math.min(CAP,Math.max(0,Number(blocked)||0));
@@ -3767,6 +3776,7 @@ function admPromote(ds,idx,i){
   toast(p.name+' confirmado/a','ok');renderAdmSlots();
 }
 
+// ── ADMIN: USERS ─────────────────────────────────────────────
 function renderUsers(){
   const q=(document.getElementById('user-search').value||'').toLowerCase();
   const list=document.getElementById('user-list');
@@ -4179,6 +4189,7 @@ posts=[
 // ═══════════════════════════════════════════════
 let chartRevenue=null,chartBookings=null,chartPlans=null;
 
+// ── ADMIN: DASHBOARD ─────────────────────────────────────────
 async function renderDashboard(){
   try{
     const today=mazToday();
@@ -4359,7 +4370,7 @@ function adminCancelUserBooking(uid,bid){
   renderUsers();
 }
 
-// ── REPORTS ──
+// ── ADMIN: REPORTS ───────────────────────────────────────────
 function initReport(){
   document.getElementById('rpt-date').value=mazToday();
   document.getElementById('rpt-output').innerHTML='';
@@ -4961,6 +4972,7 @@ async function adminGrantCourtesySb(uid,name){
   }
 }
 
+// ── ADMIN: PAYMENTS ──────────────────────────────────────────
 async function renderPaymentsSb(){
   const list=document.getElementById('payment-list');
   list.innerHTML='<div class="empty">Cargando...</div>';
@@ -5075,6 +5087,7 @@ async function adminSyncStripePaymentsSb(){
   }
 }
 
+// ── ADMIN: STATS ─────────────────────────────────────────────
 async function renderStatsSb(){
   try{
     const[{data:allU},{data:pays},{data:bks},{data:logs}]=await Promise.all([
@@ -5104,6 +5117,7 @@ async function renderStatsSb(){
 }
 
 // Save board to Supabase when admin creates/edits
+// ── SUPABASE DATA LAYER ──────────────────────────────────────
 async function saveBoardSb(board){
   try{
     await sb.from('boards').upsert({
