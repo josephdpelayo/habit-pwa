@@ -1021,7 +1021,7 @@ body.reception-mode{background:#050505}
 // ── CONFIG & SUPABASE ───────────────────────────────────────
 const SUPABASE_URL='https://pmpjteuqjusbiduevbwq.supabase.co';
 const SUPABASE_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBtcGp0ZXVxanVzYmlkdWV2YndxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc2OTI1NjUsImV4cCI6MjA5MzI2ODU2NX0.XbMzZoo2yqtrD8znLnyo_1zDfrdJAvAPj1lqGOyXnLw';
-const APP_VERSION='20260518-01';
+const APP_VERSION='20260518-02';
 const PUBLIC_APP_URL='https://habittraininghub.app/app.html';
 const PUBLIC_API_ORIGIN='https://www.habittraininghub.app';
 const sb=supabase.createClient(SUPABASE_URL,SUPABASE_KEY,{auth:{autoRefreshToken:true,persistSession:true,detectSessionInUrl:true}});
@@ -2692,9 +2692,17 @@ function renderMembershipStatus(){
   const el=document.getElementById('membership-status-wrap');
   if(!el||!curUser)return;
   if(!curUser.plan&&curUser.credits<=0){
-    el.innerHTML='<div style="background:rgba(156,163,175,.08);border:1px solid var(--border);border-radius:6px;padding:10px 14px;display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">'+
-      '<div style="font-size:12px;color:var(--gray)">Sin membresía activa</div>'+
-      '<button class="btn-sm bblue" onclick="sv(&apos;planes&apos;)">Ver planes</button></div>';
+    const indPlans=PLANS.individual.filter(canSeePlan);
+    const cards=indPlans.map(p=>'<div class="plan-card'+(p.feat?' feat':'')+'" onclick="sv(\'planes\');setTimeout(()=>choosePlan('+JSON.stringify(p)+'),120)" style="margin-bottom:8px">'+
+      '<div class="prow"><span class="pname">'+p.name+'</span><span class="pprice">'+MXN(p.price)+'</span></div>'+
+      '<div class="pdesc">'+p.perks[0]+(p.days?' · '+p.days+' días':'')+'</div>'+
+      '<div class="pperks">'+p.perks.map(k=>'<span class="perk">'+k+'</span>').join('')+'</div>'+
+      '</div>').join('');
+    el.innerHTML='<div style="margin-bottom:16px">'+
+      '<p class="slbl" style="margin-bottom:10px">Activa tu membresía</p>'+
+      cards+
+      '<button class="btn-ghost" style="width:100%;margin-top:4px;font-size:12px" onclick="sv(\'planes\')">Ver planes grupales →</button>'+
+      '</div>';
     return;
   }
   const all=[...PLANS.individual,...PLANS.grupal];
