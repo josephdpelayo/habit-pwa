@@ -1021,7 +1021,7 @@ body.reception-mode{background:#050505}
 // ── CONFIG & SUPABASE ───────────────────────────────────────
 const SUPABASE_URL='https://pmpjteuqjusbiduevbwq.supabase.co';
 const SUPABASE_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBtcGp0ZXVxanVzYmlkdWV2YndxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc2OTI1NjUsImV4cCI6MjA5MzI2ODU2NX0.XbMzZoo2yqtrD8znLnyo_1zDfrdJAvAPj1lqGOyXnLw';
-const APP_VERSION='20260515-21';
+const APP_VERSION='20260518-01';
 const PUBLIC_APP_URL='https://habittraininghub.app/app.html';
 const PUBLIC_API_ORIGIN='https://www.habittraininghub.app';
 const sb=supabase.createClient(SUPABASE_URL,SUPABASE_KEY,{auth:{autoRefreshToken:true,persistSession:true,detectSessionInUrl:true}});
@@ -2144,6 +2144,18 @@ async function doRegister(){
   pendingRegistration={name,email,phone,pass};
   showTerms();
 }
+async function ensureProfile(reg){
+  const{data:existing}=await sb.from('profiles').select('id').eq('id',sbUser.id).maybeSingle();
+  if(existing)return;
+  let code;
+  for(let attempts=0;attempts<20;attempts++){
+    code=String(Math.floor(1000+Math.random()*9000));
+    const{data:taken}=await sb.from('profiles').select('id').eq('access_code',code).maybeSingle();
+    if(!taken)break;
+  }
+  const{error}=await sb.from('profiles').insert({id:sbUser.id,name:reg.name,phone:reg.phone||null,role:'user',access_code:code});
+  if(error)throw error;
+}
 async function completeRegister(reg){
   showLoading('Creando cuenta...');
   try{
@@ -2153,7 +2165,8 @@ async function completeRegister(reg){
     const{data,error:e2}=await sb.auth.signInWithPassword({email:reg.email,password:reg.pass});
     if(e2)throw e2;
     sbUser=data.user;
-    await new Promise(r=>setTimeout(r,1500));
+    await new Promise(r=>setTimeout(r,800));
+    await ensureProfile(reg);
     await loadUserData();
     hideLoading();
     addN('Bienvenido/a a HABIT. Tu acceso se activa desde la app durante tu reserva.','success');
