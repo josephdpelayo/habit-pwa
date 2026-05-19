@@ -1,5 +1,5 @@
-const { stripe, supabase } = require('../lib/_fulfillment');
-const { buildShopOrder } = require('../lib/_shop');
+const { stripe, supabase } = require('./_fulfillment');
+const { buildShopOrder } = require('./_shop');
 
 const SHOP_ALLOWED_EMAILS = ['josephdpelayo@gmail.com'];
 const ALLOWED_STATUSES = new Set([

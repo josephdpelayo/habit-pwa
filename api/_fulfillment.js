@@ -121,4 +121,59 @@ async function activateMembership(session) {
   return { activated: true, recorded: !!recorded.recorded, duplicate: !!recorded.duplicate };
 }
 
-module.exports = { stripe, supabase, activateMembership, recordPaidStripeSession };
+async function fulfillShopOrder(session) {
+  const orderId = session.metadata && session.metadata.order_id;
+  if (!orderId) throw new Error('Missing shop order metadata');
+  if (session.payment_status && session.payment_status !== 'paid') throw new Error('Payment is not paid');
+
+  const { data: order, error: orderError } = await supabase
+    .from('shop_orders')
+    .select('id,customer_name,total,payment_status')
+    .eq('id', orderId)
+    .maybeSingle();
+  if (orderError) throw orderError;
+  if (!order) throw new Error('Shop order not found');
+  if (order.payment_status === 'paid') return { recorded: false, duplicate: true };
+
+  const paidAmount = typeof session.amount_total === 'number' ? session.amount_total / 100 : order.total;
+  const nextStatus = 'solicitado';
+  const { error: updateError } = await supabase
+    .from('shop_orders')
+    .update({
+      stripe_id: session.id,
+      payment_status: 'paid',
+      status: nextStatus,
+      total: paidAmount,
+      updated_at: new Date().toISOString(),
+    })
+    .eq('id', orderId);
+  if (updateError) throw updateError;
+
+  const { data: items, error: itemsError } = await supabase
+    .from('shop_order_items')
+    .select('product_id,quantity')
+    .eq('order_id', orderId);
+  if (itemsError) throw itemsError;
+  for (const item of items || []) {
+    const { data: product } = await supabase
+      .from('shop_products')
+      .select('stock,track_inventory')
+      .eq('id', item.product_id)
+      .maybeSingle();
+    if (product && product.track_inventory !== false) {
+      const nextStock = Math.max(0, Number(product.stock || 0) - Number(item.quantity || 0));
+      await supabase.from('shop_products').update({
+        stock: nextStock,
+        updated_at: new Date().toISOString(),
+      }).eq('id', item.product_id);
+    }
+  }
+
+  await supabase.from('admin_notifs').insert({
+    message: `Nueva compra tienda: ${order.customer_name || 'Cliente'} · $${paidAmount.toLocaleString('es-MX')} · Pedido solicitado`,
+  });
+
+  return { recorded: true, duplicate: false };
+}
+
+module.exports = { stripe, supabase, activateMembership, recordPaidStripeSession, fulfillShopOrder };
