@@ -821,7 +821,7 @@ body.reception-mode{background:#050505}
         <svg viewBox="0 0 24 24"><path d="M6 4h4v16H6zM14 4h4v16h-4zM4 9h2M10 9h4M18 9h2M4 15h2M10 15h4M18 15h2"/></svg>Rutinas</button>
       <button class="bnb" onclick="sv('comunidad')">
         <svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>Comunidad</button>
-      <button class="bnb" onclick="sv('shop')">
+      <button id="shop-nav-btn" class="bnb" onclick="sv('shop')" style="display:none">
         <span id="shop-nav-cart-badge" class="bnb-badge" data-shop-nav-count></span>
         <svg viewBox="0 0 24 24"><path d="M6 2l1.5 4h9L18 2"/><path d="M4 6h16l-1.5 14h-13z"/><path d="M9 11h6"/></svg>Tienda</button>
     </div>
@@ -1157,7 +1157,7 @@ body.reception-mode{background:#050505}
 // ── CONFIG & SUPABASE ───────────────────────────────────────
 const SUPABASE_URL='https://pmpjteuqjusbiduevbwq.supabase.co';
 const SUPABASE_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBtcGp0ZXVxanVzYmlkdWV2YndxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc2OTI1NjUsImV4cCI6MjA5MzI2ODU2NX0.XbMzZoo2yqtrD8znLnyo_1zDfrdJAvAPj1lqGOyXnLw';
-const APP_VERSION='20260519-07';
+const APP_VERSION='20260519-08';
 const PUBLIC_APP_URL='https://habittraininghub.app/app.html';
 const PUBLIC_API_ORIGIN='https://www.habittraininghub.app';
 const SHOP_ALLOWED_EMAILS=['josephdpelayo@gmail.com'];
@@ -1251,6 +1251,8 @@ async function loadUserData(){
   const{data:prof,error}=await sb.from('profiles').select('*').eq('id',sbUser.id).single();
   if(error)throw error;
   sbProfile=prof;curUser=profileToLocal(prof);
+  const shopBtn=document.getElementById('shop-nav-btn');
+  if(shopBtn)shopBtn.style.display=prof.role==='admin'?'':'none';
   const[bkRes,payRes]=await Promise.allSettled([
     sb.from('bookings').select('*').eq('user_id',sbUser.id).eq('status','active'),
     sb.from('payments').select('*').eq('user_id',sbUser.id).order('created_at',{ascending:false})
