@@ -1157,7 +1157,7 @@ body.reception-mode{background:#050505}
 // ── CONFIG & SUPABASE ───────────────────────────────────────
 const SUPABASE_URL='https://pmpjteuqjusbiduevbwq.supabase.co';
 const SUPABASE_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBtcGp0ZXVxanVzYmlkdWV2YndxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc2OTI1NjUsImV4cCI6MjA5MzI2ODU2NX0.XbMzZoo2yqtrD8znLnyo_1zDfrdJAvAPj1lqGOyXnLw';
-const APP_VERSION='20260519-03';
+const APP_VERSION='20260519-04';
 const PUBLIC_APP_URL='https://habittraininghub.app/app.html';
 const PUBLIC_API_ORIGIN='https://www.habittraininghub.app';
 const SHOP_ALLOWED_EMAILS=['josephdpelayo@gmail.com'];
@@ -3497,9 +3497,9 @@ function productArt(p){
   const main=imgs[0]||p.imageUrl;
   const pid=esc(p.id);
   const hero=main
-    ?'<div class="'+cls+'" style="cursor:zoom-in" onclick="openShopLightbox(\''+pid+'\',0)"><img src="'+esc(main)+'" alt="'+esc(p.name)+'" loading="lazy"></div>'
+    ?'<div class="'+cls+'" style="cursor:pointer" onclick="openShopLightbox(\''+pid+'\',0)"><img src="'+esc(main)+'" alt="'+esc(p.name)+'" loading="lazy" style="pointer-events:none"></div>'
     :'<div class="'+cls+'">'+esc(p.art||p.name.slice(0,2))+'</div>';
-  const thumbs=imgs.length>1?'<div class="shop-thumbs">'+imgs.slice(1,4).map((src,i)=>'<div class="shop-thumb" style="cursor:zoom-in" onclick="openShopLightbox(\''+pid+'\','+(i+1)+')"><img src="'+esc(src)+'" alt="" loading="lazy"></div>').join('')+'</div>':'';
+  const thumbs=imgs.length>1?'<div class="shop-thumbs">'+imgs.slice(1,4).map((src,i)=>'<div class="shop-thumb" style="cursor:pointer" onclick="openShopLightbox(\''+pid+'\','+(i+1)+')"><img src="'+esc(src)+'" alt="" loading="lazy" style="pointer-events:none"></div>').join('')+'</div>':'';
   return '<div class="shop-media">'+hero+thumbs+'</div>';
 }
 function shopCategoryOf(p){
