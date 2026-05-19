@@ -44,12 +44,14 @@ input,select,button,textarea{font-family:'Montserrat',sans-serif}
 .bnav{background:var(--dark);border-top:1px solid var(--border);display:flex;flex-shrink:0;overflow-x:auto;padding-bottom:env(safe-area-inset-bottom)}
 .bnav::-webkit-scrollbar{height:0}
 .bnav-inner{display:flex;min-width:max-content;width:100%}
-.bnb{flex:1;min-width:78px;padding:13px 0 10px;font-size:10px;font-weight:700;text-align:center;cursor:pointer;color:var(--gray);border:none;background:transparent;letter-spacing:.04em;text-transform:uppercase;display:flex;flex-direction:column;align-items:center;gap:5px}
+.bnb{position:relative;flex:1;min-width:78px;padding:13px 0 10px;font-size:10px;font-weight:700;text-align:center;cursor:pointer;color:var(--gray);border:none;background:transparent;letter-spacing:.04em;text-transform:uppercase;display:flex;flex-direction:column;align-items:center;gap:5px}
 .bnb.active{color:var(--bl)}
 .bnb svg{width:28px;height:28px;stroke:currentColor;fill:none;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
 .bnb.active svg{stroke:var(--bl)}
 .bnb.active .nav-logo-img{filter:none;opacity:1}
 .bnb .nav-logo-img{width:30px!important;height:30px!important;object-fit:contain;filter:grayscale(1);opacity:.45;transition:all .2s}
+.bnb-badge{position:absolute;top:7px;right:18px;min-width:18px;height:18px;border-radius:99px;background:var(--green);color:#03120d;font-size:10px;font-weight:900;display:none;align-items:center;justify-content:center;padding:0 5px;border:1px solid rgba(0,0,0,.3)}
+.bnb-badge.show{display:flex}
 .top-actions{display:flex;align-items:center;gap:6px;margin-left:auto}
 .top-action{width:34px;height:34px;border-radius:4px;border:1px solid var(--border);background:var(--card);color:var(--gray);display:flex;align-items:center;justify-content:center;cursor:pointer;position:relative}
 .top-action.primary{border-color:var(--blue);background:rgba(37,99,235,.12);color:var(--bl)}
@@ -377,6 +379,112 @@ input,select,button,textarea{font-family:'Montserrat',sans-serif}
 .new-post-box textarea{width:100%;background:var(--card2);border:1px solid var(--border);border-radius:4px;padding:10px 12px;font-size:14px;color:var(--white);outline:none;resize:none;line-height:1.5;min-height:70px}
 .new-post-box textarea::placeholder{color:#555}
 
+/* SHOP */
+.shop-hero{border:1px solid rgba(59,130,246,.2);background:linear-gradient(135deg,rgba(37,99,235,.1),rgba(16,185,129,.06));border-radius:10px;padding:12px 14px;margin-bottom:12px}
+.shop-hero-k{font-size:9px;font-weight:900;letter-spacing:.18em;text-transform:uppercase;color:var(--bl);margin-bottom:4px}
+.shop-hero h2{font-size:20px;line-height:1;font-weight:900;letter-spacing:.05em;text-transform:uppercase;margin-bottom:4px}
+.shop-hero p{font-size:11px;color:var(--gl);line-height:1.5}
+.shop-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px}
+.shop-bar{position:sticky;top:-1rem;z-index:8;display:flex;align-items:center;justify-content:space-between;gap:10px;background:rgba(8,8,8,.97);backdrop-filter:blur(16px);border:none;border-bottom:1px solid var(--border);border-radius:0;padding:12px 1rem 10px;margin-bottom:14px;margin-left:-1rem;margin-right:-1rem;margin-top:-1rem}
+.shop-bar-logo{display:flex;align-items:center;gap:8px}
+.shop-bar-logo img{width:26px;height:26px;object-fit:contain;flex-shrink:0}
+.shop-bar-title{font-size:13px;font-weight:900;letter-spacing:.12em;text-transform:uppercase;color:var(--white);line-height:1}
+.shop-bar-sub{font-size:9px;color:var(--gray);margin-top:2px;letter-spacing:.04em}
+.shop-cart-btn{position:relative;width:44px;height:44px;border-radius:10px;border:1px solid rgba(59,130,246,.45);background:rgba(37,99,235,.12);color:var(--bl);display:flex;align-items:center;justify-content:center;flex-shrink:0;padding:0}
+.shop-cart-btn svg{width:22px;height:22px;stroke:currentColor;fill:none;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round}
+.shop-cart-count{position:absolute;right:-5px;top:-5px;min-width:18px;height:18px;border-radius:999px;background:var(--green);color:#03120d;font-size:10px;font-weight:900;display:none;align-items:center;justify-content:center;padding:0 4px}
+.shop-cart-count.show{display:flex}
+.shop-section-title{font-size:11px;font-weight:900;letter-spacing:.12em;text-transform:uppercase;color:var(--gray);margin:4px 0 10px}
+.shop-category{margin-top:16px}
+.shop-category:first-of-type{margin-top:4px}
+.shop-category-head{display:flex;align-items:flex-end;justify-content:space-between;gap:12px;margin:0 0 10px}
+.shop-category-title{font-size:16px;font-weight:900;letter-spacing:.06em;text-transform:uppercase;color:var(--white)}
+.shop-category-count{font-size:10px;font-weight:900;letter-spacing:.1em;text-transform:uppercase;color:var(--gray)}
+.shop-page-head{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:14px}
+.shop-back{width:40px;height:40px;border-radius:10px;border:1px solid var(--border);background:var(--card);color:var(--white);font-size:22px;font-weight:900;display:flex;align-items:center;justify-content:center}
+.shop-page-title{font-size:22px;font-weight:900;letter-spacing:.04em;text-transform:uppercase;line-height:1}
+.shop-page-sub{font-size:12px;color:var(--gray);line-height:1.45;margin-top:4px}
+.shop-empty-action{margin-top:12px}
+.shop-card{display:flex;flex-direction:column;background:var(--card);border:1px solid var(--border);border-radius:12px;overflow:hidden;transition:box-shadow .18s ease,transform .18s ease}
+.shop-card:active{transform:scale(.98);box-shadow:0 8px 28px rgba(0,0,0,.45)}
+.shop-media{width:100%;display:flex;flex-direction:column}
+.shop-art{width:100%;aspect-ratio:1/1;background:#0a0a0a;border:none;border-bottom:1px solid rgba(255,255,255,.06);display:flex;align-items:center;justify-content:center;color:var(--bl);font-size:32px;font-weight:900;letter-spacing:.04em;text-transform:uppercase;overflow:hidden;border-radius:0}
+.shop-art img{width:100%;height:100%;object-fit:cover;display:block}
+.shop-art.shirt{font-size:11px;color:var(--white);line-height:1.25;text-align:center}
+.shop-thumbs{display:grid;grid-template-columns:repeat(3,1fr);gap:2px;margin-top:2px;padding:0 8px 6px}
+.shop-thumb{height:32px;border-radius:4px;border:1px solid var(--border);background:#080808;overflow:hidden}
+.shop-thumb img{width:100%;height:100%;object-fit:cover;display:block}
+.shop-info{flex:1;display:flex;flex-direction:column;gap:6px;padding:10px}
+.shop-name{font-size:12px;font-weight:850;color:var(--white);line-height:1.3;text-transform:uppercase;letter-spacing:.04em}
+.shop-desc{font-size:10px;color:var(--gray);line-height:1.4}
+.shop-price{font-size:18px;font-weight:900;color:var(--green);letter-spacing:.02em}
+.shop-variant-box{border:1px solid rgba(255,255,255,.08);background:rgba(255,255,255,.025);border-radius:6px;padding:8px;margin-top:2px}
+.shop-variant-label{font-size:9px;font-weight:900;letter-spacing:.12em;text-transform:uppercase;color:var(--gray);margin-bottom:6px}
+.shop-size-grid{display:flex;flex-wrap:wrap;gap:4px}
+.shop-size-btn{min-width:32px;height:28px;border-radius:4px;border:1px solid var(--border);background:var(--card2);color:var(--gl);font-size:10px;font-weight:900}
+.shop-size-btn.active{border-color:var(--blue);background:rgba(37,99,235,.18);color:var(--bl)}
+.shop-size-btn:disabled{opacity:.35}
+.shop-actions{display:flex;flex-direction:column;gap:6px;margin-top:auto;padding-top:6px}
+.shop-actions-row{display:grid;grid-template-columns:78px 1fr;gap:6px;align-items:center}
+.qty-step{height:36px;display:grid;grid-template-columns:28px 1fr 28px;border:1px solid var(--border);border-radius:6px;overflow:hidden;background:var(--card2)}
+.qty-step button{border:none;background:transparent;color:var(--white);font-size:18px;font-weight:800}
+.qty-step span{display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:800;color:var(--gl)}
+.shop-add{width:100%;height:36px;border:none;background:var(--green);color:#03120d;border-radius:6px;font-size:11px;font-weight:900;letter-spacing:.06em;text-transform:uppercase;transition:opacity .16s ease,background .16s ease,color .16s ease}
+.shop-add:active{opacity:.8}
+.shop-add.added{background:rgba(16,185,129,.22);border:1px solid var(--green);color:var(--green)}
+.shop-add:disabled{background:var(--card2);color:var(--gray);border:1px solid var(--border)}
+.shop-cart{background:var(--dark);border:1px solid rgba(255,255,255,.08);border-radius:12px;padding:14px;margin-top:10px}
+.shop-cart-empty{background:var(--card);border:1px dashed var(--border);border-radius:10px;padding:24px 14px;text-align:center;color:var(--gray);font-size:13px;line-height:1.5;margin-bottom:12px}
+.shop-checkout-actions{position:sticky;bottom:0;background:linear-gradient(180deg,rgba(17,17,17,.86),var(--dark));border:1px solid var(--border);border-radius:12px;padding:12px;margin-top:12px}
+.cart-row{display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid rgba(255,255,255,.05)}
+.cart-row:last-child{border-bottom:none}
+.cart-thumb{width:44px;height:44px;border-radius:8px;background:#111;border:1px solid rgba(255,255,255,.07);overflow:hidden;flex-shrink:0;display:flex;align-items:center;justify-content:center;color:var(--bl);font-size:12px;font-weight:900}
+.cart-thumb img{width:100%;height:100%;object-fit:cover;display:block}
+.cart-item{flex:1;min-width:0}
+.cart-name{font-size:13px;font-weight:800;color:var(--white);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.cart-meta{font-size:11px;color:var(--gray);margin-top:2px}
+.cart-total{display:flex;justify-content:space-between;gap:12px;font-size:14px;font-weight:800;margin-top:8px}
+.cart-remove{width:30px;height:30px;border-radius:6px;border:1px solid rgba(239,68,68,.25);background:rgba(239,68,68,.06);color:rgba(239,68,68,.7);font-size:14px;display:flex;align-items:center;justify-content:center;flex-shrink:0;line-height:1}
+.shop-lightbox{position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,.93);display:flex;align-items:center;justify-content:center;padding:16px;touch-action:none}
+.shop-lightbox-img{max-width:100%;max-height:82vh;border-radius:6px;object-fit:contain;display:block;user-select:none}
+.shop-lightbox-close{position:absolute;top:14px;right:14px;width:38px;height:38px;border-radius:50%;background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.15);color:#fff;font-size:20px;display:flex;align-items:center;justify-content:center}
+.shop-lightbox-nav{position:absolute;top:50%;transform:translateY(-50%);width:42px;height:42px;border-radius:50%;background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.15);color:#fff;font-size:26px;font-weight:900;display:flex;align-items:center;justify-content:center}
+.shop-lightbox-prev{left:10px}.shop-lightbox-next{right:10px}
+.shop-lightbox-dots{position:absolute;bottom:16px;left:50%;transform:translateX(-50%);display:flex;gap:7px}
+.shop-lightbox-dot{width:7px;height:7px;border-radius:50%;background:rgba(255,255,255,.28);transition:background .15s;cursor:pointer}
+.shop-lightbox-dot.active{background:#fff}
+.delivery-toggle{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:10px 0 12px}
+.delivery-toggle button{border:1px solid var(--border);background:var(--card2);color:var(--gray);border-radius:4px;padding:11px 8px;font-size:11px;font-weight:900;letter-spacing:.06em;text-transform:uppercase}
+.delivery-toggle button.active{border-color:var(--blue);background:rgba(37,99,235,.16);color:var(--bl)}
+.shop-form{background:var(--card);border:1px solid var(--border);border-radius:6px;padding:12px;margin-top:12px}
+.shop-form-grid{display:grid;gap:10px}
+.checkout-block{background:rgba(255,255,255,.025);border:1px solid var(--border);border-radius:6px;padding:12px}
+.checkout-head{display:flex;align-items:flex-start;justify-content:space-between;gap:10px;margin-bottom:10px}
+.checkout-step{width:24px;height:24px;border-radius:50%;background:rgba(37,99,235,.18);border:1px solid rgba(59,130,246,.55);color:var(--bl);font-size:12px;font-weight:900;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.checkout-title{font-size:13px;font-weight:900;letter-spacing:.06em;text-transform:uppercase;color:var(--white)}
+.checkout-copy{font-size:11px;color:var(--gray);line-height:1.45;margin-top:2px}
+.delivery-options{display:grid;grid-template-columns:1fr;gap:8px}
+.delivery-card{width:100%;border:1px solid var(--border);background:var(--card2);border-radius:6px;padding:12px;text-align:left;color:var(--white);display:grid;grid-template-columns:24px 1fr auto;gap:10px;align-items:start}
+.delivery-card.active{border-color:var(--blue);background:rgba(37,99,235,.13)}
+.delivery-radio{width:20px;height:20px;border-radius:50%;border:2px solid var(--border);display:flex;align-items:center;justify-content:center;margin-top:1px}
+.delivery-card.active .delivery-radio{border-color:var(--bl)}
+.delivery-card.active .delivery-radio:after{content:'';width:8px;height:8px;border-radius:50%;background:var(--bl)}
+.delivery-main{font-size:13px;font-weight:900;letter-spacing:.04em;text-transform:uppercase}
+.delivery-sub{font-size:11px;color:var(--gray);line-height:1.45;margin-top:3px}
+.delivery-price{font-size:12px;font-weight:900;color:var(--green);white-space:nowrap}
+.checkout-fields{display:grid;gap:10px}
+.field-row{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.address-box{border:1px solid rgba(59,130,246,.26);background:rgba(37,99,235,.07);border-radius:6px;padding:12px;margin-top:10px}
+.address-box-title{font-size:12px;font-weight:900;color:var(--white);letter-spacing:.06em;text-transform:uppercase;margin-bottom:10px}
+.checkout-note{font-size:11px;color:var(--gray);line-height:1.5}
+.field input:disabled{opacity:.78;color:var(--gl);background:#181818}
+.order-status{display:inline-flex;align-items:center;border:1px solid var(--border);border-radius:999px;padding:3px 8px;font-size:10px;font-weight:900;letter-spacing:.06em;text-transform:uppercase;color:var(--gray);white-space:nowrap}
+.order-status.solicitado{border-color:rgba(59,130,246,.5);color:var(--bl);background:rgba(37,99,235,.12)}
+.order-status.listo_para_entrega,.order-status.listo_para_enviar{border-color:rgba(245,158,11,.5);color:var(--amber);background:rgba(245,158,11,.1)}
+.order-status.enviado{border-color:rgba(139,92,246,.5);color:var(--purple);background:rgba(139,92,246,.1)}
+.order-status.recibido{border-color:rgba(16,185,129,.5);color:var(--green);background:rgba(16,185,129,.1)}
+.order-status.cancelado{border-color:rgba(239,68,68,.5);color:var(--red);background:rgba(239,68,68,.1)}
+
 /* ADMIN */
 .adm-nav{display:flex;border-bottom:1px solid var(--border);flex-shrink:0;overflow-x:auto;-webkit-overflow-scrolling:touch}
 .adm-nav::-webkit-scrollbar{height:0}
@@ -541,6 +649,17 @@ body.reception-mode{background:#050505}
   </div>
 </div>
 
+<!-- PUBLIC SHOP -->
+<div id="s-public-shop" class="screen">
+  <div class="hdr">
+    <div class="logo-wrap"><img src="/icons/logo-original.png" style="width:30px;height:30px;object-fit:contain"><div><span class="ltxt">HABIT</span><span class="lsub">SHOP</span></div></div>
+    <button class="logout-btn" onclick="showAuthFromShop()">Entrar</button>
+  </div>
+  <div class="scroll-area">
+    <div id="public-shop-content"></div>
+  </div>
+</div>
+
 <!-- MAIN -->
 <div id="s-main" class="screen">
   <div class="hdr" id="main-hdr-bar">
@@ -673,6 +792,13 @@ body.reception-mode{background:#050505}
     </div>
   </div>
 
+  <!-- TIENDA -->
+  <div id="v-shop" class="view">
+    <div class="scroll-area">
+      <div id="shop-content"></div>
+    </div>
+  </div>
+
   <!-- HISTORIAL -->
   <div id="v-historial" class="view">
     <div class="scroll-area">
@@ -695,6 +821,9 @@ body.reception-mode{background:#050505}
         <svg viewBox="0 0 24 24"><path d="M6 4h4v16H6zM14 4h4v16h-4zM4 9h2M10 9h4M18 9h2M4 15h2M10 15h4M18 15h2"/></svg>Rutinas</button>
       <button class="bnb" onclick="sv('comunidad')">
         <svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>Comunidad</button>
+      <button class="bnb" onclick="sv('shop')">
+        <span id="shop-nav-cart-badge" class="bnb-badge" data-shop-nav-count></span>
+        <svg viewBox="0 0 24 24"><path d="M6 2l1.5 4h9L18 2"/><path d="M4 6h16l-1.5 14h-13z"/><path d="M9 11h6"/></svg>Tienda</button>
     </div>
   </div>
 </div>
@@ -772,6 +901,7 @@ body.reception-mode{background:#050505}
     <button class="adm-tab" onclick="admTab('users')">Socios</button>
     <button class="adm-tab" onclick="admTab('boards')">Pizarrones</button>
     <button class="adm-tab" onclick="admTab('payments')">Pagos</button>
+    <button class="adm-tab" onclick="admTab('shop')">Tienda</button>
     <button class="adm-tab" onclick="admTab('comunidad')">Comunidad</button>
     <button class="adm-tab" onclick="admTab('notifs')">Alertas</button>
   </div>
@@ -851,6 +981,9 @@ body.reception-mode{background:#050505}
 
     <!-- PAGOS -->
     <div id="a-payments" class="adm-section"><div id="payment-list"></div></div>
+
+    <!-- TIENDA -->
+    <div id="a-shop" class="adm-section"><div id="admin-shop-list"></div></div>
 
     <!-- COMUNIDAD -->
     <div id="a-comunidad" class="adm-section"><div id="adm-feed-content"></div></div>
@@ -1024,9 +1157,10 @@ body.reception-mode{background:#050505}
 // ── CONFIG & SUPABASE ───────────────────────────────────────
 const SUPABASE_URL='https://pmpjteuqjusbiduevbwq.supabase.co';
 const SUPABASE_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBtcGp0ZXVxanVzYmlkdWV2YndxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc2OTI1NjUsImV4cCI6MjA5MzI2ODU2NX0.XbMzZoo2yqtrD8znLnyo_1zDfrdJAvAPj1lqGOyXnLw';
-const APP_VERSION='20260518-09';
+const APP_VERSION='20260519-03';
 const PUBLIC_APP_URL='https://habittraininghub.app/app.html';
 const PUBLIC_API_ORIGIN='https://www.habittraininghub.app';
+const SHOP_ALLOWED_EMAILS=['josephdpelayo@gmail.com'];
 const sb=supabase.createClient(SUPABASE_URL,SUPABASE_KEY,{auth:{autoRefreshToken:true,persistSession:true,detectSessionInUrl:true}});
 let pendingProfilePhoto=null;
 let sbUser=null,sbProfile=null;
@@ -1137,7 +1271,7 @@ function showMainSb(){
   document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
   const main=document.getElementById('s-main');
   if(main)main.classList.add('active');
-  ['inicio','book','planes','rutinas','comunidad','historial','perfil'].forEach(n=>{
+  ['inicio','book','planes','rutinas','comunidad','shop','historial','perfil'].forEach(n=>{
     const el=document.getElementById('v-'+n);
     if(el)el.classList.toggle('active',n==='inicio');
   });
@@ -1148,6 +1282,7 @@ function showMainSb(){
   renderAccess();
   renderGuestGroup().catch(console.error);
   renderActiveBookings().catch(console.error);
+  updateShopCartBadge();
   startUserNotifPolling();
   startTimer();
   
@@ -1180,6 +1315,11 @@ async function initApp(){
       showLoading('Cargando tu cuenta...');
       await loadUserData();
       hideLoading();
+      if(isPublicShopUrl()){
+        if(canAccessShop()){showPublicShop();handleShopReturn();}
+        else showShopAccessGate(true);
+        return;
+      }
       if(sbProfile.role==='admin'){showAdmin();}
       else if(sbProfile.role==='reception')showReception();
       else{
@@ -1188,9 +1328,11 @@ async function initApp(){
         
       }
     }
+    if(isPublicShopUrl())showShopAccessGate(false);
   }catch(e){
     hideLoading();
     console.log('No session:',e.message);
+    if(isPublicShopUrl())showShopAccessGate(false);
   }
 }
 // ═══════════════════════════════════════════════
@@ -1221,6 +1363,27 @@ const PLANS={
     {id:'gm',name:'Mensualidad grupal',price:2800,credits:999,days:30,type:'grupal',perks:['4 espacios','Ilimitado','30 días']},
   ]
 };
+
+const DEFAULT_SHOP_PRODUCTS=[
+  {id:'whey-1kg',name:'100% Whey Protein',price:650,desc:'Bolsa 1 kg · proteina para recuperacion diaria',art:'W',stock:20,trackInventory:true,active:true,category:'suplementos',imageUrl:'fotosproductos/proteina1.jpeg',images:['fotosproductos/proteina1.jpeg','fotosproductos/proteina2.jpeg','fotosproductos/proteina3.jpeg']},
+  {id:'protein-sachet-33g',name:'Sobre personal proteina',price:45,desc:'Una toma de 33 g para salir del entrenamiento listo',art:'33',stock:40,trackInventory:true,active:true,category:'suplementos',imageUrl:'fotosproductos/proteina2.jpeg',images:['fotosproductos/proteina2.jpeg','fotosproductos/proteina1.jpeg','fotosproductos/proteina3.jpeg']},
+  {id:'creatine-monohydrate',name:'Creatina monohidratada',price:420,desc:'Monohidratada · fuerza, potencia y constancia',art:'Cr',stock:20,trackInventory:true,active:true,category:'suplementos',imageUrl:'fotosproductos/creatina1.jpeg',images:['fotosproductos/creatina1.jpeg','fotosproductos/creatina2.jpeg','fotosproductos/creatina3.jpeg','fotosproductos/creatina%204.jpeg']},
+  {id:'habit-shirt-regular-men-xs',name:'Playera HABIT regular fit hombre XS',price:350,desc:'Regular fit para hombre · talla XS',art:'HABIT',stock:8,trackInventory:true,active:true,category:'merch',imageUrl:'fotosproductos/playera%20habit/regularh1.jpg',images:['fotosproductos/playera%20habit/regularh1.jpg','fotosproductos/playera%20habit/regularh2.jpg','fotosproductos/playera%20habit/regularh3.jpg']},
+  {id:'habit-shirt-regular-men-s',name:'Playera HABIT regular fit hombre S',price:350,desc:'Regular fit para hombre · talla S',art:'HABIT',stock:8,trackInventory:true,active:true,category:'merch',imageUrl:'fotosproductos/playera%20habit/regularh1.jpg',images:['fotosproductos/playera%20habit/regularh1.jpg','fotosproductos/playera%20habit/regularh2.jpg','fotosproductos/playera%20habit/regularh3.jpg']},
+  {id:'habit-shirt-regular-men-m',name:'Playera HABIT regular fit hombre M',price:350,desc:'Regular fit para hombre · talla M',art:'HABIT',stock:8,trackInventory:true,active:true,category:'merch',imageUrl:'fotosproductos/playera%20habit/regularh1.jpg',images:['fotosproductos/playera%20habit/regularh1.jpg','fotosproductos/playera%20habit/regularh2.jpg','fotosproductos/playera%20habit/regularh3.jpg']},
+  {id:'habit-shirt-regular-men-l',name:'Playera HABIT regular fit hombre L',price:350,desc:'Regular fit para hombre · talla L',art:'HABIT',stock:8,trackInventory:true,active:true,category:'merch',imageUrl:'fotosproductos/playera%20habit/regularh1.jpg',images:['fotosproductos/playera%20habit/regularh1.jpg','fotosproductos/playera%20habit/regularh2.jpg','fotosproductos/playera%20habit/regularh3.jpg']},
+  {id:'habit-shirt-regular-men-xl',name:'Playera HABIT regular fit hombre XL',price:350,desc:'Regular fit para hombre · talla XL',art:'HABIT',stock:8,trackInventory:true,active:true,category:'merch',imageUrl:'fotosproductos/playera%20habit/regularh1.jpg',images:['fotosproductos/playera%20habit/regularh1.jpg','fotosproductos/playera%20habit/regularh2.jpg','fotosproductos/playera%20habit/regularh3.jpg']},
+  {id:'habit-shirt-regular-women-s',name:'Playera HABIT regular fit mujer S',price:350,desc:'Regular fit para mujer · talla S',art:'HABIT',stock:8,trackInventory:true,active:true,category:'merch',imageUrl:'fotosproductos/playera%20habit/regularm1.jpg',images:['fotosproductos/playera%20habit/regularm1.jpg','fotosproductos/playera%20habit/regularm2.jpg']},
+  {id:'habit-shirt-regular-women-m',name:'Playera HABIT regular fit mujer M',price:350,desc:'Regular fit para mujer · talla M',art:'HABIT',stock:8,trackInventory:true,active:true,category:'merch',imageUrl:'fotosproductos/playera%20habit/regularm1.jpg',images:['fotosproductos/playera%20habit/regularm1.jpg','fotosproductos/playera%20habit/regularm2.jpg']},
+  {id:'habit-shirt-regular-women-l',name:'Playera HABIT regular fit mujer L',price:350,desc:'Regular fit para mujer · talla L',art:'HABIT',stock:8,trackInventory:true,active:true,category:'merch',imageUrl:'fotosproductos/playera%20habit/regularm1.jpg',images:['fotosproductos/playera%20habit/regularm1.jpg','fotosproductos/playera%20habit/regularm2.jpg']},
+  {id:'habit-shirt-oversize-unisex-xs',name:'Playera HABIT oversize unisex XS',price:390,desc:'Oversize unisex · talla XS',art:'HABIT',stock:8,trackInventory:true,active:true,category:'merch',imageUrl:'fotosproductos/playera%20habit/oversizeh1.jpg',images:['fotosproductos/playera%20habit/oversizeh1.jpg','fotosproductos/playera%20habit/oversizeh2.jpg','fotosproductos/playera%20habit/oversizeh3.jpg','fotosproductos/playera%20habit/oversizem1.jpg','fotosproductos/playera%20habit/oversizem2.jpg']},
+  {id:'habit-shirt-oversize-unisex-s',name:'Playera HABIT oversize unisex S',price:390,desc:'Oversize unisex · talla S',art:'HABIT',stock:8,trackInventory:true,active:true,category:'merch',imageUrl:'fotosproductos/playera%20habit/oversizeh1.jpg',images:['fotosproductos/playera%20habit/oversizeh1.jpg','fotosproductos/playera%20habit/oversizeh2.jpg','fotosproductos/playera%20habit/oversizeh3.jpg','fotosproductos/playera%20habit/oversizem1.jpg','fotosproductos/playera%20habit/oversizem2.jpg']},
+  {id:'habit-shirt-oversize-unisex-m',name:'Playera HABIT oversize unisex M',price:390,desc:'Oversize unisex · talla M',art:'HABIT',stock:8,trackInventory:true,active:true,category:'merch',imageUrl:'fotosproductos/playera%20habit/oversizeh1.jpg',images:['fotosproductos/playera%20habit/oversizeh1.jpg','fotosproductos/playera%20habit/oversizeh2.jpg','fotosproductos/playera%20habit/oversizeh3.jpg','fotosproductos/playera%20habit/oversizem1.jpg','fotosproductos/playera%20habit/oversizem2.jpg']},
+  {id:'habit-shirt-oversize-unisex-l',name:'Playera HABIT oversize unisex L',price:390,desc:'Oversize unisex · talla L',art:'HABIT',stock:8,trackInventory:true,active:true,category:'merch',imageUrl:'fotosproductos/playera%20habit/oversizeh1.jpg',images:['fotosproductos/playera%20habit/oversizeh1.jpg','fotosproductos/playera%20habit/oversizeh2.jpg','fotosproductos/playera%20habit/oversizeh3.jpg','fotosproductos/playera%20habit/oversizem1.jpg','fotosproductos/playera%20habit/oversizem2.jpg']},
+  {id:'habit-shirt-oversize-unisex-xl',name:'Playera HABIT oversize unisex XL',price:390,desc:'Oversize unisex · talla XL',art:'HABIT',stock:8,trackInventory:true,active:true,category:'merch',imageUrl:'fotosproductos/playera%20habit/oversizeh1.jpg',images:['fotosproductos/playera%20habit/oversizeh1.jpg','fotosproductos/playera%20habit/oversizeh2.jpg','fotosproductos/playera%20habit/oversizeh3.jpg','fotosproductos/playera%20habit/oversizem1.jpg','fotosproductos/playera%20habit/oversizem2.jpg']}
+];
+const SHOP_SHIPPING_FEE=69;
+const SHOP_FREE_SHIPPING_MIN=1000;
 
 function canSeePlan(p){
   if(!p.testEmail)return true;
@@ -1426,6 +1589,8 @@ let curUser=null, curDate=dateObjFromDS(mazToday()), selStartIdx=null, selShort=
 let accInt=null, userNotifInt=null, receptionClockInt=null, receptionDataInt=null, userNotifBootstrapped=false, userNotifSeen=new Set(), notifs=[], expandedVideos={}, logScoreCtx=null, expandedUsers=new Set();
 let receptionSessions=[], receptionLastSync=null, receptionLoading=false;
 let guestFavorites=[], guestSelected=new Set(), guestSavedActive=new Set(), guestOriginalFavoriteIds=new Set(), guestDeletedIds=new Set(), guestSearchResults=[], guestActiveBookingId=null, guestSearchTimer=null, guestDirty=false, guestCollapsed=true, guestQuery='';
+let shopProducts=[...DEFAULT_SHOP_PRODUCTS], shopCart=loadShopCart(), shopDraftQty={}, shopSelectedVariants={}, shopDelivery='pickup', shopView='catalog', adminProductFormOpen=false, adminEditingProductId=null;
+let shopLightboxImages=[], shopLightboxIdx=0;
 
 // ── SLOT DATA ACCESS ──
 function getDaySlots(ds){
@@ -2023,6 +2188,11 @@ async function doLogin(){
     showLoading('Cargando tu cuenta...');
     await loadUserData();
     hideLoading();
+    if(isPublicShopUrl()){
+      if(canAccessShop()){showPublicShop();handleShopReturn();}
+      else showShopAccessGate(true);
+      return;
+    }
     if(sbProfile.role==='admin')showAdmin();
     else if(sbProfile.role==='reception')showReception();
     else showMainSb();
@@ -2425,7 +2595,7 @@ async function loadReceptionSessions(){
 }
 
 // ── NAVIGATION ──
-const ALL_VIEWS=['inicio','book','planes','rutinas','comunidad','historial','perfil'];
+const ALL_VIEWS=['inicio','book','planes','rutinas','comunidad','shop','historial','perfil'];
 const MEMBER_LOCKED_VIEWS=['book','rutinas','comunidad'];
 function canUseMemberViews(){
   return !!(curUser&&hasActive(curUser));
@@ -2440,11 +2610,16 @@ function sv(v){
     toast('Activa una membresia vigente para usar esta seccion','warn');
     v='inicio';
   }
+  if(v==='shop'&&!canAccessShop()){
+    toast('Tienda disponible solo para josephdpelayo@gmail.com','warn');
+    v='inicio';
+  }
   document.querySelectorAll('.bnb').forEach((b,i)=>{
-    const name=['inicio','book','rutinas','comunidad'][i];
+    const name=['inicio','book','rutinas','comunidad','shop'][i];
     b.classList.toggle('active',name===v);
     b.classList.toggle('locked',MEMBER_LOCKED_VIEWS.includes(name)&&!canUseMemberViews());
   });
+  updateShopCartBadge();
   updateTopActions(v);
   ALL_VIEWS.forEach(n=>{const el=document.getElementById('v-'+n);if(el)el.classList.toggle('active',n===v);});
   if(v==='inicio'){renderMembershipStatus();renderAccess().catch(console.error);renderGuestGroup().catch(console.error);renderActiveBookings().catch(console.error);renderUserNotifsSb().catch(console.error);}
@@ -2452,6 +2627,7 @@ function sv(v){
   if(v==='planes')renderPlans();
   if(v==='rutinas'){renderRutinas().catch(console.error);}
   if(v==='comunidad'){renderFeedSb().catch(console.error);}
+  if(v==='shop'){renderShop('shop-content',false);loadShopProducts().then(()=>renderShop('shop-content',false)).catch(()=>{});handleShopReturn();}
   if(v==='historial'){renderHistorial().catch(console.error);}
   if(v==='perfil'){renderPerfil().catch(console.error);}
 }
@@ -2460,7 +2636,7 @@ function admTab(t){
   if(t!=='users'){expandedUsers=new Set();}
   if(t!=='boards'){expandedBoards=new Set();editingBoards=new Set();addingExBoards=new Set();assigningBoards=new Set();}
   document.querySelectorAll('.adm-tab').forEach((b,i)=>b.classList.toggle('active',
-    ['dash','slots','users','boards','payments','comunidad','notifs'][i]===t));
+    ['dash','slots','users','boards','payments','shop','comunidad','notifs'][i]===t));
   document.querySelectorAll('.adm-section').forEach(el=>el.classList.remove('active'));
   const el=document.getElementById('a-'+t);if(el)el.classList.add('active');
   if(t==='dash')renderDashboard();
@@ -2468,6 +2644,7 @@ function admTab(t){
   if(t==='users')renderUsersSb();
   if(t==='boards')renderBoardsAdmin();
   if(t==='payments')renderPaymentsSb();
+  if(t==='shop')renderAdminShopOrders();
   if(t==='comunidad')renderAdminFeed();
   if(t==='notifs')renderAdmNotifsSb();
 }
@@ -3170,6 +3347,616 @@ async function doPay(){
     toast('Error: '+e.message,'err');
     console.error(e);
   }
+}
+
+// ── SHOP ─────────────────────────────────────────────────────
+function isPublicShopUrl(){
+  const params=new URLSearchParams(location.search);
+  return params.get('shop')==='1'||location.hash==='#shop';
+}
+function currentEmail(){
+  return String((sbUser&&sbUser.email)||(curUser&&curUser.email)||'').trim().toLowerCase();
+}
+function canAccessShop(){
+  return SHOP_ALLOWED_EMAILS.includes(currentEmail());
+}
+function showShopAccessGate(isLoggedIn){
+  stopReception();
+  document.body.classList.remove('reception-mode');
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  const el=document.getElementById('s-public-shop');
+  if(el)el.classList.add('active');
+  const box=document.getElementById('public-shop-content');
+  if(!box)return;
+  box.innerHTML='<div class="shop-bar"><div class="shop-bar-logo"><img src="/icons/logo-original.png" alt="HABIT"><div><div class="shop-bar-title">HABIT shop</div><div class="shop-bar-sub">Acceso privado</div></div></div></div>'
+    +'<div class="shop-hero"><div class="shop-hero-k">Tienda privada</div><h2>Acceso limitado</h2><p>Esta prueba de tienda esta disponible solo para josephdpelayo@gmail.com.</p></div>'
+    +(isLoggedIn?'<button class="btn-ghost" onclick="doLogout()">Salir</button>':'<button class="btn" onclick="showAuthFromShop()">Entrar con cuenta autorizada</button>');
+}
+function showPublicShop(){
+  stopReception();
+  document.body.classList.remove('reception-mode');
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  const el=document.getElementById('s-public-shop');
+  if(el)el.classList.add('active');
+  renderShop('public-shop-content',true);
+  loadShopProducts().then(()=>renderShop('public-shop-content',true)).catch(()=>{});
+}
+function showAuthFromShop(){
+  history.replaceState({},'',location.pathname);
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  const authEl=document.getElementById('s-auth');
+  if(authEl)authEl.classList.add('active');
+}
+function loadShopCart(){
+  try{return JSON.parse(sessionStorage.getItem('habit_shop_cart')||'{}')||{};}catch(e){return{};}
+}
+function saveShopCart(){
+  sessionStorage.setItem('habit_shop_cart',JSON.stringify(shopCart||{}));
+}
+function syncShopCartFromStorage(){
+  const stored=loadShopCart();
+  if(stored&&typeof stored==='object')shopCart=stored;
+  return shopCart;
+}
+function shopQty(id){return Math.max(0,parseInt(shopCart[id],10)||0);}
+function shopDraft(id){return Math.max(0,parseInt(shopDraftQty[id],10)||0);}
+function shopItems(){
+  return shopProducts.map(p=>({...p,qty:shopQty(p.id)})).filter(p=>p.qty>0);
+}
+function shopCartCount(){
+  return Object.values(shopCart||{}).reduce((sum,qty)=>sum+(parseInt(qty,10)||0),0);
+}
+function shopSubtotal(){
+  return shopItems().reduce((sum,p)=>sum+p.price*p.qty,0);
+}
+function shopShipping(){
+  const subtotal=shopSubtotal();
+  return shopDelivery==='shipping'&&subtotal>0&&subtotal<SHOP_FREE_SHIPPING_MIN?SHOP_SHIPPING_FEE:0;
+}
+function currentShopContext(targetId,publicMode){
+  const publicActive=document.getElementById('s-public-shop')?.classList.contains('active');
+  const appShopActive=document.getElementById('v-shop')?.classList.contains('active');
+  if(publicActive)return{targetId:'public-shop-content',publicMode:true};
+  if(appShopActive)return{targetId:'shop-content',publicMode:false};
+  return{targetId:targetId||'shop-content',publicMode:!!publicMode};
+}
+function refreshShop(targetId,publicMode){
+  const ctx=currentShopContext(targetId,publicMode);
+  renderShop(ctx.targetId,ctx.publicMode);
+  updateShopCartBadge(shopCartCount());
+}
+function setShopQty(id,delta,targetId,publicMode){
+  const product=shopProducts.find(p=>p.id===id);
+  const inCart=shopQty(id);
+  const available=product&&product.trackInventory?Math.max(0,product.stock-inCart):20;
+  const maxQty=Math.min(20,available);
+  if(delta>0&&shopDraft(id)>=maxQty){toast('Sin mas inventario disponible','warn');return;}
+  const next=Math.max(0,Math.min(maxQty,shopDraft(id)+delta));
+  if(next)shopDraftQty[id]=next;else delete shopDraftQty[id];
+  refreshShop(targetId,publicMode);
+}
+function addShopProduct(id,targetId,publicMode){
+  const qty=shopDraft(id);
+  const product=shopProducts.find(p=>p.id===id);
+  if(!qty){toast('Elige cantidad con +','warn');return;}
+  if(product&&product.trackInventory&&shopQty(id)+qty>product.stock){toast('Sin mas inventario disponible','warn');return;}
+  shopCart[id]=shopQty(id)+qty;
+  delete shopDraftQty[id];
+  saveShopCart();
+  shopView='catalog';
+  refreshShop(targetId,publicMode);
+  shopAddFeedback(id);
+  toast('Producto agregado','ok');
+}
+function shopAddFeedback(id){
+  requestAnimationFrame(()=>{
+    const btn=document.querySelector('[data-shop-add="'+id+'"]');
+    if(!btn)return;
+    const old=btn.textContent;
+    btn.classList.add('added');
+    btn.textContent='Agregado';
+    setTimeout(()=>{btn.classList.remove('added');btn.textContent=old||'Agregar';},650);
+  });
+}
+function updateShopCounters(id){
+  document.querySelectorAll('[data-shop-qty="'+id+'"]').forEach(el=>{el.textContent=shopDraft(id);});
+}
+function updateShopCartBadge(countOverride){
+  if(!Number.isFinite(countOverride))syncShopCartFromStorage();
+  const count=Number.isFinite(countOverride)?countOverride:shopCartCount();
+  document.querySelectorAll('[data-shop-count]').forEach(el=>{
+    el.textContent=count?String(count):'';
+    el.classList.toggle('show',count>0);
+  });
+  document.querySelectorAll('[data-shop-nav-count]').forEach(el=>{
+    el.textContent=count?String(count):'';
+    el.classList.toggle('show',count>0);
+  });
+  const topBadge=document.getElementById('shop-top-cart-badge');
+  if(topBadge){
+    topBadge.textContent=count?String(count):'';
+    topBadge.classList.toggle('show',count>0);
+  }
+  const navBadge=document.getElementById('shop-nav-cart-badge');
+  if(navBadge){
+    navBadge.textContent=count?String(count):'';
+    navBadge.classList.toggle('show',count>0);
+  }
+}
+function setShopView(view,targetId,publicMode){
+  shopView=view||'catalog';
+  renderShop(targetId||'shop-content',!!publicMode);
+}
+function setShopDelivery(method,targetId,publicMode){
+  shopDelivery=method==='shipping'?'shipping':'pickup';
+  renderShop(targetId||'shop-content',!!publicMode);
+}
+function productArt(p){
+  const cls=String(p.id||'').startsWith('habit-shirt')?'shop-art shirt':'shop-art';
+  const imgs=(p.images&&p.images.length?p.images:(p.imageUrl?[p.imageUrl]:[])).filter(Boolean);
+  const main=imgs[0]||p.imageUrl;
+  const pid=esc(p.id);
+  const hero=main
+    ?'<div class="'+cls+'" style="cursor:zoom-in" onclick="openShopLightbox(\''+pid+'\',0)"><img src="'+esc(main)+'" alt="'+esc(p.name)+'" loading="lazy"></div>'
+    :'<div class="'+cls+'">'+esc(p.art||p.name.slice(0,2))+'</div>';
+  const thumbs=imgs.length>1?'<div class="shop-thumbs">'+imgs.slice(1,4).map((src,i)=>'<div class="shop-thumb" style="cursor:zoom-in" onclick="openShopLightbox(\''+pid+'\','+(i+1)+')"><img src="'+esc(src)+'" alt="" loading="lazy"></div>').join('')+'</div>':'';
+  return '<div class="shop-media">'+hero+thumbs+'</div>';
+}
+function shopCategoryOf(p){
+  return p.category||(/shirt|playera|merch/i.test(p.name||'')?'merch':'suplementos');
+}
+function merchGroupKey(id){
+  if(String(id).startsWith('habit-shirt-regular-men-'))return'habit-shirt-regular-men';
+  if(String(id).startsWith('habit-shirt-regular-women-'))return'habit-shirt-regular-women';
+  if(String(id).startsWith('habit-shirt-oversize-unisex-'))return'habit-shirt-oversize-unisex';
+  return id;
+}
+function merchSize(id){
+  const key=merchGroupKey(id);
+  return String(id).replace(key+'-','').toUpperCase();
+}
+function merchGroupMeta(key){
+  if(key==='habit-shirt-regular-men')return{name:'Playera HABIT regular fit hombre',desc:'Regular fit para hombre · elige talla',order:1};
+  if(key==='habit-shirt-regular-women')return{name:'Playera HABIT regular fit mujer',desc:'Regular fit para mujer · elige talla',order:2};
+  if(key==='habit-shirt-oversize-unisex')return{name:'Playera HABIT oversize unisex',desc:'Corte oversize unisex · elige talla',order:3};
+  return{name:'Merch HABIT',desc:'Elige variante',order:99};
+}
+function sizeOrder(size){
+  return ['XS','S','M','L','XL'].indexOf(size);
+}
+function selectShopVariant(groupKey,productId){
+  shopSelectedVariants[groupKey]=productId;
+  refreshShop();
+}
+function merchGroups(products){
+  const groups={};
+  products.forEach(p=>{
+    const key=merchGroupKey(p.id);
+    if(!groups[key])groups[key]=[];
+    groups[key].push(p);
+  });
+  return Object.keys(groups).map(key=>{
+    const meta=merchGroupMeta(key);
+    const variants=groups[key].sort((a,b)=>sizeOrder(merchSize(a.id))-sizeOrder(merchSize(b.id)));
+    return{key,meta,variants};
+  }).sort((a,b)=>a.meta.order-b.meta.order);
+}
+function renderShopProductCard(p){
+  const q=shopDraft(p.id);
+  const soldOut=p.trackInventory&&p.stock<=0;
+  return '<div class="shop-card">'+productArt(p)+'<div class="shop-info"><div class="shop-name">'+esc(p.name)+'</div><div class="shop-desc">'+esc(p.desc)+'</div>'+(soldOut?'<div class="badge bg-red" style="margin-top:4px">Agotado</div>':'')+'<div class="shop-price">'+MXN(p.price)+'</div><div class="shop-actions"><div class="shop-actions-row"><div class="qty-step"><button type="button" onclick="setShopQty(\''+p.id+'\',-1)">-</button><span data-shop-qty="'+esc(p.id)+'">'+q+'</span><button type="button" onclick="setShopQty(\''+p.id+'\',1)">+</button></div></div><button type="button" class="shop-add" data-shop-add="'+esc(p.id)+'" '+(soldOut?'disabled':'')+' onclick="addShopProduct(\''+p.id+'\')">Agregar al carrito</button></div></div></div>';
+}
+function renderMerchGroupCard(group){
+  const selectedId=shopSelectedVariants[group.key]||group.variants[0].id;
+  const selected=group.variants.find(p=>p.id===selectedId)||group.variants[0];
+  const q=shopDraft(selected.id);
+  const soldOut=selected.trackInventory&&selected.stock<=0;
+  const minPrice=Math.min(...group.variants.map(p=>p.price));
+  const maxPrice=Math.max(...group.variants.map(p=>p.price));
+  const price=minPrice===maxPrice?MXN(selected.price):MXN(minPrice)+' - '+MXN(maxPrice);
+  const sizes='<div class="shop-variant-box"><div class="shop-variant-label">Talla: '+esc(merchSize(selected.id))+'</div><div class="shop-size-grid">'+group.variants.map(v=>{
+    const active=v.id===selected.id;
+    const disabled=v.trackInventory&&v.stock<=0;
+    return '<button type="button" class="shop-size-btn '+(active?'active':'')+'" '+(disabled?'disabled':'')+' onclick="selectShopVariant(\''+group.key+'\',\''+v.id+'\')">'+esc(merchSize(v.id))+'</button>';
+  }).join('')+'</div></div>';
+  return '<div class="shop-card">'+productArt(selected)+'<div class="shop-info"><div class="shop-name">'+esc(group.meta.name)+'</div><div class="shop-desc">'+esc(group.meta.desc)+'</div>'+sizes+(soldOut?'<div class="badge bg-red" style="margin-top:4px">Agotado</div>':'')+'<div class="shop-price">'+price+'</div><div class="shop-actions"><div class="shop-actions-row"><div class="qty-step"><button type="button" onclick="setShopQty(\''+selected.id+'\',-1)">-</button><span data-shop-qty="'+esc(selected.id)+'">'+q+'</span><button type="button" onclick="setShopQty(\''+selected.id+'\',1)">+</button></div></div><button type="button" class="shop-add" data-shop-add="'+esc(selected.id)+'" '+(soldOut?'disabled':'')+' onclick="addShopProduct(\''+selected.id+'\')">Agregar al carrito</button></div></div></div>';
+}
+function renderShopCategory(title,products){
+  if(!products.length)return '';
+  return '<section class="shop-category"><div class="shop-category-head"><div class="shop-category-title">'+title+'</div><div class="shop-category-count">'+products.length+' productos</div></div><div class="shop-grid">'+products.map(renderShopProductCard).join('')+'</div></section>';
+}
+function renderMerchCategory(products){
+  const groups=merchGroups(products);
+  if(!groups.length)return '';
+  return '<section class="shop-category"><div class="shop-category-head"><div class="shop-category-title">Merch</div><div class="shop-category-count">'+groups.length+' modelos</div></div><div class="shop-grid">'+groups.map(renderMerchGroupCard).join('')+'</div></section>';
+}
+async function loadShopProducts(includeInactive){
+  try{
+    let q=sb.from('shop_products').select('*').order('sort_order',{ascending:true});
+    if(!includeInactive)q=q.eq('active',true);
+    const{data,error}=await q;
+    if(error)throw error;
+    if(data&&data.length){
+      shopProducts=data.map((p,i)=>{
+        const fallback=DEFAULT_SHOP_PRODUCTS.find(x=>x.id===p.id)||{};
+        const fallbackImages=Array.isArray(fallback.images)?fallback.images:[];
+        const dbImages=Array.isArray(p.image_urls)?p.image_urls.filter(Boolean):[];
+        return {
+          id:p.id,
+          name:p.name,
+          price:Number(p.price)||0,
+          desc:p.description||'',
+          stock:Number(p.stock)||Number(fallback.stock)||0,
+          trackInventory:p.track_inventory!==false,
+          imageUrl:p.image_url||fallback.imageUrl||'',
+          images:dbImages.length?dbImages:fallbackImages,
+          category:fallback.category||(/shirt|playera|merch/i.test(p.name||'')?'merch':'suplementos'),
+          active:p.active!==false,
+          sortOrder:p.sort_order??(i+1)*10,
+          art:(p.name||'?').slice(0,2).toUpperCase()
+        };
+      });
+      const ids=new Set(shopProducts.map(p=>p.id));
+      DEFAULT_SHOP_PRODUCTS.forEach(product=>{if(!ids.has(product.id))shopProducts.push(product);});
+      shopProducts.sort((a,b)=>(a.sortOrder||999)-(b.sortOrder||999));
+    }else{
+      shopProducts=[...DEFAULT_SHOP_PRODUCTS];
+    }
+  }catch(e){
+    console.warn('shop products fallback:',e.message||e);
+    shopProducts=[...DEFAULT_SHOP_PRODUCTS];
+  }
+}
+function renderShop(targetId,publicMode){
+  const el=document.getElementById(targetId);
+  if(!el)return;
+  const subtotal=shopSubtotal(),shipping=shopShipping(),total=subtotal+shipping;
+  const items=shopItems();
+  const count=shopCartCount();
+  const activeProducts=shopProducts.filter(p=>p.active!==false&&p.id!=='habit-shirt');
+  const cartRows=items.length?items.map(p=>{
+    const imgs=(p.images&&p.images.length?p.images:(p.imageUrl?[p.imageUrl]:[])).filter(Boolean);
+    const thumb=imgs[0]?'<img src="'+esc(imgs[0])+'" alt="" loading="lazy">':'<span>'+esc((p.art||p.name.slice(0,2)).toUpperCase())+'</span>';
+    return '<div class="cart-row"><div class="cart-thumb">'+thumb+'</div><div class="cart-item"><div class="cart-name">'+esc(p.name)+'</div>'
+      +'<div class="cart-meta">'+p.qty+' × '+MXN(p.price)+'</div></div>'
+      +'<div style="display:flex;align-items:center;gap:8px">'
+      +'<div style="font-size:13px;font-weight:800;color:var(--white)">'+MXN(p.qty*p.price)+'</div>'
+      +'<button type="button" class="cart-remove" onclick="removeCartItem(\''+esc(p.id)+'\',\''+targetId+'\','+publicMode+')">✕</button>'
+      +'</div></div>';
+  }).join(''):'<div class="shop-cart-empty">Tu carrito esta vacio.<br>Agrega productos para continuar.<button class="btn-ghost shop-empty-action" onclick="setShopView(\'catalog\',\''+targetId+'\','+publicMode+')">Ver productos</button></div>';
+  const summary='<div class="cart-total"><span>Subtotal</span><span>'+MXN(subtotal)+'</span></div>'
+    +'<div class="cart-total"><span>Envio</span><span>'+(shipping?MXN(shipping):(shopDelivery==='shipping'&&subtotal>=SHOP_FREE_SHIPPING_MIN?'Gratis':'$0'))+'</span></div>'
+    +'<div class="cart-total" style="font-size:18px;color:var(--white)"><span>Total</span><span>'+MXN(total)+'</span></div>'
+    +(shopDelivery==='shipping'&&subtotal>0&&subtotal<SHOP_FREE_SHIPPING_MIN?'<div class="brow-meta" style="margin-top:6px">Agrega '+MXN(SHOP_FREE_SHIPPING_MIN-subtotal)+' para envio gratis.</div>':'');
+  const bar='<div class="shop-bar"><div class="shop-bar-logo"><img src="/icons/logo-original.png" alt="HABIT"><div><div class="shop-bar-title">HABIT shop</div><div class="shop-bar-sub">Suplementos · Merch · Pickup en gym</div></div></div>'
+    +'<button type="button" class="shop-cart-btn" onclick="setShopView(\'cart\',\''+targetId+'\','+publicMode+')"><svg viewBox="0 0 24 24"><path d="M6 6h15l-1.5 9h-12z"/><path d="M6 6L5 3H2"/><circle cx="9" cy="20" r="1.5"/><circle cx="18" cy="20" r="1.5"/></svg><span id="shop-top-cart-badge" class="shop-cart-count '+(count?'show':'')+'" data-shop-count>'+(count||'')+'</span></button></div>';
+  const profileName=curUser&&curUser.name?curUser.name:'';
+  const profileEmail=sbUser&&sbUser.email?sbUser.email:'';
+  const profilePhone=curUser&&curUser.phone?curUser.phone:'';
+
+  if(shopView==='cart'){
+    el.innerHTML=bar+'<div class="shop-page-head"><button class="shop-back" onclick="setShopView(\'catalog\',\''+targetId+'\','+publicMode+')">‹</button><div style="flex:1"><div class="shop-page-title">Carrito</div><div class="shop-page-sub">Revisa tus productos antes de continuar.</div></div></div>'
+      +'<div class="shop-cart">'+cartRows+summary+'</div>'
+      +'<div class="shop-checkout-actions"><button class="btn" '+(!items.length?'disabled':'')+' onclick="setShopView(\'checkout\',\''+targetId+'\','+publicMode+')">Continuar compra</button><button class="btn-ghost" onclick="setShopView(\'catalog\',\''+targetId+'\','+publicMode+')">Seguir comprando</button></div>';
+    return;
+  }
+
+  if(shopView==='checkout'){
+    el.innerHTML=bar+'<div class="shop-page-head"><button class="shop-back" onclick="setShopView(\'cart\',\''+targetId+'\','+publicMode+')">‹</button><div style="flex:1"><div class="shop-page-title">Checkout</div><div class="shop-page-sub">Entrega, contacto y pago seguro.</div></div></div>'
+      +'<div class="shop-cart" style="margin-bottom:12px"><p class="slbl" style="margin-bottom:6px">Resumen</p>'+cartRows+summary+'</div>'
+      +'<div class="shop-form"><div class="shop-form-grid">'
+      +'<div class="checkout-block"><div class="checkout-head"><div style="display:flex;gap:10px"><div class="checkout-step">1</div><div><div class="checkout-title">Datos de contacto</div><div class="checkout-copy">Te enviaremos confirmacion y cambios de estado del pedido.</div></div></div></div>'
+      +'<div class="checkout-fields"><div class="field"><label>Nombre completo</label><input id="'+targetId+'-name" value="'+esc(profileName)+'" placeholder="Nombre completo"></div>'
+      +'<div class="field-row"><div class="field"><label>Telefono</label><input id="'+targetId+'-phone" value="'+esc(profilePhone)+'" placeholder="+52 669 000 0000" type="tel"></div>'
+      +'<div class="field"><label>Correo</label><input id="'+targetId+'-email" value="'+esc(profileEmail)+'" placeholder="correo@ejemplo.com" type="email"></div></div></div></div>'
+      +'<div class="checkout-block"><div class="checkout-head"><div style="display:flex;gap:10px"><div class="checkout-step">2</div><div><div class="checkout-title">Forma de entrega</div><div class="checkout-copy">Elige recoger en HABIT o recibirlo en tu domicilio.</div></div></div></div>'
+      +'<div class="delivery-options">'
+      +'<button type="button" class="delivery-card '+(shopDelivery==='pickup'?'active':'')+'" onclick="setShopDelivery(\'pickup\',\''+targetId+'\','+publicMode+')"><span class="delivery-radio"></span><span><span class="delivery-main">Recoger en el gym</span><span class="delivery-sub">Te avisamos cuando este listo para pasar por el pedido.</span></span><span class="delivery-price">$0</span></button>'
+      +'<button type="button" class="delivery-card '+(shopDelivery==='shipping'?'active':'')+'" onclick="setShopDelivery(\'shipping\',\''+targetId+'\','+publicMode+')"><span class="delivery-radio"></span><span><span class="delivery-main">Enviar a domicilio</span><span class="delivery-sub">Solo Mazatlan, Sinaloa. Envio $69. Gratis arriba de $1,000.</span></span><span class="delivery-price">'+(shopDelivery==='shipping'&&subtotal>=SHOP_FREE_SHIPPING_MIN?'Gratis':MXN(SHOP_SHIPPING_FEE))+'</span></button>'
+      +'</div>'
+      +(shopDelivery==='shipping'
+        ?'<div class="address-box"><div class="address-box-title">Domicilio de entrega</div><div class="field"><label>Calle</label><input id="'+targetId+'-street" placeholder="Ej: Av. del Mar"></div><div class="field-row"><div class="field"><label>Numero exterior</label><input id="'+targetId+'-ext" placeholder="123"></div><div class="field"><label>Interior / depto</label><input id="'+targetId+'-int" placeholder="Opcional"></div></div><div class="field"><label>Colonia</label><input id="'+targetId+'-neighborhood" placeholder="Ej: Centro"></div><div class="field-row"><div class="field"><label>Codigo postal</label><input id="'+targetId+'-postal" placeholder="82000" inputmode="numeric"></div><div class="field"><label>Ciudad</label><input id="'+targetId+'-city" value="Mazatlan" disabled></div></div><div class="field"><label>Estado</label><input id="'+targetId+'-state" value="Sinaloa" disabled></div><div class="field"><label>Entre calles / referencias</label><input id="'+targetId+'-references" placeholder="Color de fachada, entre calles, punto de referencia"></div><div class="field"><label>Instrucciones para entrega</label><textarea id="'+targetId+'-delivery-notes" placeholder="Ej: tocar timbre, dejar en recepcion, llamar al llegar..."></textarea></div></div>'
+        :'<div class="address-box"><div class="address-box-title">Punto de entrega</div><div class="checkout-note">HABIT Training Hub. Te avisaremos cuando el pedido este listo para recoger.</div></div>')
+      +'</div><div class="checkout-block"><div class="checkout-head"><div style="display:flex;gap:10px"><div class="checkout-step">3</div><div><div class="checkout-title">Notas del pedido</div><div class="checkout-copy">Sabor, talla o cualquier detalle especial.</div></div></div></div><div class="field" style="margin-bottom:0"><label>Notas</label><textarea id="'+targetId+'-notes" placeholder="Ej: proteina sabor chocolate, playera talla M..."></textarea></div></div>'
+      +'<button class="btn" '+(!items.length?'disabled':'')+' onclick="checkoutShop(\''+targetId+'\','+publicMode+')">Pagar con Stripe</button></div></div>';
+    return;
+  }
+
+  el.innerHTML=bar
+    +'<div class="shop-hero"><div class="shop-hero-k">Tienda online</div><h2>Suplementos y merch</h2><p>Compra facil, paga seguro con Stripe y elige recoger en HABIT o recibir en casa.</p></div>'
+    +'<div class="shop-section-title">Productos</div>'
+    +(activeProducts.length
+      ?renderShopCategory('Suplementos',activeProducts.filter(p=>shopCategoryOf(p)==='suplementos'))+renderMerchCategory(activeProducts.filter(p=>shopCategoryOf(p)==='merch'))
+      :'<div class="shop-cart-empty">No hay productos activos. Revisa Admin → Tienda.</div>');
+}
+async function checkoutShop(targetId,publicMode){
+  if(!canAccessShop()){toast('Tienda disponible solo para josephdpelayo@gmail.com','err');return;}
+  const items=shopItems().map(p=>({product_id:p.id,quantity:p.qty}));
+  if(!items.length){toast('Agrega productos al carrito','err');return;}
+  const val=id=>(document.getElementById(targetId+'-'+id)||{value:''}).value.trim();
+  const customer={name:val('name'),email:val('email'),phone:val('phone')};
+  const street=val('street'),ext=val('ext'),interior=val('int'),neighborhood=val('neighborhood');
+  const line1=[street,ext?('#'+ext):'',interior?('Int. '+interior):'',neighborhood?('Col. '+neighborhood):''].filter(Boolean).join(' ');
+  const shipping_address=shopDelivery==='shipping'?{
+    line1,
+    street,
+    exterior_number:ext,
+    interior_number:interior,
+    neighborhood,
+    city:val('city'),
+    state:val('state'),
+    postal_code:val('postal'),
+    references:val('references'),
+    delivery_notes:val('delivery-notes'),
+    country:'MX'
+  }:null;
+  if(!customer.name||!customer.email||!customer.phone){toast('Completa tus datos','err');return;}
+  if(shopDelivery==='shipping'&&(!street||!ext||!neighborhood||!shipping_address.city||!shipping_address.state||!shipping_address.postal_code)){
+    toast('Completa el domicilio de entrega','err');
+    return;
+  }
+  showLoading('Abriendo Stripe...');
+  try{
+    const{data}=await sb.auth.getSession();
+    const token=data&&data.session&&data.session.access_token;
+    const res=await fetch(apiUrl('/api/shop'),{
+      method:'POST',
+      headers:{'Content-Type':'application/json',...(token?{Authorization:'Bearer '+token}:{})},
+      body:JSON.stringify({items,customer,delivery_method:shopDelivery,shipping_address,notes:val('notes')})
+    });
+    const out=await res.json().catch(()=>({}));
+    if(!res.ok)throw new Error(out.error||'No se pudo crear el pago');
+    window.location.href=out.url;
+  }catch(e){
+    hideLoading();
+    toast('Error: '+e.message,'err');
+  }
+}
+function handleShopReturn(){
+  const params=new URLSearchParams(location.search);
+  if(params.get('shop_cancel')){toast('Compra cancelada','warn');return;}
+  if(params.get('shop_success')){
+    shopCart={};saveShopCart();
+    toast('Compra recibida. Te contactaremos con el estado del pedido.','ok');
+    if(document.getElementById('shop-content'))renderShop('shop-content',false);
+    if(document.getElementById('public-shop-content'))renderShop('public-shop-content',true);
+  }
+}
+function removeCartItem(id,targetId,publicMode){
+  delete shopCart[id];
+  delete shopDraftQty[id];
+  saveShopCart();
+  refreshShop(targetId,publicMode);
+  updateShopCartBadge();
+}
+function openShopLightbox(productId,idx){
+  const p=shopProducts.find(x=>x.id===productId);
+  if(!p)return;
+  const imgs=(p.images&&p.images.length?p.images:(p.imageUrl?[p.imageUrl]:[])).filter(Boolean);
+  if(!imgs.length)return;
+  shopLightboxImages=imgs;
+  shopLightboxIdx=Math.min(idx||0,imgs.length-1);
+  renderShopLightbox();
+}
+function renderShopLightbox(){
+  let el=document.getElementById('shop-lightbox');
+  if(!el){el=document.createElement('div');el.id='shop-lightbox';el.className='shop-lightbox';document.body.appendChild(el);}
+  const imgs=shopLightboxImages, idx=shopLightboxIdx, src=imgs[idx]||'';
+  el.innerHTML=
+    '<button class="shop-lightbox-close" onclick="closeShopLightbox()">✕</button>'
+    +(imgs.length>1?'<button class="shop-lightbox-nav shop-lightbox-prev" onclick="navShopLightbox(-1)">‹</button>':'')
+    +'<img class="shop-lightbox-img" src="'+esc(src)+'" alt="">'
+    +(imgs.length>1?'<button class="shop-lightbox-nav shop-lightbox-next" onclick="navShopLightbox(1)">›</button>':'')
+    +(imgs.length>1?'<div class="shop-lightbox-dots">'+imgs.map((_,i)=>'<div class="shop-lightbox-dot'+(i===idx?' active':'')+'" onclick="shopLightboxIdx='+i+';renderShopLightbox()"></div>').join('')+'</div>':'');
+  el.style.display='flex';
+  document.body.style.overflow='hidden';
+  el.onclick=function(e){if(e.target===el)closeShopLightbox();};
+}
+function navShopLightbox(d){
+  shopLightboxIdx=(shopLightboxIdx+d+shopLightboxImages.length)%shopLightboxImages.length;
+  renderShopLightbox();
+}
+function closeShopLightbox(){
+  const el=document.getElementById('shop-lightbox');
+  if(el)el.style.display='none';
+  document.body.style.overflow='';
+}
+function shopStatusLabel(status){
+  return ({
+    pago_pendiente:'Pago pendiente',
+    solicitado:'Solicitado',
+    listo_para_entrega:'Listo para entregar',
+    listo_para_enviar:'Listo para enviar',
+    enviado:'Enviado',
+    recibido:'Recibido',
+    cancelado:'Cancelado'
+  })[status]||status;
+}
+async function renderAdminShopOrders(){
+  const el=document.getElementById('admin-shop-list');
+  if(!el)return;
+  el.innerHTML='<div class="empty">Cargando tienda...</div>';
+  try{
+    await loadShopProducts(true);
+    const{data:orders,error}=await sb.from('shop_orders').select('*,shop_order_items(*)').order('created_at',{ascending:false});
+    if(error)throw error;
+    const paid=(orders||[]).filter(o=>o.payment_status==='paid');
+    const pending=(orders||[]).filter(o=>o.status==='solicitado').length;
+    const shipping=(orders||[]).filter(o=>o.delivery_method==='shipping'&&o.status!=='recibido'&&o.status!=='cancelado').length;
+    el.innerHTML=renderAdminShopProducts()
+      +'<div class="divider"></div><div class="metrics">'
+      +kpiCard('Pedidos pagados',paid.length,'bg-green')
+      +kpiCard('Solicitados',pending,'bg-blue')
+      +kpiCard('Envios activos',shipping,'bg-amber')
+      +kpiCard('Venta tienda',MXN(paid.reduce((s,o)=>s+Number(o.total||0),0)),'bg-green')
+      +'</div><p class="slbl" style="margin-bottom:10px">Pedidos</p>'
+      +(!(orders||[]).length?'<div class="empty">Sin pedidos aun.</div>':orders.map(o=>{
+        const items=(o.shop_order_items||[]).map(i=>i.quantity+' x '+i.product_name).join(' · ');
+        const addr=o.shipping_address?o.shipping_address:{};
+        const addrLine=[
+          addr.street||addr.line1,
+          addr.exterior_number?('#'+addr.exterior_number):'',
+          addr.interior_number?('Int. '+addr.interior_number):'',
+          addr.neighborhood?('Col. '+addr.neighborhood):'',
+          addr.postal_code?('CP '+addr.postal_code):'',
+          addr.city,
+          addr.state
+        ].filter(Boolean).join(', ');
+        const addrExtra=[addr.references?('Ref: '+addr.references):'',addr.delivery_notes?('Entrega: '+addr.delivery_notes):''].filter(Boolean).join(' · ');
+        const next=o.delivery_method==='shipping'?['solicitado','listo_para_enviar','enviado','recibido','cancelado']:['solicitado','listo_para_entrega','recibido','cancelado'];
+        return '<div class="perfil-section"><div style="display:flex;justify-content:space-between;align-items:flex-start;gap:10px">'
+          +'<div><div class="brow-name">'+esc(o.customer_name)+'</div><div class="brow-meta">'+esc(o.customer_phone||'')+' · '+esc(o.customer_email||'')+'</div></div>'
+          +'<span class="order-status '+esc(o.status)+'">'+shopStatusLabel(o.status)+'</span></div>'
+          +'<div class="divider" style="margin:.75rem 0"></div>'
+          +'<div class="brow-meta" style="line-height:1.55">'+esc(items)+'</div>'
+          +'<div class="brow-meta" style="line-height:1.55;margin-top:6px">'+(o.delivery_method==='shipping'?'Envio a casa · '+esc(addrLine):'Entrega en gym')+'</div>'
+          +(addrExtra?'<div class="brow-meta" style="line-height:1.55;margin-top:4px">'+esc(addrExtra)+'</div>':'')
+          +(o.notes?'<div class="brow-meta" style="margin-top:6px">Notas: '+esc(o.notes)+'</div>':'')
+          +'<div class="cart-total"><span>Total</span><span>'+MXN(o.total)+'</span></div>'
+          +'<div class="field" style="margin-top:10px"><label>Estado</label><select onchange="adminUpdateShopOrder(\''+esc(o.id)+'\',this.value)">'
+          +next.map(s=>'<option value="'+s+'" '+(o.status===s?'selected':'')+'>'+shopStatusLabel(s)+'</option>').join('')
+          +'</select></div></div>';
+      }).join(''));
+  }catch(e){
+    const msg=String(e.message||e);
+    if(/shop_orders|shop_products|schema cache|Could not find the table/i.test(msg)){
+      el.innerHTML='<div class="perfil-section"><p class="slbl">Tienda pendiente</p>'
+        +'<div class="empty" style="padding:1rem 0;text-align:left;line-height:1.55">La pantalla ya esta instalada, pero falta crear las tablas de tienda en Supabase. Corre la migracion <strong style="color:var(--white)">migrations/015_shop.sql</strong> en Supabase SQL Editor y despues recarga la app.</div>'
+        +'<div class="brow-meta" style="line-height:1.55">Tablas necesarias: shop_products, shop_orders y shop_order_items.</div></div>';
+      return;
+    }
+    el.innerHTML='<div class="empty">Error: '+esc(msg)+'</div>';
+  }
+}
+function shopSlug(v){
+  return String(v||'').trim().toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[^a-z0-9]+/g,'-').replace(/^-+|-+$/g,'').slice(0,48);
+}
+function renderAdminShopProducts(){
+  const productRows=shopProducts.length?shopProducts.map(p=>{
+    const pid=esc(p.id);
+    if(adminEditingProductId===p.id){
+      return '<div class="perfil-section" style="margin-bottom:10px">'
+        +'<div style="font-size:11px;font-weight:900;letter-spacing:.1em;text-transform:uppercase;color:var(--gray);margin-bottom:10px">Editando: '+esc(p.name)+'</div>'
+        +'<div class="field"><label>Nombre</label><input id="ep-name-'+pid+'" value="'+esc(p.name)+'"></div>'
+        +'<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">'
+        +'<div class="field"><label>Precio (MXN)</label><input id="ep-price-'+pid+'" type="number" min="0" step="1" value="'+p.price+'"></div>'
+        +'<div class="field"><label>Stock</label><input id="ep-stock-'+pid+'" type="number" min="0" step="1" value="'+p.stock+'"></div>'
+        +'</div>'
+        +'<div class="field"><label>Descripcion</label><input id="ep-desc-'+pid+'" value="'+esc(p.desc||'')+'"></div>'
+        +'<div style="display:flex;gap:8px;margin-top:4px">'
+        +'<button class="btn" style="flex:1" onclick="adminSaveEditProduct(\''+pid+'\')">Guardar</button>'
+        +'<button class="btn-ghost" onclick="adminCancelEditProduct()">Cancelar</button>'
+        +'</div></div>';
+    }
+    return '<div class="brow"><div class="brow-info"><div class="brow-name">'+esc(p.name)+'</div>'
+      +'<div class="brow-meta">'+MXN(p.price)+' · Stock: '+(p.trackInventory?p.stock:'Sin control')+'</div></div>'
+      +'<div style="display:flex;align-items:center;gap:5px">'
+      +'<button class="btn-sm" style="background:rgba(255,255,255,.07);border-color:rgba(255,255,255,.15);color:var(--white)" onclick="adminStartEditProduct(\''+pid+'\')">Editar</button>'
+      +'<button class="btn-sm '+(p.active?'bgreen':'bred')+'" onclick="adminToggleShopProduct(\''+pid+'\','+(!p.active)+')">'+(p.active?'ON':'OFF')+'</button>'
+      +'</div></div>';
+  }).join(''):'<div class="empty">Sin productos.</div>';
+
+  return '<div class="perfil-section"><div style="display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:8px">'
+    +'<p class="slbl" style="margin:0">Productos</p>'
+    +'<button class="btn-sm bblue" style="width:34px;height:34px;padding:0;font-size:20px;line-height:1" title="Agregar producto" onclick="toggleAdminProductForm()">+</button>'
+    +'</div>'
+    +'<div id="admin-product-form" style="'+(adminProductFormOpen?'':'display:none')+'">'
+    +'<div class="field"><label>Nombre</label><input id="sp-name" placeholder="Ej: Pre workout"></div>'
+    +'<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">'
+    +'<div class="field"><label>Precio</label><input id="sp-price" type="number" min="0" step="1" placeholder="0"></div>'
+    +'<div class="field"><label>Stock</label><input id="sp-stock" type="number" min="0" step="1" placeholder="0"></div>'
+    +'</div>'
+    +'<label class="terms-check" style="margin-bottom:12px"><input type="checkbox" id="sp-track" checked><span>Controlar inventario y pausar venta al llegar a 0.</span></label>'
+    +'<div class="field"><label>Descripcion</label><input id="sp-desc" placeholder="Descripcion corta"></div>'
+    +'<div class="field"><label>URL imagen</label><input id="sp-img" placeholder="https://..."></div>'
+    +'<button class="btn" onclick="adminSaveShopProduct()">Agregar producto</button></div>'
+    +'<div class="divider"></div>'
+    +productRows
+    +'</div>';
+}
+function toggleAdminProductForm(){adminProductFormOpen=!adminProductFormOpen;renderAdminShopOrders();}
+async function adminSaveShopProduct(){
+  const name=(document.getElementById('sp-name')||{}).value?.trim()||'';
+  const price=Number((document.getElementById('sp-price')||{}).value||0);
+  const stock=Math.max(0,parseInt((document.getElementById('sp-stock')||{}).value||0,10)||0);
+  const trackInventory=(document.getElementById('sp-track')||{}).checked!==false;
+  const desc=(document.getElementById('sp-desc')||{}).value?.trim()||'';
+  const imageUrl=(document.getElementById('sp-img')||{}).value?.trim()||'';
+  if(!name){toast('Escribe nombre del producto','err');return;}
+  if(!price||price<0){toast('Escribe precio valido','err');return;}
+  const id=shopSlug(name);
+  if(!id){toast('Nombre invalido','err');return;}
+  showLoading('Guardando producto...');
+  try{
+    const sortOrder=(shopProducts.length+1)*10;
+    const{error}=await sb.from('shop_products').upsert({id,name,description:desc,price,stock,track_inventory:trackInventory,image_url:imageUrl||null,active:true,sort_order:sortOrder,updated_at:new Date().toISOString()});
+    if(error)throw error;
+    hideLoading();
+    toast('Producto guardado','ok');
+    adminProductFormOpen=false;
+    renderAdminShopOrders();
+  }catch(e){hideLoading();toast('Error: '+e.message,'err');}
+}
+async function adminAdjustStock(id,delta){
+  const product=shopProducts.find(p=>p.id===id);
+  if(!product)return;
+  const next=Math.max(0,(Number(product.stock)||0)+delta);
+  showLoading('Actualizando inventario...');
+  try{
+    const{error}=await sb.from('shop_products').update({stock:next,updated_at:new Date().toISOString()}).eq('id',id);
+    if(error)throw error;
+    hideLoading();
+    toast('Inventario actualizado','ok');
+    renderAdminShopOrders();
+  }catch(e){hideLoading();toast('Error: '+e.message,'err');}
+}
+async function adminToggleShopProduct(id,active){
+  showLoading('Actualizando producto...');
+  try{
+    const{error}=await sb.from('shop_products').update({active,updated_at:new Date().toISOString()}).eq('id',id);
+    if(error)throw error;
+    hideLoading();
+    toast(active?'Producto activo':'Producto pausado','ok');
+    renderAdminShopOrders();
+  }catch(e){hideLoading();toast('Error: '+e.message,'err');}
+}
+function adminStartEditProduct(id){adminEditingProductId=id;adminProductFormOpen=false;renderAdminShopOrders();}
+function adminCancelEditProduct(){adminEditingProductId=null;renderAdminShopOrders();}
+async function adminSaveEditProduct(id){
+  const name=(document.getElementById('ep-name-'+id)||{}).value?.trim()||'';
+  const price=Number((document.getElementById('ep-price-'+id)||{}).value||0);
+  const stock=Math.max(0,parseInt((document.getElementById('ep-stock-'+id)||{}).value||0,10));
+  const desc=(document.getElementById('ep-desc-'+id)||{}).value?.trim()||'';
+  if(!name){toast('Escribe nombre','err');return;}
+  if(!price||price<0){toast('Precio invalido','err');return;}
+  showLoading('Guardando...');
+  try{
+    const{error}=await sb.from('shop_products').update({name,description:desc,price,stock,updated_at:new Date().toISOString()}).eq('id',id);
+    if(error)throw error;
+    hideLoading();
+    toast('Guardado','ok');
+    adminEditingProductId=null;
+    await loadShopProducts(true);
+    renderAdminShopOrders();
+  }catch(e){hideLoading();toast('Error: '+e.message,'err');}
+}
+async function adminUpdateShopOrder(orderId,status){
+  showLoading('Actualizando pedido...');
+  try{
+    const{data}=await sb.auth.getSession();
+    const token=data&&data.session&&data.session.access_token;
+    const res=await fetch('/api/shop',{
+      method:'POST',
+      headers:{'Content-Type':'application/json',Authorization:'Bearer '+token},
+      body:JSON.stringify({action:'update_order',order_id:orderId,status})
+    });
+    const out=await res.json().catch(()=>({}));
+    if(!res.ok)throw new Error(out.error||'No se pudo actualizar');
+    hideLoading();
+    toast('Pedido actualizado','ok');
+    renderAdminShopOrders();
+    if(document.getElementById('a-notifs')?.classList.contains('active'))renderAdminNotifsSb();
+  }catch(e){hideLoading();toast('Error: '+e.message,'err');}
 }
 
 // ── HISTORIAL ────────────────────────────────────────────────
@@ -5107,10 +5894,10 @@ async function adminDeletePaymentSb(paymentId){
   try{
     const{data:sessionData}=await sb.auth.getSession();
     const token=sessionData?.session?.access_token;
-    const res=await fetch('/api/delete-payment',{
+    const res=await fetch('/api/payments-admin',{
       method:'POST',
       headers:{'Content-Type':'application/json',Authorization:'Bearer '+token},
-      body:JSON.stringify({payment_id:paymentId,reason:reason.trim()})
+      body:JSON.stringify({action:'delete',payment_id:paymentId,reason:reason.trim()})
     });
     const payload=await res.json().catch(()=>({}));
     if(!res.ok)throw new Error(payload.error||'No se pudo eliminar');
@@ -5129,10 +5916,10 @@ async function adminSyncStripePaymentsSb(){
   try{
     const{data:sessionData}=await sb.auth.getSession();
     const token=sessionData?.session?.access_token;
-    const res=await fetch('/api/sync-stripe-payments',{
+    const res=await fetch('/api/payments-admin',{
       method:'POST',
       headers:{'Content-Type':'application/json',Authorization:'Bearer '+token},
-      body:JSON.stringify({limit:75})
+      body:JSON.stringify({action:'sync',limit:75})
     });
     const payload=await res.json().catch(()=>({}));
     if(!res.ok)throw new Error(payload.error||'No se pudo sincronizar Stripe');
