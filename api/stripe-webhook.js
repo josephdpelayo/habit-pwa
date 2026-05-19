@@ -1,4 +1,4 @@
-const { stripe, activateMembership } = require('./_fulfillment');
+const { stripe, activateMembership, fulfillShopOrder } = require('../lib/_fulfillment');
 
 function readRawBody(req) {
   return new Promise((resolve, reject) => {
@@ -28,7 +28,12 @@ module.exports = async function handler(req, res) {
 
   try {
     if (event.type === 'checkout.session.completed') {
-      await activateMembership(event.data.object);
+      const session = event.data.object;
+      if (session.metadata && session.metadata.kind === 'shop_order') {
+        await fulfillShopOrder(session);
+      } else {
+        await activateMembership(session);
+      }
     }
     return res.status(200).json({ received: true });
   } catch (err) {

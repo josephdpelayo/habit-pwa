@@ -1,4 +1,4 @@
-const { stripe, supabase, activateMembership } = require('./_fulfillment');
+const { stripe, supabase, activateMembership } = require('../lib/_fulfillment');
 
 module.exports = async function handler(req, res) {
   if (req.method !== 'POST') {
