@@ -6,12 +6,12 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="HABIT">
 <meta name="application-name" content="HABIT">
-<link rel="manifest" href="/manifest.json?v=20260518-04">
-<link rel="apple-touch-icon" sizes="120x120" href="/icons/icon-120.png?v=20260518-04">
-<link rel="apple-touch-icon" sizes="152x152" href="/icons/icon-152.png?v=20260518-04">
-<link rel="apple-touch-icon" sizes="167x167" href="/icons/icon-167.png?v=20260518-04">
-<link rel="apple-touch-icon" sizes="180x180" href="/icons/icon-180.png?v=20260518-04">
-<link rel="icon" type="image/png" sizes="32x32" href="/icons/icon-32.png?v=20260518-04">
+<link rel="manifest" href="/manifest.json?v=20260518-06">
+<link rel="apple-touch-icon" sizes="120x120" href="/icons/icon-120.png?v=20260518-06">
+<link rel="apple-touch-icon" sizes="152x152" href="/icons/icon-152.png?v=20260518-06">
+<link rel="apple-touch-icon" sizes="167x167" href="/icons/icon-167.png?v=20260518-06">
+<link rel="apple-touch-icon" sizes="180x180" href="/icons/icon-180.png?v=20260518-06">
+<link rel="icon" type="image/png" sizes="32x32" href="/icons/icon-32.png?v=20260518-06">
 <title>HABIT</title>
 <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700;800;900&family=Share+Tech+Mono&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
@@ -377,43 +377,6 @@ input,select,button,textarea{font-family:'Montserrat',sans-serif}
 .new-post-box textarea{width:100%;background:var(--card2);border:1px solid var(--border);border-radius:4px;padding:10px 12px;font-size:14px;color:var(--white);outline:none;resize:none;line-height:1.5;min-height:70px}
 .new-post-box textarea::placeholder{color:#555}
 
-/* SHOP */
-.shop-hero{border:1px solid rgba(59,130,246,.34);background:linear-gradient(180deg,rgba(37,99,235,.13),rgba(255,255,255,.025));border-radius:6px;padding:16px;margin-bottom:14px}
-.shop-hero-k{font-size:10px;font-weight:900;letter-spacing:.16em;text-transform:uppercase;color:var(--bl);margin-bottom:6px}
-.shop-hero h2{font-size:28px;line-height:1;font-weight:900;letter-spacing:.04em;text-transform:uppercase;margin-bottom:8px}
-.shop-hero p{font-size:13px;color:var(--gl);line-height:1.55}
-.shop-grid{display:grid;gap:10px;margin-bottom:14px}
-.shop-card{display:grid;grid-template-columns:82px 1fr;gap:12px;background:var(--card);border:1px solid var(--border);border-radius:6px;padding:10px}
-.shop-art{width:82px;height:96px;border-radius:5px;background:#090909;border:1px solid rgba(255,255,255,.1);display:flex;align-items:center;justify-content:center;color:var(--bl);font-size:28px;font-weight:900;letter-spacing:.04em;text-transform:uppercase}
-.shop-art.shirt{font-size:11px;color:var(--white);line-height:1.25;text-align:center}
-.shop-info{min-width:0;display:flex;flex-direction:column;gap:6px}
-.shop-name{font-size:14px;font-weight:850;color:var(--white);line-height:1.25;text-transform:uppercase;letter-spacing:.04em}
-.shop-desc{font-size:11px;color:var(--gray);line-height:1.45}
-.shop-price{font-size:17px;font-weight:900;color:var(--green)}
-.shop-actions{display:grid;grid-template-columns:86px 1fr;gap:8px;margin-top:auto;align-items:center}
-.qty-step{height:38px;display:grid;grid-template-columns:28px 1fr 28px;border:1px solid var(--border);border-radius:4px;overflow:hidden;background:var(--card2)}
-.qty-step button{border:none;background:transparent;color:var(--white);font-size:18px;font-weight:800}
-.qty-step span{display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:800;color:var(--gl)}
-.shop-add{height:38px;border:1px solid var(--blue);background:rgba(37,99,235,.22);color:var(--bl);border-radius:4px;font-size:11px;font-weight:900;letter-spacing:.06em;text-transform:uppercase}
-.shop-cart{position:sticky;bottom:0;background:var(--dark);border:1px solid var(--border);border-radius:6px;padding:12px;margin-top:10px;box-shadow:0 -12px 22px rgba(0,0,0,.22)}
-.cart-row{display:flex;align-items:flex-start;gap:8px;padding:8px 0;border-bottom:1px solid var(--border)}
-.cart-row:last-child{border-bottom:none}
-.cart-item{flex:1;min-width:0}
-.cart-name{font-size:13px;font-weight:800;color:var(--white)}
-.cart-meta{font-size:11px;color:var(--gray);margin-top:2px}
-.cart-total{display:flex;justify-content:space-between;gap:12px;font-size:14px;font-weight:800;margin-top:8px}
-.delivery-toggle{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:10px 0 12px}
-.delivery-toggle button{border:1px solid var(--border);background:var(--card2);color:var(--gray);border-radius:4px;padding:11px 8px;font-size:11px;font-weight:900;letter-spacing:.06em;text-transform:uppercase}
-.delivery-toggle button.active{border-color:var(--blue);background:rgba(37,99,235,.16);color:var(--bl)}
-.shop-form{background:var(--card);border:1px solid var(--border);border-radius:6px;padding:12px;margin-top:12px}
-.shop-form-grid{display:grid;gap:10px}
-.order-status{display:inline-flex;align-items:center;border:1px solid var(--border);border-radius:999px;padding:3px 8px;font-size:10px;font-weight:900;letter-spacing:.06em;text-transform:uppercase;color:var(--gray);white-space:nowrap}
-.order-status.solicitado{border-color:rgba(59,130,246,.5);color:var(--bl);background:rgba(37,99,235,.12)}
-.order-status.listo_para_entrega,.order-status.listo_para_enviar{border-color:rgba(245,158,11,.5);color:var(--amber);background:rgba(245,158,11,.1)}
-.order-status.enviado{border-color:rgba(139,92,246,.5);color:var(--purple);background:rgba(139,92,246,.1)}
-.order-status.recibido{border-color:rgba(16,185,129,.5);color:var(--green);background:rgba(16,185,129,.1)}
-.order-status.cancelado{border-color:rgba(239,68,68,.5);color:var(--red);background:rgba(239,68,68,.1)}
-
 /* ADMIN */
 .adm-nav{display:flex;border-bottom:1px solid var(--border);flex-shrink:0;overflow-x:auto;-webkit-overflow-scrolling:touch}
 .adm-nav::-webkit-scrollbar{height:0}
@@ -578,17 +541,6 @@ body.reception-mode{background:#050505}
   </div>
 </div>
 
-<!-- PUBLIC SHOP -->
-<div id="s-public-shop" class="screen">
-  <div class="hdr">
-    <div class="logo-wrap"><img src="/icons/logo-original.png" style="width:30px;height:30px;object-fit:contain"><div><span class="ltxt">HABIT</span><span class="lsub">SHOP</span></div></div>
-    <button class="logout-btn" onclick="showAuthFromShop()">Entrar</button>
-  </div>
-  <div class="scroll-area">
-    <div id="public-shop-content"></div>
-  </div>
-</div>
-
 <!-- MAIN -->
 <div id="s-main" class="screen">
   <div class="hdr" id="main-hdr-bar">
@@ -721,13 +673,6 @@ body.reception-mode{background:#050505}
     </div>
   </div>
 
-  <!-- TIENDA -->
-  <div id="v-shop" class="view">
-    <div class="scroll-area">
-      <div id="shop-content"></div>
-    </div>
-  </div>
-
   <!-- HISTORIAL -->
   <div id="v-historial" class="view">
     <div class="scroll-area">
@@ -750,8 +695,6 @@ body.reception-mode{background:#050505}
         <svg viewBox="0 0 24 24"><path d="M6 4h4v16H6zM14 4h4v16h-4zM4 9h2M10 9h4M18 9h2M4 15h2M10 15h4M18 15h2"/></svg>Rutinas</button>
       <button class="bnb" onclick="sv('comunidad')">
         <svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>Comunidad</button>
-      <button class="bnb" onclick="sv('shop')">
-        <svg viewBox="0 0 24 24"><path d="M6 2l1.5 4h9L18 2"/><path d="M4 6h16l-1.5 14h-13z"/><path d="M9 11h6"/></svg>Tienda</button>
     </div>
   </div>
 </div>
@@ -829,7 +772,6 @@ body.reception-mode{background:#050505}
     <button class="adm-tab" onclick="admTab('users')">Socios</button>
     <button class="adm-tab" onclick="admTab('boards')">Pizarrones</button>
     <button class="adm-tab" onclick="admTab('payments')">Pagos</button>
-    <button class="adm-tab" onclick="admTab('shop')">Tienda</button>
     <button class="adm-tab" onclick="admTab('comunidad')">Comunidad</button>
     <button class="adm-tab" onclick="admTab('notifs')">Alertas</button>
   </div>
@@ -909,9 +851,6 @@ body.reception-mode{background:#050505}
 
     <!-- PAGOS -->
     <div id="a-payments" class="adm-section"><div id="payment-list"></div></div>
-
-    <!-- TIENDA -->
-    <div id="a-shop" class="adm-section"><div id="admin-shop-list"></div></div>
 
     <!-- COMUNIDAD -->
     <div id="a-comunidad" class="adm-section"><div id="adm-feed-content"></div></div>
@@ -1082,7 +1021,7 @@ body.reception-mode{background:#050505}
 // ── CONFIG & SUPABASE ───────────────────────────────────────
 const SUPABASE_URL='https://pmpjteuqjusbiduevbwq.supabase.co';
 const SUPABASE_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBtcGp0ZXVxanVzYmlkdWV2YndxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc2OTI1NjUsImV4cCI6MjA5MzI2ODU2NX0.XbMzZoo2yqtrD8znLnyo_1zDfrdJAvAPj1lqGOyXnLw';
-const APP_VERSION='20260518-05';
+const APP_VERSION='20260518-06';
 const PUBLIC_APP_URL='https://habittraininghub.app/app.html';
 const PUBLIC_API_ORIGIN='https://www.habittraininghub.app';
 const sb=supabase.createClient(SUPABASE_URL,SUPABASE_KEY,{auth:{autoRefreshToken:true,persistSession:true,detectSessionInUrl:true}});
@@ -1195,7 +1134,7 @@ function showMainSb(){
   document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
   const main=document.getElementById('s-main');
   if(main)main.classList.add('active');
-  ['inicio','book','planes','rutinas','comunidad','shop','historial','perfil'].forEach(n=>{
+  ['inicio','book','planes','rutinas','comunidad','historial','perfil'].forEach(n=>{
     const el=document.getElementById('v-'+n);
     if(el)el.classList.toggle('active',n==='inicio');
   });
@@ -1223,11 +1162,6 @@ function checkExpiryPush(){
 
 async function initApp(){
   document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
-  if(isPublicShopUrl()){
-    showPublicShop();
-    handleShopReturn();
-    return;
-  }
   const authEl=document.getElementById('s-auth');
   if(authEl)authEl.classList.add('active');
   try{
@@ -1285,15 +1219,6 @@ const PLANS={
     {id:'gm',name:'Mensualidad grupal',price:2800,credits:999,days:30,type:'grupal',perks:['4 espacios','Ilimitado','30 días']},
   ]
 };
-
-const DEFAULT_SHOP_PRODUCTS=[
-  {id:'whey-1kg',name:'100% Whey Protein',price:650,desc:'Bolsa 1 kg · proteina para recuperacion diaria',tag:'WHEY',art:'W'},
-  {id:'protein-sachet-33g',name:'Sobre personal proteina',price:45,desc:'Una toma de 33 g para salir del entrenamiento listo',tag:'33 g',art:'33'},
-  {id:'creatine-monohydrate',name:'Creatina monohidratada',price:420,desc:'Monohidratada · fuerza, potencia y constancia',tag:'CREA',art:'Cr'},
-  {id:'habit-shirt',name:'Playera HABIT',price:350,desc:'Playera oficial HABIT Training Hub',tag:'MERCH',art:'HABIT'}
-];
-const SHOP_SHIPPING_FEE=100;
-const SHOP_FREE_SHIPPING_MIN=1000;
 
 function canSeePlan(p){
   if(!p.testEmail)return true;
@@ -1499,7 +1424,6 @@ let curUser=null, curDate=dateObjFromDS(mazToday()), selStartIdx=null, selShort=
 let accInt=null, userNotifInt=null, receptionClockInt=null, receptionDataInt=null, userNotifBootstrapped=false, userNotifSeen=new Set(), notifs=[], expandedVideos={}, logScoreCtx=null, expandedUsers=new Set();
 let receptionSessions=[], receptionLastSync=null, receptionLoading=false;
 let guestFavorites=[], guestSelected=new Set(), guestSavedActive=new Set(), guestOriginalFavoriteIds=new Set(), guestDeletedIds=new Set(), guestSearchResults=[], guestActiveBookingId=null, guestSearchTimer=null, guestDirty=false, guestCollapsed=true, guestQuery='';
-let shopProducts=[...DEFAULT_SHOP_PRODUCTS], shopCart=loadShopCart(), shopDelivery='pickup', adminProductFormOpen=false;
 
 // ── SLOT DATA ACCESS ──
 function getDaySlots(ds){
@@ -2164,7 +2088,6 @@ async function submitResetPassword(){
 sb.auth.onAuthStateChange((event)=>{
   if(event==='PASSWORD_RECOVERY')setTimeout(promptNewPassword,250);
 });
-
 function togglePw(inputId,btnId){
   const inp=document.getElementById(inputId);
   const btn=document.getElementById(btnId);
@@ -2501,7 +2424,7 @@ async function loadReceptionSessions(){
 }
 
 // ── NAVIGATION ──
-const ALL_VIEWS=['inicio','book','planes','rutinas','comunidad','shop','historial','perfil'];
+const ALL_VIEWS=['inicio','book','planes','rutinas','comunidad','historial','perfil'];
 const MEMBER_LOCKED_VIEWS=['book','rutinas','comunidad'];
 function canUseMemberViews(){
   return !!(curUser&&hasActive(curUser));
@@ -2517,7 +2440,7 @@ function sv(v){
     v='inicio';
   }
   document.querySelectorAll('.bnb').forEach((b,i)=>{
-    const name=['inicio','book','rutinas','comunidad','shop'][i];
+    const name=['inicio','book','rutinas','comunidad'][i];
     b.classList.toggle('active',name===v);
     b.classList.toggle('locked',MEMBER_LOCKED_VIEWS.includes(name)&&!canUseMemberViews());
   });
@@ -2528,7 +2451,6 @@ function sv(v){
   if(v==='planes')renderPlans();
   if(v==='rutinas'){renderRutinas().catch(console.error);}
   if(v==='comunidad'){renderFeedSb().catch(console.error);}
-  if(v==='shop'){renderShop('shop-content',false);loadShopProducts().then(()=>renderShop('shop-content',false)).catch(()=>{});handleShopReturn();}
   if(v==='historial'){renderHistorial().catch(console.error);}
   if(v==='perfil'){renderPerfil().catch(console.error);}
 }
@@ -2537,7 +2459,7 @@ function admTab(t){
   if(t!=='users'){expandedUsers=new Set();}
   if(t!=='boards'){expandedBoards=new Set();editingBoards=new Set();addingExBoards=new Set();assigningBoards=new Set();}
   document.querySelectorAll('.adm-tab').forEach((b,i)=>b.classList.toggle('active',
-    ['dash','slots','users','boards','payments','shop','comunidad','notifs'][i]===t));
+    ['dash','slots','users','boards','payments','comunidad','notifs'][i]===t));
   document.querySelectorAll('.adm-section').forEach(el=>el.classList.remove('active'));
   const el=document.getElementById('a-'+t);if(el)el.classList.add('active');
   if(t==='dash')renderDashboard();
@@ -2545,7 +2467,6 @@ function admTab(t){
   if(t==='users')renderUsersSb();
   if(t==='boards')renderBoardsAdmin();
   if(t==='payments')renderPaymentsSb();
-  if(t==='shop')renderAdminShopOrders();
   if(t==='comunidad')renderAdminFeed();
   if(t==='notifs')renderAdmNotifsSb();
 }
@@ -3247,342 +3168,6 @@ async function doPay(){
     hideLoading();
     toast('Error: '+e.message,'err');
     console.error(e);
-  }
-}
-
-// ── SHOP ─────────────────────────────────────────────────────
-function isPublicShopUrl(){
-  const params=new URLSearchParams(location.search);
-  return params.get('shop')==='1'||location.hash==='#shop';
-}
-function showPublicShop(){
-  stopReception();
-  document.body.classList.remove('reception-mode');
-  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
-  const el=document.getElementById('s-public-shop');
-  if(el)el.classList.add('active');
-  renderShop('public-shop-content',true);
-  loadShopProducts().then(()=>renderShop('public-shop-content',true)).catch(()=>{});
-}
-function showAuthFromShop(){
-  history.replaceState({},'',location.pathname);
-  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
-  const authEl=document.getElementById('s-auth');
-  if(authEl)authEl.classList.add('active');
-}
-function loadShopCart(){
-  try{return JSON.parse(sessionStorage.getItem('habit_shop_cart')||'{}')||{};}catch(e){return{};}
-}
-function saveShopCart(){
-  sessionStorage.setItem('habit_shop_cart',JSON.stringify(shopCart||{}));
-}
-function shopQty(id){return Math.max(0,parseInt(shopCart[id],10)||0);}
-function shopItems(){
-  return shopProducts.map(p=>({...p,qty:shopQty(p.id)})).filter(p=>p.qty>0);
-}
-function shopSubtotal(){
-  return shopItems().reduce((sum,p)=>sum+p.price*p.qty,0);
-}
-function shopShipping(){
-  const subtotal=shopSubtotal();
-  return shopDelivery==='shipping'&&subtotal>0&&subtotal<SHOP_FREE_SHIPPING_MIN?SHOP_SHIPPING_FEE:0;
-}
-function setShopQty(id,delta,targetId,publicMode){
-  const product=shopProducts.find(p=>p.id===id);
-  const maxQty=product&&product.trackInventory?Math.min(20,product.stock):20;
-  const next=Math.max(0,Math.min(maxQty,shopQty(id)+delta));
-  if(delta>0&&product&&product.trackInventory&&shopQty(id)>=product.stock){toast('Sin mas inventario disponible','warn');return;}
-  if(next)shopCart[id]=next;else delete shopCart[id];
-  saveShopCart();
-  renderShop(targetId||'shop-content',!!publicMode);
-}
-function addShopProduct(id,targetId,publicMode){
-  setShopQty(id,1,targetId,publicMode);
-  toast('Producto agregado','ok');
-}
-function setShopDelivery(method,targetId,publicMode){
-  shopDelivery=method==='shipping'?'shipping':'pickup';
-  renderShop(targetId||'shop-content',!!publicMode);
-}
-function productArt(p){
-  const cls=p.id==='habit-shirt'?'shop-art shirt':'shop-art';
-  if(p.imageUrl)return '<div class="'+cls+'" style="padding:0;overflow:hidden"><img src="'+esc(p.imageUrl)+'" alt="" style="width:100%;height:100%;object-fit:cover"></div>';
-  return '<div class="'+cls+'">'+esc(p.art||p.name.slice(0,2))+'</div>';
-}
-async function loadShopProducts(includeInactive){
-  try{
-    let q=sb.from('shop_products').select('*').order('sort_order',{ascending:true});
-    if(!includeInactive)q=q.eq('active',true);
-    const{data,error}=await q;
-    if(error)throw error;
-    if(data&&data.length){
-      shopProducts=data.map((p,i)=>({
-        id:p.id,
-        name:p.name,
-        price:Number(p.price)||0,
-        desc:p.description||'',
-        stock:Number(p.stock)||0,
-        trackInventory:p.track_inventory!==false,
-        imageUrl:p.image_url||'',
-        active:p.active!==false,
-        sortOrder:p.sort_order??(i+1)*10,
-        art:(p.name||'?').slice(0,2).toUpperCase()
-      }));
-    }
-  }catch(e){
-    console.warn('shop products fallback:',e.message||e);
-    shopProducts=[...DEFAULT_SHOP_PRODUCTS];
-  }
-}
-function renderShop(targetId,publicMode){
-  const el=document.getElementById(targetId);
-  if(!el)return;
-  const subtotal=shopSubtotal(),shipping=shopShipping(),total=subtotal+shipping;
-  const items=shopItems();
-  const cartHtml=items.length?items.map(p=>
-    '<div class="cart-row"><div class="cart-item"><div class="cart-name">'+esc(p.name)+'</div>'
-    +'<div class="cart-meta">'+p.qty+' x '+MXN(p.price)+'</div></div>'
-    +'<div style="font-size:13px;font-weight:800">'+MXN(p.qty*p.price)+'</div></div>'
-  ).join(''):'<div class="empty" style="padding:1rem 0">Tu carrito esta vacio.</div>';
-  const profileName=curUser&&curUser.name?curUser.name:'';
-  const profileEmail=sbUser&&sbUser.email?sbUser.email:'';
-  const profilePhone=curUser&&curUser.phone?curUser.phone:'';
-  el.innerHTML=
-    '<div class="shop-hero"><div class="shop-hero-k">HABIT shop</div><h2>Suplementos y merch</h2><p>Compra desde la app o desde Instagram. Recoge en el gym sin costo o recibe en casa por $100. Envio gratis arriba de $1,000.</p></div>'
-    +'<div class="shop-grid">'+shopProducts.filter(p=>p.active!==false).map(p=>{
-      const q=shopQty(p.id);
-      return '<div class="shop-card">'+productArt(p)+'<div class="shop-info">'
-        +'<div><div class="shop-name">'+esc(p.name)+'</div><div class="shop-desc">'+esc(p.desc)+'</div>'
-        +(p.trackInventory&&p.stock<=0?'<div class="badge bg-red" style="margin-top:6px">Agotado</div>':'')+'</div>'
-        +'<div class="shop-price">'+MXN(p.price)+'</div>'
-        +'<div class="shop-actions"><div class="qty-step"><button onclick="setShopQty(\''+p.id+'\',-1,\''+targetId+'\','+publicMode+')">-</button><span>'+q+'</span><button onclick="setShopQty(\''+p.id+'\',1,\''+targetId+'\','+publicMode+')">+</button></div>'
-        +'<button class="shop-add" '+(p.trackInventory&&p.stock<=0?'disabled style="opacity:.35"':'')+' onclick="addShopProduct(\''+p.id+'\',\''+targetId+'\','+publicMode+')">Agregar</button></div>'
-        +'</div></div>';
-    }).join('')+'</div>'
-    +'<div class="shop-cart"><p class="slbl" style="margin-bottom:6px">Carrito</p>'+cartHtml
-    +'<div class="delivery-toggle"><button class="'+(shopDelivery==='pickup'?'active':'')+'" onclick="setShopDelivery(\'pickup\',\''+targetId+'\','+publicMode+')">Entrega gym</button><button class="'+(shopDelivery==='shipping'?'active':'')+'" onclick="setShopDelivery(\'shipping\',\''+targetId+'\','+publicMode+')">Envio casa</button></div>'
-    +'<div class="cart-total"><span>Subtotal</span><span>'+MXN(subtotal)+'</span></div>'
-    +'<div class="cart-total"><span>Envio</span><span>'+(shipping?MXN(shipping):(shopDelivery==='shipping'&&subtotal>=SHOP_FREE_SHIPPING_MIN?'Gratis':'$0'))+'</span></div>'
-    +'<div class="cart-total" style="font-size:18px;color:var(--white)"><span>Total</span><span>'+MXN(total)+'</span></div>'
-    +(shopDelivery==='shipping'&&subtotal>0&&subtotal<SHOP_FREE_SHIPPING_MIN?'<div class="brow-meta" style="margin-top:6px">Agrega '+MXN(SHOP_FREE_SHIPPING_MIN-subtotal)+' para envio gratis.</div>':'')
-    +'<div class="shop-form"><p class="slbl">Datos de compra</p><div class="shop-form-grid">'
-    +'<div class="field"><label>Nombre</label><input id="'+targetId+'-name" value="'+esc(profileName)+'" placeholder="Nombre completo"></div>'
-    +'<div class="field"><label>Correo</label><input id="'+targetId+'-email" value="'+esc(profileEmail)+'" placeholder="correo@ejemplo.com" type="email"></div>'
-    +'<div class="field"><label>Telefono</label><input id="'+targetId+'-phone" value="'+esc(profilePhone)+'" placeholder="+52 669 000 0000" type="tel"></div>'
-    +(shopDelivery==='shipping'
-      ?'<div class="field"><label>Calle y numero</label><input id="'+targetId+'-line1" placeholder="Calle, numero, colonia"></div>'
-       +'<div class="field"><label>Ciudad</label><input id="'+targetId+'-city" value="Mazatlan" placeholder="Ciudad"></div>'
-       +'<div class="field"><label>Estado</label><input id="'+targetId+'-state" value="Sinaloa" placeholder="Estado"></div>'
-       +'<div class="field"><label>Codigo postal</label><input id="'+targetId+'-postal" placeholder="82000"></div>'
-      :'<div class="brow-meta" style="line-height:1.5">Te avisaremos cuando el pedido este listo para recoger en HABIT.</div>')
-    +'<div class="field"><label>Notas</label><textarea id="'+targetId+'-notes" placeholder="Sabor, talla, referencias de entrega..."></textarea></div>'
-    +'<button class="btn" '+(!items.length?'disabled':'')+' onclick="checkoutShop(\''+targetId+'\','+publicMode+')">Pagar con Stripe</button>'
-    +'</div></div></div>';
-}
-async function checkoutShop(targetId,publicMode){
-  const items=shopItems().map(p=>({product_id:p.id,quantity:p.qty}));
-  if(!items.length){toast('Agrega productos al carrito','err');return;}
-  const val=id=>(document.getElementById(targetId+'-'+id)||{value:''}).value.trim();
-  const customer={name:val('name'),email:val('email'),phone:val('phone')};
-  const shipping_address=shopDelivery==='shipping'?{
-    line1:val('line1'),city:val('city'),state:val('state'),postal_code:val('postal'),country:'MX'
-  }:null;
-  if(!customer.name||!customer.email||!customer.phone){toast('Completa tus datos','err');return;}
-  showLoading('Abriendo Stripe...');
-  try{
-    const{data}=await sb.auth.getSession();
-    const token=data&&data.session&&data.session.access_token;
-    const res=await fetch(apiUrl('/api/create-shop-checkout-session'),{
-      method:'POST',
-      headers:{'Content-Type':'application/json',...(token?{Authorization:'Bearer '+token}:{})},
-      body:JSON.stringify({items,customer,delivery_method:shopDelivery,shipping_address,notes:val('notes')})
-    });
-    const out=await res.json().catch(()=>({}));
-    if(!res.ok)throw new Error(out.error||'No se pudo crear el pago');
-    window.location.href=out.url;
-  }catch(e){
-    hideLoading();
-    toast('Error: '+e.message,'err');
-  }
-}
-function handleShopReturn(){
-  const params=new URLSearchParams(location.search);
-  if(params.get('shop_cancel')){
-    toast('Compra cancelada','warn');
-    return;
-  }
-  if(params.get('shop_success')){
-    shopCart={};saveShopCart();
-    toast('Compra recibida. Te contactaremos con el estado del pedido.','ok');
-    if(document.getElementById('shop-content'))renderShop('shop-content',false);
-    if(document.getElementById('public-shop-content'))renderShop('public-shop-content',true);
-  }
-}
-function shopStatusLabel(status){
-  return ({
-    pago_pendiente:'Pago pendiente',
-    solicitado:'Solicitado',
-    listo_para_entrega:'Listo para entregar',
-    listo_para_enviar:'Listo para enviar',
-    enviado:'Enviado',
-    recibido:'Recibido',
-    cancelado:'Cancelado'
-  })[status]||status;
-}
-async function renderAdminShopOrders(){
-  const el=document.getElementById('admin-shop-list');
-  if(!el)return;
-  el.innerHTML='<div class="empty">Cargando pedidos...</div>';
-  try{
-    await loadShopProducts(true);
-    const{data:orders,error}=await sb.from('shop_orders').select('*,shop_order_items(*)').order('created_at',{ascending:false});
-    if(error)throw error;
-    const paid=(orders||[]).filter(o=>o.payment_status==='paid');
-    const pending=(orders||[]).filter(o=>o.status==='solicitado').length;
-    const shipping=(orders||[]).filter(o=>o.delivery_method==='shipping'&&o.status!=='recibido'&&o.status!=='cancelado').length;
-    el.innerHTML=renderAdminShopProducts()
-      +'<div class="divider"></div><div class="metrics">'
-      +kpiCard('Pedidos pagados',paid.length,'bg-green')
-      +kpiCard('Solicitados',pending,'bg-blue')
-      +kpiCard('Envios activos',shipping,'bg-amber')
-      +kpiCard('Venta tienda',MXN(paid.reduce((s,o)=>s+Number(o.total||0),0)),'bg-green')
-      +'</div><p class="slbl" style="margin-bottom:10px">Pedidos</p>'
-      +(!(orders||[]).length?'<div class="empty">Sin pedidos aun.</div>':orders.map(o=>{
-        const items=(o.shop_order_items||[]).map(i=>i.quantity+' x '+i.product_name).join(' · ');
-        const addr=o.shipping_address?o.shipping_address:{};
-        const next=o.delivery_method==='shipping'
-          ?['solicitado','listo_para_enviar','enviado','recibido','cancelado']
-          :['solicitado','listo_para_entrega','recibido','cancelado'];
-        return '<div class="perfil-section"><div style="display:flex;justify-content:space-between;align-items:flex-start;gap:10px">'
-          +'<div><div class="brow-name">'+esc(o.customer_name)+'</div><div class="brow-meta">'+esc(o.customer_phone||'')+' · '+esc(o.customer_email||'')+'</div></div>'
-          +'<span class="order-status '+esc(o.status)+'">'+shopStatusLabel(o.status)+'</span></div>'
-          +'<div class="divider" style="margin:.75rem 0"></div>'
-          +'<div class="brow-meta" style="line-height:1.55">'+esc(items)+'</div>'
-          +'<div class="brow-meta" style="line-height:1.55;margin-top:6px">'+(o.delivery_method==='shipping'?'Envio a casa · '+esc([addr.line1,addr.city,addr.state,addr.postal_code].filter(Boolean).join(', ')):'Entrega en gym')+'</div>'
-          +(o.notes?'<div class="brow-meta" style="margin-top:6px">Notas: '+esc(o.notes)+'</div>':'')
-          +'<div class="cart-total"><span>Total</span><span>'+MXN(o.total)+'</span></div>'
-          +'<div class="field" style="margin-top:10px"><label>Estado</label><select onchange="adminUpdateShopOrder(\''+esc(o.id)+'\',this.value)">'
-          +next.map(s=>'<option value="'+s+'" '+(o.status===s?'selected':'')+'>'+shopStatusLabel(s)+'</option>').join('')
-          +'</select></div></div>';
-      }).join(''));
-  }catch(e){
-    const msg=String(e.message||e);
-    if(/shop_orders|shop_products|schema cache|Could not find the table/i.test(msg)){
-      el.innerHTML='<div class="perfil-section">'
-        +'<p class="slbl">Tienda pendiente</p>'
-        +'<div class="empty" style="padding:1rem 0;text-align:left;line-height:1.55">'
-        +'La pantalla ya esta instalada, pero falta crear las tablas de tienda en Supabase. '
-        +'Corre la migracion <strong style="color:var(--white)">migrations/015_shop.sql</strong> en Supabase SQL Editor y despues recarga la app.'
-        +'</div>'
-        +'<div class="brow-meta" style="line-height:1.55">Tablas necesarias: shop_products, shop_orders y shop_order_items.</div>'
-        +'</div>';
-      return;
-    }
-    el.innerHTML='<div class="empty">Error: '+esc(msg)+'</div>';
-  }
-}
-function shopSlug(v){
-  return String(v||'').trim().toLowerCase()
-    .normalize('NFD').replace(/[\u0300-\u036f]/g,'')
-    .replace(/[^a-z0-9]+/g,'-').replace(/^-+|-+$/g,'').slice(0,48);
-}
-function renderAdminShopProducts(){
-  return '<div class="perfil-section"><div style="display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:8px">'
-    +'<p class="slbl" style="margin:0">Productos</p>'
-    +'<button class="btn-sm bblue" style="width:34px;height:34px;padding:0;font-size:20px;line-height:1" title="Agregar producto" onclick="toggleAdminProductForm()">+</button>'
-    +'</div>'
-    +'<div id="admin-product-form" style="'+(adminProductFormOpen?'':'display:none')+'">'
-    +'<div class="field"><label>Nombre</label><input id="sp-name" placeholder="Ej: Pre workout"></div>'
-    +'<div class="field"><label>Precio</label><input id="sp-price" type="number" min="0" step="1" placeholder="0"></div>'
-    +'<div class="field"><label>Inventario</label><input id="sp-stock" type="number" min="0" step="1" placeholder="0"></div>'
-    +'<label class="terms-check" style="margin-bottom:12px"><input type="checkbox" id="sp-track" checked><span>Controlar inventario y pausar venta al llegar a 0.</span></label>'
-    +'<div class="field"><label>Descripcion</label><input id="sp-desc" placeholder="Descripcion corta"></div>'
-    +'<div class="field"><label>URL imagen</label><input id="sp-img" placeholder="https://..."></div>'
-    +'<button class="btn" onclick="adminSaveShopProduct()">Agregar producto</button></div>'
-    +'<div class="divider"></div>'
-    +(shopProducts.length?shopProducts.map(p=>'<div class="brow"><div class="brow-info"><div class="brow-name">'+esc(p.name)+'</div>'
-      +'<div class="brow-meta">'+MXN(p.price)+' · Stock: '+(p.trackInventory?p.stock:'Sin control')+' · '+esc(p.desc||'Sin descripcion')+'</div></div>'
-      +'<div style="display:flex;align-items:center;gap:6px"><button class="btn-sm bblue" onclick="adminAdjustStock(\''+esc(p.id)+'\',-1)">-</button><button class="btn-sm bblue" onclick="adminAdjustStock(\''+esc(p.id)+'\',1)">+</button><button class="btn-sm '+(p.active?'bgreen':'bred')+'" onclick="adminToggleShopProduct(\''+esc(p.id)+'\','+(!p.active)+')">'+(p.active?'Activo':'Pausado')+'</button></div></div>').join(''):'<div class="empty">Sin productos.</div>')
-    +'</div>';
-}
-function toggleAdminProductForm(){
-  adminProductFormOpen=!adminProductFormOpen;
-  renderAdminShopOrders();
-}
-async function adminSaveShopProduct(){
-  const name=(document.getElementById('sp-name')||{}).value?.trim()||'';
-  const price=Number((document.getElementById('sp-price')||{}).value||0);
-  const stock=Math.max(0,parseInt((document.getElementById('sp-stock')||{}).value||0,10)||0);
-  const trackInventory=(document.getElementById('sp-track')||{}).checked!==false;
-  const desc=(document.getElementById('sp-desc')||{}).value?.trim()||'';
-  const imageUrl=(document.getElementById('sp-img')||{}).value?.trim()||'';
-  if(!name){toast('Escribe nombre del producto','err');return;}
-  if(!price||price<0){toast('Escribe precio valido','err');return;}
-  const id=shopSlug(name);
-  if(!id){toast('Nombre invalido','err');return;}
-  showLoading('Guardando producto...');
-  try{
-    const sortOrder=(shopProducts.length+1)*10;
-    const{error}=await sb.from('shop_products').upsert({
-      id,name,description:desc,price,stock,track_inventory:trackInventory,image_url:imageUrl||null,active:true,sort_order:sortOrder,updated_at:new Date().toISOString()
-    });
-    if(error)throw error;
-    hideLoading();
-    toast('Producto guardado','ok');
-    renderAdminShopOrders();
-  }catch(e){
-    hideLoading();
-    toast('Error: '+e.message,'err');
-  }
-}
-async function adminAdjustStock(id,delta){
-  const product=shopProducts.find(p=>p.id===id);
-  if(!product)return;
-  const next=Math.max(0,(Number(product.stock)||0)+delta);
-  showLoading('Actualizando inventario...');
-  try{
-    const{error}=await sb.from('shop_products').update({stock:next,updated_at:new Date().toISOString()}).eq('id',id);
-    if(error)throw error;
-    hideLoading();
-    toast('Inventario actualizado','ok');
-    renderAdminShopOrders();
-  }catch(e){
-    hideLoading();
-    toast('Error: '+e.message,'err');
-  }
-}
-async function adminToggleShopProduct(id,active){
-  showLoading('Actualizando producto...');
-  try{
-    const{error}=await sb.from('shop_products').update({active,updated_at:new Date().toISOString()}).eq('id',id);
-    if(error)throw error;
-    hideLoading();
-    toast(active?'Producto activo':'Producto pausado','ok');
-    renderAdminShopOrders();
-  }catch(e){
-    hideLoading();
-    toast('Error: '+e.message,'err');
-  }
-}
-async function adminUpdateShopOrder(orderId,status){
-  showLoading('Actualizando pedido...');
-  try{
-    const{data}=await sb.auth.getSession();
-    const token=data&&data.session&&data.session.access_token;
-    const res=await fetch('/api/update-shop-order',{
-      method:'POST',
-      headers:{'Content-Type':'application/json',Authorization:'Bearer '+token},
-      body:JSON.stringify({order_id:orderId,status})
-    });
-    const out=await res.json().catch(()=>({}));
-    if(!res.ok)throw new Error(out.error||'No se pudo actualizar');
-    hideLoading();
-    toast('Pedido actualizado','ok');
-    renderAdminShopOrders();
-    if(document.getElementById('a-notifs')?.classList.contains('active'))renderAdminNotifsSb();
-  }catch(e){
-    hideLoading();
-    toast('Error: '+e.message,'err');
   }
 }
 
