@@ -876,7 +876,10 @@ body.reception-mode{background:#050505}
     </div>
 
     <!-- ALERTAS -->
-    <div id="a-notifs" class="adm-section"><div id="adm-notif-content"></div></div>
+    <div id="a-notifs" class="adm-section">
+      <div id="push-banner" style="margin-bottom:12px"></div>
+      <div id="adm-notif-content"></div>
+    </div>
 
     <!-- USER EDIT MODAL -->
     <div id="user-edit-modal" style="display:none;background:var(--card);border:1px solid var(--blue);border-radius:6px;padding:1rem;margin-bottom:1rem">
@@ -1021,7 +1024,7 @@ body.reception-mode{background:#050505}
 // ── CONFIG & SUPABASE ───────────────────────────────────────
 const SUPABASE_URL='https://pmpjteuqjusbiduevbwq.supabase.co';
 const SUPABASE_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBtcGp0ZXVxanVzYmlkdWV2YndxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc2OTI1NjUsImV4cCI6MjA5MzI2ODU2NX0.XbMzZoo2yqtrD8znLnyo_1zDfrdJAvAPj1lqGOyXnLw';
-const APP_VERSION='20260518-07';
+const APP_VERSION='20260518-08';
 const PUBLIC_APP_URL='https://habittraininghub.app/app.html';
 const PUBLIC_API_ORIGIN='https://www.habittraininghub.app';
 const sb=supabase.createClient(SUPABASE_URL,SUPABASE_KEY,{auth:{autoRefreshToken:true,persistSession:true,detectSessionInUrl:true}});
@@ -4456,7 +4459,33 @@ fixIOSHeight();
 // ADMIN — SUPABASE CONNECTED
 // ═══════════════════════════════════════
 
+function renderPushBanner(){
+  const el=document.getElementById('push-banner');
+  if(!el||!('Notification' in window))return;
+  const perm=Notification.permission;
+  if(perm==='granted'){
+    el.innerHTML='<div style="font-size:11px;color:#22c55e;font-weight:700;letter-spacing:.06em;text-transform:uppercase;padding:8px 0">&#10003; Notificaciones push activas</div>';
+  } else if(perm==='denied'){
+    el.innerHTML='<div style="font-size:11px;color:#ef4444;padding:8px 0">Notificaciones bloqueadas en este dispositivo. Actívalas desde Ajustes del celular.</div>';
+  } else {
+    el.innerHTML='<button class="btn" style="width:100%;margin-bottom:4px" onclick="enableAdminPush()">Activar notificaciones push</button>';
+  }
+}
+async function enableAdminPush(){
+  if(!('serviceWorker' in navigator)||!('PushManager' in window))return;
+  const perm=await Notification.requestPermission();
+  if(perm!=='granted'){renderPushBanner();return;}
+  try{
+    const reg=await navigator.serviceWorker.ready;
+    const existing=await reg.pushManager.getSubscription();
+    const sub=existing||await reg.pushManager.subscribe({userVisibleOnly:true,applicationServerKey:urlBase64ToUint8Array(VAPID_PUBLIC_KEY)});
+    await sb.from('push_subscriptions').upsert({user_id:sbUser.id,role:'admin',subscription:sub.toJSON(),updated_at:new Date().toISOString()},{onConflict:'user_id'});
+    toast('Notificaciones activadas','ok');
+  }catch(e){toast('Error: '+e.message,'err');console.warn(e);}
+  renderPushBanner();
+}
 async function renderAdmNotifsSb(){
+  renderPushBanner();
   const el=document.getElementById('adm-notif-content');
   el.innerHTML='<div class="empty">Cargando...</div>';
   try{
