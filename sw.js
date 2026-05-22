@@ -1,7 +1,7 @@
 // HABIT Training Hub — Service Worker
 // Push notifications + app shell caching
 
-const CACHE_VERSION = '20260521-01'; // keep in sync with APP_VERSION in app.html
+const CACHE_VERSION = '20260521-02'; // keep in sync with APP_VERSION in app.html
 const CACHE = `habit-${CACHE_VERSION}`;
 
 self.addEventListener('install', e => {

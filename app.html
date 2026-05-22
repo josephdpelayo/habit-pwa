@@ -904,6 +904,7 @@ body.reception-mode{background:#050505}
     <button class="adm-tab" onclick="admTab('shop')">Tienda</button>
     <button class="adm-tab" onclick="admTab('comunidad')">Comunidad</button>
     <button class="adm-tab" onclick="admTab('notifs')">Alertas</button>
+    <button class="adm-tab" onclick="admTab('reports')">Reportes</button>
   </div>
   <div class="scroll-area" style="padding-top:.75rem">
 
@@ -1157,7 +1158,7 @@ body.reception-mode{background:#050505}
 // ── CONFIG & SUPABASE ───────────────────────────────────────
 const SUPABASE_URL='https://pmpjteuqjusbiduevbwq.supabase.co';
 const SUPABASE_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBtcGp0ZXVxanVzYmlkdWV2YndxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc2OTI1NjUsImV4cCI6MjA5MzI2ODU2NX0.XbMzZoo2yqtrD8znLnyo_1zDfrdJAvAPj1lqGOyXnLw';
-const APP_VERSION='20260521-01';
+const APP_VERSION='20260521-02';
 const PUBLIC_APP_URL='https://habittraininghub.app/app.html';
 const PUBLIC_API_ORIGIN='https://www.habittraininghub.app';
 const SHOP_ALLOWED_EMAILS=['josephdpelayo@gmail.com'];
@@ -2638,7 +2639,7 @@ function admTab(t){
   if(t!=='users'){expandedUsers=new Set();}
   if(t!=='boards'){expandedBoards=new Set();editingBoards=new Set();addingExBoards=new Set();assigningBoards=new Set();}
   document.querySelectorAll('.adm-tab').forEach((b,i)=>b.classList.toggle('active',
-    ['dash','slots','users','boards','payments','shop','comunidad','notifs'][i]===t));
+    ['dash','slots','users','boards','payments','shop','comunidad','notifs','reports'][i]===t));
   document.querySelectorAll('.adm-section').forEach(el=>el.classList.remove('active'));
   const el=document.getElementById('a-'+t);if(el)el.classList.add('active');
   if(t==='dash')renderDashboard();
@@ -5006,37 +5007,65 @@ async function renderDashboard(){
   try{
     const today=mazToday();
     const monthStart=today.slice(0,7);
-    const[{data:allU},{data:pays},{data:bks},{data:logs}]=await Promise.all([
+    const cutoff14=addDaysDS(today,-14);
+    const[{data:allU},{data:pays},{data:bks},{data:logs},{data:recentBks}]=await Promise.all([
       sb.from('profiles').select('id,credits,plan_expiry,plan_id,role,name,phone').neq('role','admin'),
       sb.from('payments').select('amount,created_at,plan_name,user_id').order('created_at',{ascending:false}),
       sb.from('bookings').select('ds,status').eq('status','active'),
-      sb.from('access_log').select('id')
+      sb.from('access_log').select('id'),
+      sb.from('bookings').select('user_id').eq('status','active').gte('ds',cutoff14)
     ]);
-    const active=(allU||[]).filter(u=>{const _aP=[...PLANS.individual,...PLANS.grupal],_pp=_aP.find(x=>x.id===u.plan_id);const _ul=u.credits>=999||(_pp&&_pp.credits>=999);return(_ul||u.credits>0)&&(!u.plan_expiry||new Date(u.plan_expiry)>new Date());});
+    const allPlans=[...PLANS.individual,...PLANS.grupal];
+    const active=(allU||[]).filter(u=>{const pp=allPlans.find(x=>x.id===u.plan_id);const ul=u.credits>=999||(pp&&pp.credits>=999);return(ul||u.credits>0)&&(!u.plan_expiry||new Date(u.plan_expiry)>new Date());});
     const monthRev=(pays||[]).filter(p=>dsFromIsoMaz(p.created_at).startsWith(monthStart)).reduce((s,p)=>s+Number(p.amount),0);
     const totalRev=(pays||[]).reduce((s,p)=>s+Number(p.amount),0);
     const todayBks=(bks||[]).filter(b=>b.ds===today).length;
     const expiring=(allU||[]).filter(u=>{const d=daysUntil(u.plan_expiry);return d!==null&&d<=5&&d>=0;});
+    const recentIds=new Set((recentBks||[]).map(b=>b.user_id));
+    const atRisk=active.filter(u=>!recentIds.has(u.id));
 
-    // KPI cards
-    const dash=document.getElementById('a-dash');
-    if(!dash)return;
-    let html='<div class="metrics" style="margin-bottom:1rem">'
-      +'<div class="met"><div class="met-l">Socios activos</div><div class="met-v" style="color:var(--green)">'+active.length+'</div></div>'
+    // KPI cards — update #dash-kpis without replacing canvas elements
+    const kpisEl=document.getElementById('dash-kpis');
+    if(kpisEl)kpisEl.innerHTML=
+      '<div class="met"><div class="met-l">Socios activos</div><div class="met-v" style="color:var(--green)">'+active.length+'</div></div>'
       +'<div class="met"><div class="met-l">Total socios</div><div class="met-v">'+(allU||[]).length+'</div></div>'
-      +'<button class="met" onclick="admTab(&quot;payments&quot;)" style="text-align:left;cursor:pointer"><div class="met-l">Ingresos mes</div><div class="met-v" style="color:var(--bl)">'+MXN(monthRev)+'</div></button>'
-      +'<button class="met" onclick="admTab(&quot;payments&quot;)" style="text-align:left;cursor:pointer"><div class="met-l">Ingresos total</div><div class="met-v" style="color:var(--bl)">'+MXN(totalRev)+'</div></button>'
+      +'<button class="met" onclick="admTab(\'payments\')" style="text-align:left;cursor:pointer"><div class="met-l">Ingresos mes</div><div class="met-v" style="color:var(--bl)">'+MXN(monthRev)+'</div></button>'
+      +'<button class="met" onclick="admTab(\'payments\')" style="text-align:left;cursor:pointer"><div class="met-l">Ingresos total</div><div class="met-v" style="color:var(--bl)">'+MXN(totalRev)+'</div></button>'
       +'<div class="met"><div class="met-l">Reservas hoy</div><div class="met-v" style="color:var(--amber)">'+todayBks+'</div></div>'
-      +'<div class="met"><div class="met-l">Accesos gym</div><div class="met-v" style="color:var(--green)">'+(logs||[]).length+'</div></div>'
-      +'</div>';
+      +'<div class="met"><div class="met-l">Accesos gym</div><div class="met-v" style="color:var(--green)">'+(logs||[]).length+'</div></div>';
 
-    // Expiring memberships alert
+    // Draw charts
+    renderRevenueChart(pays);
+    renderBookingsChart(bks);
+    renderPlansChart(allU,allPlans);
+
+    // Expiry section content
+    const expEl=document.getElementById('expiry-section');
+    if(!expEl)return;
+    let html='';
+
+    // Socios en riesgo
+    if(atRisk.length){
+      html+='<div class="divider"></div><p class="slbl" style="margin-bottom:8px">⚠️ Sin reservar en +14 días ('+atRisk.length+')</p>';
+      atRisk.slice(0,6).forEach(u=>{
+        const digits=(u.phone||'').replace(/\D/g,'').slice(-10);
+        const waLink=digits?'https://wa.me/52'+digits+'?text='+encodeURIComponent('Hola '+u.name+' 👋 ¿Todo bien? Te esperamos en HABIT para tu próxima sesión 💪'):'';
+        html+='<div class="brow" style="margin-bottom:6px">'
+          +'<div class="brow-info"><div class="brow-name">'+esc(u.name)+'</div>'
+          +'<div class="brow-meta">'+(u.phone||'Sin teléfono')+'</div></div>'
+          +(waLink?'<a href="'+waLink+'" target="_blank" style="background:#25d366;color:#000;font-size:11px;font-weight:700;padding:4px 10px;border-radius:4px;white-space:nowrap;text-decoration:none">WA</a>':'')
+          +'</div>';
+      });
+      if(atRisk.length>6)html+='<p style="font-size:11px;color:var(--gray);margin:2px 0 0">y '+(atRisk.length-6)+' más</p>';
+    }
+
+    // Expiring memberships
     if(expiring.length){
-      html+='<p class="slbl" style="margin-bottom:8px">Membresias por vencer</p>';
+      html+='<div class="divider"></div><p class="slbl" style="margin-bottom:8px">Membresias por vencer</p>';
       expiring.forEach(u=>{
         const d=daysUntil(u.plan_expiry);
         html+='<div class="expiry-card"><div style="display:flex;justify-content:space-between;align-items:center">'
-          +'<div class="expiry-name">'+u.name+'</div>'
+          +'<div class="expiry-name">'+esc(u.name)+'</div>'
           +'<span class="badge '+(d<0?'bg-red':'bg-amber')+'">'+(d<0?'VENCIDA':d+'d')+'</span>'
           +'</div><div class="expiry-info">'+(u.phone||'')+'</div></div>';
       });
@@ -5044,7 +5073,7 @@ async function renderDashboard(){
 
     // Recent payments
     if(pays&&pays.length){
-      const payUserIds=[...new Set(pays.map(p=>p.user_id).filter(Boolean))];
+      const payUserIds=[...new Set(pays.slice(0,5).map(p=>p.user_id).filter(Boolean))];
       let payNameMap={};
       if(payUserIds.length){
         const{data:payProfiles}=await sb.from('profiles').select('id,name').in('id',payUserIds);
@@ -5054,13 +5083,13 @@ async function renderDashboard(){
       pays.slice(0,5).forEach(p=>{
         html+='<div class="brow" style="margin-bottom:6px">'
           +'<div class="brow-info"><div class="brow-name">'+esc(payNameMap[p.user_id]||'Usuario')+'</div>'
-          +'<div class="brow-meta">'+p.plan_name+' · '+fmtDateTimeMaz(p.created_at)+'</div></div>'
+          +'<div class="brow-meta">'+esc(p.plan_name)+' · '+fmtDateTimeMaz(p.created_at)+'</div></div>'
           +'<div style="font-weight:700;color:var(--green)">'+MXN(p.amount)+'</div>'
           +'</div>';
       });
     }
 
-    dash.innerHTML=html;
+    expEl.innerHTML=html;
   }catch(e){console.error('Dashboard error:',e);}
 }
 
@@ -5088,11 +5117,50 @@ function kpiCard(label,value,cls){
   return '<div class="met"><div class="met-l">'+label+'</div><div class="met-v '+(cls||'')+'">'+value+'</div></div>';
 }
 
-function renderRevenueChart(){}
+function renderRevenueChart(pays){
+  const ctx=document.getElementById('chart-revenue');
+  if(!ctx||typeof Chart==='undefined')return;
+  if(chartRevenue){chartRevenue.destroy();chartRevenue=null;}
+  const labels=[],data=[];
+  for(let i=5;i>=0;i--){
+    const d=new Date();d.setMonth(d.getMonth()-i);
+    const key=d.toISOString().slice(0,7);
+    labels.push(d.toLocaleDateString('es-MX',{month:'short'}));
+    data.push((pays||[]).filter(p=>dsFromIsoMaz(p.created_at).startsWith(key)).reduce((s,p)=>s+Number(p.amount),0));
+  }
+  chartRevenue=new Chart(ctx,{type:'bar',data:{labels,datasets:[{data,backgroundColor:'rgba(59,130,246,.55)',borderColor:'#3b82f6',borderWidth:1,borderRadius:4}]},options:{responsive:true,plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>'$'+c.parsed.y.toLocaleString('es-MX')}}},scales:{x:{grid:{color:'rgba(255,255,255,.04)'},ticks:{color:'#9ca3af',font:{size:11}}},y:{grid:{color:'rgba(255,255,255,.04)'},ticks:{color:'#9ca3af',callback:v=>v>=1000?'$'+(v/1000).toFixed(0)+'k':'$'+v}}}}});
+}
 
-function renderBookingsChart(){}
+function renderBookingsChart(bks){
+  const ctx=document.getElementById('chart-bookings');
+  if(!ctx||typeof Chart==='undefined')return;
+  if(chartBookings){chartBookings.destroy();chartBookings=null;}
+  const labels=[],data=[];
+  for(let i=6;i>=0;i--){
+    const d=new Date();d.setDate(d.getDate()-i);
+    const ds=d.toISOString().slice(0,10);
+    labels.push(d.toLocaleDateString('es-MX',{weekday:'short',day:'numeric'}));
+    data.push((bks||[]).filter(b=>b.ds===ds).length);
+  }
+  chartBookings=new Chart(ctx,{type:'bar',data:{labels,datasets:[{data,backgroundColor:'rgba(251,191,36,.55)',borderColor:'#fbbf24',borderWidth:1,borderRadius:4}]},options:{responsive:true,plugins:{legend:{display:false}},scales:{x:{grid:{color:'rgba(255,255,255,.04)'},ticks:{color:'#9ca3af',font:{size:10}}},y:{grid:{color:'rgba(255,255,255,.04)'},ticks:{color:'#9ca3af',stepSize:1,precision:0}}}}});
+}
 
-function renderPlansChart(){}
+function renderPlansChart(allU,allPlans){
+  const ctx=document.getElementById('chart-plans');
+  if(!ctx||typeof Chart==='undefined')return;
+  if(chartPlans){chartPlans.destroy();chartPlans=null;}
+  const plans=allPlans||[...PLANS.individual,...PLANS.grupal];
+  const mensual=(allU||[]).filter(u=>{const p=plans.find(x=>x.id===u.plan_id);return p&&p.credits>=999&&(!u.plan_expiry||new Date(u.plan_expiry)>new Date());}).length;
+  const visitas=(allU||[]).filter(u=>{const p=plans.find(x=>x.id===u.plan_id);return p&&p.credits<999&&u.credits>0&&(!u.plan_expiry||new Date(u.plan_expiry)>new Date());}).length;
+  const vencidos=(allU||[]).filter(u=>u.plan_id&&u.plan_expiry&&new Date(u.plan_expiry)<=new Date()).length;
+  const sinPlan=(allU||[]).filter(u=>!u.plan_id&&u.credits<=0).length;
+  const labels=['Mensual','Visitas','Vencidos','Sin plan'];
+  const data=[mensual,visitas,vencidos,sinPlan];
+  const colors=['#3b82f6','#22c55e','#ef4444','#6b7280'];
+  chartPlans=new Chart(ctx,{type:'doughnut',data:{labels,datasets:[{data,backgroundColor:colors,borderWidth:0,hoverOffset:4}]},options:{cutout:'65%',plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>c.label+': '+c.parsed}}}}});
+  const leg=document.getElementById('chart-plans-legend');
+  if(leg)leg.innerHTML=labels.map((l,i)=>'<div style="display:flex;align-items:center;gap:6px;margin-bottom:5px"><span style="width:9px;height:9px;border-radius:50%;background:'+colors[i]+';flex-shrink:0"></span><span style="color:#9ca3af">'+l+': <strong style="color:#e5e7eb">'+data[i]+'</strong></span></div>').join('');
+}
 
 // ── ADMIN USER MANAGEMENT ──
 function adminCreateUser(){
