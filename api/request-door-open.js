@@ -11,6 +11,21 @@ const LOCATION_EXEMPT_EMAILS = ['josephdpelayo@gmail.com', 'habit1@habit.com'];
 
 const supabase = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_SERVICE_ROLE_KEY);
 
+async function sendAdminPush(title, body, tag) {
+  const url = process.env.SUPABASE_URL;
+  const key = process.env.SUPABASE_SERVICE_ROLE_KEY;
+  if (!url || !key) return;
+  try {
+    await fetch(`${url}/functions/v1/send-push`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${key}` },
+      body: JSON.stringify({ target: 'admin', title, body, tag }),
+    });
+  } catch (e) {
+    console.warn('sendAdminPush error:', e.message);
+  }
+}
+
 function distanceMeters(aLat, aLng, bLat, bLng) {
   const toRad = deg => (deg * Math.PI) / 180;
   const r = 6371000;
@@ -388,9 +403,14 @@ module.exports = async function handler(req, res) {
     });
 
     const doorMsg = shellyResult.opened ? 'Puerta abierta' : 'Solicitud de apertura en cola';
+    const guestSuffix = activeBooking.guest_pass ? ` invitado de ${activeBooking.host_name}` : '';
     await supabase.from('admin_notifs').insert({
-      message: `${doorMsg}: ${profile.name}${activeBooking.guest_pass ? ` invitado de ${activeBooking.host_name}` : ''} · ${locationExempt ? 'ubicacion omitida' : `${distance} m`} · ${label}`,
+      message: `${doorMsg}: ${profile.name}${guestSuffix} · ${locationExempt ? 'ubicacion omitida' : `${distance} m`} · ${label}`,
     });
+
+    const pushEmoji = shellyResult.opened ? '🔓' : '⏳';
+    const pushTitle = shellyResult.opened ? 'Puerta abierta' : 'Apertura en cola';
+    sendAdminPush(`${pushEmoji} ${pushTitle}`, `${profile.name}${guestSuffix} · ${label}`, 'door-open').catch(() => {});
 
     return res.status(200).json({
       ok: true,

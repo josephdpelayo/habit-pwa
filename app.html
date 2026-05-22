@@ -1157,7 +1157,7 @@ body.reception-mode{background:#050505}
 // ── CONFIG & SUPABASE ───────────────────────────────────────
 const SUPABASE_URL='https://pmpjteuqjusbiduevbwq.supabase.co';
 const SUPABASE_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBtcGp0ZXVxanVzYmlkdWV2YndxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc2OTI1NjUsImV4cCI6MjA5MzI2ODU2NX0.XbMzZoo2yqtrD8znLnyo_1zDfrdJAvAPj1lqGOyXnLw';
-const APP_VERSION='20260519-09';
+const APP_VERSION='20260521-01';
 const PUBLIC_APP_URL='https://habittraininghub.app/app.html';
 const PUBLIC_API_ORIGIN='https://www.habittraininghub.app';
 const SHOP_ALLOWED_EMAILS=['josephdpelayo@gmail.com'];
@@ -2114,7 +2114,6 @@ async function renderAccess(){
       slot_str:timeStr,accessed_at:new Date().toISOString()
     }).catch(e=>console.warn('logAccess:',e));
       addAdminNotif('🔓 '+curUser.name+' accedió al gym · código '+curUser.accessCode+' · '+timeStr);
-      sendPush('admin','🔓 Acceso al gym',curUser.name+' abrió la puerta · '+timeStr,{tag:'door-open'});
     }
     // Timer color based on remaining time
     const minLeft=Math.floor(msToClose/60000);
@@ -2343,6 +2342,7 @@ async function completeRegister(reg){
     await new Promise(r=>setTimeout(r,800));
     await ensureProfile(reg);
     await loadUserData();
+    sendPush('admin','👤 Nuevo socio',curUser.name+' se registró · código '+curUser.accessCode,{tag:'new-member'});
     hideLoading();
     addN('Bienvenido/a a HABIT. Tu acceso se activa desde la app durante tu reserva.','success');
     showMainSb();

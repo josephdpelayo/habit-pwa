@@ -5,6 +5,21 @@ const LOG_THROTTLE_MS = 60 * 1000;
 
 const supabase = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_SERVICE_ROLE_KEY);
 
+async function sendAdminPush(title, body, tag) {
+  const url = process.env.SUPABASE_URL;
+  const key = process.env.SUPABASE_SERVICE_ROLE_KEY;
+  if (!url || !key) return;
+  try {
+    await fetch(`${url}/functions/v1/send-push`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${key}` },
+      body: JSON.stringify({ target: 'admin', title, body, tag }),
+    });
+  } catch (e) {
+    console.warn('sendAdminPush error:', e.message);
+  }
+}
+
 function normalizeCode(value) {
   return String(value || '').replace(/\D/g, '');
 }
@@ -38,6 +53,8 @@ async function maybeLogAccess(profile, booking, code) {
   await supabase.from('admin_notifs').insert({
     message: `Acceso por teclado: ${profile.name} · codigo ${code}# · ${label}`,
   });
+
+  sendAdminPush('⌨️ Acceso teclado', `${profile.name} · ${code}# · ${label}`, 'door-keypad').catch(() => {});
 
   return true;
 }
