@@ -1,4 +1,4 @@
-const { stripe, activateMembership, fulfillShopOrder } = require('./_fulfillment');
+const { stripe, activateMembership, fulfillShopOrder } = require('../lib/_fulfillment');
 
 function readRawBody(req) {
   return new Promise((resolve, reject) => {
