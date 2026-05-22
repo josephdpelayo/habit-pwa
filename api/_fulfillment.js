@@ -105,6 +105,9 @@ async function activateMembership(session) {
   if (!plan || !userId) throw new Error('Missing payment metadata');
   if (session.payment_status && session.payment_status !== 'paid') throw new Error('Payment is not paid');
 
+  const recorded = await recordPaidStripeSession(session);
+  if (recorded.duplicate) return { activated: true, recorded: false, duplicate: true };
+
   const expiry = mazEndOfDayIso(plan.days);
   const { error: profileError } = await supabase
     .from('profiles')
@@ -117,8 +120,7 @@ async function activateMembership(session) {
     .eq('id', userId);
   if (profileError) throw profileError;
 
-  const recorded = await recordPaidStripeSession(session);
-  return { activated: true, recorded: !!recorded.recorded, duplicate: !!recorded.duplicate };
+  return { activated: true, recorded: true, duplicate: false };
 }
 
 async function fulfillShopOrder(session) {

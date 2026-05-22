@@ -1,5 +1,5 @@
 const { createClient } = require('@supabase/supabase-js');
-const { slotLabel, accessWindow } = require('../lib/_slots');
+const { slotLabel, accessWindow } = require('./_slots');
 
 const DEFAULT_RADIUS_M = 120;
 const DEFAULT_MAX_ACCURACY_M = 150;

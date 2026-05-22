@@ -1,5 +1,5 @@
 const { createClient } = require('@supabase/supabase-js');
-const { slotLabel, accessWindow } = require('../lib/_slots');
+const { slotLabel, accessWindow } = require('./_slots');
 
 const LOG_THROTTLE_MS = 60 * 1000;
 
