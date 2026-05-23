@@ -1157,7 +1157,7 @@ body.reception-mode{background:#050505}
 // ── CONFIG & SUPABASE ───────────────────────────────────────
 const SUPABASE_URL='https://pmpjteuqjusbiduevbwq.supabase.co';
 const SUPABASE_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBtcGp0ZXVxanVzYmlkdWV2YndxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc2OTI1NjUsImV4cCI6MjA5MzI2ODU2NX0.XbMzZoo2yqtrD8znLnyo_1zDfrdJAvAPj1lqGOyXnLw';
-const APP_VERSION='20260523-01';
+const APP_VERSION='20260523-02';
 const PUBLIC_APP_URL='https://habittraininghub.app/app.html';
 const PUBLIC_API_ORIGIN='https://www.habittraininghub.app';
 const SHOP_ALLOWED_EMAILS=['josephdpelayo@gmail.com'];
@@ -2094,6 +2094,14 @@ async function loadAccessData(){
         }));
       }
     }
+    const today=mazToday();
+    const{data:myWaits}=await sb.from('slot_waitlist').select('id,ds,slot_idx,created_at').eq('user_id',sbUser.id).gte('ds',today).limit(20);
+    (myWaits||[]).forEach(w=>{
+      const k=w.ds+'_'+w.slot_idx;
+      if(!waitlists[k])waitlists[k]=[];
+      if(!waitlists[k].find(x=>x.userId===sbUser.id))
+        waitlists[k].push({id:w.id,userId:sbUser.id,name:curUser.name,phone:curUser.phone||'',ts:w.created_at});
+    });
   }catch(e){console.warn('loadAccessData:',e);}
   renderAccess();
 }
@@ -3273,14 +3281,30 @@ async function doConfirm(){
   }
 }
 
-function doWaitlist(){
+async function doWaitlist(){
   if(selStartIdx===null)return;
   const ds=dk(curDate),key=ds+'_'+selStartIdx;
   if(!waitlists[key])waitlists[key]=[];
   if(waitlists[key].find(w=>w.userId===curUser.id)){toast('Ya estás en lista de espera','warn');return;}
-  waitlists[key].push({userId:curUser.id,name:curUser.name,phone:curUser.phone||'',ts:new Date().toISOString()});
-  addN('Lista de espera · '+fmtDS(dk(curDate))+' '+fmtSlot(selStartIdx)+'. Te avisamos si se libera.','warn');
-  toast('En lista de espera','warn');clearSel();
+  showLoading('Guardando...');
+  try{
+    const{data,error}=await sb.from('slot_waitlist').insert({
+      ds,slot_idx:selStartIdx,user_id:sbUser.id,
+      name:curUser.name,phone:curUser.phone||''
+    }).select().single();
+    if(error)throw error;
+    waitlists[key].push({id:data.id,userId:curUser.id,name:curUser.name,phone:curUser.phone||'',ts:data.created_at});
+    hideLoading();
+    addN('Lista de espera · '+fmtDS(dk(curDate))+' '+fmtSlot(selStartIdx)+'. Te avisamos si se libera.','warn');
+    toast('En lista de espera','warn');clearSel();
+  }catch(e){
+    hideLoading();
+    if(String(e.code||'').includes('23505')||String(e.message||'').toLowerCase().includes('duplicate')){
+      toast('Ya estás en lista de espera','warn');
+    }else{
+      toast('No se pudo guardar','err');console.error('doWaitlist:',e);
+    }
+  }
 }
 
 function canCancelBk(b){
@@ -4349,15 +4373,20 @@ async function renderAdmSlots(){
   const el=document.getElementById('adm-slot-content');
   el.innerHTML='<div class="empty">Cargando...</div>';
   try{
-    const[bookingRes,blockRes]=await Promise.allSettled([
+    const[bookingRes,blockRes,waitRes]=await Promise.allSettled([
       sb.from('bookings').select('*,profiles(name,phone,access_code)').eq('ds',ds).eq('status','active').order('start_idx'),
-      sb.from('slot_blocks').select('*').eq('ds',ds)
+      sb.from('slot_blocks').select('*').eq('ds',ds),
+      sb.from('slot_waitlist').select('id,slot_idx,user_id,name,phone,created_at').eq('ds',ds).order('created_at')
     ]);
     if(bookingRes.status==='rejected')throw bookingRes.reason;
     const{data:bks,error}=bookingRes.value;
     if(error)throw error;
     const blocks=blockRes.status==='fulfilled'?(blockRes.value.data||[]):[];
     const bookings=bks||[];
+    // Populate waitlists for this date
+    const waitData=waitRes.status==='fulfilled'?(waitRes.value.data||[]):[];
+    Object.keys(waitlists).filter(k=>k.startsWith(ds+'_')).forEach(k=>delete waitlists[k]);
+    waitData.forEach(w=>{const k=ds+'_'+w.slot_idx;if(!waitlists[k])waitlists[k]=[];waitlists[k].push({id:w.id,userId:w.user_id,name:w.name||'Socio',phone:w.phone||'',ts:w.created_at});});
     const slotRows=Array.from({length:TOTAL_SLOTS},()=>({taken:0,blocked:0,items:[]}));
     (blocks||[]).forEach(b=>{
       const idx=Number(b.slot_idx);
@@ -4419,9 +4448,21 @@ async function renderAdmSlots(){
       const blockHtml=blocks.length
         ? blocks.map(it=>'<div class="adm-slot-note">Bloqueado: '+it.spots+' espacio'+(it.spots>1?'s':'')+' · '+esc(it.reason||'Sin motivo')+'</div>').join('')
         : '';
+      const wlist=waitlists[ds+'_'+idx]||[];
+      const waitHtml=wlist.length
+        ?'<div style="margin-top:6px;padding-top:6px;border-top:1px solid var(--border)">'
+          +'<div style="font-size:10px;font-weight:700;color:var(--amber);letter-spacing:.06em;margin-bottom:4px">LISTA DE ESPERA ('+wlist.length+')</div>'
+          +wlist.map((w,wi)=>'<div style="display:flex;align-items:center;justify-content:space-between;padding:2px 0">'
+            +'<span style="font-size:12px;color:var(--white)">'+esc(w.name)+'</span>'
+            +'<div style="display:flex;gap:3px">'
+            +'<button class="btn-sm bblue" style="padding:1px 7px;font-size:11px" data-ds="'+ds+'" data-idx="'+idx+'" data-wi="'+wi+'" onclick="admPromote(this.dataset.ds,parseInt(this.dataset.idx),parseInt(this.dataset.wi))">Confirmar</button>'
+            +'<button class="btn-sm bred" style="padding:1px 7px;font-size:11px" data-wid="'+w.id+'" data-ds="'+ds+'" data-idx="'+idx+'" data-wi="'+wi+'" onclick="admDelWait(this.dataset.wid,this.dataset.ds,parseInt(this.dataset.idx),parseInt(this.dataset.wi))">✕</button>'
+            +'</div></div>').join('')
+          +'</div>'
+        :'';
       html+='<div class="brow adm-slot-row">'
         +'<div class="slot-time">'+fmtSlot(idx)+'</div>'
-        +'<div class="adm-slot-main"><div class="adm-slot-head">'+adminCapacityDots(row.taken,row.blocked)+(blocks.length?'<span class="badge bg-amber">Bloqueado</span>':'')+'</div>'+peopleHtml+blockHtml+'</div>'
+        +'<div class="adm-slot-main"><div class="adm-slot-head">'+adminCapacityDots(row.taken,row.blocked)+(blocks.length?'<span class="badge bg-amber">Bloqueado</span>':'')+(wlist.length?'<span class="badge bg-amber" style="background:rgba(245,158,11,.15);color:var(--amber)">'+wlist.length+' espera</span>':'')+'</div>'+peopleHtml+blockHtml+waitHtml+'</div>'
         +'<div class="adm-slot-actions"><button class="btn-sm bblue" data-idx="'+idx+'" onclick="toggleBlockPanel(parseInt(this.dataset.idx))">Bloq.</button>'
         +(row.blocked?'<button class="btn-sm bred" data-ds="'+ds+'" data-idx="'+idx+'" onclick="unblockSlotSb(this.dataset.ds,parseInt(this.dataset.idx))">Abrir</button>':'')+'</div>'
         +'<div id="blk-panel-'+idx+'" class="adm-block-panel" style="flex-direction:column;gap:8px;padding:10px;width:100%;box-sizing:border-box">'
@@ -4643,18 +4684,53 @@ function admDelFromSlot(ds,idx,userId){
   addAdminNotif('❌ Reserva cancelada (admin): '+(u?u.name:userId)+' · '+fmtDS(ds)+' '+fmtSlot(idx));
   toast('Reserva cancelada');renderAdmSlots();renderStats();
 }
-function admDelWait(ds,idx,i){const key=ds+'_'+idx;if(waitlists[key])waitlists[key].splice(i,1);renderAdmSlots();}
-function admPromote(ds,idx,i){
+async function admDelWait(wid,ds,idx,wi){
   const key=ds+'_'+idx;
-  if(!waitlists[key]||!waitlists[key][i])return;
-  const p=waitlists[key].splice(i,1)[0];
-  const day=getDaySlots(ds);
-  const entry={userId:p.userId,name:p.name,phone:p.phone||'',isGroup:false};
-  for(let j=0;j<BOOKING_SLOTS;j++){const si=idx+j;if(!day[si])day[si]=[];day[si].push(entry);}
-  const wu=users[p.userId];
-  if(wu){addN('Tu lista de espera fue confirmada. Abre la puerta desde la app al llegar.','success');}
-  addAdminNotif('✅ '+p.name+' promovido desde lista de espera');
-  toast(p.name+' confirmado/a','ok');renderAdmSlots();
+  try{
+    const{error}=await sb.from('slot_waitlist').delete().eq('id',wid);
+    if(error)throw error;
+    if(waitlists[key])waitlists[key].splice(wi,1);
+    renderAdmSlots();
+  }catch(e){toast('Error al eliminar','err');console.error('admDelWait:',e);}
+}
+async function admPromote(ds,idx,wi){
+  const key=ds+'_'+idx;
+  const p=waitlists[key]&&waitlists[key][wi];
+  if(!p){toast('Entrada no encontrada','err');return;}
+  showLoading('Confirmando...');
+  try{
+    const{data:prof,error:profErr}=await sb.from('profiles').select('credits,plan_id,plan_type,plan_expiry').eq('id',p.userId).single();
+    if(profErr)throw profErr;
+    const allPlans=[...PLANS.individual,...PLANS.grupal];
+    const plan=allPlans.find(x=>x.id===prof.plan_id);
+    const isGrupal=prof.plan_type==='grupal'||(plan&&plan.type==='grupal');
+    const isUnlimited=prof.credits>=999||(plan&&plan.credits>=999);
+    const BSLOTS=3;
+    const slotsNeeded=[];
+    for(let i=0;i<BSLOTS;i++){const si=(idx+i)%48;const dsi=idx+i>=48?addDaysDS(ds,1):ds;slotsNeeded.push({ds:dsi,slot_idx:si});}
+    const startMin=idx*30,endMin=(idx+BSLOTS)*30;
+    const pad=n=>String(n).padStart(2,'0'),fmtM=m=>pad(Math.floor(m/60))+':'+pad(m%60);
+    const timeStr=fmtM(startMin)+' - '+fmtM(endMin%1440);
+    const{data:bk,error:bkErr}=await sb.from('bookings').insert({
+      user_id:p.userId,ds,start_idx:idx,slots_used:BSLOTS,
+      time_str:timeStr,dur_min:90,status:'active',
+      is_group:isGrupal,grupal_spots:isGrupal?CAP:null
+    }).select().single();
+    if(bkErr)throw bkErr;
+    const{error:occErr}=await sb.from('slot_occupancy').insert(
+      slotsNeeded.map(s=>({ds:s.ds,slot_idx:s.slot_idx,user_id:p.userId,booking_id:bk.id,is_group:isGrupal}))
+    );
+    if(occErr)throw occErr;
+    if(!isUnlimited){
+      const{data:fp}=await sb.from('profiles').select('credits').eq('id',p.userId).single();
+      await sb.from('profiles').update({credits:Math.max(0,(fp?fp.credits:prof.credits)-1)}).eq('id',p.userId).catch(e=>console.warn('credit:',e.message));
+    }
+    await sb.from('slot_waitlist').delete().eq('id',p.id);
+    if(waitlists[key])waitlists[key].splice(wi,1);
+    sendPush('user:'+p.userId,'✅ ¡Ya tienes lugar!','Tu espera del '+fmtDS(ds)+' '+timeStr+' fue confirmada.',{tag:'waitlist-promote'});
+    addAdminNotif('✅ '+p.name+' promovido desde lista de espera · '+ds+' '+timeStr);
+    hideLoading();toast(p.name+' confirmado/a','ok');renderAdmSlots();
+  }catch(e){hideLoading();toast('Error al confirmar','err');console.error('admPromote:',e);}
 }
 
 // ── ADMIN: USERS ─────────────────────────────────────────────
