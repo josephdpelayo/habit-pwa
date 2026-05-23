@@ -4247,6 +4247,28 @@ function cropPostImage(){
     img.src=postImageState.src;
   });
 }
+function cropPostImageBlob(){
+  return new Promise((resolve,reject)=>{
+    if(!postImageState||!postImageState.src)return resolve(null);
+    const img=new Image();
+    img.onload=()=>{
+      const outW=900,outH=1125,ratio=outW/outH;
+      const zoom=Math.max(1,Math.min(2,Number(postImageState.zoom)||1));
+      let sw=img.width,sh=sw/ratio;
+      if(sh>img.height){sh=img.height;sw=sh*ratio;}
+      sw=sw/zoom;sh=sh/zoom;
+      const sx=Math.max(0,(img.width-sw)/2);
+      const sy=Math.max(0,(img.height-sh)/2);
+      const canvas=document.createElement('canvas');
+      canvas.width=outW;canvas.height=outH;
+      const ctx=canvas.getContext('2d');
+      ctx.drawImage(img,sx,sy,sw,sh,0,0,outW,outH);
+      canvas.toBlob(blob=>blob?resolve(blob):reject(new Error('toBlob falló')),'image/jpeg',0.82);
+    };
+    img.onerror=()=>reject(new Error('No se pudo preparar la foto'));
+    img.src=postImageState.src;
+  });
+}
 function clearPostImg(){
   const prev=document.getElementById('post-img-preview');
   prev.style.display='none';prev.innerHTML='';prev._imgData=null;
@@ -6172,11 +6194,22 @@ async function createPostSb(){
   if(text.length>500){toast('Maximo 500 caracteres','err');return;}
   showLoading('Publicando...');
   try{
+    let imgUrl=null;
+    if(imgData){
+      const blob=await cropPostImageBlob();
+      if(blob){
+        const fileName=sbUser.id+'/'+Date.now()+'.jpg';
+        const{data:up,error:upErr}=await sb.storage.from('community-images').upload(fileName,blob,{contentType:'image/jpeg',upsert:false});
+        if(upErr)throw new Error('Error subiendo imagen: '+upErr.message);
+        const{data:urlData}=sb.storage.from('community-images').getPublicUrl(up.path);
+        imgUrl=urlData.publicUrl;
+      }
+    }
     const postData={
       user_id:sbUser.id,
       user_name:curUser.name,
       text_content:text||null,
-      img_url:imgData?await cropPostImage():null,
+      img_url:imgUrl,
       reactions:{fire:0,clap:0,heart:0}
     };
     const{data,error}=await sb.from('posts').insert(postData).select().single();
@@ -6251,10 +6284,10 @@ async function renderFeedSb(){
 
 async function toggleReactionSb(btn){
   const postId=btn.dataset.post,type=btn.dataset.type;
+  const wasActive=btn.classList.contains('active');
+  btn.disabled=true;
   try{
-    const{data:existing}=await sb.from('post_reactions')
-      .select('id').eq('post_id',postId).eq('user_id',sbUser.id).eq('reaction_type',type);
-    if(existing&&existing.length){
+    if(wasActive){
       await sb.from('post_reactions').delete().eq('post_id',postId).eq('user_id',sbUser.id).eq('reaction_type',type);
     }else{
       await sb.from('post_reactions').insert({post_id:postId,user_id:sbUser.id,reaction_type:type});
@@ -6262,8 +6295,14 @@ async function toggleReactionSb(btn){
       const label={fire:'reaccionó a tu publicación',clap:'aplaudió tu publicación',heart:'le gustó tu publicación'}[type]||'reaccionó a tu publicación';
       await addUserNotif(post?.user_id,'reaction',(curUser?.name||'Alguien')+' '+label,postId);
     }
-    renderFeedSb();
+    const emoji={fire:'🔥',clap:'👏',heart:'❤️'}[type]||'';
+    const match=btn.textContent.match(/(\d+)/);
+    let count=match?parseInt(match[1]):0;
+    if(!wasActive)count++;else count=Math.max(0,count-1);
+    btn.textContent=emoji+(count>0?' '+count:'');
+    btn.classList.toggle('active',!wasActive);
   }catch(e){console.error(e);}
+  btn.disabled=false;
 }
 
 async function addCommentSb(input){
@@ -6272,16 +6311,30 @@ async function addCommentSb(input){
   if(text.length>300){toast('Comentario maximo 300 caracteres','err');return;}
   input.disabled=true;
   try{
-    const{error}=await sb.from('post_comments').insert({
-      post_id:postId,
-      user_id:sbUser.id,
-      user_name:curUser.name,
-      text_content:text
-    });
+    const{data:inserted,error}=await sb.from('post_comments').insert({
+      post_id:postId,user_id:sbUser.id,user_name:curUser.name,text_content:text
+    }).select().single();
     if(error)throw error;
     input.value='';
     await addUserNotif(ownerId,'comment',(curUser?.name||'Alguien')+' comentó tu publicación',postId);
-    renderFeedSb();
+    // append in-place without full re-fetch
+    const commentSection=input.closest('.post-comments');
+    if(commentSection){
+      const emptyEl=commentSection.querySelector('[style*="Sin comentarios"]');
+      if(emptyEl)emptyEl.remove();
+      const row=document.createElement('div');row.className='comment-row';
+      row.innerHTML=avatarHtml(curUser.name,curUser.avatarUrl||'','comment-av')
+        +'<div class="comment-body"><div class="comment-meta">'+esc(curUser.name)+'<span class="comment-time">ahora</span></div>'
+        +'<div class="comment-text">'+esc(text)+'</div></div>';
+      const form=commentSection.querySelector('.comment-form');
+      commentSection.insertBefore(row,form);
+      // update comment counter on post-reactions bar
+      const rxBar=commentSection.previousElementSibling;
+      if(rxBar){
+        const counter=rxBar.querySelector('span[style*="coment"]');
+        if(counter){const n=parseInt(counter.textContent)||0;counter.textContent=(n+1)+' coment.';}
+      }
+    }
   }catch(e){
     console.error(e);
     toast('Error al comentar: '+(e.message||e),'err');
