@@ -2034,8 +2034,10 @@ async function renderGuestGroup(reload=true){
   }
   paintGuestGroup();
 }
+let _savingGuestGroup=false;
 async function saveGuestGroup(){
-  if(!hasGuestChanges())return;
+  if(!hasGuestChanges()||_savingGuestGroup)return;
+  _savingGuestGroup=true;
   const ids=[...guestSelected].slice(0,4);
   try{
     const favRows=guestFavorites.map(g=>({host_user_id:sbUser.id,guest_user_id:g.id}));
@@ -2062,6 +2064,8 @@ async function saveGuestGroup(){
     paintGuestGroup();
   }catch(e){
     toast('No se pudo guardar grupo: '+(e.message||'error'),'err');
+  }finally{
+    _savingGuestGroup=false;
   }
 }
 
@@ -4456,14 +4460,25 @@ function setSlotPanelMode(idx,mode){
 }
 
 let _adminBookingUser={};
+let _adminBookProfiles=null,_adminBookProfilesLoading=false;
+async function _loadAdminBookProfiles(){
+  if(_adminBookProfiles)return _adminBookProfiles;
+  if(_adminBookProfilesLoading)return null;
+  _adminBookProfilesLoading=true;
+  try{
+    const{data}=await sb.from('profiles').select('id,name,phone,credits,plan_id,plan_expiry').neq('role','admin').neq('role','reception').order('name').limit(1000);
+    _adminBookProfiles=data||[];
+  }finally{_adminBookProfilesLoading=false;}
+  return _adminBookProfiles;
+}
 async function adminSearchForBooking(idx,q){
   const resEl=document.getElementById('blk-user-results-'+idx);
   if(!resEl)return;
   q=(q||'').trim().toLowerCase();
   if(q.length<2){resEl.innerHTML='';return;}
-  const{data}=await sb.from('profiles').select('id,name,phone,credits,plan_id,plan_expiry').neq('role','admin').neq('role','reception').order('name');
-  const matches=(data||[]).filter(u=>(u.name||'').toLowerCase().includes(q)).slice(0,8);
-  // Store in map for safe retrieval
+  const profiles=await _loadAdminBookProfiles();
+  if(!profiles)return;
+  const matches=profiles.filter(u=>(u.name||'').toLowerCase().includes(q)).slice(0,8);
   if(!window._adminBookMap)window._adminBookMap={};
   matches.forEach(u=>window._adminBookMap[u.id]=u);
   resEl.innerHTML=matches.map(u=>'<div onclick="adminSelectBookingUser('+idx+',&quot;'+u.id+'&quot;)" style="padding:8px 10px;cursor:pointer;border-bottom:1px solid var(--border);font-size:13px;color:var(--white);background:var(--card2)">'+esc(u.name||'')+'<span style="font-size:11px;color:var(--gray);margin-left:6px">'+(u.phone||'')+'</span></div>').join('');
@@ -4737,7 +4752,7 @@ function filterBoardAssignees(input){
 
 async function renderBoardsAdmin(){
   await loadBoardsSb();
-  const{data:allU}=await sb.from('profiles').select('id,name').neq('role','admin').order('name');
+  const{data:allU}=await sb.from('profiles').select('id,name').neq('role','admin').order('name').limit(1000);
   const users=allU||[];
   const el=document.getElementById('boards-list');
   if(!el)return;
@@ -5058,7 +5073,7 @@ async function renderDashboard(){
     const cutoff14=addDaysDS(today,-14);
     const[{data:allU},{data:pays},{data:bks},{data:logs},{data:recentBks}]=await Promise.all([
       sb.from('profiles').select('id,credits,plan_expiry,plan_id,role,name,phone').neq('role','admin'),
-      sb.from('payments').select('amount,created_at,plan_name,user_id').order('created_at',{ascending:false}),
+      sb.from('payments').select('amount,created_at,plan_name,user_id').order('created_at',{ascending:false}).limit(2000),
       sb.from('bookings').select('ds,status').eq('status','active'),
       sb.from('access_log').select('id'),
       sb.from('bookings').select('user_id').eq('status','active').gte('ds',cutoff14)
