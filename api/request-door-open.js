@@ -1,7 +1,7 @@
 const { createClient } = require('@supabase/supabase-js');
 const { slotLabel, accessWindow } = require('../lib/_slots');
 
-const DEFAULT_RADIUS_M = 120;
+const DEFAULT_RADIUS_M = 500;
 const DEFAULT_MAX_ACCURACY_M = 150;
 const SHELLY_DEFAULT_TURN = 'off';
 const SHELLY_DEFAULT_RELEASE_SECONDS = 5;
