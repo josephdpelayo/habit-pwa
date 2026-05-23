@@ -1157,7 +1157,7 @@ body.reception-mode{background:#050505}
 // ── CONFIG & SUPABASE ───────────────────────────────────────
 const SUPABASE_URL='https://pmpjteuqjusbiduevbwq.supabase.co';
 const SUPABASE_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBtcGp0ZXVxanVzYmlkdWV2YndxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc2OTI1NjUsImV4cCI6MjA5MzI2ODU2NX0.XbMzZoo2yqtrD8znLnyo_1zDfrdJAvAPj1lqGOyXnLw';
-const APP_VERSION='20260522-01';
+const APP_VERSION='20260523-01';
 const PUBLIC_APP_URL='https://habittraininghub.app/app.html';
 const PUBLIC_API_ORIGIN='https://www.habittraininghub.app';
 const SHOP_ALLOWED_EMAILS=['josephdpelayo@gmail.com'];
@@ -1281,11 +1281,11 @@ function showMainSb(){
   updateTopActions('inicio');
   if('Notification' in window&&Notification.permission==='default')Notification.requestPermission().catch(()=>{});
   renderMembershipStatus();
-  renderAccess();
+  loadAccessData();
   renderGuestGroup().catch(console.error);
   renderActiveBookings().catch(console.error);
   updateShopCartBadge();
-  startUserNotifPolling();
+  startUserNotifRealtime();
   startTimer();
   
 }
@@ -1588,7 +1588,7 @@ let slots30={};
 let waitlists={}; // waitlists[ds+'_'+slotIdx] = [{userId,name,...}]
 let payments=[], boards=[], scores={}, posts=[], accessLog=[], adminNotifs=[];
 let curUser=null, curDate=dateObjFromDS(mazToday()), selStartIdx=null, selShort=false, selPlan=null, selPT='individual', selectedRoutineBoardId=null;
-let accInt=null, userNotifInt=null, receptionClockInt=null, receptionDataInt=null, userNotifBootstrapped=false, userNotifSeen=new Set(), notifs=[], expandedVideos={}, logScoreCtx=null, expandedUsers=new Set();
+let accInt=null, accessDataInt=null, notifChannel=null, userNotifInt=null, receptionClockInt=null, receptionDataInt=null, userNotifBootstrapped=false, userNotifSeen=new Set(), notifs=[], expandedVideos={}, logScoreCtx=null, expandedUsers=new Set();
 let receptionSessions=[], receptionLastSync=null, receptionLoading=false;
 let guestFavorites=[], guestSelected=new Set(), guestSavedActive=new Set(), guestOriginalFavoriteIds=new Set(), guestDeletedIds=new Set(), guestSearchResults=[], guestActiveBookingId=null, guestSearchTimer=null, guestDirty=false, guestCollapsed=true, guestQuery='';
 let shopProducts=[...DEFAULT_SHOP_PRODUCTS], shopCart=loadShopCart(), shopDraftQty={}, shopSelectedVariants={}, shopDelivery='pickup', shopView='catalog', adminProductFormOpen=false, adminEditingProductId=null;
@@ -1701,10 +1701,19 @@ async function markUserNotifRead(el){
   el.classList.remove('unread');
   try{await sb.from('user_notifications').update({is_read:true}).eq('id',id).eq('user_id',sbUser.id);}catch(e){}
 }
-function startUserNotifPolling(){
-  if(userNotifInt)clearInterval(userNotifInt);
+function startUserNotifRealtime(){
+  stopUserNotifRealtime();
   renderUserNotifsSb();
-  userNotifInt=setInterval(()=>{if(sbUser)renderUserNotifsSb();},30000);
+  if(!sbUser)return;
+  notifChannel=sb.channel('notifs:'+sbUser.id)
+    .on('postgres_changes',{event:'INSERT',schema:'public',table:'user_notifications',filter:'user_id=eq.'+sbUser.id},
+      ()=>renderUserNotifsSb())
+    .subscribe();
+  userNotifInt=setInterval(()=>{if(sbUser)renderUserNotifsSb();},300000);
+}
+function stopUserNotifRealtime(){
+  if(notifChannel){sb.removeChannel(notifChannel);notifChannel=null;}
+  if(userNotifInt){clearInterval(userNotifInt);userNotifInt=null;}
 }
 function nextBk(u){
   if(!u)return null;
@@ -2056,10 +2065,8 @@ async function saveGuestGroup(){
   }
 }
 
-async function renderAccess(){
-  const el=document.getElementById('access-main');
-  if(!curUser||!sbUser){if(el)el.innerHTML='';return;}
-  // Always load fresh bookings from Supabase
+async function loadAccessData(){
+  if(!curUser||!sbUser)return;
   try{
     const yday2=addDaysDS(mazToday(),-1);
     const{data:bks}=await sb.from('bookings')
@@ -2083,7 +2090,12 @@ async function renderAccess(){
         }));
       }
     }
-  }catch(e){console.warn('renderAccess load:',e);}
+  }catch(e){console.warn('loadAccessData:',e);}
+  renderAccess();
+}
+function renderAccess(){
+  const el=document.getElementById('access-main');
+  if(!curUser||!sbUser){if(el)el.innerHTML='';return;}
   const res=nextBk(curUser),now=mazNow();
   if(!res){
     _notifSent={};
@@ -2179,7 +2191,12 @@ async function renderAccess(){
   }
 }
 
-function startTimer(){if(accInt)clearInterval(accInt);accInt=setInterval(()=>{if(curUser&&document.getElementById('v-inicio').classList.contains('active'))renderAccess();},1000);}
+function startTimer(){
+  if(accInt)clearInterval(accInt);
+  if(accessDataInt)clearInterval(accessDataInt);
+  accessDataInt=setInterval(()=>{if(curUser&&sbUser)loadAccessData();},60000);
+  accInt=setInterval(()=>{if(curUser&&document.getElementById('v-inicio').classList.contains('active'))renderAccess();},1000);
+}
 
 // ── AUTH ──
 function gen4(){return String(Math.floor(1000+Math.random()*9000));}
@@ -2425,7 +2442,8 @@ function startReceptionWorker(){
 
 function showReception(){
   if(accInt){clearInterval(accInt);accInt=null;}
-  if(userNotifInt){clearInterval(userNotifInt);userNotifInt=null;}
+  if(accessDataInt){clearInterval(accessDataInt);accessDataInt=null;}
+  stopUserNotifRealtime();
   document.body.classList.add('reception-mode');
   document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
   const rec=document.getElementById('s-reception');
@@ -2436,7 +2454,7 @@ function showReception(){
   if(receptionClockInt)clearInterval(receptionClockInt);
   if(receptionDataInt)clearInterval(receptionDataInt);
   receptionClockInt=setInterval(()=>{updateReceptionClock();renderReceptionList();},1000);
-  receptionDataInt=setInterval(()=>{if(!receptionLoading)loadReceptionSessions();},20000);
+  receptionDataInt=setInterval(()=>{if(!receptionLoading)loadReceptionSessions();},60000);
   startReceptionWorker();
 }
 
@@ -2633,7 +2651,7 @@ function sv(v){
   updateShopCartBadge();
   updateTopActions(v);
   ALL_VIEWS.forEach(n=>{const el=document.getElementById('v-'+n);if(el)el.classList.toggle('active',n===v);});
-  if(v==='inicio'){renderMembershipStatus();renderAccess().catch(console.error);renderGuestGroup().catch(console.error);renderActiveBookings().catch(console.error);renderUserNotifsSb().catch(console.error);}
+  if(v==='inicio'){renderMembershipStatus();loadAccessData().catch(console.error);renderGuestGroup().catch(console.error);renderActiveBookings().catch(console.error);renderUserNotifsSb().catch(console.error);}
   if(v==='book'){const _ds=dk(curDate);loadSlotOccupancyFromSb(_ds).then(()=>renderBook().catch(console.error));}
   if(v==='planes')renderPlans();
   if(v==='rutinas'){renderRutinas().catch(console.error);}
@@ -2846,7 +2864,7 @@ async function renderActiveBookings(){
 function cancelFromInicio(bid){
   cancelBooking(bid);
   renderActiveBookings();
-  renderAccess();
+  loadAccessData();
 }
 function cancelFromBook(bid){
   cancelBooking(bid);
@@ -2858,7 +2876,7 @@ function handleCancelInicio(btn){
   if(!bid)return;
   cancelBooking(bid);
   renderActiveBookings();
-  renderAccess();
+  loadAccessData();
 }
 function handleCancelBook(btn){
   const bid=btn.dataset.bid;
@@ -6402,10 +6420,21 @@ function handleCancelBk(btn){
   if(!bid)return;
   cancelBooking(bid).then(()=>{
     renderActiveBookings();
-    renderAccess();
+    loadAccessData();
     renderMembershipStatus();
   }).catch(e=>toast('Error: '+e.message,'err'));
 }
+
+document.addEventListener('visibilitychange',()=>{
+  if(document.hidden){
+    if(accInt){clearInterval(accInt);accInt=null;}
+    if(accessDataInt){clearInterval(accessDataInt);accessDataInt=null;}
+  } else if(sbUser&&curUser){
+    loadAccessData();
+    if(!accInt)accInt=setInterval(()=>{if(curUser&&document.getElementById('v-inicio').classList.contains('active'))renderAccess();},1000);
+    if(!accessDataInt)accessDataInt=setInterval(()=>{if(curUser&&sbUser)loadAccessData();},60000);
+  }
+});
 
 if('serviceWorker' in navigator){
   let swRefreshing=false;
