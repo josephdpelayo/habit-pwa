@@ -25,7 +25,7 @@ A single ~5500-line file containing all HTML, CSS, and JavaScript. There is no f
 The app has four screens (`#s-auth`, `#s-main`, `#s-admin`, `#s-reception`), toggled by adding/removing the `.active` CSS class. Within `#s-main`, tabs are toggled via `.view.active`. Admin has its own tab system via `admTab()`.
 
 - `index.html` — just redirects to `app.html` with a version query string for cache busting
-- `sw.js` — service worker for push notifications only; intentionally has **no** fetch handler (no caching/offline support)
+- `sw.js` — service worker: push notifications + app shell cache. Has a fetch handler: icons are cache-first, navigation is network-first (falls back to cached `app.html` when offline), API calls pass through untouched.
 - `manifest.json` — PWA manifest
 
 **Version / cache busting**: `APP_VERSION` is defined in `app.html` (e.g. `'20260505-20'`). When making changes that clients need to pick up, update this constant and the matching `?v=` strings in `index.html` and the `<link>` tags at the top of `app.html`. Also update `CACHE_VERSION` in `sw.js` to the same value — this invalidates the old shell cache and forces clients to download the new version.
@@ -90,4 +90,4 @@ PUBLIC_APP_URL
 `LOCATION_EXEMPT_EMAILS` in `request-door-open.js` lists emails that bypass GPS checks.
 
 ### SQL Migrations
-All migrations live in `migrations/` with numeric prefixes (`001_schema.sql` … `014_add_guest_names.sql`). Run them in order in the Supabase SQL Editor. New migrations follow the same naming convention. The API handlers detect missing tables and return descriptive error messages pointing to the required migration.
+All migrations live in `migrations/` with numeric prefixes (`001_schema.sql` … `017_community_images_storage.sql`). Run them in order in the Supabase SQL Editor. New migrations follow the same naming convention. The API handlers detect missing tables and return descriptive error messages pointing to the required migration.
