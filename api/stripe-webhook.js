@@ -29,6 +29,8 @@ module.exports = async function handler(req, res) {
   try {
     if (event.type === 'checkout.session.completed') {
       const session = event.data.object;
+      if (!session || !session.id) throw new Error('Invalid session object in webhook');
+      if (session.payment_status !== 'paid') return res.status(200).json({ received: true, skipped: 'payment_status not paid' });
       if (session.metadata && session.metadata.kind === 'shop_order') {
         await fulfillShopOrder(session);
       } else {

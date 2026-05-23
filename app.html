@@ -2388,9 +2388,13 @@ async function completeRegister(reg){
 async function doLogout(){
   curUser=null;sbUser=null;sbProfile=null;
   selStartIdx=null;selShort=false;selPlan=null;notifs=[];
+  slots30={};waitlists={};
+  _adminBookProfiles=null;
+  guestFavorites=[];guestSelected=new Set();guestSavedActive=new Set();guestDeletedIds=new Set();guestActiveBookingId=null;guestDirty=false;
   stopReception();
+  stopUserNotifRealtime();
   if(accInt){clearInterval(accInt);accInt=null;}
-  if(userNotifInt){clearInterval(userNotifInt);userNotifInt=null;}
+  if(accessDataInt){clearInterval(accessDataInt);accessDataInt=null;}
   userNotifBootstrapped=false;userNotifSeen=new Set();
   await sb.auth.signOut().catch(()=>{});
   document.body.classList.remove('reception-mode');
@@ -2406,7 +2410,8 @@ function showAdmin(){
   const adm=document.getElementById('s-admin');
   if(adm)adm.classList.add('active');
   const d=document.getElementById('adm-date');if(d){d.value=mazToday();d.max=addDaysDS(mazToday(),ADMIN_BLOCK_ADVANCE_DAYS);}
-  loadBoardsSb().then(()=>admTab('dash'));
+  admTab('dash');
+  loadBoardsSb();
 }
 
 function stopReception(){
@@ -4306,7 +4311,7 @@ function renderFeed(){
     const div=document.createElement('div');div.className='post-card';
     const rx=[{k:'fire',e:'🔥'},{k:'clap',e:'👏'},{k:'heart',e:'❤️'}];
     const rxBtns=rx.map(r=>'<button class="reaction-btn'+(post.myReactions[r.k]?' active':'')+'" onclick="toggleReaction(\''+post.id+'\',\''+r.k+'\')">'+r.e+(post.reactions[r.k]>0?' '+post.reactions[r.k]:'')+'</button>').join('');
-    div.innerHTML='<div class="post-hdr">'+avatarHtml(post.userName,post.userAvatar,'post-av')+'<div><div class="post-user">'+post.userName+'</div><div class="post-time">'+timeSince(post.ts)+'</div></div></div>'+(post.text?'<div class="post-body">'+post.text+'</div>':'')+(post.img?'<img class="post-img-vertical" src="'+post.img+'">':'')+'<div class="post-reactions">'+rxBtns+'</div>';
+    div.innerHTML='<div class="post-hdr">'+avatarHtml(esc(post.userName),post.userAvatar,'post-av')+'<div><div class="post-user">'+esc(post.userName)+'</div><div class="post-time">'+timeSince(post.ts)+'</div></div></div>'+(post.text?'<div class="post-body">'+esc(post.text)+'</div>':'')+(post.img?'<img class="post-img-vertical" src="'+esc(post.img)+'">':'')+'<div class="post-reactions">'+rxBtns+'</div>';
     el.appendChild(div);
   });
 }
@@ -6117,20 +6122,6 @@ async function loadBoardsSb(){
     const{data}=await sb.from('boards').select('*,board_assignments(user_id)');
     if(data) boards=data.map(b=>({...b,assignedTo:(b.board_assignments||[]).map(a=>a.user_id)}));
   }catch(e){console.error('loadBoardsSb:',e);}
-}
-
-// Override showAdmin to load Supabase data
-const _origShowAdmin=showAdmin;
-function showAdmin(){
-  stopReception();
-  document.body.classList.remove('reception-mode');
-  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
-  const adm=document.getElementById('s-admin');
-  if(adm)adm.classList.add('active');
-  const d=document.getElementById('adm-date');if(d){d.value=mazToday();d.max=addDaysDS(mazToday(),ADMIN_BLOCK_ADVANCE_DAYS);}
-  admTab('dash');
-  // Load boards from Supabase
-  loadBoardsSb();
 }
 
 // Override renderBoardsAdmin to save on changes
