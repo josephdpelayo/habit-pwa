@@ -446,7 +446,7 @@ module.exports = async function handler(req, res) {
       });
     }
     if (msg.includes('Shelly')) {
-      return res.status(500).json({ error: msg });
+      return res.status(500).json({ error: 'No se pudo conectar con el relay de la puerta. Intenta de nuevo.' });
     }
     return res.status(500).json({ error: 'No se pudo solicitar apertura.' });
   }

@@ -66,6 +66,6 @@ module.exports = async function handler(req, res) {
     return res.status(200).json({ ok: true });
   } catch (err) {
     console.error(err);
-    return res.status(500).json({ error: err.message || 'No se pudo eliminar el socio' });
+    return res.status(500).json({ error: 'No se pudo eliminar el socio' });
   }
 };

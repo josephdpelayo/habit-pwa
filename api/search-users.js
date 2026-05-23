@@ -337,8 +337,8 @@ module.exports = async function handler(req, res) {
     return searchUsers(req, res, token);
   } catch (err) {
     console.error(err);
-    const msg = err.message || 'No se pudo completar la solicitud';
+    const msg = err.message || '';
     if (/already|registered|exists|duplicate/i.test(msg)) return res.status(409).json({ error: 'Ese correo ya esta registrado' });
-    return res.status(err.statusCode || 500).json({ error: msg });
+    return res.status(err.statusCode || 500).json({ error: 'No se pudo completar la solicitud' });
   }
 };

@@ -71,6 +71,6 @@ module.exports = async function handler(req, res) {
     return res.status(200).json({ bookings: rows });
   } catch (err) {
     console.error(err);
-    return res.status(500).json({ error: err.message || 'No se pudo cargar pase de invitado' });
+    return res.status(500).json({ error: 'No se pudo cargar pase de invitado' });
   }
 };

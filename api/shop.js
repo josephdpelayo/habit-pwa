@@ -184,6 +184,6 @@ module.exports = async function handler(req, res) {
     return createCheckout(req, res, token);
   } catch (err) {
     console.error(err);
-    return res.status(err.statusCode || 500).json({ error: err.message || 'No se pudo procesar la tienda' });
+    return res.status(err.statusCode || 500).json({ error: 'No se pudo procesar la tienda' });
   }
 };

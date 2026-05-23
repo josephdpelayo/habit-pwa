@@ -125,6 +125,6 @@ module.exports = async function handler(req, res) {
     return syncStripePayments(req, res, token);
   } catch (err) {
     console.error(err);
-    return res.status(err.statusCode || 500).json({ error: err.message || 'No se pudo procesar pagos' });
+    return res.status(err.statusCode || 500).json({ error: 'No se pudo procesar pagos' });
   }
 };
