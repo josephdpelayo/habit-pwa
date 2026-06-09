@@ -310,18 +310,31 @@ module.exports = async function handler(req, res) {
     }
 
     const nowMs = Date.now();
+    // 5-minute grace buffer to account for client clock skew.
+    const CLOCK_GRACE_MS = 5 * 60 * 1000;
     let activeBooking = null;
     let activeWindow = null;
+    let soonestWindow = null;
+    let soonestOpensMs = Infinity;
     for (const booking of accessBookings || []) {
       const window = accessWindow(booking);
-      if (nowMs >= window.opensMs && nowMs <= window.closesMs) {
+      if (nowMs >= window.opensMs - CLOCK_GRACE_MS && nowMs <= window.closesMs) {
         activeBooking = booking;
         activeWindow = window;
         break;
       }
+      // Track the next upcoming window for a better error message.
+      if (window.opensMs > nowMs && window.opensMs < soonestOpensMs) {
+        soonestOpensMs = window.opensMs;
+        soonestWindow = window;
+      }
     }
 
     if (!activeBooking) {
+      if (soonestWindow) {
+        const minsLeft = Math.ceil((soonestOpensMs - nowMs) / 60000);
+        return deny(res, 403, 'no_active_access', `Tu acceso se activa en ${minsLeft} minuto${minsLeft !== 1 ? 's' : ''}.`);
+      }
       return deny(res, 403, 'no_active_access', 'Tu acceso se activa 10 minutos antes de tu reserva.');
     }
 

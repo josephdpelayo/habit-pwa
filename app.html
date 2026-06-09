@@ -1160,7 +1160,7 @@ body.reception-mode{background:#050505}
 // ── CONFIG & SUPABASE ───────────────────────────────────────
 const SUPABASE_URL='https://pmpjteuqjusbiduevbwq.supabase.co';
 const SUPABASE_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBtcGp0ZXVxanVzYmlkdWV2YndxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc2OTI1NjUsImV4cCI6MjA5MzI2ODU2NX0.XbMzZoo2yqtrD8znLnyo_1zDfrdJAvAPj1lqGOyXnLw';
-const APP_VERSION='20260523-03';
+const APP_VERSION='20260608-01';
 const PUBLIC_APP_URL='https://habittraininghub.app/app.html';
 const PUBLIC_API_ORIGIN='https://www.habittraininghub.app';
 const SHOP_ALLOWED_EMAILS=['josephdpelayo@gmail.com'];
@@ -1844,6 +1844,7 @@ async function requestDoorOpen(btn){
     if(code===1)msg='Activa permisos de ubicacion para abrir la puerta';
     if(code===2)msg='No pudimos obtener tu ubicacion';
     if(code===3)msg='La ubicacion tardo demasiado';
+    if(e&&e.reason==='no_active_access')loadAccessData().catch(console.warn);
     toast(msg,'err');
   }finally{
     doorOpening=false;
@@ -2123,7 +2124,8 @@ function renderAccess(){
   const msToOpen=opens-now;
   const msToSession=sessionStart-now;
   const msToCodeVisible=codeVisible-now;
-  const dl=b.ds===mazToday()?'Hoy':'Mañana';
+  const{ds0:_ds0,dsY:_dsY}=(()=>{const t=mazToday();return{ds0:t,dsY:addDaysDS(t,-1)};})();
+  const dl=b.ds===_ds0?'Hoy':b.ds===_dsY?'Anoche':'Mañana';
   const slotsUsed=b.slotsUsed||BOOKING_SLOTS;
   const timeStr=b.timeStr||fmtTimeRange(b.startIdx,slotsUsed);
   const durMin=slotsUsed*30;
@@ -2863,8 +2865,9 @@ async function renderActiveBookings(){
     }));
     if(!upcoming.length){el.innerHTML='';return;}
     el.innerHTML='<p class="slbl" style="margin-bottom:10px">Mis reservas activas</p>';
+    const _today=mazToday(),_yday=addDaysDS(_today,-1);
     upcoming.forEach(b=>{
-      const dl=b.ds===mazToday()?'Hoy':'Mañana';
+      const dl=b.ds===_today?'Hoy':b.ds===_yday?'Anoche':'Mañana';
       const slotsUsed=b.slots_used||3;
       const aw=getAW({ds:b.ds,startIdx:b.start_idx,slotsUsed});
       const canC=(aw.sessionStart-mazNow())/3600000>=CANCEL_H;
