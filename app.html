@@ -1160,7 +1160,7 @@ body.reception-mode{background:#050505}
 // ── CONFIG & SUPABASE ───────────────────────────────────────
 const SUPABASE_URL='https://pmpjteuqjusbiduevbwq.supabase.co';
 const SUPABASE_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBtcGp0ZXVxanVzYmlkdWV2YndxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc2OTI1NjUsImV4cCI6MjA5MzI2ODU2NX0.XbMzZoo2yqtrD8znLnyo_1zDfrdJAvAPj1lqGOyXnLw';
-const APP_VERSION='20260609-01';
+const APP_VERSION='20260609-02';
 const PUBLIC_APP_URL='https://habittraininghub.app/app.html';
 const PUBLIC_API_ORIGIN='https://www.habittraininghub.app';
 const SHOP_ALLOWED_EMAILS=['josephdpelayo@gmail.com'];
@@ -1257,7 +1257,7 @@ async function loadUserData(){
   const shopBtn=document.getElementById('shop-nav-btn');
   if(shopBtn)shopBtn.style.display=(sbUser&&sbUser.email==='josephdpelayo@gmail.com')?'':'none';
   const[bkRes,payRes]=await Promise.allSettled([
-    sb.from('bookings').select('*').eq('user_id',sbUser.id).eq('status','active'),
+    sb.from('bookings').select('*').eq('user_id',sbUser.id).eq('status','active').gte('ds',addDaysDS(mazToday(),-1)).order('ds').order('start_idx').limit(20),
     sb.from('payments').select('*').eq('user_id',sbUser.id).order('created_at',{ascending:false})
   ]);
   curUser.bookings=bkRes.status==='fulfilled'?(bkRes.value.data||[]).map(b=>({
@@ -1810,18 +1810,25 @@ async function requestDoorOpen(btn){
   try{
     const exempt=isDoorLocationExempt();
     const pos=exempt?null:await getGeoPosition();
+    await sb.auth.refreshSession().catch(()=>{});
     const{data}=await sb.auth.getSession();
     const token=data&&data.session&&data.session.access_token;
     if(!token)throw new Error('Sesion expirada');
-    const res=await fetch(apiUrl('/api/request-door-open'),{
-      method:'POST',
-      headers:{'Content-Type':'application/json',Authorization:'Bearer '+token},
-      body:JSON.stringify(exempt?{skipLocation:true}:{
-        lat:pos.coords.latitude,
-        lng:pos.coords.longitude,
-        accuracy:pos.coords.accuracy
-      })
-    });
+    const doorAc=new AbortController();
+    const doorTimer=setTimeout(()=>doorAc.abort(),15000);
+    let res;
+    try{
+      res=await fetch(apiUrl('/api/request-door-open'),{
+        method:'POST',
+        headers:{'Content-Type':'application/json',Authorization:'Bearer '+token},
+        body:JSON.stringify(exempt?{skipLocation:true}:{
+          lat:pos.coords.latitude,
+          lng:pos.coords.longitude,
+          accuracy:pos.coords.accuracy
+        }),
+        signal:doorAc.signal
+      });
+    }finally{clearTimeout(doorTimer);}
     const out=await res.json().catch(()=>({}));
     if(out.retry_after_seconds){
       const retryMs=Number(out.retry_after_seconds)*1000;
@@ -1839,7 +1846,8 @@ async function requestDoorOpen(btn){
   }catch(e){
     const code=e&&e.code;
     let msg=e&&e.message?e.message:'No se pudo solicitar apertura';
-    if(msg==='Failed to fetch'||msg==='Load failed')msg='No pude conectar con el servidor de puerta. Abre https://www.habittraininghub.app y vuelve a intentar.';
+    if(e&&e.name==='AbortError')msg='El servidor tardó demasiado. Verifica tu conexión e intenta de nuevo.';
+    else if(msg==='Failed to fetch'||msg==='Load failed')msg='No pude conectar con el servidor de puerta. Abre https://www.habittraininghub.app y vuelve a intentar.';
     if(e&&e.retryAfter)msg+=' Intenta otra vez en '+e.retryAfter+'s.';
     if(code===1)msg='Activa permisos de ubicacion para abrir la puerta';
     if(code===2)msg='No pudimos obtener tu ubicacion';

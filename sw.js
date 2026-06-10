@@ -1,7 +1,7 @@
 // HABIT Training Hub — Service Worker
 // Push notifications + app shell caching
 
-const CACHE_VERSION = '20260609-01'; // keep in sync with APP_VERSION in app.html
+const CACHE_VERSION = '20260609-02'; // keep in sync with APP_VERSION in app.html
 const CACHE = `habit-${CACHE_VERSION}`;
 
 self.addEventListener('install', e => {
@@ -45,7 +45,9 @@ self.addEventListener('fetch', e => {
   // a redirect), so Chrome never sees a redirected response from the SW.
   if (request.mode === 'navigate') {
     e.respondWith(
-      fetch(request).catch(() => caches.match('/app.html'))
+      fetch(request).catch(() =>
+        caches.match(request).then(r => r || caches.match('/app.html'))
+      )
     );
   }
 });
