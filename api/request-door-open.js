@@ -264,11 +264,14 @@ module.exports = async function handler(req, res) {
       .single();
     if (profileError) throw profileError;
 
+    // Filter from yesterday to avoid old unarchived bookings pushing recent ones past the limit.
+    const yesterday = new Date(nowMs - 24 * 60 * 60 * 1000).toISOString().slice(0, 10);
     const { data: bookings, error: bookingError } = await supabase
       .from('bookings')
       .select('id,user_id,ds,start_idx,slots_used,time_str,status,is_group,grupal_spots')
       .eq('user_id', profile.id)
       .eq('status', 'active')
+      .gte('ds', yesterday)
       .order('ds', { ascending: true })
       .order('start_idx', { ascending: true })
       .limit(20);
