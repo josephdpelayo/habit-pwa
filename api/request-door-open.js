@@ -264,6 +264,7 @@ module.exports = async function handler(req, res) {
       .single();
     if (profileError) throw profileError;
 
+    const nowMs = Date.now();
     // Filter from yesterday to avoid old unarchived bookings pushing recent ones past the limit.
     const yesterday = new Date(nowMs - 24 * 60 * 60 * 1000).toISOString().slice(0, 10);
     const { data: bookings, error: bookingError } = await supabase
@@ -312,7 +313,6 @@ module.exports = async function handler(req, res) {
       }));
     }
 
-    const nowMs = Date.now();
     // 15-minute grace buffer to account for client clock skew.
     const CLOCK_GRACE_MS = 15 * 60 * 1000;
     // Location-exempt users get a 2-hour window around their session (handles timezone/clock issues).
