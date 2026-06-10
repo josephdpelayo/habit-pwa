@@ -1831,6 +1831,7 @@ async function requestDoorOpen(btn){
       const err=new Error(out.message||out.error||'No se pudo abrir');
       err.reason=out.reason;
       err.retryAfter=out.retry_after_seconds;
+      err.debug=out.debug;
       throw err;
     }
     toast(out.message||'Apertura solicitada','ok');
@@ -1844,7 +1845,7 @@ async function requestDoorOpen(btn){
     if(code===1)msg='Activa permisos de ubicacion para abrir la puerta';
     if(code===2)msg='No pudimos obtener tu ubicacion';
     if(code===3)msg='La ubicacion tardo demasiado';
-    if(e&&e.reason==='no_active_access')loadAccessData().catch(console.warn);
+    if(e&&e.reason==='no_active_access'){loadAccessData().catch(console.warn);if(e.debug)alert('DEBUG:\n'+JSON.stringify(e.debug,null,2));}
     toast(msg,'err');
   }finally{
     doorOpening=false;

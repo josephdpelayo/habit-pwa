@@ -331,22 +331,20 @@ module.exports = async function handler(req, res) {
     }
 
     if (!activeBooking) {
-      console.log('[door] no_active_access', JSON.stringify({
-        user: authData.user.email,
+      const debugInfo = {
         serverNow: new Date(nowMs).toISOString(),
         bookingCount: accessBookings.length,
-        bookings: (accessBookings || []).map(b => ({
-          id: b.id, ds: b.ds, start_idx: b.start_idx, slots_used: b.slots_used, status: b.status,
-          opensMs: accessWindow(b).opensMs, closesMs: accessWindow(b).closesMs,
-          opensIso: new Date(accessWindow(b).opensMs).toISOString(),
-          closesIso: new Date(accessWindow(b).closesMs).toISOString(),
-        })),
-      }));
+        bookings: (accessBookings || []).map(b => {
+          const w = accessWindow(b);
+          return { ds: b.ds, start_idx: b.start_idx, slots_used: b.slots_used, opensIso: new Date(w.opensMs).toISOString(), closesIso: new Date(w.closesMs).toISOString() };
+        }),
+      };
+      console.log('[door] no_active_access', JSON.stringify(debugInfo));
       if (soonestWindow) {
         const minsLeft = Math.ceil((soonestOpensMs - nowMs) / 60000);
-        return deny(res, 403, 'no_active_access', `Tu acceso se activa en ${minsLeft} minuto${minsLeft !== 1 ? 's' : ''}.`);
+        return deny(res, 403, 'no_active_access', `Tu acceso se activa en ${minsLeft} minuto${minsLeft !== 1 ? 's' : ''}.`, { debug: debugInfo });
       }
-      return deny(res, 403, 'no_active_access', 'Tu acceso se activa 10 minutos antes de tu reserva.');
+      return deny(res, 403, 'no_active_access', 'Tu acceso se activa 10 minutos antes de tu reserva.', { debug: debugInfo });
     }
 
     const label = slotLabel(activeBooking);
