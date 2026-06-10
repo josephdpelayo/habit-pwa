@@ -7,7 +7,7 @@ const SHELLY_DEFAULT_TURN = 'off';
 const SHELLY_DEFAULT_RELEASE_SECONDS = 5;
 const DOOR_REQUEST_COOLDOWN_MS = 5 * 1000;
 const SHELLY_RATE_LIMIT_WAIT_SECONDS = 60;
-const LOCATION_EXEMPT_EMAILS = ['josephdpelayo@gmail.com', 'habit1@habit.com'];
+const LOCATION_EXEMPT_EMAILS = ['josephdpelayo@gmail.com', 'habit1@habit.com', 'zuritalejandro5@gmail.com'];
 
 const supabase = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_SERVICE_ROLE_KEY);
 
@@ -310,8 +310,8 @@ module.exports = async function handler(req, res) {
     }
 
     const nowMs = Date.now();
-    // 5-minute grace buffer to account for client clock skew.
-    const CLOCK_GRACE_MS = 5 * 60 * 1000;
+    // 15-minute grace buffer to account for client clock skew and Android GPS delays.
+    const CLOCK_GRACE_MS = 15 * 60 * 1000;
     let activeBooking = null;
     let activeWindow = null;
     let soonestWindow = null;
