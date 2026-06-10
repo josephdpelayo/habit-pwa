@@ -310,21 +310,26 @@ module.exports = async function handler(req, res) {
     }
 
     const nowMs = Date.now();
-    // 15-minute grace buffer to account for client clock skew and Android GPS delays.
+    // 15-minute grace buffer to account for client clock skew.
     const CLOCK_GRACE_MS = 15 * 60 * 1000;
+    // Location-exempt users get a 2-hour window around their session (handles timezone/clock issues).
+    const EXEMPT_GRACE_MS = 2 * 60 * 60 * 1000;
     let activeBooking = null;
     let activeWindow = null;
     let soonestWindow = null;
     let soonestOpensMs = Infinity;
     for (const booking of accessBookings || []) {
       const window = accessWindow(booking);
-      if (nowMs >= window.opensMs - CLOCK_GRACE_MS && nowMs <= window.closesMs) {
+      const inWindow = locationExempt
+        ? nowMs >= window.opensMs - EXEMPT_GRACE_MS && nowMs <= window.closesMs + EXEMPT_GRACE_MS
+        : nowMs >= window.opensMs - CLOCK_GRACE_MS && nowMs <= window.closesMs;
+      if (inWindow) {
         activeBooking = booking;
         activeWindow = window;
         break;
       }
       // Track the next upcoming window for a better error message.
-      if (window.opensMs > nowMs && window.opensMs < soonestOpensMs) {
+      if (!locationExempt && window.opensMs > nowMs && window.opensMs < soonestOpensMs) {
         soonestOpensMs = window.opensMs;
         soonestWindow = window;
       }
