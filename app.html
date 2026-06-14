@@ -938,6 +938,8 @@ body.reception-mode{background:#050505}
 
     <!-- SOCIOS -->
     <div id="a-users" class="adm-section">
+      <div id="user-profile-view" style="display:none"></div>
+      <div id="user-list-area">
       <!-- Create user form (collapsed) -->
       <button class="btn" style="width:100%;margin-bottom:1rem;display:flex;align-items:center;justify-content:center;gap:8px" onclick="toggleNewSocioForm()">
         <span style="font-size:18px;line-height:1">+</span> Crear nuevo socio
@@ -957,6 +959,7 @@ body.reception-mode{background:#050505}
           <button class="filter-chip" data-filter="vencido" onclick="setUserFilter(this)">🔴 Vencidos</button>
           <button class="filter-chip" data-filter="por-vencer" onclick="setUserFilter(this)">⚠️ Por vencer</button>
           <button class="filter-chip" data-filter="sin-plan" onclick="setUserFilter(this)">⬜ Sin plan</button>
+          <button class="filter-chip" data-filter="prueba" onclick="setUserFilter(this)">🧪 En prueba</button>
       </div>
       <div style="margin-bottom:8px">
         <select id="user-sort" onchange="renderUsersSb()" style="background:var(--card2);border:1px solid var(--border);color:var(--white);border-radius:4px;padding:6px 10px;font-size:12px;cursor:pointer;width:100%">
@@ -970,6 +973,7 @@ body.reception-mode{background:#050505}
       </div>
       <div id="user-count" style="font-size:11px;color:var(--gray);margin-bottom:8px"></div>
       <div id="user-list"></div>
+      </div><!-- /user-list-area -->
     </div>
 
     <!-- PIZARRONES -->
@@ -1175,7 +1179,7 @@ body.reception-mode{background:#050505}
 // ── CONFIG & SUPABASE ───────────────────────────────────────
 const SUPABASE_URL='https://pmpjteuqjusbiduevbwq.supabase.co';
 const SUPABASE_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBtcGp0ZXVxanVzYmlkdWV2YndxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc2OTI1NjUsImV4cCI6MjA5MzI2ODU2NX0.XbMzZoo2yqtrD8znLnyo_1zDfrdJAvAPj1lqGOyXnLw';
-const APP_VERSION='20260614-02';
+const APP_VERSION='20260614-03';
 const PUBLIC_APP_URL='https://habittraininghub.app/app.html';
 const PUBLIC_API_ORIGIN='https://www.habittraininghub.app';
 const SHOP_ALLOWED_EMAILS=['josephdpelayo@gmail.com'];
@@ -1412,7 +1416,8 @@ function canSeePlan(p){
 }
 function adminPlanList(){
   const gaia=GAIA_PKGS.map(p=>({...p,price:p.amount,type:'gaia',days:null}));
-  return [...PLANS.individual,...PLANS.grupal].filter(p=>!p.testEmail).concat(gaia);
+  const prueba=[{id:'prueba',name:'Visita de prueba',price:0,credits:1,days:30,type:'individual'}];
+  return [...PLANS.individual,...PLANS.grupal].filter(p=>!p.testEmail).concat(prueba).concat(gaia);
 }
 
 // ── helpers ──
@@ -5670,10 +5675,11 @@ async function renderUsersSb(){
       const expired=u.plan_expiry&&new Date(u.plan_expiry)<new Date();
       const days=daysUntil(u.plan_expiry);
       const active=(u.credits>=999||u.credits>0)&&!expired;
-      if(_userFilter==='activo') return active&&!(days!==null&&days<=7&&days>=0);
+      if(_userFilter==='activo') return active&&!(days!==null&&days<=7&&days>=0)&&u.plan_id!=='prueba';
       if(_userFilter==='vencido') return expired||(u.credits!==undefined&&u.credits!==null&&u.credits<=0&&!u.plan_expiry);
       if(_userFilter==='por-vencer') return days!==null&&days>=0&&days<=7;
       if(_userFilter==='sin-plan') return !u.plan_id&&(!u.credits||u.credits<=0);
+      if(_userFilter==='prueba') return u.plan_id==='prueba';
       return true;
     });
     filtered.sort((a,b2)=>{
@@ -5701,14 +5707,14 @@ async function renderUsersSb(){
       const noCredits=!isUnlimited&&(u.credits||0)<=0;
       const lowCredits=!isUnlimited&&(u.credits||0)>0&&(u.credits||0)<=3;
       const expiring=days!==null&&days<=5&&days>=0;
-      const statusCls=expired||noCredits?'bg-red':(lowCredits||expiring)?'bg-amber':active?'bg-green':'bg-gray';
-      const statusTxt=expired?'Vencida':noCredits?'Sin visitas':isUnlimited&&active?'Mensual':lowCredits?'Pocas visitas':expiring?'Por vencer':active?'Activo':'Sin plan';
-      const isOpen=expandedUsers.has(u.id);
+      const isPrueba=u.plan_id==='prueba';
+      const statusCls=isPrueba?'bg-amber':expired||noCredits?'bg-red':(lowCredits||expiring)?'bg-amber':active?'bg-green':'bg-gray';
+      const statusTxt=isPrueba?'Prueba':expired?'Vencida':noCredits?'Sin visitas':isUnlimited&&active?'Mensual':lowCredits?'Pocas visitas':expiring?'Por vencer':active?'Activo':'Sin plan';
       const div=document.createElement('div');
       div.className='user-row';
       div.style.cssText='flex-direction:column;align-items:flex-start;gap:0;padding:0;overflow:hidden;cursor:pointer';
       div.innerHTML=
-        '<div style="display:flex;align-items:center;gap:10px;width:100%;padding:12px 4px" onclick="toggleUserCard(&quot;'+u.id+'&quot;)">'
+        '<div style="display:flex;align-items:center;gap:10px;width:100%;padding:12px 4px" onclick="adminOpenUserProfile(&quot;'+u.id+'&quot;)">'
         +avatarHtml(u.name,u.avatar_url,'post-av')
         +'<div style="flex:1;min-width:0">'
         +'<div class="brow-name">'+u.name+'</div>'
@@ -5717,25 +5723,78 @@ async function renderUsersSb(){
         +'</div>'
         +'<div style="display:flex;flex-direction:column;align-items:flex-end;gap:4px">'
         +'<span class="badge '+statusCls+'">'+statusTxt+'</span>'
-        +'<span style="font-size:16px;color:var(--gray);line-height:1">'+(isOpen?'▲':'▼')+'</span>'
+        +'<span style="font-size:16px;color:var(--gray);line-height:1">›</span>'
         +'</div>'
-        +'</div>'
-        +(isOpen?
-          '<div style="padding:0 4px 12px;display:grid;grid-template-columns:1fr 1fr;gap:6px;width:100%;box-sizing:border-box">'
-          +'<div style="grid-column:1/-1;font-size:11px;color:var(--gray);padding:2px 0 6px">Código: <strong style="color:var(--bl)">'+(u.access_code||'???')+'#</strong></div>'
-          +'<button class="btn-sm bblue" data-uid="'+u.id+'" data-name="'+esc(u.name)+'" onclick="adminOpenMembershipModal(this.dataset.uid,this.dataset.name)">Activar membresía</button>'
-          +'<button class="btn-sm bgreen" data-uid="'+u.id+'" data-name="'+esc(u.name)+'" onclick="openCourtesyModal(this.dataset.uid,this.dataset.name)">Cortesía</button>'
-          +'<button class="btn-sm bblue" data-uid="'+u.id+'" data-name="'+esc(u.name)+'" onclick="adminEditUserSb(this.dataset.uid,this.dataset.name)">Editar datos</button>'
-
-          +'<button class="btn-sm bgreen" data-uid="'+u.id+'" onclick="adminAddCreditsSb(this.dataset.uid)">+Visita extra</button>'
-          +'<button class="btn-sm bred" style="grid-column:1/-1" data-uid="'+u.id+'" data-name="'+esc(u.name)+'" onclick="adminDeleteUserSb(this.dataset.uid,this.dataset.name)">Eliminar socio</button>'
-          +'</div>'
-        :'');
+        +'</div>';
       list.appendChild(div);
     });
   }catch(e){
     list.innerHTML='<div class="empty">Error: '+e.message+'</div>';
     console.error('renderUsersSb error:',e);
+  }
+}
+
+function adminCloseUserProfile(){
+  document.getElementById('user-profile-view').style.display='none';
+  document.getElementById('user-list-area').style.display='block';
+}
+
+async function adminOpenUserProfile(uid){
+  const profileView=document.getElementById('user-profile-view');
+  const listArea=document.getElementById('user-list-area');
+  listArea.style.display='none';
+  profileView.style.display='block';
+  profileView.innerHTML='<div class="empty">Cargando perfil...</div>';
+  try{
+    const[{data:u,error:ue},{data:bks},{data:pays}]=await Promise.all([
+      sb.from('profiles').select('*').eq('id',uid).single(),
+      sb.from('bookings').select('*').eq('user_id',uid).eq('status','active').order('ds',{ascending:false}).order('start_idx',{ascending:false}).limit(60),
+      sb.from('payments').select('*').eq('user_id',uid).order('created_at',{ascending:false}).limit(30),
+    ]);
+    if(ue)throw ue;
+    const allP=[...PLANS.individual,...PLANS.grupal];
+    const plan=allP.find(p=>p.id===u.plan_id);
+    const expired=u.plan_expiry&&new Date(u.plan_expiry)<new Date();
+    const active=hasActive({credits:u.credits,plan:u.plan_id,planExpiry:u.plan_expiry,planType:u.plan_type})&&!expired;
+    const isPrueba=u.plan_id==='prueba';
+    const isUnlimited=u.credits>=999||(plan&&plan.credits>=999);
+    const statusCls=isPrueba?'bg-amber':expired?'bg-red':active?'bg-green':'bg-gray';
+    const statusTxt=isPrueba?'Prueba':expired?'Vencida':isUnlimited&&active?'Mensual':active?'Activo':'Sin plan';
+    const planName=plan?plan.name:(isPrueba?'Visita de prueba':(u.credits||0)>0?'Visitas manuales':'Sin plan');
+    const today=mazToday();
+    const pastBks=(bks||[]).filter(b=>b.ds<today);
+    const upBks=(bks||[]).filter(b=>b.ds>=today);
+    const bkRowHtml=arr=>arr.map(b=>'<div class="brow"><div class="brow-info"><div class="brow-name" style="font-size:13px">'+fmtDS(b.ds)+'</div><div class="brow-meta">'+(b.time_str||fmtTimeRange(b.start_idx,b.slots_used||3))+(b.is_group?' · Grupal':'')+'</div></div></div>').join('');
+    const payRowHtml=(pays||[]).map(p=>'<div class="brow"><div class="brow-info"><div class="brow-name" style="font-size:13px">'+esc(p.plan_name||p.plan_id||'Pago')+'</div><div class="brow-meta">'+fmtDateTimeMaz(p.created_at)+' · '+esc(p.last4||'----')+'</div></div><div style="font-weight:700;font-size:14px">'+MXN(p.amount)+'</div></div>').join('');
+    profileView.innerHTML=
+      '<div style="display:flex;align-items:center;gap:10px;margin-bottom:1rem">'
+      +'<button onclick="adminCloseUserProfile()" style="background:var(--card2);border:1px solid var(--border);border-radius:6px;padding:8px 14px;color:var(--white);font-size:13px;cursor:pointer;white-space:nowrap">← Volver</button>'
+      +'<span style="font-size:16px;font-weight:800;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+esc(u.name||'')+'</span>'
+      +'<span class="badge '+statusCls+'">'+statusTxt+'</span>'
+      +'</div>'
+      +'<div style="background:var(--card);border:1px solid var(--border);border-radius:6px;padding:1rem;margin-bottom:12px">'
+      +'<div style="font-size:12px;color:var(--gray);line-height:2">'
+      +(u.email?'<div>'+esc(u.email)+'</div>':'')
+      +(u.phone?'<div>'+esc(u.phone)+'</div>':'')
+      +'<div>Código: <strong style="color:var(--bl)">'+(u.access_code||'—')+'#</strong></div>'
+      +'<div>Plan: <strong style="color:var(--white)">'+esc(planName)+'</strong></div>'
+      +'<div>Visitas: <strong style="color:var(--white)">'+(isUnlimited?'Ilimitadas':(u.credits||0))+'</strong></div>'
+      +(u.plan_expiry?'<div>Vence: <strong style="color:var(--white)">'+fmtDateMaz(u.plan_expiry)+'</strong></div>':'')
+      +'<div>Reservas: <strong style="color:var(--white)">'+(bks||[]).length+' total · '+upBks.length+' próximas · '+pastBks.length+' pasadas</strong></div>'
+      +'</div>'
+      +'</div>'
+      +'<div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:12px">'
+      +'<button class="btn-sm bblue" onclick="adminOpenMembershipModal(\''+uid+'\',\''+esc(u.name||'')+'\')">Activar membresía</button>'
+      +'<button class="btn-sm bgreen" onclick="openCourtesyModal(\''+uid+'\',\''+esc(u.name||'')+'\')">Cortesía</button>'
+      +'<button class="btn-sm bblue" onclick="adminEditUserSb(\''+uid+'\',\''+esc(u.name||'')+'\')">Editar datos</button>'
+      +'<button class="btn-sm bgreen" onclick="adminAddCreditsSb(\''+uid+'\')">+Visita extra</button>'
+      +'<button class="btn-sm bred" style="grid-column:1/-1" onclick="adminDeleteUserSb(\''+uid+'\',\''+esc(u.name||'')+'\')">Eliminar socio</button>'
+      +'</div>'
+      +(upBks.length?'<p class="slbl" style="margin-bottom:8px">Próximas reservas ('+upBks.length+')</p>'+bkRowHtml(upBks):'')
+      +(pastBks.length?'<p class="slbl" style="margin:12px 0 8px">Historial reservas ('+pastBks.length+')</p>'+bkRowHtml(pastBks):'<div class="empty" style="font-size:12px;margin:12px 0">Sin reservas pasadas.</div>')
+      +((pays&&pays.length)?'<p class="slbl" style="margin:12px 0 8px">Pagos ('+pays.length+')</p>'+payRowHtml:'<div class="empty" style="font-size:12px;margin:12px 0">Sin pagos registrados.</div>');
+  }catch(e){
+    profileView.innerHTML='<button onclick="adminCloseUserProfile()" style="background:var(--card2);border:1px solid var(--border);border-radius:6px;padding:8px 14px;color:var(--white);font-size:13px;cursor:pointer;margin-bottom:1rem">← Volver</button><div class="empty" style="color:var(--red)">Error: '+esc(e.message)+'</div>';
   }
 }
 
