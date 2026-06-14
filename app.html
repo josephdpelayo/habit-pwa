@@ -1175,7 +1175,7 @@ body.reception-mode{background:#050505}
 // ── CONFIG & SUPABASE ───────────────────────────────────────
 const SUPABASE_URL='https://pmpjteuqjusbiduevbwq.supabase.co';
 const SUPABASE_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBtcGp0ZXVxanVzYmlkdWV2YndxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc2OTI1NjUsImV4cCI6MjA5MzI2ODU2NX0.XbMzZoo2yqtrD8znLnyo_1zDfrdJAvAPj1lqGOyXnLw';
-const APP_VERSION='20260614-01';
+const APP_VERSION='20260614-02';
 const PUBLIC_APP_URL='https://habittraininghub.app/app.html';
 const PUBLIC_API_ORIGIN='https://www.habittraininghub.app';
 const SHOP_ALLOWED_EMAILS=['josephdpelayo@gmail.com'];
@@ -1411,7 +1411,8 @@ function canSeePlan(p){
   return email===String(p.testEmail).toLowerCase();
 }
 function adminPlanList(){
-  return [...PLANS.individual,...PLANS.grupal].filter(p=>!p.testEmail);
+  const gaia=GAIA_PKGS.map(p=>({...p,price:p.amount,type:'gaia',days:null}));
+  return [...PLANS.individual,...PLANS.grupal].filter(p=>!p.testEmail).concat(gaia);
 }
 
 // ── helpers ──
@@ -5831,9 +5832,9 @@ async function adminTryLogManualPayment(uid,name,plan,amount,method,note){
 
 // ── ADMIN: GAIA ALLIANCE ─────────────────────────────────────
 const GAIA_PKGS=[
-  {id:'gaia1',name:'GAIA Paquete 1',pilates:5,credits:5,total:890,amount:256},
-  {id:'gaia2',name:'GAIA Paquete 2',pilates:10,credits:8,total:1600,amount:369},
-  {id:'gaia3',name:'GAIA Paquete 3',pilates:13,credits:8,total:1900,amount:356},
+  {id:'gaia1',name:'GAIA · 5 Pilates + 5 HABIT',pilates:5,credits:5,total:890,amount:256},
+  {id:'gaia2',name:'GAIA · 10 Pilates + 8 HABIT',pilates:10,credits:8,total:1600,amount:369},
+  {id:'gaia3',name:'GAIA · 13 Pilates + 8 HABIT',pilates:13,credits:8,total:1900,amount:356},
 ];
 
 async function renderGaiaTab(){
@@ -5933,14 +5934,29 @@ async function adminGrantSelectedPlanSb(uid,name){
   const note=(document.getElementById('grant-note')||{value:''}).value.trim();
   showLoading('Activando membresia...');
   try{
-    const expiry=mazPlanExpiryIso(plan.days);
-    const{error}=await sb.from('profiles').update({plan_id:plan.id,plan_type:plan.type,credits:plan.credits,plan_expiry:expiry}).eq('id',uid);
-    if(error)throw error;
-    await adminLogManualPayment(uid,name,plan,amount,method,note);
+    if(plan.type==='gaia'){
+      const{data:curr,error:fe}=await sb.from('profiles').select('credits').eq('id',uid).single();
+      if(fe)throw fe;
+      const{error:ue}=await sb.from('profiles').update({credits:(curr.credits||0)+plan.credits}).eq('id',uid);
+      if(ue)throw ue;
+      const{error:pe}=await sb.from('payments').insert({
+        user_id:uid,plan_id:plan.id,plan_name:plan.name,plan_type:'gaia',
+        amount:amount,currency:'MXN',last4:'GAIA',status:'completed',payment_method:'gaia',
+        notes:(note?note+' · ':'')+'Alianza GAIA Pilates · '+plan.pilates+' clases Pilates + '+plan.credits+' visitas HABIT · Total cliente $'+plan.total+' · HABIT recibe $'+plan.amount,
+        created_by:sbUser?sbUser.id:null
+      });
+      if(pe)throw pe;
+      await sb.from('admin_notifs').insert({message:'GAIA: '+name+' · '+plan.name+' · +'+plan.credits+' visitas · '+MXN(amount)+' a caja'});
+    } else {
+      const expiry=mazPlanExpiryIso(plan.days);
+      const{error}=await sb.from('profiles').update({plan_id:plan.id,plan_type:plan.type,credits:plan.credits,plan_expiry:expiry}).eq('id',uid);
+      if(error)throw error;
+      await adminLogManualPayment(uid,name,plan,amount,method,note);
+      sendPush('user:'+uid,'✅ Membresía activada','Tu membresía '+plan.name+' está activa. ¡A entrenar!',{tag:'membership-active'});
+    }
     hideLoading();
     document.getElementById('membership-grant-modal')?.remove();
-    toast('Membresia activada a '+name,'ok');
-    sendPush('user:'+uid,'✅ Membresía activada','Tu membresía '+plan.name+' está activa. ¡A entrenar!',{tag:'membership-active'});
+    toast((plan.type==='gaia'?'+'+plan.credits+' visitas GAIA · '+MXN(amount)+' a caja':'Membresia activada a '+name),'ok');
     renderUsersSb();
   }catch(e){
     hideLoading();
