@@ -907,6 +907,7 @@ body.reception-mode{background:#050505}
     <button class="adm-tab" onclick="admTab('comunidad')">Comunidad</button>
     <button class="adm-tab" onclick="admTab('notifs')">Alertas</button>
     <button class="adm-tab" onclick="admTab('reports')">Reportes</button>
+    <button class="adm-tab" onclick="admTab('gaia')">GAIA</button>
   </div>
   <div class="scroll-area" style="padding-top:.75rem">
 
@@ -1015,6 +1016,20 @@ body.reception-mode{background:#050505}
     <div id="a-notifs" class="adm-section">
       <div id="push-banner" style="margin-bottom:12px"></div>
       <div id="adm-notif-content"></div>
+    </div>
+
+    <!-- GAIA ALLIANCE -->
+    <div id="a-gaia" class="adm-section">
+      <div style="background:var(--card);border:1px solid var(--border);border-radius:6px;padding:1rem;margin-bottom:1rem">
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px">
+          <img src="icons/logo-original.png" style="height:28px;border-radius:4px" alt="">
+          <span style="font-size:13px;color:var(--gray)">+</span>
+          <span style="font-size:14px;font-weight:700;color:var(--bl)">GAIA Pilates Studio</span>
+        </div>
+        <p style="font-size:12px;color:var(--gray);margin:0">Registra un paquete de alianza. Se suman las visitas HABIT al socio y se registra el ingreso a caja.</p>
+      </div>
+      <input class="adm-search" id="gaia-search" placeholder="Buscar socio por nombre o telefono..." oninput="renderGaiaTab()">
+      <div id="gaia-user-list"><div class="empty" style="color:var(--gray);font-size:13px">Escribe para buscar un socio.</div></div>
     </div>
 
     <!-- USER EDIT MODAL -->
@@ -1160,7 +1175,7 @@ body.reception-mode{background:#050505}
 // ── CONFIG & SUPABASE ───────────────────────────────────────
 const SUPABASE_URL='https://pmpjteuqjusbiduevbwq.supabase.co';
 const SUPABASE_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBtcGp0ZXVxanVzYmlkdWV2YndxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc2OTI1NjUsImV4cCI6MjA5MzI2ODU2NX0.XbMzZoo2yqtrD8znLnyo_1zDfrdJAvAPj1lqGOyXnLw';
-const APP_VERSION='20260609-03';
+const APP_VERSION='20260614-01';
 const PUBLIC_APP_URL='https://habittraininghub.app/app.html';
 const PUBLIC_API_ORIGIN='https://www.habittraininghub.app';
 const SHOP_ALLOWED_EMAILS=['josephdpelayo@gmail.com'];
@@ -2703,7 +2718,7 @@ function admTab(t){
   if(t!=='users'){expandedUsers=new Set();}
   if(t!=='boards'){expandedBoards=new Set();editingBoards=new Set();addingExBoards=new Set();assigningBoards=new Set();}
   document.querySelectorAll('.adm-tab').forEach((b,i)=>b.classList.toggle('active',
-    ['dash','slots','users','boards','payments','shop','comunidad','notifs','reports'][i]===t));
+    ['dash','slots','users','boards','payments','shop','comunidad','notifs','reports','gaia'][i]===t));
   document.querySelectorAll('.adm-section').forEach(el=>el.classList.remove('active'));
   const el=document.getElementById('a-'+t);if(el)el.classList.add('active');
   if(t==='dash')renderDashboard();
@@ -2714,6 +2729,7 @@ function admTab(t){
   if(t==='shop')renderAdminShopOrders();
   if(t==='comunidad')renderAdminFeed();
   if(t==='notifs')renderAdmNotifsSb();
+  if(t==='gaia')renderGaiaTab();
 }
 
 // ── HELPERS ──
@@ -5810,6 +5826,101 @@ async function adminTryLogManualPayment(uid,name,plan,amount,method,note){
   }catch(e){
     console.warn('Manual payment log failed:',e);
     return false;
+  }
+}
+
+// ── ADMIN: GAIA ALLIANCE ─────────────────────────────────────
+const GAIA_PKGS=[
+  {id:'gaia1',name:'GAIA Paquete 1',pilates:5,credits:5,total:890,amount:256},
+  {id:'gaia2',name:'GAIA Paquete 2',pilates:10,credits:8,total:1600,amount:369},
+  {id:'gaia3',name:'GAIA Paquete 3',pilates:13,credits:8,total:1900,amount:356},
+];
+
+async function renderGaiaTab(){
+  const q=(document.getElementById('gaia-search')||{value:''}).value.trim().toLowerCase();
+  const list=document.getElementById('gaia-user-list');
+  if(!list)return;
+  if(q.length<2){list.innerHTML='<div class="empty" style="color:var(--gray);font-size:13px">Escribe para buscar un socio.</div>';return;}
+  list.innerHTML='<div class="empty">Buscando...</div>';
+  try{
+    const{data,error}=await sb.from('profiles').select('id,name,phone,email,credits').neq('role','admin').neq('role','reception').or('name.ilike.%'+q+'%,phone.ilike.%'+q+'%,email.ilike.%'+q+'%').order('name').limit(20);
+    if(error)throw error;
+    if(!data||!data.length){list.innerHTML='<div class="empty">Sin resultados.</div>';return;}
+    list.innerHTML=data.map(u=>
+      '<div class="brow"><div class="brow-info"><div class="brow-name">'+esc(u.name||'')+'</div>'
+      +'<div class="brow-meta">'+(u.phone||u.email||'')+' · '+u.credits+' visita'+(u.credits===1?'':'s')+'</div></div>'
+      +'<button class="btn-sm bblue" onclick="gaiaOpenModal(\''+u.id+'\',\''+esc(u.name||'')+'\','+u.credits+')">Asignar</button></div>'
+    ).join('');
+  }catch(e){
+    list.innerHTML='<div class="empty" style="color:var(--red)">Error: '+esc(e.message)+'</div>';
+  }
+}
+
+function gaiaOpenModal(uid,name,currentCredits){
+  document.getElementById('gaia-modal')?.remove();
+  const pkgHtml=GAIA_PKGS.map(p=>
+    '<label style="display:flex;align-items:center;gap:12px;background:var(--card2);border:1px solid var(--border);border-radius:6px;padding:12px;cursor:pointer;margin-bottom:8px">'
+    +'<input type="radio" name="gaia-pkg" value="'+p.id+'" style="accent-color:var(--bl);width:18px;height:18px;flex-shrink:0">'
+    +'<div><div style="font-size:14px;font-weight:700">'+p.pilates+' clases Pilates + '+p.credits+' visitas HABIT</div>'
+    +'<div style="font-size:11px;color:var(--gray);margin-top:2px">Precio total: $'+p.total.toLocaleString()+' · Ingreso HABIT: $'+p.amount.toLocaleString()+'</div></div>'
+    +'</label>'
+  ).join('');
+  const modal=document.createElement('div');
+  modal.id='gaia-modal';
+  modal.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,.85);z-index:9999;display:flex;align-items:flex-end;justify-content:center';
+  modal.innerHTML=
+    '<div style="background:var(--dark);border:1px solid var(--border);border-radius:12px 12px 0 0;width:100%;max-width:430px;display:flex;flex-direction:column;overflow:hidden">'
+    +'<div style="padding:1rem;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between">'
+    +'<span style="font-size:17px;font-weight:800;letter-spacing:.08em">PAQUETE GAIA</span>'
+    +'<button onclick="document.getElementById(\'gaia-modal\').remove()" style="background:none;border:none;color:var(--gray);font-size:22px;cursor:pointer;line-height:1">x</button>'
+    +'</div>'
+    +'<div style="padding:1rem;overflow-y:auto">'
+    +'<div class="brow-name" style="margin-bottom:4px">'+esc(name)+'</div>'
+    +'<div style="font-size:11px;color:var(--gray);margin-bottom:14px">Visitas actuales: '+currentCredits+'</div>'
+    +pkgHtml
+    +'</div>'
+    +'<div style="padding:1rem;border-top:1px solid var(--border)">'
+    +'<button class="btn" onclick="gaiaConfirm(\''+uid+'\',\''+esc(name)+'\')">Confirmar y registrar</button>'
+    +'</div>'
+    +'</div>';
+  document.body.appendChild(modal);
+  modal.querySelector('input[type=radio]').checked=true;
+}
+
+async function gaiaConfirm(uid,name){
+  const sel=document.querySelector('input[name="gaia-pkg"]:checked');
+  if(!sel){toast('Selecciona un paquete','err');return;}
+  const pkg=GAIA_PKGS.find(p=>p.id===sel.value);
+  if(!pkg)return;
+  showLoading('Registrando paquete GAIA...');
+  try{
+    const{data:curr,error:fe}=await sb.from('profiles').select('credits').eq('id',uid).single();
+    if(fe)throw fe;
+    const newCredits=(curr.credits||0)+pkg.credits;
+    const{error:ue}=await sb.from('profiles').update({credits:newCredits}).eq('id',uid);
+    if(ue)throw ue;
+    const{error:pe}=await sb.from('payments').insert({
+      user_id:uid,
+      plan_id:pkg.id,
+      plan_name:pkg.name+' · '+pkg.credits+' visitas HABIT',
+      plan_type:'gaia',
+      amount:pkg.amount,
+      currency:'MXN',
+      last4:'GAIA',
+      status:'completed',
+      payment_method:'gaia',
+      notes:'Alianza GAIA Pilates · '+pkg.pilates+' clases Pilates + '+pkg.credits+' visitas HABIT · Total cliente $'+pkg.total+' · HABIT recibe $'+pkg.amount,
+      created_by:sbUser?sbUser.id:null
+    });
+    if(pe)throw pe;
+    await sb.from('admin_notifs').insert({message:'GAIA: '+name+' · '+pkg.name+' · +'+pkg.credits+' visitas · '+MXN(pkg.amount)+' a caja'});
+    _adminBookProfiles=null;
+    hideLoading();
+    document.getElementById('gaia-modal')?.remove();
+    toast(name+' · +'+pkg.credits+' visitas · '+MXN(pkg.amount)+' a caja','ok');
+  }catch(e){
+    hideLoading();
+    toast('Error: '+e.message,'err');
   }
 }
 
