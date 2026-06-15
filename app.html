@@ -1179,7 +1179,7 @@ body.reception-mode{background:#050505}
 // ── CONFIG & SUPABASE ───────────────────────────────────────
 const SUPABASE_URL='https://pmpjteuqjusbiduevbwq.supabase.co';
 const SUPABASE_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBtcGp0ZXVxanVzYmlkdWV2YndxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc2OTI1NjUsImV4cCI6MjA5MzI2ODU2NX0.XbMzZoo2yqtrD8znLnyo_1zDfrdJAvAPj1lqGOyXnLw';
-const APP_VERSION='20260614-03';
+const APP_VERSION='20260614-04';
 const PUBLIC_APP_URL='https://habittraininghub.app/app.html';
 const PUBLIC_API_ORIGIN='https://www.habittraininghub.app';
 const SHOP_ALLOWED_EMAILS=['josephdpelayo@gmail.com'];
@@ -5748,7 +5748,7 @@ async function adminOpenUserProfile(uid){
   try{
     const[{data:u,error:ue},{data:bks},{data:pays}]=await Promise.all([
       sb.from('profiles').select('*').eq('id',uid).single(),
-      sb.from('bookings').select('*').eq('user_id',uid).eq('status','active').order('ds',{ascending:false}).order('start_idx',{ascending:false}).limit(60),
+      sb.from('bookings').select('*').eq('user_id',uid).order('ds',{ascending:false}).order('start_idx',{ascending:false}).limit(60),
       sb.from('payments').select('*').eq('user_id',uid).order('created_at',{ascending:false}).limit(30),
     ]);
     if(ue)throw ue;
