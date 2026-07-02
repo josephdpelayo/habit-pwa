@@ -1,7 +1,7 @@
 // HABIT Training Hub — Service Worker
 // Push notifications + app shell caching
 
-const CACHE_VERSION = '20260702-01'; // keep in sync with APP_VERSION in app.html
+const CACHE_VERSION = '20260702-02'; // keep in sync with APP_VERSION in app.html
 const CACHE = `habit-${CACHE_VERSION}`;
 
 self.addEventListener('install', e => {
@@ -41,11 +41,20 @@ self.addEventListener('fetch', e => {
   }
 
   // Navigation: network-first, serve cached shell only when offline.
-  // We pass the original request through (Vercel rewrites handle it server-side without
-  // a redirect), so Chrome never sees a redirected response from the SW.
+  // If the network response went through an HTTP redirect (e.g. apex → www),
+  // Safari refuses to let a SW hand back a "redirected" Response to respondWith()
+  // for a navigation ("Response served by service worker has redirections").
+  // Rebuilding a plain Response from the body strips that flag; Chrome is unaffected.
   if (request.mode === 'navigate') {
     e.respondWith(
-      fetch(request).catch(() =>
+      fetch(request).then(res => {
+        if (!res.redirected) return res;
+        return res.blob().then(body => new Response(body, {
+          status: res.status,
+          statusText: res.statusText,
+          headers: res.headers,
+        }));
+      }).catch(() =>
         caches.match(request).then(r => r || caches.match('/app.html'))
       )
     );
