@@ -1,6 +1,6 @@
 const { createClient } = require('@supabase/supabase-js');
 const { getPlan } = require('../lib/_plans');
-const { stripe, recordPaidStripeSession } = require('../lib/_fulfillment');
+const { stripe, recordPaidStripeSession, recalculateStripeFees } = require('../lib/_fulfillment');
 
 const supabase = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_SERVICE_ROLE_KEY);
 
@@ -112,6 +112,13 @@ async function syncStripePayments(req, res, token) {
   return res.status(200).json({ ok: true, ...summary });
 }
 
+async function recalcFees(req, res, token) {
+  await requireAdmin(token, 'recalcular comisiones');
+  const limit = Math.max(1, Math.min(100, Number((req.body && req.body.limit) || 50)));
+  const summary = await recalculateStripeFees({ limit });
+  return res.status(200).json({ ok: true, ...summary });
+}
+
 module.exports = async function handler(req, res) {
   if (req.method !== 'POST') {
     res.setHeader('Allow', 'POST');
@@ -122,6 +129,7 @@ module.exports = async function handler(req, res) {
     const token = getToken(req);
     const action = String((req.body && req.body.action) || '').trim();
     if (action === 'delete') return deletePayment(req, res, token);
+    if (action === 'recalc_fees') return recalcFees(req, res, token);
     return syncStripePayments(req, res, token);
   } catch (err) {
     console.error(err);

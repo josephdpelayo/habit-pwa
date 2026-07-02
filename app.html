@@ -1179,7 +1179,7 @@ body.reception-mode{background:#050505}
 // ── CONFIG & SUPABASE ───────────────────────────────────────
 const SUPABASE_URL='https://pmpjteuqjusbiduevbwq.supabase.co';
 const SUPABASE_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBtcGp0ZXVxanVzYmlkdWV2YndxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc2OTI1NjUsImV4cCI6MjA5MzI2ODU2NX0.XbMzZoo2yqtrD8znLnyo_1zDfrdJAvAPj1lqGOyXnLw';
-const APP_VERSION='20260702-02';
+const APP_VERSION='20260702-03';
 const PUBLIC_APP_URL='https://habittraininghub.app/app.html';
 const PUBLIC_API_ORIGIN='https://www.habittraininghub.app';
 const SHOP_ALLOWED_EMAILS=['josephdpelayo@gmail.com'];
@@ -6343,10 +6343,12 @@ async function renderPaymentsSb(){
     if(error)throw error;
     list.innerHTML='';
     const title=document.createElement('div');
-    title.innerHTML='<div style="display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:10px">'
+    title.innerHTML='<div style="display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:10px;flex-wrap:wrap">'
       +'<p class="slbl" style="margin:0">Finanzas</p>'
+      +'<div style="display:flex;gap:8px;flex-wrap:wrap">'
       +'<button class="btn-sm bblue" onclick="adminSyncStripePaymentsSb()">Sincronizar Stripe</button>'
-      +'</div>';
+      +'<button class="btn-sm" onclick="adminRecalcStripeFeesSb()">Recalcular comisiones</button>'
+      +'</div></div>';
     list.appendChild(title);
     if(!pays||!pays.length){
       const empty=document.createElement('div');
@@ -6368,6 +6370,13 @@ async function renderPaymentsSb(){
       acc[method]=(acc[method]||0)+amount;
       return acc;
     },{total:0,stripe:0,cash:0,courtesy:0,adjustment:0});
+    const feeTotal=pays.reduce((s,p)=>s+(p.stripe_fee!=null?Number(p.stripe_fee):0),0);
+    const netTotal=pays.reduce((s,p)=>{
+      const amount=Number(p.amount)||0;
+      if((p.payment_method||'stripe')==='stripe')return s+(p.net_amount!=null?Number(p.net_amount):amount);
+      return s+amount;
+    },0);
+    const pendingFeeCount=pays.filter(p=>(p.payment_method||'stripe')==='stripe'&&p.stripe_fee==null).length;
     const summary=document.createElement('div');
     summary.style.cssText='display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px';
     const today=mazToday();
@@ -6380,8 +6389,16 @@ async function renderPaymentsSb(){
       +'<div class="met"><div class="met-l">Total cobrado</div><div class="met-v" style="color:var(--green)">'+MXN(sums.total)+'</div></div>'
       +'<div class="met"><div class="met-l">Stripe / TDC</div><div class="met-v" style="color:var(--bl)">'+MXN(sums.stripe)+'</div></div>'
       +'<div class="met"><div class="met-l">Efectivo</div><div class="met-v" style="color:var(--amber)">'+MXN(sums.cash)+'</div></div>'
-      +'<div class="met"><div class="met-l">Cortesias / ajustes</div><div class="met-v">'+MXN((sums.courtesy||0)+(sums.adjustment||0))+'</div></div>';
+      +'<div class="met"><div class="met-l">Cortesias / ajustes</div><div class="met-v">'+MXN((sums.courtesy||0)+(sums.adjustment||0))+'</div></div>'
+      +'<div class="met"><div class="met-l">Comisión Stripe</div><div class="met-v" style="color:var(--red)">-'+MXN(feeTotal)+'</div></div>'
+      +'<div class="met"><div class="met-l">Ingreso neto (balance real)</div><div class="met-v" style="color:var(--green)">'+MXN(netTotal)+'</div></div>';
     list.appendChild(summary);
+    if(pendingFeeCount>0){
+      const warn=document.createElement('div');
+      warn.style.cssText='font-size:12px;color:var(--amber);margin-bottom:12px';
+      warn.textContent='⚠️ '+pendingFeeCount+' pago(s) de Stripe sin comisión calculada todavía. Usa "Recalcular comisiones" (puede requerir varios clics si hay muchos).';
+      list.appendChild(warn);
+    }
     const recent=document.createElement('p');
     recent.className='slbl';
     recent.style.margin='14px 0 10px';
@@ -6390,9 +6407,13 @@ async function renderPaymentsSb(){
     pays.forEach(p=>{
       const method={stripe:'TDC / Stripe',cash:'Efectivo',courtesy:'Cortesia',adjustment:'Ajuste manual'}[p.payment_method||'stripe']||p.payment_method||'Pago';
       const ref=p.last4?' · '+(p.payment_method==='stripe'?'**** ':'')+(p.last4||'----'):'';
+      const feeLine=(p.payment_method||'stripe')==='stripe'
+        ?(p.stripe_fee!=null?'<div class="brow-meta">Comisión -'+MXN(p.stripe_fee)+' · Neto '+MXN(p.net_amount)+'</div>':'<div class="brow-meta" style="color:var(--amber)">Comisión sin calcular</div>')
+        :'';
       const d=document.createElement('div');d.className='brow';
       d.innerHTML='<div class="brow-info"><div class="brow-name">'+esc(nameMap[p.user_id]||'Usuario')+'</div>'
         +'<div class="brow-meta">'+p.plan_name+' · '+method+' · '+fmtDateTimeMaz(p.created_at)+ref+'</div>'
+        +feeLine
         +(p.notes?'<div class="brow-meta">'+esc(p.notes)+'</div>':'')+'</div>'
         +'<div style="display:flex;align-items:center;gap:8px"><div style="font-size:16px;font-weight:700">'+MXN(p.amount)+'</div><button class="btn-sm bred" data-pid="'+esc(p.id)+'" onclick="adminDeletePaymentSb(this.dataset.pid)">Eliminar</button></div>';
       list.appendChild(d);
@@ -6446,6 +6467,29 @@ async function adminSyncStripePaymentsSb(){
   }catch(e){
     hideLoading();
     toast('Error al sincronizar Stripe: '+(e.message||e),'err');
+  }
+}
+
+async function adminRecalcStripeFeesSb(){
+  showLoading('Recalculando comisiones...');
+  try{
+    const{data:sessionData}=await sb.auth.getSession();
+    const token=sessionData?.session?.access_token;
+    const res=await fetch('/api/payments-admin',{
+      method:'POST',
+      headers:{'Content-Type':'application/json',Authorization:'Bearer '+token},
+      body:JSON.stringify({action:'recalc_fees',limit:50})
+    });
+    const payload=await res.json().catch(()=>({}));
+    if(!res.ok)throw new Error(payload.error||'No se pudo recalcular');
+    hideLoading();
+    const msg='Comisiones actualizadas: '+(payload.updated||0)
+      +(payload.remaining?' · Faltan '+payload.remaining+', vuelve a tocar el botón':' · Listo, no quedan pendientes');
+    toast(msg,'ok');
+    renderPaymentsSb();
+  }catch(e){
+    hideLoading();
+    toast('Error al recalcular: '+(e.message||e),'err');
   }
 }
 
