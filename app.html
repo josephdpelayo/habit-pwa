@@ -914,8 +914,8 @@ body.reception-mode{background:#050505}
     <!-- DASHBOARD -->
     <div id="a-dash" class="adm-section active">
       <div class="metrics" id="dash-kpis"></div>
-      <p style="font-size:11px;color:var(--gray);margin:6px 0 18px;line-height:1.5">"Depositado" es dinero real en el banco: Stripe (ya sin su comisión) + GAIA. No incluye efectivo ni cortesías/ajustes, que nunca llegan a esa cuenta. Detalle completo en Pagos.</p>
-      <p class="slbl" style="margin-bottom:10px">Depositado en banco, por mes</p>
+      <p style="font-size:11px;color:var(--gray);margin:6px 0 18px;line-height:1.5">"Ingreso real" es dinero que efectivamente recibiste: Stripe (ya sin su comisión) + GAIA + efectivo/transferencia. No incluye cortesías ni ajustes manuales, que no son dinero real. Detalle completo en Pagos.</p>
+      <p class="slbl" style="margin-bottom:10px">Ingreso real, por mes</p>
       <div style="background:var(--card);border:1px solid var(--border);border-radius:6px;padding:1rem;margin-bottom:1rem">
         <canvas id="chart-revenue" height="160"></canvas>
       </div>
@@ -1180,7 +1180,7 @@ body.reception-mode{background:#050505}
 // ── CONFIG & SUPABASE ───────────────────────────────────────
 const SUPABASE_URL='https://pmpjteuqjusbiduevbwq.supabase.co';
 const SUPABASE_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBtcGp0ZXVxanVzYmlkdWV2YndxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc2OTI1NjUsImV4cCI6MjA5MzI2ODU2NX0.XbMzZoo2yqtrD8znLnyo_1zDfrdJAvAPj1lqGOyXnLw';
-const APP_VERSION='20260702-05';
+const APP_VERSION='20260702-06';
 const PUBLIC_APP_URL='https://habittraininghub.app/app.html';
 const PUBLIC_API_ORIGIN='https://www.habittraininghub.app';
 const SHOP_ALLOWED_EMAILS=['josephdpelayo@gmail.com'];
@@ -1372,12 +1372,13 @@ async function initApp(){
 const CAP=4, SLOTS_PER_HOUR=2, TOTAL_SLOTS=48, SLOT_DUR=30, BOOKING_SLOTS=3, BOOKING_SLOTS_SHORT=2, BOOKING_ADVANCE_DAYS=7, ADMIN_BLOCK_ADVANCE_DAYS=14; // 3×30=90min, 2×30=60min
 const BEFORE_MIN=10, CANCEL_H=12;
 const MXN=v=>'$'+Number(v).toLocaleString('es-MX');
-// Solo Stripe (neto, ya con su comisión descontada) y GAIA depositan en el
-// banco. Efectivo/cortesías/ajustes son registros contables que nunca lo tocan.
-const BANK_METHODS=['stripe','gaia'];
-function paymentBankAmount(p){
+// Dinero real recibido: Stripe (neto, ya con su comisión descontada),
+// GAIA y efectivo/transferencia son ingresos reales. Cortesías y ajustes
+// manuales NO son dinero real (son regalos o correcciones contables).
+const REAL_MONEY_METHODS=['stripe','gaia','cash'];
+function paymentRealAmount(p){
   const method=p.payment_method||'stripe';
-  if(!BANK_METHODS.includes(method))return 0;
+  if(!REAL_MONEY_METHODS.includes(method))return 0;
   const amount=Number(p.amount)||0;
   if(method==='stripe')return p.net_amount!=null?Number(p.net_amount):amount;
   return amount;
@@ -5308,9 +5309,9 @@ async function renderDashboard(){
     ]);
     const allPlans=[...PLANS.individual,...PLANS.grupal];
     const active=(allU||[]).filter(u=>{const pp=allPlans.find(x=>x.id===u.plan_id);const ul=u.credits>=999||(pp&&pp.credits>=999);return(ul||u.credits>0)&&(!u.plan_expiry||new Date(u.plan_expiry)>new Date());});
-    // Dinero real que cae al banco (Stripe neto + GAIA); no el cobrado bruto.
-    const monthRev=(pays||[]).filter(p=>dsFromIsoMaz(p.created_at).startsWith(monthStart)).reduce((s,p)=>s+paymentBankAmount(p),0);
-    const totalRev=(pays||[]).reduce((s,p)=>s+paymentBankAmount(p),0);
+    // Dinero real recibido (Stripe neto + GAIA + efectivo/transferencia); no el cobrado bruto.
+    const monthRev=(pays||[]).filter(p=>dsFromIsoMaz(p.created_at).startsWith(monthStart)).reduce((s,p)=>s+paymentRealAmount(p),0);
+    const totalRev=(pays||[]).reduce((s,p)=>s+paymentRealAmount(p),0);
     const todayBks=(bks||[]).filter(b=>b.ds===today).length;
     const expiring=(allU||[]).filter(u=>{const d=daysUntil(u.plan_expiry);return d!==null&&d<=5&&d>=0;});
     const recentIds=new Set((recentBks||[]).map(b=>b.user_id));
@@ -5321,8 +5322,8 @@ async function renderDashboard(){
     if(kpisEl)kpisEl.innerHTML=
       '<div class="met"><div class="met-l">Socios activos</div><div class="met-v" style="color:var(--green)">'+active.length+'</div></div>'
       +'<div class="met"><div class="met-l">Total socios</div><div class="met-v">'+(allU||[]).length+'</div></div>'
-      +'<button class="met" onclick="admTab(\'payments\')" style="text-align:left;cursor:pointer"><div class="met-l">Depositado (mes)</div><div class="met-v" style="color:var(--bl)">'+MXN(monthRev)+'</div></button>'
-      +'<button class="met" onclick="admTab(\'payments\')" style="text-align:left;cursor:pointer"><div class="met-l">Depositado (total)</div><div class="met-v" style="color:var(--bl)">'+MXN(totalRev)+'</div></button>'
+      +'<button class="met" onclick="admTab(\'payments\')" style="text-align:left;cursor:pointer"><div class="met-l">Ingreso real (mes)</div><div class="met-v" style="color:var(--bl)">'+MXN(monthRev)+'</div></button>'
+      +'<button class="met" onclick="admTab(\'payments\')" style="text-align:left;cursor:pointer"><div class="met-l">Ingreso real (total)</div><div class="met-v" style="color:var(--bl)">'+MXN(totalRev)+'</div></button>'
       +'<div class="met"><div class="met-l">Reservas hoy</div><div class="met-v" style="color:var(--amber)">'+todayBks+'</div></div>'
       +'<div class="met"><div class="met-l">Accesos gym</div><div class="met-v" style="color:var(--green)">'+(logs||[]).length+'</div></div>';
 
@@ -5418,7 +5419,7 @@ function renderRevenueChart(pays){
     const d=new Date();d.setMonth(d.getMonth()-i);
     const key=d.toISOString().slice(0,7);
     labels.push(d.toLocaleDateString('es-MX',{month:'short'}));
-    data.push((pays||[]).filter(p=>dsFromIsoMaz(p.created_at).startsWith(key)).reduce((s,p)=>s+paymentBankAmount(p),0));
+    data.push((pays||[]).filter(p=>dsFromIsoMaz(p.created_at).startsWith(key)).reduce((s,p)=>s+paymentRealAmount(p),0));
   }
   chartRevenue=new Chart(ctx,{type:'bar',data:{labels,datasets:[{data,backgroundColor:'rgba(59,130,246,.55)',borderColor:'#3b82f6',borderWidth:1,borderRadius:4}]},options:{responsive:true,plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>'$'+c.parsed.y.toLocaleString('es-MX')}}},scales:{x:{grid:{color:'rgba(255,255,255,.04)'},ticks:{color:'#9ca3af',font:{size:11}}},y:{grid:{color:'rgba(255,255,255,.04)'},ticks:{color:'#9ca3af',callback:v=>v>=1000?'$'+(v/1000).toFixed(0)+'k':'$'+v}}}}});
 }
@@ -6417,15 +6418,15 @@ function renderFinanzasView(){
     return acc;
   },{total:0,stripe:0,cash:0,courtesy:0,adjustment:0,gaia:0});
   const feeTotal=pays.reduce((s,p)=>s+(p.stripe_fee!=null?Number(p.stripe_fee):0),0);
-  const bankTotal=pays.reduce((s,p)=>s+paymentBankAmount(p),0);
+  const realTotal=pays.reduce((s,p)=>s+paymentRealAmount(p),0);
   const pendingFeeCount=pays.filter(p=>(p.payment_method||'stripe')==='stripe'&&p.stripe_fee==null).length;
 
-  // ── Tarjeta principal: lo que de verdad cae al banco en el periodo ──
+  // ── Tarjeta principal: dinero real recibido en el periodo ──
   const hero=document.createElement('div');
   hero.style.cssText='background:var(--card);border:1px solid var(--border);border-radius:8px;padding:18px;margin-bottom:6px;text-align:center';
-  hero.innerHTML='<div class="met-l" style="margin-bottom:6px">Depositado en banco · '+esc(finMonthLabel(selectedYm))+'</div>'
-    +'<div style="font-size:34px;font-weight:800;color:var(--green)">'+MXN(bankTotal)+'</div>'
-    +'<div style="font-size:11px;color:var(--gray);margin-top:6px;line-height:1.5">Solo Stripe (ya con su comisión descontada) + transferencias GAIA — lo único que realmente entra al banco. Efectivo y cortesías no cuentan aquí, y los cobros Stripe muy recientes pueden tardar unos días en depositarse.</div>';
+  hero.innerHTML='<div class="met-l" style="margin-bottom:6px">Ingreso real · '+esc(finMonthLabel(selectedYm))+'</div>'
+    +'<div style="font-size:34px;font-weight:800;color:var(--green)">'+MXN(realTotal)+'</div>'
+    +'<div style="font-size:11px;color:var(--gray);margin-top:6px;line-height:1.5">Stripe (ya con su comisión descontada) + GAIA + efectivo/transferencia — todo lo que de verdad recibiste. No incluye cortesías ni ajustes manuales, que no son dinero real. Los cobros Stripe muy recientes pueden tardar unos días en depositarse.</div>';
   list.appendChild(hero);
 
   if(pendingFeeCount>0){
@@ -6448,8 +6449,8 @@ function renderFinanzasView(){
     +'<div class="met"><div class="met-l">Comisión Stripe</div><div class="met-v" style="color:var(--red)">-'+MXN(feeTotal)+'</div></div>'
     +'<div class="met"><div class="met-l">Stripe / TDC</div><div class="met-v" style="color:var(--bl)">'+MXN(sums.stripe)+'</div></div>'
     +'<div class="met"><div class="met-l">GAIA</div><div class="met-v" style="color:var(--purple)">'+MXN(sums.gaia||0)+'</div></div>'
-    +'<div class="met"><div class="met-l">Efectivo (no va al banco)</div><div class="met-v" style="color:var(--amber)">'+MXN(sums.cash)+'</div></div>'
-    +'<div class="met"><div class="met-l">Cortesias / ajustes</div><div class="met-v">'+MXN((sums.courtesy||0)+(sums.adjustment||0))+'</div></div>';
+    +'<div class="met"><div class="met-l">Efectivo / transferencia</div><div class="met-v" style="color:var(--amber)">'+MXN(sums.cash)+'</div></div>'
+    +'<div class="met"><div class="met-l">Cortesias / ajustes (no es dinero real)</div><div class="met-v">'+MXN((sums.courtesy||0)+(sums.adjustment||0))+'</div></div>';
   list.appendChild(summary);
 
   const recent=document.createElement('p');
