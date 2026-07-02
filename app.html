@@ -1179,7 +1179,7 @@ body.reception-mode{background:#050505}
 // ── CONFIG & SUPABASE ───────────────────────────────────────
 const SUPABASE_URL='https://pmpjteuqjusbiduevbwq.supabase.co';
 const SUPABASE_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBtcGp0ZXVxanVzYmlkdWV2YndxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc2OTI1NjUsImV4cCI6MjA5MzI2ODU2NX0.XbMzZoo2yqtrD8znLnyo_1zDfrdJAvAPj1lqGOyXnLw';
-const APP_VERSION='20260702-03';
+const APP_VERSION='20260702-04';
 const PUBLIC_APP_URL='https://habittraininghub.app/app.html';
 const PUBLIC_API_ORIGIN='https://www.habittraininghub.app';
 const SHOP_ALLOWED_EMAILS=['josephdpelayo@gmail.com'];
@@ -6371,9 +6371,14 @@ async function renderPaymentsSb(){
       return acc;
     },{total:0,stripe:0,cash:0,courtesy:0,adjustment:0});
     const feeTotal=pays.reduce((s,p)=>s+(p.stripe_fee!=null?Number(p.stripe_fee):0),0);
-    const netTotal=pays.reduce((s,p)=>{
+    // Solo Stripe (neto de comisión) y GAIA depositan en la cuenta de banco.
+    // Efectivo y cortesias/ajustes son registros contables que nunca tocan esa cuenta.
+    const BANK_METHODS=['stripe','gaia'];
+    const bankTotal=pays.reduce((s,p)=>{
+      const method=p.payment_method||'stripe';
+      if(!BANK_METHODS.includes(method))return s;
       const amount=Number(p.amount)||0;
-      if((p.payment_method||'stripe')==='stripe')return s+(p.net_amount!=null?Number(p.net_amount):amount);
+      if(method==='stripe')return s+(p.net_amount!=null?Number(p.net_amount):amount);
       return s+amount;
     },0);
     const pendingFeeCount=pays.filter(p=>(p.payment_method||'stripe')==='stripe'&&p.stripe_fee==null).length;
@@ -6391,8 +6396,12 @@ async function renderPaymentsSb(){
       +'<div class="met"><div class="met-l">Efectivo</div><div class="met-v" style="color:var(--amber)">'+MXN(sums.cash)+'</div></div>'
       +'<div class="met"><div class="met-l">Cortesias / ajustes</div><div class="met-v">'+MXN((sums.courtesy||0)+(sums.adjustment||0))+'</div></div>'
       +'<div class="met"><div class="met-l">Comisión Stripe</div><div class="met-v" style="color:var(--red)">-'+MXN(feeTotal)+'</div></div>'
-      +'<div class="met"><div class="met-l">Ingreso neto (balance real)</div><div class="met-v" style="color:var(--green)">'+MXN(netTotal)+'</div></div>';
+      +'<div class="met"><div class="met-l">Depositado en banco (Stripe + GAIA)</div><div class="met-v" style="color:var(--green)">'+MXN(bankTotal)+'</div></div>';
     list.appendChild(summary);
+    const bankNote=document.createElement('div');
+    bankNote.style.cssText='font-size:11px;color:var(--gray);margin-bottom:12px';
+    bankNote.textContent='Excluye efectivo y cortesías/ajustes (no llegan a esa cuenta). Los cobros Stripe muy recientes pueden no haberse depositado todavía — Stripe paga con unos días de retraso.';
+    list.appendChild(bankNote);
     if(pendingFeeCount>0){
       const warn=document.createElement('div');
       warn.style.cssText='font-size:12px;color:var(--amber);margin-bottom:12px';
