@@ -1179,7 +1179,7 @@ body.reception-mode{background:#050505}
 // ── CONFIG & SUPABASE ───────────────────────────────────────
 const SUPABASE_URL='https://pmpjteuqjusbiduevbwq.supabase.co';
 const SUPABASE_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBtcGp0ZXVxanVzYmlkdWV2YndxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc2OTI1NjUsImV4cCI6MjA5MzI2ODU2NX0.XbMzZoo2yqtrD8znLnyo_1zDfrdJAvAPj1lqGOyXnLw';
-const APP_VERSION='20260614-04';
+const APP_VERSION='20260702-01';
 const PUBLIC_APP_URL='https://habittraininghub.app/app.html';
 const PUBLIC_API_ORIGIN='https://www.habittraininghub.app';
 const SHOP_ALLOWED_EMAILS=['josephdpelayo@gmail.com'];
@@ -2686,7 +2686,11 @@ async function loadReceptionSessions(){
 const ALL_VIEWS=['inicio','book','planes','rutinas','comunidad','shop','historial','perfil'];
 const MEMBER_LOCKED_VIEWS=['book','rutinas','comunidad'];
 function canUseMemberViews(){
-  return !!(curUser&&hasActive(curUser));
+  if(!curUser)return false;
+  if(hasActive(curUser))return true;
+  // Se acabaron las visitas, pero si ya reservó su última sesión, conserva
+  // acceso (pizarrón, comunidad, etc.) hasta que esa sesión termine.
+  return (curUser.bookings||[]).some(b=>!isBookingPast(b));
 }
 function updateTopActions(v){
   document.querySelectorAll('.top-action[data-top-view]').forEach(btn=>{
