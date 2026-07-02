@@ -914,7 +914,8 @@ body.reception-mode{background:#050505}
     <!-- DASHBOARD -->
     <div id="a-dash" class="adm-section active">
       <div class="metrics" id="dash-kpis"></div>
-      <p class="slbl" style="margin-bottom:10px">Ingresos del mes</p>
+      <p style="font-size:11px;color:var(--gray);margin:6px 0 18px;line-height:1.5">"Depositado" es dinero real en el banco: Stripe (ya sin su comisión) + GAIA. No incluye efectivo ni cortesías/ajustes, que nunca llegan a esa cuenta. Detalle completo en Pagos.</p>
+      <p class="slbl" style="margin-bottom:10px">Depositado en banco, por mes</p>
       <div style="background:var(--card);border:1px solid var(--border);border-radius:6px;padding:1rem;margin-bottom:1rem">
         <canvas id="chart-revenue" height="160"></canvas>
       </div>
@@ -1179,7 +1180,7 @@ body.reception-mode{background:#050505}
 // ── CONFIG & SUPABASE ───────────────────────────────────────
 const SUPABASE_URL='https://pmpjteuqjusbiduevbwq.supabase.co';
 const SUPABASE_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBtcGp0ZXVxanVzYmlkdWV2YndxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc2OTI1NjUsImV4cCI6MjA5MzI2ODU2NX0.XbMzZoo2yqtrD8znLnyo_1zDfrdJAvAPj1lqGOyXnLw';
-const APP_VERSION='20260702-04';
+const APP_VERSION='20260702-05';
 const PUBLIC_APP_URL='https://habittraininghub.app/app.html';
 const PUBLIC_API_ORIGIN='https://www.habittraininghub.app';
 const SHOP_ALLOWED_EMAILS=['josephdpelayo@gmail.com'];
@@ -1371,6 +1372,16 @@ async function initApp(){
 const CAP=4, SLOTS_PER_HOUR=2, TOTAL_SLOTS=48, SLOT_DUR=30, BOOKING_SLOTS=3, BOOKING_SLOTS_SHORT=2, BOOKING_ADVANCE_DAYS=7, ADMIN_BLOCK_ADVANCE_DAYS=14; // 3×30=90min, 2×30=60min
 const BEFORE_MIN=10, CANCEL_H=12;
 const MXN=v=>'$'+Number(v).toLocaleString('es-MX');
+// Solo Stripe (neto, ya con su comisión descontada) y GAIA depositan en el
+// banco. Efectivo/cortesías/ajustes son registros contables que nunca lo tocan.
+const BANK_METHODS=['stripe','gaia'];
+function paymentBankAmount(p){
+  const method=p.payment_method||'stripe';
+  if(!BANK_METHODS.includes(method))return 0;
+  const amount=Number(p.amount)||0;
+  if(method==='stripe')return p.net_amount!=null?Number(p.net_amount):amount;
+  return amount;
+}
 
 const PLANS={
   individual:[
@@ -5290,15 +5301,16 @@ async function renderDashboard(){
     const cutoff14=addDaysDS(today,-14);
     const[{data:allU},{data:pays},{data:bks},{data:logs},{data:recentBks}]=await Promise.all([
       sb.from('profiles').select('id,credits,plan_expiry,plan_id,role,name,phone').neq('role','admin'),
-      sb.from('payments').select('amount,created_at,plan_name,user_id').order('created_at',{ascending:false}).limit(2000),
+      sb.from('payments').select('amount,created_at,plan_name,user_id,payment_method,net_amount').order('created_at',{ascending:false}).limit(2000),
       sb.from('bookings').select('ds,status').eq('status','active'),
       sb.from('access_log').select('id'),
       sb.from('bookings').select('user_id').eq('status','active').gte('ds',cutoff14)
     ]);
     const allPlans=[...PLANS.individual,...PLANS.grupal];
     const active=(allU||[]).filter(u=>{const pp=allPlans.find(x=>x.id===u.plan_id);const ul=u.credits>=999||(pp&&pp.credits>=999);return(ul||u.credits>0)&&(!u.plan_expiry||new Date(u.plan_expiry)>new Date());});
-    const monthRev=(pays||[]).filter(p=>dsFromIsoMaz(p.created_at).startsWith(monthStart)).reduce((s,p)=>s+Number(p.amount),0);
-    const totalRev=(pays||[]).reduce((s,p)=>s+Number(p.amount),0);
+    // Dinero real que cae al banco (Stripe neto + GAIA); no el cobrado bruto.
+    const monthRev=(pays||[]).filter(p=>dsFromIsoMaz(p.created_at).startsWith(monthStart)).reduce((s,p)=>s+paymentBankAmount(p),0);
+    const totalRev=(pays||[]).reduce((s,p)=>s+paymentBankAmount(p),0);
     const todayBks=(bks||[]).filter(b=>b.ds===today).length;
     const expiring=(allU||[]).filter(u=>{const d=daysUntil(u.plan_expiry);return d!==null&&d<=5&&d>=0;});
     const recentIds=new Set((recentBks||[]).map(b=>b.user_id));
@@ -5309,8 +5321,8 @@ async function renderDashboard(){
     if(kpisEl)kpisEl.innerHTML=
       '<div class="met"><div class="met-l">Socios activos</div><div class="met-v" style="color:var(--green)">'+active.length+'</div></div>'
       +'<div class="met"><div class="met-l">Total socios</div><div class="met-v">'+(allU||[]).length+'</div></div>'
-      +'<button class="met" onclick="admTab(\'payments\')" style="text-align:left;cursor:pointer"><div class="met-l">Ingresos mes</div><div class="met-v" style="color:var(--bl)">'+MXN(monthRev)+'</div></button>'
-      +'<button class="met" onclick="admTab(\'payments\')" style="text-align:left;cursor:pointer"><div class="met-l">Ingresos total</div><div class="met-v" style="color:var(--bl)">'+MXN(totalRev)+'</div></button>'
+      +'<button class="met" onclick="admTab(\'payments\')" style="text-align:left;cursor:pointer"><div class="met-l">Depositado (mes)</div><div class="met-v" style="color:var(--bl)">'+MXN(monthRev)+'</div></button>'
+      +'<button class="met" onclick="admTab(\'payments\')" style="text-align:left;cursor:pointer"><div class="met-l">Depositado (total)</div><div class="met-v" style="color:var(--bl)">'+MXN(totalRev)+'</div></button>'
       +'<div class="met"><div class="met-l">Reservas hoy</div><div class="met-v" style="color:var(--amber)">'+todayBks+'</div></div>'
       +'<div class="met"><div class="met-l">Accesos gym</div><div class="met-v" style="color:var(--green)">'+(logs||[]).length+'</div></div>';
 
@@ -5406,7 +5418,7 @@ function renderRevenueChart(pays){
     const d=new Date();d.setMonth(d.getMonth()-i);
     const key=d.toISOString().slice(0,7);
     labels.push(d.toLocaleDateString('es-MX',{month:'short'}));
-    data.push((pays||[]).filter(p=>dsFromIsoMaz(p.created_at).startsWith(key)).reduce((s,p)=>s+Number(p.amount),0));
+    data.push((pays||[]).filter(p=>dsFromIsoMaz(p.created_at).startsWith(key)).reduce((s,p)=>s+paymentBankAmount(p),0));
   }
   chartRevenue=new Chart(ctx,{type:'bar',data:{labels,datasets:[{data,backgroundColor:'rgba(59,130,246,.55)',borderColor:'#3b82f6',borderWidth:1,borderRadius:4}]},options:{responsive:true,plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>'$'+c.parsed.y.toLocaleString('es-MX')}}},scales:{x:{grid:{color:'rgba(255,255,255,.04)'},ticks:{color:'#9ca3af',font:{size:11}}},y:{grid:{color:'rgba(255,255,255,.04)'},ticks:{color:'#9ca3af',callback:v=>v>=1000?'$'+(v/1000).toFixed(0)+'k':'$'+v}}}}});
 }
@@ -6335,99 +6347,130 @@ async function adminGrantCourtesySb(uid,name){
 }
 
 // ── ADMIN: PAYMENTS ──────────────────────────────────────────
+let _finData=null; // {pays,nameMap} — cache para no re-consultar al cambiar de mes
+let _finMonth='current'; // 'current' | 'all' | 'YYYY-MM'
+
+function finMonthLabel(ym){
+  if(ym==='all')return'Todo el tiempo';
+  const[y,m]=ym.split('-');
+  const name=MO[Number(m)-1]||'';
+  return(name.charAt(0).toUpperCase()+name.slice(1)+' '+y);
+}
+function setFinMonth(v){_finMonth=v;renderFinanzasView();}
+
 async function renderPaymentsSb(){
   const list=document.getElementById('payment-list');
   list.innerHTML='<div class="empty">Cargando...</div>';
   try{
     const{data:pays,error}=await sb.from('payments').select('*').order('created_at',{ascending:false});
     if(error)throw error;
-    list.innerHTML='';
-    const title=document.createElement('div');
-    title.innerHTML='<div style="display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:10px;flex-wrap:wrap">'
-      +'<p class="slbl" style="margin:0">Finanzas</p>'
-      +'<div style="display:flex;gap:8px;flex-wrap:wrap">'
-      +'<button class="btn-sm bblue" onclick="adminSyncStripePaymentsSb()">Sincronizar Stripe</button>'
-      +'<button class="btn-sm" onclick="adminRecalcStripeFeesSb()">Recalcular comisiones</button>'
-      +'</div></div>';
-    list.appendChild(title);
-    if(!pays||!pays.length){
-      const empty=document.createElement('div');
-      empty.className='empty';
-      empty.textContent='Sin pagos.';
-      list.appendChild(empty);
-      return;
-    }
-    const userIds=[...new Set(pays.map(p=>p.user_id).filter(Boolean))];
+    const userIds=[...new Set((pays||[]).map(p=>p.user_id).filter(Boolean))];
     let nameMap={};
     if(userIds.length){
       const{data:profRows}=await sb.from('profiles').select('id,name').in('id',userIds);
       nameMap=Object.fromEntries((profRows||[]).map(p=>[p.id,p.name]));
     }
-    const sums=pays.reduce((acc,p)=>{
-      const method=p.payment_method||'stripe';
-      const amount=Number(p.amount)||0;
-      acc.total+=amount;
-      acc[method]=(acc[method]||0)+amount;
-      return acc;
-    },{total:0,stripe:0,cash:0,courtesy:0,adjustment:0});
-    const feeTotal=pays.reduce((s,p)=>s+(p.stripe_fee!=null?Number(p.stripe_fee):0),0);
-    // Solo Stripe (neto de comisión) y GAIA depositan en la cuenta de banco.
-    // Efectivo y cortesias/ajustes son registros contables que nunca tocan esa cuenta.
-    const BANK_METHODS=['stripe','gaia'];
-    const bankTotal=pays.reduce((s,p)=>{
-      const method=p.payment_method||'stripe';
-      if(!BANK_METHODS.includes(method))return s;
-      const amount=Number(p.amount)||0;
-      if(method==='stripe')return s+(p.net_amount!=null?Number(p.net_amount):amount);
-      return s+amount;
-    },0);
-    const pendingFeeCount=pays.filter(p=>(p.payment_method||'stripe')==='stripe'&&p.stripe_fee==null).length;
-    const summary=document.createElement('div');
-    summary.style.cssText='display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px';
-    const today=mazToday();
-    const month=today.slice(0,7);
-    const todayTotal=pays.filter(p=>dsFromIsoMaz(p.created_at)===today).reduce((s,p)=>s+Number(p.amount||0),0);
-    const monthTotal=pays.filter(p=>dsFromIsoMaz(p.created_at).startsWith(month)).reduce((s,p)=>s+Number(p.amount||0),0);
-    summary.innerHTML=
-      '<div class="met"><div class="met-l">Hoy</div><div class="met-v" style="color:var(--green)">'+MXN(todayTotal)+'</div></div>'
-      +'<div class="met"><div class="met-l">Mes actual</div><div class="met-v" style="color:var(--green)">'+MXN(monthTotal)+'</div></div>'
-      +'<div class="met"><div class="met-l">Total cobrado</div><div class="met-v" style="color:var(--green)">'+MXN(sums.total)+'</div></div>'
-      +'<div class="met"><div class="met-l">Stripe / TDC</div><div class="met-v" style="color:var(--bl)">'+MXN(sums.stripe)+'</div></div>'
-      +'<div class="met"><div class="met-l">Efectivo</div><div class="met-v" style="color:var(--amber)">'+MXN(sums.cash)+'</div></div>'
-      +'<div class="met"><div class="met-l">Cortesias / ajustes</div><div class="met-v">'+MXN((sums.courtesy||0)+(sums.adjustment||0))+'</div></div>'
-      +'<div class="met"><div class="met-l">Comisión Stripe</div><div class="met-v" style="color:var(--red)">-'+MXN(feeTotal)+'</div></div>'
-      +'<div class="met"><div class="met-l">Depositado en banco (Stripe + GAIA)</div><div class="met-v" style="color:var(--green)">'+MXN(bankTotal)+'</div></div>';
-    list.appendChild(summary);
-    const bankNote=document.createElement('div');
-    bankNote.style.cssText='font-size:11px;color:var(--gray);margin-bottom:12px';
-    bankNote.textContent='Excluye efectivo y cortesías/ajustes (no llegan a esa cuenta). Los cobros Stripe muy recientes pueden no haberse depositado todavía — Stripe paga con unos días de retraso.';
-    list.appendChild(bankNote);
-    if(pendingFeeCount>0){
-      const warn=document.createElement('div');
-      warn.style.cssText='font-size:12px;color:var(--amber);margin-bottom:12px';
-      warn.textContent='⚠️ '+pendingFeeCount+' pago(s) de Stripe sin comisión calculada todavía. Usa "Recalcular comisiones" (puede requerir varios clics si hay muchos).';
-      list.appendChild(warn);
-    }
-    const recent=document.createElement('p');
-    recent.className='slbl';
-    recent.style.margin='14px 0 10px';
-    recent.textContent='Movimientos';
-    list.appendChild(recent);
-    pays.forEach(p=>{
-      const method={stripe:'TDC / Stripe',cash:'Efectivo',courtesy:'Cortesia',adjustment:'Ajuste manual'}[p.payment_method||'stripe']||p.payment_method||'Pago';
-      const ref=p.last4?' · '+(p.payment_method==='stripe'?'**** ':'')+(p.last4||'----'):'';
-      const feeLine=(p.payment_method||'stripe')==='stripe'
-        ?(p.stripe_fee!=null?'<div class="brow-meta">Comisión -'+MXN(p.stripe_fee)+' · Neto '+MXN(p.net_amount)+'</div>':'<div class="brow-meta" style="color:var(--amber)">Comisión sin calcular</div>')
-        :'';
-      const d=document.createElement('div');d.className='brow';
-      d.innerHTML='<div class="brow-info"><div class="brow-name">'+esc(nameMap[p.user_id]||'Usuario')+'</div>'
-        +'<div class="brow-meta">'+p.plan_name+' · '+method+' · '+fmtDateTimeMaz(p.created_at)+ref+'</div>'
-        +feeLine
-        +(p.notes?'<div class="brow-meta">'+esc(p.notes)+'</div>':'')+'</div>'
-        +'<div style="display:flex;align-items:center;gap:8px"><div style="font-size:16px;font-weight:700">'+MXN(p.amount)+'</div><button class="btn-sm bred" data-pid="'+esc(p.id)+'" onclick="adminDeletePaymentSb(this.dataset.pid)">Eliminar</button></div>';
-      list.appendChild(d);
-    });
+    _finData={pays:pays||[],nameMap};
+    renderFinanzasView();
   }catch(e){list.innerHTML='<div class="empty">Error: '+e.message+'</div>';}
+}
+
+function renderFinanzasView(){
+  const list=document.getElementById('payment-list');
+  if(!_finData)return;
+  const{pays:allPays,nameMap}=_finData;
+  const months=[...new Set(allPays.map(p=>dsFromIsoMaz(p.created_at).slice(0,7)))].sort().reverse();
+  const currentYm=mazToday().slice(0,7);
+  let selectedYm=_finMonth==='current'?currentYm:_finMonth;
+  if(selectedYm!=='all'&&!months.includes(selectedYm))selectedYm=months[0]||'all';
+  const pays=selectedYm==='all'?allPays:allPays.filter(p=>dsFromIsoMaz(p.created_at).slice(0,7)===selectedYm);
+
+  list.innerHTML='';
+
+  // ── Encabezado: título + selector de mes + acciones admin ──
+  const monthOpts=['<option value="all"'+(selectedYm==='all'?' selected':'')+'>Todo el tiempo</option>']
+    .concat(months.map(ym=>'<option value="'+ym+'"'+(ym===selectedYm?' selected':'')+'>'+finMonthLabel(ym)+'</option>'));
+  const header=document.createElement('div');
+  header.innerHTML='<div style="display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:10px;flex-wrap:wrap">'
+    +'<p class="slbl" style="margin:0">Finanzas</p>'
+    +'<select onchange="setFinMonth(this.value)" style="background:var(--card);color:var(--white);border:1px solid var(--border);border-radius:4px;padding:8px 10px;font-size:13px;font-family:inherit">'+monthOpts.join('')+'</select>'
+    +'</div>'
+    +'<div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px">'
+    +'<button class="btn-sm bblue" onclick="adminSyncStripePaymentsSb()">Sincronizar Stripe</button>'
+    +'<button class="btn-sm" onclick="adminRecalcStripeFeesSb()">Recalcular comisiones</button>'
+    +'</div>';
+  list.appendChild(header);
+
+  if(!pays.length){
+    const empty=document.createElement('div');
+    empty.className='empty';
+    empty.textContent=selectedYm==='all'?'Sin pagos.':'Sin pagos en '+finMonthLabel(selectedYm)+'.';
+    list.appendChild(empty);
+    return;
+  }
+
+  const sums=pays.reduce((acc,p)=>{
+    const method=p.payment_method||'stripe';
+    const amount=Number(p.amount)||0;
+    acc.total+=amount;
+    acc[method]=(acc[method]||0)+amount;
+    return acc;
+  },{total:0,stripe:0,cash:0,courtesy:0,adjustment:0,gaia:0});
+  const feeTotal=pays.reduce((s,p)=>s+(p.stripe_fee!=null?Number(p.stripe_fee):0),0);
+  const bankTotal=pays.reduce((s,p)=>s+paymentBankAmount(p),0);
+  const pendingFeeCount=pays.filter(p=>(p.payment_method||'stripe')==='stripe'&&p.stripe_fee==null).length;
+
+  // ── Tarjeta principal: lo que de verdad cae al banco en el periodo ──
+  const hero=document.createElement('div');
+  hero.style.cssText='background:var(--card);border:1px solid var(--border);border-radius:8px;padding:18px;margin-bottom:6px;text-align:center';
+  hero.innerHTML='<div class="met-l" style="margin-bottom:6px">Depositado en banco · '+esc(finMonthLabel(selectedYm))+'</div>'
+    +'<div style="font-size:34px;font-weight:800;color:var(--green)">'+MXN(bankTotal)+'</div>'
+    +'<div style="font-size:11px;color:var(--gray);margin-top:6px;line-height:1.5">Solo Stripe (ya con su comisión descontada) + transferencias GAIA — lo único que realmente entra al banco. Efectivo y cortesías no cuentan aquí, y los cobros Stripe muy recientes pueden tardar unos días en depositarse.</div>';
+  list.appendChild(hero);
+
+  if(pendingFeeCount>0){
+    const warn=document.createElement('div');
+    warn.style.cssText='font-size:12px;color:var(--amber);margin:10px 0';
+    warn.textContent='⚠️ '+pendingFeeCount+' pago(s) de Stripe en este periodo sin comisión calculada todavía. Usa "Recalcular comisiones" (puede requerir varios clics si hay muchos).';
+    list.appendChild(warn);
+  }
+
+  const secTitle=document.createElement('p');
+  secTitle.className='slbl';
+  secTitle.style.margin='16px 0 10px';
+  secTitle.textContent='Cobros del periodo, por método';
+  list.appendChild(secTitle);
+
+  const summary=document.createElement('div');
+  summary.style.cssText='display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px';
+  summary.innerHTML=
+    '<div class="met"><div class="met-l">Total cobrado (bruto)</div><div class="met-v" style="color:var(--green)">'+MXN(sums.total)+'</div></div>'
+    +'<div class="met"><div class="met-l">Comisión Stripe</div><div class="met-v" style="color:var(--red)">-'+MXN(feeTotal)+'</div></div>'
+    +'<div class="met"><div class="met-l">Stripe / TDC</div><div class="met-v" style="color:var(--bl)">'+MXN(sums.stripe)+'</div></div>'
+    +'<div class="met"><div class="met-l">GAIA</div><div class="met-v" style="color:var(--purple)">'+MXN(sums.gaia||0)+'</div></div>'
+    +'<div class="met"><div class="met-l">Efectivo (no va al banco)</div><div class="met-v" style="color:var(--amber)">'+MXN(sums.cash)+'</div></div>'
+    +'<div class="met"><div class="met-l">Cortesias / ajustes</div><div class="met-v">'+MXN((sums.courtesy||0)+(sums.adjustment||0))+'</div></div>';
+  list.appendChild(summary);
+
+  const recent=document.createElement('p');
+  recent.className='slbl';
+  recent.style.margin='16px 0 10px';
+  recent.textContent='Movimientos · '+finMonthLabel(selectedYm)+' ('+pays.length+')';
+  list.appendChild(recent);
+  pays.forEach(p=>{
+    const method={stripe:'TDC / Stripe',cash:'Efectivo',courtesy:'Cortesia',adjustment:'Ajuste manual',gaia:'GAIA'}[p.payment_method||'stripe']||p.payment_method||'Pago';
+    const ref=p.last4?' · '+(p.payment_method==='stripe'?'**** ':'')+(p.last4||'----'):'';
+    const feeLine=(p.payment_method||'stripe')==='stripe'
+      ?(p.stripe_fee!=null?'<div class="brow-meta">Comisión -'+MXN(p.stripe_fee)+' · Neto '+MXN(p.net_amount)+'</div>':'<div class="brow-meta" style="color:var(--amber)">Comisión sin calcular</div>')
+      :'';
+    const d=document.createElement('div');d.className='brow';
+    d.innerHTML='<div class="brow-info"><div class="brow-name">'+esc(nameMap[p.user_id]||'Usuario')+'</div>'
+      +'<div class="brow-meta">'+p.plan_name+' · '+method+' · '+fmtDateTimeMaz(p.created_at)+ref+'</div>'
+      +feeLine
+      +(p.notes?'<div class="brow-meta">'+esc(p.notes)+'</div>':'')+'</div>'
+      +'<div style="display:flex;align-items:center;gap:8px"><div style="font-size:16px;font-weight:700">'+MXN(p.amount)+'</div><button class="btn-sm bred" data-pid="'+esc(p.id)+'" onclick="adminDeletePaymentSb(this.dataset.pid)">Eliminar</button></div>';
+    list.appendChild(d);
+  });
 }
 
 async function adminDeletePaymentSb(paymentId){
