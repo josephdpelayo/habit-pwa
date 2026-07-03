@@ -1180,7 +1180,7 @@ body.reception-mode{background:#050505}
 // ── CONFIG & SUPABASE ───────────────────────────────────────
 const SUPABASE_URL='https://pmpjteuqjusbiduevbwq.supabase.co';
 const SUPABASE_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBtcGp0ZXVxanVzYmlkdWV2YndxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc2OTI1NjUsImV4cCI6MjA5MzI2ODU2NX0.XbMzZoo2yqtrD8znLnyo_1zDfrdJAvAPj1lqGOyXnLw';
-const APP_VERSION='20260702-06';
+const APP_VERSION='20260702-07';
 const PUBLIC_APP_URL='https://habittraininghub.app/app.html';
 const PUBLIC_API_ORIGIN='https://www.habittraininghub.app';
 const SHOP_ALLOWED_EMAILS=['josephdpelayo@gmail.com'];
@@ -6464,14 +6464,94 @@ function renderFinanzasView(){
     const feeLine=(p.payment_method||'stripe')==='stripe'
       ?(p.stripe_fee!=null?'<div class="brow-meta">Comisión -'+MXN(p.stripe_fee)+' · Neto '+MXN(p.net_amount)+'</div>':'<div class="brow-meta" style="color:var(--amber)">Comisión sin calcular</div>')
       :'';
+    const fixBtn=p.user_id?'<button class="btn-sm" data-pid="'+esc(p.id)+'" data-uid="'+esc(p.user_id)+'" onclick="adminOpenFixPlanModal(this.dataset.pid,this.dataset.uid)">Corregir plan</button>':'';
     const d=document.createElement('div');d.className='brow';
     d.innerHTML='<div class="brow-info"><div class="brow-name">'+esc(nameMap[p.user_id]||'Usuario')+'</div>'
       +'<div class="brow-meta">'+p.plan_name+' · '+method+' · '+fmtDateTimeMaz(p.created_at)+ref+'</div>'
       +feeLine
       +(p.notes?'<div class="brow-meta">'+esc(p.notes)+'</div>':'')+'</div>'
-      +'<div style="display:flex;align-items:center;gap:8px"><div style="font-size:16px;font-weight:700">'+MXN(p.amount)+'</div><button class="btn-sm bred" data-pid="'+esc(p.id)+'" onclick="adminDeletePaymentSb(this.dataset.pid)">Eliminar</button></div>';
+      +'<div style="display:flex;flex-direction:column;align-items:flex-end;gap:6px"><div style="font-size:16px;font-weight:700">'+MXN(p.amount)+'</div><div style="display:flex;gap:6px">'+fixBtn+'<button class="btn-sm bred" data-pid="'+esc(p.id)+'" onclick="adminDeletePaymentSb(this.dataset.pid)">Eliminar</button></div></div>';
     list.appendChild(d);
   });
+}
+
+// ── Corregir plan/pago ────────────────────────────────────────
+// Para casos como: cliente pagó Pack 12 visitas, al día siguiente pidió
+// cambiar a Mensualidad y transfirió la diferencia. En vez de editar a mano
+// el perfil y perder el registro de lo que realmente se cobró, esto deja el
+// pago original intacto (fue dinero real recibido bajo ese plan), actualiza
+// el plan/créditos vigentes del socio, y registra la diferencia como un
+// pago nuevo con nota — todo queda trazable.
+function adminOpenFixPlanModal(paymentId,uid){
+  if(!_finData)return;
+  const payment=_finData.pays.find(p=>p.id===paymentId);
+  if(!payment){toast('No se encontró el pago','err');return;}
+  const name=_finData.nameMap[uid]||'Usuario';
+  const existing=document.getElementById('fix-plan-modal');
+  if(existing)existing.remove();
+  const planOptions=adminPlanList().map(p=>
+    '<option value="'+p.id+'">'+p.name+' · '+(p.credits>=999?'Mensual':p.credits+' visita'+(p.credits===1?'':'s'))+(p.days?' · '+p.days+' dias':'')+'</option>'
+  ).join('');
+  const modal=document.createElement('div');
+  modal.id='fix-plan-modal';
+  modal.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,.85);z-index:9999;display:flex;align-items:flex-end;justify-content:center';
+  modal.innerHTML=
+    '<div style="background:var(--dark);border:1px solid var(--border);border-radius:12px 12px 0 0;width:100%;max-width:430px;display:flex;flex-direction:column;overflow:hidden;max-height:90vh;overflow-y:auto">'
+    +'<div style="padding:1rem;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between">'
+    +'<span style="font-size:16px;font-weight:800;letter-spacing:.04em">CORREGIR PLAN</span>'
+    +'<button onclick="document.getElementById(&quot;fix-plan-modal&quot;).remove()" style="background:none;border:none;color:var(--gray);font-size:22px;cursor:pointer">x</button>'
+    +'</div>'
+    +'<div style="padding:1rem">'
+    +'<div class="brow-name" style="margin-bottom:4px">'+esc(name)+'</div>'
+    +'<div class="brow-meta" style="margin-bottom:14px">Pago original: '+esc(payment.plan_name)+' · '+MXN(payment.amount)+' · '+fmtDateTimeMaz(payment.created_at)+'</div>'
+    +'<p style="font-size:11px;color:var(--gray);margin-bottom:14px;line-height:1.5">Esto NO borra ni modifica el pago original (ese dinero sí se cobró). Solo actualiza el plan/créditos vigentes de '+esc(name)+' y, si recibiste un pago adicional por la diferencia, lo registra aparte.</p>'
+    +'<div class="field"><label>Plan correcto (el que debería tener ahora)</label><select id="fix-plan-id" style="width:100%;background:var(--card2);border:1px solid var(--border);border-radius:4px;padding:12px;font-size:16px;color:var(--white);outline:none;-webkit-appearance:none">'+planOptions+'</select></div>'
+    +'<div class="field"><label>¿Recibiste un pago adicional por la diferencia?</label><input type="number" id="fix-extra-amount" min="0" step="1" value="0" style="width:100%;background:var(--card2);border:1px solid var(--border);border-radius:4px;padding:12px;font-size:16px;color:var(--white);outline:none"></div>'
+    +'<div class="field"><label>Método del pago adicional</label><select id="fix-extra-method" style="width:100%;background:var(--card2);border:1px solid var(--border);border-radius:4px;padding:12px;font-size:16px;color:var(--white);outline:none;-webkit-appearance:none"><option value="cash">Efectivo / Transferencia</option><option value="courtesy">Cortesia</option><option value="adjustment">Ajuste manual</option></select></div>'
+    +'<div class="field"><label>Nota</label><textarea id="fix-note" placeholder="Ej: pidió cambiar de Pack 12 visitas a Mensualidad, transfirió la diferencia" style="width:100%;background:var(--card2);border:1px solid var(--border);border-radius:4px;padding:12px;font-size:13px;color:var(--white);outline:none;resize:none;min-height:62px"></textarea></div>'
+    +'</div>'
+    +'<div style="padding:1rem;border-top:1px solid var(--border)"><button class="btn" id="fix-plan-submit" data-pid="'+esc(paymentId)+'" data-uid="'+esc(uid)+'" data-name="'+esc(name)+'" onclick="adminApplyPlanCorrection(this.dataset.pid,this.dataset.uid,this.dataset.name)">Aplicar corrección</button></div>'
+    +'</div>';
+  document.body.appendChild(modal);
+}
+
+async function adminApplyPlanCorrection(paymentId,uid,name){
+  const planId=(document.getElementById('fix-plan-id')||{}).value;
+  const plan=adminPlanList().find(p=>p.id===planId);
+  if(!plan){toast('Selecciona un plan','err');return;}
+  const extraAmount=Number((document.getElementById('fix-extra-amount')||{value:0}).value)||0;
+  const method=(document.getElementById('fix-extra-method')||{value:'cash'}).value;
+  const note=(document.getElementById('fix-note')||{value:''}).value.trim();
+  const btn=document.getElementById('fix-plan-submit');
+  if(btn){btn.disabled=true;btn.textContent='Aplicando...';}
+  try{
+    if(plan.type==='gaia'){
+      const{data:curr,error:fe}=await sb.from('profiles').select('credits').eq('id',uid).single();
+      if(fe)throw fe;
+      const{error:ue}=await sb.from('profiles').update({credits:(curr.credits||0)+plan.credits}).eq('id',uid);
+      if(ue)throw ue;
+    }else{
+      const expiry=mazPlanExpiryIso(plan.days);
+      const{error}=await sb.from('profiles').update({plan_id:plan.id,plan_type:plan.type,credits:plan.credits,plan_expiry:expiry}).eq('id',uid);
+      if(error)throw error;
+    }
+    const{data:original}=await sb.from('payments').select('notes').eq('id',paymentId).maybeSingle();
+    const correctionNote=(original&&original.notes?original.notes+' · ':'')+'Plan corregido a '+plan.name+' el '+fmtDateTimeMaz(new Date().toISOString());
+    await sb.from('payments').update({notes:correctionNote}).eq('id',paymentId);
+    if(extraAmount>0){
+      await adminLogManualPayment(uid,name,plan,extraAmount,method,note||('Complemento por cambio de plan a '+plan.name));
+    }else{
+      await sb.from('admin_notifs').insert({message:'Corrección de plan: '+name+' → '+plan.name+(note?' · '+note:'')});
+    }
+    document.getElementById('fix-plan-modal')?.remove();
+    toast('Plan corregido a '+plan.name,'ok');
+    renderPaymentsSb();
+    renderUsersSb();
+  }catch(e){
+    toast('Error al corregir: '+(e.message||e),'err');
+  }finally{
+    if(btn){btn.disabled=false;btn.textContent='Aplicar corrección';}
+  }
 }
 
 async function adminDeletePaymentSb(paymentId){
