@@ -5654,8 +5654,13 @@ async function renderAdmNotifsSb(){
     const{data:logs}=await sb.from('access_log').select('*').order('accessed_at',{ascending:false}).limit(30);
     let html='';
     if(notifs&&notifs.length){
-      html+='<p class="slbl" style="margin-bottom:10px">Actividad reciente</p>';
-      html+=notifs.map(n=>'<div class="adm-notif'+(n.is_read?'':' unread')+'">'
+      const unreadCount=notifs.filter(n=>!n.is_read).length;
+      html+='<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;gap:8px">'
+        +'<p class="slbl" style="margin-bottom:0">Actividad reciente'+(unreadCount?' ('+unreadCount+' sin leer)':'')+'</p>'
+        +(unreadCount?'<button class="btn-sm bblue" onclick="markAllAdminNotifsRead()">Marcar todo leído</button>':'')
+        +'</div>';
+      html+=notifs.map(n=>'<div class="adm-notif'+(n.is_read?'':' unread')+'" data-nid="'+esc(n.id)+'"'
+        +(n.is_read?'':' onclick="markAdminNotifRead(this)"')+'>'
         +'<div class="adm-notif-text">'+n.message
         +'<div class="adm-notif-time">'+timeSince(n.created_at)+'</div></div></div>').join('');
     }
@@ -5669,6 +5674,18 @@ async function renderAdmNotifsSb(){
     }
     el.innerHTML=html||'<div class="empty">Sin actividad aun.</div>';
   }catch(e){el.innerHTML='<div class="empty">Error: '+e.message+'</div>';}
+}
+async function markAdminNotifRead(el){
+  const id=el.dataset.nid;
+  if(!id)return;
+  el.classList.remove('unread');
+  el.removeAttribute('onclick');
+  try{await sb.from('admin_notifs').update({is_read:true}).eq('id',id);}catch(e){}
+  renderAdmNotifsSb();
+}
+async function markAllAdminNotifsRead(){
+  try{await sb.from('admin_notifs').update({is_read:true}).or('is_read.is.null,is_read.eq.false');}catch(e){}
+  renderAdmNotifsSb();
 }
 
 let _userFilter='todos';
