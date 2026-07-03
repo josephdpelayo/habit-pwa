@@ -1192,7 +1192,7 @@ body.reception-mode{background:#050505}
 // ── CONFIG & SUPABASE ───────────────────────────────────────
 const SUPABASE_URL='https://pmpjteuqjusbiduevbwq.supabase.co';
 const SUPABASE_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBtcGp0ZXVxanVzYmlkdWV2YndxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc2OTI1NjUsImV4cCI6MjA5MzI2ODU2NX0.XbMzZoo2yqtrD8znLnyo_1zDfrdJAvAPj1lqGOyXnLw';
-const APP_VERSION='20260702-12';
+const APP_VERSION='20260702-13';
 const PUBLIC_APP_URL='https://habittraininghub.app/app.html';
 const PUBLIC_API_ORIGIN='https://www.habittraininghub.app';
 const SHOP_ALLOWED_EMAILS=['josephdpelayo@gmail.com'];
@@ -5781,6 +5781,13 @@ function adminCloseUserProfile(){
   document.getElementById('user-list-area').style.display='block';
 }
 
+// Ir al perfil completo de un socio desde otra sección (ej. un movimiento en Finanzas).
+function goToClientProfile(uid){
+  if(!uid)return;
+  admTab('users');
+  adminOpenUserProfile(uid);
+}
+
 async function adminOpenUserProfile(uid){
   const profileView=document.getElementById('user-profile-view');
   const listArea=document.getElementById('user-list-area');
@@ -6724,8 +6731,11 @@ function renderFinanzasView(){
     const amountDisplay=p.payment_method==='courtesy'
       ?'<div style="font-size:13px;font-weight:700;color:var(--gray)">Regalo</div>'
       :'<div style="font-size:16px;font-weight:700">'+MXN(p.amount)+'</div>';
+    const nameHtml=p.user_id
+      ?'<div class="brow-name" style="cursor:pointer;text-decoration:underline;text-underline-offset:2px" data-uid="'+esc(p.user_id)+'" onclick="goToClientProfile(this.dataset.uid)">'+esc(nameMap[p.user_id]||'Usuario')+'</div>'
+      :'<div class="brow-name">'+esc(nameMap[p.user_id]||'Usuario')+'</div>';
     const d=document.createElement('div');d.className='brow';
-    d.innerHTML='<div class="brow-info"><div class="brow-name">'+esc(nameMap[p.user_id]||'Usuario')+'</div>'
+    d.innerHTML='<div class="brow-info">'+nameHtml
       +'<div class="brow-meta">'+p.plan_name+' · '+method+' · '+fmtDateTimeMaz(p.created_at)+ref+'</div>'
       +feeLine
       +(p.notes?'<div class="brow-meta">'+esc(p.notes)+'</div>':'')+'</div>'
