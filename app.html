@@ -1180,7 +1180,7 @@ body.reception-mode{background:#050505}
 // ── CONFIG & SUPABASE ───────────────────────────────────────
 const SUPABASE_URL='https://pmpjteuqjusbiduevbwq.supabase.co';
 const SUPABASE_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBtcGp0ZXVxanVzYmlkdWV2YndxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc2OTI1NjUsImV4cCI6MjA5MzI2ODU2NX0.XbMzZoo2yqtrD8znLnyo_1zDfrdJAvAPj1lqGOyXnLw';
-const APP_VERSION='20260702-07';
+const APP_VERSION='20260702-08';
 const PUBLIC_APP_URL='https://habittraininghub.app/app.html';
 const PUBLIC_API_ORIGIN='https://www.habittraininghub.app';
 const SHOP_ALLOWED_EMAILS=['josephdpelayo@gmail.com'];
@@ -5880,7 +5880,7 @@ function adminFillGrantAmount(){
   if(plan&&amount)amount.value=plan.price;
 }
 
-async function adminLogManualPayment(uid,name,plan,amount,method,note){
+async function adminLogManualPayment(uid,name,plan,amount,method,note,dateOverride){
   const methodLabel={cash:'Efectivo',courtesy:'Cortesia',adjustment:'Ajuste manual'}[method]||'Ajuste manual';
   const paymentPayload={
     user_id:uid,
@@ -5895,6 +5895,9 @@ async function adminLogManualPayment(uid,name,plan,amount,method,note){
     notes:(note?note+' · ':'')+methodLabel+' registrado por admin',
     created_by:sbUser?sbUser.id:null
   };
+  // dateOverride: cuando el pago real ocurrió antes de hoy (ej. correcciones
+  // tardías), para que el reporte mensual lo cuente en el mes correcto.
+  if(dateOverride)paymentPayload.created_at=mazLocalDateTimeIso(dateOverride,12,0,0);
   const{error:payErr}=await sb.from('payments').insert(paymentPayload);
   if(payErr)throw payErr;
   await sb.from('admin_notifs').insert({message:'Registro manual: '+methodLabel+' · '+name+' · '+paymentPayload.plan_name+' · '+MXN(paymentPayload.amount)});
@@ -6508,6 +6511,7 @@ function adminOpenFixPlanModal(paymentId,uid){
     +'<div class="field"><label>Plan correcto (el que debería tener ahora)</label><select id="fix-plan-id" style="width:100%;background:var(--card2);border:1px solid var(--border);border-radius:4px;padding:12px;font-size:16px;color:var(--white);outline:none;-webkit-appearance:none">'+planOptions+'</select></div>'
     +'<div class="field"><label>¿Recibiste un pago adicional por la diferencia?</label><input type="number" id="fix-extra-amount" min="0" step="1" value="0" style="width:100%;background:var(--card2);border:1px solid var(--border);border-radius:4px;padding:12px;font-size:16px;color:var(--white);outline:none"></div>'
     +'<div class="field"><label>Método del pago adicional</label><select id="fix-extra-method" style="width:100%;background:var(--card2);border:1px solid var(--border);border-radius:4px;padding:12px;font-size:16px;color:var(--white);outline:none;-webkit-appearance:none"><option value="cash">Efectivo / Transferencia</option><option value="courtesy">Cortesia</option><option value="adjustment">Ajuste manual</option></select></div>'
+    +'<div class="field"><label>Fecha en que realmente lo recibiste</label><input type="date" id="fix-extra-date" value="'+mazToday()+'" style="width:100%;background:var(--card2);border:1px solid var(--border);border-radius:4px;padding:12px;font-size:16px;color:var(--white);outline:none;color-scheme:dark"></div>'
     +'<div class="field"><label>Nota</label><textarea id="fix-note" placeholder="Ej: pidió cambiar de Pack 12 visitas a Mensualidad, transfirió la diferencia" style="width:100%;background:var(--card2);border:1px solid var(--border);border-radius:4px;padding:12px;font-size:13px;color:var(--white);outline:none;resize:none;min-height:62px"></textarea></div>'
     +'</div>'
     +'<div style="padding:1rem;border-top:1px solid var(--border)"><button class="btn" id="fix-plan-submit" data-pid="'+esc(paymentId)+'" data-uid="'+esc(uid)+'" data-name="'+esc(name)+'" onclick="adminApplyPlanCorrection(this.dataset.pid,this.dataset.uid,this.dataset.name)">Aplicar corrección</button></div>'
@@ -6521,6 +6525,7 @@ async function adminApplyPlanCorrection(paymentId,uid,name){
   if(!plan){toast('Selecciona un plan','err');return;}
   const extraAmount=Number((document.getElementById('fix-extra-amount')||{value:0}).value)||0;
   const method=(document.getElementById('fix-extra-method')||{value:'cash'}).value;
+  const extraDate=(document.getElementById('fix-extra-date')||{value:''}).value||mazToday();
   const note=(document.getElementById('fix-note')||{value:''}).value.trim();
   const btn=document.getElementById('fix-plan-submit');
   if(btn){btn.disabled=true;btn.textContent='Aplicando...';}
@@ -6539,7 +6544,7 @@ async function adminApplyPlanCorrection(paymentId,uid,name){
     const correctionNote=(original&&original.notes?original.notes+' · ':'')+'Plan corregido a '+plan.name+' el '+fmtDateTimeMaz(new Date().toISOString());
     await sb.from('payments').update({notes:correctionNote}).eq('id',paymentId);
     if(extraAmount>0){
-      await adminLogManualPayment(uid,name,plan,extraAmount,method,note||('Complemento por cambio de plan a '+plan.name));
+      await adminLogManualPayment(uid,name,plan,extraAmount,method,note||('Complemento por cambio de plan a '+plan.name),extraDate);
     }else{
       await sb.from('admin_notifs').insert({message:'Corrección de plan: '+name+' → '+plan.name+(note?' · '+note:'')});
     }
