@@ -5546,51 +5546,115 @@ function initReport(){
   document.getElementById('rpt-date').value=mazToday();
   document.getElementById('rpt-output').innerHTML='';
 }
-function generateReport(){
+async function generateReport(){
   const type=document.getElementById('rpt-type').value;
   const date=document.getElementById('rpt-date').value;
   const out=document.getElementById('rpt-output');
-  let html='<div style="background:var(--card);border:1px solid var(--border);border-radius:6px;padding:1rem;margin-top:1rem">';
-  const allU=Object.values(users).filter(u=>u.role!=='admin');
-  if(type==='reservas-dia'){
-    const bks=allU.flatMap(u=>(u.bookings||[]).filter(b=>b.ds===date).map(b=>({...b,userName:u.name,phone:u.phone})));
-    bks.sort((a,b2)=>a.startIdx-b2.startIdx);
-    html+='<p class="slbl" style="margin-bottom:10px">Reservas · '+fmtDS(date)+'</p>';
-    if(!bks.length){html+='<div class="empty">Sin reservas para este día.</div>';}
-    else bks.forEach(b=>{html+='<div class="brow"><div class="brow-info"><div class="brow-name">'+b.userName+'</div><div class="brow-meta">'+b.timeStr+' · '+b.durMin+' min'+(b.isGroup?' · Grupal':'')+'</div></div></div>';});
-  } else if(type==='pagos-mes'){
-    const month=date.slice(0,7);
-    const pays=payments.filter(p=>dsFromIsoMaz(p.ts).startsWith(month)).sort((a,b2)=>b2.ts.localeCompare(a.ts));
-    const total=pays.reduce((s,p)=>s+p.amount,0);
-    html+='<p class="slbl" style="margin-bottom:10px">Pagos · '+month+' · Total: '+MXN(total)+'</p>';
-    if(!pays.length){html+='<div class="empty">Sin pagos este mes.</div>';}
-    else pays.forEach(p=>{html+='<div class="brow"><div class="brow-info"><div class="brow-name">'+p.userName+'</div><div class="brow-meta">'+p.plan+' · '+fmtDateTimeMaz(p.ts)+' · **** '+p.last4+'</div></div><div style="font-size:15px;font-weight:700">'+MXN(p.amount)+'</div></div>';});
-  } else if(type==='socios-activos'){
-    const active=allU.filter(u=>hasActive(u));
-    html+='<p class="slbl" style="margin-bottom:10px">Socios activos · '+active.length+' total</p>';
-    active.forEach(u=>{const d=daysUntil(u.planExpiry);html+='<div class="brow"><div class="brow-info"><div class="brow-name">'+u.name+'</div><div class="brow-meta">'+planLbl(u)+(u.planExpiry?' · vence '+fmtDateMaz(u.planExpiry):'')+'</div></div>'+(d!==null&&d<=5?'<span class="badge bg-amber">'+d+'d</span>':'')+'</div>';});
-  } else if(type==='socios-vencidos'){
-    const exp=allU.filter(u=>{const d=daysUntil(u.planExpiry);return d!==null&&d<=5;}).sort((a,b2)=>daysUntil(a.planExpiry)-daysUntil(b2.planExpiry));
-    html+='<p class="slbl" style="margin-bottom:10px">Socios por vencer o vencidos · '+exp.length+' total</p>';
-    if(!exp.length){html+='<div class="empty">Sin socios por vencer.</div>';}
-    else exp.forEach(u=>{const d=daysUntil(u.planExpiry);html+='<div class="expiry-card"><div style="display:flex;justify-content:space-between;align-items:center"><div class="expiry-name">'+u.name+'</div><span class="badge '+(d<0?'bg-red':'bg-amber')+'">'+(d<0?'Vencida':d+'d')+'</span></div><div class="expiry-info">'+u.email+(u.phone?' · '+u.phone:'')+'</div></div>';});
-  } else if(type==='asistencia'){
-    const logs=accessLog.filter(a=>dsFromIsoMaz(a.ts).startsWith(date.slice(0,7)));
-    html+='<p class="slbl" style="margin-bottom:10px">Accesos al gym · '+date.slice(0,7)+' · '+logs.length+' total</p>';
-    if(!logs.length){html+='<div class="empty">Sin registros de acceso.</div>';}
-    else logs.forEach(a=>{html+='<div class="brow"><div class="brow-info"><div class="brow-name">'+a.name+'</div><div class="brow-meta">'+fmtDateTimeMaz(a.ts)+' · código '+a.code+' · '+a.slot+'</div></div></div>';});
-  } else if(type==='retencion'){
-    const total=allU.length;const active=allU.filter(u=>hasActive(u)).length;
-    const rate=total?Math.round(active/total*100):0;
-    html+='<p class="slbl" style="margin-bottom:10px">Retención de socios</p>';
-    html+='<div style="text-align:center;padding:1rem"><div style="font-size:52px;font-weight:800;color:var(--green);font-family:inherit">'+rate+'%</div><div style="color:var(--gray);font-size:13px;margin-top:4px">'+active+' activos de '+total+' registrados</div></div>';
-    html+='<div class="brow"><div class="brow-info"><div class="brow-name">Socios totales</div></div><strong>'+total+'</strong></div>';
-    html+='<div class="brow"><div class="brow-info"><div class="brow-name">Con membresía activa</div></div><strong style="color:var(--green)">'+active+'</strong></div>';
-    html+='<div class="brow"><div class="brow-info"><div class="brow-name">Sin membresía</div></div><strong style="color:var(--red)">'+(total-active)+'</strong></div>';
-    html+='<div class="brow"><div class="brow-info"><div class="brow-name">Ingresos totales</div></div><strong>'+MXN(payments.reduce((s,p)=>s+p.amount,0))+'</strong></div>';
+  out.innerHTML='<div class="empty">Cargando...</div>';
+  const allPlans=[...PLANS.individual,...PLANS.grupal];
+  function isActiveProfile(u){
+    const p=allPlans.find(x=>x.id===u.plan_id);
+    const unlim=u.credits>=999||(p&&p.credits>=999);
+    if(!unlim&&u.credits<=0)return false;
+    if(u.plan_expiry&&new Date(u.plan_expiry)<new Date())return false;
+    return true;
   }
-  html+='</div>';
-  out.innerHTML=html;
+  function profilePlanLbl(u){
+    const p=allPlans.find(x=>x.id===u.plan_id);
+    if(!p)return(u.credits||0)>0?'Individual · '+u.credits+' visita'+(u.credits===1?'':'s'):'Sin membresía';
+    if(u.plan_expiry&&new Date(u.plan_expiry)<new Date())return'Vencida';
+    const unlim=u.credits>=999||(p&&p.credits>=999);
+    return(u.plan_type==='grupal'?'Grupal':'Individual')+' · '+(unlim?'Mensual':u.credits+' visita'+(u.credits===1?'':'s'));
+  }
+  try{
+    let html='<div style="background:var(--card);border:1px solid var(--border);border-radius:6px;padding:1rem;margin-top:1rem">';
+    if(type==='reservas-dia'){
+      const{data:bks,error}=await sb.from('bookings').select('*').eq('ds',date).eq('status','active').order('start_idx');
+      if(error)throw error;
+      const uids=[...new Set((bks||[]).map(b=>b.user_id).filter(Boolean))];
+      let profMap={};
+      if(uids.length){
+        const{data:profs}=await sb.from('profiles').select('id,name,phone').in('id',uids);
+        profMap=Object.fromEntries((profs||[]).map(p=>[p.id,p]));
+      }
+      html+='<p class="slbl" style="margin-bottom:10px">Reservas · '+fmtDS(date)+'</p>';
+      if(!bks||!bks.length){html+='<div class="empty">Sin reservas para este día.</div>';}
+      else bks.forEach(b=>{
+        const prof=profMap[b.user_id]||{};
+        const timeStr=b.time_str||fmtTimeRange(b.start_idx,b.slots_used||3);
+        html+='<div class="brow"><div class="brow-info"><div class="brow-name">'+esc(prof.name||'Usuario')+'</div><div class="brow-meta">'+timeStr+' · '+(b.dur_min||90)+' min'+(b.is_group?' · Grupal':'')+'</div></div></div>';
+      });
+    } else if(type==='pagos-mes'){
+      const month=date.slice(0,7);
+      const{data:allPays,error}=await sb.from('payments').select('*').order('created_at',{ascending:false});
+      if(error)throw error;
+      const pays=(allPays||[]).filter(p=>dsFromIsoMaz(p.created_at).startsWith(month));
+      const uids=[...new Set(pays.map(p=>p.user_id).filter(Boolean))];
+      let nameMap={};
+      if(uids.length){
+        const{data:profs}=await sb.from('profiles').select('id,name').in('id',uids);
+        nameMap=Object.fromEntries((profs||[]).map(p=>[p.id,p.name]));
+      }
+      const total=pays.reduce((s,p)=>s+paymentRealAmount(p),0);
+      html+='<p class="slbl" style="margin-bottom:10px">Pagos · '+month+' · Ingreso real: '+MXN(total)+'</p>';
+      if(!pays.length){html+='<div class="empty">Sin pagos este mes.</div>';}
+      else pays.forEach(p=>{
+        const real=paymentRealAmount(p);
+        html+='<div class="brow"><div class="brow-info"><div class="brow-name">'+esc(nameMap[p.user_id]||'Usuario')+'</div><div class="brow-meta">'+esc(p.plan_name||'')+' · '+fmtDateTimeMaz(p.created_at)+' · **** '+(p.last4||'----')+'</div></div><div style="font-size:15px;font-weight:700">'+MXN(p.amount)+(real!==p.amount?' <span style="color:var(--gray);font-weight:400;font-size:11px">(real '+MXN(real)+')</span>':'')+'</div></div>';
+      });
+    } else if(type==='socios-activos'){
+      const{data:allU,error}=await sb.from('profiles').select('*').neq('role','admin');
+      if(error)throw error;
+      const active=(allU||[]).filter(isActiveProfile);
+      html+='<p class="slbl" style="margin-bottom:10px">Socios activos · '+active.length+' total</p>';
+      if(!active.length){html+='<div class="empty">Sin socios activos.</div>';}
+      else active.forEach(u=>{
+        const d=daysUntil(u.plan_expiry);
+        html+='<div class="brow"><div class="brow-info"><div class="brow-name">'+esc(u.name)+'</div><div class="brow-meta">'+profilePlanLbl(u)+(u.plan_expiry?' · vence '+fmtDateMaz(u.plan_expiry):'')+'</div></div>'+(d!==null&&d<=5?'<span class="badge bg-amber">'+d+'d</span>':'')+'</div>';
+      });
+    } else if(type==='socios-vencidos'){
+      const{data:allU,error}=await sb.from('profiles').select('*').neq('role','admin');
+      if(error)throw error;
+      const exp=(allU||[]).filter(u=>{const d=daysUntil(u.plan_expiry);return d!==null&&d<=5;}).sort((a,b2)=>daysUntil(a.plan_expiry)-daysUntil(b2.plan_expiry));
+      html+='<p class="slbl" style="margin-bottom:10px">Socios por vencer o vencidos · '+exp.length+' total</p>';
+      if(!exp.length){html+='<div class="empty">Sin socios por vencer.</div>';}
+      else exp.forEach(u=>{
+        const d=daysUntil(u.plan_expiry);
+        html+='<div class="expiry-card"><div style="display:flex;justify-content:space-between;align-items:center"><div class="expiry-name">'+esc(u.name)+'</div><span class="badge '+(d<0?'bg-red':'bg-amber')+'">'+(d<0?'Vencida':d+'d')+'</span></div><div class="expiry-info">'+esc(u.email||'')+(u.phone?' · '+esc(u.phone):'')+'</div></div>';
+      });
+    } else if(type==='asistencia'){
+      const month=date.slice(0,7);
+      const{data:allLogs,error}=await sb.from('access_log').select('*').order('accessed_at',{ascending:false});
+      if(error)throw error;
+      const logs=(allLogs||[]).filter(a=>dsFromIsoMaz(a.accessed_at).startsWith(month));
+      html+='<p class="slbl" style="margin-bottom:10px">Accesos al gym · '+month+' · '+logs.length+' total</p>';
+      if(!logs.length){html+='<div class="empty">Sin registros de acceso.</div>';}
+      else logs.forEach(a=>{
+        html+='<div class="brow"><div class="brow-info"><div class="brow-name">'+esc(a.user_name||'')+'</div><div class="brow-meta">'+fmtDateTimeMaz(a.accessed_at)+' · código '+(a.access_code||'')+' · '+(a.slot_str||'')+'</div></div></div>';
+      });
+    } else if(type==='retencion'){
+      const[{data:allU,error:errU},{data:allPays,error:errP}]=await Promise.all([
+        sb.from('profiles').select('*').neq('role','admin'),
+        sb.from('payments').select('amount,payment_method,net_amount')
+      ]);
+      if(errU)throw errU;
+      if(errP)throw errP;
+      const total=(allU||[]).length;
+      const active=(allU||[]).filter(isActiveProfile).length;
+      const rate=total?Math.round(active/total*100):0;
+      const totalRev=(allPays||[]).reduce((s,p)=>s+paymentRealAmount(p),0);
+      html+='<p class="slbl" style="margin-bottom:10px">Retención de socios</p>';
+      html+='<div style="text-align:center;padding:1rem"><div style="font-size:52px;font-weight:800;color:var(--green);font-family:inherit">'+rate+'%</div><div style="color:var(--gray);font-size:13px;margin-top:4px">'+active+' activos de '+total+' registrados</div></div>';
+      html+='<div class="brow"><div class="brow-info"><div class="brow-name">Socios totales</div></div><strong>'+total+'</strong></div>';
+      html+='<div class="brow"><div class="brow-info"><div class="brow-name">Con membresía activa</div></div><strong style="color:var(--green)">'+active+'</strong></div>';
+      html+='<div class="brow"><div class="brow-info"><div class="brow-name">Sin membresía</div></div><strong style="color:var(--red)">'+(total-active)+'</strong></div>';
+      html+='<div class="brow"><div class="brow-info"><div class="brow-name">Ingresos reales totales</div></div><strong>'+MXN(totalRev)+'</strong></div>';
+    }
+    html+='</div>';
+    out.innerHTML=html;
+  }catch(e){
+    out.innerHTML='<div class="empty">Error: '+e.message+'</div>';
+  }
 }
 
 
