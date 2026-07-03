@@ -1192,7 +1192,7 @@ body.reception-mode{background:#050505}
 // ── CONFIG & SUPABASE ───────────────────────────────────────
 const SUPABASE_URL='https://pmpjteuqjusbiduevbwq.supabase.co';
 const SUPABASE_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBtcGp0ZXVxanVzYmlkdWV2YndxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc2OTI1NjUsImV4cCI6MjA5MzI2ODU2NX0.XbMzZoo2yqtrD8znLnyo_1zDfrdJAvAPj1lqGOyXnLw';
-const APP_VERSION='20260702-14';
+const APP_VERSION='20260702-15';
 const PUBLIC_APP_URL='https://habittraininghub.app/app.html';
 const PUBLIC_API_ORIGIN='https://www.habittraininghub.app';
 const SHOP_ALLOWED_EMAILS=['josephdpelayo@gmail.com'];
@@ -6704,10 +6704,11 @@ function renderFinanzasView(){
     +'<p class="slbl" style="margin:0">Finanzas</p>'
     +'<select onchange="setFinMonth(this.value)" style="background:var(--card);color:var(--white);border:1px solid var(--border);border-radius:4px;padding:8px 10px;font-size:13px;font-family:inherit">'+monthOpts.join('')+'</select>'
     +'</div>'
-    +'<div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px">'
+    +'<div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:4px">'
     +'<button class="btn-sm bblue" onclick="adminSyncStripePaymentsSb()">Sincronizar Stripe</button>'
     +'<button class="btn-sm" onclick="adminRecalcStripeFeesSb()">Recalcular comisiones</button>'
-    +'</div>';
+    +'</div>'
+    +'<div style="font-size:10px;color:var(--gray);line-height:1.5;margin-bottom:14px">"Sincronizar Stripe" trae cobros hechos en Stripe que no se hayan registrado aquí (úsalo si sospechas que falta alguno). "Recalcular comisiones" corrige la comisión de pagos viejos que se guardaron con un estimado — solo hace falta usarlo si ves el aviso de abajo.</div>';
   list.appendChild(header);
 
   const allGastos=_finData.gastos||[];
@@ -6739,7 +6740,7 @@ function renderFinanzasView(){
   hero.style.cssText='background:var(--card);border:1px solid var(--border);border-radius:8px;padding:18px;margin-bottom:6px;text-align:center';
   hero.innerHTML='<div class="met-l" style="margin-bottom:6px">Balance · '+esc(finMonthLabel(selectedYm))+'</div>'
     +'<div style="font-size:34px;font-weight:800;color:'+(balance>=0?'var(--green)':'var(--red)')+'">'+MXN(balance)+'</div>'
-    +'<div style="font-size:11px;color:var(--gray);margin-top:6px;line-height:1.5">Ingreso real ('+MXN(realTotal)+') menos gastos operativos ('+MXN(gastosTotal)+') del periodo.</div>';
+    +'<div style="font-size:11px;color:var(--gray);margin-top:6px;line-height:1.5">Ingreso real ('+MXN(realTotal)+') menos gastos operativos ('+MXN(gastosTotal)+') del periodo. No incluye ventas de Tienda — revisa esa pestaña por separado.</div>';
   list.appendChild(hero);
 
   const balGrid=document.createElement('div');
@@ -6748,6 +6749,31 @@ function renderFinanzasView(){
     '<div class="met"><div class="met-l">Ingreso real</div><div class="met-v" style="color:var(--green)">'+MXN(realTotal)+'</div></div>'
     +'<div class="met"><div class="met-l">Gastos</div><div class="met-v" style="color:var(--red)">-'+MXN(gastosTotal)+'</div></div>';
   list.appendChild(balGrid);
+
+  // ── Tendencia: balance de los últimos 6 meses, para ver cómo va el negocio ──
+  const trendTitle=document.createElement('p');
+  trendTitle.className='slbl';
+  trendTitle.style.margin='4px 0 10px';
+  trendTitle.textContent='Balance, últimos 6 meses';
+  list.appendChild(trendTitle);
+
+  const trendRows=[];
+  for(let i=5;i>=0;i--){
+    const d=new Date();d.setMonth(d.getMonth()-i);
+    const ym=d.toISOString().slice(0,7);
+    const ingresoYm=allPays.filter(p=>dsFromIsoMaz(p.created_at).slice(0,7)===ym).reduce((s,p)=>s+paymentRealAmount(p),0);
+    const gastoYm=allGastos.filter(g=>(g.fecha||'').slice(0,7)===ym).reduce((s,g)=>s+(Number(g.monto)||0),0);
+    trendRows.push({ym,balance:ingresoYm-gastoYm});
+  }
+  const trend=document.createElement('div');
+  trend.style.cssText='background:var(--card);border:1px solid var(--border);border-radius:8px;padding:12px 14px;margin-bottom:16px';
+  trend.innerHTML=trendRows.map(r=>
+    '<div style="display:flex;justify-content:space-between;align-items:center;padding:6px 0'+(r.ym===selectedYm?';background:rgba(59,130,246,.08);margin:0 -14px;padding-left:14px;padding-right:14px;border-radius:4px':'')+'">'
+    +'<span style="font-size:12px;color:'+(r.ym===selectedYm?'var(--white)':'var(--gray)')+'">'+esc(finMonthLabel(r.ym))+'</span>'
+    +'<span style="font-size:13px;font-weight:700;color:'+(r.balance>=0?'var(--green)':'var(--red)')+'">'+MXN(r.balance)+'</span>'
+    +'</div>'
+  ).join('');
+  list.appendChild(trend);
 
   if(pendingFeeCount>0){
     const warn=document.createElement('div');
@@ -6784,7 +6810,10 @@ function renderFinanzasView(){
     const feeLine=(p.payment_method||'stripe')==='stripe'
       ?(p.stripe_fee!=null?'<div class="brow-meta">Comisión -'+MXN(p.stripe_fee)+' · Neto '+MXN(p.net_amount)+'</div>':'<div class="brow-meta" style="color:var(--amber)">Comisión sin calcular</div>')
       :'';
-    const fixBtn=p.user_id?'<button class="btn-sm" data-pid="'+esc(p.id)+'" data-uid="'+esc(p.user_id)+'" onclick="adminOpenFixPlanModal(this.dataset.pid,this.dataset.uid)">Corregir plan</button>':'';
+    // "Corregir plan" solo tiene sentido en pagos reales de un plan HABIT (Stripe/efectivo).
+    // GAIA es un paquete aparte y cortesía/ajuste no representan la compra de un plan.
+    const canFixPlan=p.user_id&&['stripe','cash'].includes(p.payment_method||'stripe');
+    const fixBtn=canFixPlan?'<button class="btn-sm" style="padding:10px 14px;min-height:38px" data-pid="'+esc(p.id)+'" data-uid="'+esc(p.user_id)+'" onclick="adminOpenFixPlanModal(this.dataset.pid,this.dataset.uid)">Corregir plan</button>':'';
     // Cortesía = regalo, no es dinero — no se muestra como cifra en $.
     const amountDisplay=p.payment_method==='courtesy'
       ?'<div style="font-size:13px;font-weight:700;color:var(--gray)">Regalo</div>'
@@ -6797,7 +6826,7 @@ function renderFinanzasView(){
       +'<div class="brow-meta">'+p.plan_name+' · '+method+' · '+fmtDateTimeMaz(p.created_at)+ref+'</div>'
       +feeLine
       +(p.notes?'<div class="brow-meta">'+esc(p.notes)+'</div>':'')+'</div>'
-      +'<div style="display:flex;flex-direction:column;align-items:flex-end;gap:6px">'+amountDisplay+'<div style="display:flex;gap:6px">'+fixBtn+'<button class="btn-sm bred" data-pid="'+esc(p.id)+'" onclick="adminDeletePaymentSb(this.dataset.pid)">Eliminar</button></div></div>';
+      +'<div style="display:flex;flex-direction:column;align-items:flex-end;gap:8px">'+amountDisplay+'<div style="display:flex;flex-direction:column;gap:8px;align-items:stretch">'+fixBtn+'<button class="btn-sm bred" style="padding:10px 14px;min-height:38px" data-pid="'+esc(p.id)+'" onclick="adminDeletePaymentSb(this.dataset.pid)">Eliminar</button></div></div>';
     list.appendChild(d);
   });
 }
