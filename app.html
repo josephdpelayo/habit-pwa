@@ -1180,7 +1180,7 @@ body.reception-mode{background:#050505}
 // ── CONFIG & SUPABASE ───────────────────────────────────────
 const SUPABASE_URL='https://pmpjteuqjusbiduevbwq.supabase.co';
 const SUPABASE_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBtcGp0ZXVxanVzYmlkdWV2YndxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc2OTI1NjUsImV4cCI6MjA5MzI2ODU2NX0.XbMzZoo2yqtrD8znLnyo_1zDfrdJAvAPj1lqGOyXnLw';
-const APP_VERSION='20260702-09';
+const APP_VERSION='20260702-10';
 const PUBLIC_APP_URL='https://habittraininghub.app/app.html';
 const PUBLIC_API_ORIGIN='https://www.habittraininghub.app';
 const SHOP_ALLOWED_EMAILS=['josephdpelayo@gmail.com'];
@@ -5845,14 +5845,30 @@ async function adminDeleteUserSb(uid,name){
   }
 }
 
-function adminOpenMembershipModal(uid,name){
+async function adminOpenMembershipModal(uid,name){
   const existing=document.getElementById('membership-grant-modal');
   if(existing)existing.remove();
-  const planOptions=adminPlanList().map(p=>
+  const{data:profile}=await sb.from('profiles').select('plan_id,credits,plan_expiry,plan_type').eq('id',uid).maybeSingle();
+  const allPlans=adminPlanList();
+  const currentPlan=allPlans.find(p=>p.id===profile?.plan_id);
+  const isUnlimited=(profile?.credits>=999)||(currentPlan&&currentPlan.credits>=999);
+  const notExpired=!profile?.plan_expiry||new Date(profile.plan_expiry)>new Date();
+  const hasActivePlan=!!(profile&&((isUnlimited||profile.credits>0)&&notExpired));
+  const currentPlanLabel=hasActivePlan?
+    (currentPlan?currentPlan.name:'Sin plan')+' · '+(isUnlimited?'Mensual ilimitado':(profile.credits||0)+' visita'+(profile.credits===1?'':'s'))+' · '+(profile.plan_expiry?('vence '+fmtDateMaz(profile.plan_expiry)):'sin vencimiento')
+    :'';
+  const warnBanner=hasActivePlan?
+    '<div class="warn-box" style="margin-bottom:12px">⚠️ '+esc(name)+' ya tiene un plan activo: '+currentPlanLabel+'.<br>'
+    +'Si te está pidiendo CAMBIAR de un plan que ya pagó a otro, usa el botón "Corregir plan" en la pestaña Pagos (en el pago original de esa persona) en vez de esto — así no se pierde el registro de lo que ya cobraste.<br>'
+    +'Usa "Activar membresía" solo si es un plan nuevo o quieres reemplazar/resetear su plan actual a propósito.</div>'
+    :'';
+  const planOptions=allPlans.map(p=>
     '<option value="'+p.id+'">'+p.name+' · '+(p.credits>=999?'Mensual':p.credits+' visita'+(p.credits===1?'':'s'))+(p.days?' · '+p.days+' dias':'')+'</option>'
   ).join('');
   const modal=document.createElement('div');
   modal.id='membership-grant-modal';
+  modal.dataset.hadActivePlan=hasActivePlan?'1':'0';
+  modal.dataset.currentPlanLabel=currentPlanLabel;
   modal.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,.85);z-index:9999;display:flex;align-items:flex-end;justify-content:center';
   modal.innerHTML=
     '<div style="background:var(--dark);border:1px solid var(--border);border-radius:12px 12px 0 0;width:100%;max-width:430px;display:flex;flex-direction:column;overflow:hidden">'
@@ -5862,8 +5878,10 @@ function adminOpenMembershipModal(uid,name){
     +'</div>'
     +'<div style="padding:1rem">'
     +'<div class="brow-name" style="margin-bottom:12px">'+esc(name)+'</div>'
+    +warnBanner
     +'<div class="field"><label>Plan</label><select id="grant-plan-id" onchange="adminFillGrantAmount()" style="width:100%;background:var(--card2);border:1px solid var(--border);border-radius:4px;padding:12px;font-size:16px;color:var(--white);outline:none;-webkit-appearance:none">'+planOptions+'</select></div>'
-    +'<div class="field"><label>Metodo</label><select id="grant-method" style="width:100%;background:var(--card2);border:1px solid var(--border);border-radius:4px;padding:12px;font-size:16px;color:var(--white);outline:none;-webkit-appearance:none"><option value="cash">Efectivo</option><option value="courtesy">Cortesia</option><option value="adjustment">Ajuste manual</option></select></div>'
+    +'<div id="grant-preview" style="font-size:12px;color:var(--gray);margin:-4px 0 12px;line-height:1.4"></div>'
+    +'<div class="field"><label>Metodo</label><select id="grant-method" onchange="adminFillGrantAmount()" style="width:100%;background:var(--card2);border:1px solid var(--border);border-radius:4px;padding:12px;font-size:16px;color:var(--white);outline:none;-webkit-appearance:none"><option value="cash">Efectivo</option><option value="courtesy">Cortesia</option><option value="adjustment">Ajuste manual</option></select></div>'
     +'<div class="field"><label>Monto cobrado</label><input type="number" id="grant-amount" min="0" step="1" value="0" style="width:100%;background:var(--card2);border:1px solid var(--border);border-radius:4px;padding:12px;font-size:16px;color:var(--white);outline:none"></div>'
     +'<div class="field"><label>Nota</label><textarea id="grant-note" placeholder="Ej: pago en efectivo, cortesia, convenio..." style="width:100%;background:var(--card2);border:1px solid var(--border);border-radius:4px;padding:12px;font-size:13px;color:var(--white);outline:none;resize:none;min-height:62px"></textarea></div>'
     +'</div>'
@@ -5873,11 +5891,31 @@ function adminOpenMembershipModal(uid,name){
   adminFillGrantAmount();
 }
 
+function adminUpdateGrantPreview(){
+  const preview=document.getElementById('grant-preview');
+  if(!preview)return;
+  const planId=(document.getElementById('grant-plan-id')||{}).value;
+  const plan=adminPlanList().find(p=>p.id===planId);
+  if(!plan){preview.textContent='';return;}
+  const expiry=plan.days?mazPlanExpiryIso(plan.days):null;
+  preview.textContent='Va a quedar: '+plan.name+' · '+(plan.credits>=999?'Mensual ilimitado':plan.credits+' visita'+(plan.credits===1?'':'s'))+' · vence '+(expiry?fmtDateMaz(expiry):'sin vencimiento');
+}
+
 function adminFillGrantAmount(){
   const planId=(document.getElementById('grant-plan-id')||{}).value;
-  const amount=document.getElementById('grant-amount');
+  const method=(document.getElementById('grant-method')||{value:'cash'}).value;
+  const amountEl=document.getElementById('grant-amount');
   const plan=adminPlanList().find(p=>p.id===planId);
-  if(plan&&amount)amount.value=plan.price;
+  if(amountEl){
+    if(method==='courtesy'){
+      amountEl.value=0;
+      amountEl.disabled=true;
+    }else{
+      amountEl.disabled=false;
+      if(plan)amountEl.value=plan.price;
+    }
+  }
+  adminUpdateGrantPreview();
 }
 
 async function adminLogManualPayment(uid,name,plan,amount,method,note,dateOverride){
@@ -6012,6 +6050,10 @@ async function adminGrantSelectedPlanSb(uid,name){
   const planId=(document.getElementById('grant-plan-id')||{}).value;
   const plan=adminPlanList().find(p=>p.id===planId);
   if(!plan){toast('Selecciona un plan','err');return;}
+  const modalEl=document.getElementById('membership-grant-modal');
+  const hadActivePlan=modalEl?.dataset.hadActivePlan==='1';
+  const currentPlanLabel=modalEl?.dataset.currentPlanLabel||'su plan actual';
+  if(hadActivePlan&&!confirm('Esto va a REEMPLAZAR el plan actual de '+name+' ('+currentPlanLabel+') por '+plan.name+'. ¿Confirmas? Si el socio ya pagó algo bajo el plan anterior, considera usar "Corregir plan" en vez de esto.'))return;
   const method=(document.getElementById('grant-method')||{value:'adjustment'}).value;
   const amount=Number((document.getElementById('grant-amount')||{value:0}).value||0);
   const note=(document.getElementById('grant-note')||{value:''}).value.trim();
@@ -6501,6 +6543,8 @@ function adminOpenFixPlanModal(paymentId,uid){
   ).join('');
   const modal=document.createElement('div');
   modal.id='fix-plan-modal';
+  modal.dataset.originalPlanId=payment.plan_id||'';
+  modal.dataset.originalPlanName=payment.plan_name||'';
   modal.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,.85);z-index:9999;display:flex;align-items:flex-end;justify-content:center';
   modal.innerHTML=
     '<div style="background:var(--dark);border:1px solid var(--border);border-radius:12px 12px 0 0;width:100%;max-width:430px;display:flex;flex-direction:column;overflow:hidden;max-height:90vh;overflow-y:auto">'
@@ -6512,15 +6556,45 @@ function adminOpenFixPlanModal(paymentId,uid){
     +'<div class="brow-name" style="margin-bottom:4px">'+esc(name)+'</div>'
     +'<div class="brow-meta" style="margin-bottom:14px">Pago original: '+esc(payment.plan_name)+' · '+MXN(payment.amount)+' · '+fmtDateTimeMaz(payment.created_at)+'</div>'
     +'<p style="font-size:11px;color:var(--gray);margin-bottom:14px;line-height:1.5">Esto NO borra ni modifica el pago original (ese dinero sí se cobró). Solo actualiza el plan/créditos vigentes de '+esc(name)+' y, si recibiste un pago adicional por la diferencia, lo registra aparte.</p>'
-    +'<div class="field"><label>Plan correcto (el que debería tener ahora)</label><select id="fix-plan-id" style="width:100%;background:var(--card2);border:1px solid var(--border);border-radius:4px;padding:12px;font-size:16px;color:var(--white);outline:none;-webkit-appearance:none">'+planOptions+'</select></div>'
+    +'<div class="field"><label>Plan correcto (el que debería tener ahora)</label><select id="fix-plan-id" onchange="adminUpdateFixPlanPreview()" style="width:100%;background:var(--card2);border:1px solid var(--border);border-radius:4px;padding:12px;font-size:16px;color:var(--white);outline:none;-webkit-appearance:none">'+planOptions+'</select></div>'
+    +'<div id="fix-plan-preview" style="font-size:12px;color:var(--gray);line-height:1.6;background:var(--card2);border:1px solid var(--border);border-radius:4px;padding:10px 12px;margin-bottom:14px"></div>'
     +'<div class="field"><label>¿Recibiste un pago adicional por la diferencia?</label><input type="number" id="fix-extra-amount" min="0" step="1" value="0" style="width:100%;background:var(--card2);border:1px solid var(--border);border-radius:4px;padding:12px;font-size:16px;color:var(--white);outline:none"></div>'
-    +'<div class="field"><label>Método del pago adicional</label><select id="fix-extra-method" style="width:100%;background:var(--card2);border:1px solid var(--border);border-radius:4px;padding:12px;font-size:16px;color:var(--white);outline:none;-webkit-appearance:none"><option value="cash">Efectivo / Transferencia</option><option value="courtesy">Cortesia</option><option value="adjustment">Ajuste manual</option></select></div>'
+    +'<div class="field"><label>Método del pago adicional</label><select id="fix-extra-method" onchange="adminSyncFixExtraAmount()" style="width:100%;background:var(--card2);border:1px solid var(--border);border-radius:4px;padding:12px;font-size:16px;color:var(--white);outline:none;-webkit-appearance:none"><option value="cash">Efectivo / Transferencia</option><option value="courtesy">Cortesia</option><option value="adjustment">Ajuste manual</option></select></div>'
     +'<div class="field"><label>Fecha en que realmente lo recibiste</label><input type="date" id="fix-extra-date" value="'+mazToday()+'" style="width:100%;background:var(--card2);border:1px solid var(--border);border-radius:4px;padding:12px;font-size:16px;color:var(--white);outline:none;color-scheme:dark"></div>'
     +'<div class="field"><label>Nota</label><textarea id="fix-note" placeholder="Ej: pidió cambiar de Pack 12 visitas a Mensualidad, transfirió la diferencia" style="width:100%;background:var(--card2);border:1px solid var(--border);border-radius:4px;padding:12px;font-size:13px;color:var(--white);outline:none;resize:none;min-height:62px"></textarea></div>'
     +'</div>'
     +'<div style="padding:1rem;border-top:1px solid var(--border)"><button class="btn" id="fix-plan-submit" data-pid="'+esc(paymentId)+'" data-uid="'+esc(uid)+'" data-name="'+esc(name)+'" onclick="adminApplyPlanCorrection(this.dataset.pid,this.dataset.uid,this.dataset.name)">Aplicar corrección</button></div>'
     +'</div>';
   document.body.appendChild(modal);
+  adminUpdateFixPlanPreview();
+  adminSyncFixExtraAmount();
+}
+
+function adminUpdateFixPlanPreview(){
+  const modal=document.getElementById('fix-plan-modal');
+  const previewEl=document.getElementById('fix-plan-preview');
+  if(!modal||!previewEl)return;
+  const planId=(document.getElementById('fix-plan-id')||{}).value;
+  const plan=adminPlanList().find(p=>p.id===planId);
+  const originalPlanName=modal.dataset.originalPlanName||'—';
+  const originalPlanId=modal.dataset.originalPlanId||'';
+  if(!plan){previewEl.innerHTML='';return;}
+  const creditsLabel=plan.credits>=999?'Mensual ilimitado':plan.credits+' visita'+(plan.credits===1?'':'s');
+  const expiryLabel=plan.days?('vence '+fmtDateMaz(mazPlanExpiryIso(plan.days))):'sin vencimiento';
+  let html='Antes: '+esc(originalPlanName)+' (pago original)<br>'
+    +'Después: '+esc(plan.name)+' · '+creditsLabel+' · '+expiryLabel;
+  if(originalPlanId&&planId===originalPlanId){
+    html+='<div style="color:var(--amber);margin-top:6px">Este ya es el plan actual — probablemente no haya nada que corregir.</div>';
+  }
+  previewEl.innerHTML=html;
+}
+
+function adminSyncFixExtraAmount(){
+  const method=(document.getElementById('fix-extra-method')||{value:'cash'}).value;
+  const amountEl=document.getElementById('fix-extra-amount');
+  if(!amountEl)return;
+  if(method==='courtesy'){amountEl.value=0;amountEl.disabled=true;}
+  else amountEl.disabled=false;
 }
 
 async function adminApplyPlanCorrection(paymentId,uid,name){
@@ -6531,6 +6605,13 @@ async function adminApplyPlanCorrection(paymentId,uid,name){
   const method=(document.getElementById('fix-extra-method')||{value:'cash'}).value;
   const extraDate=(document.getElementById('fix-extra-date')||{value:''}).value||mazToday();
   const note=(document.getElementById('fix-note')||{value:''}).value.trim();
+  const originalPayment=(_finData&&_finData.pays.find(p=>p.id===paymentId))||null;
+  const originalPlanName=originalPayment?originalPayment.plan_name:'el plan anterior';
+  const methodLabel={cash:'Efectivo/Transferencia',courtesy:'Cortesía',adjustment:'Ajuste manual'}[method]||method;
+  const summary='Vas a cambiar a '+name+' de "'+originalPlanName+'" a "'+plan.name+'".'
+    +(extraAmount>0?' Se registrará un pago adicional de '+MXN(extraAmount)+' ('+methodLabel+') fechado '+extraDate+'.':' No se registrará ningún pago adicional.')
+    +' ¿Confirmas?';
+  if(!confirm(summary))return;
   const btn=document.getElementById('fix-plan-submit');
   if(btn){btn.disabled=true;btn.textContent='Aplicando...';}
   try{
