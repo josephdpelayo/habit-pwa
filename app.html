@@ -492,6 +492,9 @@ input,select,button,textarea{font-family:'Montserrat',sans-serif}
 .adm-tab{flex-shrink:0;padding:10px 14px;font-size:10px;font-weight:700;cursor:pointer;color:var(--gray);border:none;background:transparent;border-bottom:2px solid transparent;letter-spacing:.08em;text-transform:uppercase}
 .adm-tab.active{color:var(--bl);border-bottom:2px solid var(--blue)}
 .adm-section{display:none}.adm-section.active{display:block}
+.fin-panel{display:none}.fin-panel.active{display:block}
+.fin-subtab{flex-shrink:0;padding:10px 14px;font-size:10px;font-weight:700;cursor:pointer;color:var(--gray);border:none;background:transparent;border-bottom:2px solid transparent;letter-spacing:.08em;text-transform:uppercase}
+.fin-subtab.active{color:var(--bl);border-bottom:2px solid var(--blue)}
 .metrics{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:1.25rem}
 .met{background:var(--card);border:1px solid var(--border);border-radius:4px;padding:12px}
 .met-l{font-size:10px;color:var(--gray);margin-bottom:4px;font-weight:600;letter-spacing:.06em;text-transform:uppercase}
@@ -902,7 +905,7 @@ body.reception-mode{background:#050505}
     <button class="adm-tab" onclick="admTab('slots')">Slots</button>
     <button class="adm-tab" onclick="admTab('users')">Socios</button>
     <button class="adm-tab" onclick="admTab('boards')">Pizarrones</button>
-    <button class="adm-tab" onclick="admTab('payments')">Pagos</button>
+    <button class="adm-tab" onclick="admTab('payments')">Finanzas</button>
     <button class="adm-tab" onclick="admTab('shop')">Tienda</button>
     <button class="adm-tab" onclick="admTab('comunidad')">Comunidad</button>
     <button class="adm-tab" onclick="admTab('notifs')">Alertas</button>
@@ -988,8 +991,15 @@ body.reception-mode{background:#050505}
       <div id="boards-list"></div>
     </div>
 
-    <!-- PAGOS -->
-    <div id="a-payments" class="adm-section"><div id="payment-list"></div></div>
+    <!-- FINANZAS -->
+    <div id="a-payments" class="adm-section">
+      <div style="display:flex;gap:4px;margin-bottom:14px;border-bottom:1px solid var(--border)">
+        <button class="fin-subtab active" onclick="finSubTab('resumen',this)">Resumen</button>
+        <button class="fin-subtab" onclick="finSubTab('gastos',this)">Gastos</button>
+      </div>
+      <div id="fin-panel-resumen" class="fin-panel active"><div id="payment-list"></div></div>
+      <div id="fin-panel-gastos" class="fin-panel"><div id="gastos-list"></div></div>
+    </div>
 
     <!-- TIENDA -->
     <div id="a-shop" class="adm-section"><div id="admin-shop-list"></div></div>
@@ -2752,6 +2762,15 @@ function admTab(t){
   if(t==='comunidad')renderAdminFeed();
   if(t==='notifs')renderAdmNotifsSb();
   if(t==='gaia')renderGaiaTab();
+}
+
+function finSubTab(t,btn){
+  document.querySelectorAll('.fin-subtab').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  document.querySelectorAll('.fin-panel').forEach(el=>el.classList.remove('active'));
+  const el=document.getElementById('fin-panel-'+t);if(el)el.classList.add('active');
+  if(t==='resumen')renderPaymentsSb();
+  if(t==='gastos')renderGastosSb();
 }
 
 // ── HELPERS ──
@@ -6408,7 +6427,10 @@ async function renderPaymentsSb(){
   const list=document.getElementById('payment-list');
   list.innerHTML='<div class="empty">Cargando...</div>';
   try{
-    const{data:pays,error}=await sb.from('payments').select('*').order('created_at',{ascending:false});
+    const[{data:pays,error},{data:gastos,error:gastosError}]=await Promise.all([
+      sb.from('payments').select('*').order('created_at',{ascending:false}),
+      sb.from('habit_gastos').select('monto,fecha')
+    ]);
     if(error)throw error;
     const userIds=[...new Set((pays||[]).map(p=>p.user_id).filter(Boolean))];
     let nameMap={};
@@ -6416,7 +6438,9 @@ async function renderPaymentsSb(){
       const{data:profRows}=await sb.from('profiles').select('id,name').in('id',userIds);
       nameMap=Object.fromEntries((profRows||[]).map(p=>[p.id,p.name]));
     }
-    _finData={pays:pays||[],nameMap};
+    // gastosError se ignora en silencio: si la migración 022_habit_gastos.sql
+    // aún no se ha corrido, el Balance simplemente no la resta (gastos=[]).
+    _finData={pays:pays||[],nameMap,gastos:gastosError?[]:(gastos||[])};
     renderFinanzasView();
   }catch(e){list.innerHTML='<div class="empty">Error: '+e.message+'</div>';}
 }
@@ -6447,10 +6471,14 @@ function renderFinanzasView(){
     +'</div>';
   list.appendChild(header);
 
-  if(!pays.length){
+  const allGastos=_finData.gastos||[];
+  const gastosPeriodo=selectedYm==='all'?allGastos:allGastos.filter(g=>(g.fecha||'').slice(0,7)===selectedYm);
+  const gastosTotal=gastosPeriodo.reduce((s,g)=>s+(Number(g.monto)||0),0);
+
+  if(!pays.length&&!gastosPeriodo.length){
     const empty=document.createElement('div');
     empty.className='empty';
-    empty.textContent=selectedYm==='all'?'Sin pagos.':'Sin pagos en '+finMonthLabel(selectedYm)+'.';
+    empty.textContent=selectedYm==='all'?'Sin movimientos.':'Sin movimientos en '+finMonthLabel(selectedYm)+'.';
     list.appendChild(empty);
     return;
   }
@@ -6464,15 +6492,23 @@ function renderFinanzasView(){
   },{total:0,stripe:0,cash:0,courtesy:0,adjustment:0,gaia:0});
   const feeTotal=pays.reduce((s,p)=>s+(p.stripe_fee!=null?Number(p.stripe_fee):0),0);
   const realTotal=pays.reduce((s,p)=>s+paymentRealAmount(p),0);
+  const balance=realTotal-gastosTotal;
   const pendingFeeCount=pays.filter(p=>(p.payment_method||'stripe')==='stripe'&&p.stripe_fee==null).length;
 
-  // ── Tarjeta principal: dinero real recibido en el periodo ──
+  // ── Tarjeta principal: balance real del periodo (ingreso real - gastos) ──
   const hero=document.createElement('div');
   hero.style.cssText='background:var(--card);border:1px solid var(--border);border-radius:8px;padding:18px;margin-bottom:6px;text-align:center';
-  hero.innerHTML='<div class="met-l" style="margin-bottom:6px">Ingreso real · '+esc(finMonthLabel(selectedYm))+'</div>'
-    +'<div style="font-size:34px;font-weight:800;color:var(--green)">'+MXN(realTotal)+'</div>'
-    +'<div style="font-size:11px;color:var(--gray);margin-top:6px;line-height:1.5">Stripe (ya con su comisión descontada) + GAIA + efectivo/transferencia — todo lo que de verdad recibiste. No incluye cortesías ni ajustes manuales, que no son dinero real. Los cobros Stripe muy recientes pueden tardar unos días en depositarse.</div>';
+  hero.innerHTML='<div class="met-l" style="margin-bottom:6px">Balance · '+esc(finMonthLabel(selectedYm))+'</div>'
+    +'<div style="font-size:34px;font-weight:800;color:'+(balance>=0?'var(--green)':'var(--red)')+'">'+MXN(balance)+'</div>'
+    +'<div style="font-size:11px;color:var(--gray);margin-top:6px;line-height:1.5">Ingreso real ('+MXN(realTotal)+') menos gastos operativos ('+MXN(gastosTotal)+') del periodo.</div>';
   list.appendChild(hero);
+
+  const balGrid=document.createElement('div');
+  balGrid.style.cssText='display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px';
+  balGrid.innerHTML=
+    '<div class="met"><div class="met-l">Ingreso real</div><div class="met-v" style="color:var(--green)">'+MXN(realTotal)+'</div></div>'
+    +'<div class="met"><div class="met-l">Gastos</div><div class="met-v" style="color:var(--red)">-'+MXN(gastosTotal)+'</div></div>';
+  list.appendChild(balGrid);
 
   if(pendingFeeCount>0){
     const warn=document.createElement('div');
