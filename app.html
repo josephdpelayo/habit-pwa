@@ -1180,7 +1180,7 @@ body.reception-mode{background:#050505}
 // ── CONFIG & SUPABASE ───────────────────────────────────────
 const SUPABASE_URL='https://pmpjteuqjusbiduevbwq.supabase.co';
 const SUPABASE_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBtcGp0ZXVxanVzYmlkdWV2YndxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc2OTI1NjUsImV4cCI6MjA5MzI2ODU2NX0.XbMzZoo2yqtrD8znLnyo_1zDfrdJAvAPj1lqGOyXnLw';
-const APP_VERSION='20260702-08';
+const APP_VERSION='20260702-09';
 const PUBLIC_APP_URL='https://habittraininghub.app/app.html';
 const PUBLIC_API_ORIGIN='https://www.habittraininghub.app';
 const SHOP_ALLOWED_EMAILS=['josephdpelayo@gmail.com'];
@@ -6468,12 +6468,16 @@ function renderFinanzasView(){
       ?(p.stripe_fee!=null?'<div class="brow-meta">Comisión -'+MXN(p.stripe_fee)+' · Neto '+MXN(p.net_amount)+'</div>':'<div class="brow-meta" style="color:var(--amber)">Comisión sin calcular</div>')
       :'';
     const fixBtn=p.user_id?'<button class="btn-sm" data-pid="'+esc(p.id)+'" data-uid="'+esc(p.user_id)+'" onclick="adminOpenFixPlanModal(this.dataset.pid,this.dataset.uid)">Corregir plan</button>':'';
+    // Cortesía = regalo, no es dinero — no se muestra como cifra en $.
+    const amountDisplay=p.payment_method==='courtesy'
+      ?'<div style="font-size:13px;font-weight:700;color:var(--gray)">Regalo</div>'
+      :'<div style="font-size:16px;font-weight:700">'+MXN(p.amount)+'</div>';
     const d=document.createElement('div');d.className='brow';
     d.innerHTML='<div class="brow-info"><div class="brow-name">'+esc(nameMap[p.user_id]||'Usuario')+'</div>'
       +'<div class="brow-meta">'+p.plan_name+' · '+method+' · '+fmtDateTimeMaz(p.created_at)+ref+'</div>'
       +feeLine
       +(p.notes?'<div class="brow-meta">'+esc(p.notes)+'</div>':'')+'</div>'
-      +'<div style="display:flex;flex-direction:column;align-items:flex-end;gap:6px"><div style="font-size:16px;font-weight:700">'+MXN(p.amount)+'</div><div style="display:flex;gap:6px">'+fixBtn+'<button class="btn-sm bred" data-pid="'+esc(p.id)+'" onclick="adminDeletePaymentSb(this.dataset.pid)">Eliminar</button></div></div>';
+      +'<div style="display:flex;flex-direction:column;align-items:flex-end;gap:6px">'+amountDisplay+'<div style="display:flex;gap:6px">'+fixBtn+'<button class="btn-sm bred" data-pid="'+esc(p.id)+'" onclick="adminDeletePaymentSb(this.dataset.pid)">Eliminar</button></div></div>';
     list.appendChild(d);
   });
 }
