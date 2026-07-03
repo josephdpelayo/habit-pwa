@@ -4250,7 +4250,6 @@ async function adminToggleInstructor(uid,current){
   }catch(e){toast('Error: '+e.message,'err');}
 }
 
-function toggleUserCard(uid){if(expandedUsers.has(uid))expandedUsers.delete(uid);else expandedUsers.add(uid);renderUsersSb();}
 let expandedBoards=new Set();
 let editingBoards=new Set();
 let addingExBoards=new Set();
@@ -4791,6 +4790,7 @@ async function blockSlotSb(ds,idx,spots,reason){
   spots=Math.min(CAP,Math.max(1,Number(spots)||1));
   reason=(reason||'').trim();
   if(!reason){toast('Agrega el motivo del bloqueo','err');return;}
+  if(!confirm('¿Bloquear '+fmtSlot(idx)+' del '+fmtDS(ds)+'? ('+spots+' espacio'+(spots>1?'s':'')+')'))return;
   try{
     const{error}=await sb.from('slot_blocks').upsert({ds,slot_idx:idx,spots,reason,created_by:sbUser?.id||null},{onConflict:'ds,slot_idx'});
     if(error)throw error;
@@ -4835,7 +4835,6 @@ async function adminCancelBookingSb(bid){
     toast('Reserva cancelada · visita devuelta','ok');
     await loadSlotOccupancyFromSb(document.getElementById('adm-date').value||mazToday());
     renderAdmSlots();
-    renderStatsSb();
   }catch(e){
     hideLoading();
     toast('Error: '+e.message,'err');
@@ -4851,7 +4850,7 @@ function admDelFromSlot(ds,idx,userId){
   // Remove from user's bookings array too
   if(u&&u.bookings)u.bookings=u.bookings.filter(b=>!(b.ds===ds&&b.startIdx===idx));
   addAdminNotif('❌ Reserva cancelada (admin): '+(u?u.name:userId)+' · '+fmtDS(ds)+' '+fmtSlot(idx));
-  toast('Reserva cancelada');renderAdmSlots();renderStats();
+  toast('Reserva cancelada');renderAdmSlots();
 }
 async function admDelWait(wid,ds,idx,wi){
   const key=ds+'_'+idx;
@@ -4946,28 +4945,6 @@ function renderPayments(){
   if(!payments.length){list.innerHTML='<div class="empty">Sin pagos.</div>';return;}
   list.innerHTML='';
   payments.slice().reverse().forEach(p=>{const d=document.createElement('div');d.className='brow';d.innerHTML='<div class="brow-info"><div class="brow-name">'+p.userName+'</div><div class="brow-meta">'+fmtDateTimeMaz(p.ts)+' · **** '+p.last4+'</div></div><div style="font-family:\'Montserrat\',sans-serif;font-size:16px;font-weight:700">'+MXN(p.amount)+'</div>';list.appendChild(d);});
-}
-
-function renderStats(){
-  const allU=Object.values(users).filter(u=>u.role!=='admin'),active=allU.filter(u=>hasActive(u));
-  const totalRev=payments.reduce((s,p)=>s+p.amount,0),todayRev=payments.filter(p=>dsFromIsoMaz(p.ts)===mazToday()).reduce((s,p)=>s+p.amount,0);
-  const totalBk=allU.reduce((s,u)=>s+(u.bookings?u.bookings.length:0),0);
-  document.getElementById('stats-metrics').innerHTML=
-    '<div class="met"><div class="met-l">Usuarios</div><div class="met-v">'+allU.length+'</div></div>'+
-    '<div class="met"><div class="met-l">Membresías activas</div><div class="met-v">'+active.length+'</div></div>'+
-    '<div class="met"><div class="met-l">Ingresos totales</div><div class="met-v">'+MXN(totalRev)+'</div></div>'+
-    '<div class="met"><div class="met-l">Ingresos hoy</div><div class="met-v">'+MXN(todayRev)+'</div></div>'+
-    '<div class="met"><div class="met-l">Reservas totales</div><div class="met-v">'+totalBk+'</div></div>'+
-    '<div class="met"><div class="met-l">Posts comunidad</div><div class="met-v">'+posts.length+'</div></div>';
-  const expiring=allU.filter(u=>{const d=daysUntil(u.planExpiry);return d!==null&&d<=5&&d>=0;}).sort((a,b)=>daysUntil(a.planExpiry)-daysUntil(b.planExpiry));
-  const expired=allU.filter(u=>{const d=daysUntil(u.planExpiry);return d!==null&&d<0;});
-  let eHtml='';
-  if(expiring.length||expired.length){
-    eHtml='<div class="divider"></div><p class="slbl" style="margin-bottom:10px">Membresías — retención</p>';
-    expired.forEach(u=>{eHtml+='<div class="expiry-card"><div style="display:flex;justify-content:space-between;align-items:center"><div class="expiry-name">'+u.name+'</div><span class="badge bg-red">VENCIDA</span></div><div class="expiry-info">'+planLbl(u)+' · venció '+fmtDateMaz(u.planExpiry)+'</div></div>';});
-    expiring.forEach(u=>{const d=daysUntil(u.planExpiry);eHtml+='<div class="expiry-card"><div style="display:flex;justify-content:space-between;align-items:center"><div class="expiry-name">'+u.name+'</div><span style="font-family:\'Montserrat\',sans-serif;font-size:18px;font-weight:700;color:var(--amber)">'+d+'d</span></div><div class="expiry-info">'+planLbl(u)+' · vence '+fmtDateMaz(u.planExpiry)+'</div></div>';});
-  }
-  document.getElementById('expiry-section').innerHTML=eHtml;
 }
 
 // ── ADMIN PIZARRONES ──
@@ -6937,34 +6914,6 @@ async function adminRecalcStripeFeesSb(){
 }
 
 // ── ADMIN: STATS ─────────────────────────────────────────────
-async function renderStatsSb(){
-  try{
-    const[{data:allU},{data:pays},{data:bks},{data:logs}]=await Promise.all([
-      sb.from('profiles').select('id,credits,plan_expiry,plan_id,role').neq('role','admin'),
-      sb.from('payments').select('amount,created_at'),
-      sb.from('bookings').select('ds').eq('status','active'),
-      sb.from('access_log').select('id')
-    ]);
-    const active=(allU||[]).filter(u=>{const _aP=[...PLANS.individual,...PLANS.grupal],_pp=_aP.find(x=>x.id===u.plan_id);const _ul=u.credits>=999||(_pp&&_pp.credits>=999);return(_ul||u.credits>0)&&(!u.plan_expiry||new Date(u.plan_expiry)>new Date());});
-    const today=mazToday();
-    const monthStart=today.slice(0,7);
-    const monthRev=(pays||[]).filter(p=>dsFromIsoMaz(p.created_at).startsWith(monthStart)).reduce((s,p)=>s+Number(p.amount),0);
-    const totalRev=(pays||[]).reduce((s,p)=>s+Number(p.amount),0);
-    const todayBks=(bks||[]).filter(b=>b.ds===today).length;
-    const expiring=(allU||[]).filter(u=>{const d=daysUntil(u.plan_expiry);return d!==null&&d<=5&&d>=0;}).length;
-    const metricsEl=document.getElementById('stats-metrics');
-    if(metricsEl) metricsEl.innerHTML=
-      '<div class="met"><div class="met-l">Socios activos</div><div class="met-v" style="color:var(--green)">'+active.length+'</div></div>'
-      +'<div class="met"><div class="met-l">Total socios</div><div class="met-v">'+(allU||[]).length+'</div></div>'
-      +'<div class="met"><div class="met-l">Ingresos mes</div><div class="met-v" style="color:var(--bl)">'+MXN(monthRev)+'</div></div>'
-      +'<div class="met"><div class="met-l">Ingresos total</div><div class="met-v" style="color:var(--bl)">'+MXN(totalRev)+'</div></div>'
-      +'<div class="met"><div class="met-l">Reservas hoy</div><div class="met-v" style="color:var(--amber)">'+todayBks+'</div></div>'
-      +'<div class="met"><div class="met-l">Por vencer</div><div class="met-v" style="color:var(--amber)">'+expiring+'</div></div>'
-      +'<div class="met"><div class="met-l">Accesos gym</div><div class="met-v" style="color:var(--green)">'+(logs||[]).length+'</div></div>'
-      +'<div class="met"><div class="met-l">Pagos total</div><div class="met-v">'+(pays||[]).length+'</div></div>';
-  }catch(e){console.error('stats:',e);}
-}
-
 // Save board to Supabase when admin creates/edits
 // ── SUPABASE DATA LAYER ──────────────────────────────────────
 async function saveBoardSb(board){
