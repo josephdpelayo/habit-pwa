@@ -29,7 +29,7 @@ html,body{height:100%;background:var(--black);overflow:hidden}
 input,select,button,textarea{font-family:'Montserrat',sans-serif}
 .screen{display:none;flex-direction:column;height:100%;overflow:hidden}
 .screen.active{display:flex}
-.scroll-area{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:1rem}
+.scroll-area{flex:1;overflow-y:auto;overflow-x:hidden;-webkit-overflow-scrolling:touch;padding:1rem}
 .scroll-area::-webkit-scrollbar{width:3px}
 .scroll-area::-webkit-scrollbar-thumb{background:var(--border);border-radius:99px}
 .hdr{padding:calc(env(safe-area-inset-top,0px) + .75rem) 1rem .75rem;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px;min-height:52px;flex-shrink:0;background:var(--black)}
@@ -919,12 +919,12 @@ body.reception-mode{background:#050505}
       <div class="metrics" id="dash-kpis"></div>
       <p style="font-size:11px;color:var(--gray);margin:6px 0 18px;line-height:1.5">"Ingreso real" es dinero que efectivamente recibiste: Stripe (ya sin su comisión) + GAIA + efectivo/transferencia. No incluye cortesías ni ajustes manuales, que no son dinero real. Detalle completo en Pagos.</p>
       <p class="slbl" style="margin-bottom:10px">Ingreso real, por mes</p>
-      <div style="background:var(--card);border:1px solid var(--border);border-radius:6px;padding:1rem;margin-bottom:1rem">
-        <canvas id="chart-revenue" height="160"></canvas>
+      <div style="background:var(--card);border:1px solid var(--border);border-radius:6px;padding:1rem;margin-bottom:1rem;position:relative;width:100%;max-width:100%;height:200px;box-sizing:border-box">
+        <canvas id="chart-revenue"></canvas>
       </div>
       <p class="slbl" style="margin-bottom:10px">Reservas por día (últimos 7 días)</p>
-      <div style="background:var(--card);border:1px solid var(--border);border-radius:6px;padding:1rem;margin-bottom:1rem">
-        <canvas id="chart-bookings" height="160"></canvas>
+      <div style="background:var(--card);border:1px solid var(--border);border-radius:6px;padding:1rem;margin-bottom:1rem;position:relative;width:100%;max-width:100%;height:200px;box-sizing:border-box">
+        <canvas id="chart-bookings"></canvas>
       </div>
       <p class="slbl" style="margin-bottom:10px">Distribución de membresías</p>
       <div style="background:var(--card);border:1px solid var(--border);border-radius:6px;padding:1rem;margin-bottom:1rem;display:flex;align-items:center;gap:1rem">
@@ -1192,7 +1192,7 @@ body.reception-mode{background:#050505}
 // ── CONFIG & SUPABASE ───────────────────────────────────────
 const SUPABASE_URL='https://pmpjteuqjusbiduevbwq.supabase.co';
 const SUPABASE_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBtcGp0ZXVxanVzYmlkdWV2YndxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc2OTI1NjUsImV4cCI6MjA5MzI2ODU2NX0.XbMzZoo2yqtrD8znLnyo_1zDfrdJAvAPj1lqGOyXnLw';
-const APP_VERSION='20260702-13';
+const APP_VERSION='20260702-14';
 const PUBLIC_APP_URL='https://habittraininghub.app/app.html';
 const PUBLIC_API_ORIGIN='https://www.habittraininghub.app';
 const SHOP_ALLOWED_EMAILS=['josephdpelayo@gmail.com'];
@@ -5442,7 +5442,7 @@ function renderRevenueChart(pays){
     labels.push(d.toLocaleDateString('es-MX',{month:'short'}));
     data.push((pays||[]).filter(p=>dsFromIsoMaz(p.created_at).startsWith(key)).reduce((s,p)=>s+paymentRealAmount(p),0));
   }
-  chartRevenue=new Chart(ctx,{type:'bar',data:{labels,datasets:[{data,backgroundColor:'rgba(59,130,246,.55)',borderColor:'#3b82f6',borderWidth:1,borderRadius:4}]},options:{responsive:true,plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>'$'+c.parsed.y.toLocaleString('es-MX')}}},scales:{x:{grid:{color:'rgba(255,255,255,.04)'},ticks:{color:'#9ca3af',font:{size:11}}},y:{grid:{color:'rgba(255,255,255,.04)'},ticks:{color:'#9ca3af',callback:v=>v>=1000?'$'+(v/1000).toFixed(0)+'k':'$'+v}}}}});
+  chartRevenue=new Chart(ctx,{type:'bar',data:{labels,datasets:[{data,backgroundColor:'rgba(59,130,246,.55)',borderColor:'#3b82f6',borderWidth:1,borderRadius:4}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>'$'+c.parsed.y.toLocaleString('es-MX')}}},scales:{x:{grid:{color:'rgba(255,255,255,.04)'},ticks:{color:'#9ca3af',font:{size:11}}},y:{grid:{color:'rgba(255,255,255,.04)'},ticks:{color:'#9ca3af',callback:v=>v>=1000?'$'+(v/1000).toFixed(0)+'k':'$'+v}}}}});
 }
 
 function renderBookingsChart(bks){
@@ -5456,7 +5456,7 @@ function renderBookingsChart(bks){
     labels.push(d.toLocaleDateString('es-MX',{weekday:'short',day:'numeric'}));
     data.push((bks||[]).filter(b=>b.ds===ds).length);
   }
-  chartBookings=new Chart(ctx,{type:'bar',data:{labels,datasets:[{data,backgroundColor:'rgba(251,191,36,.55)',borderColor:'#fbbf24',borderWidth:1,borderRadius:4}]},options:{responsive:true,plugins:{legend:{display:false}},scales:{x:{grid:{color:'rgba(255,255,255,.04)'},ticks:{color:'#9ca3af',font:{size:10}}},y:{grid:{color:'rgba(255,255,255,.04)'},ticks:{color:'#9ca3af',stepSize:1,precision:0}}}}});
+  chartBookings=new Chart(ctx,{type:'bar',data:{labels,datasets:[{data,backgroundColor:'rgba(251,191,36,.55)',borderColor:'#fbbf24',borderWidth:1,borderRadius:4}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{grid:{color:'rgba(255,255,255,.04)'},ticks:{color:'#9ca3af',font:{size:10}}},y:{grid:{color:'rgba(255,255,255,.04)'},ticks:{color:'#9ca3af',stepSize:1,precision:0}}}}});
 }
 
 function renderPlansChart(allU,allPlans){
@@ -5471,7 +5471,7 @@ function renderPlansChart(allU,allPlans){
   const labels=['Mensual','Visitas','Vencidos','Sin plan'];
   const data=[mensual,visitas,vencidos,sinPlan];
   const colors=['#3b82f6','#22c55e','#ef4444','#6b7280'];
-  chartPlans=new Chart(ctx,{type:'doughnut',data:{labels,datasets:[{data,backgroundColor:colors,borderWidth:0,hoverOffset:4}]},options:{cutout:'65%',plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>c.label+': '+c.parsed}}}}});
+  chartPlans=new Chart(ctx,{type:'doughnut',data:{labels,datasets:[{data,backgroundColor:colors,borderWidth:0,hoverOffset:4}]},options:{responsive:true,maintainAspectRatio:false,cutout:'65%',plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>c.label+': '+c.parsed}}}}});
   const leg=document.getElementById('chart-plans-legend');
   if(leg)leg.innerHTML=labels.map((l,i)=>'<div style="display:flex;align-items:center;gap:6px;margin-bottom:5px"><span style="width:9px;height:9px;border-radius:50%;background:'+colors[i]+';flex-shrink:0"></span><span style="color:#9ca3af">'+l+': <strong style="color:#e5e7eb">'+data[i]+'</strong></span></div>').join('');
 }
