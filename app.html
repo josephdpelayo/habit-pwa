@@ -945,6 +945,7 @@ body.reception-mode{background:#050505}
     <!-- SOCIOS -->
     <div id="a-users" class="adm-section">
       <div id="user-profile-view" style="display:none"></div>
+      <div id="courtesy-view" style="display:none"></div>
       <div id="user-list-area">
       <!-- Create user form (collapsed) -->
       <button class="btn" style="width:100%;margin-bottom:1rem;display:flex;align-items:center;justify-content:center;gap:8px" onclick="toggleNewSocioForm()">
@@ -958,6 +959,8 @@ body.reception-mode{background:#050505}
         <button class="btn" onclick="adminCreateUserSb()">Crear socio</button>
       </div>
 
+      <button class="btn-sm" style="width:100%;margin-bottom:10px;padding:10px" onclick="adminOpenCourtesyView()">🎁 Ver cortesías activas</button>
+
       <input class="adm-search" id="user-search" placeholder="Buscar por nombre, correo o teléfono..." oninput="renderUsersSb()">
       <div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:6px;">
           <button class="filter-chip active" data-filter="todos" onclick="setUserFilter(this)">Todos</button>
@@ -965,7 +968,6 @@ body.reception-mode{background:#050505}
           <button class="filter-chip" data-filter="vencido" onclick="setUserFilter(this)">🔴 Vencidos</button>
           <button class="filter-chip" data-filter="por-vencer" onclick="setUserFilter(this)">⚠️ Por vencer</button>
           <button class="filter-chip" data-filter="sin-plan" onclick="setUserFilter(this)">⬜ Sin plan</button>
-          <button class="filter-chip" data-filter="prueba" onclick="setUserFilter(this)">🎁 Cortesía / prueba</button>
       </div>
       <div style="margin-bottom:8px">
         <select id="user-sort" onchange="renderUsersSb()" style="background:var(--card2);border:1px solid var(--border);color:var(--white);border-radius:4px;padding:6px 10px;font-size:12px;cursor:pointer;width:100%">
@@ -1194,7 +1196,7 @@ body.reception-mode{background:#050505}
 // ── CONFIG & SUPABASE ───────────────────────────────────────
 const SUPABASE_URL='https://pmpjteuqjusbiduevbwq.supabase.co';
 const SUPABASE_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBtcGp0ZXVxanVzYmlkdWV2YndxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc2OTI1NjUsImV4cCI6MjA5MzI2ODU2NX0.XbMzZoo2yqtrD8znLnyo_1zDfrdJAvAPj1lqGOyXnLw';
-const APP_VERSION='20260707-06';
+const APP_VERSION='20260707-07';
 const PUBLIC_APP_URL='https://habittraininghub.app/app.html';
 const PUBLIC_API_ORIGIN='https://www.habittraininghub.app';
 const SHOP_ALLOWED_EMAILS=['josephdpelayo@gmail.com'];
@@ -5781,7 +5783,6 @@ async function renderUsersSb(){
       if(_userFilter==='vencido') return expired||(u.credits!==undefined&&u.credits!==null&&u.credits<=0&&!u.plan_expiry);
       if(_userFilter==='por-vencer') return days!==null&&days>=0&&days<=7;
       if(_userFilter==='sin-plan') return !u.plan_id&&(!u.credits||u.credits<=0);
-      if(_userFilter==='prueba') return u.plan_id==='prueba'||!!u.plan_is_courtesy;
       return true;
     });
     filtered.sort((a,b2)=>{
@@ -5838,7 +5839,95 @@ async function renderUsersSb(){
 
 function adminCloseUserProfile(){
   document.getElementById('user-profile-view').style.display='none';
+  if(_profileReturnTo==='courtesy'){
+    _profileReturnTo='list';
+    adminOpenCourtesyView();
+  }else{
+    document.getElementById('user-list-area').style.display='block';
+  }
+}
+
+function adminCloseCourtesyView(){
+  document.getElementById('courtesy-view').style.display='none';
   document.getElementById('user-list-area').style.display='block';
+}
+
+// Sección dedicada: socios con visitas de cortesía/prueba activas ahorita
+// (no historial completo, solo quién tiene cortesía vigente en este momento).
+async function adminOpenCourtesyView(){
+  const view=document.getElementById('courtesy-view');
+  document.getElementById('user-list-area').style.display='none';
+  document.getElementById('user-profile-view').style.display='none';
+  view.style.display='block';
+  view.innerHTML='<div class="empty">Cargando...</div>';
+  try{
+    const{data:allU,error}=await sb.from('profiles').select('*').neq('role','admin').neq('role','reception');
+    if(error)throw error;
+    const socios=(allU||[]).filter(u=>u.plan_id==='prueba'||!!u.plan_is_courtesy);
+    let grantMap={};
+    if(socios.length){
+      const ids=socios.map(u=>u.id);
+      const{data:grants}=await sb.from('payments').select('user_id,plan_name,created_at,created_by')
+        .eq('payment_method','courtesy').in('user_id',ids).order('created_at',{ascending:false});
+      (grants||[]).forEach(g=>{ if(!grantMap[g.user_id]) grantMap[g.user_id]=g; }); // el primero por user_id ya es el más reciente (ordenado desc)
+      const adminIds=[...new Set(Object.values(grantMap).map(g=>g.created_by).filter(Boolean))];
+      let adminNames={};
+      if(adminIds.length){
+        const{data:admins}=await sb.from('profiles').select('id,name').in('id',adminIds);
+        adminNames=Object.fromEntries((admins||[]).map(a=>[a.id,a.name]));
+      }
+      Object.values(grantMap).forEach(g=>{g._adminName=adminNames[g.created_by]||'Admin';});
+    }
+    socios.sort((a,b)=>{
+      const ga=grantMap[a.id], gb=grantMap[b.id];
+      const ta=ga?new Date(ga.created_at).getTime():0, tb=gb?new Date(gb.created_at).getTime():0;
+      return tb-ta;
+    });
+
+    const header=document.createElement('div');
+    header.style.cssText='display:flex;align-items:center;gap:10px;margin-bottom:1rem';
+    header.innerHTML='<button onclick="adminCloseCourtesyView()" style="background:var(--card2);border:1px solid var(--border);border-radius:6px;padding:8px 14px;color:var(--white);font-size:13px;cursor:pointer;white-space:nowrap">← Volver</button>'
+      +'<span style="font-size:16px;font-weight:800;flex:1">🎁 Cortesías activas ('+socios.length+')</span>';
+    view.appendChild(header);
+
+    const note=document.createElement('div');
+    note.style.cssText='font-size:11px;color:var(--gray);margin-bottom:14px;line-height:1.5';
+    note.textContent='Socios que ahorita tienen visitas regaladas o están en el plan de prueba — no cuentan como "Activos" hasta que hagan un pago real.';
+    view.appendChild(note);
+
+    if(!socios.length){
+      const empty=document.createElement('div');
+      empty.className='empty';
+      empty.textContent='Nadie tiene cortesía o prueba activa ahorita.';
+      view.appendChild(empty);
+      return;
+    }
+
+    socios.forEach(u=>{
+      const g=grantMap[u.id];
+      const isUnlimited=u.credits>=999;
+      const visitas=isUnlimited?'Ilimitado':(u.credits||0)+' visita'+(u.credits===1?'':'s');
+      const grantInfo=g
+        ?esc(g.plan_name||'Cortesía')+' · dada por '+esc(g._adminName)+' · '+fmtDateTimeMaz(g.created_at)
+        :(u.plan_id==='prueba'?'Registro con visita de prueba (automático)':'Sin registro de cuándo se otorgó');
+      const div=document.createElement('div');
+      div.className='user-row';
+      div.style.cssText='flex-direction:column;align-items:flex-start;gap:0;padding:0;overflow:hidden;cursor:pointer';
+      div.innerHTML=
+        '<div style="display:flex;align-items:center;gap:10px;width:100%;padding:12px 4px" onclick="adminOpenUserProfile(&quot;'+u.id+'&quot;)">'
+        +avatarHtml(u.name,u.avatar_url,'post-av')
+        +'<div style="flex:1;min-width:0">'
+        +'<div class="brow-name">'+esc(u.name||'')+'</div>'
+        +'<div class="brow-meta">'+esc(u.phone||'Sin telefono')+' · '+visitas+(u.plan_expiry?' · vence '+fmtDateMaz(u.plan_expiry):'')+'</div>'
+        +'<div class="brow-meta" style="color:var(--amber)">'+grantInfo+'</div>'
+        +'</div>'
+        +'<span style="font-size:16px;color:var(--gray);line-height:1">›</span>'
+        +'</div>';
+      view.appendChild(div);
+    });
+  }catch(e){
+    view.innerHTML='<div class="empty">Error: '+e.message+'</div>';
+  }
 }
 
 // Ir al perfil completo de un socio desde otra sección (ej. un movimiento en Finanzas).
@@ -5848,10 +5937,14 @@ function goToClientProfile(uid){
   adminOpenUserProfile(uid);
 }
 
+let _profileReturnTo='list'; // 'list' | 'courtesy' — a dónde volver al cerrar el perfil
 async function adminOpenUserProfile(uid){
   const profileView=document.getElementById('user-profile-view');
   const listArea=document.getElementById('user-list-area');
+  const courtesyView=document.getElementById('courtesy-view');
+  _profileReturnTo=(courtesyView&&courtesyView.style.display!=='none')?'courtesy':'list';
   listArea.style.display='none';
+  if(courtesyView)courtesyView.style.display='none';
   profileView.style.display='block';
   profileView.innerHTML='<div class="empty">Cargando perfil...</div>';
   try{
