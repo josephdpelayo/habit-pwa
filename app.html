@@ -59,8 +59,8 @@ input,select,button,textarea{font-family:'Montserrat',sans-serif}
 .view{display:none;flex-direction:column;flex:1;overflow:hidden}
 .view.active{display:flex}
 .toast-wrap{position:absolute;top:60px;left:1rem;right:1rem;z-index:999;pointer-events:none}
-.toast{background:var(--blue);color:var(--white);padding:10px 16px;border-radius:6px;font-size:13px;font-weight:500;opacity:0;transition:opacity .3s;text-align:center;pointer-events:auto}
-.toast.show{opacity:1}
+.toast{background:var(--blue);color:var(--white);padding:10px 16px;border-radius:6px;font-size:13px;font-weight:500;opacity:0;transition:opacity .3s;text-align:center;pointer-events:none}
+.toast.show{opacity:1;pointer-events:auto}
 .toast.err{background:var(--red)}.toast.warn{background:var(--amber);color:#000}.toast.ok{background:var(--green)}
 .slbl{font-size:10px;font-weight:700;color:var(--gray);letter-spacing:.12em;text-transform:uppercase;margin-bottom:8px}
 .field{margin-bottom:12px}
@@ -1196,7 +1196,7 @@ body.reception-mode{background:#050505}
 // ── CONFIG & SUPABASE ───────────────────────────────────────
 const SUPABASE_URL='https://pmpjteuqjusbiduevbwq.supabase.co';
 const SUPABASE_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBtcGp0ZXVxanVzYmlkdWV2YndxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc2OTI1NjUsImV4cCI6MjA5MzI2ODU2NX0.XbMzZoo2yqtrD8znLnyo_1zDfrdJAvAPj1lqGOyXnLw';
-const APP_VERSION='20260707-07';
+const APP_VERSION='20260707-08';
 const PUBLIC_APP_URL='https://habittraininghub.app/app.html';
 const PUBLIC_API_ORIGIN='https://www.habittraininghub.app';
 const SHOP_ALLOWED_EMAILS=['josephdpelayo@gmail.com'];
