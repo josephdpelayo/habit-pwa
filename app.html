@@ -1196,7 +1196,7 @@ body.reception-mode{background:#050505}
 // ── CONFIG & SUPABASE ───────────────────────────────────────
 const SUPABASE_URL='https://pmpjteuqjusbiduevbwq.supabase.co';
 const SUPABASE_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBtcGp0ZXVxanVzYmlkdWV2YndxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc2OTI1NjUsImV4cCI6MjA5MzI2ODU2NX0.XbMzZoo2yqtrD8znLnyo_1zDfrdJAvAPj1lqGOyXnLw';
-const APP_VERSION='20260707-08';
+const APP_VERSION='20260707-09';
 const PUBLIC_APP_URL='https://habittraininghub.app/app.html';
 const PUBLIC_API_ORIGIN='https://www.habittraininghub.app';
 const SHOP_ALLOWED_EMAILS=['josephdpelayo@gmail.com'];
@@ -7032,7 +7032,7 @@ async function renderGastosSb(){
         +(g.descripcion?'<div class="brow-meta">'+esc(g.descripcion)+'</div>':'')
         +'<div class="brow-meta">'+fmtDS(g.fecha)+' · Registró: '+esc(nameMap[g.admin_id]||'Admin')+(comprobante?' · '+comprobante:'')+'</div>'
         +'</div>'
-        +'<div style="display:flex;flex-direction:column;align-items:flex-end;gap:6px"><div style="font-size:16px;font-weight:700;color:var(--red)">'+MXN(g.monto)+'</div><button class="btn-sm bred" data-gid="'+esc(g.id)+'" onclick="adminDeleteGastoSb(this.dataset.gid)">Eliminar</button></div>';
+        +'<div style="display:flex;flex-direction:column;align-items:flex-end;gap:6px"><div style="font-size:16px;font-weight:700;color:var(--red)">'+MXN(g.monto)+'</div><button class="btn-sm bred" style="padding:10px 14px;min-height:38px" data-gid="'+esc(g.id)+'" onclick="adminDeleteGastoSb(this.dataset.gid)">Eliminar</button></div>';
       list.appendChild(d);
     });
   }catch(e){
