@@ -1194,7 +1194,7 @@ body.reception-mode{background:#050505}
 // ── CONFIG & SUPABASE ───────────────────────────────────────
 const SUPABASE_URL='https://pmpjteuqjusbiduevbwq.supabase.co';
 const SUPABASE_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBtcGp0ZXVxanVzYmlkdWV2YndxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc2OTI1NjUsImV4cCI6MjA5MzI2ODU2NX0.XbMzZoo2yqtrD8znLnyo_1zDfrdJAvAPj1lqGOyXnLw';
-const APP_VERSION='20260707-01';
+const APP_VERSION='20260707-02';
 const PUBLIC_APP_URL='https://habittraininghub.app/app.html';
 const PUBLIC_API_ORIGIN='https://www.habittraininghub.app';
 const SHOP_ALLOWED_EMAILS=['josephdpelayo@gmail.com'];
@@ -6653,8 +6653,15 @@ async function renderCuentasSb(){
     gymCard.style.cssText='background:var(--card);border:1px solid var(--border);border-radius:8px;padding:18px;margin-bottom:16px;text-align:center';
     gymCard.innerHTML='<div class="met-l" style="margin-bottom:6px">Balance cuenta Gym</div>'
       +'<div style="font-size:30px;font-weight:800;color:'+(gymBalance>=0?'var(--green)':'var(--red)')+'">'+MXN(gymBalance)+'</div>'
-      +'<div style="font-size:11px;color:var(--gray);margin-top:6px;line-height:1.5">Ingreso real ('+MXN(ingresoReal)+') − gastos pagados por el gym ('+MXN(gastoGym)+') − retiros a socios ('+MXN(retirosTotal)+').</div>';
+      +'<div style="font-size:11px;color:var(--gray);margin-top:6px;line-height:1.5">Ingreso real ('+MXN(ingresoReal)+') − gastos pagados por el gym ('+MXN(gastoGym)+') − retiros a socios ('+MXN(retirosTotal)+'). Esto sí es efectivo real, a diferencia de "Ganancia neta" en Resumen.</div>';
     list.appendChild(gymCard);
+
+    const cuentasNote=document.createElement('div');
+    cuentasNote.style.cssText='font-size:10px;color:var(--gray);margin:-10px 0 16px;text-align:center';
+    cuentasNote.textContent='Esta pestaña es un acumulado histórico completo (sin selector de mes, a diferencia de Resumen/Gastos).';
+    list.appendChild(cuentasNote);
+
+    const div1=document.createElement('div');div1.className='divider';list.appendChild(div1);
 
     // ── Reparto de gastos entre socios ──
     const secTitle=document.createElement('p');
@@ -6693,6 +6700,8 @@ async function renderCuentasSb(){
       list.appendChild(debtBox);
     }
 
+    const div2=document.createElement('div');div2.className='divider';list.appendChild(div2);
+
     // ── Retiros recibidos por socio (informativo) ──
     const retiroTitle=document.createElement('p');
     retiroTitle.className='slbl';
@@ -6706,7 +6715,14 @@ async function renderCuentasSb(){
     ).join('');
     list.appendChild(retiroGrid);
 
+    const div3=document.createElement('div');div3.className='divider';list.appendChild(div3);
+
     // ── Formularios: registrar retiro / pago de deuda ──
+    const formsTitle=document.createElement('p');
+    formsTitle.className='slbl';
+    formsTitle.style.margin='4px 0 10px';
+    formsTitle.textContent='Registrar movimiento';
+    list.appendChild(formsTitle);
     const socioOpts=SOCIOS.map(([v,l])=>'<option value="'+v+'">'+l+'</option>').join('');
     const forms=document.createElement('div');
     forms.style.cssText='display:flex;flex-direction:column;gap:12px;margin-bottom:16px';
@@ -6729,6 +6745,8 @@ async function renderCuentasSb(){
       +'<button class="btn" onclick="adminSaveDeudaPagoSb()">Registrar pago</button>'
       +'</div>';
     list.appendChild(forms);
+
+    const div4=document.createElement('div');div4.className='divider';list.appendChild(div4);
 
     // ── Movimientos: retiros + pagos de deuda ──
     const movTitle=document.createElement('p');
@@ -7017,9 +7035,9 @@ function renderFinanzasView(){
   // ── Tarjeta principal: balance real del periodo (ingreso real - gastos) ──
   const hero=document.createElement('div');
   hero.style.cssText='background:var(--card);border:1px solid var(--border);border-radius:8px;padding:18px;margin-bottom:6px;text-align:center';
-  hero.innerHTML='<div class="met-l" style="margin-bottom:6px">Balance · '+esc(finMonthLabel(selectedYm))+'</div>'
+  hero.innerHTML='<div class="met-l" style="margin-bottom:6px">Ganancia neta · '+esc(finMonthLabel(selectedYm))+'</div>'
     +'<div style="font-size:34px;font-weight:800;color:'+(balance>=0?'var(--green)':'var(--red)')+'">'+MXN(balance)+'</div>'
-    +'<div style="font-size:11px;color:var(--gray);margin-top:6px;line-height:1.5">Ingreso real ('+MXN(realTotal)+') menos gastos operativos ('+MXN(gastosTotal)+') del periodo. No incluye ventas de Tienda — revisa esa pestaña por separado.</div>';
+    +'<div style="font-size:11px;color:var(--gray);margin-top:6px;line-height:1.5">Ingreso real ('+MXN(realTotal)+') menos TODOS los gastos ('+MXN(gastosTotal)+') del periodo, sin importar quién los pagó. No incluye ventas de Tienda. Esto es qué tan rentable fue el negocio, no el efectivo real en el banco — para eso ve a la pestaña Cuentas.</div>';
   list.appendChild(hero);
 
   const balGrid=document.createElement('div');
