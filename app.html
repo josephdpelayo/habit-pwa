@@ -1194,7 +1194,7 @@ body.reception-mode{background:#050505}
 // ── CONFIG & SUPABASE ───────────────────────────────────────
 const SUPABASE_URL='https://pmpjteuqjusbiduevbwq.supabase.co';
 const SUPABASE_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBtcGp0ZXVxanVzYmlkdWV2YndxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc2OTI1NjUsImV4cCI6MjA5MzI2ODU2NX0.XbMzZoo2yqtrD8znLnyo_1zDfrdJAvAPj1lqGOyXnLw';
-const APP_VERSION='20260707-05';
+const APP_VERSION='20260707-06';
 const PUBLIC_APP_URL='https://habittraininghub.app/app.html';
 const PUBLIC_API_ORIGIN='https://www.habittraininghub.app';
 const SHOP_ALLOWED_EMAILS=['josephdpelayo@gmail.com'];
@@ -5764,12 +5764,20 @@ async function renderUsersSb(){
   try{
     const{data:allU,error}=await sb.from('profiles').select('*').order('created_at');
     if(error)throw error;
+    // Para "Activos": un socio solo cuenta si tiene al menos un pago real en su
+    // historial (no cortesía) — esto también cubre cortesías viejas dadas antes
+    // de que existiera plan_is_courtesy, sin necesidad de marcarlas a mano.
+    let realPayerIds=null;
+    if(_userFilter==='activo'){
+      const{data:realPays}=await sb.from('payments').select('user_id').neq('payment_method','courtesy').not('user_id','is',null);
+      realPayerIds=new Set((realPays||[]).map(p=>p.user_id));
+    }
     let filtered=(allU||[]).filter(u=>u.role!=='admin'&&u.role!=='reception'&&(!q||((u.name||'').toLowerCase().includes(q)||(u.phone||'').includes(q)||(u.email||'').toLowerCase().includes(q))));
     filtered=filtered.filter(u=>{
       const expired=u.plan_expiry&&new Date(u.plan_expiry)<new Date();
       const days=daysUntil(u.plan_expiry);
       const active=(u.credits>=999||u.credits>0)&&!expired;
-      if(_userFilter==='activo') return active&&!(days!==null&&days<=7&&days>=0)&&u.plan_id!=='prueba'&&!u.plan_is_courtesy;
+      if(_userFilter==='activo') return active&&!(days!==null&&days<=7&&days>=0)&&u.plan_id!=='prueba'&&!u.plan_is_courtesy&&realPayerIds.has(u.id);
       if(_userFilter==='vencido') return expired||(u.credits!==undefined&&u.credits!==null&&u.credits<=0&&!u.plan_expiry);
       if(_userFilter==='por-vencer') return days!==null&&days>=0&&days<=7;
       if(_userFilter==='sin-plan') return !u.plan_id&&(!u.credits||u.credits<=0);
