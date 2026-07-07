@@ -486,7 +486,7 @@ input,select,button,textarea{font-family:'Montserrat',sans-serif}
 .order-status.cancelado{border-color:rgba(239,68,68,.5);color:var(--red);background:rgba(239,68,68,.1)}
 
 /* ADMIN */
-.adm-nav{display:flex;border-bottom:1px solid var(--border);flex-shrink:0;overflow-x:auto;-webkit-overflow-scrolling:touch}
+.adm-nav{display:flex;flex-wrap:wrap;border-bottom:1px solid var(--border);flex-shrink:0}
 .adm-nav::-webkit-scrollbar{height:0}
 .adm-nav::-webkit-scrollbar{height:0}
 .adm-tab{flex-shrink:0;padding:10px 14px;font-size:10px;font-weight:700;cursor:pointer;color:var(--gray);border:none;background:transparent;border-bottom:2px solid transparent;letter-spacing:.08em;text-transform:uppercase}
@@ -900,7 +900,7 @@ body.reception-mode{background:#050505}
     <div class="logo-wrap"><img src="icons/logo-original.png" class="header-logo-img" alt=""><div><span class="ltxt">HABIT</span><span class="lsub">ADMIN PANEL</span></div></div>
     <button class="logout-btn" onclick="doLogout()">Salir</button>
   </div>
-  <div class="adm-nav" style="overflow-x:auto">
+  <div class="adm-nav">
     <button class="adm-tab active" onclick="admTab('dash')">Dashboard</button>
     <button class="adm-tab" onclick="admTab('slots')">Slots</button>
     <button class="adm-tab" onclick="admTab('users')">Socios</button>
@@ -1194,7 +1194,7 @@ body.reception-mode{background:#050505}
 // ── CONFIG & SUPABASE ───────────────────────────────────────
 const SUPABASE_URL='https://pmpjteuqjusbiduevbwq.supabase.co';
 const SUPABASE_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBtcGp0ZXVxanVzYmlkdWV2YndxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc2OTI1NjUsImV4cCI6MjA5MzI2ODU2NX0.XbMzZoo2yqtrD8znLnyo_1zDfrdJAvAPj1lqGOyXnLw';
-const APP_VERSION='20260707-02';
+const APP_VERSION='20260707-03';
 const PUBLIC_APP_URL='https://habittraininghub.app/app.html';
 const PUBLIC_API_ORIGIN='https://www.habittraininghub.app';
 const SHOP_ALLOWED_EMAILS=['josephdpelayo@gmail.com'];
@@ -6997,15 +6997,10 @@ function renderFinanzasView(){
   const monthOpts=['<option value="all"'+(selectedYm==='all'?' selected':'')+'>Todo el tiempo</option>']
     .concat(months.map(ym=>'<option value="'+ym+'"'+(ym===selectedYm?' selected':'')+'>'+finMonthLabel(ym)+'</option>'));
   const header=document.createElement('div');
-  header.innerHTML='<div style="display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:10px;flex-wrap:wrap">'
+  header.innerHTML='<div style="display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:14px;flex-wrap:wrap">'
     +'<p class="slbl" style="margin:0">Finanzas</p>'
     +'<select onchange="setFinMonth(this.value)" style="background:var(--card);color:var(--white);border:1px solid var(--border);border-radius:4px;padding:8px 10px;font-size:13px;font-family:inherit">'+monthOpts.join('')+'</select>'
-    +'</div>'
-    +'<div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:4px">'
-    +'<button class="btn-sm bblue" onclick="adminSyncStripePaymentsSb()">Sincronizar Stripe</button>'
-    +'<button class="btn-sm" onclick="adminRecalcStripeFeesSb()">Recalcular comisiones</button>'
-    +'</div>'
-    +'<div style="font-size:10px;color:var(--gray);line-height:1.5;margin-bottom:14px">"Sincronizar Stripe" trae cobros hechos en Stripe que no se hayan registrado aquí (úsalo si sospechas que falta alguno). "Recalcular comisiones" corrige la comisión de pagos viejos que se guardaron con un estimado — solo hace falta usarlo si ves el aviso de abajo.</div>';
+    +'</div>';
   list.appendChild(header);
 
   const allGastos=_finData.gastos||[];
@@ -7030,7 +7025,6 @@ function renderFinanzasView(){
   const feeTotal=pays.reduce((s,p)=>s+(p.stripe_fee!=null?Number(p.stripe_fee):0),0);
   const realTotal=pays.reduce((s,p)=>s+paymentRealAmount(p),0);
   const balance=realTotal-gastosTotal;
-  const pendingFeeCount=pays.filter(p=>(p.payment_method||'stripe')==='stripe'&&p.stripe_fee==null).length;
 
   // ── Tarjeta principal: balance real del periodo (ingreso real - gastos) ──
   const hero=document.createElement('div');
@@ -7072,12 +7066,6 @@ function renderFinanzasView(){
   ).join('');
   list.appendChild(trend);
 
-  if(pendingFeeCount>0){
-    const warn=document.createElement('div');
-    warn.style.cssText='font-size:12px;color:var(--amber);margin:10px 0';
-    warn.textContent='⚠️ '+pendingFeeCount+' pago(s) de Stripe en este periodo sin comisión calculada todavía. Usa "Recalcular comisiones" (puede requerir varios clics si hay muchos).';
-    list.appendChild(warn);
-  }
 
   const secTitle=document.createElement('p');
   secTitle.className='slbl';
@@ -7270,52 +7258,6 @@ async function adminDeletePaymentSb(paymentId){
   }catch(e){
     hideLoading();
     toast('Error al eliminar pago: '+(e.message||e),'err');
-  }
-}
-
-async function adminSyncStripePaymentsSb(){
-  showLoading('Sincronizando Stripe...');
-  try{
-    const{data:sessionData}=await sb.auth.getSession();
-    const token=sessionData?.session?.access_token;
-    const res=await fetch('/api/payments-admin',{
-      method:'POST',
-      headers:{'Content-Type':'application/json',Authorization:'Bearer '+token},
-      body:JSON.stringify({action:'sync',limit:75})
-    });
-    const payload=await res.json().catch(()=>({}));
-    if(!res.ok)throw new Error(payload.error||'No se pudo sincronizar Stripe');
-    hideLoading();
-    toast('Stripe sincronizado: '+(payload.recorded||0)+' nuevo(s), '+(payload.duplicate||0)+' ya estaban','ok');
-    renderPaymentsSb();
-    renderDashboard();
-    if(document.getElementById('a-notifs')?.classList.contains('active'))renderAdminNotifsSb();
-  }catch(e){
-    hideLoading();
-    toast('Error al sincronizar Stripe: '+(e.message||e),'err');
-  }
-}
-
-async function adminRecalcStripeFeesSb(){
-  showLoading('Recalculando comisiones...');
-  try{
-    const{data:sessionData}=await sb.auth.getSession();
-    const token=sessionData?.session?.access_token;
-    const res=await fetch('/api/payments-admin',{
-      method:'POST',
-      headers:{'Content-Type':'application/json',Authorization:'Bearer '+token},
-      body:JSON.stringify({action:'recalc_fees',limit:50})
-    });
-    const payload=await res.json().catch(()=>({}));
-    if(!res.ok)throw new Error(payload.error||'No se pudo recalcular');
-    hideLoading();
-    const msg='Comisiones actualizadas: '+(payload.updated||0)
-      +(payload.remaining?' · Faltan '+payload.remaining+', vuelve a tocar el botón':' · Listo, no quedan pendientes');
-    toast(msg,'ok');
-    renderPaymentsSb();
-  }catch(e){
-    hideLoading();
-    toast('Error al recalcular: '+(e.message||e),'err');
   }
 }
 
