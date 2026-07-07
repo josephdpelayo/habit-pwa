@@ -363,7 +363,7 @@ input,select,button,textarea{font-family:'Montserrat',sans-serif}
 .post-crop-actions label{font-size:10px;color:var(--gray);font-weight:800;letter-spacing:.08em;text-transform:uppercase}
 .post-crop-actions input{width:100%;accent-color:var(--blue)}
 .post-reactions{display:flex;gap:6px;padding:10px 14px;border-top:1px solid var(--border)}
-.reaction-btn{display:flex;align-items:center;gap:4px;padding:5px 10px;border:1px solid var(--border);border-radius:99px;font-size:12px;cursor:pointer;background:transparent;color:var(--gray)}
+.reaction-btn{display:flex;align-items:center;gap:4px;padding:9px 13px;border:1px solid var(--border);border-radius:99px;font-size:12px;cursor:pointer;background:transparent;color:var(--gray)}
 .reaction-btn.active{border-color:var(--blue);background:rgba(37,99,235,.12);color:var(--bl)}
 .post-comments{border-top:1px solid var(--border);padding:10px 14px;background:rgba(255,255,255,.015)}
 .comment-row{display:flex;gap:8px;margin-bottom:8px}
@@ -509,7 +509,7 @@ input,select,button,textarea{font-family:'Montserrat',sans-serif}
 .asb{padding:0 12px}
 .wsec{font-size:10px;font-weight:700;color:var(--amber);letter-spacing:.1em;text-transform:uppercase;padding:8px 0 4px}
 .adm-search{width:100%;background:var(--card);border:1px solid var(--border);border-radius:4px;padding:12px;font-size:16px;color:var(--white);outline:none;margin-bottom:1rem;-webkit-appearance:none}
-.filter-chip{background:var(--card2);border:1px solid var(--border);color:var(--gray);border-radius:20px;padding:5px 12px;font-size:11px;font-weight:600;letter-spacing:.04em;cursor:pointer;white-space:nowrap;transition:all .15s}
+.filter-chip{background:var(--card2);border:1px solid var(--border);color:var(--gray);border-radius:20px;padding:9px 14px;font-size:11px;font-weight:600;letter-spacing:.04em;cursor:pointer;white-space:nowrap;transition:all .15s}
 .filter-chip.active{background:rgba(37,99,235,.2);border-color:var(--blue);color:var(--bl)}
 .adm-date{width:100%;background:var(--card);border:1px solid var(--border);border-radius:4px;padding:12px;font-size:16px;color:var(--white);outline:none;margin-bottom:1rem;color-scheme:dark;-webkit-appearance:none}
 
@@ -692,6 +692,7 @@ body.reception-mode{background:#050505}
       <div class="perfil-section">
         <div class="perfil-avatar" id="perfil-av"></div>
         <div id="perfil-info"></div>
+        <button class="btn-ghost" onclick="sv('inicio')" style="width:100%;margin-top:8px">Ver mi membresía y visitas →</button>
         <div class="divider" style="margin:.75rem 0"></div>
         <p class="slbl">Editar datos</p>
         <div class="avatar-picker">
@@ -808,6 +809,15 @@ body.reception-mode{background:#050505}
       <p class="slbl">Mis PRs</p>
       <div id="h-scores"></div>
       <div class="divider"></div>
+      <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:2px">
+        <p class="slbl" style="margin:0">Mis reservas y pagos</p>
+        <select id="hist-range" onchange="setHistorialRange(this.value)" style="background:var(--card);color:var(--white);border:1px solid var(--border);border-radius:4px;padding:8px 10px;font-size:13px;font-family:inherit">
+          <option value="30">Últimos 30 días</option>
+          <option value="90" selected>Últimos 3 meses</option>
+          <option value="365">Último año</option>
+          <option value="all">Todo</option>
+        </select>
+      </div>
       <p class="slbl">Mis reservas</p>
       <div id="hb"></div>
       <div class="divider"></div>
@@ -1196,7 +1206,7 @@ body.reception-mode{background:#050505}
 // ── CONFIG & SUPABASE ───────────────────────────────────────
 const SUPABASE_URL='https://pmpjteuqjusbiduevbwq.supabase.co';
 const SUPABASE_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBtcGp0ZXVxanVzYmlkdWV2YndxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc2OTI1NjUsImV4cCI6MjA5MzI2ODU2NX0.XbMzZoo2yqtrD8znLnyo_1zDfrdJAvAPj1lqGOyXnLw';
-const APP_VERSION='20260707-09';
+const APP_VERSION='20260707-10';
 const PUBLIC_APP_URL='https://habittraininghub.app/app.html';
 const PUBLIC_API_ORIGIN='https://www.habittraininghub.app';
 const SHOP_ALLOWED_EMAILS=['josephdpelayo@gmail.com'];
@@ -3999,9 +4009,9 @@ function renderAdminShopProducts(){
     }
     return '<div class="brow"><div class="brow-info"><div class="brow-name">'+esc(p.name)+'</div>'
       +'<div class="brow-meta">'+MXN(p.price)+' · Stock: '+(p.trackInventory?p.stock:'Sin control')+'</div></div>'
-      +'<div style="display:flex;align-items:center;gap:5px">'
-      +'<button class="btn-sm" style="background:rgba(255,255,255,.07);border-color:rgba(255,255,255,.15);color:var(--white)" onclick="adminStartEditProduct(\''+pid+'\')">Editar</button>'
-      +'<button class="btn-sm '+(p.active?'bgreen':'bred')+'" onclick="adminToggleShopProduct(\''+pid+'\','+(!p.active)+')">'+(p.active?'ON':'OFF')+'</button>'
+      +'<div style="display:flex;align-items:center;gap:10px">'
+      +'<button class="btn-sm" style="padding:10px 14px;min-height:38px;background:rgba(255,255,255,.07);border-color:rgba(255,255,255,.15);color:var(--white)" onclick="adminStartEditProduct(\''+pid+'\')">Editar</button>'
+      +'<button class="btn-sm '+(p.active?'bgreen':'bred')+'" style="padding:10px 14px;min-height:38px" onclick="adminToggleShopProduct(\''+pid+'\','+(!p.active)+')">'+(p.active?'ON':'OFF')+'</button>'
       +'</div></div>';
   }).join(''):'<div class="empty">Sin productos.</div>';
 
@@ -4110,20 +4120,31 @@ async function adminUpdateShopOrder(orderId,status){
 
 // ── HISTORIAL ────────────────────────────────────────────────
 const _prCharts={};
+let _historialRange='90'; // '30' | '90' | '365' | 'all'
+function setHistorialRange(v){_historialRange=v;renderHistorial();}
 async function renderHistorial(){
   const hbEl=document.getElementById('hb');
   const hpEl=document.getElementById('hp');
   const hsEl=document.getElementById('h-scores');
+  const rangeEl=document.getElementById('hist-range');
   if(!hbEl||!sbUser)return;
+  if(rangeEl)rangeEl.value=_historialRange;
   hbEl.innerHTML='<div class="empty">Cargando...</div>';
   if(hpEl)hpEl.innerHTML='';
   if(hsEl)hsEl.innerHTML='<div class="empty">Cargando...</div>';
   try{
+    const isAll=_historialRange==='all';
+    const cutoffDs=isAll?null:addDaysDS(mazToday(),-Number(_historialRange));
+    const cutoffIso=isAll?null:mazLocalDateTimeIso(cutoffDs,0,0,0);
+    let bkQuery=sb.from('bookings').select('*').eq('user_id',sbUser.id);
+    let payQuery=sb.from('payments').select('*').eq('user_id',sbUser.id);
+    if(!isAll){
+      bkQuery=bkQuery.gte('ds',cutoffDs);
+      payQuery=payQuery.gte('created_at',cutoffIso);
+    }
     const[bkRes,payRes,scRes]=await Promise.allSettled([
-      sb.from('bookings').select('*').eq('user_id',sbUser.id)
-        .order('ds',{ascending:false}).order('start_idx',{ascending:false}).limit(30),
-      sb.from('payments').select('*').eq('user_id',sbUser.id)
-        .order('created_at',{ascending:false}).limit(20),
+      bkQuery.order('ds',{ascending:false}).order('start_idx',{ascending:false}).limit(isAll?30:200),
+      payQuery.order('created_at',{ascending:false}).limit(isAll?20:200),
       sb.from('user_scores').select('*').eq('user_id',sbUser.id)
         .order('logged_at',{ascending:true}).limit(200)
     ]);
@@ -4217,7 +4238,7 @@ async function renderHistorial(){
         hbEl.appendChild(div);
       });
     }else{
-      hbEl.innerHTML='<div class="empty">Sin reservas aun.</div>';
+      hbEl.innerHTML='<div class="empty">'+(isAll?'Sin reservas aun.':'Sin reservas en este periodo.')+'</div>';
     }
 
     // Render payments
@@ -4234,7 +4255,7 @@ async function renderHistorial(){
           hpEl.appendChild(div);
         });
       }else{
-        hpEl.innerHTML='<div class="empty">Sin pagos aun.</div>';
+        hpEl.innerHTML='<div class="empty">'+(isAll?'Sin pagos aun.':'Sin pagos en este periodo.')+'</div>';
       }
     }
   }catch(e){
@@ -4742,6 +4763,37 @@ async function adminBookForUser(ds,idx,panelIdx){
       slotsNeeded.push({ds:dsi,slot_idx:si});
     }
 
+    // Validar cupo y reserva duplicada con datos frescos de la BD (a
+    // diferencia del flujo del socio, esta reserva manual no pasaba por
+    // canStartAt() y podía sobre-reservar un horario lleno o duplicar).
+    const datesInvolved=[...new Set(slotsNeeded.map(s=>s.ds))];
+    const[bkCheck,blkCheck]=await Promise.all([
+      sb.from('bookings').select('user_id,ds,start_idx,slots_used,is_group,grupal_spots').in('ds',datesInvolved).eq('status','active'),
+      sb.from('slot_blocks').select('ds,slot_idx,spots').in('ds',datesInvolved),
+    ]);
+    const dayBookings=bkCheck.data||[];
+    const dayBlocks=blkCheck.data||[];
+    if(dayBookings.some(b=>b.user_id===u.id&&b.ds===ds)){
+      hideLoading();
+      toast('Este socio ya tiene una reserva activa ese día','err');
+      return;
+    }
+    for(const s of slotsNeeded){
+      let taken=0;
+      dayBlocks.forEach(b=>{ if(b.ds===s.ds&&Number(b.slot_idx)===s.slot_idx) taken+=Math.min(CAP,Number(b.spots)||1); });
+      dayBookings.forEach(b=>{
+        const len=b.slots_used||BOOKING_SLOTS;
+        if(b.ds===s.ds&&s.slot_idx>=b.start_idx&&s.slot_idx<b.start_idx+len){
+          taken+=b.is_group?Math.min(CAP,Number(b.grupal_spots)||CAP):1;
+        }
+      });
+      if(taken>=CAP){
+        hideLoading();
+        toast('El horario '+fmtSlot(s.slot_idx)+' ya está lleno','err');
+        return;
+      }
+    }
+
     // Build time string
     const startMin=idx*30;
     const endMin=(idx+BOOKING_SLOTS)*30;
@@ -4846,17 +4898,6 @@ async function adminCancelBookingSb(bid){
   }
 }
 
-function admDelFromSlot(ds,idx,userId){
-  const day=getDaySlots(ds);
-  // Remove from all 3 slots of this booking
-  for(let i=0;i<BOOKING_SLOTS;i++){const si=idx+i;if(day[si])day[si]=day[si].filter(b=>b.userId!==userId);}
-  // Restore credit
-  const u=users[userId];if(u){const _aP=[...PLANS.individual,...PLANS.grupal],_pp=_aP.find(x=>x.id===u.plan);const _ul=u.credits>=999||(_pp&&_pp.credits>=999);if(!_ul)u.credits++;}
-  // Remove from user's bookings array too
-  if(u&&u.bookings)u.bookings=u.bookings.filter(b=>!(b.ds===ds&&b.startIdx===idx));
-  addAdminNotif('❌ Reserva cancelada (admin): '+(u?u.name:userId)+' · '+fmtDS(ds)+' '+fmtSlot(idx));
-  toast('Reserva cancelada');renderAdmSlots();
-}
 async function admDelWait(wid,ds,idx,wi){
   const key=ds+'_'+idx;
   try{
@@ -5261,8 +5302,6 @@ async function deleteBoardSb(bid){
   toast('Pizarron eliminado','ok');
   renderBoardsAdmin();
 }
-function createBoard(){const name=document.getElementById('nb-name').value.trim(),color=document.getElementById('nb-color').value;if(!name){toast('Escribe un nombre','err');return;}boards.push({id:'b'+Date.now(),name,color,exercises:[],assignedTo:[]});document.getElementById('nb-name').value='';toast('Pizarrón creado','ok');renderBoardsAdmin();}
-function delBoard(id){boards=boards.filter(b=>b.id!==id);toast('Pizarrón eliminado');renderBoardsAdmin();}
 function addEx(bid){
   const b=boards.find(x=>x.id===bid);if(!b)return;
   const name=document.getElementById('en-'+bid).value.trim(),sets=document.getElementById('es-'+bid).value.trim(),reps=document.getElementById('er-'+bid).value.trim(),rest=document.getElementById('ert-'+bid).value.trim(),note=document.getElementById('eno-'+bid).value.trim(),video=document.getElementById('ev-'+bid).value.trim();
