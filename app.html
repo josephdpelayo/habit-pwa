@@ -965,7 +965,7 @@ body.reception-mode{background:#050505}
           <button class="filter-chip" data-filter="vencido" onclick="setUserFilter(this)">🔴 Vencidos</button>
           <button class="filter-chip" data-filter="por-vencer" onclick="setUserFilter(this)">⚠️ Por vencer</button>
           <button class="filter-chip" data-filter="sin-plan" onclick="setUserFilter(this)">⬜ Sin plan</button>
-          <button class="filter-chip" data-filter="prueba" onclick="setUserFilter(this)">🧪 En prueba</button>
+          <button class="filter-chip" data-filter="prueba" onclick="setUserFilter(this)">🎁 Cortesía / prueba</button>
       </div>
       <div style="margin-bottom:8px">
         <select id="user-sort" onchange="renderUsersSb()" style="background:var(--card2);border:1px solid var(--border);color:var(--white);border-radius:4px;padding:6px 10px;font-size:12px;cursor:pointer;width:100%">
@@ -1194,7 +1194,7 @@ body.reception-mode{background:#050505}
 // ── CONFIG & SUPABASE ───────────────────────────────────────
 const SUPABASE_URL='https://pmpjteuqjusbiduevbwq.supabase.co';
 const SUPABASE_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBtcGp0ZXVxanVzYmlkdWV2YndxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc2OTI1NjUsImV4cCI6MjA5MzI2ODU2NX0.XbMzZoo2yqtrD8znLnyo_1zDfrdJAvAPj1lqGOyXnLw';
-const APP_VERSION='20260707-04';
+const APP_VERSION='20260707-05';
 const PUBLIC_APP_URL='https://habittraininghub.app/app.html';
 const PUBLIC_API_ORIGIN='https://www.habittraininghub.app';
 const SHOP_ALLOWED_EMAILS=['josephdpelayo@gmail.com'];
@@ -5769,11 +5769,11 @@ async function renderUsersSb(){
       const expired=u.plan_expiry&&new Date(u.plan_expiry)<new Date();
       const days=daysUntil(u.plan_expiry);
       const active=(u.credits>=999||u.credits>0)&&!expired;
-      if(_userFilter==='activo') return active&&!(days!==null&&days<=7&&days>=0)&&u.plan_id!=='prueba';
+      if(_userFilter==='activo') return active&&!(days!==null&&days<=7&&days>=0)&&u.plan_id!=='prueba'&&!u.plan_is_courtesy;
       if(_userFilter==='vencido') return expired||(u.credits!==undefined&&u.credits!==null&&u.credits<=0&&!u.plan_expiry);
       if(_userFilter==='por-vencer') return days!==null&&days>=0&&days<=7;
       if(_userFilter==='sin-plan') return !u.plan_id&&(!u.credits||u.credits<=0);
-      if(_userFilter==='prueba') return u.plan_id==='prueba';
+      if(_userFilter==='prueba') return u.plan_id==='prueba'||!!u.plan_is_courtesy;
       return true;
     });
     filtered.sort((a,b2)=>{
@@ -5801,9 +5801,9 @@ async function renderUsersSb(){
       const noCredits=!isUnlimited&&(u.credits||0)<=0;
       const lowCredits=!isUnlimited&&(u.credits||0)>0&&(u.credits||0)<=3;
       const expiring=days!==null&&days<=5&&days>=0;
-      const isPrueba=u.plan_id==='prueba';
+      const isPrueba=u.plan_id==='prueba'||!!u.plan_is_courtesy;
       const statusCls=isPrueba?'bg-amber':expired||noCredits?'bg-red':(lowCredits||expiring)?'bg-amber':active?'bg-green':'bg-gray';
-      const statusTxt=isPrueba?'Prueba':expired?'Vencida':noCredits?'Sin visitas':isUnlimited&&active?'Mensual':lowCredits?'Pocas visitas':expiring?'Por vencer':active?'Activo':'Sin plan';
+      const statusTxt=isPrueba?'🎁 Cortesía':expired?'Vencida':noCredits?'Sin visitas':isUnlimited&&active?'Mensual':lowCredits?'Pocas visitas':expiring?'Por vencer':active?'Activo':'Sin plan';
       const div=document.createElement('div');
       div.className='user-row';
       div.style.cssText='flex-direction:column;align-items:flex-start;gap:0;padding:0;overflow:hidden;cursor:pointer';
@@ -5857,10 +5857,10 @@ async function adminOpenUserProfile(uid){
     const plan=allP.find(p=>p.id===u.plan_id);
     const expired=u.plan_expiry&&new Date(u.plan_expiry)<new Date();
     const active=hasActive({credits:u.credits,plan:u.plan_id,planExpiry:u.plan_expiry,planType:u.plan_type})&&!expired;
-    const isPrueba=u.plan_id==='prueba';
+    const isPrueba=u.plan_id==='prueba'||!!u.plan_is_courtesy;
     const isUnlimited=u.credits>=999||(plan&&plan.credits>=999);
     const statusCls=isPrueba?'bg-amber':expired?'bg-red':active?'bg-green':'bg-gray';
-    const statusTxt=isPrueba?'Prueba':expired?'Vencida':isUnlimited&&active?'Mensual':active?'Activo':'Sin plan';
+    const statusTxt=isPrueba?'🎁 Cortesía':expired?'Vencida':isUnlimited&&active?'Mensual':active?'Activo':'Sin plan';
     const planName=plan?plan.name:(isPrueba?'Visita de prueba':(u.credits||0)>0?'Visitas manuales':'Sin plan');
     const today=mazToday();
     const pastBks=(bks||[]).filter(b=>b.ds<today);
@@ -6154,7 +6154,7 @@ async function adminGrantSelectedPlanSb(uid,name){
       await sb.from('admin_notifs').insert({message:'GAIA: '+name+' · '+plan.name+' · +'+plan.credits+' visitas · '+MXN(amount)+' a caja'});
     } else {
       const expiry=mazPlanExpiryIso(plan.days);
-      const{error}=await sb.from('profiles').update({plan_id:plan.id,plan_type:plan.type,credits:plan.credits,plan_expiry:expiry}).eq('id',uid);
+      const{error}=await sb.from('profiles').update({plan_id:plan.id,plan_type:plan.type,credits:plan.credits,plan_expiry:expiry,plan_is_courtesy:method==='courtesy'}).eq('id',uid);
       if(error)throw error;
       await adminLogManualPayment(uid,name,plan,amount,method,note);
       sendPush('user:'+uid,'✅ Membresía activada','Tu membresía '+plan.name+' está activa. ¡A entrenar!',{tag:'membership-active'});
@@ -6452,7 +6452,7 @@ async function adminGrantCourtesySb(uid,name){
     const{data:prof,error}=await sb.from('profiles').select('credits,name,plan_id,plan_type,plan_expiry').eq('id',uid).single();
     if(error)throw error;
     const newCredits=Math.min(999,(prof.credits||0)+qty);
-    const patch={credits:newCredits};
+    const patch={credits:newCredits,plan_is_courtesy:true};
     const expired=prof.plan_expiry&&new Date(prof.plan_expiry)<new Date();
     if(!prof.plan_id||expired){
       patch.plan_id=tipo==='grupal'?'g1':'i1';
@@ -7204,7 +7204,7 @@ async function adminApplyPlanCorrection(paymentId,uid,name){
       if(ue)throw ue;
     }else{
       const expiry=mazPlanExpiryIso(plan.days);
-      const{error}=await sb.from('profiles').update({plan_id:plan.id,plan_type:plan.type,credits:plan.credits,plan_expiry:expiry}).eq('id',uid);
+      const{error}=await sb.from('profiles').update({plan_id:plan.id,plan_type:plan.type,credits:plan.credits,plan_expiry:expiry,plan_is_courtesy:false}).eq('id',uid);
       if(error)throw error;
     }
     const{data:original}=await sb.from('payments').select('notes').eq('id',paymentId).maybeSingle();
