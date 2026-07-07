@@ -1194,7 +1194,7 @@ body.reception-mode{background:#050505}
 // ── CONFIG & SUPABASE ───────────────────────────────────────
 const SUPABASE_URL='https://pmpjteuqjusbiduevbwq.supabase.co';
 const SUPABASE_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBtcGp0ZXVxanVzYmlkdWV2YndxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc2OTI1NjUsImV4cCI6MjA5MzI2ODU2NX0.XbMzZoo2yqtrD8znLnyo_1zDfrdJAvAPj1lqGOyXnLw';
-const APP_VERSION='20260702-16';
+const APP_VERSION='20260707-01';
 const PUBLIC_APP_URL='https://habittraininghub.app/app.html';
 const PUBLIC_API_ORIGIN='https://www.habittraininghub.app';
 const SHOP_ALLOWED_EMAILS=['josephdpelayo@gmail.com'];
@@ -7074,8 +7074,7 @@ function renderFinanzasView(){
     +'<div class="met"><div class="met-l">Comisión Stripe</div><div class="met-v" style="color:var(--red)">-'+MXN(feeTotal)+'</div></div>'
     +'<div class="met"><div class="met-l">Stripe / TDC</div><div class="met-v" style="color:var(--bl)">'+MXN(sums.stripe)+'</div></div>'
     +'<div class="met"><div class="met-l">GAIA</div><div class="met-v" style="color:var(--purple)">'+MXN(sums.gaia||0)+'</div></div>'
-    +'<div class="met"><div class="met-l">Efectivo / transferencia</div><div class="met-v" style="color:var(--amber)">'+MXN(sums.cash)+'</div></div>'
-    +'<div class="met"><div class="met-l">Cortesias / ajustes (no es dinero real)</div><div class="met-v">'+MXN((sums.courtesy||0)+(sums.adjustment||0))+'</div></div>';
+    +'<div class="met"><div class="met-l">Efectivo / transferencia</div><div class="met-v" style="color:var(--amber)">'+MXN(sums.cash)+'</div></div>';
   list.appendChild(summary);
 
   const recent=document.createElement('p');
