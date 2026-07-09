@@ -6,12 +6,12 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="HABIT">
 <meta name="application-name" content="HABIT">
-<link rel="manifest" href="/manifest.json?v=20260518-07">
-<link rel="apple-touch-icon" sizes="120x120" href="/icons/icon-120.png?v=20260518-07">
-<link rel="apple-touch-icon" sizes="152x152" href="/icons/icon-152.png?v=20260518-07">
-<link rel="apple-touch-icon" sizes="167x167" href="/icons/icon-167.png?v=20260518-07">
-<link rel="apple-touch-icon" sizes="180x180" href="/icons/icon-180.png?v=20260518-07">
-<link rel="icon" type="image/png" sizes="32x32" href="/icons/icon-32.png?v=20260518-07">
+<link rel="manifest" href="/manifest.json?v=20260708-01">
+<link rel="apple-touch-icon" sizes="120x120" href="/icons/icon-120.png?v=20260708-01">
+<link rel="apple-touch-icon" sizes="152x152" href="/icons/icon-152.png?v=20260708-01">
+<link rel="apple-touch-icon" sizes="167x167" href="/icons/icon-167.png?v=20260708-01">
+<link rel="apple-touch-icon" sizes="180x180" href="/icons/icon-180.png?v=20260708-01">
+<link rel="icon" type="image/png" sizes="32x32" href="/icons/icon-32.png?v=20260708-01">
 <title>HABIT</title>
 <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700;800;900&family=Share+Tech+Mono&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
@@ -330,6 +330,31 @@ input,select,button,textarea{font-family:'Montserrat',sans-serif}
 .video-modal-close{border:1px solid var(--border);background:var(--card);color:var(--white);border-radius:6px;padding:10px 12px;font-size:12px;font-weight:800}
 .video-modal-frame{width:min(92vw,430px);height:min(78vh,760px);aspect-ratio:9/16;background:#000;border:1px solid var(--border);overflow:hidden}
 .log-score-btn{display:flex;align-items:center;gap:8px;padding:10px 12px;background:rgba(139,92,246,.1);border-top:1px solid rgba(139,92,246,.2);cursor:pointer;color:var(--purple);font-size:12px;font-weight:600;letter-spacing:.04em;text-transform:uppercase}
+
+/* COACHING */
+.coach-alert{display:flex;align-items:center;justify-content:space-between;gap:10px;background:rgba(245,158,11,.1);border-left:4px solid var(--amber);border-radius:4px;padding:11px 12px;margin-bottom:12px;font-size:13px;color:var(--white)}
+.coach-alert-close{background:none;border:none;color:var(--gray);font-size:16px;cursor:pointer;padding:0 4px;flex-shrink:0}
+.coach-day-strip{display:grid;grid-template-columns:repeat(7,1fr);gap:6px;background:var(--card);border:1px solid var(--border);border-radius:6px;padding:14px 10px;margin-bottom:12px}
+.coach-day{display:flex;flex-direction:column;align-items:center;gap:6px;font-family:'Oswald',sans-serif}
+.coach-day-label{font-size:10px;font-weight:700;letter-spacing:.06em;color:var(--gray);text-transform:uppercase}
+.coach-day-num{width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;color:var(--gray);border:1.5px solid var(--border)}
+.coach-day.scheduled .coach-day-num{border-color:var(--bl);color:var(--bl)}
+.coach-day.done .coach-day-num{background:var(--green);border-color:var(--green);color:#03120d}
+.coach-day.missed .coach-day-num{border-color:var(--red);color:var(--red)}
+.coach-day.today .coach-day-num{box-shadow:0 0 0 2px var(--blue)}
+.coach-day.today .coach-day-label{color:var(--bl)}
+.coach-progress-track{background:var(--card2);border-radius:99px;height:8px;overflow:hidden;margin:8px 0}
+.coach-progress-fill{background:var(--green);height:100%;border-radius:99px;transition:width .3s}
+.coach-task-row{display:flex;align-items:center;gap:10px;background:var(--card);border:1px solid var(--border);border-radius:4px;padding:12px;margin-bottom:8px;cursor:pointer}
+.coach-task-check{width:22px;height:22px;border-radius:50%;border:1.5px solid var(--border);flex-shrink:0;display:flex;align-items:center;justify-content:center;color:transparent;font-size:13px;font-weight:900}
+.coach-task-row.done{opacity:.6}
+.coach-task-row.done .coach-task-check{background:var(--green);border-color:var(--green);color:#03120d}
+.coach-task-row.done .coach-task-title{text-decoration:line-through}
+.coach-task-title{font-size:13px;font-weight:600;color:var(--white);flex:1}
+.coach-task-due{font-size:11px;color:var(--gray)}
+.coach-empty{background:var(--card);border:1px solid var(--border);border-radius:6px;padding:24px 16px;text-align:center;color:var(--gray);font-size:13px}
+.active-session-bar{flex-shrink:0;display:flex;align-items:center;justify-content:space-between;gap:10px;background:var(--blue);color:var(--white);padding:11px 16px;cursor:pointer;font-family:'Oswald',sans-serif;font-weight:700;font-size:13px;letter-spacing:.04em}
+.active-session-bar #asb-elapsed{font-family:'Montserrat',sans-serif;font-variant-numeric:tabular-nums}
 
 /* SCORES */
 .score-board{background:var(--card);border:1px solid var(--border);border-radius:6px;margin-bottom:12px;overflow:hidden}
@@ -775,6 +800,18 @@ body.reception-mode{background:#050505}
     </div>
   </div>
 
+  <!-- COACHING -->
+  <div id="v-coaching" class="view">
+    <div class="scroll-area">
+      <div class="routine-tabs" id="coach-subtabs">
+        <button class="routine-tab active" onclick="coachSubTab('hoy')">Hoy</button>
+        <button class="routine-tab" onclick="coachSubTab('semana')">Semana</button>
+      </div>
+      <div id="coach-hoy-panel"></div>
+      <div id="coach-semana-panel" style="display:none"></div>
+    </div>
+  </div>
+
   <!-- SCORES -->
 
 
@@ -826,6 +863,12 @@ body.reception-mode{background:#050505}
     </div>
   </div>
 
+  <!-- ACTIVE COACHING SESSION BAR -->
+  <div id="active-session-bar" class="active-session-bar" style="display:none" onclick="sv('coaching')">
+    <span id="asb-board-name"></span>
+    <span id="asb-elapsed">00:00</span>
+  </div>
+
   <!-- BOTTOM NAV -->
   <div class="bnav">
     <div class="bnav-inner">
@@ -835,6 +878,8 @@ body.reception-mode{background:#050505}
         <svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>Reservar</button>
       <button class="bnb" onclick="sv('rutinas')">
         <svg viewBox="0 0 24 24"><path d="M6 4h4v16H6zM14 4h4v16h-4zM4 9h2M10 9h4M18 9h2M4 15h2M10 15h4M18 15h2"/></svg>Rutinas</button>
+      <button id="coaching-nav-btn" class="bnb" onclick="sv('coaching')" style="display:none">
+        <svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M3 10h18M8 2v4M16 2v4M8 15l2 2 4-4"/></svg>Coaching</button>
       <button class="bnb" onclick="sv('comunidad')">
         <svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>Comunidad</button>
       <button id="shop-nav-btn" class="bnb" onclick="sv('shop')" style="display:none">
@@ -915,6 +960,7 @@ body.reception-mode{background:#050505}
     <button class="adm-tab" onclick="admTab('slots')">Slots</button>
     <button class="adm-tab" onclick="admTab('users')">Socios</button>
     <button class="adm-tab" onclick="admTab('boards')">Pizarrones</button>
+    <button class="adm-tab" onclick="admTab('coaching')">Coaching</button>
     <button class="adm-tab" onclick="admTab('payments')">Finanzas</button>
     <button class="adm-tab" onclick="admTab('shop')">Tienda</button>
     <button class="adm-tab" onclick="admTab('comunidad')">Comunidad</button>
@@ -1003,6 +1049,16 @@ body.reception-mode{background:#050505}
         <button class="btn" onclick="addBoardSb()">Crear pizarron</button>
       </div>
       <div id="boards-list"></div>
+    </div>
+
+    <!-- COACHING (beta oculta) -->
+    <div id="a-coaching" class="adm-section">
+      <div style="background:var(--card);border:1px solid var(--border);border-radius:6px;padding:1rem;margin-bottom:1rem">
+        <p class="slbl" style="margin-bottom:8px">Clientes beta</p>
+        <input class="adm-search" placeholder="Buscar socio..." oninput="filterCoachingClients(this)">
+        <div id="coaching-client-list"></div>
+      </div>
+      <div id="coaching-detail"></div>
     </div>
 
     <!-- FINANZAS -->
@@ -1206,7 +1262,7 @@ body.reception-mode{background:#050505}
 // ── CONFIG & SUPABASE ───────────────────────────────────────
 const SUPABASE_URL='https://pmpjteuqjusbiduevbwq.supabase.co';
 const SUPABASE_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBtcGp0ZXVxanVzYmlkdWV2YndxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc2OTI1NjUsImV4cCI6MjA5MzI2ODU2NX0.XbMzZoo2yqtrD8znLnyo_1zDfrdJAvAPj1lqGOyXnLw';
-const APP_VERSION='20260707-10';
+const APP_VERSION='20260708-01';
 const PUBLIC_APP_URL='https://habittraininghub.app/app.html';
 const PUBLIC_API_ORIGIN='https://www.habittraininghub.app';
 const SHOP_ALLOWED_EMAILS=['josephdpelayo@gmail.com'];
@@ -1302,6 +1358,9 @@ async function loadUserData(){
   sbProfile=prof;curUser=profileToLocal(prof);
   const shopBtn=document.getElementById('shop-nav-btn');
   if(shopBtn)shopBtn.style.display=(sbUser&&sbUser.email==='josephdpelayo@gmail.com')?'':'none';
+  const coachBtn=document.getElementById('coaching-nav-btn');
+  if(coachBtn)coachBtn.style.display=prof.coaching_beta?'':'none';
+  if(prof.coaching_beta)loadActiveCoachingSessionSb().catch(console.error);
   const[bkRes,payRes]=await Promise.allSettled([
     sb.from('bookings').select('*').eq('user_id',sbUser.id).eq('status','active').gte('ds',addDaysDS(mazToday(),-1)).order('ds').order('start_idx').limit(20),
     sb.from('payments').select('*').eq('user_id',sbUser.id).order('created_at',{ascending:false})
@@ -1322,7 +1381,7 @@ function showMainSb(){
   document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
   const main=document.getElementById('s-main');
   if(main)main.classList.add('active');
-  ['inicio','book','planes','rutinas','comunidad','shop','historial','perfil'].forEach(n=>{
+  ['inicio','book','planes','rutinas','coaching','comunidad','shop','historial','perfil'].forEach(n=>{
     const el=document.getElementById('v-'+n);
     if(el)el.classList.toggle('active',n==='inicio');
   });
@@ -1650,7 +1709,9 @@ let slots30={};
 let waitlists={}; // waitlists[ds+'_'+slotIdx] = [{userId,name,...}]
 let payments=[], boards=[], scores={}, posts=[], accessLog=[], adminNotifs=[];
 let curUser=null, curDate=dateObjFromDS(mazToday()), selStartIdx=null, selShort=false, selPlan=null, selPT='individual', selectedRoutineBoardId=null;
-let accInt=null, accessDataInt=null, notifChannel=null, userNotifInt=null, receptionClockInt=null, receptionDataInt=null, userNotifBootstrapped=false, userNotifSeen=new Set(), notifs=[], expandedVideos={}, logScoreCtx=null, expandedUsers=new Set();
+let accInt=null, accessDataInt=null, notifChannel=null, userNotifInt=null, receptionClockInt=null, receptionDataInt=null, userNotifBootstrapped=false, userNotifSeen=new Set(), notifs=[], expandedVideos={}, logScoreCtx=null, expandedUsers=new Set(), expandedCoachVideos={};
+let coachWeekStart=null, coachSchedule=[], coachTasks=[], coachBoardsById={}, coachActiveSubTab='hoy', activeCoachingSession=null, coachSessionTickInt=null;
+let coachingAdminClients=[], selectedCoachClientId=null, coachAdminWeekStart=null, coachAdminSchedule=[], coachAdminTasks=[];
 let receptionSessions=[], receptionLastSync=null, receptionLoading=false;
 let guestFavorites=[], guestSelected=new Set(), guestSavedActive=new Set(), guestOriginalFavoriteIds=new Set(), guestDeletedIds=new Set(), guestSearchResults=[], guestActiveBookingId=null, guestSearchTimer=null, guestDirty=false, guestCollapsed=true, guestQuery='';
 let shopProducts=[...DEFAULT_SHOP_PRODUCTS], shopCart=loadShopCart(), shopDraftQty={}, shopSelectedVariants={}, shopDelivery='pickup', shopView='catalog', adminProductFormOpen=false, adminEditingProductId=null;
@@ -2721,7 +2782,7 @@ async function loadReceptionSessions(){
 }
 
 // ── NAVIGATION ──
-const ALL_VIEWS=['inicio','book','planes','rutinas','comunidad','shop','historial','perfil'];
+const ALL_VIEWS=['inicio','book','planes','rutinas','coaching','comunidad','shop','historial','perfil'];
 const MEMBER_LOCKED_VIEWS=['book','rutinas','comunidad'];
 function canUseMemberViews(){
   if(!curUser)return false;
@@ -2744,8 +2805,12 @@ function sv(v){
     toast('Tienda disponible solo para josephdpelayo@gmail.com','warn');
     v='inicio';
   }
+  if(v==='coaching'&&!canAccessCoaching()){
+    toast('Coaching disponible solo para socios beta','warn');
+    v='inicio';
+  }
   document.querySelectorAll('.bnb').forEach((b,i)=>{
-    const name=['inicio','book','rutinas','comunidad','shop'][i];
+    const name=['inicio','book','rutinas','coaching','comunidad','shop'][i];
     b.classList.toggle('active',name===v);
     b.classList.toggle('locked',MEMBER_LOCKED_VIEWS.includes(name)&&!canUseMemberViews());
   });
@@ -2756,6 +2821,7 @@ function sv(v){
   if(v==='book'){const _ds=dk(curDate);loadSlotOccupancyFromSb(_ds).then(()=>renderBook().catch(console.error));}
   if(v==='planes')renderPlans();
   if(v==='rutinas'){renderRutinas().catch(console.error);}
+  if(v==='coaching'){renderCoachingSb().catch(console.error);}
   if(v==='comunidad'){renderFeedSb().catch(console.error);}
   if(v==='shop'){renderShop('shop-content',false);loadShopProducts().then(()=>renderShop('shop-content',false)).catch(()=>{});handleShopReturn();}
   if(v==='historial'){renderHistorial().catch(console.error);}
@@ -2766,13 +2832,14 @@ function admTab(t){
   if(t!=='users'){expandedUsers=new Set();}
   if(t!=='boards'){expandedBoards=new Set();editingBoards=new Set();addingExBoards=new Set();assigningBoards=new Set();}
   document.querySelectorAll('.adm-tab').forEach((b,i)=>b.classList.toggle('active',
-    ['dash','slots','users','boards','payments','shop','comunidad','notifs','reports','gaia'][i]===t));
+    ['dash','slots','users','boards','coaching','payments','shop','comunidad','notifs','reports','gaia'][i]===t));
   document.querySelectorAll('.adm-section').forEach(el=>el.classList.remove('active'));
   const el=document.getElementById('a-'+t);if(el)el.classList.add('active');
   if(t==='dash')renderDashboard();
   if(t==='slots')renderAdmSlots();
   if(t==='users')renderUsersSb();
   if(t==='boards')renderBoardsAdmin();
+  if(t==='coaching')renderCoachingAdminSb();
   if(t==='payments')renderPaymentsSb();
   if(t==='shop')renderAdminShopOrders();
   if(t==='comunidad')renderAdminFeed();
@@ -3517,6 +3584,9 @@ function currentEmail(){
 }
 function canAccessShop(){
   return SHOP_ALLOWED_EMAILS.includes(currentEmail());
+}
+function canAccessCoaching(){
+  return !!(sbProfile&&sbProfile.coaching_beta);
 }
 function showShopAccessGate(isLoggedIn){
   stopReception();
@@ -4266,6 +4336,7 @@ async function renderHistorial(){
 
 // ── RUTINAS & BOARDS ─────────────────────────────────────────
 function toggleVideo(k){expandedVideos[k]=!expandedVideos[k];renderRutinas();}
+function toggleCoachVideo(k){expandedCoachVideos[k]=!expandedCoachVideos[k];renderCoachHoyPanel();}
 async function adminToggleInstructor(uid,current){
   const newVal=!current;
   try{
@@ -4341,6 +4412,32 @@ async function submitScore(){
   scores[k].entries.sort((a,b)=>b.weight-a.weight);
   logScoreCtx=null;hideLoading();toast('PR guardado 💪','ok');renderRutinas();
 }
+function renderExerciseListHtml(exercises,keyPrefix,expandedMap,toggleFnName){
+  if(!exercises.length)return'<div class="empty">Sin ejercicios en esta rutina.</div>';
+  return exercises.map((ex,i)=>{
+    const videos=getExerciseVideos(ex);
+    const gKey=keyPrefix+'_'+i+'_group';
+    const groupOpen=!!expandedMap[gKey];
+    return '<div class="exercise-detail">'
+      +'<div class="exercise-detail-head">'
+      +'<div style="display:flex;align-items:flex-start;gap:10px">'
+      +'<div class="ex-num">'+(i+1)+'</div>'
+      +'<div class="ex-body"><div class="ex-name">'+esc(ex.name)+'</div>'
+      +'<div class="ex-detail">'+[ex.sets?esc(ex.sets)+' series':null,ex.reps?esc(ex.reps)+' reps':null,ex.rest?esc(ex.rest)+' descanso':null].filter(Boolean).join(' · ')+'</div>'
+      +(ex.note||ex.notes||ex.description?'<div class="ex-note">'+esc(ex.note||ex.notes||ex.description)+'</div>':'')
+      +'</div>'
+      +(videos.length?'<button class="btn-sm" style="padding:0 10px;min-width:36px;height:34px;display:flex;align-items:center;justify-content:center;background:rgba(16,185,129,.15);border:1px solid rgba(16,185,129,.4);color:#10b981;border-radius:4px" onclick="'+toggleFnName+'(&quot;'+gKey+'&quot;)" aria-label="Ver videos">'+(groupOpen?'<svg width="14" height="14" viewBox="0 0 14 14" fill="currentColor"><rect x="2" y="1" width="3.5" height="12" rx="1"/><rect x="8.5" y="1" width="3.5" height="12" rx="1"/></svg>':'<svg width="14" height="14" viewBox="0 0 14 14" fill="currentColor"><polygon points="2,1 13,7 2,13"/></svg>')+'</button>':'')
+      +'</div>'
+      +'</div>'
+      +(groupOpen?videos.map((vid,vi)=>{
+        const vKey=keyPrefix+'_'+i+'_'+vi;
+        const videoLabel=vid.title||('Video '+(vi+1));
+        return '<div class="ex-video-btn" onclick="'+toggleFnName+'(&quot;'+vKey+'&quot;)"><span class="play-icon"><span class="play-tri"></span></span><span class="ex-video-title">'+esc(videoLabel)+'</span>'+(expandedMap[vKey]?'<button class="ex-video-min" onclick="event.stopPropagation();'+toggleFnName+'(&quot;'+vKey+'&quot;)" aria-label="Minimizar video">−</button>':'')+'</div>'
+          +(expandedMap[vKey]?getVideoHtml(vid.url):'');
+      }).join(''):'')
+      +'</div>';
+  }).join('');
+}
 async function renderRutinas(){
   const el=document.getElementById('rut-content');
   if(!el)return;
@@ -4363,29 +4460,7 @@ async function renderRutinas(){
     const selected=myBoards.find(b=>b.id===selectedRoutineBoardId)||myBoards[0];
     const tabs=myBoards.map(b=>'<button class="routine-tab '+(b.id===selected.id?'active':'')+'" onclick="selectRoutineBoard(&quot;'+esc(b.id)+'&quot;)">'+esc(b.name)+'</button>').join('');
     const exercises=selected.exercises||[];
-    const exHtml=exercises.length?exercises.map((ex,i)=>{
-      const videos=getExerciseVideos(ex);
-      const gKey=selected.id+'_'+i+'_group';
-      const groupOpen=!!expandedVideos[gKey];
-      return '<div class="exercise-detail">'
-        +'<div class="exercise-detail-head">'
-        +'<div style="display:flex;align-items:flex-start;gap:10px">'
-        +'<div class="ex-num">'+(i+1)+'</div>'
-        +'<div class="ex-body"><div class="ex-name">'+esc(ex.name)+'</div>'
-        +'<div class="ex-detail">'+[ex.sets?esc(ex.sets)+' series':null,ex.reps?esc(ex.reps)+' reps':null,ex.rest?esc(ex.rest)+' descanso':null].filter(Boolean).join(' · ')+'</div>'
-        +(ex.note||ex.notes||ex.description?'<div class="ex-note">'+esc(ex.note||ex.notes||ex.description)+'</div>':'')
-        +'</div>'
-        +(videos.length?'<button class="btn-sm" style="padding:0 10px;min-width:36px;height:34px;display:flex;align-items:center;justify-content:center;background:rgba(16,185,129,.15);border:1px solid rgba(16,185,129,.4);color:#10b981;border-radius:4px" onclick="toggleVideo(&quot;'+gKey+'&quot;)" aria-label="Ver videos">'+(groupOpen?'<svg width="14" height="14" viewBox="0 0 14 14" fill="currentColor"><rect x="2" y="1" width="3.5" height="12" rx="1"/><rect x="8.5" y="1" width="3.5" height="12" rx="1"/></svg>':'<svg width="14" height="14" viewBox="0 0 14 14" fill="currentColor"><polygon points="2,1 13,7 2,13"/></svg>')+'</button>':'')
-        +'</div>'
-        +'</div>'
-        +(groupOpen?videos.map((vid,vi)=>{
-          const vKey=selected.id+'_'+i+'_'+vi;
-          const videoLabel=vid.title||('Video '+(vi+1));
-          return '<div class="ex-video-btn" onclick="toggleVideo(&quot;'+vKey+'&quot;)"><span class="play-icon"><span class="play-tri"></span></span><span class="ex-video-title">'+esc(videoLabel)+'</span>'+(expandedVideos[vKey]?'<button class="ex-video-min" onclick="event.stopPropagation();toggleVideo(&quot;'+vKey+'&quot;)" aria-label="Minimizar video">−</button>':'')+'</div>'
-            +(expandedVideos[vKey]?getVideoHtml(vid.url):'');
-        }).join(''):'')
-        +'</div>';
-    }).join(''):'<div class="empty">Sin ejercicios en esta rutina.</div>';
+    const exHtml=renderExerciseListHtml(exercises,selected.id,expandedVideos,'toggleVideo');
     const waHelpLink='https://wa.me/526623562816?text='+encodeURIComponent('Hola HABIT 👋 Tengo una duda sobre mi rutina "'+selected.name+'"');
     el.innerHTML='<div class="routine-tabs">'+tabs+'</div>'
       +'<a href="'+waHelpLink+'" target="_blank" rel="noopener" style="display:flex;align-items:center;justify-content:center;gap:8px;background:#25d366;color:#04170d;font-weight:800;font-size:13px;padding:11px;border-radius:8px;text-decoration:none;margin-bottom:12px">'
@@ -4396,6 +4471,177 @@ async function renderRutinas(){
     el.innerHTML='<div class="empty">Error cargando rutinas: '+e.message+'</div>';
     console.error('renderRutinas:',e);
   }
+}
+
+// ── COACHING (beta oculta) ──────────────────────────────────
+function mazWeekStart(ds){
+  const dow=dateObjFromDS(ds).getUTCDay(); // 0=Dom..6=Sab
+  const offset=(dow+6)%7; // dias desde el lunes
+  return addDaysDS(ds,-offset);
+}
+async function renderCoachingSb(){
+  if(!sbUser)return;
+  coachWeekStart=mazWeekStart(mazToday());
+  const weekEnd=addDaysDS(coachWeekStart,6);
+  try{
+    const[schRes,taskRes]=await Promise.allSettled([
+      sb.from('coaching_schedule').select('*').eq('user_id',sbUser.id).gte('ds',coachWeekStart).lte('ds',weekEnd).order('ds'),
+      sb.from('coaching_tasks').select('*').eq('user_id',sbUser.id).or('is_done.eq.false,completed_at.gte.'+mazLocalDateTimeIso(coachWeekStart,0,0,0)).order('due_date',{ascending:true,nullsFirst:false})
+    ]);
+    coachSchedule=schRes.status==='fulfilled'?(schRes.value.data||[]):[];
+    coachTasks=taskRes.status==='fulfilled'?(taskRes.value.data||[]):[];
+    const boardIds=[...new Set(coachSchedule.map(r=>r.board_id).filter(Boolean))];
+    coachBoardsById={};
+    if(boardIds.length){
+      const{data:brds}=await sb.from('boards').select('id,exercises').in('id',boardIds);
+      (brds||[]).forEach(b=>{coachBoardsById[b.id]=b;});
+    }
+  }catch(e){
+    console.error('renderCoachingSb:',e);
+    coachSchedule=[];coachTasks=[];coachBoardsById={};
+  }
+  coachSubTab(coachActiveSubTab||'hoy');
+}
+function coachSubTab(t){
+  coachActiveSubTab=t;
+  document.querySelectorAll('#coach-subtabs .routine-tab').forEach((b,i)=>b.classList.toggle('active',['hoy','semana'][i]===t));
+  const hoyEl=document.getElementById('coach-hoy-panel'),semEl=document.getElementById('coach-semana-panel');
+  if(hoyEl)hoyEl.style.display=t==='hoy'?'':'none';
+  if(semEl)semEl.style.display=t==='semana'?'':'none';
+  if(t==='hoy')renderCoachHoyPanel();
+  if(t==='semana')renderCoachSemanaPanel();
+}
+function coachRelevantTasks(){
+  const weekEnd=addDaysDS(coachWeekStart,6);
+  return coachTasks.filter(t=>!t.due_date||(t.due_date>=coachWeekStart&&t.due_date<=weekEnd));
+}
+function renderCoachHoyPanel(){
+  const el=document.getElementById('coach-hoy-panel');
+  if(!el)return;
+  const today=mazToday();
+  const todayRow=coachSchedule.find(r=>r.ds===today);
+  const missedRows=coachSchedule.filter(r=>r.ds<today&&!r.started_at&&r.status!=='done');
+  let html='';
+  if(missedRows.length){
+    const label=missedRows.length===1?('el entreno de '+fmtDS(missedRows[0].ds)):(missedRows.length+' entrenos esta semana');
+    html+='<div class="coach-alert"><span>👋 Te perdiste '+esc(label)+'</span><button class="coach-alert-close" onclick="this.parentElement.remove()">×</button></div>';
+  }
+  if(!todayRow){
+    html+='<div class="coach-empty">No tienes rutina programada para hoy.<br>Descansa o pide a tu coach que te programe una.</div>';
+  }else if(todayRow.status==='done'){
+    html+='<div class="board-card"><div class="board-hdr"><div style="display:flex;align-items:center;gap:8px;min-width:0"><div style="width:10px;height:10px;border-radius:50%;background:'+esc(todayRow.board_color||'#2563eb')+'"></div><span class="board-title">'+esc(todayRow.board_name)+'</span></div><span class="badge bg-green">Completado ✓</span></div></div>';
+  }else{
+    const board=coachBoardsById[todayRow.board_id];
+    const exercises=(board&&board.exercises)||[];
+    const exHtml=renderExerciseListHtml(exercises,'coach_'+todayRow.id,expandedCoachVideos,'toggleCoachVideo');
+    const isActive=todayRow.status==='in_progress';
+    html+='<div class="board-card"><div class="board-hdr"><div style="display:flex;align-items:center;gap:8px;min-width:0"><div style="width:10px;height:10px;border-radius:50%;background:'+esc(todayRow.board_color||'#2563eb')+'"></div><span class="board-title">'+esc(todayRow.board_name)+'</span></div><span class="badge bg-blue">'+exercises.length+' ejercicios</span></div><div class="board-body">'
+      +'<button class="btn" style="margin-bottom:12px" onclick="'+(isActive?'finishCoachingSessionSb()':'startCoachingSessionSb(&quot;'+todayRow.id+'&quot;)')+'">'+(isActive?'Finalizar entreno':'Iniciar entreno')+'</button>'
+      +exHtml+'</div></div>';
+  }
+  const relevantTasks=coachRelevantTasks();
+  html+='<div class="board-card"><div class="board-hdr"><span class="board-title">Tareas</span></div><div class="board-body">'
+    +(relevantTasks.length?relevantTasks.map(t=>'<div class="coach-task-row'+(t.is_done?' done':'')+'" onclick="toggleTaskSb(&quot;'+t.id+'&quot;)"><div class="coach-task-check">'+(t.is_done?'✓':'')+'</div><div class="coach-task-title">'+esc(t.title)+'</div>'+(t.due_date?'<div class="coach-task-due">'+fmtDS(t.due_date)+'</div>':'')+'</div>').join(''):'<div class="empty">Sin tareas pendientes.</div>')
+    +'</div></div>';
+  el.innerHTML=html;
+}
+function renderCoachSemanaPanel(){
+  const el=document.getElementById('coach-semana-panel');
+  if(!el||!coachWeekStart)return;
+  const today=mazToday();
+  const DN_MON=['Lun','Mar','Mié','Jue','Vie','Sáb','Dom'];
+  let scheduledCount=0;
+  let strip='<div class="coach-day-strip">';
+  for(let i=0;i<7;i++){
+    const ds=addDaysDS(coachWeekStart,i);
+    const row=coachSchedule.find(r=>r.ds===ds);
+    let cls='coach-day';
+    if(ds===today)cls+=' today';
+    if(row){
+      scheduledCount++;
+      if(row.status==='done')cls+=' done';
+      else if(ds<today)cls+=' missed';
+      else cls+=' scheduled';
+    }
+    strip+='<div class="'+cls+'"><span class="coach-day-label">'+DN_MON[i]+'</span><span class="coach-day-num">'+parseDS(ds).d+'</span></div>';
+  }
+  strip+='</div>';
+  const summary='<div class="board-card"><div class="board-body" style="text-align:center;font-weight:700">'+(scheduledCount?('¡Tienes '+scheduledCount+' entreno'+(scheduledCount===1?'':'s')+' esta semana!'):'Sin entrenos programados esta semana.')+'</div></div>';
+  const relevantTasks=coachRelevantTasks();
+  const doneCount=relevantTasks.filter(t=>t.is_done).length;
+  const pct=relevantTasks.length?Math.round(doneCount/relevantTasks.length*100):0;
+  const tasksHtml='<div class="board-card"><div class="board-hdr"><span class="board-title">Tareas (esta semana)</span></div><div class="board-body">'
+    +'<div>Completaste '+doneCount+'/'+relevantTasks.length+' tareas</div>'
+    +'<div class="coach-progress-track"><div class="coach-progress-fill" style="width:'+pct+'%"></div></div>'
+    +'</div></div>';
+  el.innerHTML=strip+summary+tasksHtml;
+}
+async function startCoachingSessionSb(scheduleId){
+  try{
+    const{data,error}=await sb.from('coaching_schedule').update({status:'in_progress',started_at:new Date().toISOString()}).eq('id',scheduleId).select().single();
+    if(error)throw error;
+    const idx=coachSchedule.findIndex(r=>r.id===data.id);
+    if(idx>-1)coachSchedule[idx]=data;
+    activeCoachingSession=data;
+    showActiveSessionBar();
+    renderCoachHoyPanel();
+  }catch(e){toast('Error al iniciar entreno: '+e.message,'err');}
+}
+async function finishCoachingSessionSb(){
+  if(!activeCoachingSession)return;
+  try{
+    const startedMs=new Date(activeCoachingSession.started_at).getTime();
+    const durationSec=Math.max(0,Math.round((Date.now()-startedMs)/1000));
+    const{data,error}=await sb.from('coaching_schedule').update({status:'done',completed_at:new Date().toISOString(),duration_sec:durationSec}).eq('id',activeCoachingSession.id).select().single();
+    if(error)throw error;
+    const idx=coachSchedule.findIndex(r=>r.id===data.id);
+    if(idx>-1)coachSchedule[idx]=data;
+    activeCoachingSession=null;
+    hideActiveSessionBar();
+    renderCoachHoyPanel();
+    toast('¡Entreno completado!','ok');
+  }catch(e){toast('Error al finalizar entreno: '+e.message,'err');}
+}
+async function loadActiveCoachingSessionSb(){
+  if(!sbUser)return;
+  try{
+    const{data}=await sb.from('coaching_schedule').select('*').eq('user_id',sbUser.id).eq('status','in_progress').limit(1).maybeSingle();
+    if(data){activeCoachingSession=data;showActiveSessionBar();}
+  }catch(e){console.error('loadActiveCoachingSessionSb:',e);}
+}
+function showActiveSessionBar(){
+  const bar=document.getElementById('active-session-bar');
+  if(!bar||!activeCoachingSession)return;
+  const nameEl=document.getElementById('asb-board-name');
+  if(nameEl)nameEl.textContent=activeCoachingSession.board_name;
+  bar.style.display='flex';
+  if(coachSessionTickInt)clearInterval(coachSessionTickInt);
+  tickActiveSessionBar();
+  coachSessionTickInt=setInterval(tickActiveSessionBar,1000);
+}
+function hideActiveSessionBar(){
+  const bar=document.getElementById('active-session-bar');
+  if(bar)bar.style.display='none';
+  if(coachSessionTickInt){clearInterval(coachSessionTickInt);coachSessionTickInt=null;}
+}
+function tickActiveSessionBar(){
+  if(!activeCoachingSession)return;
+  const el=document.getElementById('asb-elapsed');
+  if(!el)return;
+  const sec=Math.max(0,Math.floor((Date.now()-new Date(activeCoachingSession.started_at).getTime())/1000));
+  el.textContent=pad(Math.floor(sec/60))+':'+pad(sec%60);
+}
+async function toggleTaskSb(id){
+  const t=coachTasks.find(x=>x.id===id);
+  if(!t)return;
+  const newDone=!t.is_done;
+  try{
+    const{data,error}=await sb.from('coaching_tasks').update({is_done:newDone,completed_at:newDone?new Date().toISOString():null}).eq('id',id).select().single();
+    if(error)throw error;
+    const idx=coachTasks.findIndex(x=>x.id===id);
+    if(idx>-1)coachTasks[idx]=data;
+    if(coachActiveSubTab==='semana')renderCoachSemanaPanel();else renderCoachHoyPanel();
+  }catch(e){toast('Error al actualizar tarea: '+e.message,'err');}
 }
 
 // ── SCORES ──
@@ -7413,6 +7659,159 @@ async function loadBoardsSb(){
     const{data}=await sb.from('boards').select('*,board_assignments(user_id)');
     if(data) boards=data.map(b=>({...b,assignedTo:(b.board_assignments||[]).map(a=>a.user_id)}));
   }catch(e){console.error('loadBoardsSb:',e);}
+}
+
+// ── COACHING ADMIN (beta oculta) ─────────────────────────────
+async function renderCoachingAdminSb(){
+  const{data:allU}=await sb.from('profiles').select('id,name,coaching_beta').neq('role','admin').order('name').limit(1000);
+  coachingAdminClients=allU||[];
+  renderCoachingClientList();
+  if(!selectedCoachClientId){
+    const el=document.getElementById('coaching-detail');
+    if(el)el.innerHTML='<div class="empty">Selecciona un socio para programar su semana.</div>';
+  }
+}
+function renderCoachingClientList(filter){
+  const el=document.getElementById('coaching-client-list');
+  if(!el)return;
+  const f=(filter||'').toLowerCase();
+  const list=coachingAdminClients.filter(u=>!f||(u.name||'').toLowerCase().includes(f));
+  el.innerHTML=list.length?list.map(u=>
+    '<label style="cursor:pointer;display:flex;align-items:center;gap:10px;padding:9px 4px;border-bottom:1px solid var(--border)'+(u.id===selectedCoachClientId?';background:rgba(37,99,235,.08)':'')+'">'
+    +'<div style="width:32px;height:32px;border-radius:50%;background:var(--bl);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;color:#fff;flex-shrink:0" onclick="selectCoachingClient(&quot;'+esc(u.id)+'&quot;)">'+inits(u.name)+'</div>'
+    +'<span style="flex:1;font-size:13px;font-weight:600" onclick="selectCoachingClient(&quot;'+esc(u.id)+'&quot;)">'+esc(u.name||'Socio')+'</span>'
+    +'<input type="checkbox" data-uid="'+esc(u.id)+'" '+(u.coaching_beta?'checked':'')+' onchange="toggleCoachingBetaSb(this)" style="width:18px;height:18px;accent-color:var(--green)" title="Activar Coaching beta">'
+    +'</label>'
+  ).join(''):'<div style="padding:8px;font-size:12px;color:var(--gray)">Sin socios registrados</div>';
+}
+function filterCoachingClients(input){renderCoachingClientList(input.value);}
+async function toggleCoachingBetaSb(cb){
+  const uid=cb.dataset.uid;
+  const prevChecked=!cb.checked;
+  try{
+    const{error}=await sb.from('profiles').update({coaching_beta:cb.checked}).eq('id',uid);
+    if(error)throw error;
+    const u=coachingAdminClients.find(x=>x.id===uid);
+    if(u)u.coaching_beta=cb.checked;
+    toast(cb.checked?'Coaching activado':'Coaching desactivado','ok');
+  }catch(e){cb.checked=prevChecked;toast('Error: '+e.message,'err');}
+}
+async function selectCoachingClient(uid){
+  selectedCoachClientId=uid;
+  if(!coachAdminWeekStart)coachAdminWeekStart=mazWeekStart(mazToday());
+  renderCoachingClientList(document.querySelector('#a-coaching .adm-search')?.value);
+  await loadBoardsSb();
+  await loadCoachingWeekAdminSb();
+  renderCoachingDetail();
+}
+function coachAdminWeekShift(days){
+  coachAdminWeekStart=addDaysDS(coachAdminWeekStart,days);
+  loadCoachingWeekAdminSb().then(renderCoachingDetail);
+}
+async function loadCoachingWeekAdminSb(){
+  if(!selectedCoachClientId||!coachAdminWeekStart)return;
+  const weekEnd=addDaysDS(coachAdminWeekStart,6);
+  const[schRes,taskRes]=await Promise.allSettled([
+    sb.from('coaching_schedule').select('*').eq('user_id',selectedCoachClientId).gte('ds',coachAdminWeekStart).lte('ds',weekEnd),
+    sb.from('coaching_tasks').select('*').eq('user_id',selectedCoachClientId).order('due_date',{ascending:true,nullsFirst:false}).order('created_at',{ascending:false}).limit(50)
+  ]);
+  coachAdminSchedule=schRes.status==='fulfilled'?(schRes.value.data||[]):[];
+  coachAdminTasks=taskRes.status==='fulfilled'?(taskRes.value.data||[]):[];
+}
+function renderCoachingDetail(){
+  const el=document.getElementById('coaching-detail');
+  if(!el)return;
+  const client=coachingAdminClients.find(u=>u.id===selectedCoachClientId);
+  if(!client){el.innerHTML='';return;}
+  const weekEnd=addDaysDS(coachAdminWeekStart,6);
+  const DN_MON=['Lun','Mar','Mié','Jue','Vie','Sáb','Dom'];
+  let dayRows='';
+  for(let i=0;i<7;i++){
+    const ds=addDaysDS(coachAdminWeekStart,i);
+    const row=coachAdminSchedule.find(r=>r.ds===ds);
+    const opts='<option value="">— Descanso —</option>'+boards.map(b=>'<option value="'+esc(b.id)+'" '+(row&&row.board_id===b.id?'selected':'')+'>'+esc(b.name)+'</option>').join('');
+    dayRows+='<div style="display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--border)">'
+      +'<div style="width:64px;font-size:12px;font-weight:700;color:var(--gray)">'+DN_MON[i]+' '+parseDS(ds).d+'</div>'
+      +'<select data-coach-day="'+ds+'" style="flex:1;background:var(--card2);border:1px solid var(--border);border-radius:4px;padding:9px;font-size:13px;color:var(--white)">'+opts+'</select>'
+      +'</div>';
+  }
+  const tasksHtml=coachAdminTasks.length?coachAdminTasks.map(t=>
+    '<div style="display:flex;align-items:center;gap:8px;padding:8px 0;border-bottom:1px solid var(--border)">'
+    +'<span style="flex:1;font-size:13px;'+(t.is_done?'color:var(--gray);text-decoration:line-through':'color:var(--white)')+'">'+esc(t.title)+(t.due_date?' · '+fmtDS(t.due_date):'')+'</span>'
+    +'<button class="btn-sm bred" style="padding:4px 8px" onclick="deleteCoachingTaskSb(&quot;'+t.id+'&quot;)">Eliminar</button>'
+    +'</div>'
+  ).join(''):'<div class="empty">Sin tareas.</div>';
+  el.innerHTML=
+    '<div style="background:var(--card);border:1px solid var(--border);border-radius:6px;padding:1rem;margin-bottom:1rem">'
+    +'<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">'
+    +'<button class="btn-sm" onclick="coachAdminWeekShift(-7)">‹</button>'
+    +'<span style="font-size:13px;font-weight:700">'+esc(client.name)+' · '+fmtDS(coachAdminWeekStart)+' – '+fmtDS(weekEnd)+'</span>'
+    +'<button class="btn-sm" onclick="coachAdminWeekShift(7)">›</button>'
+    +'</div>'
+    +dayRows
+    +'<button class="btn" style="margin-top:12px" onclick="saveCoachingWeekSb()">Guardar semana</button>'
+    +'</div>'
+    +'<div style="background:var(--card);border:1px solid var(--border);border-radius:6px;padding:1rem">'
+    +'<p class="slbl" style="margin-bottom:8px">Nueva tarea</p>'
+    +'<div class="field"><label>Titulo</label><input type="text" id="coach-task-title-in" placeholder="Ej: Registro de peso"></div>'
+    +'<div class="field"><label>Fecha limite (opcional)</label><input type="date" id="coach-task-due-in"></div>'
+    +'<button class="btn" onclick="addCoachingTaskSb()">Asignar tarea</button>'
+    +'<div style="margin-top:14px">'+tasksHtml+'</div>'
+    +'</div>';
+}
+async function saveCoachingWeekSb(){
+  if(!selectedCoachClientId)return;
+  const selects=document.querySelectorAll('#coaching-detail select[data-coach-day]');
+  const upserts=[],deletes=[];
+  selects.forEach(sel=>{
+    const ds=sel.dataset.coachDay;
+    const boardId=sel.value||null;
+    const existing=coachAdminSchedule.find(r=>r.ds===ds);
+    if(!boardId){
+      if(existing)deletes.push(existing.id);
+      return;
+    }
+    if(existing&&existing.board_id===boardId)return; // sin cambios
+    const board=boards.find(b=>b.id===boardId);
+    if(!board)return;
+    upserts.push({user_id:selectedCoachClientId,ds,board_id:boardId,board_name:board.name,board_color:board.color||'#2563eb',created_by:sbUser.id});
+  });
+  try{
+    if(deletes.length){const{error}=await sb.from('coaching_schedule').delete().in('id',deletes);if(error)throw error;}
+    if(upserts.length){
+      const{error}=await sb.from('coaching_schedule').upsert(upserts,{onConflict:'user_id,ds'});
+      if(error)throw error;
+      sendPush('user:'+selectedCoachClientId,'🏋️ Nueva rutina asignada','Tu coach programo tu semana de entrenamiento.');
+    }
+    toast('Semana guardada','ok');
+    await loadCoachingWeekAdminSb();
+    renderCoachingDetail();
+  }catch(e){toast('Error al guardar: '+e.message,'err');}
+}
+async function addCoachingTaskSb(){
+  if(!selectedCoachClientId)return;
+  const titleIn=document.getElementById('coach-task-title-in');
+  const dueIn=document.getElementById('coach-task-due-in');
+  const title=(titleIn.value||'').trim();
+  const due=dueIn.value||null;
+  if(!title){toast('Escribe un titulo','err');return;}
+  try{
+    const{error}=await sb.from('coaching_tasks').insert({user_id:selectedCoachClientId,title,due_date:due,created_by:sbUser.id});
+    if(error)throw error;
+    titleIn.value='';dueIn.value='';
+    sendPush('user:'+selectedCoachClientId,'✅ Nueva tarea asignada',title);
+    await loadCoachingWeekAdminSb();
+    renderCoachingDetail();
+    toast('Tarea asignada','ok');
+  }catch(e){toast('Error: '+e.message,'err');}
+}
+async function deleteCoachingTaskSb(id){
+  try{
+    const{error}=await sb.from('coaching_tasks').delete().eq('id',id);
+    if(error)throw error;
+    await loadCoachingWeekAdminSb();
+    renderCoachingDetail();
+  }catch(e){toast('Error: '+e.message,'err');}
 }
 
 // Override renderBoardsAdmin to save on changes
