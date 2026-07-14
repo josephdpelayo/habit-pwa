@@ -6,12 +6,12 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="HABIT">
 <meta name="application-name" content="HABIT">
-<link rel="manifest" href="/manifest.json?v=20260713-01">
-<link rel="apple-touch-icon" sizes="120x120" href="/icons/icon-120.png?v=20260713-01">
-<link rel="apple-touch-icon" sizes="152x152" href="/icons/icon-152.png?v=20260713-01">
-<link rel="apple-touch-icon" sizes="167x167" href="/icons/icon-167.png?v=20260713-01">
-<link rel="apple-touch-icon" sizes="180x180" href="/icons/icon-180.png?v=20260713-01">
-<link rel="icon" type="image/png" sizes="32x32" href="/icons/icon-32.png?v=20260713-01">
+<link rel="manifest" href="/manifest.json?v=20260713-02">
+<link rel="apple-touch-icon" sizes="120x120" href="/icons/icon-120.png?v=20260713-02">
+<link rel="apple-touch-icon" sizes="152x152" href="/icons/icon-152.png?v=20260713-02">
+<link rel="apple-touch-icon" sizes="167x167" href="/icons/icon-167.png?v=20260713-02">
+<link rel="apple-touch-icon" sizes="180x180" href="/icons/icon-180.png?v=20260713-02">
+<link rel="icon" type="image/png" sizes="32x32" href="/icons/icon-32.png?v=20260713-02">
 <title>HABIT</title>
 <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700;800;900&family=Share+Tech+Mono&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
@@ -56,6 +56,14 @@ input,select,button,textarea{font-family:'Montserrat',sans-serif}
 .top-action{width:34px;height:34px;border-radius:4px;border:1px solid var(--border);background:var(--card);color:var(--gray);display:flex;align-items:center;justify-content:center;cursor:pointer;position:relative}
 .top-action.primary{border-color:var(--blue);background:rgba(37,99,235,.12);color:var(--bl)}
 .top-action svg{width:19px;height:19px;stroke:currentColor;fill:none;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round}
+.coach-hub-nav{display:flex;flex-shrink:0;border-bottom:1px solid var(--border);background:var(--dark)}
+.coach-hub-tab{position:relative;flex:1;padding:11px 0 9px;font-size:10px;font-weight:700;text-align:center;cursor:pointer;color:var(--gray);border:none;background:transparent;letter-spacing:.04em;text-transform:uppercase;display:flex;flex-direction:column;align-items:center;gap:4px}
+.coach-hub-tab.active{color:var(--bl)}
+.coach-hub-tab svg{width:20px;height:20px;stroke:currentColor;fill:none;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
+.coach-hub-tab.active svg{stroke:var(--bl)}
+.score-unit-toggle{display:flex;gap:6px;margin-bottom:14px}
+.score-unit-pill,.tu-unit-pill{flex:1;padding:9px 0;border:1px solid var(--border);background:var(--card2);color:var(--gray);border-radius:6px;font-size:12px;font-weight:800;letter-spacing:.06em;cursor:pointer}
+.score-unit-pill.active,.tu-unit-pill.active{border-color:var(--purple);background:rgba(139,92,246,.15);color:var(--purple)}
 .view{display:none;flex-direction:column;flex:1;overflow:hidden}
 .view.active{display:flex}
 .toast-wrap{position:absolute;top:60px;left:1rem;right:1rem;z-index:999;pointer-events:none}
@@ -827,33 +835,53 @@ body.reception-mode{background:#050505}
     </div>
   </div>
 
-  <!-- HOY -->
-  <div id="v-hoy" class="view">
-    <div class="scroll-area">
-      <div id="coach-hoy-panel"></div>
-    </div>
-  </div>
-
-  <!-- COACHING (semana) -->
+  <!-- COACHING HUB -->
   <div id="v-coaching" class="view">
-    <div class="scroll-area">
-      <div id="coach-semana-panel"></div>
+    <div class="coach-hub-nav" id="coach-hub-nav">
+      <button class="coach-hub-tab active" data-tab="hoy" onclick="coachHubTab('hoy',this)">
+        <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>Hoy</button>
+      <button class="coach-hub-tab" data-tab="programa" onclick="coachHubTab('programa',this)">
+        <svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M3 10h18M8 2v4M16 2v4M8 15l2 2 4-4"/></svg>Coaching</button>
+      <button class="coach-hub-tab" data-tab="mensajes" onclick="coachHubTab('mensajes',this)">
+        <span id="coach-hub-mensajes-badge" class="bnb-badge" data-mensajes-nav-count></span>
+        <svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>Mensajes</button>
+      <button class="coach-hub-tab" data-tab="tu" onclick="coachHubTab('tu',this)">
+        <svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21v-1a8 8 0 0116 0v1"/></svg>Tú</button>
     </div>
-  </div>
 
-  <!-- MENSAJES -->
-  <div id="v-mensajes" class="view">
-    <div id="chat-thread" class="chat-thread"></div>
-    <div id="chat-img-preview" class="chat-img-preview" style="display:none"></div>
-    <div id="chat-recording-indicator" class="chat-recording-indicator" style="display:none"></div>
-    <div class="chat-composer">
-      <label class="chat-attach-btn" title="Adjuntar foto">
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--gray)" stroke-width="1.6"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg>
-        <input type="file" id="chat-img-input" accept="image/*" style="display:none" onchange="handleChatImgPick(this)">
-      </label>
-      <textarea id="chat-text-input" class="chat-text-input" placeholder="Escribe un mensaje..." rows="1" oninput="onChatInputChange(this)"></textarea>
-      <button id="chat-mic-btn" class="chat-mic-btn" onclick="toggleVoiceRecording()">🎤</button>
-      <button id="chat-send-btn" class="chat-send-btn" style="display:none" onclick="sendChatMessageSb()">➤</button>
+    <div id="v-coach-hoy" class="view active">
+      <div class="scroll-area"><div id="coach-hoy-panel"></div></div>
+    </div>
+
+    <div id="v-coach-programa" class="view">
+      <div class="scroll-area">
+        <div id="coach-semana-panel"></div>
+        <div class="divider"></div>
+        <p class="slbl">Tus rutinas</p>
+        <div id="coach-rutinas-panel"></div>
+      </div>
+    </div>
+
+    <div id="v-coach-mensajes" class="view">
+      <div id="chat-thread" class="chat-thread"></div>
+      <div id="chat-img-preview" class="chat-img-preview" style="display:none"></div>
+      <div id="chat-recording-indicator" class="chat-recording-indicator" style="display:none"></div>
+      <div class="chat-composer">
+        <label class="chat-attach-btn" title="Adjuntar foto">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--gray)" stroke-width="1.6"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg>
+          <input type="file" id="chat-img-input" accept="image/*" style="display:none" onchange="handleChatImgPick(this)">
+        </label>
+        <textarea id="chat-text-input" class="chat-text-input" placeholder="Escribe un mensaje..." rows="1" oninput="onChatInputChange(this)"></textarea>
+        <button id="chat-mic-btn" class="chat-mic-btn" onclick="toggleVoiceRecording()">🎤</button>
+        <button id="chat-send-btn" class="chat-send-btn" style="display:none" onclick="sendChatMessageSb()">➤</button>
+      </div>
+    </div>
+
+    <div id="v-coach-tu" class="view">
+      <div class="scroll-area">
+        <p class="slbl">Tus ejercicios</p>
+        <div id="coach-tu-panel"></div>
+      </div>
     </div>
   </div>
 
@@ -909,7 +937,7 @@ body.reception-mode{background:#050505}
   </div>
 
   <!-- ACTIVE COACHING SESSION BAR -->
-  <div id="active-session-bar" class="active-session-bar" style="display:none" onclick="sv('hoy')">
+  <div id="active-session-bar" class="active-session-bar" style="display:none" onclick="sv('coaching')">
     <span id="asb-board-name"></span>
     <span id="asb-elapsed">00:00</span>
   </div>
@@ -921,15 +949,11 @@ body.reception-mode{background:#050505}
         <img src="/icons/logo-original.png" class="nav-logo-img" style="width:22px;height:22px;object-fit:contain">Inicio</button>
       <button class="bnb" onclick="sv('book')">
         <svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>Reservar</button>
-      <button class="bnb" onclick="sv('rutinas')">
+      <button id="rutinas-nav-btn" class="bnb" onclick="sv('rutinas')">
         <svg viewBox="0 0 24 24"><path d="M6 4h4v16H6zM14 4h4v16h-4zM4 9h2M10 9h4M18 9h2M4 15h2M10 15h4M18 15h2"/></svg>Rutinas</button>
-      <button id="hoy-nav-btn" class="bnb" onclick="sv('hoy')" style="display:none">
-        <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>Hoy</button>
       <button id="coaching-nav-btn" class="bnb" onclick="sv('coaching')" style="display:none">
+        <span id="coaching-nav-badge" class="bnb-badge" data-mensajes-nav-count></span>
         <svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M3 10h18M8 2v4M16 2v4M8 15l2 2 4-4"/></svg>Coaching</button>
-      <button id="mensajes-nav-btn" class="bnb" onclick="sv('mensajes')" style="display:none">
-        <span id="mensajes-nav-badge" class="bnb-badge" data-mensajes-nav-count></span>
-        <svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>Mensajes</button>
       <button class="bnb" onclick="sv('comunidad')">
         <svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>Comunidad</button>
       <button id="shop-nav-btn" class="bnb" onclick="sv('shop')" style="display:none">
@@ -1273,6 +1297,27 @@ body.reception-mode{background:#050505}
   </div>
 </div>
 
+<!-- LOG SCORE MODAL (registro de peso por ejercicio) -->
+<div id="log-score-modal" class="terms-modal" style="display:none">
+  <div class="terms-box">
+    <div class="terms-hdr">
+      <h2 id="log-score-ex-name">Ejercicio</h2>
+      <button class="video-modal-close" onclick="closeLogScoreModal()">Cerrar</button>
+    </div>
+    <div class="terms-body">
+      <div class="score-unit-toggle">
+        <button class="score-unit-pill" data-unit="kg" onclick="setLogScoreUnit('kg')">KG</button>
+        <button class="score-unit-pill" data-unit="lb" onclick="setLogScoreUnit('lb')">LB</button>
+      </div>
+      <div class="field"><label>Peso</label><input type="number" id="score-weight-input" inputmode="decimal" placeholder="Ej: 40" min="0" max="2000" step="0.5"></div>
+      <div class="field"><label>Reps (opcional)</label><input type="text" id="score-reps-input" placeholder="Ej: 8-10"></div>
+    </div>
+    <div class="terms-footer">
+      <button class="btn" onclick="submitScore()">Guardar</button>
+    </div>
+  </div>
+</div>
+
 <!-- INSTALL GUIDE MODAL -->
 <div id="install-guide-modal" class="terms-modal" style="display:none">
   <div class="install-box">
@@ -1325,7 +1370,7 @@ body.reception-mode{background:#050505}
 // ── CONFIG & SUPABASE ───────────────────────────────────────
 const SUPABASE_URL='https://pmpjteuqjusbiduevbwq.supabase.co';
 const SUPABASE_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBtcGp0ZXVxanVzYmlkdWV2YndxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc2OTI1NjUsImV4cCI6MjA5MzI2ODU2NX0.XbMzZoo2yqtrD8znLnyo_1zDfrdJAvAPj1lqGOyXnLw';
-const APP_VERSION='20260713-01';
+const APP_VERSION='20260713-02';
 const PUBLIC_APP_URL='https://habittraininghub.app/app.html';
 const PUBLIC_API_ORIGIN='https://www.habittraininghub.app';
 const SHOP_ALLOWED_EMAILS=['josephdpelayo@gmail.com'];
@@ -1421,12 +1466,10 @@ async function loadUserData(){
   sbProfile=prof;curUser=profileToLocal(prof);
   const shopBtn=document.getElementById('shop-nav-btn');
   if(shopBtn)shopBtn.style.display=(sbUser&&sbUser.email==='josephdpelayo@gmail.com')?'':'none';
-  const hoyBtn=document.getElementById('hoy-nav-btn');
-  if(hoyBtn)hoyBtn.style.display=prof.coaching_beta?'':'none';
+  const rutBtn=document.getElementById('rutinas-nav-btn');
+  if(rutBtn)rutBtn.style.display=prof.coaching_beta?'none':'';
   const coachBtn=document.getElementById('coaching-nav-btn');
   if(coachBtn)coachBtn.style.display=prof.coaching_beta?'':'none';
-  const mensBtn=document.getElementById('mensajes-nav-btn');
-  if(mensBtn)mensBtn.style.display=prof.coaching_beta?'':'none';
   if(prof.coaching_beta){startChatRealtime();}else{stopChatRealtime();}
   if(prof.coaching_beta)loadActiveCoachingSessionSb().catch(console.error);
   const[bkRes,payRes]=await Promise.allSettled([
@@ -1449,7 +1492,7 @@ function showMainSb(){
   document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
   const main=document.getElementById('s-main');
   if(main)main.classList.add('active');
-  ['inicio','book','planes','rutinas','hoy','coaching','mensajes','comunidad','shop','historial','perfil'].forEach(n=>{
+  ['inicio','book','planes','rutinas','coaching','comunidad','shop','historial','perfil'].forEach(n=>{
     const el=document.getElementById('v-'+n);
     if(el)el.classList.toggle('active',n==='inicio');
   });
@@ -2859,7 +2902,7 @@ async function loadReceptionSessions(){
 }
 
 // ── NAVIGATION ──
-const ALL_VIEWS=['inicio','book','planes','rutinas','hoy','coaching','mensajes','comunidad','shop','historial','perfil'];
+const ALL_VIEWS=['inicio','book','planes','rutinas','coaching','comunidad','shop','historial','perfil'];
 const MEMBER_LOCKED_VIEWS=['book','rutinas','comunidad'];
 function canUseMemberViews(){
   if(!curUser)return false;
@@ -2874,6 +2917,7 @@ function updateTopActions(v){
   });
 }
 function sv(v){
+  if(v==='rutinas'&&canAccessCoaching()){v='coaching';coachHubActiveTab='programa';}
   if(MEMBER_LOCKED_VIEWS.includes(v)&&!canUseMemberViews()){
     toast('Activa una membresia vigente para usar esta seccion','warn');
     v='inicio';
@@ -2882,12 +2926,12 @@ function sv(v){
     toast('Tienda disponible solo para josephdpelayo@gmail.com','warn');
     v='inicio';
   }
-  if((v==='hoy'||v==='coaching'||v==='mensajes')&&!canAccessCoaching()){
+  if(v==='coaching'&&!canAccessCoaching()){
     toast('Coaching disponible solo para socios beta','warn');
     v='inicio';
   }
   document.querySelectorAll('.bnb').forEach((b,i)=>{
-    const name=['inicio','book','rutinas','hoy','coaching','mensajes','comunidad','shop'][i];
+    const name=['inicio','book','rutinas','coaching','comunidad','shop'][i];
     b.classList.toggle('active',name===v);
     b.classList.toggle('locked',MEMBER_LOCKED_VIEWS.includes(name)&&!canUseMemberViews());
   });
@@ -2898,9 +2942,7 @@ function sv(v){
   if(v==='book'){const _ds=dk(curDate);loadSlotOccupancyFromSb(_ds).then(()=>renderBook().catch(console.error));}
   if(v==='planes')renderPlans();
   if(v==='rutinas'){renderRutinas().catch(console.error);}
-  if(v==='hoy'){renderHoySb().catch(console.error);}
-  if(v==='coaching'){renderCoachingWeekSb().catch(console.error);}
-  if(v==='mensajes'){renderMensajesSb().catch(console.error);}
+  if(v==='coaching'){renderCoachHub();}
   if(v==='comunidad'){renderFeedSb().catch(console.error);}
   if(v==='shop'){renderShop('shop-content',false);loadShopProducts().then(()=>renderShop('shop-content',false)).catch(()=>{});handleShopReturn();}
   if(v==='historial'){renderHistorial().catch(console.error);}
@@ -2925,6 +2967,28 @@ function admTab(t){
   if(t==='comunidad')renderAdminFeed();
   if(t==='notifs')renderAdmNotifsSb();
   if(t==='gaia')renderGaiaTab();
+}
+
+let coachHubActiveTab='hoy';
+function coachHubTab(t,btn){
+  coachHubActiveTab=t;
+  document.querySelectorAll('.coach-hub-tab').forEach(b=>b.classList.remove('active'));
+  if(btn)btn.classList.add('active');
+  else{const b=document.querySelector('.coach-hub-tab[data-tab="'+t+'"]');if(b)b.classList.add('active');}
+  ['hoy','programa','mensajes','tu'].forEach(x=>{
+    const el=document.getElementById('v-coach-'+x);
+    if(el)el.classList.toggle('active',x===t);
+  });
+  if(t==='hoy')renderHoySb();
+  if(t==='programa')renderCoachProgramaSb();
+  if(t==='mensajes')renderMensajesSb();
+  if(t==='tu')renderCoachTuSb();
+}
+function renderCoachHub(){coachHubTab(coachHubActiveTab,null);}
+async function renderCoachProgramaSb(){
+  await loadCoachWeekDataSb(false);
+  renderCoachSemanaPanel();
+  renderCoachRutinasPanel();
 }
 
 function finSubTab(t,btn){
@@ -4268,6 +4332,91 @@ async function adminUpdateShopOrder(orderId,status){
   }catch(e){hideLoading();toast('Error: '+e.message,'err');}
 }
 
+// ── REGISTRO DE PESO: gráficas compartidas (Historial + Tú) ──
+function scoreGroupKey(row){return row.ex_key||(row.board_id+'_idx_'+row.ex_idx);}
+function kgToUnit(kg,unit){return unit==='lb'?kg*2.20462262:kg;}
+function fmtScoreWeight(kg,unit){return (Math.round(kgToUnit(kg,unit)*10)/10)+' '+unit;}
+function renderPrCardsInto(containerEl,chartsRegistry,scoreRows,unit,canvasPrefix){
+  if(!containerEl)return;
+  Object.values(chartsRegistry).forEach(c=>{try{c.destroy();}catch(_){}});
+  Object.keys(chartsRegistry).forEach(k=>delete chartsRegistry[k]);
+  if(!scoreRows.length){
+    containerEl.innerHTML='<div class="empty">Sin pesos registrados aun.<br>Usa el botón 💪 en tus ejercicios para empezar.</div>';
+    return;
+  }
+  const exMap={};
+  scoreRows.forEach(r=>{
+    const k=scoreGroupKey(r);
+    if(!exMap[k])exMap[k]={name:r.ex_name,entries:[]};
+    exMap[k].entries.push({w:parseFloat(r.weight),reps:r.reps||'',ts:r.logged_at});
+  });
+  containerEl.innerHTML='';
+  Object.entries(exMap).forEach(([k,ex])=>{
+    const best=ex.entries.reduce((a,b)=>b.w>a.w?b:a);
+    const last=ex.entries[ex.entries.length-1];
+    const isPR=last.w===best.w;
+    const recent=ex.entries.slice(-20);
+    const labels=recent.map(e=>new Date(e.ts).toLocaleDateString('es-MX',{day:'2-digit',month:'short'}));
+    const data=recent.map(e=>kgToUnit(e.w,unit));
+    const card=document.createElement('div');
+    card.style.cssText='background:var(--card);border-radius:12px;padding:14px;margin-bottom:14px;border:1px solid var(--border)';
+    const canvasId=(canvasPrefix||'h')+'-pr-chart-'+k.replace(/[^a-z0-9]/gi,'_');
+    card.innerHTML=
+      '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">'
+      +'<div style="font-size:14px;font-weight:700;color:var(--white)">'+esc(ex.name)+'</div>'
+      +'<div style="text-align:right">'
+      +'<div style="font-size:20px;font-weight:800;color:'+(isPR?'var(--green)':'var(--white)')+'">'+fmtScoreWeight(best.w,unit)+'</div>'
+      +(best.reps?'<div style="font-size:11px;color:var(--gray)">x '+esc(best.reps)+'</div>':'')
+      +'<div style="font-size:10px;color:var(--gray);margin-top:1px">PR · '+new Date(best.ts).toLocaleDateString('es-MX',{day:'2-digit',month:'short',year:'numeric'})+'</div>'
+      +'</div></div>'
+      +'<canvas id="'+canvasId+'" height="90"></canvas>'
+      +'<div style="font-size:10px;color:var(--gray);margin-top:6px;text-align:right">'+ex.entries.length+' registro'+(ex.entries.length===1?'':'s')+'</div>';
+    containerEl.appendChild(card);
+    const ctx=document.getElementById(canvasId);
+    if(ctx&&typeof Chart!=='undefined'){
+      chartsRegistry[k]=new Chart(ctx,{
+        type:'line',
+        data:{labels,datasets:[{
+          data,borderColor:'#2563eb',backgroundColor:'rgba(37,99,235,.12)',borderWidth:2,pointRadius:3,
+          pointBackgroundColor:data.map((v,i)=>i===recent.length-1-[...recent].reverse().findIndex(e=>e.w===best.w)?'#10b981':'#2563eb'),
+          tension:0.3,fill:true
+        }]},
+        options:{
+          responsive:true,
+          plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>fmtScoreWeight(recent[c.dataIndex].w,unit)+(recent[c.dataIndex].reps?' x '+recent[c.dataIndex].reps:'')}}},
+          scales:{
+            x:{grid:{color:'rgba(255,255,255,.04)'},ticks:{color:'#6b7280',font:{size:10},maxRotation:0}},
+            y:{grid:{color:'rgba(255,255,255,.04)'},ticks:{color:'#6b7280',font:{size:11},callback:v=>v+unit}}
+          }
+        }
+      });
+    }
+  });
+}
+let _tuPrCharts={};
+let _tuScoreRows=null;
+function updateScoreUnitToggleUI(){
+  document.querySelectorAll('.tu-unit-pill').forEach(b=>b.classList.toggle('active',b.dataset.unit===scoreWeightUnit));
+}
+async function renderCoachTuSb(){
+  const el=document.getElementById('coach-tu-panel');
+  if(!el||!sbUser)return;
+  el.innerHTML='<div class="score-unit-toggle">'
+    +'<button class="tu-unit-pill" data-unit="kg" onclick="setLogScoreUnit(&quot;kg&quot;)">KG</button>'
+    +'<button class="tu-unit-pill" data-unit="lb" onclick="setLogScoreUnit(&quot;lb&quot;)">LB</button>'
+    +'</div><div id="coach-tu-scores"><div class="empty">Cargando...</div></div>';
+  updateScoreUnitToggleUI();
+  try{
+    const{data,error}=await sb.from('user_scores').select('*').eq('user_id',sbUser.id).order('logged_at',{ascending:true}).limit(300);
+    if(error)throw error;
+    _tuScoreRows=data||[];
+    renderPrCardsInto(document.getElementById('coach-tu-scores'),_tuPrCharts,_tuScoreRows,scoreWeightUnit,'tu');
+  }catch(e){
+    document.getElementById('coach-tu-scores').innerHTML='<div class="empty">Error: '+e.message+'</div>';
+    console.error('renderCoachTuSb:',e);
+  }
+}
+
 // ── HISTORIAL ────────────────────────────────────────────────
 const _prCharts={};
 let _historialRange='90'; // '30' | '90' | '365' | 'all'
@@ -4303,73 +4452,7 @@ async function renderHistorial(){
     const userScoreRows=scRes.status==='fulfilled'?(scRes.value.data||[]):[];
 
     // Render PRs
-    if(hsEl){
-      // Destroy old charts
-      Object.values(_prCharts).forEach(c=>{try{c.destroy();}catch(_){}});
-      Object.keys(_prCharts).forEach(k=>delete _prCharts[k]);
-      if(!userScoreRows.length){
-        hsEl.innerHTML='<div class="empty">Sin PRs registrados aun.<br>Usa el botón 💪 en tu rutina para empezar.</div>';
-      }else{
-        // Group by ex_name (use board_id+ex_idx as key for stability)
-        const exMap={};
-        userScoreRows.forEach(r=>{
-          const k=r.board_id+'_'+r.ex_idx;
-          if(!exMap[k])exMap[k]={name:r.ex_name,entries:[]};
-          exMap[k].entries.push({w:parseFloat(r.weight),reps:r.reps||'',ts:r.logged_at});
-        });
-        hsEl.innerHTML='';
-        Object.entries(exMap).forEach(([k,ex])=>{
-          const best=ex.entries.reduce((a,b)=>b.w>a.w?b:a);
-          const last=ex.entries[ex.entries.length-1];
-          const isPR=last.w===best.w;
-          // Labels: last 20 entries
-          const recent=ex.entries.slice(-20);
-          const labels=recent.map(e=>new Date(e.ts).toLocaleDateString('es-MX',{day:'2-digit',month:'short'}));
-          const data=recent.map(e=>e.w);
-          const card=document.createElement('div');
-          card.style.cssText='background:var(--card);border-radius:12px;padding:14px;margin-bottom:14px;border:1px solid var(--border)';
-          const canvasId='pr-chart-'+k.replace(/[^a-z0-9]/gi,'_');
-          card.innerHTML=
-            '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">'
-            +'<div style="font-size:14px;font-weight:700;color:var(--white)">'+esc(ex.name)+'</div>'
-            +'<div style="text-align:right">'
-            +'<div style="font-size:20px;font-weight:800;color:'+(isPR?'var(--green)':'var(--white)')+'">'+best.w+' kg</div>'
-            +(best.reps?'<div style="font-size:11px;color:var(--gray)">x '+esc(best.reps)+'</div>':'')
-            +'<div style="font-size:10px;color:var(--gray);margin-top:1px">PR · '+new Date(best.ts).toLocaleDateString('es-MX',{day:'2-digit',month:'short',year:'numeric'})+'</div>'
-            +'</div></div>'
-            +'<canvas id="'+canvasId+'" height="90"></canvas>'
-            +'<div style="font-size:10px;color:var(--gray);margin-top:6px;text-align:right">'+ex.entries.length+' registro'+(ex.entries.length===1?'':'s')+'</div>';
-          hsEl.appendChild(card);
-          const ctx=document.getElementById(canvasId);
-          if(ctx&&typeof Chart!=='undefined'){
-            _prCharts[k]=new Chart(ctx,{
-              type:'line',
-              data:{
-                labels,
-                datasets:[{
-                  data,
-                  borderColor:'#2563eb',
-                  backgroundColor:'rgba(37,99,235,.12)',
-                  borderWidth:2,
-                  pointRadius:3,
-                  pointBackgroundColor:data.map((v,i)=>v===best.w&&i===data.lastIndexOf(best.w)?'#10b981':'#2563eb'),
-                  tension:0.3,
-                  fill:true
-                }]
-              },
-              options:{
-                responsive:true,
-                plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>c.parsed.y+' kg'+(recent[c.dataIndex].reps?' x '+recent[c.dataIndex].reps:'')}}},
-                scales:{
-                  x:{grid:{color:'rgba(255,255,255,.04)'},ticks:{color:'#6b7280',font:{size:10},maxRotation:0}},
-                  y:{grid:{color:'rgba(255,255,255,.04)'},ticks:{color:'#6b7280',font:{size:11},callback:v=>v+'kg'}}
-                }
-              }
-            });
-          }
-        });
-      }
-    }
+    if(hsEl)renderPrCardsInto(hsEl,_prCharts,userScoreRows,'kg','h');
 
     // Render bookings
     if(bks.length){
@@ -4464,35 +4547,69 @@ function cancelBoardEdit(bid){
 }
 function toggleNewSocioForm(){const f=document.getElementById('new-socio-form');if(!f)return;const open=f.style.display!=='none';f.style.display=open?'none':'block';}
 function selectRoutineBoard(bid){selectedRoutineBoardId=bid;renderRutinas();}
-function openLogScore(src,exIdx,exName){
-  if(src&&src.dataset){logScoreCtx={boardId:src.dataset.bid,exIdx:parseInt(src.dataset.idx),exName:src.dataset.name};}
-  else{logScoreCtx={boardId:src,exIdx,exName};}
-  renderRutinas();
+let scoreWeightUnit=localStorage.getItem('habit_weight_unit')||'kg';
+function openLogScore(btn){
+  logScoreCtx={boardId:btn.dataset.bid,exIdx:parseInt(btn.dataset.idx,10),exName:btn.dataset.name,exId:btn.dataset.exid||null};
+  const nameEl=document.getElementById('log-score-ex-name');
+  if(nameEl)nameEl.textContent=logScoreCtx.exName;
+  const wEl=document.getElementById('score-weight-input');
+  const rEl=document.getElementById('score-reps-input');
+  if(wEl)wEl.value='';
+  if(rEl)rEl.value='';
+  setLogScoreUnitUI(scoreWeightUnit);
+  const modal=document.getElementById('log-score-modal');
+  if(modal)modal.style.display='flex';
+  setTimeout(()=>wEl?.focus(),150);
+}
+function closeLogScoreModal(){
+  const modal=document.getElementById('log-score-modal');
+  if(modal)modal.style.display='none';
+  logScoreCtx=null;
+}
+function setLogScoreUnitUI(u){
+  document.querySelectorAll('.score-unit-pill').forEach(b=>b.classList.toggle('active',b.dataset.unit===u));
+}
+function setLogScoreUnit(u){
+  scoreWeightUnit=u;
+  localStorage.setItem('habit_weight_unit',u);
+  setLogScoreUnitUI(u);
+  updateScoreUnitToggleUI();
+  if(_tuScoreRows)renderPrCardsInto(document.getElementById('coach-tu-scores'),_tuPrCharts,_tuScoreRows,scoreWeightUnit,'tu');
 }
 async function submitScore(){
   if(!logScoreCtx)return;
-  const wVal=document.getElementById('score-weight-input').value;
-  const rVal=document.getElementById('score-reps-input').value.trim();
-  const w=parseFloat(wVal);
-  if(!wVal||isNaN(w)||w<=0||w>999){toast('Ingresa un peso válido (0-999 kg)','err');return;}
+  const wRaw=parseFloat(document.getElementById('score-weight-input').value);
+  const reps=(document.getElementById('score-reps-input').value||'').trim();
+  if(!wRaw||isNaN(wRaw)||wRaw<=0||wRaw>2000){toast('Ingresa un peso válido','err');return;}
+  const weightKg=scoreWeightUnit==='lb'?Math.round(wRaw*0.453592*100)/100:wRaw;
   const{boardId,exIdx,exName}=logScoreCtx;
-  showLoading('Guardando PR...');
+  let exId=logScoreCtx.exId;
+  showLoading('Guardando...');
   try{
+    if(!exId){
+      const{data:brd,error:be}=await sb.from('boards').select('exercises').eq('id',boardId).single();
+      if(be)throw be;
+      const exArr=brd.exercises||[];
+      if(exArr[exIdx]){
+        if(!exArr[exIdx].id){
+          exId=crypto.randomUUID();
+          exArr[exIdx]={...exArr[exIdx],id:exId};
+          await sb.from('boards').update({exercises:exArr}).eq('id',boardId);
+          const bLocal=(typeof boards!=='undefined'&&boards)?boards.find(x=>x.id===boardId):null;
+          if(bLocal)bLocal.exercises=exArr;
+        }else{exId=exArr[exIdx].id;}
+      }
+    }
+    const exKey=exId||(boardId+'_idx_'+exIdx);
     const{error}=await sb.from('user_scores').insert({
-      user_id:sbUser.id,board_id:boardId,ex_idx:exIdx,
-      ex_name:exName,weight:w,reps:rVal||null
+      user_id:sbUser.id,board_id:boardId,ex_idx:exIdx,ex_key:exKey,
+      ex_name:exName,weight:weightKg,reps:reps||null
     });
     if(error)throw error;
-  }catch(e){hideLoading();toast('Error al guardar','err');console.error('submitScore:',e);return;}
-  // Update in-memory leaderboard
-  const k=boardId+'_'+exIdx;
-  if(!scores[k])scores[k]={exName,entries:[]};
-  scores[k].entries=scores[k].entries.filter(e=>e.userId!==curUser.id);
-  scores[k].entries.push({userId:curUser.id,name:curUser.name,weight:w,reps:rVal,ts:new Date().toISOString()});
-  scores[k].entries.sort((a,b)=>b.weight-a.weight);
-  logScoreCtx=null;hideLoading();toast('PR guardado 💪','ok');renderRutinas();
+  }catch(e){hideLoading();toast('Error al guardar: '+(e.message||e),'err');console.error('submitScore:',e);return;}
+  hideLoading();closeLogScoreModal();toast('Peso registrado 💪','ok');
 }
-function renderExerciseListHtml(exercises,keyPrefix,expandedMap,toggleFnName){
+function renderExerciseListHtml(exercises,keyPrefix,expandedMap,toggleFnName,boardId){
   if(!exercises.length)return'<div class="empty">Sin ejercicios en esta rutina.</div>';
   return exercises.map((ex,i)=>{
     const videos=getExerciseVideos(ex);
@@ -4509,6 +4626,7 @@ function renderExerciseListHtml(exercises,keyPrefix,expandedMap,toggleFnName){
       +(videos.length?'<button class="btn-sm" style="padding:0 10px;min-width:36px;height:34px;display:flex;align-items:center;justify-content:center;background:rgba(16,185,129,.15);border:1px solid rgba(16,185,129,.4);color:#10b981;border-radius:4px" onclick="'+toggleFnName+'(&quot;'+gKey+'&quot;)" aria-label="Ver videos">'+(groupOpen?'<svg width="14" height="14" viewBox="0 0 14 14" fill="currentColor"><rect x="2" y="1" width="3.5" height="12" rx="1"/><rect x="8.5" y="1" width="3.5" height="12" rx="1"/></svg>':'<svg width="14" height="14" viewBox="0 0 14 14" fill="currentColor"><polygon points="2,1 13,7 2,13"/></svg>')+'</button>':'')
       +'</div>'
       +'</div>'
+      +'<button class="log-score-btn" data-bid="'+esc(boardId||keyPrefix)+'" data-idx="'+i+'" data-name="'+esc(ex.name)+'" data-exid="'+esc(ex.id||'')+'" onclick="openLogScore(this)">💪 Registrar peso</button>'
       +(groupOpen?videos.map((vid,vi)=>{
         const vKey=keyPrefix+'_'+i+'_'+vi;
         const videoLabel=vid.title||('Video '+(vi+1));
@@ -4540,7 +4658,7 @@ async function renderRutinas(){
     const selected=myBoards.find(b=>b.id===selectedRoutineBoardId)||myBoards[0];
     const tabs=myBoards.map(b=>'<button class="routine-tab '+(b.id===selected.id?'active':'')+'" onclick="selectRoutineBoard(&quot;'+esc(b.id)+'&quot;)">'+esc(b.name)+'</button>').join('');
     const exercises=selected.exercises||[];
-    const exHtml=renderExerciseListHtml(exercises,selected.id,expandedVideos,'toggleVideo');
+    const exHtml=renderExerciseListHtml(exercises,selected.id,expandedVideos,'toggleVideo',selected.id);
     const waHelpLink='https://wa.me/526623562816?text='+encodeURIComponent('Hola HABIT 👋 Tengo una duda sobre mi rutina "'+selected.name+'"');
     el.innerHTML='<div class="routine-tabs">'+tabs+'</div>'
       +'<a href="'+waHelpLink+'" target="_blank" rel="noopener" style="display:flex;align-items:center;justify-content:center;gap:8px;background:#25d366;color:#04170d;font-weight:800;font-size:13px;padding:11px;border-radius:8px;text-decoration:none;margin-bottom:12px">'
@@ -4550,6 +4668,40 @@ async function renderRutinas(){
   }catch(e){
     el.innerHTML='<div class="empty">Error cargando rutinas: '+e.message+'</div>';
     console.error('renderRutinas:',e);
+  }
+}
+
+async function renderCoachRutinasPanel(){
+  const el=document.getElementById('coach-rutinas-panel');
+  if(!el)return;
+  if(!canUseMemberViews()){
+    el.innerHTML='<div class="empty">Activa una membresia vigente para ver tus rutinas asignadas.</div>';
+    return;
+  }
+  el.innerHTML='<div class="empty">Cargando rutinas...</div>';
+  if(!sbUser){el.innerHTML='<div class="empty">Inicia sesion para ver tus rutinas.</div>';return;}
+  try{
+    const{data:assignments}=await sb.from('board_assignments').select('board_id').eq('user_id',sbUser.id);
+    const boardIds=(assignments||[]).map(a=>a.board_id);
+    if(!boardIds.length){
+      el.innerHTML='<div class="empty">No tienes rutinas asignadas.<br>Pide a tu coach que te asigne un pizarron.</div>';
+      return;
+    }
+    const{data:myBoards}=await sb.from('boards').select('*').in('id',boardIds);
+    if(!myBoards||!myBoards.length){
+      el.innerHTML='<div class="empty">Sin rutinas disponibles.</div>';
+      return;
+    }
+    if(!selectedRoutineBoardId||!myBoards.some(b=>b.id===selectedRoutineBoardId))selectedRoutineBoardId=myBoards[0].id;
+    const selected=myBoards.find(b=>b.id===selectedRoutineBoardId)||myBoards[0];
+    const tabs=myBoards.map(b=>'<button class="routine-tab '+(b.id===selected.id?'active':'')+'" onclick="selectRoutineBoard(&quot;'+esc(b.id)+'&quot;)">'+esc(b.name)+'</button>').join('');
+    const exercises=selected.exercises||[];
+    const exHtml=renderExerciseListHtml(exercises,selected.id,expandedVideos,'toggleVideo',selected.id);
+    el.innerHTML='<div class="routine-tabs">'+tabs+'</div>'
+      +'<div class="board-card"><div class="board-hdr"><div style="display:flex;align-items:center;gap:8px;min-width:0"><div style="width:10px;height:10px;border-radius:50%;background:'+esc(selected.color||'#2563eb')+'"></div><span class="board-title">'+esc(selected.name)+'</span></div><span class="badge bg-blue">'+exercises.length+' ejercicios</span></div><div class="board-body">'+exHtml+'</div></div>';
+  }catch(e){
+    el.innerHTML='<div class="empty">Error cargando rutinas: '+e.message+'</div>';
+    console.error('renderCoachRutinasPanel:',e);
   }
 }
 
@@ -4589,10 +4741,6 @@ async function renderHoySb(){
   await loadCoachWeekDataSb(false);
   renderCoachHoyPanel();
 }
-async function renderCoachingWeekSb(){
-  await loadCoachWeekDataSb(false);
-  renderCoachSemanaPanel();
-}
 function coachRelevantTasks(){
   const weekEnd=addDaysDS(coachWeekStart,6);
   return coachTasks.filter(t=>!t.due_date||(t.due_date>=coachWeekStart&&t.due_date<=weekEnd));
@@ -4615,7 +4763,7 @@ function renderCoachHoyPanel(){
   }else{
     const board=coachBoardsById[todayRow.board_id];
     const exercises=(board&&board.exercises)||[];
-    const exHtml=renderExerciseListHtml(exercises,'coach_'+todayRow.id,expandedCoachVideos,'toggleCoachVideo');
+    const exHtml=renderExerciseListHtml(exercises,'coach_'+todayRow.id,expandedCoachVideos,'toggleCoachVideo',todayRow.board_id);
     const isActive=todayRow.status==='in_progress';
     html+='<div class="board-card"><div class="board-hdr"><div style="display:flex;align-items:center;gap:8px;min-width:0"><div style="width:10px;height:10px;border-radius:50%;background:'+esc(todayRow.board_color||'#2563eb')+'"></div><span class="board-title">'+esc(todayRow.board_name)+'</span></div><span class="badge bg-blue">'+exercises.length+' ejercicios</span></div><div class="board-body">'
       +'<button class="btn" style="margin-bottom:12px" onclick="'+(isActive?'finishCoachingSessionSb()':'startCoachingSessionSb(&quot;'+todayRow.id+'&quot;)')+'">'+(isActive?'Finalizar entreno':'Iniciar entreno')+'</button>'
@@ -4722,7 +4870,7 @@ async function toggleTaskSb(id){
     if(error)throw error;
     const idx=coachTasks.findIndex(x=>x.id===id);
     if(idx>-1)coachTasks[idx]=data;
-    if(document.getElementById('v-coaching')?.classList.contains('active'))renderCoachSemanaPanel();else renderCoachHoyPanel();
+    if(coachHubActiveTab==='programa')renderCoachSemanaPanel();else renderCoachHoyPanel();
   }catch(e){toast('Error al actualizar tarea: '+e.message,'err');}
 }
 
@@ -4995,7 +5143,7 @@ function startChatRealtime(){
   refreshChatUnreadBadge();
   chatChannel=sb.channel('chat:'+sbUser.id)
     .on('postgres_changes',{event:'INSERT',schema:'public',table:'coaching_messages',filter:'user_id=eq.'+sbUser.id},payload=>{
-      if(document.getElementById('v-mensajes')?.classList.contains('active')){
+      if(document.getElementById('v-coach-mensajes')?.classList.contains('active')){
         if(!chatMessages.some(m=>m.id===payload.new.id))chatMessages.push(payload.new);
         renderChatThread();
         markChatReadSb().then(refreshChatUnreadBadge).catch(console.error);
@@ -5868,7 +6016,7 @@ async function addExerciseSb(bid){
   const videos=[];
   if(video)videos.push({url:video,title:videoTitle});
   if(video2)videos.push({url:video2,title:videoTitle2});
-  b.exercises.push({name,sets,reps,rest,note,description:note,video:video||'',videoTitle:videoTitle||'',videos});
+  b.exercises.push({id:crypto.randomUUID(),name,sets,reps,rest,note,description:note,video:video||'',videoTitle:videoTitle||'',videos});
   await sb.from('boards').update({exercises:b.exercises}).eq('id',bid);
   document.getElementById('exn-'+bid).value='';
   document.getElementById('exs-'+bid).value='';
