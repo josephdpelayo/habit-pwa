@@ -6,12 +6,12 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="HABIT">
 <meta name="application-name" content="HABIT">
-<link rel="manifest" href="/manifest.json?v=20260708-02">
-<link rel="apple-touch-icon" sizes="120x120" href="/icons/icon-120.png?v=20260708-02">
-<link rel="apple-touch-icon" sizes="152x152" href="/icons/icon-152.png?v=20260708-02">
-<link rel="apple-touch-icon" sizes="167x167" href="/icons/icon-167.png?v=20260708-02">
-<link rel="apple-touch-icon" sizes="180x180" href="/icons/icon-180.png?v=20260708-02">
-<link rel="icon" type="image/png" sizes="32x32" href="/icons/icon-32.png?v=20260708-02">
+<link rel="manifest" href="/manifest.json?v=20260713-01">
+<link rel="apple-touch-icon" sizes="120x120" href="/icons/icon-120.png?v=20260713-01">
+<link rel="apple-touch-icon" sizes="152x152" href="/icons/icon-152.png?v=20260713-01">
+<link rel="apple-touch-icon" sizes="167x167" href="/icons/icon-167.png?v=20260713-01">
+<link rel="apple-touch-icon" sizes="180x180" href="/icons/icon-180.png?v=20260713-01">
+<link rel="icon" type="image/png" sizes="32x32" href="/icons/icon-32.png?v=20260713-01">
 <title>HABIT</title>
 <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700;800;900&family=Share+Tech+Mono&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
@@ -356,6 +356,31 @@ input,select,button,textarea{font-family:'Montserrat',sans-serif}
 .active-session-bar{flex-shrink:0;display:flex;align-items:center;justify-content:space-between;gap:10px;background:var(--blue);color:var(--white);padding:11px 16px;cursor:pointer;font-family:'Oswald',sans-serif;font-weight:700;font-size:13px;letter-spacing:.04em}
 .active-session-bar #asb-elapsed{font-family:'Montserrat',sans-serif;font-variant-numeric:tabular-nums}
 
+/* MENSAJES / CHAT */
+.chat-thread{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:1rem;display:flex;flex-direction:column;gap:4px}
+.chat-day-divider{align-self:center;font-size:11px;font-weight:700;color:var(--gray);background:var(--card2);border-radius:99px;padding:4px 12px;margin:10px 0}
+.chat-row{display:flex;margin-bottom:2px}
+.chat-row.mine{justify-content:flex-end}
+.chat-row.theirs{justify-content:flex-start}
+.chat-bubble{max-width:78%;border-radius:14px;padding:9px 12px;font-size:13px;line-height:1.4}
+.chat-row.mine .chat-bubble{background:var(--blue);color:#fff;border-bottom-right-radius:4px}
+.chat-row.theirs .chat-bubble{background:var(--card2);color:var(--white);border:1px solid var(--border);border-bottom-left-radius:4px}
+.chat-bubble-time{display:block;font-size:10px;opacity:.65;margin-top:3px;text-align:right}
+.chat-bubble-img{max-width:220px;border-radius:10px;display:block;cursor:pointer}
+.chat-voice{display:flex;align-items:center;gap:8px;min-width:180px}
+.chat-voice-play{width:32px;height:32px;border-radius:50%;background:rgba(255,255,255,.18);border:none;color:inherit;display:flex;align-items:center;justify-content:center;flex-shrink:0;cursor:pointer}
+.chat-voice-track{flex:1;height:4px;border-radius:99px;background:rgba(255,255,255,.25);overflow:hidden}
+.chat-voice-fill{height:100%;background:currentColor;width:0%}
+.chat-voice-dur{font-size:11px;opacity:.8;font-variant-numeric:tabular-nums;flex-shrink:0}
+.chat-composer{flex-shrink:0;display:flex;align-items:flex-end;gap:8px;padding:10px 12px;border-top:1px solid var(--border);background:var(--dark)}
+.chat-attach-btn{width:38px;height:38px;border-radius:50%;background:var(--card2);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0}
+.chat-text-input{flex:1;background:var(--card2);border:1px solid var(--border);border-radius:20px;padding:9px 14px;font-size:13px;color:var(--white);resize:none;max-height:100px}
+.chat-mic-btn,.chat-send-btn{width:38px;height:38px;border-radius:50%;background:var(--blue);border:none;color:#fff;display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0}
+.chat-recording-indicator{flex-shrink:0;display:flex;align-items:center;gap:8px;padding:10px 16px;background:rgba(239,68,68,.12);border-top:1px solid var(--red);color:var(--red);font-size:13px;font-weight:700}
+.chat-recording-dot{width:9px;height:9px;border-radius:50%;background:var(--red);animation:chatPulse 1s infinite}
+@keyframes chatPulse{0%,100%{opacity:1}50%{opacity:.3}}
+.chat-img-preview{padding:8px 12px;display:flex;align-items:center;gap:8px}
+
 /* SCORES */
 .score-board{background:var(--card);border:1px solid var(--border);border-radius:6px;margin-bottom:12px;overflow:hidden}
 .score-board-hdr{display:flex;align-items:center;justify-content:space-between;padding:12px 14px;background:rgba(255,255,255,.025)}
@@ -537,6 +562,8 @@ input,select,button,textarea{font-family:'Montserrat',sans-serif}
 .filter-chip{background:var(--card2);border:1px solid var(--border);color:var(--gray);border-radius:20px;padding:9px 14px;font-size:11px;font-weight:600;letter-spacing:.04em;cursor:pointer;white-space:nowrap;transition:all .15s}
 .filter-chip.active{background:rgba(37,99,235,.2);border-color:var(--blue);color:var(--bl)}
 .adm-date{width:100%;background:var(--card);border:1px solid var(--border);border-radius:4px;padding:12px;font-size:16px;color:var(--white);outline:none;margin-bottom:1rem;color-scheme:dark;-webkit-appearance:none}
+.mensajes-inbox-row{cursor:pointer;display:flex;align-items:center;gap:10px;padding:9px 4px;border-bottom:1px solid var(--border)}
+.mensajes-inbox-preview{font-size:11px;color:var(--gray);margin-top:1px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 
 /* RECEPTION TV */
 body.reception-mode .app{max-width:none;width:100vw;height:100vh}
@@ -800,15 +827,33 @@ body.reception-mode{background:#050505}
     </div>
   </div>
 
-  <!-- COACHING -->
+  <!-- HOY -->
+  <div id="v-hoy" class="view">
+    <div class="scroll-area">
+      <div id="coach-hoy-panel"></div>
+    </div>
+  </div>
+
+  <!-- COACHING (semana) -->
   <div id="v-coaching" class="view">
     <div class="scroll-area">
-      <div class="routine-tabs" id="coach-subtabs">
-        <button class="routine-tab active" onclick="coachSubTab('hoy')">Hoy</button>
-        <button class="routine-tab" onclick="coachSubTab('semana')">Semana</button>
-      </div>
-      <div id="coach-hoy-panel"></div>
-      <div id="coach-semana-panel" style="display:none"></div>
+      <div id="coach-semana-panel"></div>
+    </div>
+  </div>
+
+  <!-- MENSAJES -->
+  <div id="v-mensajes" class="view">
+    <div id="chat-thread" class="chat-thread"></div>
+    <div id="chat-img-preview" class="chat-img-preview" style="display:none"></div>
+    <div id="chat-recording-indicator" class="chat-recording-indicator" style="display:none"></div>
+    <div class="chat-composer">
+      <label class="chat-attach-btn" title="Adjuntar foto">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--gray)" stroke-width="1.6"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg>
+        <input type="file" id="chat-img-input" accept="image/*" style="display:none" onchange="handleChatImgPick(this)">
+      </label>
+      <textarea id="chat-text-input" class="chat-text-input" placeholder="Escribe un mensaje..." rows="1" oninput="onChatInputChange(this)"></textarea>
+      <button id="chat-mic-btn" class="chat-mic-btn" onclick="toggleVoiceRecording()">🎤</button>
+      <button id="chat-send-btn" class="chat-send-btn" style="display:none" onclick="sendChatMessageSb()">➤</button>
     </div>
   </div>
 
@@ -864,7 +909,7 @@ body.reception-mode{background:#050505}
   </div>
 
   <!-- ACTIVE COACHING SESSION BAR -->
-  <div id="active-session-bar" class="active-session-bar" style="display:none" onclick="sv('coaching')">
+  <div id="active-session-bar" class="active-session-bar" style="display:none" onclick="sv('hoy')">
     <span id="asb-board-name"></span>
     <span id="asb-elapsed">00:00</span>
   </div>
@@ -878,8 +923,13 @@ body.reception-mode{background:#050505}
         <svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>Reservar</button>
       <button class="bnb" onclick="sv('rutinas')">
         <svg viewBox="0 0 24 24"><path d="M6 4h4v16H6zM14 4h4v16h-4zM4 9h2M10 9h4M18 9h2M4 15h2M10 15h4M18 15h2"/></svg>Rutinas</button>
+      <button id="hoy-nav-btn" class="bnb" onclick="sv('hoy')" style="display:none">
+        <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>Hoy</button>
       <button id="coaching-nav-btn" class="bnb" onclick="sv('coaching')" style="display:none">
         <svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M3 10h18M8 2v4M16 2v4M8 15l2 2 4-4"/></svg>Coaching</button>
+      <button id="mensajes-nav-btn" class="bnb" onclick="sv('mensajes')" style="display:none">
+        <span id="mensajes-nav-badge" class="bnb-badge" data-mensajes-nav-count></span>
+        <svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>Mensajes</button>
       <button class="bnb" onclick="sv('comunidad')">
         <svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>Comunidad</button>
       <button id="shop-nav-btn" class="bnb" onclick="sv('shop')" style="display:none">
@@ -961,6 +1011,7 @@ body.reception-mode{background:#050505}
     <button class="adm-tab" onclick="admTab('users')">Socios</button>
     <button class="adm-tab" onclick="admTab('boards')">Pizarrones</button>
     <button class="adm-tab" onclick="admTab('coaching')">Coaching</button>
+    <button class="adm-tab" onclick="admTab('mensajes')">Mensajes</button>
     <button class="adm-tab" onclick="admTab('payments')">Finanzas</button>
     <button class="adm-tab" onclick="admTab('shop')">Tienda</button>
     <button class="adm-tab" onclick="admTab('comunidad')">Comunidad</button>
@@ -1059,6 +1110,18 @@ body.reception-mode{background:#050505}
         <div id="coaching-client-list"></div>
       </div>
       <div id="coaching-detail"></div>
+    </div>
+
+    <!-- MENSAJES (beta oculta) -->
+    <div id="a-mensajes" class="adm-section">
+      <div id="mensajes-list-area">
+        <div style="background:var(--card);border:1px solid var(--border);border-radius:6px;padding:1rem">
+          <p class="slbl" style="margin-bottom:8px">Conversaciones</p>
+          <input class="adm-search" placeholder="Buscar socio..." oninput="filterMensajesInbox(this)">
+          <div id="mensajes-inbox-list"></div>
+        </div>
+      </div>
+      <div id="mensajes-thread-view" style="display:none"></div>
     </div>
 
     <!-- FINANZAS -->
@@ -1262,7 +1325,7 @@ body.reception-mode{background:#050505}
 // ── CONFIG & SUPABASE ───────────────────────────────────────
 const SUPABASE_URL='https://pmpjteuqjusbiduevbwq.supabase.co';
 const SUPABASE_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBtcGp0ZXVxanVzYmlkdWV2YndxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc2OTI1NjUsImV4cCI6MjA5MzI2ODU2NX0.XbMzZoo2yqtrD8znLnyo_1zDfrdJAvAPj1lqGOyXnLw';
-const APP_VERSION='20260708-02';
+const APP_VERSION='20260713-01';
 const PUBLIC_APP_URL='https://habittraininghub.app/app.html';
 const PUBLIC_API_ORIGIN='https://www.habittraininghub.app';
 const SHOP_ALLOWED_EMAILS=['josephdpelayo@gmail.com'];
@@ -1358,8 +1421,13 @@ async function loadUserData(){
   sbProfile=prof;curUser=profileToLocal(prof);
   const shopBtn=document.getElementById('shop-nav-btn');
   if(shopBtn)shopBtn.style.display=(sbUser&&sbUser.email==='josephdpelayo@gmail.com')?'':'none';
+  const hoyBtn=document.getElementById('hoy-nav-btn');
+  if(hoyBtn)hoyBtn.style.display=prof.coaching_beta?'':'none';
   const coachBtn=document.getElementById('coaching-nav-btn');
   if(coachBtn)coachBtn.style.display=prof.coaching_beta?'':'none';
+  const mensBtn=document.getElementById('mensajes-nav-btn');
+  if(mensBtn)mensBtn.style.display=prof.coaching_beta?'':'none';
+  if(prof.coaching_beta){startChatRealtime();}else{stopChatRealtime();}
   if(prof.coaching_beta)loadActiveCoachingSessionSb().catch(console.error);
   const[bkRes,payRes]=await Promise.allSettled([
     sb.from('bookings').select('*').eq('user_id',sbUser.id).eq('status','active').gte('ds',addDaysDS(mazToday(),-1)).order('ds').order('start_idx').limit(20),
@@ -1381,7 +1449,7 @@ function showMainSb(){
   document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
   const main=document.getElementById('s-main');
   if(main)main.classList.add('active');
-  ['inicio','book','planes','rutinas','coaching','comunidad','shop','historial','perfil'].forEach(n=>{
+  ['inicio','book','planes','rutinas','hoy','coaching','mensajes','comunidad','shop','historial','perfil'].forEach(n=>{
     const el=document.getElementById('v-'+n);
     if(el)el.classList.toggle('active',n==='inicio');
   });
@@ -1393,6 +1461,7 @@ function showMainSb(){
   renderGuestGroup().catch(console.error);
   renderActiveBookings().catch(console.error);
   updateShopCartBadge();
+  refreshChatUnreadBadge();
   startUserNotifRealtime();
   startTimer();
   
@@ -1710,8 +1779,12 @@ let waitlists={}; // waitlists[ds+'_'+slotIdx] = [{userId,name,...}]
 let payments=[], boards=[], scores={}, posts=[], accessLog=[], adminNotifs=[];
 let curUser=null, curDate=dateObjFromDS(mazToday()), selStartIdx=null, selShort=false, selPlan=null, selPT='individual', selectedRoutineBoardId=null;
 let accInt=null, accessDataInt=null, notifChannel=null, userNotifInt=null, receptionClockInt=null, receptionDataInt=null, userNotifBootstrapped=false, userNotifSeen=new Set(), notifs=[], expandedVideos={}, logScoreCtx=null, expandedUsers=new Set(), expandedCoachVideos={};
-let coachWeekStart=null, coachSchedule=[], coachTasks=[], coachBoardsById={}, coachActiveSubTab='hoy', activeCoachingSession=null, coachSessionTickInt=null;
+let coachWeekStart=null, coachSchedule=[], coachTasks=[], coachBoardsById={}, activeCoachingSession=null, coachSessionTickInt=null;
+let chatMessages=[], chatChannel=null, chatPollInt=null, chatSendContext=null,
+    chatMediaRecorder=null, chatRecordChunks=[], chatRecordStartMs=0, chatRecordTimerInt=null,
+    chatPendingImgFile=null;
 let coachingAdminClients=[], selectedCoachClientId=null, coachAdminWeekStart=null, coachAdminSchedule=[], coachAdminTasks=[];
+let mensajesAdminClients=[], selectedChatClientId=null, adminChatChannel=null, adminChatPollInt=null;
 let receptionSessions=[], receptionLastSync=null, receptionLoading=false;
 let guestFavorites=[], guestSelected=new Set(), guestSavedActive=new Set(), guestOriginalFavoriteIds=new Set(), guestDeletedIds=new Set(), guestSearchResults=[], guestActiveBookingId=null, guestSearchTimer=null, guestDirty=false, guestCollapsed=true, guestQuery='';
 let shopProducts=[...DEFAULT_SHOP_PRODUCTS], shopCart=loadShopCart(), shopDraftQty={}, shopSelectedVariants={}, shopDelivery='pickup', shopView='catalog', adminProductFormOpen=false, adminEditingProductId=null;
@@ -2542,6 +2615,8 @@ async function doLogout(){
   guestFavorites=[];guestSelected=new Set();guestSavedActive=new Set();guestDeletedIds=new Set();guestActiveBookingId=null;guestDirty=false;
   stopReception();
   stopUserNotifRealtime();
+  stopChatRealtime();
+  stopAdminChatRealtime();
   if(accInt){clearInterval(accInt);accInt=null;}
   if(accessDataInt){clearInterval(accessDataInt);accessDataInt=null;}
   userNotifBootstrapped=false;userNotifSeen=new Set();
@@ -2561,6 +2636,7 @@ function showAdmin(){
   const d=document.getElementById('adm-date');if(d){d.value=mazToday();d.max=addDaysDS(mazToday(),ADMIN_BLOCK_ADVANCE_DAYS);}
   admTab('dash');
   loadBoardsSb();
+  startAdminChatRealtime();
 }
 
 function stopReception(){
@@ -2602,6 +2678,7 @@ function showReception(){
   if(accInt){clearInterval(accInt);accInt=null;}
   if(accessDataInt){clearInterval(accessDataInt);accessDataInt=null;}
   stopUserNotifRealtime();
+  stopChatRealtime();
   document.body.classList.add('reception-mode');
   document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
   const rec=document.getElementById('s-reception');
@@ -2782,7 +2859,7 @@ async function loadReceptionSessions(){
 }
 
 // ── NAVIGATION ──
-const ALL_VIEWS=['inicio','book','planes','rutinas','coaching','comunidad','shop','historial','perfil'];
+const ALL_VIEWS=['inicio','book','planes','rutinas','hoy','coaching','mensajes','comunidad','shop','historial','perfil'];
 const MEMBER_LOCKED_VIEWS=['book','rutinas','comunidad'];
 function canUseMemberViews(){
   if(!curUser)return false;
@@ -2805,12 +2882,12 @@ function sv(v){
     toast('Tienda disponible solo para josephdpelayo@gmail.com','warn');
     v='inicio';
   }
-  if(v==='coaching'&&!canAccessCoaching()){
+  if((v==='hoy'||v==='coaching'||v==='mensajes')&&!canAccessCoaching()){
     toast('Coaching disponible solo para socios beta','warn');
     v='inicio';
   }
   document.querySelectorAll('.bnb').forEach((b,i)=>{
-    const name=['inicio','book','rutinas','coaching','comunidad','shop'][i];
+    const name=['inicio','book','rutinas','hoy','coaching','mensajes','comunidad','shop'][i];
     b.classList.toggle('active',name===v);
     b.classList.toggle('locked',MEMBER_LOCKED_VIEWS.includes(name)&&!canUseMemberViews());
   });
@@ -2821,7 +2898,9 @@ function sv(v){
   if(v==='book'){const _ds=dk(curDate);loadSlotOccupancyFromSb(_ds).then(()=>renderBook().catch(console.error));}
   if(v==='planes')renderPlans();
   if(v==='rutinas'){renderRutinas().catch(console.error);}
-  if(v==='coaching'){renderCoachingSb().catch(console.error);}
+  if(v==='hoy'){renderHoySb().catch(console.error);}
+  if(v==='coaching'){renderCoachingWeekSb().catch(console.error);}
+  if(v==='mensajes'){renderMensajesSb().catch(console.error);}
   if(v==='comunidad'){renderFeedSb().catch(console.error);}
   if(v==='shop'){renderShop('shop-content',false);loadShopProducts().then(()=>renderShop('shop-content',false)).catch(()=>{});handleShopReturn();}
   if(v==='historial'){renderHistorial().catch(console.error);}
@@ -2832,7 +2911,7 @@ function admTab(t){
   if(t!=='users'){expandedUsers=new Set();}
   if(t!=='boards'){expandedBoards=new Set();editingBoards=new Set();addingExBoards=new Set();assigningBoards=new Set();}
   document.querySelectorAll('.adm-tab').forEach((b,i)=>b.classList.toggle('active',
-    ['dash','slots','users','boards','coaching','payments','shop','comunidad','notifs','reports','gaia'][i]===t));
+    ['dash','slots','users','boards','coaching','mensajes','payments','shop','comunidad','notifs','reports','gaia'][i]===t));
   document.querySelectorAll('.adm-section').forEach(el=>el.classList.remove('active'));
   const el=document.getElementById('a-'+t);if(el)el.classList.add('active');
   if(t==='dash')renderDashboard();
@@ -2840,6 +2919,7 @@ function admTab(t){
   if(t==='users')renderUsersSb();
   if(t==='boards')renderBoardsAdmin();
   if(t==='coaching')renderCoachingAdminSb();
+  if(t==='mensajes')renderMensajesAdminSb();
   if(t==='payments')renderPaymentsSb();
   if(t==='shop')renderAdminShopOrders();
   if(t==='comunidad')renderAdminFeed();
@@ -4479,8 +4559,11 @@ function mazWeekStart(ds){
   const offset=(dow+6)%7; // dias desde el lunes
   return addDaysDS(ds,-offset);
 }
-async function renderCoachingSb(){
+let coachDataLoadedAt=0;
+const COACH_DATA_TTL_MS=30000;
+async function loadCoachWeekDataSb(force){
   if(!sbUser)return;
+  if(!force&&coachDataLoadedAt&&(Date.now()-coachDataLoadedAt<COACH_DATA_TTL_MS)&&coachWeekStart===mazWeekStart(mazToday()))return;
   coachWeekStart=mazWeekStart(mazToday());
   const weekEnd=addDaysDS(coachWeekStart,6);
   try{
@@ -4496,20 +4579,19 @@ async function renderCoachingSb(){
       const{data:brds}=await sb.from('boards').select('id,exercises').in('id',boardIds);
       (brds||[]).forEach(b=>{coachBoardsById[b.id]=b;});
     }
+    coachDataLoadedAt=Date.now();
   }catch(e){
-    console.error('renderCoachingSb:',e);
+    console.error('loadCoachWeekDataSb:',e);
     coachSchedule=[];coachTasks=[];coachBoardsById={};
   }
-  coachSubTab(coachActiveSubTab||'hoy');
 }
-function coachSubTab(t){
-  coachActiveSubTab=t;
-  document.querySelectorAll('#coach-subtabs .routine-tab').forEach((b,i)=>b.classList.toggle('active',['hoy','semana'][i]===t));
-  const hoyEl=document.getElementById('coach-hoy-panel'),semEl=document.getElementById('coach-semana-panel');
-  if(hoyEl)hoyEl.style.display=t==='hoy'?'':'none';
-  if(semEl)semEl.style.display=t==='semana'?'':'none';
-  if(t==='hoy')renderCoachHoyPanel();
-  if(t==='semana')renderCoachSemanaPanel();
+async function renderHoySb(){
+  await loadCoachWeekDataSb(false);
+  renderCoachHoyPanel();
+}
+async function renderCoachingWeekSb(){
+  await loadCoachWeekDataSb(false);
+  renderCoachSemanaPanel();
 }
 function coachRelevantTasks(){
   const weekEnd=addDaysDS(coachWeekStart,6);
@@ -4640,8 +4722,310 @@ async function toggleTaskSb(id){
     if(error)throw error;
     const idx=coachTasks.findIndex(x=>x.id===id);
     if(idx>-1)coachTasks[idx]=data;
-    if(coachActiveSubTab==='semana')renderCoachSemanaPanel();else renderCoachHoyPanel();
+    if(document.getElementById('v-coaching')?.classList.contains('active'))renderCoachSemanaPanel();else renderCoachHoyPanel();
   }catch(e){toast('Error al actualizar tarea: '+e.message,'err');}
+}
+
+// ── MENSAJES (CHAT 1-A-1) ──────────────────────────────────────
+// chatSendContext={userId,senderRole,senderId} — determina "de quién" se
+// envía/lee un mensaje. El cliente lo setea a sí mismo en renderMensajesSb();
+// el admin lo setea al abrir el hilo de un cliente. Todo lo demás (enviar
+// texto/foto/voz, marcar leído) es 100% compartido entre ambos lados.
+async function loadMessagesSb(force){
+  if(!chatSendContext)return;
+  try{
+    const{data,error}=await sb.from('coaching_messages').select('*').eq('user_id',chatSendContext.userId).order('created_at').limit(200);
+    if(error)throw error;
+    chatMessages=data||[];
+  }catch(e){console.error('loadMessagesSb:',e);}
+}
+async function renderMensajesSb(){
+  if(!sbUser)return;
+  if(!chatSendContext||chatSendContext.userId!==sbUser.id||chatSendContext.senderRole!=='user'){
+    chatSendContext={userId:sbUser.id,senderRole:'user',senderId:sbUser.id};
+  }
+  await loadMessagesSb();
+  renderChatThread();
+  markChatReadSb().then(refreshChatUnreadBadge).catch(console.error);
+}
+function fmtChatDayDivider(ds){
+  const today=mazToday(),yesterday=addDaysDS(today,-1);
+  if(ds===today)return'Hoy'; if(ds===yesterday)return'Ayer';
+  return fmtDS(ds);
+}
+function fmtChatTime(iso){
+  return new Date(iso).toLocaleTimeString('es-MX',{timeZone:MAZ_TZ,hour:'numeric',minute:'2-digit',hour12:true});
+}
+function chatMsgDs(iso){
+  const parts=new Intl.DateTimeFormat('en-CA',{timeZone:MAZ_TZ,year:'numeric',month:'2-digit',day:'2-digit'}).formatToParts(new Date(iso));
+  const p=Object.fromEntries(parts.map(x=>[x.type,x.value]));
+  return p.year+'-'+p.month+'-'+p.day;
+}
+function chatVoiceDurLabel(sec){
+  sec=Math.max(0,Math.round(sec||0));
+  return Math.floor(sec/60)+':'+String(sec%60).padStart(2,'0');
+}
+// Cliente y admin comparten el mismo motor de chat pero el markup del cliente
+// (#v-mensajes) nunca se remueve del DOM, solo se oculta — así que el admin usa
+// ids con prefijo 'adm-' para no chocar con getElementById() del lado cliente.
+function chatId(base){
+  return (chatSendContext&&chatSendContext.senderRole==='admin')?('adm-'+base):base;
+}
+function renderChatThread(){
+  const el=document.getElementById(chatId('chat-thread'));
+  if(!el||!chatSendContext)return;
+  let html='',lastDs=null;
+  chatMessages.forEach(m=>{
+    const ds=chatMsgDs(m.created_at);
+    if(ds!==lastDs){
+      html+='<div class="chat-day-divider">'+esc(fmtChatDayDivider(ds))+'</div>';
+      lastDs=ds;
+    }
+    const mine=m.sender_role===chatSendContext.senderRole;
+    let inner;
+    if(m.media_type==='image'){
+      inner='<img class="chat-bubble-img" src="'+esc(m.media_url)+'" onclick="openChatLightbox(&quot;'+esc(m.media_url)+'&quot;)">';
+    }else if(m.media_type==='audio'){
+      inner='<div class="chat-voice">'
+        +'<button class="chat-voice-play" id="chat-voice-play-'+esc(m.id)+'" onclick="toggleChatAudio(&quot;'+esc(m.id)+'&quot;,&quot;'+esc(m.media_url)+'&quot;)">▶</button>'
+        +'<div class="chat-voice-track"><div class="chat-voice-fill" id="chat-voice-fill-'+esc(m.id)+'"></div></div>'
+        +'<span class="chat-voice-dur" id="chat-voice-dur-'+esc(m.id)+'">'+chatVoiceDurLabel(m.media_duration_sec)+'</span>'
+        +'</div>';
+    }else{
+      inner=esc(m.body);
+    }
+    html+='<div class="chat-row '+(mine?'mine':'theirs')+'"><div class="chat-bubble">'+inner+'<span class="chat-bubble-time">'+esc(fmtChatTime(m.created_at))+'</span></div></div>';
+  });
+  el.innerHTML=html||'<div class="coach-empty">Aún no hay mensajes. Escribe el primero.</div>';
+  el.scrollTop=el.scrollHeight;
+}
+// ── Reproductor de notas de voz ──
+let chatAudioEls={}, chatPlayingId=null;
+function toggleChatAudio(id,url){
+  let audio=chatAudioEls[id];
+  if(!audio){
+    audio=new Audio(url);
+    chatAudioEls[id]=audio;
+    audio.addEventListener('timeupdate',()=>{
+      const fill=document.getElementById('chat-voice-fill-'+id);
+      const dur=document.getElementById('chat-voice-dur-'+id);
+      if(fill&&audio.duration)fill.style.width=((audio.currentTime/audio.duration)*100)+'%';
+      if(dur&&audio.duration)dur.textContent=chatVoiceDurLabel(audio.duration-audio.currentTime);
+    });
+    audio.addEventListener('ended',()=>{
+      chatPlayingId=null;
+      const btn=document.getElementById('chat-voice-play-'+id);
+      if(btn)btn.textContent='▶';
+      const fill=document.getElementById('chat-voice-fill-'+id);
+      if(fill)fill.style.width='0%';
+      const dur=document.getElementById('chat-voice-dur-'+id);
+      const m=chatMessages.find(x=>x.id===id);
+      if(dur&&m)dur.textContent=chatVoiceDurLabel(m.media_duration_sec);
+    });
+  }
+  if(chatPlayingId&&chatPlayingId!==id){
+    const prev=chatAudioEls[chatPlayingId];
+    if(prev)prev.pause();
+    const prevBtn=document.getElementById('chat-voice-play-'+chatPlayingId);
+    if(prevBtn)prevBtn.textContent='▶';
+  }
+  const btn=document.getElementById('chat-voice-play-'+id);
+  if(audio.paused){
+    audio.play().catch(()=>toast('No se pudo reproducir el audio','err'));
+    chatPlayingId=id;
+    if(btn)btn.textContent='⏸';
+  }else{
+    audio.pause();
+    chatPlayingId=null;
+    if(btn)btn.textContent='▶';
+  }
+}
+// ── Composer ──
+function onChatInputChange(el){
+  el.style.height='auto';
+  el.style.height=Math.min(el.scrollHeight,100)+'px';
+  const hasText=el.value.trim().length>0;
+  const sendBtn=document.getElementById(chatId('chat-send-btn'));
+  const micBtn=document.getElementById(chatId('chat-mic-btn'));
+  if(sendBtn)sendBtn.style.display=hasText?'':'none';
+  if(micBtn)micBtn.style.display=hasText?'none':'';
+}
+function chatMsgPreview(text,type){
+  if(type==='image')return'📷 Foto';
+  if(type==='audio')return'🎤 Nota de voz';
+  return text.length>60?text.slice(0,60)+'…':text;
+}
+function sendChatPushNotify(preview){
+  if(!chatSendContext)return;
+  if(chatSendContext.senderRole==='user'){
+    sendPush('admin','💬 Nuevo mensaje',(curUser&&curUser.name||'Socio')+': '+preview,{tag:'new-message'});
+  }else{
+    sendPush('user:'+chatSendContext.userId,'💬 Nuevo mensaje de tu coach',preview,{tag:'new-message'});
+  }
+}
+async function sendChatMessageSb(){
+  const input=document.getElementById(chatId('chat-text-input'));
+  const text=(input&&input.value||'').trim();
+  if(!text||!chatSendContext)return;
+  try{
+    const{data,error}=await sb.from('coaching_messages').insert({
+      user_id:chatSendContext.userId,sender_role:chatSendContext.senderRole,
+      sender_id:chatSendContext.senderId,body:text
+    }).select().single();
+    if(error)throw error;
+    if(!chatMessages.some(m=>m.id===data.id))chatMessages.push(data);
+    input.value='';
+    onChatInputChange(input);
+    renderChatThread();
+    sendChatPushNotify(chatMsgPreview(text));
+  }catch(e){toast('Error al enviar mensaje: '+e.message,'err');}
+}
+function handleChatImgPick(input){
+  if(!input.files||!input.files[0])return;
+  const file=input.files[0];
+  if(file.size>5*1024*1024){toast('La imagen no debe superar 5MB','err');input.value='';return;}
+  sendChatImageSb(file).finally(()=>{input.value='';});
+}
+async function sendChatImageSb(file){
+  if(!chatSendContext)return;
+  showLoading('Subiendo foto...');
+  try{
+    const fileName=chatSendContext.userId+'/'+Date.now()+'.jpg';
+    const{data:up,error:upErr}=await sb.storage.from('coaching-chat').upload(fileName,file,{contentType:file.type||'image/jpeg',upsert:false});
+    if(upErr)throw new Error('Error subiendo imagen: '+upErr.message);
+    const{data:urlData}=sb.storage.from('coaching-chat').getPublicUrl(up.path);
+    const{data,error}=await sb.from('coaching_messages').insert({
+      user_id:chatSendContext.userId,sender_role:chatSendContext.senderRole,
+      sender_id:chatSendContext.senderId,media_url:urlData.publicUrl,media_type:'image'
+    }).select().single();
+    if(error)throw error;
+    if(!chatMessages.some(m=>m.id===data.id))chatMessages.push(data);
+    renderChatThread();
+    sendChatPushNotify(chatMsgPreview('','image'));
+  }catch(e){toast('Error al enviar foto: '+e.message,'err');}
+  finally{hideLoading();}
+}
+// ── Nota de voz (tap para empezar / tap para parar, máx 120s) ──
+function toggleVoiceRecording(){
+  if(chatMediaRecorder&&chatMediaRecorder.state==='recording'){stopVoiceRecording();}
+  else{startVoiceRecording();}
+}
+async function startVoiceRecording(){
+  if(!window.MediaRecorder){toast('Tu navegador no soporta notas de voz','err');return;}
+  try{
+    const stream=await navigator.mediaDevices.getUserMedia({audio:true});
+    chatRecordChunks=[];
+    chatMediaRecorder=new MediaRecorder(stream);
+    chatMediaRecorder._stream=stream;
+    chatMediaRecorder.ondataavailable=e=>{if(e.data&&e.data.size>0)chatRecordChunks.push(e.data);};
+    chatMediaRecorder.start();
+    chatRecordStartMs=Date.now();
+    const micBtn=document.getElementById(chatId('chat-mic-btn'));
+    if(micBtn){micBtn.textContent='⏹';micBtn.classList.add('recording');}
+    const ind=document.getElementById(chatId('chat-recording-indicator'));
+    if(ind){ind.style.display='flex';ind.innerHTML='<span class="chat-recording-dot"></span><span>Grabando <span id="'+chatId('chat-recording-time')+'">0:00</span></span>';}
+    chatRecordTimerInt=setInterval(()=>{
+      const sec=Math.floor((Date.now()-chatRecordStartMs)/1000);
+      const t=document.getElementById(chatId('chat-recording-time'));
+      if(t)t.textContent=chatVoiceDurLabel(sec);
+      if(sec>=120)stopVoiceRecording();
+    },1000);
+  }catch(e){toast('No se pudo acceder al micrófono','err');}
+}
+function stopVoiceRecording(){
+  if(!chatMediaRecorder)return;
+  const recorder=chatMediaRecorder;
+  const durationSec=Math.round((Date.now()-chatRecordStartMs)/1000);
+  if(chatRecordTimerInt){clearInterval(chatRecordTimerInt);chatRecordTimerInt=null;}
+  const micBtn=document.getElementById(chatId('chat-mic-btn'));
+  if(micBtn){micBtn.textContent='🎤';micBtn.classList.remove('recording');}
+  const ind=document.getElementById(chatId('chat-recording-indicator'));
+  if(ind){ind.style.display='none';ind.innerHTML='';}
+  recorder.onstop=()=>{
+    if(recorder._stream)recorder._stream.getTracks().forEach(t=>t.stop());
+    const chunks=chatRecordChunks;chatRecordChunks=[];chatMediaRecorder=null;
+    if(durationSec<1||!chunks.length)return;
+    const blob=new Blob(chunks,{type:recorder.mimeType||'audio/webm'});
+    sendChatVoiceSb(blob,durationSec);
+  };
+  if(recorder.state!=='inactive')recorder.stop();else recorder.onstop();
+}
+async function sendChatVoiceSb(blob,durationSec){
+  if(!chatSendContext)return;
+  showLoading('Subiendo nota de voz...');
+  try{
+    const ext=blob.type.includes('mp4')?'m4a':(blob.type.includes('ogg')?'ogg':(blob.type.includes('mpeg')?'mp3':'webm'));
+    const fileName=chatSendContext.userId+'/'+Date.now()+'.'+ext;
+    const{data:up,error:upErr}=await sb.storage.from('coaching-chat').upload(fileName,blob,{contentType:blob.type||'audio/webm',upsert:false});
+    if(upErr)throw new Error('Error subiendo nota de voz: '+upErr.message);
+    const{data:urlData}=sb.storage.from('coaching-chat').getPublicUrl(up.path);
+    const{data,error}=await sb.from('coaching_messages').insert({
+      user_id:chatSendContext.userId,sender_role:chatSendContext.senderRole,
+      sender_id:chatSendContext.senderId,media_url:urlData.publicUrl,media_type:'audio',media_duration_sec:durationSec
+    }).select().single();
+    if(error)throw error;
+    if(!chatMessages.some(m=>m.id===data.id))chatMessages.push(data);
+    renderChatThread();
+    sendChatPushNotify(chatMsgPreview('','audio'));
+  }catch(e){toast('Error al enviar nota de voz: '+e.message,'err');}
+  finally{hideLoading();}
+}
+// ── Leído / badge / realtime ──
+async function markChatReadSb(){
+  if(!chatSendContext)return;
+  try{
+    await sb.from('coaching_messages').update({read_at:new Date().toISOString()})
+      .eq('user_id',chatSendContext.userId).neq('sender_role',chatSendContext.senderRole).is('read_at',null);
+  }catch(e){console.warn('markChatReadSb:',e);}
+}
+async function refreshChatUnreadBadge(){
+  if(!sbUser)return;
+  try{
+    const{count}=await sb.from('coaching_messages').select('id',{count:'exact',head:true})
+      .eq('user_id',sbUser.id).eq('sender_role','admin').is('read_at',null);
+    document.querySelectorAll('[data-mensajes-nav-count]').forEach(el=>{
+      el.textContent=count?String(count):'';
+      el.classList.toggle('show',count>0);
+    });
+  }catch(e){console.warn('refreshChatUnreadBadge:',e);}
+}
+function startChatRealtime(){
+  stopChatRealtime();
+  if(!sbUser)return;
+  refreshChatUnreadBadge();
+  chatChannel=sb.channel('chat:'+sbUser.id)
+    .on('postgres_changes',{event:'INSERT',schema:'public',table:'coaching_messages',filter:'user_id=eq.'+sbUser.id},payload=>{
+      if(document.getElementById('v-mensajes')?.classList.contains('active')){
+        if(!chatMessages.some(m=>m.id===payload.new.id))chatMessages.push(payload.new);
+        renderChatThread();
+        markChatReadSb().then(refreshChatUnreadBadge).catch(console.error);
+      }else{
+        refreshChatUnreadBadge();
+      }
+    }).subscribe();
+  chatPollInt=setInterval(()=>{if(sbUser)refreshChatUnreadBadge();},300000);
+}
+function stopChatRealtime(){
+  if(chatChannel){sb.removeChannel(chatChannel);chatChannel=null;}
+  if(chatPollInt){clearInterval(chatPollInt);chatPollInt=null;}
+}
+// ── Lightbox de fotos (standalone, no toca el de la tienda) ──
+function openChatLightbox(url){
+  let el=document.getElementById('chat-lightbox');
+  if(!el){
+    el=document.createElement('div');
+    el.id='chat-lightbox';el.className='shop-lightbox';
+    el.onclick=function(e){if(e.target===el)closeChatLightbox();};
+    document.body.appendChild(el);
+  }
+  el.innerHTML='<button class="shop-lightbox-close" onclick="closeChatLightbox()">✕</button><img class="shop-lightbox-img" src="'+esc(url)+'" alt="">';
+  el.style.display='flex';
+  document.body.style.overflow='hidden';
+}
+function closeChatLightbox(){
+  const el=document.getElementById('chat-lightbox');
+  if(el)el.style.display='none';
+  document.body.style.overflow='';
 }
 
 // ── SCORES ──
@@ -7886,6 +8270,105 @@ async function adminCreateReceptionUserSb(){
     hideLoading();
     toast('Error: '+e.message,'err');
   }
+}
+
+// ── MENSAJES ADMIN (beta oculta) ──────────────────────────────
+async function renderMensajesAdminSb(){
+  const{data:allU}=await sb.from('profiles').select('id,name').eq('coaching_beta',true).order('name').limit(1000);
+  const clients=allU||[];
+  const{data:msgs}=await sb.from('coaching_messages').select('*').order('created_at',{ascending:false}).limit(500);
+  const byClient={};
+  (msgs||[]).forEach(m=>{
+    if(!byClient[m.user_id])byClient[m.user_id]={last:m,unread:0};
+    if(m.sender_role==='user'&&!m.read_at)byClient[m.user_id].unread++;
+  });
+  mensajesAdminClients=clients.map(c=>({...c,last:byClient[c.id]?.last||null,unread:byClient[c.id]?.unread||0}));
+  mensajesAdminClients.sort((a,b)=>(b.unread>0)-(a.unread>0)||new Date(b.last?.created_at||0)-new Date(a.last?.created_at||0));
+  renderMensajesInboxList();
+}
+function renderMensajesInboxList(filter){
+  const el=document.getElementById('mensajes-inbox-list');
+  if(!el)return;
+  const f=(filter||'').toLowerCase();
+  const list=mensajesAdminClients.filter(u=>!f||(u.name||'').toLowerCase().includes(f));
+  el.innerHTML=list.length?list.map(u=>{
+    const last=u.last;
+    const preview=!last?'Sin mensajes':(last.body?esc(last.body):(last.media_type==='image'?'📷 Foto':last.media_type==='audio'?'🎤 Nota de voz':''));
+    return '<div class="mensajes-inbox-row" onclick="openMensajesThreadAdmin(&quot;'+esc(u.id)+'&quot;)">'
+      +'<div style="width:36px;height:36px;border-radius:50%;background:var(--bl);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;color:#fff;flex-shrink:0">'+inits(u.name||'?')+'</div>'
+      +'<div style="flex:1;min-width:0">'
+      +'<div style="display:flex;align-items:center;gap:6px">'
+      +'<span style="font-size:13px;font-weight:600">'+esc(u.name||'Socio')+'</span>'
+      +(u.unread>0?'<span class="badge bg-blue" style="font-size:10px">'+u.unread+'</span>':'')
+      +'</div>'
+      +'<div class="mensajes-inbox-preview">'+preview+'</div>'
+      +'</div>'
+      +'</div>';
+  }).join(''):'<div style="padding:8px;font-size:12px;color:var(--gray)">Sin conversaciones</div>';
+}
+function filterMensajesInbox(input){renderMensajesInboxList(input.value);}
+async function openMensajesThreadAdmin(uid){
+  selectedChatClientId=uid;
+  document.getElementById('mensajes-list-area').style.display='none';
+  const view=document.getElementById('mensajes-thread-view');
+  view.style.display='block';
+  view.innerHTML='<div class="empty">Cargando conversación...</div>';
+  const client=mensajesAdminClients.find(c=>c.id===uid);
+  chatSendContext={userId:uid,senderRole:'admin',senderId:sbUser.id};
+  try{
+    await loadMessagesSb(true);
+    renderMensajesThreadAdmin(client?.name||'Socio');
+    await markChatReadSb();
+    renderMensajesAdminSb(); // refresca contadores de no-leídos del inbox en segundo plano
+  }catch(e){
+    view.innerHTML='<div class="empty">Error: '+esc(e.message)+'</div>';
+  }
+}
+function closeMensajesThreadAdmin(){
+  document.getElementById('mensajes-thread-view').style.display='none';
+  document.getElementById('mensajes-list-area').style.display='block';
+  selectedChatClientId=null;
+}
+function renderMensajesThreadAdmin(clientName){
+  const view=document.getElementById('mensajes-thread-view');
+  view.innerHTML=
+    '<div style="display:flex;align-items:center;gap:10px;margin-bottom:12px">'
+    +'<button onclick="closeMensajesThreadAdmin()" style="background:var(--card2);border:1px solid var(--border);border-radius:6px;padding:8px 14px;color:var(--white);font-size:13px;cursor:pointer">← Volver</button>'
+    +'<span style="font-size:15px;font-weight:700">'+esc(clientName)+'</span>'
+    +'</div>'
+    +'<div id="adm-chat-thread" class="chat-thread" style="max-height:calc(100vh - 280px);overflow-y:auto"></div>'
+    +'<div id="adm-chat-img-preview" class="chat-img-preview" style="display:none"></div>'
+    +'<div id="adm-chat-recording-indicator" class="chat-recording-indicator" style="display:none"></div>'
+    +'<div class="chat-composer">'
+    +'<label class="chat-attach-btn" title="Adjuntar foto">'
+    +'<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--gray)" stroke-width="1.6"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg>'
+    +'<input type="file" id="adm-chat-img-input" accept="image/*" style="display:none" onchange="handleChatImgPick(this)">'
+    +'</label>'
+    +'<textarea id="adm-chat-text-input" class="chat-text-input" placeholder="Escribe un mensaje..." rows="1" oninput="onChatInputChange(this)"></textarea>'
+    +'<button id="adm-chat-mic-btn" class="chat-mic-btn" onclick="toggleVoiceRecording()">🎤</button>'
+    +'<button id="adm-chat-send-btn" class="chat-send-btn" style="display:none" onclick="sendChatMessageSb()">➤</button>'
+    +'</div>';
+  renderChatThread(); // función compartida (agente de chat) — solo se invoca, no se redefine
+}
+function startAdminChatRealtime(){
+  stopAdminChatRealtime();
+  adminChatChannel=sb.channel('chat:admin')
+    .on('postgres_changes',{event:'INSERT',schema:'public',table:'coaching_messages'},payload=>{
+      if(payload.new.sender_role!=='user')return;
+      const threadOpen=selectedChatClientId===payload.new.user_id&&document.getElementById('mensajes-thread-view')?.style.display!=='none';
+      if(threadOpen){
+        if(!chatMessages.some(m=>m.id===payload.new.id))chatMessages.push(payload.new);
+        renderChatThread();
+        markChatReadSb();
+      }else if(document.getElementById('a-mensajes')?.classList.contains('active')){
+        renderMensajesAdminSb();
+      }
+    }).subscribe();
+  adminChatPollInt=setInterval(()=>{if(document.getElementById('a-mensajes')?.classList.contains('active'))renderMensajesAdminSb();},300000);
+}
+function stopAdminChatRealtime(){
+  if(adminChatChannel){sb.removeChannel(adminChatChannel);adminChatChannel=null;}
+  if(adminChatPollInt){clearInterval(adminChatPollInt);adminChatPollInt=null;}
 }
 
 // ── POSTS TO SUPABASE ──
