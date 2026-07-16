@@ -6,12 +6,12 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="HABIT">
 <meta name="application-name" content="HABIT">
-<link rel="manifest" href="/manifest.json?v=20260713-03">
-<link rel="apple-touch-icon" sizes="120x120" href="/icons/icon-120.png?v=20260713-03">
-<link rel="apple-touch-icon" sizes="152x152" href="/icons/icon-152.png?v=20260713-03">
-<link rel="apple-touch-icon" sizes="167x167" href="/icons/icon-167.png?v=20260713-03">
-<link rel="apple-touch-icon" sizes="180x180" href="/icons/icon-180.png?v=20260713-03">
-<link rel="icon" type="image/png" sizes="32x32" href="/icons/icon-32.png?v=20260713-03">
+<link rel="manifest" href="/manifest.json?v=20260713-04">
+<link rel="apple-touch-icon" sizes="120x120" href="/icons/icon-120.png?v=20260713-04">
+<link rel="apple-touch-icon" sizes="152x152" href="/icons/icon-152.png?v=20260713-04">
+<link rel="apple-touch-icon" sizes="167x167" href="/icons/icon-167.png?v=20260713-04">
+<link rel="apple-touch-icon" sizes="180x180" href="/icons/icon-180.png?v=20260713-04">
+<link rel="icon" type="image/png" sizes="32x32" href="/icons/icon-32.png?v=20260713-04">
 <title>HABIT</title>
 <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700;800;900&family=Share+Tech+Mono&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
@@ -360,6 +360,7 @@ input,select,button,textarea{font-family:'Montserrat',sans-serif}
 .coach-task-row.done .coach-task-title{text-decoration:line-through}
 .coach-task-title{font-size:13px;font-weight:600;color:var(--white);flex:1}
 .coach-task-due{font-size:11px;color:var(--gray)}
+.coach-task-row.overdue .coach-task-due{color:#ef4444;font-weight:700}
 .coach-empty{background:var(--card);border:1px solid var(--border);border-radius:6px;padding:24px 16px;text-align:center;color:var(--gray);font-size:13px}
 .active-session-bar{flex-shrink:0;display:flex;align-items:center;justify-content:space-between;gap:10px;background:var(--blue);color:var(--white);padding:11px 16px;cursor:pointer;font-family:'Oswald',sans-serif;font-weight:700;font-size:13px;letter-spacing:.04em}
 .active-session-bar #asb-elapsed{font-family:'Montserrat',sans-serif;font-variant-numeric:tabular-nums}
@@ -1370,7 +1371,7 @@ body.reception-mode{background:#050505}
 // ── CONFIG & SUPABASE ───────────────────────────────────────
 const SUPABASE_URL='https://pmpjteuqjusbiduevbwq.supabase.co';
 const SUPABASE_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBtcGp0ZXVxanVzYmlkdWV2YndxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc2OTI1NjUsImV4cCI6MjA5MzI2ODU2NX0.XbMzZoo2yqtrD8znLnyo_1zDfrdJAvAPj1lqGOyXnLw';
-const APP_VERSION='20260713-03';
+const APP_VERSION='20260713-04';
 const PUBLIC_APP_URL='https://habittraininghub.app/app.html';
 const PUBLIC_API_ORIGIN='https://www.habittraininghub.app';
 const SHOP_ALLOWED_EMAILS=['josephdpelayo@gmail.com'];
@@ -1826,7 +1827,7 @@ let coachWeekStart=null, coachSchedule=[], coachTasks=[], coachBoardsById={}, ac
 let chatMessages=[], chatChannel=null, chatPollInt=null, chatSendContext=null,
     chatMediaRecorder=null, chatRecordChunks=[], chatRecordStartMs=0, chatRecordTimerInt=null,
     chatPendingImgFile=null;
-let coachingAdminClients=[], selectedCoachClientId=null, coachAdminWeekStart=null, coachAdminSchedule=[], coachAdminTasks=[];
+let coachingAdminClients=[], selectedCoachClientId=null, coachAdminWeekStart=null, coachAdminSchedule=[], coachAdminTasks=[], coachClientAssignedBoardIds=new Set(), editingCoachTaskId=null;
 let mensajesAdminClients=[], selectedChatClientId=null, adminChatChannel=null, adminChatPollInt=null;
 let receptionSessions=[], receptionLastSync=null, receptionLoading=false;
 let guestFavorites=[], guestSelected=new Set(), guestSavedActive=new Set(), guestOriginalFavoriteIds=new Set(), guestDeletedIds=new Set(), guestSearchResults=[], guestActiveBookingId=null, guestSearchTimer=null, guestDirty=false, guestCollapsed=true, guestQuery='';
@@ -2663,6 +2664,12 @@ async function doLogout(){
   if(accInt){clearInterval(accInt);accInt=null;}
   if(accessDataInt){clearInterval(accessDataInt);accessDataInt=null;}
   userNotifBootstrapped=false;userNotifSeen=new Set();
+  hideActiveSessionBar();
+  activeCoachingSession=null;coachSchedule=[];coachTasks=[];coachBoardsById={};
+  coachWeekStart=null;coachDataLoadedAt=0;coachHubActiveTab='hoy';
+  selectedRoutineBoardId=null;logScoreCtx=null;
+  chatMessages=[];chatSendContext=null;
+  Object.values(_tuPrCharts).forEach(c=>{try{c.destroy();}catch(_){}});_tuPrCharts={};_tuScoreRows=null;
   await sb.auth.signOut().catch(()=>{});
   document.body.classList.remove('reception-mode');
   document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
@@ -4743,7 +4750,8 @@ async function renderHoySb(){
 }
 function coachRelevantTasks(){
   const weekEnd=addDaysDS(coachWeekStart,6);
-  return coachTasks.filter(t=>!t.due_date||(t.due_date>=coachWeekStart&&t.due_date<=weekEnd));
+  const today=mazToday();
+  return coachTasks.filter(t=>!t.due_date||(t.due_date>=coachWeekStart&&t.due_date<=weekEnd)||(!t.is_done&&t.due_date<today));
 }
 function renderCoachHoyPanel(){
   const el=document.getElementById('coach-hoy-panel');
@@ -4778,7 +4786,10 @@ function renderCoachHoyPanel(){
   }
   const relevantTasks=coachRelevantTasks();
   html+='<div class="board-card"><div class="board-hdr"><span class="board-title">Tareas</span></div><div class="board-body">'
-    +(relevantTasks.length?relevantTasks.map(t=>'<div class="coach-task-row'+(t.is_done?' done':'')+'" onclick="toggleTaskSb(&quot;'+t.id+'&quot;)"><div class="coach-task-check">'+(t.is_done?'✓':'')+'</div><div class="coach-task-title">'+esc(t.title)+'</div>'+(t.due_date?'<div class="coach-task-due">'+fmtDS(t.due_date)+'</div>':'')+'</div>').join(''):'<div class="empty">Sin tareas pendientes.</div>')
+    +(relevantTasks.length?relevantTasks.map(t=>{
+        const isOverdue=!t.is_done&&t.due_date&&t.due_date<mazToday();
+        return '<div class="coach-task-row'+(t.is_done?' done':'')+(isOverdue?' overdue':'')+'" onclick="toggleTaskSb(&quot;'+t.id+'&quot;)"><div class="coach-task-check">'+(t.is_done?'✓':'')+'</div><div class="coach-task-title">'+esc(t.title)+'</div>'+(t.due_date?'<div class="coach-task-due">'+(isOverdue?'Atrasada · ':'')+fmtDS(t.due_date)+'</div>':'')+'</div>';
+      }).join(''):'<div class="empty">Sin tareas pendientes.</div>')
     +'</div></div>';
   el.innerHTML=html;
 }
@@ -6101,16 +6112,6 @@ async function deleteBoardSb(bid){
   toast('Pizarron eliminado','ok');
   renderBoardsAdmin();
 }
-function addEx(bid){
-  const b=boards.find(x=>x.id===bid);if(!b)return;
-  const name=document.getElementById('en-'+bid).value.trim(),sets=document.getElementById('es-'+bid).value.trim(),reps=document.getElementById('er-'+bid).value.trim(),rest=document.getElementById('ert-'+bid).value.trim(),note=document.getElementById('eno-'+bid).value.trim(),video=document.getElementById('ev-'+bid).value.trim();
-  if(!name){toast('El nombre del ejercicio es obligatorio','err');return;}
-  if(!sets||isNaN(parseInt(sets))){toast('Ingresa un número de series válido','err');return;}
-  if(!reps){toast('Ingresa las repeticiones','err');return;}
-  if(video&&!isUrl(video)){toast('El link debe empezar con https://','err');return;}
-  b.exercises.push({name,sets,reps,rest,note,video});toast('Ejercicio agregado','ok');renderBoardsAdmin();
-}
-function delEx(bid,idx){const b=boards.find(x=>x.id===bid);if(!b)return;b.exercises.splice(idx,1);renderBoardsAdmin();}
 function toggleAssign(bid,uid,checked){const b=boards.find(x=>x.id===bid);if(!b)return;if(checked&&!b.assignedTo.includes(uid))b.assignedTo.push(uid);if(!checked)b.assignedTo=b.assignedTo.filter(x=>x!==uid);const u=users[uid];if(u)toast(checked?'Asignado a '+u.name:'Removido de '+u.name);}
 
 // ── SAMPLE DATA ──
@@ -8252,9 +8253,12 @@ async function toggleCoachingBetaSb(cb){
 }
 async function selectCoachingClient(uid){
   selectedCoachClientId=uid;
+  editingCoachTaskId=null;
   if(!coachAdminWeekStart)coachAdminWeekStart=mazWeekStart(mazToday());
   renderCoachingClientList(document.querySelector('#a-coaching .adm-search')?.value);
   await loadBoardsSb();
+  const{data:assignments}=await sb.from('board_assignments').select('board_id').eq('user_id',uid);
+  coachClientAssignedBoardIds=new Set((assignments||[]).map(a=>a.board_id));
   await loadCoachingWeekAdminSb();
   renderCoachingDetail();
 }
@@ -8289,7 +8293,12 @@ function renderCoachingDetail(){
   for(let i=0;i<7;i++){
     const ds=addDaysDS(coachAdminWeekStart,i);
     const row=coachAdminSchedule.find(r=>r.ds===ds);
-    const opts='<option value="">— Descanso —</option>'+boards.map(b=>'<option value="'+esc(b.id)+'" '+(row&&row.board_id===b.id?'selected':'')+'>'+esc(b.name)+'</option>').join('');
+    const boardOpt=b=>'<option value="'+esc(b.id)+'" '+(row&&row.board_id===b.id?'selected':'')+'>'+esc(b.name)+'</option>';
+    const assignedBoards=boards.filter(b=>coachClientAssignedBoardIds.has(b.id));
+    const otherBoards=boards.filter(b=>!coachClientAssignedBoardIds.has(b.id));
+    const opts='<option value="">— Descanso —</option>'
+      +(assignedBoards.length?'<optgroup label="Asignados a este socio">'+assignedBoards.map(boardOpt).join('')+'</optgroup>':'')
+      +(otherBoards.length?'<optgroup label="Resto del catálogo">'+otherBoards.map(boardOpt).join('')+'</optgroup>':'');
     dayRows+='<div style="display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--border)">'
       +'<div style="width:64px;font-size:12px;font-weight:700;color:var(--gray)">'+DN_MON[i]+' '+parseDS(ds).d+'</div>'
       +'<select data-coach-day="'+ds+'" style="flex:1;background:var(--card2);border:1px solid var(--border);border-radius:4px;padding:9px;font-size:13px;color:var(--white)">'+opts+'</select>'
@@ -8298,6 +8307,7 @@ function renderCoachingDetail(){
   const tasksHtml=coachAdminTasks.length?coachAdminTasks.map(t=>
     '<div style="display:flex;align-items:center;gap:8px;padding:8px 0;border-bottom:1px solid var(--border)">'
     +'<span style="flex:1;font-size:13px;'+(t.is_done?'color:var(--gray);text-decoration:line-through':'color:var(--white)')+'">'+esc(t.title)+(t.due_date?' · '+fmtDS(t.due_date):'')+'</span>'
+    +'<button class="btn-sm" style="padding:4px 8px" data-tid="'+esc(t.id)+'" data-ttitle="'+esc(t.title)+'" data-tdue="'+esc(t.due_date||'')+'" onclick="startEditCoachingTaskSb(this)">Editar</button>'
     +'<button class="btn-sm bred" style="padding:4px 8px" onclick="deleteCoachingTaskSb(&quot;'+t.id+'&quot;)">Eliminar</button>'
     +'</div>'
   ).join(''):'<div class="empty">Sin tareas.</div>';
@@ -8312,10 +8322,13 @@ function renderCoachingDetail(){
     +'<button class="btn" style="margin-top:12px" onclick="saveCoachingWeekSb()">Guardar semana</button>'
     +'</div>'
     +'<div style="background:var(--card);border:1px solid var(--border);border-radius:6px;padding:1rem">'
-    +'<p class="slbl" style="margin-bottom:8px">Nueva tarea</p>'
+    +'<p class="slbl" style="margin-bottom:8px" id="coach-task-form-label">'+(editingCoachTaskId?'Editar tarea':'Nueva tarea')+'</p>'
     +'<div class="field"><label>Titulo</label><input type="text" id="coach-task-title-in" placeholder="Ej: Registro de peso"></div>'
     +'<div class="field"><label>Fecha limite (opcional)</label><input type="date" id="coach-task-due-in"></div>'
-    +'<button class="btn" onclick="addCoachingTaskSb()">Asignar tarea</button>'
+    +'<div style="display:flex;gap:8px">'
+    +'<button class="btn" style="flex:1" onclick="addCoachingTaskSb()">'+(editingCoachTaskId?'Guardar cambios':'Asignar tarea')+'</button>'
+    +(editingCoachTaskId?'<button class="btn-sm" onclick="cancelEditCoachingTaskSb()">Cancelar</button>':'')
+    +'</div>'
     +'<div style="margin-top:14px">'+tasksHtml+'</div>'
     +'</div>'
     +'<div style="background:var(--card);border:1px solid var(--border);border-radius:6px;padding:1rem;margin-top:1rem">'
@@ -8366,6 +8379,19 @@ async function saveCoachingWeekSb(){
     renderCoachingDetail();
   }catch(e){toast('Error al guardar: '+e.message,'err');}
 }
+function startEditCoachingTaskSb(btn){
+  editingCoachTaskId=btn.dataset.tid;
+  renderCoachingDetail();
+  const titleIn=document.getElementById('coach-task-title-in');
+  const dueIn=document.getElementById('coach-task-due-in');
+  if(titleIn)titleIn.value=btn.dataset.ttitle||'';
+  if(dueIn)dueIn.value=btn.dataset.tdue||'';
+  titleIn?.focus();
+}
+function cancelEditCoachingTaskSb(){
+  editingCoachTaskId=null;
+  renderCoachingDetail();
+}
 async function addCoachingTaskSb(){
   if(!selectedCoachClientId)return;
   const titleIn=document.getElementById('coach-task-title-in');
@@ -8374,6 +8400,15 @@ async function addCoachingTaskSb(){
   const due=dueIn.value||null;
   if(!title){toast('Escribe un titulo','err');return;}
   try{
+    if(editingCoachTaskId){
+      const{error}=await sb.from('coaching_tasks').update({title,due_date:due}).eq('id',editingCoachTaskId);
+      if(error)throw error;
+      editingCoachTaskId=null;
+      await loadCoachingWeekAdminSb();
+      renderCoachingDetail();
+      toast('Tarea actualizada','ok');
+      return;
+    }
     const{error}=await sb.from('coaching_tasks').insert({user_id:selectedCoachClientId,title,due_date:due,created_by:sbUser.id});
     if(error)throw error;
     titleIn.value='';dueIn.value='';
@@ -8387,6 +8422,7 @@ async function deleteCoachingTaskSb(id){
   try{
     const{error}=await sb.from('coaching_tasks').delete().eq('id',id);
     if(error)throw error;
+    if(editingCoachTaskId===id)editingCoachTaskId=null;
     await loadCoachingWeekAdminSb();
     renderCoachingDetail();
   }catch(e){toast('Error: '+e.message,'err');}
