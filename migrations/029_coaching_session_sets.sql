@@ -21,10 +21,12 @@ create index if not exists idx_coaching_session_sets_schedule on public.coaching
 
 alter table public.coaching_session_sets enable row level security;
 
+drop policy if exists "Users manage own session sets" on public.coaching_session_sets;
 create policy "Users manage own session sets"
   on public.coaching_session_sets for all
   using (auth.uid() = user_id) with check (auth.uid() = user_id);
 
+drop policy if exists "Admin view all session sets" on public.coaching_session_sets;
 create policy "Admin view all session sets"
   on public.coaching_session_sets for select
   using (exists(select 1 from public.profiles where id=auth.uid() and role='admin'));

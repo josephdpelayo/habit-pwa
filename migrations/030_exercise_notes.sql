@@ -14,10 +14,12 @@ create table if not exists public.exercise_notes (
 
 alter table public.exercise_notes enable row level security;
 
+drop policy if exists "Users manage own exercise notes" on public.exercise_notes;
 create policy "Users manage own exercise notes"
   on public.exercise_notes for all
   using (auth.uid() = user_id) with check (auth.uid() = user_id);
 
+drop policy if exists "Admin view all exercise notes" on public.exercise_notes;
 create policy "Admin view all exercise notes"
   on public.exercise_notes for select
   using (exists(select 1 from public.profiles where id=auth.uid() and role='admin'));
