@@ -6,12 +6,12 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="HABIT">
 <meta name="application-name" content="HABIT">
-<link rel="manifest" href="/manifest.json?v=20260713-02">
-<link rel="apple-touch-icon" sizes="120x120" href="/icons/icon-120.png?v=20260713-02">
-<link rel="apple-touch-icon" sizes="152x152" href="/icons/icon-152.png?v=20260713-02">
-<link rel="apple-touch-icon" sizes="167x167" href="/icons/icon-167.png?v=20260713-02">
-<link rel="apple-touch-icon" sizes="180x180" href="/icons/icon-180.png?v=20260713-02">
-<link rel="icon" type="image/png" sizes="32x32" href="/icons/icon-32.png?v=20260713-02">
+<link rel="manifest" href="/manifest.json?v=20260713-03">
+<link rel="apple-touch-icon" sizes="120x120" href="/icons/icon-120.png?v=20260713-03">
+<link rel="apple-touch-icon" sizes="152x152" href="/icons/icon-152.png?v=20260713-03">
+<link rel="apple-touch-icon" sizes="167x167" href="/icons/icon-167.png?v=20260713-03">
+<link rel="apple-touch-icon" sizes="180x180" href="/icons/icon-180.png?v=20260713-03">
+<link rel="icon" type="image/png" sizes="32x32" href="/icons/icon-32.png?v=20260713-03">
 <title>HABIT</title>
 <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700;800;900&family=Share+Tech+Mono&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
@@ -1370,7 +1370,7 @@ body.reception-mode{background:#050505}
 // ── CONFIG & SUPABASE ───────────────────────────────────────
 const SUPABASE_URL='https://pmpjteuqjusbiduevbwq.supabase.co';
 const SUPABASE_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBtcGp0ZXVxanVzYmlkdWV2YndxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc2OTI1NjUsImV4cCI6MjA5MzI2ODU2NX0.XbMzZoo2yqtrD8znLnyo_1zDfrdJAvAPj1lqGOyXnLw';
-const APP_VERSION='20260713-02';
+const APP_VERSION='20260713-03';
 const PUBLIC_APP_URL='https://habittraininghub.app/app.html';
 const PUBLIC_API_ORIGIN='https://www.habittraininghub.app';
 const SHOP_ALLOWED_EMAILS=['josephdpelayo@gmail.com'];
@@ -4756,6 +4756,13 @@ function renderCoachHoyPanel(){
     const label=missedRows.length===1?('el entreno de '+fmtDS(missedRows[0].ds)):(missedRows.length+' entrenos esta semana');
     html+='<div class="coach-alert"><span>👋 Te perdiste '+esc(label)+'</span><button class="coach-alert-close" onclick="this.parentElement.remove()">×</button></div>';
   }
+  if(activeCoachingSession&&activeCoachingSession.ds!==today){
+    html+='<div class="coach-alert"><span>⏱ Tienes un entreno sin terminar de '+esc(fmtDS(activeCoachingSession.ds))+' ('+esc(activeCoachingSession.board_name)+')</span></div>'
+      +'<div class="board-card"><div class="board-body" style="display:flex;gap:8px">'
+      +'<button class="btn" style="flex:1" onclick="finishCoachingSessionSb()">Finalizar entreno</button>'
+      +'<button class="btn-sm" style="flex:1;background:rgba(239,68,68,.12);border-color:rgba(239,68,68,.3);color:#ef4444" onclick="cancelCoachingSessionSb()">Cancelar</button>'
+      +'</div></div>';
+  }
   if(!todayRow){
     html+='<div class="coach-empty">No tienes rutina programada para hoy.<br>Descansa o pide a tu coach que te programe una.</div>';
   }else if(todayRow.status==='done'){
@@ -4831,6 +4838,20 @@ async function finishCoachingSessionSb(){
     renderCoachHoyPanel();
     toast('¡Entreno completado!','ok');
   }catch(e){toast('Error al finalizar entreno: '+e.message,'err');}
+}
+async function cancelCoachingSessionSb(){
+  if(!activeCoachingSession)return;
+  if(!confirm('¿Cancelar este entreno? Se perderá el progreso de esta sesión.'))return;
+  try{
+    const{data,error}=await sb.from('coaching_schedule').update({status:'scheduled',started_at:null,duration_sec:null}).eq('id',activeCoachingSession.id).select().single();
+    if(error)throw error;
+    const idx=coachSchedule.findIndex(r=>r.id===data.id);
+    if(idx>-1)coachSchedule[idx]=data;
+    activeCoachingSession=null;
+    hideActiveSessionBar();
+    renderCoachHoyPanel();
+    toast('Entreno cancelado','ok');
+  }catch(e){toast('Error al cancelar: '+e.message,'err');}
 }
 async function loadActiveCoachingSessionSb(){
   if(!sbUser)return;
@@ -8296,7 +8317,25 @@ function renderCoachingDetail(){
     +'<div class="field"><label>Fecha limite (opcional)</label><input type="date" id="coach-task-due-in"></div>'
     +'<button class="btn" onclick="addCoachingTaskSb()">Asignar tarea</button>'
     +'<div style="margin-top:14px">'+tasksHtml+'</div>'
+    +'</div>'
+    +'<div style="background:var(--card);border:1px solid var(--border);border-radius:6px;padding:1rem;margin-top:1rem">'
+    +'<p class="slbl" style="margin-bottom:8px">Progreso de peso</p>'
+    +'<div id="coach-admin-scores"><div class="empty">Cargando...</div></div>'
     +'</div>';
+  renderCoachingAdminScores().catch(console.error);
+}
+let _coachAdminPrCharts={};
+async function renderCoachingAdminScores(){
+  const el=document.getElementById('coach-admin-scores');
+  if(!el||!selectedCoachClientId)return;
+  try{
+    const{data,error}=await sb.from('user_scores').select('*').eq('user_id',selectedCoachClientId).order('logged_at',{ascending:true}).limit(300);
+    if(error)throw error;
+    renderPrCardsInto(el,_coachAdminPrCharts,data||[],'kg','ca');
+  }catch(e){
+    el.innerHTML='<div class="empty">Error: '+e.message+'</div>';
+    console.error('renderCoachingAdminScores:',e);
+  }
 }
 async function saveCoachingWeekSb(){
   if(!selectedCoachClientId)return;
