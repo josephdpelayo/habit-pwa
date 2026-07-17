@@ -6,12 +6,12 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="HABIT">
 <meta name="application-name" content="HABIT">
-<link rel="manifest" href="/manifest.json?v=20260713-08">
-<link rel="apple-touch-icon" sizes="120x120" href="/icons/icon-120.png?v=20260713-08">
-<link rel="apple-touch-icon" sizes="152x152" href="/icons/icon-152.png?v=20260713-08">
-<link rel="apple-touch-icon" sizes="167x167" href="/icons/icon-167.png?v=20260713-08">
-<link rel="apple-touch-icon" sizes="180x180" href="/icons/icon-180.png?v=20260713-08">
-<link rel="icon" type="image/png" sizes="32x32" href="/icons/icon-32.png?v=20260713-08">
+<link rel="manifest" href="/manifest.json?v=20260713-09">
+<link rel="apple-touch-icon" sizes="120x120" href="/icons/icon-120.png?v=20260713-09">
+<link rel="apple-touch-icon" sizes="152x152" href="/icons/icon-152.png?v=20260713-09">
+<link rel="apple-touch-icon" sizes="167x167" href="/icons/icon-167.png?v=20260713-09">
+<link rel="apple-touch-icon" sizes="180x180" href="/icons/icon-180.png?v=20260713-09">
+<link rel="icon" type="image/png" sizes="32x32" href="/icons/icon-32.png?v=20260713-09">
 <title>HABIT</title>
 <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700;800;900&family=Share+Tech+Mono&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
@@ -343,8 +343,9 @@ input,select,button,textarea{font-family:'Montserrat',sans-serif}
 .video-modal-frame{width:min(92vw,430px);height:min(78vh,760px);aspect-ratio:9/16;background:#000;border:1px solid var(--border);overflow:hidden}
 .log-score-btn{display:flex;align-items:center;justify-content:center;gap:8px;padding:10px 12px;background:rgba(139,92,246,.1);border-top:1px solid rgba(139,92,246,.2);cursor:pointer;color:var(--purple);font-size:12px;font-weight:600;letter-spacing:.04em;text-transform:uppercase}
 .set-tracker{padding:12px;background:var(--card2);border-top:1px solid var(--border)}
-.set-tracker-hdr{display:grid;grid-template-columns:36px 1fr 40px;gap:8px;font-size:10px;font-weight:700;color:var(--gray);letter-spacing:.06em;text-transform:uppercase;padding:0 2px 6px}
-.set-row{display:grid;grid-template-columns:36px 1fr 40px;gap:8px;align-items:center;margin-bottom:6px}
+.set-tracker-hdr{display:grid;grid-template-columns:28px 1fr 1fr 40px;gap:6px;font-size:10px;font-weight:700;color:var(--gray);letter-spacing:.06em;text-transform:uppercase;padding:0 2px 6px;text-align:center}
+.set-tracker-hdr span:first-child{text-align:left}
+.set-row{display:grid;grid-template-columns:28px 1fr 1fr 40px;gap:6px;align-items:center;margin-bottom:6px}
 .set-num{font-size:12px;font-weight:700;color:var(--gray);text-align:center}
 .set-reps-in{background:var(--card);border:1px solid var(--border);border-radius:4px;padding:8px;font-size:13px;color:var(--white);width:100%}
 .set-check{width:32px;height:32px;border-radius:6px;border:1.5px solid var(--border);background:var(--card);color:transparent;font-size:14px;font-weight:900;cursor:pointer;justify-self:center}
@@ -377,6 +378,9 @@ input,select,button,textarea{font-family:'Montserrat',sans-serif}
 .coach-empty{background:var(--card);border:1px solid var(--border);border-radius:6px;padding:24px 16px;text-align:center;color:var(--gray);font-size:13px}
 .active-session-bar{flex-shrink:0;display:flex;align-items:center;justify-content:space-between;gap:10px;background:var(--blue);color:var(--white);padding:11px 16px;cursor:pointer;font-family:'Oswald',sans-serif;font-weight:700;font-size:13px;letter-spacing:.04em}
 .active-session-bar #asb-elapsed{font-family:'Montserrat',sans-serif;font-variant-numeric:tabular-nums}
+.rest-timer-bar{background:var(--amber);color:#1a1200}
+.rest-timer-bar .rest-timer-hint{font-size:10px;font-weight:600;text-transform:none;letter-spacing:0;opacity:.75}
+#rest-timer-label{font-variant-numeric:tabular-nums}
 
 /* MENSAJES / CHAT */
 .chat-thread{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:1rem;display:flex;flex-direction:column;gap:4px}
@@ -956,6 +960,12 @@ body.reception-mode{background:#050505}
     <span id="asb-elapsed">00:00</span>
   </div>
 
+  <!-- REST TIMER BAR (descanso entre series) -->
+  <div id="rest-timer-bar" class="active-session-bar rest-timer-bar" style="display:none" onclick="stopRestTimer()">
+    <span id="rest-timer-label">Descanso</span>
+    <span class="rest-timer-hint">Toca para saltar</span>
+  </div>
+
   <!-- BOTTOM NAV -->
   <div class="bnav">
     <div class="bnav-inner">
@@ -1404,7 +1414,7 @@ body.reception-mode{background:#050505}
 // ── CONFIG & SUPABASE ───────────────────────────────────────
 const SUPABASE_URL='https://pmpjteuqjusbiduevbwq.supabase.co';
 const SUPABASE_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBtcGp0ZXVxanVzYmlkdWV2YndxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc2OTI1NjUsImV4cCI6MjA5MzI2ODU2NX0.XbMzZoo2yqtrD8znLnyo_1zDfrdJAvAPj1lqGOyXnLw';
-const APP_VERSION='20260713-08';
+const APP_VERSION='20260713-09';
 const MUSCLE_GROUPS=['Pecho','Espalda','Piernas','Hombros','Brazos','Core','Cardio','Full Body'];
 function muscleGroupSelectHtml(id,selected){
   return '<select id="'+id+'" style="width:100%;background:var(--card);border:1px solid var(--border);border-radius:4px;padding:8px;font-size:12px;color:var(--white);outline:none;margin-bottom:6px;box-sizing:border-box">'
@@ -2707,6 +2717,7 @@ async function doLogout(){
   if(accessDataInt){clearInterval(accessDataInt);accessDataInt=null;}
   userNotifBootstrapped=false;userNotifSeen=new Set();
   hideActiveSessionBar();
+  stopRestTimer();
   activeCoachingSession=null;coachSchedule=[];coachTasks=[];coachBoardsById={};
   coachWeekStart=null;coachDataLoadedAt=0;coachDataLoadError=null;coachHubActiveTab='hoy';coachSessionSets={};exerciseNotesMap={};
   selectedRoutineBoardId=null;logScoreCtx=null;
@@ -4730,10 +4741,11 @@ function renderSetTrackerHtml(sessionCtx,exKey,ex){
   const sets=sessionCtx.sets[exKey]||[];
   if(!sets.length)return'';
   return '<div class="set-tracker">'
-    +'<div class="set-tracker-hdr"><span>SERIE</span><span>REPS</span><span></span></div>'
+    +'<div class="set-tracker-hdr"><span>SERIE</span><span>KG</span><span>REPS</span><span></span></div>'
     +sets.map(s=>'<div class="set-row">'
       +'<span class="set-num">'+(s.set_idx+1)+'</span>'
-      +'<input class="set-reps-in" type="text" value="'+esc(s.actual_reps||s.reps_target||'')+'" onchange="updateSetRepsSb(&quot;'+s.id+'&quot;,this.value)">'
+      +'<input class="set-reps-in" type="number" inputmode="decimal" placeholder="kg" value="'+(s.weight!=null?s.weight:'')+'" onchange="updateSetWeightSb(&quot;'+s.id+'&quot;,this.value)">'
+      +'<input class="set-reps-in" type="text" placeholder="reps" value="'+esc(s.actual_reps||s.reps_target||'')+'" onchange="updateSetRepsSb(&quot;'+s.id+'&quot;,this.value)">'
       +'<button class="set-check'+(s.done?' done':'')+'" onclick="toggleSetDoneSb(&quot;'+s.id+'&quot;,'+(!s.done)+')">'+(s.done?'✓':'')+'</button>'
       +'</div>').join('')
     +'<div class="set-tracker-actions">'
@@ -4741,12 +4753,45 @@ function renderSetTrackerHtml(sessionCtx,exKey,ex){
     +'<button class="btn-sm" onclick="markAllSetsSb(&quot;'+esc(exKey)+'&quot;)">Marcar Todo</button>'
     +'</div></div>';
 }
+function findExerciseByExKey(exKey){
+  if(!activeCoachingSession)return null;
+  const board=coachBoardsById[activeCoachingSession.board_id];
+  if(!board)return null;
+  const exercises=board.exercises||[];
+  for(let i=0;i<exercises.length;i++){
+    const k=exercises[i].id||(activeCoachingSession.board_id+'_idx_'+i);
+    if(k===exKey)return{ex:exercises[i],idx:i};
+  }
+  return null;
+}
+function logSetToUserScores(row){
+  if(!activeCoachingSession||row.weight==null)return;
+  const found=findExerciseByExKey(row.ex_key);
+  if(!found)return;
+  sb.from('user_scores').insert({
+    user_id:sbUser.id,board_id:activeCoachingSession.board_id,ex_idx:found.idx,ex_key:row.ex_key,
+    ex_name:found.ex.name,weight:row.weight,reps:row.actual_reps||row.reps_target||null
+  }).then(({error})=>{if(error)console.error('logSetToUserScores:',error);});
+}
 async function toggleSetDoneSb(setId,newDone){
   try{
     const{data,error}=await sb.from('coaching_session_sets').update({done:newDone,updated_at:new Date().toISOString()}).eq('id',setId).select().single();
     if(error)throw error;
     const arr=coachSessionSets[data.ex_key];
-    if(arr){const idx=arr.findIndex(s=>s.id===setId);if(idx>-1)arr[idx]=data;}
+    if(arr){
+      const idx=arr.findIndex(s=>s.id===setId);
+      if(idx>-1)arr[idx]=data;
+      if(newDone){
+        logSetToUserScores(data);
+        const next=arr.find(s=>s.set_idx===data.set_idx+1&&!s.done);
+        if(next&&data.weight!=null&&next.weight!==data.weight){
+          const{data:nextData,error:nErr}=await sb.from('coaching_session_sets').update({weight:data.weight}).eq('id',next.id).select().single();
+          if(!nErr){const ni=arr.findIndex(s=>s.id===next.id);if(ni>-1)arr[ni]=nextData;}
+        }
+        const found=findExerciseByExKey(data.ex_key);
+        if(found)startRestTimerForExercise(found.ex);
+      }
+    }
     renderCoachHoyPanel();
   }catch(e){toast('Error: '+e.message,'err');}
 }
@@ -4758,11 +4803,21 @@ async function updateSetRepsSb(setId,value){
     if(arr){const idx=arr.findIndex(s=>s.id===setId);if(idx>-1)arr[idx]=data;}
   }catch(e){toast('Error: '+e.message,'err');}
 }
+async function updateSetWeightSb(setId,value){
+  const w=value===''?null:parseFloat(value);
+  try{
+    const{data,error}=await sb.from('coaching_session_sets').update({weight:(w==null||isNaN(w))?null:w,updated_at:new Date().toISOString()}).eq('id',setId).select().single();
+    if(error)throw error;
+    const arr=coachSessionSets[data.ex_key];
+    if(arr){const idx=arr.findIndex(s=>s.id===setId);if(idx>-1)arr[idx]=data;}
+  }catch(e){toast('Error: '+e.message,'err');}
+}
 async function addSetSb(scheduleId,exKey,defaultReps){
   const arr=coachSessionSets[exKey]||[];
   const nextIdx=arr.length;
+  const lastWeight=arr.length?arr[arr.length-1].weight:null;
   try{
-    const{data,error}=await sb.from('coaching_session_sets').insert({schedule_id:scheduleId,user_id:sbUser.id,ex_key:exKey,set_idx:nextIdx,reps_target:defaultReps||null,done:false}).select().single();
+    const{data,error}=await sb.from('coaching_session_sets').insert({schedule_id:scheduleId,user_id:sbUser.id,ex_key:exKey,set_idx:nextIdx,reps_target:defaultReps||null,weight:lastWeight,done:false}).select().single();
     if(error)throw error;
     if(!coachSessionSets[exKey])coachSessionSets[exKey]=[];
     coachSessionSets[exKey].push(data);
@@ -4776,7 +4831,7 @@ async function markAllSetsSb(exKey){
   try{
     const{data,error}=await sb.from('coaching_session_sets').update({done:true,updated_at:new Date().toISOString()}).in('id',ids).select();
     if(error)throw error;
-    (data||[]).forEach(row=>{const idx=arr.findIndex(s=>s.id===row.id);if(idx>-1)arr[idx]=row;});
+    (data||[]).forEach(row=>{const idx=arr.findIndex(s=>s.id===row.id);if(idx>-1)arr[idx]=row;logSetToUserScores(row);});
     renderCoachHoyPanel();
   }catch(e){toast('Error: '+e.message,'err');}
 }
@@ -4874,12 +4929,53 @@ async function renderCoachRutinasPanel(){
     const tabs=myBoards.map(b=>'<button class="routine-tab '+(b.id===selected.id?'active':'')+'" onclick="selectRoutineBoard(&quot;'+esc(b.id)+'&quot;)">'+esc(b.name)+'</button>').join('');
     const exercises=selected.exercises||[];
     const exHtml=renderExerciseListHtml(exercises,selected.id,expandedVideos,'toggleVideo',selected.id);
+    const today=mazToday();
+    const todayRow=coachSchedule.find(r=>r.ds===today);
+    let startBtnHtml;
+    if(todayRow&&todayRow.board_id===selected.id&&todayRow.status==='done'){
+      startBtnHtml='<div class="badge bg-green" style="display:block;text-align:center;padding:10px;margin-bottom:12px">Completado hoy ✓</div>';
+    }else if(todayRow&&todayRow.board_id===selected.id&&todayRow.status==='in_progress'){
+      startBtnHtml='<button class="btn" style="width:100%;margin-bottom:12px" onclick="coachHubActiveTab=&quot;hoy&quot;;coachHubTab(&quot;hoy&quot;,null)">▶ Continuar entreno en curso</button>';
+    }else{
+      startBtnHtml='<button class="btn" style="width:100%;margin-bottom:12px" onclick="startWorkoutFromBoardSb(&quot;'+esc(selected.id)+'&quot;,&quot;'+esc(selected.name)+'&quot;,&quot;'+esc(selected.color||'#2563eb')+'&quot;)">▶ Iniciar entreno</button>';
+    }
     el.innerHTML='<div class="routine-tabs">'+tabs+'</div>'
+      +startBtnHtml
       +'<div class="board-card"><div class="board-hdr"><div style="display:flex;align-items:center;gap:8px;min-width:0"><div style="width:10px;height:10px;border-radius:50%;background:'+esc(selected.color||'#2563eb')+'"></div><span class="board-title">'+esc(selected.name)+'</span></div><span class="badge bg-blue">'+exercises.length+' ejercicios</span></div><div class="board-body">'+exHtml+'</div></div>';
   }catch(e){
     el.innerHTML='<div class="empty">Error cargando rutinas: '+e.message+'</div>';
     console.error('renderCoachRutinasPanel:',e);
   }
+}
+async function startWorkoutFromBoardSb(boardId,boardName,boardColor){
+  const today=mazToday();
+  let todayRow=coachSchedule.find(r=>r.ds===today);
+  try{
+    if(todayRow&&(todayRow.status==='in_progress'||todayRow.status==='done')&&todayRow.board_id!==boardId){
+      toast('Ya tienes un entreno '+(todayRow.status==='done'?'completado':'en progreso')+' hoy: '+todayRow.board_name,'warn');
+      return;
+    }
+    if(todayRow&&todayRow.board_id!==boardId){
+      const{data,error}=await sb.from('coaching_schedule').update({board_id:boardId,board_name:boardName,board_color:boardColor}).eq('id',todayRow.id).select().single();
+      if(error)throw error;
+      todayRow=data;
+      const idx=coachSchedule.findIndex(r=>r.id===data.id);
+      if(idx>-1)coachSchedule[idx]=data;
+    }else if(!todayRow){
+      const{data,error}=await sb.from('coaching_schedule').insert({user_id:sbUser.id,board_id:boardId,board_name:boardName,board_color:boardColor,ds:today,created_by:sbUser.id}).select().single();
+      if(error)throw error;
+      todayRow=data;
+      coachSchedule.push(data);
+    }
+    if(!coachBoardsById[boardId]){
+      const{data:brd}=await sb.from('boards').select('id,exercises').eq('id',boardId).single();
+      if(brd)coachBoardsById[boardId]=brd;
+    }
+    await startCoachingSessionSb(todayRow.id);
+    coachHubActiveTab='hoy';
+    coachHubTab('hoy',null);
+    toast('¡Entreno iniciado! 💪','ok');
+  }catch(e){toast('Error al iniciar: '+e.message,'err');}
 }
 
 // ── COACHING (beta oculta) ──────────────────────────────────
@@ -5006,11 +5102,19 @@ function renderCoachSemanaPanel(){
 async function seedSessionSetsSb(scheduleRow){
   const board=coachBoardsById[scheduleRow.board_id];
   const exercises=(board&&board.exercises)||[];
+  if(!exercises.length)return;
+  const exKeys=exercises.map((ex,i)=>ex.id||(scheduleRow.board_id+'_idx_'+i));
+  const lastWeights={};
+  try{
+    const{data}=await sb.from('user_scores').select('ex_key,weight').eq('user_id',sbUser.id).in('ex_key',exKeys).order('logged_at',{ascending:true});
+    (data||[]).forEach(r=>{lastWeights[r.ex_key]=r.weight;}); // orden ascendente: el último sobreescribe = más reciente
+  }catch(e){console.error('seedSessionSetsSb weights:',e);}
   const rows=[];
   exercises.forEach((ex,i)=>{
-    const exKey=ex.id||(scheduleRow.board_id+'_idx_'+i);
+    const exKey=exKeys[i];
     const n=Math.max(1,parseInt(ex.sets,10)||1);
-    for(let s=0;s<n;s++)rows.push({schedule_id:scheduleRow.id,user_id:sbUser.id,ex_key:exKey,set_idx:s,reps_target:ex.reps||null,done:false});
+    const prevWeight=lastWeights[exKey];
+    for(let s=0;s<n;s++)rows.push({schedule_id:scheduleRow.id,user_id:sbUser.id,ex_key:exKey,set_idx:s,reps_target:ex.reps||null,weight:prevWeight!=null?prevWeight:null,done:false});
   });
   if(!rows.length)return;
   try{
@@ -5054,6 +5158,7 @@ async function finishCoachingSessionSb(){
     activeCoachingSession=null;
     coachSessionSets={};
     hideActiveSessionBar();
+    stopRestTimer();
     renderCoachHoyPanel();
     toast('¡Entreno completado!','ok');
   }catch(e){toast('Error al finalizar entreno: '+e.message,'err');}
@@ -5070,6 +5175,7 @@ async function cancelCoachingSessionSb(){
     activeCoachingSession=null;
     coachSessionSets={};
     hideActiveSessionBar();
+    stopRestTimer();
     renderCoachHoyPanel();
     toast('Entreno cancelado','ok');
   }catch(e){toast('Error al cancelar: '+e.message,'err');}
@@ -5102,6 +5208,37 @@ function tickActiveSessionBar(){
   if(!el)return;
   const sec=Math.max(0,Math.floor((Date.now()-new Date(activeCoachingSession.started_at).getTime())/1000));
   el.textContent=pad(Math.floor(sec/60))+':'+pad(sec%60);
+}
+let restTimerEndAt=0, restTimerInt=null, restTimerExName='';
+function parseRestSeconds(restStr){
+  if(!restStr)return 0;
+  const m=String(restStr).match(/(\d+)/);
+  if(!m)return 0;
+  const n=parseInt(m[1],10);
+  return /min/i.test(restStr)?n*60:n;
+}
+function startRestTimerForExercise(ex){
+  const secs=ex?parseRestSeconds(ex.rest):0;
+  if(!secs)return;
+  restTimerEndAt=Date.now()+secs*1000;
+  restTimerExName=ex.name||'';
+  const bar=document.getElementById('rest-timer-bar');
+  if(bar)bar.style.display='flex';
+  if(restTimerInt)clearInterval(restTimerInt);
+  restTimerInt=setInterval(tickRestTimer,500);
+  tickRestTimer();
+}
+function tickRestTimer(){
+  const lbl=document.getElementById('rest-timer-label');
+  if(!lbl)return;
+  const remain=Math.max(0,Math.round((restTimerEndAt-Date.now())/1000));
+  lbl.textContent='Descanso · '+restTimerExName+' · '+pad(Math.floor(remain/60))+':'+pad(remain%60);
+  if(remain<=0){stopRestTimer();toast('¡Descanso terminado! 💪','ok');}
+}
+function stopRestTimer(){
+  if(restTimerInt){clearInterval(restTimerInt);restTimerInt=null;}
+  const bar=document.getElementById('rest-timer-bar');
+  if(bar)bar.style.display='none';
 }
 async function toggleTaskSb(id){
   const t=coachTasks.find(x=>x.id===id);
