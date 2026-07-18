@@ -6,12 +6,12 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="HABIT">
 <meta name="application-name" content="HABIT">
-<link rel="manifest" href="/manifest.json?v=20260718-08">
-<link rel="apple-touch-icon" sizes="120x120" href="/icons/icon-120.png?v=20260718-08">
-<link rel="apple-touch-icon" sizes="152x152" href="/icons/icon-152.png?v=20260718-08">
-<link rel="apple-touch-icon" sizes="167x167" href="/icons/icon-167.png?v=20260718-08">
-<link rel="apple-touch-icon" sizes="180x180" href="/icons/icon-180.png?v=20260718-08">
-<link rel="icon" type="image/png" sizes="32x32" href="/icons/icon-32.png?v=20260718-08">
+<link rel="manifest" href="/manifest.json?v=20260718-09">
+<link rel="apple-touch-icon" sizes="120x120" href="/icons/icon-120.png?v=20260718-09">
+<link rel="apple-touch-icon" sizes="152x152" href="/icons/icon-152.png?v=20260718-09">
+<link rel="apple-touch-icon" sizes="167x167" href="/icons/icon-167.png?v=20260718-09">
+<link rel="apple-touch-icon" sizes="180x180" href="/icons/icon-180.png?v=20260718-09">
+<link rel="icon" type="image/png" sizes="32x32" href="/icons/icon-32.png?v=20260718-09">
 <title>HABIT</title>
 <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700;800;900&family=Share+Tech+Mono&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
@@ -383,6 +383,13 @@ input,select,button,textarea{font-family:'Montserrat',sans-serif}
 #v-coaching .set-reps-in,#a-coaching-detail .set-reps-in{border-radius:10px;background:rgba(0,0,0,.24);border-color:rgba(255,255,255,.1);text-align:center}
 #v-coaching .set-check,#a-coaching-detail .set-check{border-radius:11px;background:rgba(0,0,0,.24);border-color:rgba(255,255,255,.14)}
 #v-coaching .set-check.done,#a-coaching-detail .set-check.done{box-shadow:0 0 0 3px rgba(16,185,129,.12)}
+.edit-workout-summary{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:12px 14px;margin-bottom:12px;border:1px solid rgba(255,255,255,.08);border-radius:14px;background:rgba(255,255,255,.04)}
+.edit-workout-title{min-width:0;font-size:14px;font-weight:850;color:var(--white);line-height:1.25}
+.edit-workout-date{flex-shrink:0;font-size:11px;font-weight:800;color:#9aa1ad;background:rgba(255,255,255,.06);border-radius:999px;padding:6px 9px}
+.edit-workout-hint{margin:-2px 2px 12px;color:#a3a9b5;font-size:12px;line-height:1.45}
+.edit-workout-exercise{cursor:default;margin-bottom:12px}
+.edit-workout-exercise .exercise-detail-head{border-bottom:1px solid rgba(255,255,255,.06)}
+.edit-workout-exercise .set-tracker{margin:0;border:none;border-radius:0;background:rgba(255,255,255,.025)}
 
 /* COACHING */
 .coach-hub-nav{gap:6px;padding:8px;background:rgba(17,17,17,.94);border-bottom:1px solid rgba(255,255,255,.08)}
@@ -1745,7 +1752,7 @@ html,body{background:radial-gradient(circle at 50% -18%,rgba(80,112,164,.16),tra
 // ── CONFIG & SUPABASE ───────────────────────────────────────
 const SUPABASE_URL='https://pmpjteuqjusbiduevbwq.supabase.co';
 const SUPABASE_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBtcGp0ZXVxanVzYmlkdWV2YndxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc2OTI1NjUsImV4cCI6MjA5MzI2ODU2NX0.XbMzZoo2yqtrD8znLnyo_1zDfrdJAvAPj1lqGOyXnLw';
-const APP_VERSION='20260718-08';
+const APP_VERSION='20260718-09';
 const MUSCLE_GROUPS=['Pecho','Espalda','Piernas','Hombros','Brazos','Core','Cardio','Full Body'];
 function muscleGroupSelectHtml(id,selected){
   return '<select id="'+id+'" style="width:100%;background:var(--card);border:1px solid var(--border);border-radius:4px;padding:8px;font-size:12px;color:var(--white);outline:none;margin-bottom:6px;box-sizing:border-box">'
@@ -5020,7 +5027,7 @@ function askAboutExercise(exName){
 // ── FICHA DE EJERCICIO (video arriba + historial/nota/asesoría + series) ──
 // Reemplaza los antiguos botones ▶ (video) y ⋯ (más opciones) por una sola
 // ficha completa al tocar el ejercicio — estilo Everfit.
-let _exFocusData=null, _exFocusVideoOpen=false;
+let _exFocusData=null, _exFocusVideoOpen=false, _editingWorkoutContext=null;
 function openExerciseFocus(rowEl){
   try{_exFocusData=JSON.parse(rowEl.dataset.ex);}catch(e){return;}
   _exFocusVideoOpen=false;
@@ -5224,6 +5231,9 @@ function logSetToUserScores(row){
 // son dos árboles de DOM separados, uno no actualiza al otro solo.
 function refreshSessionUiFor(exKey){
   renderCoachHoyPanel();
+  if(_editingWorkoutContext&&document.getElementById('edit-workout-modal')?.style.display==='flex'){
+    renderEditWorkoutModalBody();
+  }
   if(_exFocusData&&_exFocusData.exKey===exKey&&_exFocusData.scheduleId){
     const sessionCtx={scheduleId:_exFocusData.scheduleId,sets:coachSessionSets};
     const bodyEl=document.getElementById('exercise-focus-body');
@@ -5334,6 +5344,9 @@ async function markAllSetsSb(exKey){
       logSetToUserScores(data);
     });
     renderCoachHoyPanel();
+    if(_editingWorkoutContext&&document.getElementById('edit-workout-modal')?.style.display==='flex'){
+      renderEditWorkoutModalBody();
+    }
     // Si se disparó desde la ficha del ejercicio, avanza al siguiente en vez
     // de solo refrescar el set-tracker de este mismo (que ya se completó).
     if(_exFocusData&&_exFocusData.exKey===exKey){
@@ -5376,6 +5389,26 @@ function renderExerciseListHtml(exercises,keyPrefix,boardId,sessionCtx){
       +(showProgress?'<span class="ex-progress-badge'+(doneCount===sets.length?' done':'')+'">'+doneCount+'/'+sets.length+'</span>':'')
       +'<span class="ex-chevron">›</span>'
       +'</div>'
+      +'</div>';
+  }).join('');
+}
+function renderWorkoutEditListHtml(exercises,boardId,scheduleId){
+  if(!exercises.length)return'<div class="empty">Sin ejercicios en esta rutina.</div>';
+  const sessionCtx={scheduleId,sets:coachSessionSets};
+  return exercises.map((ex,i)=>{
+    const exKey=ex.id||(boardId+'_idx_'+i);
+    const sets=coachSessionSets[exKey]||[];
+    const doneCount=sets.filter(s=>s.done).length;
+    return '<div class="exercise-detail edit-workout-exercise">'
+      +'<div class="exercise-detail-head" style="display:flex;align-items:center;gap:10px">'
+      +'<div class="ex-num">'+(i+1)+'</div>'
+      +'<div class="ex-body"><div class="ex-name">'+esc(ex.name)+'</div>'
+      +'<div class="ex-detail">'+[ex.sets?esc(ex.sets)+' series':null,ex.reps?esc(ex.reps)+' reps':null,ex.rest?esc(ex.rest)+' descanso':null].filter(Boolean).join(' · ')+(ex.muscleGroup?' · '+esc(ex.muscleGroup):'')+'</div>'
+      +(ex.note||ex.notes||ex.description?'<div class="ex-note">'+esc(ex.note||ex.notes||ex.description)+'</div>':'')
+      +'</div>'
+      +'<span class="ex-progress-badge'+(sets.length&&doneCount===sets.length?' done':'')+'">'+doneCount+'/'+sets.length+'</span>'
+      +'</div>'
+      +(renderSetTrackerHtml(sessionCtx,exKey,ex)||'<div class="set-tracker"><div class="empty" style="margin:0">Sin series configuradas.</div></div>')
       +'</div>';
   }).join('');
 }
@@ -5685,6 +5718,53 @@ function closeAddWorkoutModal(){
 }
 // Permite corregir un entreno ya completado: carga sus series guardadas y
 // reusa la misma lista/ficha de ejercicio (editable) que la sesión en vivo.
+async function ensureWorkoutEditSetsSb(scheduleRow,exercises,existingRows){
+  const byExKey={};
+  (existingRows||[]).forEach(s=>{(byExKey[s.ex_key]=byExKey[s.ex_key]||[]).push(s);});
+  const missing=[];
+  exercises.forEach((ex,i)=>{
+    const exKey=ex.id||(scheduleRow.board_id+'_idx_'+i);
+    const known=new Set((byExKey[exKey]||[]).map(s=>s.set_idx));
+    const target=Math.max(1,parseInt(ex.sets,10)||1);
+    for(let idx=0;idx<target;idx++){
+      if(!known.has(idx)){
+        missing.push({
+          schedule_id:scheduleRow.id,
+          user_id:sbUser.id,
+          ex_key:exKey,
+          set_idx:idx,
+          reps_target:ex.reps||null,
+          done:false
+        });
+      }
+    }
+  });
+  let rows=existingRows||[];
+  if(missing.length){
+    const{data,error}=await sb.from('coaching_session_sets')
+      .upsert(missing,{onConflict:'schedule_id,ex_key,set_idx',ignoreDuplicates:true})
+      .select();
+    if(error)throw error;
+    rows=rows.concat(data||[]);
+  }
+  const scopedKeys=new Set(exercises.map((ex,i)=>ex.id||(scheduleRow.board_id+'_idx_'+i)));
+  const nextSets={...coachSessionSets};
+  scopedKeys.forEach(k=>{nextSets[k]=[];});
+  rows.forEach(s=>{
+    if(scopedKeys.has(s.ex_key))(nextSets[s.ex_key]=nextSets[s.ex_key]||[]).push(s);
+  });
+  scopedKeys.forEach(k=>{nextSets[k].sort((a,b)=>a.set_idx-b.set_idx);});
+  coachSessionSets=nextSets;
+}
+function renderEditWorkoutModalBody(){
+  if(!_editingWorkoutContext)return;
+  const{row,exercises}= _editingWorkoutContext;
+  document.getElementById('edit-workout-modal-body').innerHTML=
+    '<div class="edit-workout-summary"><div class="edit-workout-title">'+esc(row.board_name)+'</div><div class="edit-workout-date">'+fmtDS(row.ds)+'</div></div>'
+    +'<div class="edit-workout-hint">Edita peso, reps y series directamente aqui. Los cambios se guardan al cambiar cada campo o marcar la serie.</div>'
+    +renderWorkoutEditListHtml(exercises,row.board_id,row.id)
+    +'<button class="btn-sm bred" style="width:100%;margin-top:10px" onclick="deleteCompletedWorkoutSb(&quot;'+row.id+'&quot;)">Eliminar este entreno</button>';
+}
 async function openEditCompletedWorkoutSb(scheduleId){
   const row=coachSchedule.find(r=>r.id===scheduleId);
   if(!row)return;
@@ -5699,32 +5779,38 @@ async function openEditCompletedWorkoutSb(scheduleId){
       if(b){coachBoardsById[b.id]=b;board=b;}
     }
     const exercises=(board&&board.exercises)||[];
-    const setsByExKey={};
-    (data||[]).forEach(s=>{(setsByExKey[s.ex_key]=setsByExKey[s.ex_key]||[]).push(s);});
-    coachSessionSets={...coachSessionSets,...setsByExKey};
+    await ensureWorkoutEditSetsSb(row,exercises,data||[]);
+    _editingWorkoutContext={row,exercises};
     hideLoading();
-    document.getElementById('edit-workout-modal-body').innerHTML=
-      '<div style="font-size:13px;font-weight:700;margin-bottom:10px">'+esc(row.board_name)+' · '+fmtDS(row.ds)+'</div>'
-      +renderExerciseListHtml(exercises,'edit_'+scheduleId,row.board_id,{scheduleId,sets:coachSessionSets})
-      +'<button class="btn-sm bred" style="width:100%;margin-top:10px" onclick="deleteCompletedWorkoutSb(&quot;'+scheduleId+'&quot;)">🗑 Eliminar este entreno</button>';
+    renderEditWorkoutModalBody();
     document.getElementById('edit-workout-modal').style.display='flex';
   }catch(e){hideLoading();toast('Error: '+e.message,'err');}
 }
 function closeEditWorkoutModal(){
   document.getElementById('edit-workout-modal').style.display='none';
+  _editingWorkoutContext=null;
 }
 async function deleteCompletedWorkoutSb(scheduleId){
   if(!confirm('¿Eliminar este entreno? Se borrará todo su registro de series y pesos.'))return;
+  showLoading('Eliminando...');
   try{
-    const{error}=await sb.from('coaching_schedule').delete().eq('id',scheduleId);
+    const{data,error}=await sb.from('coaching_schedule')
+      .delete()
+      .eq('id',scheduleId)
+      .eq('user_id',sbUser.id)
+      .select('id');
     if(error)throw error;
+    if(!data||!data.length)throw new Error('No se pudo borrar en el servidor. Intenta actualizar la app e iniciar sesion de nuevo.');
     coachSchedule=coachSchedule.filter(r=>r.id!==scheduleId);
+    coachDataLoadedAt=0;
+    await loadCoachWeekDataSb(true);
+    hideLoading();
     closeEditWorkoutModal();
     closeExerciseFocus();
     renderCoachHoyPanel();
     renderCoachSemanaPanel();
     toast('Entreno eliminado','ok');
-  }catch(e){toast('Error: '+e.message,'err');}
+  }catch(e){hideLoading();toast('Error: '+e.message,'err');}
 }
 // ── CRONÓMETRO / TEMPORIZADOR MANUAL (independiente del descanso entre series) ──
 function openStopwatchModal(){document.getElementById('stopwatch-modal').style.display='flex';}
