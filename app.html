@@ -6,12 +6,12 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="HABIT">
 <meta name="application-name" content="HABIT">
-<link rel="manifest" href="/manifest.json?v=20260718-23">
-<link rel="apple-touch-icon" sizes="120x120" href="/icons/icon-120.png?v=20260718-23">
-<link rel="apple-touch-icon" sizes="152x152" href="/icons/icon-152.png?v=20260718-23">
-<link rel="apple-touch-icon" sizes="167x167" href="/icons/icon-167.png?v=20260718-23">
-<link rel="apple-touch-icon" sizes="180x180" href="/icons/icon-180.png?v=20260718-23">
-<link rel="icon" type="image/png" sizes="32x32" href="/icons/icon-32.png?v=20260718-23">
+<link rel="manifest" href="/manifest.json?v=20260718-24">
+<link rel="apple-touch-icon" sizes="120x120" href="/icons/icon-120.png?v=20260718-24">
+<link rel="apple-touch-icon" sizes="152x152" href="/icons/icon-152.png?v=20260718-24">
+<link rel="apple-touch-icon" sizes="167x167" href="/icons/icon-167.png?v=20260718-24">
+<link rel="apple-touch-icon" sizes="180x180" href="/icons/icon-180.png?v=20260718-24">
+<link rel="icon" type="image/png" sizes="32x32" href="/icons/icon-32.png?v=20260718-24">
 <title>HABIT</title>
 <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700;800;900&family=Share+Tech+Mono&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
@@ -362,10 +362,28 @@ input,select,button,textarea{font-family:'Montserrat',sans-serif}
 .ex-menu-item{display:flex;align-items:center;gap:8px;width:100%;padding:12px 10px;background:transparent;border:none;border-bottom:1px solid var(--border);color:var(--white);font-size:13.5px;font-weight:600;text-align:left;cursor:pointer}
 .ex-menu-item:last-child{border-bottom:none}
 .ex-menu-item:active{background:var(--card2)}
-.ex-focus-video-btn{width:calc(100% - 28px);margin:14px;display:flex;align-items:center;justify-content:center;gap:8px;background:rgba(37,99,235,.14);border:1px solid rgba(59,130,246,.4);border-radius:8px;padding:13px;color:var(--bl);font-size:13px;font-weight:800;letter-spacing:.04em;text-transform:uppercase;cursor:pointer}
+.ex-focus-video-btn{width:100%;display:flex;align-items:center;justify-content:center;gap:8px;background:rgba(37,99,235,.14);border:1px solid rgba(59,130,246,.4);border-radius:14px;padding:13px;color:var(--bl);font-size:12px;font-weight:800;letter-spacing:.04em;text-transform:uppercase;cursor:pointer}
 .ex-focus-video-btn:active{background:rgba(37,99,235,.24)}
-.ex-focus-icon-btn{flex:1;display:flex;flex-direction:column;align-items:center;gap:4px;padding:10px 4px;background:var(--card2);border:1px solid var(--border);border-radius:8px;color:var(--white);font-size:11px;font-weight:700;cursor:pointer}
+.ex-focus-icon-btn{flex:1;min-width:0;display:flex;flex-direction:column;align-items:center;gap:4px;padding:10px 4px;background:var(--card2);border:1px solid var(--border);border-radius:14px;color:var(--white);font-size:10.5px;font-weight:750;cursor:pointer}
 .ex-focus-icon-btn:active{background:var(--border)}
+.exercise-session-modal{background:rgba(0,0,0,.9);backdrop-filter:blur(18px)}
+.terms-box.exercise-focus-box{width:100%;height:100%;max-width:430px;max-height:none;border-radius:0;background:linear-gradient(180deg,#111214 0%,#08090a 56%,#050505 100%);display:flex;flex-direction:column}
+.terms-box.exercise-focus-box .terms-hdr{padding:calc(env(safe-area-inset-top,0px) + 18px) 18px 16px;border-bottom:1px solid rgba(255,255,255,.07);background:rgba(10,10,10,.8);backdrop-filter:blur(14px)}
+.terms-box.exercise-focus-box .terms-hdr h2{font-size:19px;font-weight:900;line-height:1.08;letter-spacing:0;text-transform:uppercase;max-width:260px}
+.exercise-focus-body{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:16px 16px calc(96px + env(safe-area-inset-bottom,0px))}
+.exercise-focus-stage{border:1px solid rgba(255,255,255,.08);background:rgba(255,255,255,.035);border-radius:18px;padding:12px;margin-bottom:14px}
+.exercise-focus-stage.expanded{padding:0;overflow:hidden;background:#050505}
+.exercise-focus-stage.expanded .video-shell{border-top:none}
+.exercise-focus-video-foot{display:flex;gap:8px;padding:10px;background:#050505;border-top:1px solid rgba(255,255,255,.08)}
+.ex-focus-min-btn{width:100%;border:1px solid rgba(255,255,255,.12);background:rgba(255,255,255,.06);color:var(--white);border-radius:12px;padding:12px;font-size:11px;font-weight:850;text-transform:uppercase;letter-spacing:.05em}
+.exercise-focus-meta{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:12px;color:var(--gray);font-size:12px}
+.exercise-focus-progress{font-family:'Montserrat',sans-serif;color:var(--bl);font-weight:900;background:rgba(37,99,235,.14);border:1px solid rgba(59,130,246,.35);border-radius:999px;padding:5px 9px;white-space:nowrap}
+.ex-focus-tools{display:grid;grid-template-columns:repeat(auto-fit,minmax(58px,1fr));gap:7px;margin-bottom:14px}
+.exercise-focus-nav{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:14px}
+.exercise-focus-nav .btn,.exercise-focus-nav .btn-sm{margin:0;width:100%;padding:15px 10px;font-size:13px;border-radius:16px}
+.exercise-focus-nav .finish{grid-column:1/-1;background:linear-gradient(180deg,#ecf3ff,#dfeeff);color:#020617}
+.exercise-focus-nav.single{grid-template-columns:1fr}
+.exercise-focus-pause-note{font-size:11px;color:var(--gray);text-align:center;margin-top:10px}
 .ex-history-row{display:flex;align-items:center;justify-content:space-between;padding:10px 0;border-bottom:1px solid var(--border);font-size:13px}
 .ex-history-row:last-child{border-bottom:none}
 .set-tracker{padding:12px;background:var(--card2);border-top:1px solid var(--border)}
@@ -1689,23 +1707,21 @@ html,body{background:radial-gradient(circle at 50% -18%,rgba(80,112,164,.16),tra
 
 <!-- EXERCISE ACTIONS MODAL (menú "más opciones" por ejercicio) -->
 <!-- FICHA DE EJERCICIO (video + historial/nota/asesoría + series) -->
-<div id="exercise-focus-modal" class="terms-modal" style="display:none">
-  <div class="terms-box" style="max-height:92vh">
+<div id="exercise-focus-modal" class="terms-modal exercise-session-modal" style="display:none">
+  <div class="terms-box exercise-focus-box">
     <div class="terms-hdr">
       <h2 id="exercise-focus-name">Ejercicio</h2>
-      <button class="video-modal-close" onclick="closeExerciseFocus()">Cerrar</button>
+      <button class="video-modal-close" onclick="closeExerciseFocus()">Pausar</button>
     </div>
-    <div class="terms-body" style="padding:0">
+    <div class="terms-body exercise-focus-body">
       <div id="exercise-focus-video"></div>
-      <div style="padding:14px">
-        <div id="exercise-focus-detail" style="font-size:12.5px;color:var(--gray);margin-bottom:12px"></div>
-        <div style="display:flex;gap:8px;margin-bottom:14px">
-          <button class="ex-focus-icon-btn" onclick="openExerciseHistoryModal()">🕐 Historial</button>
-          <button class="ex-focus-icon-btn" id="exercise-focus-note-btn" onclick="openExerciseNoteFromFocus()">📝 Nota</button>
-          <button class="ex-focus-icon-btn" id="exercise-focus-asesoria-btn" onclick="askAboutExerciseFromFocus()">🙋 Asesoría</button>
-        </div>
-        <div id="exercise-focus-body"></div>
+      <div class="exercise-focus-meta">
+        <div id="exercise-focus-detail"></div>
+        <div id="exercise-focus-progress" class="exercise-focus-progress"></div>
       </div>
+      <div id="exercise-focus-tools" class="ex-focus-tools"></div>
+      <div id="exercise-focus-body"></div>
+      <div class="exercise-focus-pause-note">Pausa el entreno para salir de esta pantalla.</div>
     </div>
   </div>
 </div>
@@ -1857,7 +1873,7 @@ html,body{background:radial-gradient(circle at 50% -18%,rgba(80,112,164,.16),tra
 // ── CONFIG & SUPABASE ───────────────────────────────────────
 const SUPABASE_URL='https://pmpjteuqjusbiduevbwq.supabase.co';
 const SUPABASE_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBtcGp0ZXVxanVzYmlkdWV2YndxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc2OTI1NjUsImV4cCI6MjA5MzI2ODU2NX0.XbMzZoo2yqtrD8znLnyo_1zDfrdJAvAPj1lqGOyXnLw';
-const APP_VERSION='20260718-23';
+const APP_VERSION='20260718-24';
 const MUSCLE_GROUPS=['Pecho','Espalda','Piernas','Hombros','Brazos','Core','Cardio','Full Body'];
 const DAILY_QUOTES=[
   {text:'Haz hoy lo que tu version de manana agradeceria.',action:'Elige una accion pequeña y cumplible antes de buscar motivacion.'},
@@ -3531,7 +3547,11 @@ function coachHubTab(t,btn){
   if(t==='tu')renderCoachTuSb();
 }
 function renderCoachHub(){coachHubTab(coachHubActiveTab,null);}
-function goToActiveSession(){coachHubActiveTab='hoy';sv('coaching');}
+function goToActiveSession(){
+  coachHubActiveTab='hoy';
+  sv('coaching');
+  setTimeout(()=>openActiveCoachingExercise(),120);
+}
 async function renderCoachProgramaSb(){
   const el=document.getElementById('coach-semana-panel');
   if(el&&!coachDataLoadedAt)el.innerHTML='<div class="empty">Cargando...</div>';
@@ -5211,8 +5231,32 @@ function renderExerciseFocusVideo(){
   if(!d||!el)return;
   if(!d.videos||!d.videos.length){el.innerHTML='';return;}
   el.innerHTML=_exFocusVideoOpen
-    ? '<div style="padding:0 14px 14px">'+getVideoHtml(d.videos[0].url)+'</div>'
-    : '<button class="ex-focus-video-btn" onclick="toggleExFocusVideo()"><span class="play-icon"><span class="play-tri"></span></span> Ver video</button>';
+    ? '<div class="exercise-focus-stage expanded">'+getVideoHtml(d.videos[0].url)+'<div class="exercise-focus-video-foot"><button class="ex-focus-min-btn" onclick="toggleExFocusVideo()">Minimizar video</button></div></div>'
+    : '<div class="exercise-focus-stage"><button class="ex-focus-video-btn" onclick="toggleExFocusVideo()"><span class="play-icon"><span class="play-tri"></span></span> Ver video</button></div>';
+}
+function renderExerciseFocusTools(){
+  const d=_exFocusData;
+  const tools=document.getElementById('exercise-focus-tools');
+  if(!d||!tools)return;
+  tools.innerHTML=
+    '<button class="ex-focus-icon-btn" onclick="openExerciseHistoryModal()">Historial</button>'
+    +'<button class="ex-focus-icon-btn" id="exercise-focus-note-btn" onclick="openExerciseNoteFromFocus()">'+(d.hasNote?'Ver nota':'Nota')+'</button>'
+    +(d.showAsesoria?'<button class="ex-focus-icon-btn" id="exercise-focus-asesoria-btn" onclick="askAboutExerciseFromFocus()">Asesoría</button>':'')
+    +'<button class="ex-focus-icon-btn" onclick="openStopwatchTab(&quot;stopwatch&quot;)">Crono</button>'
+    +'<button class="ex-focus-icon-btn" onclick="openStopwatchTab(&quot;timer&quot;)">Timer</button>';
+}
+function renderExerciseFocusBodyHtml(){
+  const d=_exFocusData;
+  if(!d)return'';
+  if(!d.scheduleId)return'<button class="btn" style="width:100%" onclick="openLogScoreFromFocus()">Registrar peso</button>';
+  const sessionCtx={scheduleId:d.scheduleId,sets:coachSessionSets};
+  const tracker=renderSetTrackerHtml(sessionCtx,d.exKey,{rest:d.rest,reps:d.reps})
+    ||'<div class="empty">Sin series configuradas.</div>';
+  const nav=[
+    hasPrevExerciseInFocus()?'<button class="btn-sm" onclick="moveExerciseFocus(-1)">Anterior</button>':'',
+    hasNextExerciseInFocus()?'<button class="btn" onclick="moveExerciseFocus(1)">Siguiente</button>':'<button class="btn finish" onclick="finishCoachingSessionSb()">Finalizar entreno</button>'
+  ].filter(Boolean).join('');
+  return tracker+'<div class="exercise-focus-nav'+(hasPrevExerciseInFocus()?'':' single')+'">'+nav+'</div>';
 }
 function renderExerciseFocusModal(){
   const d=_exFocusData;
@@ -5221,25 +5265,29 @@ function renderExerciseFocusModal(){
   renderExerciseFocusVideo();
   document.getElementById('exercise-focus-detail').textContent=
     [d.sets?d.sets+' series':null,d.reps?d.reps+' reps':null,d.rest?d.rest+' descanso':null].filter(Boolean).join(' · ')||'Sin detalle';
-  const noteBtn=document.getElementById('exercise-focus-note-btn');
-  if(noteBtn)noteBtn.textContent=d.hasNote?'📝 Ver nota':'📝 Nota';
-  const asesoriaBtn=document.getElementById('exercise-focus-asesoria-btn');
-  if(asesoriaBtn)asesoriaBtn.style.display=d.showAsesoria?'':'none';
+  const progressEl=document.getElementById('exercise-focus-progress');
+  if(progressEl)progressEl.textContent=(typeof d.idx==='number'?('Ejercicio '+(d.idx+1)+(activeCoachingSession&&coachBoardsById[activeCoachingSession.board_id]?'/'+((coachBoardsById[activeCoachingSession.board_id].exercises||[]).length):'')):'');
+  renderExerciseFocusTools();
   const bodyEl=document.getElementById('exercise-focus-body');
-  if(d.scheduleId){
-    const sessionCtx={scheduleId:d.scheduleId,sets:coachSessionSets};
-    bodyEl.innerHTML=(renderSetTrackerHtml(sessionCtx,d.exKey,{rest:d.rest,reps:d.reps})
-      ||'<div class="empty">Sin series configuradas.</div>')
-      +(hasNextExerciseInFocus()?'<button class="btn" style="width:100%;margin-top:14px;padding:17px;font-size:15px" onclick="advanceToNextExerciseInFocus()">Siguiente ejercicio →</button>':'');
-  }else{
-    bodyEl.innerHTML='<button class="btn" style="width:100%" onclick="openLogScoreFromFocus()">💪 Registrar peso</button>';
-  }
+  if(bodyEl)bodyEl.innerHTML=renderExerciseFocusBodyHtml();
+}
+function buildExerciseFocusData(exercises,idx,boardId,scheduleId){
+  const ex=exercises[idx];
+  if(!ex)return null;
+  const exKey=ex.id||boardId+'_idx_'+idx;
+  return {name:ex.name,sets:ex.sets||'',reps:ex.reps||'',rest:ex.rest||'',
+    videos:getExerciseVideos(ex),exKey,hasNote:!!exerciseNotesMap[exKey],
+    bid:boardId,idx,exid:ex.id||'',scheduleId:scheduleId||null,
+    showAsesoria:canAccessCoaching()};
 }
 function hasNextExerciseInFocus(){
   if(!_exFocusData||!activeCoachingSession||_exFocusData.scheduleId!==activeCoachingSession.id)return false;
   const board=coachBoardsById[activeCoachingSession.board_id];
   const exercises=(board&&board.exercises)||[];
   return _exFocusData.idx+1<exercises.length;
+}
+function hasPrevExerciseInFocus(){
+  return !!(_exFocusData&&activeCoachingSession&&_exFocusData.scheduleId===activeCoachingSession.id&&_exFocusData.idx>0);
 }
 function openLogScoreFromFocus(){
   if(!_exFocusData)return;
@@ -5273,22 +5321,39 @@ async function openExerciseHistoryModal(){
 function closeExerciseHistoryModal(){
   document.getElementById('exercise-history-modal').style.display='none';
 }
+function getActiveExerciseIndex(){
+  if(!activeCoachingSession)return 0;
+  const board=coachBoardsById[activeCoachingSession.board_id];
+  const exercises=(board&&board.exercises)||[];
+  if(!exercises.length)return 0;
+  const idx=exercises.findIndex((ex,i)=>{
+    const exKey=ex.id||activeCoachingSession.board_id+'_idx_'+i;
+    const sets=coachSessionSets[exKey]||[];
+    return !sets.length||sets.some(s=>!s.done);
+  });
+  return idx>-1?idx:exercises.length-1;
+}
+function openActiveCoachingExercise(idx){
+  if(!activeCoachingSession)return;
+  const board=coachBoardsById[activeCoachingSession.board_id];
+  const exercises=(board&&board.exercises)||[];
+  if(!exercises.length)return;
+  const safeIdx=typeof idx==='number'?Math.max(0,Math.min(exercises.length-1,idx)):getActiveExerciseIndex();
+  _exFocusData=buildExerciseFocusData(exercises,safeIdx,activeCoachingSession.board_id,activeCoachingSession.id);
+  _exFocusVideoOpen=false;
+  renderExerciseFocusModal();
+  const modal=document.getElementById('exercise-focus-modal');
+  if(modal)modal.style.display='flex';
+}
 function advanceToNextExerciseInFocus(){
+  moveExerciseFocus(1);
+}
+function moveExerciseFocus(delta){
   if(!_exFocusData||!activeCoachingSession)return;
   const board=coachBoardsById[activeCoachingSession.board_id];
   const exercises=(board&&board.exercises)||[];
-  const nextIdx=_exFocusData.idx+1;
-  if(nextIdx>=exercises.length){
-    closeExerciseFocus();
-    toast('¡Terminaste todos los ejercicios! 🎉','ok');
-    return;
-  }
-  const nextEx=exercises[nextIdx];
-  const nextExKey=nextEx.id||(_exFocusData.bid)+'_idx_'+nextIdx;
-  _exFocusData={name:nextEx.name,sets:nextEx.sets||'',reps:nextEx.reps||'',rest:nextEx.rest||'',
-    videos:getExerciseVideos(nextEx),exKey:nextExKey,hasNote:!!exerciseNotesMap[nextExKey],
-    bid:_exFocusData.bid,idx:nextIdx,exid:nextEx.id||'',scheduleId:activeCoachingSession.id,
-    showAsesoria:canAccessCoaching()};
+  const nextIdx=Math.max(0,Math.min(exercises.length-1,_exFocusData.idx+delta));
+  _exFocusData=buildExerciseFocusData(exercises,nextIdx,activeCoachingSession.board_id,activeCoachingSession.id);
   _exFocusVideoOpen=false;
   renderExerciseFocusModal();
 }
@@ -5398,10 +5463,8 @@ function refreshSessionUiFor(exKey){
     renderEditWorkoutModalBody();
   }
   if(_exFocusData&&_exFocusData.exKey===exKey&&_exFocusData.scheduleId){
-    const sessionCtx={scheduleId:_exFocusData.scheduleId,sets:coachSessionSets};
     const bodyEl=document.getElementById('exercise-focus-body');
-    if(bodyEl)bodyEl.innerHTML=(renderSetTrackerHtml(sessionCtx,exKey,{rest:_exFocusData.rest,reps:_exFocusData.reps})||'<div class="empty">Sin series configuradas.</div>')
-      +(hasNextExerciseInFocus()?'<button class="btn" style="width:100%;margin-top:14px;padding:17px;font-size:15px" onclick="advanceToNextExerciseInFocus()">Siguiente ejercicio →</button>':'');
+    if(bodyEl)bodyEl.innerHTML=renderExerciseFocusBodyHtml();
   }
 }
 async function toggleSetDoneSb(setId,newDone,btnEl){
@@ -5781,7 +5844,7 @@ function renderCoachHoyPanel(){
         const isActive=todayRow.status==='in_progress';
         const exHtml=renderExerciseListHtml(exercises,'coach_'+todayRow.id,todayRow.board_id,isActive?{scheduleId:todayRow.id,sets:coachSessionSets}:null);
         html+='<div class="board-card"><div class="board-hdr"><div style="display:flex;align-items:center;gap:8px;min-width:0"><div style="width:10px;height:10px;border-radius:50%;background:'+esc(todayRow.board_color||'#2563eb')+'"></div><span class="board-title">'+esc(todayRow.board_name)+'</span></div><span class="badge bg-blue">'+exercises.length+' ejercicios</span></div><div class="board-body">'
-          +'<button class="btn" style="margin-bottom:12px" onclick="'+(isActive?'finishCoachingSessionSb()':'startCoachingSessionSb(&quot;'+todayRow.id+'&quot;)')+'">'+(isActive?'Finalizar entreno':'Iniciar entreno')+'</button>'
+          +'<button class="btn" style="margin-bottom:12px" onclick="'+(isActive?'openActiveCoachingExercise()':'startCoachingSessionSb(&quot;'+todayRow.id+'&quot;)')+'">'+(isActive?'Volver al entreno':'Iniciar entreno')+'</button>'
           +exHtml+'</div></div>';
       }
     });
@@ -5978,6 +6041,10 @@ async function deleteCompletedWorkoutSb(scheduleId){
 // ── CRONÓMETRO / TEMPORIZADOR MANUAL (independiente del descanso entre series) ──
 function openStopwatchModal(){document.getElementById('stopwatch-modal').style.display='flex';}
 function closeStopwatchModal(){document.getElementById('stopwatch-modal').style.display='none';}
+function openStopwatchTab(t){
+  openStopwatchModal();
+  switchStopwatchTab(t||'stopwatch');
+}
 function switchStopwatchTab(t){
   document.getElementById('sw-tab-stopwatch').classList.toggle('active',t==='stopwatch');
   document.getElementById('sw-tab-timer').classList.toggle('active',t==='timer');
@@ -6151,6 +6218,7 @@ async function startCoachingSessionSb(scheduleId){
     await seedSessionSetsSb(data);
     await loadSessionSetsSb(data.id);
     renderCoachHoyPanel();
+    openActiveCoachingExercise(0);
   }catch(e){toast('Error al iniciar entreno: '+e.message,'err');}
 }
 async function finishCoachingSessionSb(){
@@ -6166,6 +6234,7 @@ async function finishCoachingSessionSb(){
     coachSessionSets={};
     hideActiveSessionBar();
     stopRestTimer();
+    closeExerciseFocus();
     renderCoachHoyPanel();
     toast('¡Entreno completado!','ok');
   }catch(e){toast('Error al finalizar entreno: '+e.message,'err');}
