@@ -6,12 +6,12 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="HABIT">
 <meta name="application-name" content="HABIT">
-<link rel="manifest" href="/manifest.json?v=20260718-11">
-<link rel="apple-touch-icon" sizes="120x120" href="/icons/icon-120.png?v=20260718-11">
-<link rel="apple-touch-icon" sizes="152x152" href="/icons/icon-152.png?v=20260718-11">
-<link rel="apple-touch-icon" sizes="167x167" href="/icons/icon-167.png?v=20260718-11">
-<link rel="apple-touch-icon" sizes="180x180" href="/icons/icon-180.png?v=20260718-11">
-<link rel="icon" type="image/png" sizes="32x32" href="/icons/icon-32.png?v=20260718-11">
+<link rel="manifest" href="/manifest.json?v=20260718-12">
+<link rel="apple-touch-icon" sizes="120x120" href="/icons/icon-120.png?v=20260718-12">
+<link rel="apple-touch-icon" sizes="152x152" href="/icons/icon-152.png?v=20260718-12">
+<link rel="apple-touch-icon" sizes="167x167" href="/icons/icon-167.png?v=20260718-12">
+<link rel="apple-touch-icon" sizes="180x180" href="/icons/icon-180.png?v=20260718-12">
+<link rel="icon" type="image/png" sizes="32x32" href="/icons/icon-32.png?v=20260718-12">
 <title>HABIT</title>
 <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700;800;900&family=Share+Tech+Mono&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
@@ -858,8 +858,8 @@ html,body{background:radial-gradient(circle at 50% -18%,rgba(80,112,164,.16),tra
 /* Admin */
 #s-admin .hdr{min-height:72px;background:linear-gradient(180deg,rgba(11,11,12,.98),rgba(8,8,8,.92));box-shadow:0 10px 30px rgba(0,0,0,.2)}
 #s-admin .scroll-area{padding:14px;background:linear-gradient(180deg,#080808,#050505)}
-.adm-nav{gap:6px;padding:8px;overflow-x:auto;flex-wrap:nowrap;background:rgba(11,11,12,.96);border-bottom-color:var(--hairline);scroll-snap-type:x proximity}
-.adm-tab,.fin-subtab{border-radius:999px;border:none;padding:10px 13px;text-transform:none;letter-spacing:0;background:transparent;color:var(--gray);scroll-snap-align:start;min-height:38px}
+.adm-nav{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:7px;padding:10px;background:rgba(11,11,12,.96);border-bottom-color:var(--hairline);overflow:visible}
+.adm-tab,.fin-subtab{border-radius:999px;border:none;padding:10px 6px;text-transform:none;letter-spacing:0;background:transparent;color:var(--gray);min-height:38px;min-width:0;width:100%;line-height:1.1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .adm-tab.active,.fin-subtab.active{border:none;background:linear-gradient(180deg,rgba(255,255,255,.12),rgba(255,255,255,.07));color:var(--white);box-shadow:inset 0 0 0 1px rgba(255,255,255,.08)}
 .fin-subtab{flex:1;text-align:center}
 #s-admin .adm-section.active{display:block;animation:adminFade .18s ease-out}
@@ -875,8 +875,8 @@ html,body{background:radial-gradient(circle at 50% -18%,rgba(80,112,164,.16),tra
 .admin-card-title{font-size:13px;font-weight:850;color:var(--white);line-height:1.25;margin-bottom:10px}
 .admin-chart-card{border:1px solid var(--hairline);border-radius:18px;background:linear-gradient(180deg,rgba(255,255,255,.052),rgba(255,255,255,.028));box-shadow:var(--shadow-card);padding:14px;margin-bottom:14px;position:relative;width:100%;max-width:100%;height:210px;box-sizing:border-box}
 .admin-chart-card.compact{height:auto;min-height:178px;display:flex;align-items:center;gap:14px}
-.admin-filter-strip{display:flex;gap:7px;overflow-x:auto;padding:1px 0 10px;margin-bottom:4px;-webkit-overflow-scrolling:touch}
-.admin-filter-strip .filter-chip{flex:0 0 auto}
+.admin-filter-strip{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:7px;padding:1px 0 10px;margin-bottom:4px}
+.admin-filter-strip .filter-chip{width:100%;min-width:0;text-align:center;padding-left:8px;padding-right:8px;overflow:hidden;text-overflow:ellipsis}
 .admin-toolbar{display:grid;grid-template-columns:1fr;gap:10px;margin-bottom:12px}
 .admin-select{background:rgba(255,255,255,.052);border:1px solid var(--hairline);color:var(--white);border-radius:12px;padding:12px 14px;font-size:13px;cursor:pointer;width:100%;color-scheme:dark}
 .admin-soft-action{width:100%;min-height:44px;display:flex;align-items:center;justify-content:center;gap:8px}
@@ -898,6 +898,10 @@ html,body{background:radial-gradient(circle at 50% -18%,rgba(80,112,164,.16),tra
 .mensajes-inbox-row:active{background:var(--surface)}
 @media (min-width:390px){
   .admin-toolbar.two{grid-template-columns:1fr auto;align-items:center}
+}
+@media (max-width:360px){
+  .adm-nav{grid-template-columns:repeat(3,minmax(0,1fr))}
+  .admin-filter-strip{grid-template-columns:repeat(2,minmax(0,1fr))}
 }
 .new-board-form>h3{letter-spacing:0;text-transform:none}
 
@@ -1821,7 +1825,7 @@ html,body{background:radial-gradient(circle at 50% -18%,rgba(80,112,164,.16),tra
 // ── CONFIG & SUPABASE ───────────────────────────────────────
 const SUPABASE_URL='https://pmpjteuqjusbiduevbwq.supabase.co';
 const SUPABASE_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBtcGp0ZXVxanVzYmlkdWV2YndxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc2OTI1NjUsImV4cCI6MjA5MzI2ODU2NX0.XbMzZoo2yqtrD8znLnyo_1zDfrdJAvAPj1lqGOyXnLw';
-const APP_VERSION='20260718-11';
+const APP_VERSION='20260718-12';
 const MUSCLE_GROUPS=['Pecho','Espalda','Piernas','Hombros','Brazos','Core','Cardio','Full Body'];
 function muscleGroupSelectHtml(id,selected){
   return '<select id="'+id+'" style="width:100%;background:var(--card);border:1px solid var(--border);border-radius:4px;padding:8px;font-size:12px;color:var(--white);outline:none;margin-bottom:6px;box-sizing:border-box">'
