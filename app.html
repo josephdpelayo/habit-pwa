@@ -6,12 +6,12 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="HABIT">
 <meta name="application-name" content="HABIT">
-<link rel="manifest" href="/manifest.json?v=20260713-10">
-<link rel="apple-touch-icon" sizes="120x120" href="/icons/icon-120.png?v=20260713-10">
-<link rel="apple-touch-icon" sizes="152x152" href="/icons/icon-152.png?v=20260713-10">
-<link rel="apple-touch-icon" sizes="167x167" href="/icons/icon-167.png?v=20260713-10">
-<link rel="apple-touch-icon" sizes="180x180" href="/icons/icon-180.png?v=20260713-10">
-<link rel="icon" type="image/png" sizes="32x32" href="/icons/icon-32.png?v=20260713-10">
+<link rel="manifest" href="/manifest.json?v=20260717-01">
+<link rel="apple-touch-icon" sizes="120x120" href="/icons/icon-120.png?v=20260717-01">
+<link rel="apple-touch-icon" sizes="152x152" href="/icons/icon-152.png?v=20260717-01">
+<link rel="apple-touch-icon" sizes="167x167" href="/icons/icon-167.png?v=20260717-01">
+<link rel="apple-touch-icon" sizes="180x180" href="/icons/icon-180.png?v=20260717-01">
+<link rel="icon" type="image/png" sizes="32x32" href="/icons/icon-32.png?v=20260717-01">
 <title>HABIT</title>
 <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700;800;900&family=Share+Tech+Mono&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
@@ -397,6 +397,7 @@ input,select,button,textarea{font-family:'Montserrat',sans-serif}
 .chat-bubble{max-width:78%;border-radius:14px;padding:9px 12px;font-size:13px;line-height:1.4}
 .chat-row.mine .chat-bubble{background:var(--blue);color:#fff;border-bottom-right-radius:4px}
 .chat-row.theirs .chat-bubble{background:var(--card2);color:var(--white);border:1px solid var(--border);border-bottom-left-radius:4px}
+.chat-bubble a{color:inherit;text-decoration:underline;word-break:break-all}
 .chat-bubble-time{display:block;font-size:10px;opacity:.65;margin-top:3px;text-align:right}
 .chat-bubble-img{max-width:220px;border-radius:10px;display:block;cursor:pointer}
 .chat-voice{display:flex;align-items:center;gap:8px;min-width:180px}
@@ -572,6 +573,8 @@ input,select,button,textarea{font-family:'Montserrat',sans-serif}
 .adm-nav::-webkit-scrollbar{height:0}
 .adm-nav::-webkit-scrollbar{height:0}
 .adm-tab{flex-shrink:0;padding:10px 14px;font-size:10px;font-weight:700;cursor:pointer;color:var(--gray);border:none;background:transparent;border-bottom:2px solid transparent;letter-spacing:.08em;text-transform:uppercase}
+.adm-tab-badge{display:none;min-width:16px;height:16px;margin-left:6px;border-radius:99px;background:var(--green);color:#03120d;font-size:9px;font-weight:900;align-items:center;justify-content:center;padding:0 4px;vertical-align:middle}
+.adm-tab-badge.show{display:inline-flex}
 .adm-tab.active{color:var(--bl);border-bottom:2px solid var(--blue)}
 .adm-section{display:none}.adm-section.active{display:block}
 .fin-panel{display:none}.fin-panel.active{display:block}
@@ -1065,7 +1068,7 @@ body.reception-mode{background:#050505}
     <button class="adm-tab" onclick="admTab('users')">Socios</button>
     <button class="adm-tab" onclick="admTab('boards')">Pizarrones</button>
     <button class="adm-tab" onclick="admTab('coaching')">Coaching</button>
-    <button class="adm-tab" onclick="admTab('mensajes')">Mensajes</button>
+    <button class="adm-tab" onclick="admTab('mensajes')">Mensajes<span id="adm-mensajes-badge" class="adm-tab-badge"></span></button>
     <button class="adm-tab" onclick="admTab('payments')">Finanzas</button>
     <button class="adm-tab" onclick="admTab('shop')">Tienda</button>
     <button class="adm-tab" onclick="admTab('comunidad')">Comunidad</button>
@@ -1420,7 +1423,7 @@ body.reception-mode{background:#050505}
 // ── CONFIG & SUPABASE ───────────────────────────────────────
 const SUPABASE_URL='https://pmpjteuqjusbiduevbwq.supabase.co';
 const SUPABASE_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBtcGp0ZXVxanVzYmlkdWV2YndxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc2OTI1NjUsImV4cCI6MjA5MzI2ODU2NX0.XbMzZoo2yqtrD8znLnyo_1zDfrdJAvAPj1lqGOyXnLw';
-const APP_VERSION='20260713-10';
+const APP_VERSION='20260717-01';
 const MUSCLE_GROUPS=['Pecho','Espalda','Piernas','Hombros','Brazos','Core','Cardio','Full Body'];
 function muscleGroupSelectHtml(id,selected){
   return '<select id="'+id+'" style="width:100%;background:var(--card);border:1px solid var(--border);border-radius:4px;padding:8px;font-size:12px;color:var(--white);outline:none;margin-bottom:6px;box-sizing:border-box">'
@@ -1695,6 +1698,11 @@ const dk=d=>d.toISOString().slice(0,10);
 const inits=n=>n.split(' ').map(w=>w[0]).join('').slice(0,2).toUpperCase();
 const isUrl=u=>u&&(u.startsWith('http')||u.startsWith('https'));
 const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+// Escapa el texto y convierte URLs sueltas en <a> clicables (mensajes de chat).
+const CHAT_URL_RE=/(https?:\/\/[^\s<]+)/g;
+function linkifyText(v){
+  return esc(v).replace(CHAT_URL_RE,u=>'<a href="'+u+'" target="_blank" rel="noopener">'+u+'</a>');
+}
 function avatarHtml(name,url,cls){
   return '<div class="'+cls+'">'+(url?'<img src="'+esc(url)+'" alt="">':inits(name||'?'))+'</div>';
 }
@@ -1880,7 +1888,7 @@ let waitlists={}; // waitlists[ds+'_'+slotIdx] = [{userId,name,...}]
 let payments=[], boards=[], scores={}, posts=[], accessLog=[], adminNotifs=[];
 let curUser=null, curDate=dateObjFromDS(mazToday()), selStartIdx=null, selShort=false, selPlan=null, selPT='individual', selectedRoutineBoardId=null;
 let accInt=null, accessDataInt=null, notifChannel=null, userNotifInt=null, receptionClockInt=null, receptionDataInt=null, userNotifBootstrapped=false, userNotifSeen=new Set(), notifs=[], expandedVideos={}, logScoreCtx=null, expandedUsers=new Set(), expandedCoachVideos={};
-let coachWeekStart=null, coachSchedule=[], coachTasks=[], coachBoardsById={}, activeCoachingSession=null, coachSessionTickInt=null, coachSessionSets={};
+let coachWeekStart=null, coachSchedule=[], coachTasks=[], coachBoardsById={}, activeCoachingSession=null, coachSessionTickInt=null, coachSessionSets={}, coachTaskLogsToday=new Set();
 let chatMessages=[], chatChannel=null, chatPollInt=null, chatSendContext=null,
     chatMediaRecorder=null, chatRecordChunks=[], chatRecordStartMs=0, chatRecordTimerInt=null,
     chatPendingImgFile=null;
@@ -2726,7 +2734,7 @@ async function doLogout(){
   hideActiveSessionBar();
   stopRestTimer();
   activeCoachingSession=null;coachSchedule=[];coachTasks=[];coachBoardsById={};
-  coachWeekStart=null;coachDataLoadedAt=0;coachDataLoadError=null;coachHubActiveTab='hoy';coachSessionSets={};exerciseNotesMap={};
+  coachWeekStart=null;coachDataLoadedAt=0;coachDataLoadError=null;coachHubActiveTab='hoy';coachSessionSets={};exerciseNotesMap={};coachTaskLogsToday=new Set();
   selectedRoutineBoardId=null;logScoreCtx=null;
   chatMessages=[];chatSendContext=null;
   Object.values(_tuPrCharts).forEach(c=>{try{c.destroy();}catch(_){}});_tuPrCharts={};_tuScoreRows=null;
@@ -2747,6 +2755,7 @@ function showAdmin(){
   admTab('dash');
   loadBoardsSb();
   startAdminChatRealtime();
+  refreshAdminMensajesBadge();
 }
 
 function stopReception(){
@@ -4681,6 +4690,19 @@ function closeExerciseNoteModal(){
   if(modal)modal.style.display='none';
   noteCtx=null;
 }
+// Abre el chat 1-a-1 con tu coach con un mensaje pre-armado sobre este ejercicio.
+function askAboutExercise(btn){
+  const exName=btn.dataset.name||'este ejercicio';
+  coachHubActiveTab='mensajes';
+  sv('coaching'); // ya renderiza el tab 'mensajes' vía coachHubActiveTab
+  const ta=document.getElementById('chat-text-input');
+  if(!ta)return;
+  ta.value='Duda sobre "'+exName+'": ';
+  onChatInputChange(ta);
+  ta.focus();
+  const end=ta.value.length;
+  ta.setSelectionRange(end,end);
+}
 async function saveExerciseNoteSb(){
   if(!noteCtx)return;
   const ta=document.getElementById('exercise-note-input');
@@ -4749,11 +4771,11 @@ function renderSetTrackerHtml(sessionCtx,exKey,ex){
   if(!sets.length)return'';
   return '<div class="set-tracker">'
     +'<div class="set-tracker-hdr"><span>SERIE</span><span>KG</span><span>REPS</span><span></span></div>'
-    +sets.map(s=>'<div class="set-row">'
+    +sets.map(s=>'<div class="set-row" data-set-id="'+s.id+'">'
       +'<span class="set-num">'+(s.set_idx+1)+'</span>'
-      +'<input class="set-reps-in" type="number" inputmode="decimal" placeholder="kg" value="'+(s.weight!=null?s.weight:'')+'" onchange="updateSetWeightSb(&quot;'+s.id+'&quot;,this.value)">'
-      +'<input class="set-reps-in" type="text" placeholder="reps" value="'+esc(s.actual_reps||s.reps_target||'')+'" onchange="updateSetRepsSb(&quot;'+s.id+'&quot;,this.value)">'
-      +'<button class="set-check'+(s.done?' done':'')+'" onclick="toggleSetDoneSb(&quot;'+s.id+'&quot;,'+(!s.done)+')">'+(s.done?'✓':'')+'</button>'
+      +'<input class="set-reps-in set-weight-in" type="number" inputmode="decimal" placeholder="kg" value="'+(s.weight!=null?s.weight:'')+'" onchange="updateSetWeightSb(&quot;'+s.id+'&quot;,this.value)">'
+      +'<input class="set-reps-in set-actual-reps-in" type="text" placeholder="reps" value="'+esc(s.actual_reps||s.reps_target||'')+'" onchange="updateSetRepsSb(&quot;'+s.id+'&quot;,this.value)">'
+      +'<button class="set-check'+(s.done?' done':'')+'" onclick="toggleSetDoneSb(&quot;'+s.id+'&quot;,'+(!s.done)+',this)">'+(s.done?'✓':'')+'</button>'
       +'</div>').join('')
     +'<div class="set-tracker-actions">'
     +'<button class="btn-sm" onclick="addSetSb(&quot;'+sessionCtx.scheduleId+'&quot;,&quot;'+esc(exKey)+'&quot;,&quot;'+esc(ex.reps||'')+'&quot;)">+ Agregar serie</button>'
@@ -4780,9 +4802,21 @@ function logSetToUserScores(row){
     ex_name:found.ex.name,weight:row.weight,reps:row.actual_reps||row.reps_target||null
   }).then(({error})=>{if(error)console.error('logSetToUserScores:',error);});
 }
-async function toggleSetDoneSb(setId,newDone){
+async function toggleSetDoneSb(setId,newDone,btnEl){
+  // El peso/reps se leen directo del DOM al momento de palomear en vez de
+  // confiar en que el onchange de los inputs vecinos ya haya terminado de
+  // guardar — evita una condición de carrera donde el check llegaba antes
+  // que el guardado del peso y se registraba con el valor viejo (o vacío).
+  const patch={done:newDone,updated_at:new Date().toISOString()};
+  if(newDone){
+    const row=btnEl?btnEl.closest('.set-row'):document.querySelector('.set-row[data-set-id="'+setId+'"]');
+    const wIn=row?.querySelector('.set-weight-in');
+    const rIn=row?.querySelector('.set-actual-reps-in');
+    if(wIn){const w=wIn.value===''?null:parseFloat(wIn.value);patch.weight=(w==null||isNaN(w))?null:w;}
+    if(rIn)patch.actual_reps=rIn.value||null;
+  }
   try{
-    const{data,error}=await sb.from('coaching_session_sets').update({done:newDone,updated_at:new Date().toISOString()}).eq('id',setId).select().single();
+    const{data,error}=await sb.from('coaching_session_sets').update(patch).eq('id',setId).select().single();
     if(error)throw error;
     const arr=coachSessionSets[data.ex_key];
     if(arr){
@@ -4833,12 +4867,29 @@ async function addSetSb(scheduleId,exKey,defaultReps){
 }
 async function markAllSetsSb(exKey){
   const arr=coachSessionSets[exKey]||[];
-  const ids=arr.filter(s=>!s.done).map(s=>s.id);
-  if(!ids.length)return;
+  const undone=arr.filter(s=>!s.done);
+  if(!undone.length)return;
+  // Igual que toggleSetDoneSb: lee peso/reps del DOM por fila para no pisar
+  // valores capturados pero aún no confirmados por el onchange de cada input.
+  const patches=undone.map(s=>{
+    const row=document.querySelector('.set-row[data-set-id="'+s.id+'"]');
+    const wIn=row?.querySelector('.set-weight-in');
+    const rIn=row?.querySelector('.set-actual-reps-in');
+    const w=wIn&&wIn.value!==''?parseFloat(wIn.value):null;
+    return{id:s.id,weight:(w==null||isNaN(w))?null:w,actual_reps:(rIn&&rIn.value)||null};
+  });
   try{
-    const{data,error}=await sb.from('coaching_session_sets').update({done:true,updated_at:new Date().toISOString()}).in('id',ids).select();
-    if(error)throw error;
-    (data||[]).forEach(row=>{const idx=arr.findIndex(s=>s.id===row.id);if(idx>-1)arr[idx]=row;logSetToUserScores(row);});
+    const results=await Promise.all(patches.map(p=>
+      sb.from('coaching_session_sets').update({weight:p.weight,actual_reps:p.actual_reps,done:true,updated_at:new Date().toISOString()}).eq('id',p.id).select().single()
+    ));
+    const failed=results.find(r=>r.error);
+    if(failed)throw failed.error;
+    results.forEach(({data})=>{
+      if(!data)return;
+      const idx=arr.findIndex(s=>s.id===data.id);
+      if(idx>-1)arr[idx]=data;
+      logSetToUserScores(data);
+    });
     renderCoachHoyPanel();
   }catch(e){toast('Error: '+e.message,'err');}
 }
@@ -4850,6 +4901,7 @@ function renderExerciseListHtml(exercises,keyPrefix,expandedMap,toggleFnName,boa
     const groupOpen=!!expandedMap[gKey];
     const exKey=ex.id||(boardId||keyPrefix)+'_idx_'+i;
     const hasNote=!!exerciseNotesMap[exKey];
+    const hasLiveTracker=!!(sessionCtx&&(sessionCtx.sets[exKey]||[]).length);
     return '<div class="exercise-detail">'
       +'<div class="exercise-detail-head">'
       +'<div style="display:flex;align-items:flex-start;gap:10px">'
@@ -4862,8 +4914,9 @@ function renderExerciseListHtml(exercises,keyPrefix,expandedMap,toggleFnName,boa
       +'</div>'
       +'</div>'
       +'<div style="display:flex">'
-      +'<button class="log-score-btn" style="flex:1" data-bid="'+esc(boardId||keyPrefix)+'" data-idx="'+i+'" data-name="'+esc(ex.name)+'" data-exid="'+esc(ex.id||'')+'" onclick="openLogScore(this)">💪 Registrar peso</button>'
+      +(hasLiveTracker?'':'<button class="log-score-btn" style="flex:1" data-bid="'+esc(boardId||keyPrefix)+'" data-idx="'+i+'" data-name="'+esc(ex.name)+'" data-exid="'+esc(ex.id||'')+'" onclick="openLogScore(this)">💪 Registrar peso</button>')
       +'<button class="log-score-btn" style="flex:1;border-left:1px solid rgba(139,92,246,.2)" data-exkey="'+esc(exKey)+'" data-name="'+esc(ex.name)+'" onclick="openExerciseNote(this)">'+(hasNote?'📝 Ver nota':'📝 Agregar nota')+'</button>'
+      +(canAccessCoaching()?'<button class="log-score-btn" style="flex:1;border-left:1px solid rgba(139,92,246,.2)" data-name="'+esc(ex.name)+'" onclick="askAboutExercise(this)">🙋 Asesoría</button>':'')
       +'</div>'
       +(sessionCtx?renderSetTrackerHtml(sessionCtx,exKey,ex):'')
       +(groupOpen?videos.map((vid,vi)=>{
@@ -4999,12 +5052,14 @@ async function loadCoachWeekDataSb(force){
   coachWeekStart=mazWeekStart(mazToday());
   const weekEnd=addDaysDS(coachWeekStart,6);
   try{
-    const[schRes,taskRes]=await Promise.allSettled([
+    const[schRes,taskRes,logRes]=await Promise.allSettled([
       sb.from('coaching_schedule').select('*').eq('user_id',sbUser.id).gte('ds',coachWeekStart).lte('ds',weekEnd).order('ds'),
-      sb.from('coaching_tasks').select('*').eq('user_id',sbUser.id).or('is_done.eq.false,completed_at.gte.'+mazLocalDateTimeIso(coachWeekStart,0,0,0)).order('due_date',{ascending:true,nullsFirst:false})
+      sb.from('coaching_tasks').select('*').eq('user_id',sbUser.id).or('is_done.eq.false,completed_at.gte.'+mazLocalDateTimeIso(coachWeekStart,0,0,0)).order('due_date',{ascending:true,nullsFirst:false}),
+      sb.from('coaching_task_logs').select('task_id').eq('user_id',sbUser.id).eq('ds',mazToday())
     ]);
     coachSchedule=schRes.status==='fulfilled'?(schRes.value.data||[]):[];
     coachTasks=taskRes.status==='fulfilled'?(taskRes.value.data||[]):[];
+    coachTaskLogsToday=new Set(logRes.status==='fulfilled'?(logRes.value.data||[]).map(r=>r.task_id):[]);
     const boardIds=[...new Set(coachSchedule.map(r=>r.board_id).filter(Boolean))];
     coachBoardsById={};
     if(boardIds.length){
@@ -5015,7 +5070,7 @@ async function loadCoachWeekDataSb(force){
     coachDataLoadError=null;
   }catch(e){
     console.error('loadCoachWeekDataSb:',e);
-    coachSchedule=[];coachTasks=[];coachBoardsById={};
+    coachSchedule=[];coachTasks=[];coachBoardsById={};coachTaskLogsToday=new Set();
     coachDataLoadError=e.message||'Error de red';
   }
 }
@@ -5032,6 +5087,11 @@ function coachRelevantTasks(){
   const weekEnd=addDaysDS(coachWeekStart,6);
   const today=mazToday();
   return coachTasks.filter(t=>!t.due_date||(t.due_date>=coachWeekStart&&t.due_date<=weekEnd)||(!t.is_done&&t.due_date<today));
+}
+// Las tareas recurrentes ("tareas diarias") no usan is_done (viven para
+// siempre) — su estado de "hecha" es si ya hay un log de hoy.
+function isTaskDoneToday(t){
+  return t.is_recurring?coachTaskLogsToday.has(t.id):t.is_done;
 }
 function renderCoachHoyPanel(){
   const el=document.getElementById('coach-hoy-panel');
@@ -5068,8 +5128,9 @@ function renderCoachHoyPanel(){
   const relevantTasks=coachRelevantTasks();
   html+='<div class="board-card"><div class="board-hdr"><span class="board-title">Tareas</span></div><div class="board-body">'
     +(relevantTasks.length?relevantTasks.map(t=>{
-        const isOverdue=!t.is_done&&t.due_date&&t.due_date<mazToday();
-        return '<div class="coach-task-row'+(t.is_done?' done':'')+(isOverdue?' overdue':'')+'" onclick="toggleTaskSb(&quot;'+t.id+'&quot;)"><div class="coach-task-check">'+(t.is_done?'✓':'')+'</div><div class="coach-task-title">'+esc(t.title)+'</div>'+(t.due_date?'<div class="coach-task-due">'+(isOverdue?'Atrasada · ':'')+fmtDS(t.due_date)+'</div>':'')+'</div>';
+        const done=isTaskDoneToday(t);
+        const isOverdue=!t.is_recurring&&!done&&t.due_date&&t.due_date<mazToday();
+        return '<div class="coach-task-row'+(done?' done':'')+(isOverdue?' overdue':'')+'" onclick="toggleTaskSb(&quot;'+t.id+'&quot;)"><div class="coach-task-check">'+(done?'✓':'')+'</div><div class="coach-task-title">'+esc(t.title)+'</div>'+(t.is_recurring?'<div class="coach-task-due">🔁 Diaria</div>':t.due_date?'<div class="coach-task-due">'+(isOverdue?'Atrasada · ':'')+fmtDS(t.due_date)+'</div>':'')+'</div>';
       }).join(''):'<div class="empty">Sin tareas pendientes.</div>')
     +'</div></div>';
   el.innerHTML=html;
@@ -5098,7 +5159,7 @@ function renderCoachSemanaPanel(){
   strip+='</div>';
   const summary='<div class="board-card"><div class="board-body" style="text-align:center;font-weight:700">'+(scheduledCount?('¡Tienes '+scheduledCount+' entreno'+(scheduledCount===1?'':'s')+' esta semana!'):'Sin entrenos programados esta semana.')+'</div></div>';
   const relevantTasks=coachRelevantTasks();
-  const doneCount=relevantTasks.filter(t=>t.is_done).length;
+  const doneCount=relevantTasks.filter(isTaskDoneToday).length;
   const pct=relevantTasks.length?Math.round(doneCount/relevantTasks.length*100):0;
   const tasksHtml='<div class="board-card"><div class="board-hdr"><span class="board-title">Tareas (esta semana)</span></div><div class="board-body">'
     +'<div>Completaste '+doneCount+'/'+relevantTasks.length+' tareas</div>'
@@ -5250,6 +5311,23 @@ function stopRestTimer(){
 async function toggleTaskSb(id){
   const t=coachTasks.find(x=>x.id===id);
   if(!t)return;
+  if(t.is_recurring){
+    const today=mazToday();
+    const already=coachTaskLogsToday.has(id);
+    try{
+      if(already){
+        const{error}=await sb.from('coaching_task_logs').delete().eq('task_id',id).eq('user_id',sbUser.id).eq('ds',today);
+        if(error)throw error;
+        coachTaskLogsToday.delete(id);
+      }else{
+        const{error}=await sb.from('coaching_task_logs').insert({task_id:id,user_id:sbUser.id,ds:today});
+        if(error)throw error;
+        coachTaskLogsToday.add(id);
+      }
+      if(coachHubActiveTab==='programa')renderCoachSemanaPanel();else renderCoachHoyPanel();
+    }catch(e){toast('Error al actualizar tarea: '+e.message,'err');}
+    return;
+  }
   const newDone=!t.is_done;
   try{
     const{data,error}=await sb.from('coaching_tasks').update({is_done:newDone,completed_at:newDone?new Date().toISOString():null}).eq('id',id).select().single();
@@ -5326,7 +5404,7 @@ function renderChatThread(){
         +'<span class="chat-voice-dur" id="chat-voice-dur-'+esc(m.id)+'">'+chatVoiceDurLabel(m.media_duration_sec)+'</span>'
         +'</div>';
     }else{
-      inner=esc(m.body);
+      inner=linkifyText(m.body);
     }
     html+='<div class="chat-row '+(mine?'mine':'theirs')+'"><div class="chat-bubble">'+inner+'<span class="chat-bubble-time">'+esc(fmtChatTime(m.created_at))+'</span></div></div>';
   });
@@ -8799,8 +8877,8 @@ function renderCoachingDetail(){
 
   const tasksHtml=coachAdminTasks.length?coachAdminTasks.map(t=>
     '<div style="display:flex;align-items:center;gap:8px;padding:8px 0;border-bottom:1px solid var(--border)">'
-    +'<span style="flex:1;font-size:13px;'+(t.is_done?'color:var(--gray);text-decoration:line-through':'color:var(--white)')+'">'+esc(t.title)+(t.due_date?' · '+fmtDS(t.due_date):'')+'</span>'
-    +'<button class="btn-sm" style="padding:4px 8px" data-tid="'+esc(t.id)+'" data-ttitle="'+esc(t.title)+'" data-tdue="'+esc(t.due_date||'')+'" onclick="startEditCoachingTaskSb(this)">Editar</button>'
+    +'<span style="flex:1;font-size:13px;'+(t.is_done?'color:var(--gray);text-decoration:line-through':'color:var(--white)')+'">'+esc(t.title)+(t.is_recurring?' · 🔁 Diaria':t.due_date?' · '+fmtDS(t.due_date):'')+'</span>'
+    +'<button class="btn-sm" style="padding:4px 8px" data-tid="'+esc(t.id)+'" data-ttitle="'+esc(t.title)+'" data-tdue="'+esc(t.due_date||'')+'" data-trecurring="'+(t.is_recurring?'1':'')+'" onclick="startEditCoachingTaskSb(this)">Editar</button>'
     +'<button class="btn-sm bred" style="padding:4px 8px" onclick="deleteCoachingTaskSb(&quot;'+t.id+'&quot;)">Eliminar</button>'
     +'</div>'
   ).join(''):'<div class="empty">Sin tareas.</div>';
@@ -8851,7 +8929,16 @@ function renderCoachingDetail(){
     +'<div style="background:var(--card);border:1px solid var(--border);border-radius:6px;padding:1rem">'
     +'<p class="slbl" style="margin-bottom:8px" id="coach-task-form-label">'+(editingCoachTaskId?'Editar tarea':'Nueva tarea')+'</p>'
     +'<div class="field"><label>Titulo</label><input type="text" id="coach-task-title-in" placeholder="Ej: Registro de peso"></div>'
-    +'<div class="field"><label>Fecha limite (opcional)</label><input type="date" id="coach-task-due-in"></div>'
+    +(editingCoachTaskId?'':'<div style="display:flex;gap:6px;flex-wrap:wrap;margin:-2px 0 12px">'
+      +'<button type="button" class="btn-sm" onclick="fillRecurringTaskPreset(&quot;💧 Tomar 2L de agua&quot;)">💧 2L de agua</button>'
+      +'<button type="button" class="btn-sm" onclick="fillRecurringTaskPreset(&quot;🍽️ Ayuno intermitente&quot;)">🍽️ Ayuno intermitente</button>'
+      +'<button type="button" class="btn-sm" onclick="fillRecurringTaskPreset(&quot;🧘 Meditar 10 min&quot;)">🧘 Meditar</button>'
+      +'</div>')
+    +'<label style="display:flex;align-items:center;gap:8px;margin-bottom:12px;font-size:13px;color:var(--white)">'
+    +'<input type="checkbox" id="coach-task-recurring-in" style="width:18px;height:18px;accent-color:var(--blue)" onchange="toggleCoachTaskDueVisibility()">'
+    +'Tarea diaria (se repite cada día, el cliente la palomea día a día)'
+    +'</label>'
+    +'<div class="field" id="coach-task-due-field"><label>Fecha limite (opcional)</label><input type="date" id="coach-task-due-in"></div>'
     +'<div style="display:flex;gap:8px">'
     +'<button class="btn" style="flex:1" onclick="addCoachingTaskSb()">'+(editingCoachTaskId?'Guardar cambios':'Asignar tarea')+'</button>'
     +(editingCoachTaskId?'<button class="btn-sm" onclick="cancelEditCoachingTaskSb()">Cancelar</button>':'')
@@ -8925,24 +9012,42 @@ function startEditCoachingTaskSb(btn){
   renderCoachingDetail();
   const titleIn=document.getElementById('coach-task-title-in');
   const dueIn=document.getElementById('coach-task-due-in');
+  const recIn=document.getElementById('coach-task-recurring-in');
   if(titleIn)titleIn.value=btn.dataset.ttitle||'';
   if(dueIn)dueIn.value=btn.dataset.tdue||'';
+  if(recIn)recIn.checked=btn.dataset.trecurring==='1';
+  toggleCoachTaskDueVisibility();
   titleIn?.focus();
 }
 function cancelEditCoachingTaskSb(){
   editingCoachTaskId=null;
   renderCoachingDetail();
 }
+function fillRecurringTaskPreset(title){
+  const titleIn=document.getElementById('coach-task-title-in');
+  const recIn=document.getElementById('coach-task-recurring-in');
+  if(titleIn)titleIn.value=title;
+  if(recIn)recIn.checked=true;
+  toggleCoachTaskDueVisibility();
+  titleIn?.focus();
+}
+function toggleCoachTaskDueVisibility(){
+  const recIn=document.getElementById('coach-task-recurring-in');
+  const field=document.getElementById('coach-task-due-field');
+  if(field)field.style.display=(recIn&&recIn.checked)?'none':'';
+}
 async function addCoachingTaskSb(){
   if(!selectedCoachClientId)return;
   const titleIn=document.getElementById('coach-task-title-in');
   const dueIn=document.getElementById('coach-task-due-in');
+  const recIn=document.getElementById('coach-task-recurring-in');
   const title=(titleIn.value||'').trim();
-  const due=dueIn.value||null;
+  const isRecurring=!!(recIn&&recIn.checked);
+  const due=isRecurring?null:(dueIn.value||null);
   if(!title){toast('Escribe un titulo','err');return;}
   try{
     if(editingCoachTaskId){
-      const{error}=await sb.from('coaching_tasks').update({title,due_date:due}).eq('id',editingCoachTaskId);
+      const{error}=await sb.from('coaching_tasks').update({title,due_date:due,is_recurring:isRecurring}).eq('id',editingCoachTaskId);
       if(error)throw error;
       editingCoachTaskId=null;
       await loadCoachingWeekAdminSb();
@@ -8950,9 +9055,10 @@ async function addCoachingTaskSb(){
       toast('Tarea actualizada','ok');
       return;
     }
-    const{error}=await sb.from('coaching_tasks').insert({user_id:selectedCoachClientId,title,due_date:due,created_by:sbUser.id});
+    const{error}=await sb.from('coaching_tasks').insert({user_id:selectedCoachClientId,title,due_date:due,is_recurring:isRecurring,created_by:sbUser.id});
     if(error)throw error;
-    titleIn.value='';dueIn.value='';
+    titleIn.value='';dueIn.value='';if(recIn)recIn.checked=false;
+    toggleCoachTaskDueVisibility();
     sendPush('user:'+selectedCoachClientId,'✅ Nueva tarea asignada',title);
     await loadCoachingWeekAdminSb();
     renderCoachingDetail();
@@ -9084,6 +9190,7 @@ async function openMensajesThreadAdmin(uid){
     renderMensajesThreadAdmin(client?.name||'Socio');
     await markChatReadSb();
     renderMensajesAdminSb(); // refresca contadores de no-leídos del inbox en segundo plano
+    refreshAdminMensajesBadge();
   }catch(e){
     view.innerHTML='<div class="empty">Error: '+esc(e.message)+'</div>';
   }
@@ -9123,12 +9230,25 @@ function startAdminChatRealtime(){
       if(threadOpen){
         if(!chatMessages.some(m=>m.id===payload.new.id))chatMessages.push(payload.new);
         renderChatThread();
-        markChatReadSb();
-      }else if(document.getElementById('a-mensajes')?.classList.contains('active')){
-        renderMensajesAdminSb();
+        markChatReadSb().then(refreshAdminMensajesBadge);
+      }else{
+        if(document.getElementById('a-mensajes')?.classList.contains('active'))renderMensajesAdminSb();
+        refreshAdminMensajesBadge();
       }
     }).subscribe();
-  adminChatPollInt=setInterval(()=>{if(document.getElementById('a-mensajes')?.classList.contains('active'))renderMensajesAdminSb();},300000);
+  adminChatPollInt=setInterval(()=>{
+    if(document.getElementById('a-mensajes')?.classList.contains('active'))renderMensajesAdminSb();
+    refreshAdminMensajesBadge();
+  },300000);
+}
+async function refreshAdminMensajesBadge(){
+  if(!sbUser)return;
+  try{
+    const{count}=await sb.from('coaching_messages').select('id',{count:'exact',head:true})
+      .eq('sender_role','user').is('read_at',null);
+    const el=document.getElementById('adm-mensajes-badge');
+    if(el){el.textContent=count?String(count):'';el.classList.toggle('show',!!count);}
+  }catch(e){console.warn('refreshAdminMensajesBadge:',e);}
 }
 function stopAdminChatRealtime(){
   if(adminChatChannel){sb.removeChannel(adminChatChannel);adminChatChannel=null;}
