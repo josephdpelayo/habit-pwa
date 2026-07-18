@@ -6,12 +6,12 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="HABIT">
 <meta name="application-name" content="HABIT">
-<link rel="manifest" href="/manifest.json?v=20260717-01">
-<link rel="apple-touch-icon" sizes="120x120" href="/icons/icon-120.png?v=20260717-01">
-<link rel="apple-touch-icon" sizes="152x152" href="/icons/icon-152.png?v=20260717-01">
-<link rel="apple-touch-icon" sizes="167x167" href="/icons/icon-167.png?v=20260717-01">
-<link rel="apple-touch-icon" sizes="180x180" href="/icons/icon-180.png?v=20260717-01">
-<link rel="icon" type="image/png" sizes="32x32" href="/icons/icon-32.png?v=20260717-01">
+<link rel="manifest" href="/manifest.json?v=20260718-03">
+<link rel="apple-touch-icon" sizes="120x120" href="/icons/icon-120.png?v=20260718-03">
+<link rel="apple-touch-icon" sizes="152x152" href="/icons/icon-152.png?v=20260718-03">
+<link rel="apple-touch-icon" sizes="167x167" href="/icons/icon-167.png?v=20260718-03">
+<link rel="apple-touch-icon" sizes="180x180" href="/icons/icon-180.png?v=20260718-03">
+<link rel="icon" type="image/png" sizes="32x32" href="/icons/icon-32.png?v=20260718-03">
 <title>HABIT</title>
 <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700;800;900&family=Share+Tech+Mono&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
@@ -42,6 +42,7 @@ input,select,button,textarea{font-family:'Montserrat',sans-serif}
 .logout-btn{font-size:11px;color:var(--gray);cursor:pointer;background:none;border:none;font-weight:600;letter-spacing:.05em;text-transform:uppercase;margin-left:auto;padding:4px}
 /* BOTTOM NAV */
 .bnav{background:var(--dark);border-top:1px solid var(--border);display:flex;flex-shrink:0;overflow-x:auto;padding-bottom:env(safe-area-inset-bottom)}
+.bnav.kb-hidden{display:none}
 .bnav::-webkit-scrollbar{height:0}
 .bnav-inner{display:flex;min-width:max-content;width:100%}
 .bnb{position:relative;flex:1;min-width:78px;padding:13px 0 10px;font-size:10px;font-weight:700;text-align:center;cursor:pointer;color:var(--gray);border:none;background:transparent;letter-spacing:.04em;text-transform:uppercase;display:flex;flex-direction:column;align-items:center;gap:5px}
@@ -342,6 +343,12 @@ input,select,button,textarea{font-family:'Montserrat',sans-serif}
 .video-modal-close{border:1px solid var(--border);background:var(--card);color:var(--white);border-radius:6px;padding:10px 12px;font-size:12px;font-weight:800}
 .video-modal-frame{width:min(92vw,430px);height:min(78vh,760px);aspect-ratio:9/16;background:#000;border:1px solid var(--border);overflow:hidden}
 .log-score-btn{display:flex;align-items:center;justify-content:center;gap:8px;padding:10px 12px;background:rgba(139,92,246,.1);border-top:1px solid rgba(139,92,246,.2);cursor:pointer;color:var(--purple);font-size:12px;font-weight:600;letter-spacing:.04em;text-transform:uppercase}
+.ex-menu-wrap{position:relative;flex-shrink:0}
+.ex-menu-btn{width:34px;height:34px;border-radius:4px;background:var(--card2);border:1px solid var(--border);color:var(--gray);font-size:18px;font-weight:900;line-height:1;cursor:pointer;display:flex;align-items:center;justify-content:center}
+.ex-menu-dropdown{display:none;position:absolute;top:40px;right:0;z-index:20;background:var(--card2);border:1px solid var(--border);border-radius:8px;min-width:180px;padding:4px;box-shadow:0 8px 24px rgba(0,0,0,.45)}
+.ex-menu-dropdown.open{display:block}
+.ex-menu-item{display:flex;align-items:center;gap:8px;width:100%;padding:10px;background:transparent;border:none;color:var(--white);font-size:12.5px;font-weight:600;text-align:left;border-radius:6px;cursor:pointer}
+.ex-menu-item:active{background:var(--border)}
 .set-tracker{padding:12px;background:var(--card2);border-top:1px solid var(--border)}
 .set-tracker-hdr{display:grid;grid-template-columns:28px 1fr 1fr 40px;gap:6px;font-size:10px;font-weight:700;color:var(--gray);letter-spacing:.06em;text-transform:uppercase;padding:0 2px 6px;text-align:center}
 .set-tracker-hdr span:first-child{text-align:left}
@@ -410,6 +417,7 @@ input,select,button,textarea{font-family:'Montserrat',sans-serif}
 .chat-text-input{flex:1;background:var(--card2);border:1px solid var(--border);border-radius:20px;padding:9px 14px;font-size:13px;color:var(--white);resize:none;max-height:100px}
 .chat-mic-btn,.chat-send-btn{width:38px;height:38px;border-radius:50%;background:var(--blue);border:none;color:#fff;display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0}
 .chat-recording-indicator{flex-shrink:0;display:flex;align-items:center;gap:8px;padding:10px 16px;background:rgba(239,68,68,.12);border-top:1px solid var(--red);color:var(--red);font-size:13px;font-weight:700}
+.chat-recording-cancel{margin-left:auto;background:transparent;border:1px solid var(--red);color:var(--red);border-radius:6px;padding:5px 10px;font-size:11px;font-weight:700;cursor:pointer}
 .chat-recording-dot{width:9px;height:9px;border-radius:50%;background:var(--red);animation:chatPulse 1s infinite}
 @keyframes chatPulse{0%,100%{opacity:1}50%{opacity:.3}}
 .chat-img-preview{padding:8px 12px;display:flex;align-items:center;gap:8px}
@@ -1067,7 +1075,6 @@ body.reception-mode{background:#050505}
     <button class="adm-tab" onclick="admTab('slots')">Slots</button>
     <button class="adm-tab" onclick="admTab('users')">Socios</button>
     <button class="adm-tab" onclick="admTab('boards')">Pizarrones</button>
-    <button class="adm-tab" onclick="admTab('coaching')">Coaching</button>
     <button class="adm-tab" onclick="admTab('mensajes')">Mensajes<span id="adm-mensajes-badge" class="adm-tab-badge"></span></button>
     <button class="adm-tab" onclick="admTab('payments')">Finanzas</button>
     <button class="adm-tab" onclick="admTab('shop')">Tienda</button>
@@ -1132,6 +1139,7 @@ body.reception-mode{background:#050505}
           <button class="filter-chip" data-filter="vencido" onclick="setUserFilter(this)">🔴 Vencidos</button>
           <button class="filter-chip" data-filter="por-vencer" onclick="setUserFilter(this)">⚠️ Por vencer</button>
           <button class="filter-chip" data-filter="sin-plan" onclick="setUserFilter(this)">⬜ Sin plan</button>
+          <button class="filter-chip" data-filter="coaching" onclick="setUserFilter(this)">🏋️ Coaching</button>
       </div>
       <div style="margin-bottom:8px">
         <select id="user-sort" onchange="renderUsersSb()" style="background:var(--card2);border:1px solid var(--border);color:var(--white);border-radius:4px;padding:6px 10px;font-size:12px;cursor:pointer;width:100%">
@@ -1148,6 +1156,12 @@ body.reception-mode{background:#050505}
       </div><!-- /user-list-area -->
     </div>
 
+    <!-- COACHING de un socio — pantalla aparte, sin tab propio en el nav.
+         Solo se llega aquí desde el perfil individual (adminOpenCoachingCockpit). -->
+    <div id="a-coaching-detail" class="adm-section">
+      <div id="coaching-detail"></div>
+    </div>
+
     <!-- PIZARRONES -->
     <div id="a-boards" class="adm-section">
       <div style="background:var(--card);border:1px solid var(--border);border-radius:6px;padding:1rem;margin-bottom:1rem">
@@ -1159,19 +1173,6 @@ body.reception-mode{background:#050505}
       <div id="boards-list"></div>
     </div>
 
-    <!-- COACHING (beta oculta) -->
-    <div id="a-coaching" class="adm-section">
-      <div style="background:var(--card);border:1px solid var(--border);border-radius:6px;padding:1rem;margin-bottom:1rem">
-        <p class="slbl" style="margin-bottom:8px">Clientes beta</p>
-        <input class="adm-search" placeholder="Buscar socio..." oninput="filterCoachingClients(this)">
-        <label style="display:flex;align-items:center;gap:8px;margin:8px 0;cursor:pointer">
-          <input type="checkbox" id="coaching-beta-only-toggle" onchange="renderCoachingClientList(document.querySelector('#a-coaching .adm-search').value)" style="width:16px;height:16px;accent-color:var(--green)">
-          <span style="font-size:12px;color:var(--gray)">Solo beta activos</span>
-        </label>
-        <div id="coaching-client-list"></div>
-      </div>
-      <div id="coaching-detail"></div>
-    </div>
 
     <!-- MENSAJES (beta oculta) -->
     <div id="a-mensajes" class="adm-section">
@@ -1423,7 +1424,7 @@ body.reception-mode{background:#050505}
 // ── CONFIG & SUPABASE ───────────────────────────────────────
 const SUPABASE_URL='https://pmpjteuqjusbiduevbwq.supabase.co';
 const SUPABASE_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBtcGp0ZXVxanVzYmlkdWV2YndxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc2OTI1NjUsImV4cCI6MjA5MzI2ODU2NX0.XbMzZoo2yqtrD8znLnyo_1zDfrdJAvAPj1lqGOyXnLw';
-const APP_VERSION='20260717-01';
+const APP_VERSION='20260718-03';
 const MUSCLE_GROUPS=['Pecho','Espalda','Piernas','Hombros','Brazos','Core','Cardio','Full Body'];
 function muscleGroupSelectHtml(id,selected){
   return '<select id="'+id+'" style="width:100%;background:var(--card);border:1px solid var(--border);border-radius:4px;padding:8px;font-size:12px;color:var(--white);outline:none;margin-bottom:6px;box-sizing:border-box">'
@@ -3029,14 +3030,13 @@ function admTab(t){
   if(t!=='users'){expandedUsers=new Set();}
   if(t!=='boards'){expandedBoards=new Set();editingBoards=new Set();addingExBoards=new Set();assigningBoards=new Set();}
   document.querySelectorAll('.adm-tab').forEach((b,i)=>b.classList.toggle('active',
-    ['dash','slots','users','boards','coaching','mensajes','payments','shop','comunidad','notifs','reports','gaia'][i]===t));
+    ['dash','slots','users','boards','mensajes','payments','shop','comunidad','notifs','reports','gaia'][i]===t));
   document.querySelectorAll('.adm-section').forEach(el=>el.classList.remove('active'));
   const el=document.getElementById('a-'+t);if(el)el.classList.add('active');
   if(t==='dash')renderDashboard();
   if(t==='slots')renderAdmSlots();
   if(t==='users')renderUsersSb();
   if(t==='boards')renderBoardsAdmin();
-  if(t==='coaching')renderCoachingAdminSb();
   if(t==='mensajes')renderMensajesAdminSb();
   if(t==='payments')renderPaymentsSb();
   if(t==='shop')renderAdminShopOrders();
@@ -4691,6 +4691,18 @@ function closeExerciseNoteModal(){
   noteCtx=null;
 }
 // Abre el chat 1-a-1 con tu coach con un mensaje pre-armado sobre este ejercicio.
+function closeAllExMenus(){
+  document.querySelectorAll('.ex-menu-dropdown.open').forEach(d=>d.classList.remove('open'));
+}
+function toggleExMenu(btn){
+  const dropdown=btn.nextElementSibling;
+  const wasOpen=dropdown.classList.contains('open');
+  closeAllExMenus();
+  if(!wasOpen)dropdown.classList.add('open');
+}
+document.addEventListener('click',e=>{
+  if(!e.target.closest('.ex-menu-wrap'))closeAllExMenus();
+});
 function askAboutExercise(btn){
   const exName=btn.dataset.name||'este ejercicio';
   coachHubActiveTab='mensajes';
@@ -4774,7 +4786,7 @@ function renderSetTrackerHtml(sessionCtx,exKey,ex){
     +sets.map(s=>'<div class="set-row" data-set-id="'+s.id+'">'
       +'<span class="set-num">'+(s.set_idx+1)+'</span>'
       +'<input class="set-reps-in set-weight-in" type="number" inputmode="decimal" placeholder="kg" value="'+(s.weight!=null?s.weight:'')+'" onchange="updateSetWeightSb(&quot;'+s.id+'&quot;,this.value)">'
-      +'<input class="set-reps-in set-actual-reps-in" type="text" placeholder="reps" value="'+esc(s.actual_reps||s.reps_target||'')+'" onchange="updateSetRepsSb(&quot;'+s.id+'&quot;,this.value)">'
+      +'<input class="set-reps-in set-actual-reps-in" type="text" inputmode="numeric" placeholder="'+esc(s.reps_target||'reps')+'" value="'+esc(s.actual_reps||'')+'" onchange="updateSetRepsSb(&quot;'+s.id+'&quot;,this.value)">'
       +'<button class="set-check'+(s.done?' done':'')+'" onclick="toggleSetDoneSb(&quot;'+s.id+'&quot;,'+(!s.done)+',this)">'+(s.done?'✓':'')+'</button>'
       +'</div>').join('')
     +'<div class="set-tracker-actions">'
@@ -4799,7 +4811,7 @@ function logSetToUserScores(row){
   if(!found)return;
   sb.from('user_scores').insert({
     user_id:sbUser.id,board_id:activeCoachingSession.board_id,ex_idx:found.idx,ex_key:row.ex_key,
-    ex_name:found.ex.name,weight:row.weight,reps:row.actual_reps||row.reps_target||null
+    ex_name:found.ex.name,weight:row.weight,reps:row.actual_reps||null
   }).then(({error})=>{if(error)console.error('logSetToUserScores:',error);});
 }
 async function toggleSetDoneSb(setId,newDone,btnEl){
@@ -4902,6 +4914,12 @@ function renderExerciseListHtml(exercises,keyPrefix,expandedMap,toggleFnName,boa
     const exKey=ex.id||(boardId||keyPrefix)+'_idx_'+i;
     const hasNote=!!exerciseNotesMap[exKey];
     const hasLiveTracker=!!(sessionCtx&&(sessionCtx.sets[exKey]||[]).length);
+    // Acciones secundarias (registrar peso fuera de sesión, nota, asesoría)
+    // se agrupan en un solo menú "⋯" en vez de 3 botones siempre visibles.
+    const menuItems=[]
+      .concat(hasLiveTracker?[]:['<button class="ex-menu-item" data-bid="'+esc(boardId||keyPrefix)+'" data-idx="'+i+'" data-name="'+esc(ex.name)+'" data-exid="'+esc(ex.id||'')+'" onclick="closeAllExMenus();openLogScore(this)">💪 Registrar peso</button>'])
+      .concat(['<button class="ex-menu-item" data-exkey="'+esc(exKey)+'" data-name="'+esc(ex.name)+'" onclick="closeAllExMenus();openExerciseNote(this)">'+(hasNote?'📝 Ver nota':'📝 Agregar nota')+'</button>'])
+      .concat(canAccessCoaching()?['<button class="ex-menu-item" data-name="'+esc(ex.name)+'" onclick="closeAllExMenus();askAboutExercise(this)">🙋 Asesoría</button>']:[]);
     return '<div class="exercise-detail">'
       +'<div class="exercise-detail-head">'
       +'<div style="display:flex;align-items:flex-start;gap:10px">'
@@ -4911,12 +4929,8 @@ function renderExerciseListHtml(exercises,keyPrefix,expandedMap,toggleFnName,boa
       +(ex.note||ex.notes||ex.description?'<div class="ex-note">'+esc(ex.note||ex.notes||ex.description)+'</div>':'')
       +'</div>'
       +(videos.length?'<button class="btn-sm" style="padding:0 10px;min-width:36px;height:34px;display:flex;align-items:center;justify-content:center;background:rgba(16,185,129,.15);border:1px solid rgba(16,185,129,.4);color:#10b981;border-radius:4px" onclick="'+toggleFnName+'(&quot;'+gKey+'&quot;)" aria-label="Ver videos">'+(groupOpen?'<svg width="14" height="14" viewBox="0 0 14 14" fill="currentColor"><rect x="2" y="1" width="3.5" height="12" rx="1"/><rect x="8.5" y="1" width="3.5" height="12" rx="1"/></svg>':'<svg width="14" height="14" viewBox="0 0 14 14" fill="currentColor"><polygon points="2,1 13,7 2,13"/></svg>')+'</button>':'')
+      +'<div class="ex-menu-wrap"><button class="ex-menu-btn" onclick="toggleExMenu(this)" aria-label="Más opciones">⋯</button><div class="ex-menu-dropdown">'+menuItems.join('')+'</div></div>'
       +'</div>'
-      +'</div>'
-      +'<div style="display:flex">'
-      +(hasLiveTracker?'':'<button class="log-score-btn" style="flex:1" data-bid="'+esc(boardId||keyPrefix)+'" data-idx="'+i+'" data-name="'+esc(ex.name)+'" data-exid="'+esc(ex.id||'')+'" onclick="openLogScore(this)">💪 Registrar peso</button>')
-      +'<button class="log-score-btn" style="flex:1;border-left:1px solid rgba(139,92,246,.2)" data-exkey="'+esc(exKey)+'" data-name="'+esc(ex.name)+'" onclick="openExerciseNote(this)">'+(hasNote?'📝 Ver nota':'📝 Agregar nota')+'</button>'
-      +(canAccessCoaching()?'<button class="log-score-btn" style="flex:1;border-left:1px solid rgba(139,92,246,.2)" data-name="'+esc(ex.name)+'" onclick="askAboutExercise(this)">🙋 Asesoría</button>':'')
       +'</div>'
       +(sessionCtx?renderSetTrackerHtml(sessionCtx,exKey,ex):'')
       +(groupOpen?videos.map((vid,vi)=>{
@@ -5535,7 +5549,7 @@ async function startVoiceRecording(){
     const micBtn=document.getElementById(chatId('chat-mic-btn'));
     if(micBtn){micBtn.textContent='⏹';micBtn.classList.add('recording');}
     const ind=document.getElementById(chatId('chat-recording-indicator'));
-    if(ind){ind.style.display='flex';ind.innerHTML='<span class="chat-recording-dot"></span><span>Grabando <span id="'+chatId('chat-recording-time')+'">0:00</span></span>';}
+    if(ind){ind.style.display='flex';ind.innerHTML='<span class="chat-recording-dot"></span><span>Grabando <span id="'+chatId('chat-recording-time')+'">0:00</span></span><button class="chat-recording-cancel" onclick="cancelVoiceRecording()">✕ Cancelar</button>';}
     chatRecordTimerInt=setInterval(()=>{
       const sec=Math.floor((Date.now()-chatRecordStartMs)/1000);
       const t=document.getElementById(chatId('chat-recording-time'));
@@ -5559,6 +5573,20 @@ function stopVoiceRecording(){
     if(durationSec<1||!chunks.length)return;
     const blob=new Blob(chunks,{type:recorder.mimeType||'audio/webm'});
     sendChatVoiceSb(blob,durationSec);
+  };
+  if(recorder.state!=='inactive')recorder.stop();else recorder.onstop();
+}
+function cancelVoiceRecording(){
+  if(!chatMediaRecorder)return;
+  const recorder=chatMediaRecorder;
+  if(chatRecordTimerInt){clearInterval(chatRecordTimerInt);chatRecordTimerInt=null;}
+  const micBtn=document.getElementById(chatId('chat-mic-btn'));
+  if(micBtn){micBtn.textContent='🎤';micBtn.classList.remove('recording');}
+  const ind=document.getElementById(chatId('chat-recording-indicator'));
+  if(ind){ind.style.display='none';ind.innerHTML='';}
+  recorder.onstop=()=>{
+    if(recorder._stream)recorder._stream.getTracks().forEach(t=>t.stop());
+    chatRecordChunks=[];chatMediaRecorder=null;
   };
   if(recorder.state!=='inactive')recorder.stop();else recorder.onstop();
 }
@@ -7059,6 +7087,7 @@ async function renderUsersSb(){
       if(_userFilter==='vencido') return expired||(u.credits!==undefined&&u.credits!==null&&u.credits<=0&&!u.plan_expiry);
       if(_userFilter==='por-vencer') return days!==null&&days>=0&&days<=7;
       if(_userFilter==='sin-plan') return !u.plan_id&&(!u.credits||u.credits<=0);
+      if(_userFilter==='coaching') return !!u.coaching_beta;
       return true;
     });
     filtered.sort((a,b2)=>{
@@ -7266,7 +7295,9 @@ async function adminOpenUserProfile(uid){
       +'<button class="btn-sm bgreen" onclick="openCourtesyModal(\''+uid+'\',\''+esc(u.name||'')+'\')">Cortesía</button>'
       +'<button class="btn-sm bblue" onclick="adminEditUserSb(\''+uid+'\',\''+esc(u.name||'')+'\')">Editar datos</button>'
       +'<button class="btn-sm bgreen" onclick="adminAddCreditsSb(\''+uid+'\')">+Visita extra</button>'
-      +'<button class="btn-sm" style="grid-column:1/-1;background:rgba(37,99,235,.12);border-color:var(--blue);color:var(--bl)" onclick="adminGoToCoaching(\''+uid+'\')">🏋️ Coaching'+(u.coaching_beta?' · beta activa ✓':'')+'</button>'
+      +(u.coaching_beta
+        ?'<button class="btn-sm" style="grid-column:1/-1;background:rgba(16,185,129,.12);border-color:var(--green);color:var(--green)" onclick="adminOpenCoachingCockpit(\''+uid+'\',\''+esc(u.name||'')+'\')">🏋️ Ver Coaching →</button>'
+        :'<button class="btn-sm" style="grid-column:1/-1;background:rgba(37,99,235,.12);border-color:var(--blue);color:var(--bl)" onclick="adminToggleCoachingBetaSb(\''+uid+'\',true,\''+esc(u.name||'')+'\')">🏋️ Activar Coaching</button>')
       +'<button class="btn-sm bred" style="grid-column:1/-1" onclick="adminDeleteUserSb(\''+uid+'\',\''+esc(u.name||'')+'\')">Eliminar socio</button>'
       +'</div>'
       +(upBks.length?'<p class="slbl" style="margin-bottom:8px">Próximas reservas ('+upBks.length+')</p>'+bkRowHtml(upBks):'')
@@ -8654,61 +8685,52 @@ async function loadBoardsSb(){
 }
 
 // ── COACHING ADMIN (beta oculta) ─────────────────────────────
-async function renderCoachingAdminSb(){
-  const{data:allU}=await sb.from('profiles').select('id,name,coaching_beta').neq('role','admin').order('name').limit(1000);
-  coachingAdminClients=allU||[];
-  renderCoachingClientList();
-  if(!selectedCoachClientId){
-    const el=document.getElementById('coaching-detail');
-    if(el)el.innerHTML='<div class="empty">Selecciona un socio para programar su semana.</div>';
-  }
-}
-function renderCoachingClientList(filter){
-  const el=document.getElementById('coaching-client-list');
-  if(!el)return;
-  const f=(filter||'').toLowerCase();
-  const betaOnly=document.getElementById('coaching-beta-only-toggle')?.checked;
-  let list=coachingAdminClients.filter(u=>!f||(u.name||'').toLowerCase().includes(f));
-  if(betaOnly)list=list.filter(u=>u.coaching_beta);
-  list=[...list].sort((a,b)=>(b.coaching_beta?1:0)-(a.coaching_beta?1:0));
-  el.innerHTML=list.length?list.map(u=>
-    '<label style="cursor:pointer;display:flex;align-items:center;gap:10px;padding:9px 4px;border-bottom:1px solid var(--border)'+(u.id===selectedCoachClientId?';background:rgba(37,99,235,.08)':'')+'">'
-    +'<div style="width:32px;height:32px;border-radius:50%;background:var(--bl);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;color:#fff;flex-shrink:0" onclick="selectCoachingClient(&quot;'+esc(u.id)+'&quot;)">'+inits(u.name)+'</div>'
-    +'<span style="flex:1;font-size:13px;font-weight:600" onclick="selectCoachingClient(&quot;'+esc(u.id)+'&quot;)">'+esc(u.name||'Socio')+'</span>'
-    +'<input type="checkbox" data-uid="'+esc(u.id)+'" '+(u.coaching_beta?'checked':'')+' onchange="toggleCoachingBetaSb(this)" style="width:18px;height:18px;accent-color:var(--green)" title="Activar Coaching beta">'
-    +'</label>'
-  ).join(''):'<div style="padding:8px;font-size:12px;color:var(--gray)">Sin socios registrados</div>';
-}
-function filterCoachingClients(input){renderCoachingClientList(input.value);}
-async function toggleCoachingBetaSb(cb){
-  const uid=cb.dataset.uid;
-  const prevChecked=!cb.checked;
+// El cockpit de coaching (Semana/Rutinas/Tareas/Notas/Progreso) vive embebido
+// dentro del perfil individual del socio (adminOpenUserProfile), no en un tab
+// aparte — evita tener que buscar al socio dos veces en dos listas distintas.
+async function adminToggleCoachingBetaSb(uid,enabled,name){
   try{
-    const{error}=await sb.from('profiles').update({coaching_beta:cb.checked}).eq('id',uid);
+    const{error}=await sb.from('profiles').update({coaching_beta:enabled}).eq('id',uid);
     if(error)throw error;
-    const u=coachingAdminClients.find(x=>x.id===uid);
-    if(u)u.coaching_beta=cb.checked;
-    toast(cb.checked?'Coaching activado':'Coaching desactivado','ok');
-  }catch(e){cb.checked=prevChecked;toast('Error: '+e.message,'err');}
+    toast(enabled?'Coaching activado':'Coaching desactivado','ok');
+    if(enabled){
+      adminOpenCoachingCockpit(uid,name);
+    }else{
+      document.querySelectorAll('.adm-section').forEach(el=>el.classList.remove('active'));
+      document.getElementById('a-users').classList.add('active');
+      adminOpenUserProfile(uid);
+    }
+  }catch(e){toast('Error: '+e.message,'err');}
 }
-async function selectCoachingClient(uid){
+// Pantalla dedicada de coaching para un socio — separada del perfil para no
+// amontonar reservas/pagos/coaching en un solo scroll. Solo se llega aquí
+// desde el perfil individual; "← Volver" regresa a ese mismo perfil.
+let _coachingReturnUid=null;
+async function adminOpenCoachingCockpit(uid,name){
+  _coachingReturnUid=uid;
+  document.querySelectorAll('.adm-section').forEach(el=>el.classList.remove('active'));
+  document.getElementById('a-coaching-detail').classList.add('active');
+  await loadAndRenderCoachingCockpit(uid,name);
+}
+function adminCloseCoachingCockpit(){
+  document.querySelectorAll('.adm-section').forEach(el=>el.classList.remove('active'));
+  document.getElementById('a-users').classList.add('active');
+  adminOpenUserProfile(_coachingReturnUid);
+}
+async function loadAndRenderCoachingCockpit(uid,name){
   selectedCoachClientId=uid;
+  coachingAdminClients=[{id:uid,name}];
   editingCoachTaskId=null;
   selectedCoachDetailDs=null;
   coachDetailActiveTab='semana';
   if(!coachAdminWeekStart)coachAdminWeekStart=mazWeekStart(mazToday());
-  renderCoachingClientList(document.querySelector('#a-coaching .adm-search')?.value);
+  const detailEl=document.getElementById('coaching-detail');
+  if(detailEl)detailEl.innerHTML='<div class="empty">Cargando coaching...</div>';
   await loadBoardsSb();
   const{data:assignments}=await sb.from('board_assignments').select('board_id').eq('user_id',uid);
   coachClientAssignedBoardIds=new Set((assignments||[]).map(a=>a.board_id));
   await loadCoachingWeekAdminSb();
   renderCoachingDetail();
-}
-// Atajo desde la tarjeta de un socio (tab Socios) — salta directo al tab
-// Coaching con ese cliente ya seleccionado, sin tener que buscarlo de nuevo.
-async function adminGoToCoaching(uid){
-  admTab('coaching');
-  await selectCoachingClient(uid);
 }
 function coachAdminWeekShift(days){
   coachAdminWeekStart=addDaysDS(coachAdminWeekStart,days);
@@ -8898,7 +8920,11 @@ function renderCoachingDetail(){
     +'</div>';
 
   el.innerHTML=liveBanner
-    +'<div style="font-size:15px;font-weight:700;margin-bottom:10px">'+esc(client.name)+'</div>'
+    +'<div style="display:flex;align-items:center;gap:10px;margin-bottom:6px">'
+    +'<button onclick="adminCloseCoachingCockpit()" style="background:var(--card2);border:1px solid var(--border);border-radius:6px;padding:8px 14px;color:var(--white);font-size:13px;cursor:pointer;white-space:nowrap">← Volver</button>'
+    +'<span style="font-size:15px;font-weight:700;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+esc(client.name||'')+'</span>'
+    +'</div>'
+    +'<button onclick="adminToggleCoachingBetaSb(&quot;'+selectedCoachClientId+'&quot;,false)" style="background:none;border:none;color:var(--gray);font-size:11px;text-decoration:underline;cursor:pointer;padding:0;margin-bottom:14px">Desactivar coaching para este socio</button>'
     +navHtml
 
     +'<div class="coach-detail-panel'+(coachDetailActiveTab==='semana'?' active':'')+'" data-panel="semana">'
@@ -9565,6 +9591,20 @@ if('serviceWorker' in navigator){
     if(swRefreshing)return;
     swRefreshing=true;
     window.location.reload();
+  });
+  // El teclado en iOS/Android encoge el viewport dinámico (100dvh) y el
+  // nav inferior, al ser un flex-item normal (no fixed), se aprieta entre
+  // el composer y el teclado. Ocultarlo mientras se escribe en el chat
+  // evita ese amontonamiento — igual que WhatsApp/iMessage.
+  document.addEventListener('focusin',e=>{
+    if(e.target&&e.target.classList&&e.target.classList.contains('chat-text-input')){
+      document.querySelector('.bnav')?.classList.add('kb-hidden');
+    }
+  });
+  document.addEventListener('focusout',e=>{
+    if(e.target&&e.target.classList&&e.target.classList.contains('chat-text-input')){
+      document.querySelector('.bnav')?.classList.remove('kb-hidden');
+    }
   });
   window.addEventListener('load',async()=>{
     try{
