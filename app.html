@@ -6,12 +6,12 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="HABIT">
 <meta name="application-name" content="HABIT">
-<link rel="manifest" href="/manifest.json?v=20260718-18">
-<link rel="apple-touch-icon" sizes="120x120" href="/icons/icon-120.png?v=20260718-18">
-<link rel="apple-touch-icon" sizes="152x152" href="/icons/icon-152.png?v=20260718-18">
-<link rel="apple-touch-icon" sizes="167x167" href="/icons/icon-167.png?v=20260718-18">
-<link rel="apple-touch-icon" sizes="180x180" href="/icons/icon-180.png?v=20260718-18">
-<link rel="icon" type="image/png" sizes="32x32" href="/icons/icon-32.png?v=20260718-18">
+<link rel="manifest" href="/manifest.json?v=20260718-20">
+<link rel="apple-touch-icon" sizes="120x120" href="/icons/icon-120.png?v=20260718-20">
+<link rel="apple-touch-icon" sizes="152x152" href="/icons/icon-152.png?v=20260718-20">
+<link rel="apple-touch-icon" sizes="167x167" href="/icons/icon-167.png?v=20260718-20">
+<link rel="apple-touch-icon" sizes="180x180" href="/icons/icon-180.png?v=20260718-20">
+<link rel="icon" type="image/png" sizes="32x32" href="/icons/icon-32.png?v=20260718-20">
 <title>HABIT</title>
 <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700;800;900&family=Share+Tech+Mono&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
@@ -167,6 +167,14 @@ input,select,button,textarea{font-family:'Montserrat',sans-serif}
 .door-open-btn{margin-top:14px;width:100%;padding:14px;border-radius:6px;border:1px solid rgba(16,185,129,.65);background:rgba(16,185,129,.16);color:var(--green);font-size:13px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;cursor:pointer}
 .door-open-btn:disabled{opacity:.45;cursor:wait}
 .door-open-note{font-size:10px;color:var(--gray);line-height:1.5;margin-top:8px}
+.ac-compact{display:grid;grid-template-columns:46px minmax(0,1fr);gap:10px 12px;align-items:center;text-align:left;padding:13px 14px;margin-bottom:12px;border-radius:16px}
+.ac-compact .ac-door-icon{grid-row:1 / span 3;width:46px;height:46px;margin:0;border-radius:13px}
+.ac-compact .ac-door-icon svg{width:26px;height:26px}
+.ac-compact .ac-status{margin:0 0 2px;font-size:10px;letter-spacing:.12em}
+.ac-compact .ac-timer{margin:0;font-size:25px;line-height:1.05}
+.ac-compact .ac-info{margin:0;font-size:12px;line-height:1.42}
+.ac-compact .door-open-btn{grid-column:1/-1;margin-top:2px;padding:11px 12px;border-radius:12px;font-size:12px;letter-spacing:.06em}
+.ac-compact .door-open-note,.ac-compact .ac-hint{grid-column:1/-1;margin-top:0;text-align:center;font-size:10px}
 .daily-quote-card{position:relative;overflow:hidden;margin:14px 0 12px;padding:18px 16px;border:1px solid rgba(127,176,255,.22);border-left-color:rgba(32,212,146,.5);border-radius:18px;background:linear-gradient(135deg,rgba(37,99,235,.16),rgba(32,212,146,.055) 44%,rgba(255,255,255,.035));box-shadow:0 18px 44px rgba(0,0,0,.26)}
 .daily-quote-card:before{content:'';position:absolute;inset:0;background:linear-gradient(180deg,rgba(255,255,255,.055),transparent 42%);pointer-events:none}
 .daily-quote-head{position:relative;display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:12px}
@@ -1024,9 +1032,9 @@ html,body{background:radial-gradient(circle at 50% -18%,rgba(80,112,164,.16),tra
   <!-- INICIO -->
   <div id="v-inicio" class="view active">
     <div class="scroll-area">
+      <div id="daily-quote-wrap"></div>
       <div id="membership-status-wrap"></div>
       <div id="access-main"></div>
-      <div id="daily-quote-wrap"></div>
       <div id="guest-group-wrap"></div>
       <div id="active-bookings-wrap"></div>
       <div id="notif-wrap"></div>
@@ -1849,7 +1857,7 @@ html,body{background:radial-gradient(circle at 50% -18%,rgba(80,112,164,.16),tra
 // ── CONFIG & SUPABASE ───────────────────────────────────────
 const SUPABASE_URL='https://pmpjteuqjusbiduevbwq.supabase.co';
 const SUPABASE_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBtcGp0ZXVxanVzYmlkdWV2YndxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc2OTI1NjUsImV4cCI6MjA5MzI2ODU2NX0.XbMzZoo2yqtrD8znLnyo_1zDfrdJAvAPj1lqGOyXnLw';
-const APP_VERSION='20260718-18';
+const APP_VERSION='20260718-20';
 const MUSCLE_GROUPS=['Pecho','Espalda','Piernas','Hombros','Brazos','Core','Cardio','Full Body'];
 const DAILY_QUOTES=[
   {text:'Haz hoy lo que tu version de manana agradeceria.',action:'Elige una accion pequeña y cumplible antes de buscar motivacion.'},
@@ -2952,7 +2960,7 @@ function renderAccess(){
       timerColor='var(--amber)';
       cardClass='ac-on ac-warn';
     }
-    el.innerHTML='<div class="ac-card '+cardClass+'">'+
+    el.innerHTML='<div class="ac-card ac-compact '+cardClass+'">'+
       DOOR_ICON+
       '<div class="ac-status" style="color:'+timerColor+'">● Sesión activa</div>'+
       '<div class="ac-timer" style="color:'+timerColor+'">'+fmtCd(msToClose)+'</div>'+
@@ -2968,7 +2976,7 @@ function renderAccess(){
 
   // Before session — code visible 1 hour before
   if(msToCodeVisible<=0){
-    el.innerHTML='<div class="ac-card ac-soon">'+
+    el.innerHTML='<div class="ac-card ac-compact ac-soon">'+
       DOOR_ICON+
       '<div class="ac-status">Acceso en '+fmtCd(msToOpen)+'</div>'+
       '<div class="ac-timer">'+fmtCd(msToOpen)+'</div>'+
@@ -2978,7 +2986,7 @@ function renderAccess(){
       '</div>';
   } else {
     // Code still hidden (more than 1 hour away)
-    el.innerHTML='<div class="ac-card ac-off">'+
+    el.innerHTML='<div class="ac-card ac-compact ac-off">'+
       DOOR_ICON+
       '<div class="ac-status">Reserva confirmada</div>'+
       inviteMsg+
