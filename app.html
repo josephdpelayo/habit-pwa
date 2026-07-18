@@ -6,12 +6,12 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="HABIT">
 <meta name="application-name" content="HABIT">
-<link rel="manifest" href="/manifest.json?v=20260718-25">
-<link rel="apple-touch-icon" sizes="120x120" href="/icons/icon-120.png?v=20260718-25">
-<link rel="apple-touch-icon" sizes="152x152" href="/icons/icon-152.png?v=20260718-25">
-<link rel="apple-touch-icon" sizes="167x167" href="/icons/icon-167.png?v=20260718-25">
-<link rel="apple-touch-icon" sizes="180x180" href="/icons/icon-180.png?v=20260718-25">
-<link rel="icon" type="image/png" sizes="32x32" href="/icons/icon-32.png?v=20260718-25">
+<link rel="manifest" href="/manifest.json?v=20260718-27">
+<link rel="apple-touch-icon" sizes="120x120" href="/icons/icon-120.png?v=20260718-27">
+<link rel="apple-touch-icon" sizes="152x152" href="/icons/icon-152.png?v=20260718-27">
+<link rel="apple-touch-icon" sizes="167x167" href="/icons/icon-167.png?v=20260718-27">
+<link rel="apple-touch-icon" sizes="180x180" href="/icons/icon-180.png?v=20260718-27">
+<link rel="icon" type="image/png" sizes="32x32" href="/icons/icon-32.png?v=20260718-27">
 <title>HABIT</title>
 <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700;800;900&family=Share+Tech+Mono&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
@@ -368,15 +368,17 @@ input,select,button,textarea{font-family:'Montserrat',sans-serif}
 .ex-focus-icon-btn{flex:1;min-width:0;display:flex;flex-direction:column;align-items:center;gap:4px;padding:10px 4px;background:var(--card2);border:1px solid var(--border);border-radius:14px;color:var(--white);font-size:10.5px;font-weight:750;cursor:pointer}
 .ex-focus-icon-btn:active{background:var(--border)}
 .exercise-session-modal{background:rgba(0,0,0,.9);backdrop-filter:blur(18px)}
-.terms-box.exercise-focus-box{width:100%;height:100%;max-width:430px;max-height:none;border-radius:0;background:linear-gradient(180deg,#111214 0%,#08090a 56%,#050505 100%);display:flex;flex-direction:column}
+.terms-box.exercise-focus-box{position:relative;width:100%;height:100%;max-width:430px;max-height:none;border-radius:0;background:linear-gradient(180deg,#111214 0%,#08090a 56%,#050505 100%);display:flex;flex-direction:column}
 .terms-box.exercise-focus-box .terms-hdr{padding:calc(env(safe-area-inset-top,0px) + 18px) 18px 16px;border-bottom:1px solid rgba(255,255,255,.07);background:rgba(10,10,10,.8);backdrop-filter:blur(14px)}
 .terms-box.exercise-focus-box .terms-hdr h2{font-size:19px;font-weight:900;line-height:1.08;letter-spacing:0;text-transform:uppercase;max-width:260px}
-.exercise-focus-body{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:16px 16px calc(96px + env(safe-area-inset-bottom,0px))}
+.exercise-focus-body{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:16px 16px calc(150px + env(safe-area-inset-bottom,0px))}
 .exercise-focus-stage{border:1px solid rgba(255,255,255,.08);background:rgba(255,255,255,.035);border-radius:18px;padding:12px;margin-bottom:14px}
-.exercise-focus-stage.expanded{padding:0;overflow:hidden;background:#050505}
-.exercise-focus-stage.expanded .video-shell{border-top:none}
-.exercise-focus-video-foot{display:flex;gap:8px;padding:10px;background:#050505;border-top:1px solid rgba(255,255,255,.08)}
+.exercise-focus-stage.expanded{padding:12px;overflow:hidden;background:rgba(255,255,255,.03)}
+.exercise-focus-stage.expanded .video-shell{border:0;background:transparent;padding:0}
+.exercise-focus-stage.expanded .video-frame{width:min(58vw,220px);max-width:220px;max-height:42vh;border-radius:16px;border-color:rgba(255,255,255,.1);box-shadow:0 18px 42px rgba(0,0,0,.38)}
+.exercise-focus-video-foot{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px}
 .ex-focus-min-btn{width:100%;border:1px solid rgba(255,255,255,.12);background:rgba(255,255,255,.06);color:var(--white);border-radius:12px;padding:12px;font-size:11px;font-weight:850;text-transform:uppercase;letter-spacing:.05em}
+.exercise-focus-video-foot .video-open-btn{border-radius:12px;padding:12px;background:rgba(37,99,235,.14)}
 .exercise-focus-meta{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:12px;color:var(--gray);font-size:12px}
 .exercise-focus-progress{font-family:'Montserrat',sans-serif;color:var(--bl);font-weight:900;background:rgba(37,99,235,.14);border:1px solid rgba(59,130,246,.35);border-radius:999px;padding:5px 9px;white-space:nowrap}
 .ex-focus-tools{display:grid;grid-template-columns:repeat(auto-fit,minmax(58px,1fr));gap:7px;margin-bottom:14px}
@@ -385,6 +387,14 @@ input,select,button,textarea{font-family:'Montserrat',sans-serif}
 .exercise-focus-nav .finish{grid-column:1/-1;background:linear-gradient(180deg,#ecf3ff,#dfeeff);color:#020617}
 .exercise-focus-nav.single{grid-template-columns:1fr}
 .exercise-focus-pause-note{font-size:11px;color:var(--gray);text-align:center;margin-top:10px}
+.exercise-focus-fabs{position:absolute;right:16px;bottom:calc(18px + env(safe-area-inset-bottom,0px));z-index:2;display:flex;flex-direction:column;gap:10px}
+.exercise-focus-fab{width:54px;height:54px;border-radius:50%;border:1px solid rgba(255,255,255,.12);background:rgba(22,23,25,.94);color:var(--white);display:flex;align-items:center;justify-content:center;font-size:22px;box-shadow:0 16px 38px rgba(0,0,0,.44);cursor:pointer}
+.exercise-focus-fab.primary{background:linear-gradient(180deg,#f7bd49,#f0a819);color:#1a1200;border-color:rgba(255,255,255,.18)}
+.exercise-focus-fab.help{background:rgba(37,99,235,.9);color:#fff}
+.exercise-focus-danger{width:100%;margin-top:10px;border:1px solid rgba(239,68,68,.28);background:rgba(239,68,68,.09);color:#fca5a5;border-radius:16px;padding:13px;font-size:12px;font-weight:850}
+.coach-workout-summary{display:grid;grid-template-columns:1fr auto;gap:10px;align-items:center;margin-bottom:12px;padding:12px 13px;border:1px solid rgba(255,255,255,.08);background:rgba(255,255,255,.035);border-radius:16px}
+.coach-workout-summary strong{display:block;font-size:13px;color:var(--white);margin-bottom:5px}
+.coach-workout-summary span{font-size:11px;color:var(--gray);line-height:1.35}
 .ex-history-row{display:flex;align-items:center;justify-content:space-between;padding:10px 0;border-bottom:1px solid var(--border);font-size:13px}
 .ex-history-row:last-child{border-bottom:none}
 .set-tracker{padding:12px;background:var(--card2);border-top:1px solid var(--border)}
@@ -1724,6 +1734,10 @@ html,body{background:radial-gradient(circle at 50% -18%,rgba(80,112,164,.16),tra
       <div id="exercise-focus-body"></div>
       <div class="exercise-focus-pause-note">Pausa el entreno para salir de esta pantalla.</div>
     </div>
+    <div class="exercise-focus-fabs">
+      <button class="exercise-focus-fab primary" onclick="openStopwatchModal()" aria-label="Cronometro y temporizador">🕐</button>
+      <button class="exercise-focus-fab help" onclick="openWorkoutHelpFromFocus()" aria-label="Pedir ayuda">💬</button>
+    </div>
   </div>
 </div>
 
@@ -1874,7 +1888,7 @@ html,body{background:radial-gradient(circle at 50% -18%,rgba(80,112,164,.16),tra
 // ── CONFIG & SUPABASE ───────────────────────────────────────
 const SUPABASE_URL='https://pmpjteuqjusbiduevbwq.supabase.co';
 const SUPABASE_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBtcGp0ZXVxanVzYmlkdWV2YndxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc2OTI1NjUsImV4cCI6MjA5MzI2ODU2NX0.XbMzZoo2yqtrD8znLnyo_1zDfrdJAvAPj1lqGOyXnLw';
-const APP_VERSION='20260718-25';
+const APP_VERSION='20260718-27';
 const MUSCLE_GROUPS=['Pecho','Espalda','Piernas','Hombros','Brazos','Core','Cardio','Full Body'];
 const DAILY_QUOTES=[
   {text:'Haz hoy lo que tu version de manana agradeceria.',action:'Elige una accion pequeña y cumplible antes de buscar motivacion.'},
@@ -2326,6 +2340,15 @@ function getVideoHtml(url){
   return '<div class="video-shell"><div class="video-frame"><iframe class="video-embed" src="'+esc(embed)+'" allow="autoplay; encrypted-media; picture-in-picture; fullscreen" allowfullscreen referrerpolicy="no-referrer-when-downgrade"></iframe></div></div>'
     +'<div class="video-actions"><button class="video-open-btn" data-embed="'+esc(embed)+'" onclick="openVideoModal(this.dataset.embed)">Ver grande</button></div>'
     +(isDrive?'<div class="video-help">Si Drive se queda negro, comparte el video como "Cualquiera con el enlace puede ver".</div>':'');
+}
+function getExerciseFocusVideoHtml(url){
+  const embed=getEmbedUrl(url);
+  if(!embed)return'';
+  return '<div class="video-shell"><div class="video-frame"><iframe class="video-embed" src="'+esc(embed)+'" allow="autoplay; encrypted-media; picture-in-picture; fullscreen" allowfullscreen referrerpolicy="no-referrer-when-downgrade"></iframe></div></div>'
+    +'<div class="exercise-focus-video-foot">'
+    +'<button class="ex-focus-min-btn" onclick="toggleExFocusVideo()">Minimizar</button>'
+    +'<button class="video-open-btn" data-embed="'+esc(embed)+'" onclick="openVideoModal(this.dataset.embed)">Ver grande</button>'
+    +'</div>';
 }
 function getExerciseVideos(ex){
   const raw=Array.isArray(ex&&ex.videos)?ex.videos:[];
@@ -3532,7 +3555,7 @@ function admTab(t){
   if(t==='gaia')renderGaiaTab();
 }
 
-let coachHubActiveTab='hoy';
+let coachHubActiveTab='hoy', coachTodayExpandedBoards=new Set();
 function coachHubTab(t,btn){
   coachHubActiveTab=t;
   document.querySelectorAll('.coach-hub-tab').forEach(b=>b.classList.remove('active'));
@@ -3548,6 +3571,11 @@ function coachHubTab(t,btn){
   if(t==='tu')renderCoachTuSb();
 }
 function renderCoachHub(){coachHubTab(coachHubActiveTab,null);}
+function toggleCoachTodayBoard(id){
+  if(coachTodayExpandedBoards.has(id))coachTodayExpandedBoards.delete(id);
+  else coachTodayExpandedBoards.add(id);
+  renderCoachHoyPanel();
+}
 function goToActiveSession(){
   coachHubActiveTab='hoy';
   sv('coaching');
@@ -5232,7 +5260,7 @@ function renderExerciseFocusVideo(){
   if(!d||!el)return;
   if(!d.videos||!d.videos.length){el.innerHTML='';return;}
   el.innerHTML=_exFocusVideoOpen
-    ? '<div class="exercise-focus-stage expanded">'+getVideoHtml(d.videos[0].url)+'<div class="exercise-focus-video-foot"><button class="ex-focus-min-btn" onclick="toggleExFocusVideo()">Minimizar video</button></div></div>'
+    ? '<div class="exercise-focus-stage expanded">'+getExerciseFocusVideoHtml(d.videos[0].url)+'</div>'
     : '<div class="exercise-focus-stage"><button class="ex-focus-video-btn" onclick="toggleExFocusVideo()"><span class="play-icon"><span class="play-tri"></span></span> Ver video</button></div>';
 }
 function renderExerciseFocusTools(){
@@ -5241,10 +5269,7 @@ function renderExerciseFocusTools(){
   if(!d||!tools)return;
   tools.innerHTML=
     '<button class="ex-focus-icon-btn" onclick="openExerciseHistoryModal()">Historial</button>'
-    +'<button class="ex-focus-icon-btn" id="exercise-focus-note-btn" onclick="openExerciseNoteFromFocus()">'+(d.hasNote?'Ver nota':'Nota')+'</button>'
-    +(d.showAsesoria?'<button class="ex-focus-icon-btn" id="exercise-focus-asesoria-btn" onclick="askAboutExerciseFromFocus()">Asesoría</button>':'')
-    +'<button class="ex-focus-icon-btn" onclick="openStopwatchTab(&quot;stopwatch&quot;)">Crono</button>'
-    +'<button class="ex-focus-icon-btn" onclick="openStopwatchTab(&quot;timer&quot;)">Timer</button>';
+    +'<button class="ex-focus-icon-btn" id="exercise-focus-note-btn" onclick="openExerciseNoteFromFocus()">'+(d.hasNote?'Ver nota':'Nota')+'</button>';
 }
 function renderExerciseFocusBodyHtml(){
   const d=_exFocusData;
@@ -5257,7 +5282,8 @@ function renderExerciseFocusBodyHtml(){
     hasPrevExerciseInFocus()?'<button class="btn-sm" onclick="moveExerciseFocus(-1)">Anterior</button>':'',
     hasNextExerciseInFocus()?'<button class="btn" onclick="moveExerciseFocus(1)">Siguiente</button>':'<button class="btn finish" onclick="finishCoachingSessionSb()">Finalizar entreno</button>'
   ].filter(Boolean).join('');
-  return tracker+'<div class="exercise-focus-nav'+(hasPrevExerciseInFocus()?'':' single')+'">'+nav+'</div>';
+  return tracker+'<div class="exercise-focus-nav'+(hasPrevExerciseInFocus()?'':' single')+'">'+nav+'</div>'
+    +'<button class="exercise-focus-danger" onclick="cancelCoachingSessionSb()">Cancelar entreno</button>';
 }
 function renderExerciseFocusModal(){
   const d=_exFocusData;
@@ -5301,6 +5327,21 @@ function openExerciseNoteFromFocus(){
 function askAboutExerciseFromFocus(){
   if(!_exFocusData)return;
   askAboutExercise(_exFocusData.name);
+}
+function openWorkoutHelpFromFocus(){
+  if(!_exFocusData||!sbUser)return;
+  const exName=_exFocusData.name;
+  closeExerciseFocus();
+  coachHubActiveTab='mensajes';
+  sv('coaching');
+  setTimeout(()=>{
+    const input=document.getElementById('chat-text-input');
+    if(input&&!input.value.trim()){
+      input.value='Necesito ayuda con '+exName+'.';
+      onChatInputChange(input);
+      input.focus();
+    }
+  },180);
 }
 async function openExerciseHistoryModal(){
   const d=_exFocusData;
@@ -5455,6 +5496,22 @@ function logSetToUserScores(row){
     ex_name:found.ex.name,weight:row.weight,reps:row.actual_reps||null
   }).then(({error})=>{if(error)console.error('logSetToUserScores:',error);});
 }
+function getSetRowElement(setId){
+  const modal=document.getElementById('exercise-focus-modal');
+  if(modal&&modal.style.display==='flex'){
+    const row=modal.querySelector('.set-row[data-set-id="'+setId+'"]');
+    if(row)return row;
+  }
+  return document.querySelector('.set-row[data-set-id="'+setId+'"]');
+}
+async function getLastScoreForExKey(exKey){
+  if(!sbUser||!exKey)return{};
+  try{
+    const{data,error}=await sb.from('user_scores').select('weight,reps').eq('user_id',sbUser.id).eq('ex_key',exKey).order('logged_at',{ascending:false}).limit(1);
+    if(error)throw error;
+    return(data&&data[0])||{};
+  }catch(e){console.error('getLastScoreForExKey:',e);return{};}
+}
 // Refresca tanto la lista (badges de progreso) como el set-tracker dentro de
 // la ficha del ejercicio si está abierta mostrando este mismo ejercicio —
 // son dos árboles de DOM separados, uno no actualiza al otro solo.
@@ -5475,7 +5532,7 @@ async function toggleSetDoneSb(setId,newDone,btnEl){
   // que el guardado del peso y se registraba con el valor viejo (o vacío).
   const patch={done:newDone,updated_at:new Date().toISOString()};
   if(newDone){
-    const row=btnEl?btnEl.closest('.set-row'):document.querySelector('.set-row[data-set-id="'+setId+'"]');
+    const row=btnEl?btnEl.closest('.set-row'):getSetRowElement(setId);
     const wIn=row?.querySelector('.set-weight-in');
     const rIn=row?.querySelector('.set-actual-reps-in');
     if(wIn){const w=wIn.value===''?null:parseFloat(wIn.value);patch.weight=(w==null||isNaN(w))?null:w;}
@@ -5523,8 +5580,9 @@ async function addSetSb(scheduleId,exKey,defaultReps){
   const arr=coachSessionSets[exKey]||[];
   const nextIdx=arr.length;
   const lastWeight=arr.length?arr[arr.length-1].weight:null;
+  const lastReps=arr.length?arr[arr.length-1].actual_reps:null;
   try{
-    const{data,error}=await sb.from('coaching_session_sets').insert({schedule_id:scheduleId,user_id:sbUser.id,ex_key:exKey,set_idx:nextIdx,reps_target:defaultReps||null,weight:lastWeight,done:false}).select().single();
+    const{data,error}=await sb.from('coaching_session_sets').insert({schedule_id:scheduleId,user_id:sbUser.id,ex_key:exKey,set_idx:nextIdx,reps_target:defaultReps||null,weight:lastWeight,actual_reps:lastReps||defaultReps||null,done:false}).select().single();
     if(error)throw error;
     if(!coachSessionSets[exKey])coachSessionSets[exKey]=[];
     coachSessionSets[exKey].push(data);
@@ -5540,7 +5598,7 @@ async function markAllSetsSb(exKey){
   // quedaron vacías, en vez de dejarlas en null.
   let lastWeight=null,lastReps=null;
   [...arr].sort((a,b)=>a.set_idx-b.set_idx).forEach(s=>{
-    const row=document.querySelector('.set-row[data-set-id="'+s.id+'"]');
+    const row=getSetRowElement(s.id);
     const wIn=row?.querySelector('.set-weight-in');
     const rIn=row?.querySelector('.set-actual-reps-in');
     const wRaw=wIn&&wIn.value!==''?parseFloat(wIn.value):null;
@@ -5549,13 +5607,18 @@ async function markAllSetsSb(exKey){
     if(w!=null)lastWeight=w;
     if(r)lastReps=r;
   });
+  if(lastWeight==null||!lastReps){
+    const last=await getLastScoreForExKey(exKey);
+    if(lastWeight==null&&last.weight!=null)lastWeight=last.weight;
+    if(!lastReps&&last.reps)lastReps=last.reps;
+  }
   const patches=undone.map(s=>{
-    const row=document.querySelector('.set-row[data-set-id="'+s.id+'"]');
+    const row=getSetRowElement(s.id);
     const wIn=row?.querySelector('.set-weight-in');
     const rIn=row?.querySelector('.set-actual-reps-in');
     const wRaw=wIn&&wIn.value!==''?parseFloat(wIn.value):null;
     const w=(wRaw!=null&&!isNaN(wRaw))?wRaw:lastWeight;
-    const r=(rIn&&rIn.value)||lastReps;
+    const r=(rIn&&rIn.value)||lastReps||s.reps_target||null;
     return{id:s.id,weight:w,actual_reps:r};
   });
   try{
@@ -5844,9 +5907,14 @@ function renderCoachHoyPanel(){
         const exercises=(board&&board.exercises)||[];
         const isActive=todayRow.status==='in_progress';
         const exHtml=renderExerciseListHtml(exercises,'coach_'+todayRow.id,todayRow.board_id,isActive?{scheduleId:todayRow.id,sets:coachSessionSets}:null);
+        const isExpanded=coachTodayExpandedBoards.has(todayRow.id);
+        const totalSets=Object.values(coachSessionSets).reduce((sum,list)=>sum+(Array.isArray(list)?list.length:0),0);
+        const doneSets=Object.values(coachSessionSets).reduce((sum,list)=>sum+(Array.isArray(list)?list.filter(s=>s.done).length:0),0);
+        const progressLabel=isActive&&totalSets?(doneSets+'/'+totalSets+' series'):(exercises.length+' ejercicios');
         html+='<div class="board-card"><div class="board-hdr"><div style="display:flex;align-items:center;gap:8px;min-width:0"><div style="width:10px;height:10px;border-radius:50%;background:'+esc(todayRow.board_color||'#2563eb')+'"></div><span class="board-title">'+esc(todayRow.board_name)+'</span></div><span class="badge bg-blue">'+exercises.length+' ejercicios</span></div><div class="board-body">'
+          +'<div class="coach-workout-summary"><div><strong>'+(isActive?'Entreno en curso':'Rutina lista')+'</strong><span>'+esc(progressLabel)+' · '+esc(todayRow.board_name)+'</span></div><button class="btn-sm" onclick="toggleCoachTodayBoard(&quot;'+todayRow.id+'&quot;)">'+(isExpanded?'Ocultar':'Ver ejercicios')+'</button></div>'
           +'<button class="btn" style="margin-bottom:12px" onclick="'+(isActive?'openActiveCoachingExercise()':'startCoachingSessionSb(&quot;'+todayRow.id+'&quot;)')+'">'+(isActive?'Volver al entreno':'Iniciar entreno')+'</button>'
-          +exHtml+'</div></div>';
+          +(isExpanded?exHtml:'')+'</div></div>';
       }
     });
   }
@@ -6175,17 +6243,17 @@ async function seedSessionSetsSb(scheduleRow){
   const exercises=(board&&board.exercises)||[];
   if(!exercises.length)return;
   const exKeys=exercises.map((ex,i)=>ex.id||(scheduleRow.board_id+'_idx_'+i));
-  const lastWeights={};
+  const lastScores={};
   try{
-    const{data}=await sb.from('user_scores').select('ex_key,weight').eq('user_id',sbUser.id).in('ex_key',exKeys).order('logged_at',{ascending:true});
-    (data||[]).forEach(r=>{lastWeights[r.ex_key]=r.weight;}); // orden ascendente: el último sobreescribe = más reciente
-  }catch(e){console.error('seedSessionSetsSb weights:',e);}
+    const{data}=await sb.from('user_scores').select('ex_key,weight,reps').eq('user_id',sbUser.id).in('ex_key',exKeys).order('logged_at',{ascending:true});
+    (data||[]).forEach(r=>{lastScores[r.ex_key]={weight:r.weight,reps:r.reps};}); // orden ascendente: el último sobreescribe = más reciente
+  }catch(e){console.error('seedSessionSetsSb scores:',e);}
   const rows=[];
   exercises.forEach((ex,i)=>{
     const exKey=exKeys[i];
     const n=Math.max(1,parseInt(ex.sets,10)||1);
-    const prevWeight=lastWeights[exKey];
-    for(let s=0;s<n;s++)rows.push({schedule_id:scheduleRow.id,user_id:sbUser.id,ex_key:exKey,set_idx:s,reps_target:ex.reps||null,weight:prevWeight!=null?prevWeight:null,done:false});
+    const prev=lastScores[exKey]||{};
+    for(let s=0;s<n;s++)rows.push({schedule_id:scheduleRow.id,user_id:sbUser.id,ex_key:exKey,set_idx:s,reps_target:ex.reps||null,weight:prev.weight!=null?prev.weight:null,actual_reps:prev.reps||ex.reps||null,done:false});
   });
   if(!rows.length)return;
   try{
@@ -6202,7 +6270,28 @@ async function loadSessionSetsSb(scheduleId){
       if(!coachSessionSets[row.ex_key])coachSessionSets[row.ex_key]=[];
       coachSessionSets[row.ex_key].push(row);
     });
+    await hydrateSessionSetDefaults();
   }catch(e){console.error('loadSessionSetsSb:',e);coachSessionSets={};}
+}
+async function hydrateSessionSetDefaults(){
+  const exKeys=Object.keys(coachSessionSets);
+  if(!sbUser||!exKeys.length)return;
+  const needsDefaults=exKeys.some(k=>(coachSessionSets[k]||[]).some(s=>s.weight==null||!s.actual_reps));
+  if(!needsDefaults)return;
+  try{
+    const{data,error}=await sb.from('user_scores').select('ex_key,weight,reps').eq('user_id',sbUser.id).in('ex_key',exKeys).order('logged_at',{ascending:true});
+    if(error)throw error;
+    const lastScores={};
+    (data||[]).forEach(r=>{lastScores[r.ex_key]={weight:r.weight,reps:r.reps};});
+    exKeys.forEach(k=>{
+      const prev=lastScores[k];
+      if(!prev)return;
+      (coachSessionSets[k]||[]).forEach(s=>{
+        if(s.weight==null&&prev.weight!=null)s.weight=prev.weight;
+        if(!s.actual_reps&&prev.reps)s.actual_reps=prev.reps;
+      });
+    });
+  }catch(e){console.error('hydrateSessionSetDefaults:',e);}
 }
 async function startCoachingSessionSb(scheduleId){
   if(activeCoachingSession&&activeCoachingSession.id!==scheduleId){
@@ -6253,6 +6342,7 @@ async function cancelCoachingSessionSb(){
     coachSessionSets={};
     hideActiveSessionBar();
     stopRestTimer();
+    closeExerciseFocus();
     renderCoachHoyPanel();
     toast('Entreno cancelado','ok');
   }catch(e){toast('Error al cancelar: '+e.message,'err');}
