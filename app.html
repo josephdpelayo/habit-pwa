@@ -6,12 +6,12 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="HABIT">
 <meta name="application-name" content="HABIT">
-<link rel="manifest" href="/manifest.json?v=20260718-17">
-<link rel="apple-touch-icon" sizes="120x120" href="/icons/icon-120.png?v=20260718-17">
-<link rel="apple-touch-icon" sizes="152x152" href="/icons/icon-152.png?v=20260718-17">
-<link rel="apple-touch-icon" sizes="167x167" href="/icons/icon-167.png?v=20260718-17">
-<link rel="apple-touch-icon" sizes="180x180" href="/icons/icon-180.png?v=20260718-17">
-<link rel="icon" type="image/png" sizes="32x32" href="/icons/icon-32.png?v=20260718-17">
+<link rel="manifest" href="/manifest.json?v=20260718-18">
+<link rel="apple-touch-icon" sizes="120x120" href="/icons/icon-120.png?v=20260718-18">
+<link rel="apple-touch-icon" sizes="152x152" href="/icons/icon-152.png?v=20260718-18">
+<link rel="apple-touch-icon" sizes="167x167" href="/icons/icon-167.png?v=20260718-18">
+<link rel="apple-touch-icon" sizes="180x180" href="/icons/icon-180.png?v=20260718-18">
+<link rel="icon" type="image/png" sizes="32x32" href="/icons/icon-32.png?v=20260718-18">
 <title>HABIT</title>
 <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700;800;900&family=Share+Tech+Mono&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
@@ -167,6 +167,14 @@ input,select,button,textarea{font-family:'Montserrat',sans-serif}
 .door-open-btn{margin-top:14px;width:100%;padding:14px;border-radius:6px;border:1px solid rgba(16,185,129,.65);background:rgba(16,185,129,.16);color:var(--green);font-size:13px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;cursor:pointer}
 .door-open-btn:disabled{opacity:.45;cursor:wait}
 .door-open-note{font-size:10px;color:var(--gray);line-height:1.5;margin-top:8px}
+.daily-quote-card{position:relative;overflow:hidden;margin:14px 0 12px;padding:18px 16px;border:1px solid rgba(127,176,255,.22);border-left-color:rgba(32,212,146,.5);border-radius:18px;background:linear-gradient(135deg,rgba(37,99,235,.16),rgba(32,212,146,.055) 44%,rgba(255,255,255,.035));box-shadow:0 18px 44px rgba(0,0,0,.26)}
+.daily-quote-card:before{content:'';position:absolute;inset:0;background:linear-gradient(180deg,rgba(255,255,255,.055),transparent 42%);pointer-events:none}
+.daily-quote-head{position:relative;display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:12px}
+.daily-quote-kicker{font-size:10px;font-weight:900;letter-spacing:.12em;text-transform:uppercase;color:#94a3b8}
+.daily-quote-date{font-size:10px;font-weight:850;color:var(--green);white-space:nowrap}
+.daily-quote-text{position:relative;font-size:18px;font-weight:850;line-height:1.3;color:var(--white);letter-spacing:0}
+.daily-quote-action{position:relative;margin-top:13px;padding-top:12px;border-top:1px solid rgba(255,255,255,.085);font-size:12px;line-height:1.5;color:#aab3c2}
+.daily-quote-action strong{color:#9ec5ff;font-weight:850}
 .guest-card{background:var(--card);border:1px solid rgba(37,99,235,.35);border-radius:6px;margin-bottom:12px;overflow:hidden}
 .guest-toggle{width:100%;background:var(--card);border:1px solid rgba(37,99,235,.35);border-radius:6px;padding:13px 14px;margin-bottom:12px;display:flex;align-items:center;justify-content:space-between;gap:10px;color:var(--white);cursor:pointer}
 .guest-toggle-title{font-size:13px;font-weight:800;letter-spacing:.1em;text-transform:uppercase}
@@ -1018,6 +1026,7 @@ html,body{background:radial-gradient(circle at 50% -18%,rgba(80,112,164,.16),tra
     <div class="scroll-area">
       <div id="membership-status-wrap"></div>
       <div id="access-main"></div>
+      <div id="daily-quote-wrap"></div>
       <div id="guest-group-wrap"></div>
       <div id="active-bookings-wrap"></div>
       <div id="notif-wrap"></div>
@@ -1840,8 +1849,41 @@ html,body{background:radial-gradient(circle at 50% -18%,rgba(80,112,164,.16),tra
 // ── CONFIG & SUPABASE ───────────────────────────────────────
 const SUPABASE_URL='https://pmpjteuqjusbiduevbwq.supabase.co';
 const SUPABASE_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBtcGp0ZXVxanVzYmlkdWV2YndxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc2OTI1NjUsImV4cCI6MjA5MzI2ODU2NX0.XbMzZoo2yqtrD8znLnyo_1zDfrdJAvAPj1lqGOyXnLw';
-const APP_VERSION='20260718-17';
+const APP_VERSION='20260718-18';
 const MUSCLE_GROUPS=['Pecho','Espalda','Piernas','Hombros','Brazos','Core','Cardio','Full Body'];
+const DAILY_QUOTES=[
+  {text:'Haz hoy lo que tu version de manana agradeceria.',action:'Elige una accion pequeña y cumplible antes de buscar motivacion.'},
+  {text:'La disciplina no grita; aparece cuando nadie esta mirando.',action:'Entrena el estandar, no el animo del momento.'},
+  {text:'Controla tu siguiente repeticion. Lo demas se ordena despues.',action:'Pon tu atencion en el proximo paso concreto.'},
+  {text:'Un buen habito es una promesa que cumples en silencio.',action:'Cumple una promesa pequeña antes de pedirte una grande.'},
+  {text:'La incomodidad no es una senal de detenerte; es una senal de presencia.',action:'Respira, ajusta y continua con buena forma.'},
+  {text:'No necesitas un dia perfecto para construir una vida fuerte.',action:'Protege la consistencia aunque el dia venga incompleto.'},
+  {text:'Lo que repites te entrena mas que lo que deseas.',action:'Revisa que tus repeticiones diarias apunten a quien quieres ser.'},
+  {text:'La calma tambien se practica bajo peso.',action:'Mantente firme cuando el esfuerzo suba.'},
+  {text:'No compitas con la prisa de otros; compite con tu excusa de ayer.',action:'Haz una mejora medible, aunque sea minima.'},
+  {text:'El caracter se forma en la decision que parecia facil posponer.',action:'Haz primero lo importante, antes de negociar contigo.'},
+  {text:'Si cuidas tu rutina, tu rutina cuidara tu direccion.',action:'Define tu hora, tu plan y tu primer movimiento.'},
+  {text:'La fuerza empieza cuando dejas de pedir permiso al cansancio.',action:'Distingue fatiga real de resistencia mental.'},
+  {text:'Tu cuerpo escucha lo que haces mas que lo que prometes.',action:'Convierte la intencion en una accion visible.'},
+  {text:'La excelencia es sencilla: volver, ajustar, repetir.',action:'No persigas perfeccion; persigue regreso constante.'},
+  {text:'Domina lo pequeno y lo grande deja de intimidarte.',action:'Cuida tecnica, respiracion y enfoque durante diez minutos.'},
+  {text:'Cada entrenamiento es una votacion por tu identidad.',action:'Actua como la persona que estas construyendo.'},
+  {text:'La voluntad se vuelve confiable cuando tiene estructura.',action:'Prepara tu entorno para que hacer lo correcto sea facil.'},
+  {text:'No eres tus impulsos; eres la respuesta que eliges.',action:'Pausa un segundo antes de decidir saltarte el habito.'},
+  {text:'Una vida fuerte se edifica con dias que no presumiste.',action:'Haz el trabajo aunque no se vea espectacular.'},
+  {text:'Lo dificil se vuelve manejable cuando lo divides en presencia.',action:'Enfocate solo en la serie, el bloque o la tarea actual.'},
+  {text:'Tu paz crece cuando aceptas el esfuerzo que te corresponde.',action:'Haz lo tuyo sin cargar lo que no controlas.'},
+  {text:'El progreso respeta a quien aparece con honestidad.',action:'Llega, registra, aprende y vuelve mejor.'},
+  {text:'No desperdicies energia peleando con el dia; usala para dirigirlo.',action:'Elige una prioridad y ejecutala sin drama.'},
+  {text:'La constancia convierte limites en informacion.',action:'Observa que falla y ajusta el sistema, no tu valor.'},
+  {text:'Entrenar tambien es aprender a obedecer a tu mejor criterio.',action:'Sigue el plan antes de seguir el impulso.'},
+  {text:'La paciencia no es lentitud; es fuerza sin desesperacion.',action:'Deja que el proceso acumule resultados.'},
+  {text:'Hoy no tienes que conquistar todo. Tienes que no abandonarte.',action:'Termina una cosa que te acerque a tu version fuerte.'},
+  {text:'El habito correcto reduce el ruido de decidir cada dia.',action:'Haz que tu primer paso sea automatico.'},
+  {text:'La mente se vuelve mas clara cuando el cuerpo cumple.',action:'Muévete con intencion antes de esperar claridad perfecta.'},
+  {text:'Tu estandar se revela en lo que haces cuando nadie te exige.',action:'Haz una accion limpia, completa y sin atajos.'},
+  {text:'La fortaleza es repetir lo correcto hasta que deja de sentirse ajeno.',action:'Dale otra prueba a la persona que estas practicando ser.'}
+];
 function muscleGroupSelectHtml(id,selected){
   return '<select id="'+id+'" style="width:100%;background:var(--card);border:1px solid var(--border);border-radius:4px;padding:8px;font-size:12px;color:var(--white);outline:none;margin-bottom:6px;box-sizing:border-box">'
     +'<option value="">Grupo muscular (opcional)</option>'
@@ -1979,6 +2021,7 @@ function showMainSb(){
   if('Notification' in window&&Notification.permission==='default')Notification.requestPermission().catch(()=>{});
   renderMembershipStatus();
   loadAccessData();
+  renderDailyQuote();
   renderGuestGroup().catch(console.error);
   renderActiveBookings().catch(console.error);
   updateShopCartBadge();
@@ -3434,7 +3477,7 @@ function sv(v){
   updateShopCartBadge();
   updateTopActions(v);
   ALL_VIEWS.forEach(n=>{const el=document.getElementById('v-'+n);if(el)el.classList.toggle('active',n===v);});
-  if(v==='inicio'){renderMembershipStatus();loadAccessData().catch(console.error);renderGuestGroup().catch(console.error);renderActiveBookings().catch(console.error);renderUserNotifsSb().catch(console.error);}
+  if(v==='inicio'){renderMembershipStatus();loadAccessData().catch(console.error);renderDailyQuote();renderGuestGroup().catch(console.error);renderActiveBookings().catch(console.error);renderUserNotifsSb().catch(console.error);}
   if(v==='book'){const _ds=dk(curDate);loadSlotOccupancyFromSb(_ds).then(()=>renderBook().catch(console.error));}
   if(v==='planes')renderPlans();
   if(v==='rutinas'){renderRutinas().catch(console.error);}
@@ -3716,6 +3759,26 @@ function handleAdminCancelBk(btn){
   const uid=btn.dataset.uid, bid=btn.dataset.bid;
   if(!uid||!bid)return;
   adminCancelUserBooking(uid,bid);
+}
+
+function dailyQuoteForDate(ds){
+  const parts=(ds||mazToday()).split('-').map(Number);
+  const dayKey=Math.floor(Date.UTC(parts[0]||2026,(parts[1]||1)-1,parts[2]||1)/86400000);
+  return DAILY_QUOTES[Math.abs(dayKey)%DAILY_QUOTES.length];
+}
+function renderDailyQuote(){
+  const el=document.getElementById('daily-quote-wrap');
+  if(!el)return;
+  const ds=mazToday();
+  const q=dailyQuoteForDate(ds);
+  el.innerHTML='<section class="daily-quote-card" aria-label="Frase del dia">'+
+    '<div class="daily-quote-head">'+
+      '<div class="daily-quote-kicker">Frase del dia</div>'+
+      '<div class="daily-quote-date">'+fmtDS(ds)+'</div>'+
+    '</div>'+
+    '<div class="daily-quote-text">“'+esc(q.text)+'”</div>'+
+    '<div class="daily-quote-action"><strong>Practica:</strong> '+esc(q.action)+'</div>'+
+  '</section>';
 }
 
 // ── MEMBERSHIP STATUS in Inicio ──
