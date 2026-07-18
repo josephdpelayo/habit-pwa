@@ -6,12 +6,12 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="HABIT">
 <meta name="application-name" content="HABIT">
-<link rel="manifest" href="/manifest.json?v=20260718-04">
-<link rel="apple-touch-icon" sizes="120x120" href="/icons/icon-120.png?v=20260718-04">
-<link rel="apple-touch-icon" sizes="152x152" href="/icons/icon-152.png?v=20260718-04">
-<link rel="apple-touch-icon" sizes="167x167" href="/icons/icon-167.png?v=20260718-04">
-<link rel="apple-touch-icon" sizes="180x180" href="/icons/icon-180.png?v=20260718-04">
-<link rel="icon" type="image/png" sizes="32x32" href="/icons/icon-32.png?v=20260718-04">
+<link rel="manifest" href="/manifest.json?v=20260718-05">
+<link rel="apple-touch-icon" sizes="120x120" href="/icons/icon-120.png?v=20260718-05">
+<link rel="apple-touch-icon" sizes="152x152" href="/icons/icon-152.png?v=20260718-05">
+<link rel="apple-touch-icon" sizes="167x167" href="/icons/icon-167.png?v=20260718-05">
+<link rel="apple-touch-icon" sizes="180x180" href="/icons/icon-180.png?v=20260718-05">
+<link rel="icon" type="image/png" sizes="32x32" href="/icons/icon-32.png?v=20260718-05">
 <title>HABIT</title>
 <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700;800;900&family=Share+Tech+Mono&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
@@ -1393,6 +1393,28 @@ body.reception-mode{background:#050505}
   </div>
 </div>
 
+<!-- SEMANA DETALLE (entrenos por día + acceso a reorganizar) -->
+<div id="week-detail-modal" class="terms-modal" style="display:none">
+  <div class="terms-box" style="max-height:85vh">
+    <div class="terms-hdr">
+      <h2>Tu semana</h2>
+      <button class="video-modal-close" onclick="closeWeekDetailModal()">Cerrar</button>
+    </div>
+    <div class="terms-body" id="week-detail-modal-body" style="padding:10px"></div>
+  </div>
+</div>
+
+<!-- MOVER ENTRENO A OTRO DÍA -->
+<div id="move-day-modal" class="terms-modal" style="display:none">
+  <div class="terms-box">
+    <div class="terms-hdr">
+      <h2>Mover a otro día</h2>
+      <button class="video-modal-close" onclick="closeMoveDayModal()">Cerrar</button>
+    </div>
+    <div class="terms-body" id="move-day-modal-body" style="padding:6px"></div>
+  </div>
+</div>
+
 <!-- INSTALL GUIDE MODAL -->
 <div id="install-guide-modal" class="terms-modal" style="display:none">
   <div class="install-box">
@@ -1445,7 +1467,7 @@ body.reception-mode{background:#050505}
 // ── CONFIG & SUPABASE ───────────────────────────────────────
 const SUPABASE_URL='https://pmpjteuqjusbiduevbwq.supabase.co';
 const SUPABASE_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBtcGp0ZXVxanVzYmlkdWV2YndxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc2OTI1NjUsImV4cCI6MjA5MzI2ODU2NX0.XbMzZoo2yqtrD8znLnyo_1zDfrdJAvAPj1lqGOyXnLw';
-const APP_VERSION='20260718-04';
+const APP_VERSION='20260718-05';
 const MUSCLE_GROUPS=['Pecho','Espalda','Piernas','Hombros','Brazos','Core','Cardio','Full Body'];
 function muscleGroupSelectHtml(id,selected){
   return '<select id="'+id+'" style="width:100%;background:var(--card);border:1px solid var(--border);border-radius:4px;padding:8px;font-size:12px;color:var(--white);outline:none;margin-bottom:6px;box-sizing:border-box">'
@@ -5170,6 +5192,77 @@ function renderCoachHoyPanel(){
     +'</div></div>';
   el.innerHTML=html;
 }
+// ── SEMANA: detalle por día + reorganizar ──────────────────────
+const DIAS_LARGO=['Lunes','Martes','Miércoles','Jueves','Viernes','Sábado','Domingo'];
+function renderWeekDetailBody(){
+  const body=document.getElementById('week-detail-modal-body');
+  if(!body||!coachWeekStart)return;
+  const today=mazToday();
+  let html='';
+  for(let i=0;i<7;i++){
+    const ds=addDaysDS(coachWeekStart,i);
+    const row=coachSchedule.find(r=>r.ds===ds);
+    html+='<div style="padding:10px 0;border-bottom:1px solid var(--border)">'
+      +'<div style="font-size:11px;color:var(--gray);text-transform:uppercase;font-weight:700;margin-bottom:4px">'+DIAS_LARGO[i]+' '+parseDS(ds).d+(ds===today?' · Hoy':'')+'</div>';
+    if(row){
+      const isMissed=row.status==='scheduled'&&ds<today;
+      const statusLabel=row.status==='done'?'Completado ✓':row.status==='in_progress'?'En curso':isMissed?'Omitido':'Programado';
+      const statusColor=row.status==='done'?'var(--green)':row.status==='in_progress'?'var(--blue)':isMissed?'#ef4444':'var(--gray)';
+      html+='<div style="display:flex;align-items:center;justify-content:space-between;gap:8px">'
+        +'<div><div style="font-weight:700;font-size:13.5px">'+esc(row.board_name)+'</div><div style="font-size:11px;color:'+statusColor+';font-weight:700">'+statusLabel+'</div></div>'
+        +(row.status==='scheduled'?'<button class="btn-sm" onclick="openMoveDayModal(&quot;'+row.id+'&quot;)">Mover</button>':'')
+        +'</div>';
+    }else{
+      html+='<div style="font-size:12.5px;color:var(--gray)">Sin entreno</div>';
+    }
+    html+='</div>';
+  }
+  body.innerHTML=html;
+}
+function openWeekDetailModal(){
+  renderWeekDetailBody();
+  document.getElementById('week-detail-modal').style.display='flex';
+}
+function closeWeekDetailModal(){
+  document.getElementById('week-detail-modal').style.display='none';
+}
+let _moveDayScheduleId=null;
+function openMoveDayModal(scheduleId){
+  _moveDayScheduleId=scheduleId;
+  const row=coachSchedule.find(r=>r.id===scheduleId);
+  if(!row)return;
+  let html='';
+  for(let i=0;i<7;i++){
+    const ds=addDaysDS(coachWeekStart,i);
+    if(ds===row.ds)continue;
+    const other=coachSchedule.find(r=>r.ds===ds);
+    const blocked=!!(other&&other.status!=='scheduled');
+    const label=DIAS_LARGO[i]+' '+parseDS(ds).d+(other?(blocked?' · '+esc(other.board_name)+' (no se puede)':' · ya tiene: '+esc(other.board_name)):' · libre');
+    html+='<button class="ex-menu-item"'+(blocked?' style="opacity:.4;cursor:not-allowed"':'')+' onclick="'+(blocked?'':'moveCoachingDaySb(&quot;'+ds+'&quot;)')+'">'+label+'</button>';
+  }
+  document.getElementById('move-day-modal-body').innerHTML=html||'<div class="empty">No hay otros días esta semana.</div>';
+  document.getElementById('move-day-modal').style.display='flex';
+}
+function closeMoveDayModal(){
+  document.getElementById('move-day-modal').style.display='none';
+  _moveDayScheduleId=null;
+}
+async function moveCoachingDaySb(newDs){
+  if(!_moveDayScheduleId)return;
+  const id=_moveDayScheduleId;
+  showLoading('Moviendo...');
+  try{
+    const{error}=await sb.rpc('reorganize_coaching_day',{p_schedule_id:id,p_new_ds:newDs});
+    if(error)throw error;
+    closeMoveDayModal();
+    await loadCoachWeekDataSb(true);
+    renderWeekDetailBody();
+    renderCoachSemanaPanel();
+    if(coachHubActiveTab==='hoy')renderCoachHoyPanel();
+    hideLoading();
+    toast('Entreno movido','ok');
+  }catch(e){hideLoading();toast('Error: '+e.message,'err');}
+}
 function renderCoachSemanaPanel(){
   const el=document.getElementById('coach-semana-panel');
   if(!el||!coachWeekStart)return;
@@ -5177,7 +5270,7 @@ function renderCoachSemanaPanel(){
   const today=mazToday();
   const DN_MON=['Lun','Mar','Mié','Jue','Vie','Sáb','Dom'];
   let scheduledCount=0;
-  let strip='<div class="coach-day-strip">';
+  let strip='<div class="coach-day-strip" style="cursor:pointer" onclick="openWeekDetailModal()">';
   for(let i=0;i<7;i++){
     const ds=addDaysDS(coachWeekStart,i);
     const row=coachSchedule.find(r=>r.ds===ds);
@@ -5191,7 +5284,8 @@ function renderCoachSemanaPanel(){
     }
     strip+='<div class="'+cls+'"><span class="coach-day-label">'+DN_MON[i]+'</span><span class="coach-day-num">'+parseDS(ds).d+'</span></div>';
   }
-  strip+='</div>';
+  strip+='</div>'
+    +'<div style="text-align:center;margin:-6px 0 12px;font-size:11px;font-weight:700;color:var(--bl);cursor:pointer" onclick="openWeekDetailModal()">Ver semana completa ›</div>';
   const summary='<div class="board-card"><div class="board-body" style="text-align:center;font-weight:700">'+(scheduledCount?('¡Tienes '+scheduledCount+' entreno'+(scheduledCount===1?'':'s')+' esta semana!'):'Sin entrenos programados esta semana.')+'</div></div>';
   const relevantTasks=coachRelevantTasks();
   const doneCount=relevantTasks.filter(isTaskDoneToday).length;
