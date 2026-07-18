@@ -6,14 +6,14 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="HABIT">
 <meta name="application-name" content="HABIT">
-<link rel="manifest" href="/manifest.json?v=20260718-21">
-<link rel="apple-touch-icon" sizes="120x120" href="/icons/icon-120.png?v=20260718-21">
-<link rel="apple-touch-icon" sizes="152x152" href="/icons/icon-152.png?v=20260718-21">
-<link rel="apple-touch-icon" sizes="167x167" href="/icons/icon-167.png?v=20260718-21">
-<link rel="apple-touch-icon" sizes="180x180" href="/icons/icon-180.png?v=20260718-21">
-<link rel="icon" type="image/png" sizes="32x32" href="/icons/icon-32.png?v=20260718-21">
+<link rel="manifest" href="/manifest.json?v=20260718-22">
+<link rel="apple-touch-icon" sizes="120x120" href="/icons/icon-120.png?v=20260718-22">
+<link rel="apple-touch-icon" sizes="152x152" href="/icons/icon-152.png?v=20260718-22">
+<link rel="apple-touch-icon" sizes="167x167" href="/icons/icon-167.png?v=20260718-22">
+<link rel="apple-touch-icon" sizes="180x180" href="/icons/icon-180.png?v=20260718-22">
+<link rel="icon" type="image/png" sizes="32x32" href="/icons/icon-32.png?v=20260718-22">
 <title>HABIT</title>
-<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700;800;900&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700;800;900&family=Share+Tech+Mono&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
@@ -39,6 +39,9 @@ input,select,button,textarea{font-family:'Montserrat',sans-serif}
 .header-logo-img{width:30px;height:30px;object-fit:contain;display:block;flex-shrink:0}
 .ltxt{font-family:'Montserrat',sans-serif;font-size:17px;font-weight:800;letter-spacing:.1em}
 .lsub{font-size:7px;letter-spacing:.15em;color:var(--bl);display:block;margin-top:-2px}
+.main-member-pill{display:none;margin-top:5px;width:max-content;max-width:130px;border:1px solid rgba(32,212,146,.24);border-radius:999px;background:rgba(32,212,146,.09);color:var(--green);padding:4px 7px;font-size:8px;font-weight:900;letter-spacing:.09em;text-transform:uppercase;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.main-member-pill.warn{border-color:rgba(245,184,75,.28);background:rgba(245,184,75,.1);color:var(--amber)}
+.main-member-pill.danger{border-color:rgba(255,100,100,.3);background:rgba(255,100,100,.1);color:var(--red)}
 .logout-btn{font-size:11px;color:var(--gray);cursor:pointer;background:none;border:none;font-weight:600;letter-spacing:.05em;text-transform:uppercase;margin-left:auto;padding:4px}
 /* BOTTOM NAV */
 .bnav{background:var(--dark);border-top:1px solid var(--border);display:flex;flex-shrink:0;overflow-x:auto;padding-bottom:env(safe-area-inset-bottom)}
@@ -181,11 +184,11 @@ input,select,button,textarea{font-family:'Montserrat',sans-serif}
 .daily-quote-head{position:relative;display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:18px;z-index:1}
 .daily-quote-brand{display:flex;align-items:center;gap:9px;min-width:0}
 .daily-quote-mark{width:28px;height:28px;border-radius:50%;object-fit:contain;filter:drop-shadow(0 6px 14px rgba(0,0,0,.45))}
-.daily-quote-kicker{font-size:10px;font-weight:900;letter-spacing:.14em;text-transform:uppercase;color:#d7e3f4;line-height:1}
+.daily-quote-kicker{font-family:'Space Grotesk','Montserrat',sans-serif;font-size:10px;font-weight:700;letter-spacing:.16em;text-transform:uppercase;color:#d7e3f4;line-height:1}
 .daily-quote-sub{margin-top:4px;font-size:9px;font-weight:800;letter-spacing:.18em;text-transform:uppercase;color:#7fb0ff;line-height:1}
 .daily-quote-date{border:1px solid rgba(32,212,146,.28);border-radius:999px;background:rgba(32,212,146,.1);padding:6px 9px;font-size:10px;font-weight:900;color:var(--green);white-space:nowrap}
 .daily-quote-spark{position:relative;z-index:1;width:34px;height:34px;border:1px solid rgba(255,255,255,.14);border-radius:999px;background:rgba(255,255,255,.055);display:flex;align-items:center;justify-content:center;color:var(--green);font-size:24px;font-weight:900;margin-bottom:14px;box-shadow:0 0 34px rgba(32,212,146,.18)}
-.daily-quote-text{position:relative;z-index:1;font-size:clamp(26px,7vw,34px);font-weight:950;line-height:1.04;color:var(--white);letter-spacing:0;text-wrap:balance;text-shadow:0 10px 30px rgba(0,0,0,.35)}
+.daily-quote-text{position:relative;z-index:1;font-family:'Space Grotesk','Montserrat',sans-serif;font-size:clamp(25px,6.7vw,33px);font-weight:700;line-height:1.06;color:var(--white);letter-spacing:0;text-wrap:balance;text-shadow:0 10px 30px rgba(0,0,0,.35)}
 .daily-quote-action{position:relative;z-index:1;margin-top:18px;padding-top:14px;border-top:1px solid rgba(255,255,255,.11);font-size:13px;line-height:1.55;color:#c2cad7}
 .daily-quote-action strong{color:#9ec5ff;font-weight:900}
 .daily-quote-footer{position:relative;z-index:1;display:flex;align-items:center;justify-content:space-between;gap:12px;margin-top:16px;color:#7f8794;font-size:10px;font-weight:850;letter-spacing:.11em;text-transform:uppercase}
@@ -1027,7 +1030,7 @@ html,body{background:radial-gradient(circle at 50% -18%,rgba(80,112,164,.16),tra
 <!-- MAIN -->
 <div id="s-main" class="screen">
   <div class="hdr" id="main-hdr-bar">
-    <div class="logo-wrap" onclick="sv('inicio')" style="cursor:pointer"><img src="/icons/logo-original.png" style="width:30px;height:30px;object-fit:contain"><div><span class="ltxt">HABIT</span><span class="lsub">TRAINING HUB</span></div></div>
+    <div class="logo-wrap" onclick="sv('inicio')" style="cursor:pointer"><img src="/icons/logo-original.png" style="width:30px;height:30px;object-fit:contain"><div><span class="ltxt">HABIT</span><span class="lsub">TRAINING HUB</span><span id="main-member-pill" class="main-member-pill"></span></div></div>
     <div class="top-actions">
       <button class="top-action" data-top-view="planes" onclick="sv('planes')" title="Membresía"><svg viewBox="0 0 24 24"><rect x="2" y="5" width="20" height="14" rx="2"/><path d="M2 10h20M6 15h4M14 15h4"/></svg></button>
       <button class="top-action" data-top-view="historial" onclick="sv('historial')" title="Historial"><svg viewBox="0 0 24 24"><path d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg></button>
@@ -1039,11 +1042,11 @@ html,body{background:radial-gradient(circle at 50% -18%,rgba(80,112,164,.16),tra
   <!-- INICIO -->
   <div id="v-inicio" class="view active">
     <div class="scroll-area">
-      <div id="daily-quote-wrap"></div>
-      <div id="membership-status-wrap"></div>
       <div id="access-main"></div>
+      <div id="daily-quote-wrap"></div>
       <div id="guest-group-wrap"></div>
       <div id="active-bookings-wrap"></div>
+      <div id="membership-status-wrap"></div>
       <div id="notif-wrap"></div>
     </div>
   </div>
@@ -1864,7 +1867,7 @@ html,body{background:radial-gradient(circle at 50% -18%,rgba(80,112,164,.16),tra
 // ── CONFIG & SUPABASE ───────────────────────────────────────
 const SUPABASE_URL='https://pmpjteuqjusbiduevbwq.supabase.co';
 const SUPABASE_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBtcGp0ZXVxanVzYmlkdWV2YndxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc2OTI1NjUsImV4cCI6MjA5MzI2ODU2NX0.XbMzZoo2yqtrD8znLnyo_1zDfrdJAvAPj1lqGOyXnLw';
-const APP_VERSION='20260718-21';
+const APP_VERSION='20260718-22';
 const MUSCLE_GROUPS=['Pecho','Espalda','Piernas','Hombros','Brazos','Core','Cardio','Full Body'];
 const DAILY_QUOTES=[
   {text:'Haz hoy lo que tu version de manana agradeceria.',action:'Elige una accion pequeña y cumplible antes de buscar motivacion.'},
@@ -3802,8 +3805,34 @@ function renderDailyQuote(){
 }
 
 // ── MEMBERSHIP STATUS in Inicio ──
+function updateMainMembershipPill(){
+  const pill=document.getElementById('main-member-pill');
+  if(!pill)return;
+  pill.className='main-member-pill';
+  if(!curUser){
+    pill.style.display='none';
+    pill.textContent='';
+    return;
+  }
+  const all=[...PLANS.individual,...PLANS.grupal];
+  const p=all.find(x=>x.id===curUser.plan)||null;
+  const expired=curUser.planExpiry&&new Date(curUser.planExpiry)<new Date();
+  const isUnlimited=curUser.credits>=999||(p&&p.credits>=999);
+  const noCredits=!isUnlimited&&curUser.credits<=0;
+  const days=daysUntil(curUser.planExpiry);
+  const expiringSoon=days!==null&&days<=5&&days>=0;
+  let label='Sin membresia';
+  if(expired)label='Vencida';
+  else if(isUnlimited)label='Mensual';
+  else if(curUser.credits>0)label=curUser.credits+' visita'+(curUser.credits===1?'':'s');
+  if(noCredits||expired)pill.classList.add('danger');
+  else if(expiringSoon)pill.classList.add('warn');
+  pill.textContent=label;
+  pill.style.display='inline-flex';
+}
 function renderMembershipStatus(){
   const el=document.getElementById('membership-status-wrap');
+  updateMainMembershipPill();
   if(!el||!curUser)return;
   if(!curUser.plan&&curUser.credits<=0){
     const indPlans=PLANS.individual.filter(canSeePlan);
@@ -3822,27 +3851,7 @@ function renderMembershipStatus(){
   const all=[...PLANS.individual,...PLANS.grupal];
   const p=all.find(x=>x.id===curUser.plan)||{id:'manual',name:'Visitas manuales',type:'individual'};
   if(!p){el.innerHTML='';return;}
-  const expired=curUser.planExpiry&&new Date(curUser.planExpiry)<new Date();
-  const days=daysUntil(curUser.planExpiry);
-  const isUnlimited=curUser.credits>=999||p.credits>=999;
-  const noCredits=!isUnlimited&&curUser.credits<=0;
-  const lowCredits=!isUnlimited&&curUser.credits>0&&curUser.credits<=3;
-  const expiringSoon=days!==null&&days<=5&&days>=0;
-  const credText=expired?'Vencida':isUnlimited?'Mensual':noCredits?'Sin visitas':(curUser.credits+' visita'+(curUser.credits===1?'':'s'));
-  const expiryText=curUser.planExpiry?fmtDateMaz(curUser.planExpiry,{day:'numeric',month:'short'}):'';
-  const urgentColor=expired||noCredits?'var(--red)':(lowCredits||expiringSoon)?'var(--amber)':'var(--green)';
-  const borderColor=expired||noCredits?'rgba(239,68,68,.3)':(lowCredits||expiringSoon)?'rgba(245,158,11,.3)':'rgba(16,185,129,.2)';
-  el.innerHTML='<div style="background:rgba(0,0,0,.3);border:1px solid '+borderColor+';border-radius:6px;padding:10px 14px;display:flex;align-items:center;gap:10px;margin-bottom:10px">'+
-    '<div style="flex:1;min-width:0">'+
-    '<div style="font-size:11px;color:var(--gray);font-weight:600;letter-spacing:.06em;text-transform:uppercase;margin-bottom:2px">'+p.name+'</div>'+
-    '<div style="display:flex;align-items:center;gap:8px">'+
-    '<span style="font-size:20px;font-weight:800;color:'+urgentColor+'">'+credText+'</span>'+
-    (expiryText?'<span style="font-size:11px;color:var(--gray)">· vence '+expiryText+'</span>':'')+
-    (lowCredits?'<span style="font-size:10px;font-weight:700;color:var(--amber)">Pocas visitas</span>':'')+
-    (expiringSoon&&!expired?'<span style="font-size:10px;font-weight:700;color:var(--amber)">'+days+'d</span>':'')+
-    '</div></div>'+
-    '<button class="btn-sm bblue" onclick="sv(&apos;planes&apos;)">Renovar</button>'+
-    '</div>';
+  el.innerHTML='';
 }
 
 // ═══════════════════════════════════════════════
