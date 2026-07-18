@@ -6,12 +6,12 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="HABIT">
 <meta name="application-name" content="HABIT">
-<link rel="manifest" href="/manifest.json?v=20260718-27">
-<link rel="apple-touch-icon" sizes="120x120" href="/icons/icon-120.png?v=20260718-27">
-<link rel="apple-touch-icon" sizes="152x152" href="/icons/icon-152.png?v=20260718-27">
-<link rel="apple-touch-icon" sizes="167x167" href="/icons/icon-167.png?v=20260718-27">
-<link rel="apple-touch-icon" sizes="180x180" href="/icons/icon-180.png?v=20260718-27">
-<link rel="icon" type="image/png" sizes="32x32" href="/icons/icon-32.png?v=20260718-27">
+<link rel="manifest" href="/manifest.json?v=20260718-28">
+<link rel="apple-touch-icon" sizes="120x120" href="/icons/icon-120.png?v=20260718-28">
+<link rel="apple-touch-icon" sizes="152x152" href="/icons/icon-152.png?v=20260718-28">
+<link rel="apple-touch-icon" sizes="167x167" href="/icons/icon-167.png?v=20260718-28">
+<link rel="apple-touch-icon" sizes="180x180" href="/icons/icon-180.png?v=20260718-28">
+<link rel="icon" type="image/png" sizes="32x32" href="/icons/icon-32.png?v=20260718-28">
 <title>HABIT</title>
 <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700;800;900&family=Share+Tech+Mono&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
@@ -395,6 +395,17 @@ input,select,button,textarea{font-family:'Montserrat',sans-serif}
 .coach-workout-summary{display:grid;grid-template-columns:1fr auto;gap:10px;align-items:center;margin-bottom:12px;padding:12px 13px;border:1px solid rgba(255,255,255,.08);background:rgba(255,255,255,.035);border-radius:16px}
 .coach-workout-summary strong{display:block;font-size:13px;color:var(--white);margin-bottom:5px}
 .coach-workout-summary span{font-size:11px;color:var(--gray);line-height:1.35}
+.coach-session-card{border:1px solid rgba(255,255,255,.08);border-radius:18px;background:linear-gradient(180deg,rgba(255,255,255,.058),rgba(255,255,255,.03));box-shadow:0 14px 34px rgba(0,0,0,.22);padding:13px;margin-bottom:10px}
+.coach-session-top{display:grid;grid-template-columns:auto 1fr auto;gap:10px;align-items:center}
+.coach-session-dot{width:9px;height:9px;border-radius:50%;box-shadow:0 0 0 5px rgba(37,99,235,.1)}
+.coach-session-title{font-size:16px;font-weight:900;color:var(--white);line-height:1.1;letter-spacing:0}
+.coach-session-meta{font-size:11px;color:var(--gray);margin-top:4px;line-height:1.35}
+.coach-session-count{border-radius:999px;background:rgba(37,99,235,.15);color:#bfdbfe;padding:7px 10px;font-size:11px;font-weight:850;white-space:nowrap}
+.coach-session-actions{display:grid;grid-template-columns:1fr auto;gap:8px;margin-top:12px}
+.coach-session-actions .btn{min-height:42px;border-radius:14px;font-size:13px}
+.coach-session-actions .btn-sm{min-height:42px;border-radius:14px;padding:8px 12px}
+.coach-session-details{margin-top:12px}
+.coach-add-workout{width:100%;margin:0 0 10px;min-height:34px}
 .ex-history-row{display:flex;align-items:center;justify-content:space-between;padding:10px 0;border-bottom:1px solid var(--border);font-size:13px}
 .ex-history-row:last-child{border-bottom:none}
 .set-tracker{padding:12px;background:var(--card2);border-top:1px solid var(--border)}
@@ -455,6 +466,14 @@ input,select,button,textarea{font-family:'Montserrat',sans-serif}
 .coach-hero-stat{border:1px solid rgba(255,255,255,.08);border-radius:14px;padding:10px 12px;background:rgba(0,0,0,.18)}
 .coach-hero-stat strong{display:block;font-size:20px;color:var(--white);font-variant-numeric:tabular-nums}
 .coach-hero-stat span{display:block;margin-top:2px;font-size:10px;color:var(--gray);font-weight:700;letter-spacing:.04em}
+.coach-hero.compact{padding:12px 13px;display:grid;grid-template-columns:1fr auto;gap:10px;align-items:end}
+.coach-hero.compact .coach-hero-k{margin-bottom:4px;font-size:9px}
+.coach-hero.compact .coach-hero-title{font-size:20px}
+.coach-hero.compact .coach-hero-sub{font-size:11px;margin-top:4px}
+.coach-hero.compact .coach-hero-stats{display:flex;gap:6px;margin-top:0}
+.coach-hero.compact .coach-hero-stat{min-width:58px;padding:8px 9px;border-radius:12px}
+.coach-hero.compact .coach-hero-stat strong{font-size:16px}
+.coach-hero.compact .coach-hero-stat span{font-size:9px}
 .coach-alert{display:flex;align-items:center;justify-content:space-between;gap:10px;background:rgba(245,158,11,.09);border:1px solid rgba(245,158,11,.24);border-radius:14px;padding:12px 13px;margin-bottom:12px;font-size:13px;color:var(--white);line-height:1.35}
 .coach-alert-close{width:28px;height:28px;border-radius:999px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.08);color:var(--gray);font-size:16px;cursor:pointer;padding:0;flex-shrink:0}
 .coach-day-strip{display:grid;grid-template-columns:repeat(7,1fr);gap:6px;background:rgba(255,255,255,.045);border:1px solid rgba(255,255,255,.08);border-radius:16px;padding:10px 8px;margin-bottom:12px;box-shadow:0 12px 30px rgba(0,0,0,.2)}
@@ -1888,7 +1907,7 @@ html,body{background:radial-gradient(circle at 50% -18%,rgba(80,112,164,.16),tra
 // ── CONFIG & SUPABASE ───────────────────────────────────────
 const SUPABASE_URL='https://pmpjteuqjusbiduevbwq.supabase.co';
 const SUPABASE_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBtcGp0ZXVxanVzYmlkdWV2YndxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc2OTI1NjUsImV4cCI6MjA5MzI2ODU2NX0.XbMzZoo2yqtrD8znLnyo_1zDfrdJAvAPj1lqGOyXnLw';
-const APP_VERSION='20260718-27';
+const APP_VERSION='20260718-28';
 const MUSCLE_GROUPS=['Pecho','Espalda','Piernas','Hombros','Brazos','Core','Cardio','Full Body'];
 const DAILY_QUOTES=[
   {text:'Haz hoy lo que tu version de manana agradeceria.',action:'Elige una accion pequeña y cumplible antes de buscar motivacion.'},
@@ -5875,10 +5894,12 @@ function renderCoachHoyPanel(){
   const doneTasks=relevantTasks.filter(isTaskDoneToday).length;
   const doneWorkouts=todayRows.filter(r=>r.status==='done').length;
   let html='';
-  html+='<div class="coach-hero">'
+  html+='<div class="coach-hero compact">'
+    +'<div>'
     +'<div class="coach-hero-k">Coaching de hoy</div>'
     +'<div class="coach-hero-title">'+(activeCoachingSession?'Entreno en curso':todayRows.length?'Tu sesión está lista':'Día libre')+'</div>'
     +'<div class="coach-hero-sub">'+(activeCoachingSession?'Registra tus series sin perder el ritmo.':todayRows.length?'Abre tu rutina, registra series y deja notas para tu coach.':'No tienes rutina programada. Puedes iniciar una rutina asignada cuando quieras.')+'</div>'
+    +'</div>'
     +'<div class="coach-hero-stats">'
     +'<div class="coach-hero-stat"><strong>'+doneWorkouts+'/'+todayRows.length+'</strong><span>Entrenos</span></div>'
     +'<div class="coach-hero-stat"><strong>'+doneTasks+'/'+relevantTasks.length+'</strong><span>Tareas</span></div>'
@@ -5911,14 +5932,18 @@ function renderCoachHoyPanel(){
         const totalSets=Object.values(coachSessionSets).reduce((sum,list)=>sum+(Array.isArray(list)?list.length:0),0);
         const doneSets=Object.values(coachSessionSets).reduce((sum,list)=>sum+(Array.isArray(list)?list.filter(s=>s.done).length:0),0);
         const progressLabel=isActive&&totalSets?(doneSets+'/'+totalSets+' series'):(exercises.length+' ejercicios');
-        html+='<div class="board-card"><div class="board-hdr"><div style="display:flex;align-items:center;gap:8px;min-width:0"><div style="width:10px;height:10px;border-radius:50%;background:'+esc(todayRow.board_color||'#2563eb')+'"></div><span class="board-title">'+esc(todayRow.board_name)+'</span></div><span class="badge bg-blue">'+exercises.length+' ejercicios</span></div><div class="board-body">'
-          +'<div class="coach-workout-summary"><div><strong>'+(isActive?'Entreno en curso':'Rutina lista')+'</strong><span>'+esc(progressLabel)+' · '+esc(todayRow.board_name)+'</span></div><button class="btn-sm" onclick="toggleCoachTodayBoard(&quot;'+todayRow.id+'&quot;)">'+(isExpanded?'Ocultar':'Ver ejercicios')+'</button></div>'
-          +'<button class="btn" style="margin-bottom:12px" onclick="'+(isActive?'openActiveCoachingExercise()':'startCoachingSessionSb(&quot;'+todayRow.id+'&quot;)')+'">'+(isActive?'Volver al entreno':'Iniciar entreno')+'</button>'
-          +(isExpanded?exHtml:'')+'</div></div>';
+        html+='<div class="coach-session-card">'
+          +'<div class="coach-session-top"><div class="coach-session-dot" style="background:'+esc(todayRow.board_color||'#2563eb')+'"></div>'
+          +'<div style="min-width:0"><div class="coach-session-title">'+esc(todayRow.board_name)+'</div><div class="coach-session-meta">'+(isActive?'En curso':'Rutina lista')+' · '+esc(progressLabel)+'</div></div>'
+          +'<div class="coach-session-count">'+exercises.length+' ej.</div></div>'
+          +'<div class="coach-session-actions">'
+          +'<button class="btn" onclick="'+(isActive?'openActiveCoachingExercise()':'startCoachingSessionSb(&quot;'+todayRow.id+'&quot;)')+'">'+(isActive?'Volver':'Iniciar')+'</button>'
+          +'<button class="btn-sm" onclick="toggleCoachTodayBoard(&quot;'+todayRow.id+'&quot;)">'+(isExpanded?'Ocultar':'Detalle')+'</button></div>'
+          +(isExpanded?'<div class="coach-session-details">'+exHtml+'</div>':'')+'</div>';
       }
     });
   }
-  html+='<button class="btn-sm" style="width:100%;margin-bottom:12px" onclick="openAddWorkoutModal()">Agregar otro entreno</button>';
+  html+='<button class="btn-sm coach-add-workout" onclick="openAddWorkoutModal()">Agregar otro entreno</button>';
   html+='<div class="board-card"><div class="board-hdr"><span class="board-title">Tareas</span></div><div class="board-body">'
     +(relevantTasks.length?relevantTasks.map(t=>{
         const done=isTaskDoneToday(t);
