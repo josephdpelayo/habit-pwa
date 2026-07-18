@@ -6,12 +6,12 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="HABIT">
 <meta name="application-name" content="HABIT">
-<link rel="manifest" href="/manifest.json?v=20260718-30">
-<link rel="apple-touch-icon" sizes="120x120" href="/icons/icon-120.png?v=20260718-30">
-<link rel="apple-touch-icon" sizes="152x152" href="/icons/icon-152.png?v=20260718-30">
-<link rel="apple-touch-icon" sizes="167x167" href="/icons/icon-167.png?v=20260718-30">
-<link rel="apple-touch-icon" sizes="180x180" href="/icons/icon-180.png?v=20260718-30">
-<link rel="icon" type="image/png" sizes="32x32" href="/icons/icon-32.png?v=20260718-30">
+<link rel="manifest" href="/manifest.json?v=20260718-31">
+<link rel="apple-touch-icon" sizes="120x120" href="/icons/icon-120.png?v=20260718-31">
+<link rel="apple-touch-icon" sizes="152x152" href="/icons/icon-152.png?v=20260718-31">
+<link rel="apple-touch-icon" sizes="167x167" href="/icons/icon-167.png?v=20260718-31">
+<link rel="apple-touch-icon" sizes="180x180" href="/icons/icon-180.png?v=20260718-31">
+<link rel="icon" type="image/png" sizes="32x32" href="/icons/icon-32.png?v=20260718-31">
 <title>HABIT</title>
 <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700;800;900&family=Share+Tech+Mono&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
@@ -505,6 +505,26 @@ input,select,button,textarea{font-family:'Montserrat',sans-serif}
 .coach-task-title{font-size:13px;font-weight:600;color:var(--white);flex:1}
 .coach-task-due{font-size:11px;color:var(--gray)}
 .coach-task-row.overdue .coach-task-due{color:#ef4444;font-weight:700}
+.habit-presets{display:flex;gap:6px;flex-wrap:wrap;margin:-2px 0 14px}
+.habit-presets .btn-sm{padding:8px 10px;border-radius:999px;background:rgba(255,255,255,.055)}
+.habit-schedule-picker{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px}
+.habit-mode-btn{border:1px solid rgba(255,255,255,.1);background:rgba(255,255,255,.045);color:var(--gray);border-radius:14px;padding:12px 10px;text-align:left;cursor:pointer}
+.habit-mode-btn strong{display:block;color:inherit;font-size:13px;margin-bottom:3px}
+.habit-mode-btn span{font-size:10.5px;line-height:1.3;color:var(--gray)}
+.habit-mode-btn.active{border-color:rgba(59,130,246,.55);background:rgba(37,99,235,.13);color:#bfdbfe}
+.fasting-card{position:relative;overflow:hidden;background:linear-gradient(135deg,rgba(255,255,255,.055),rgba(16,185,129,.055));border:1px solid rgba(255,255,255,.09);border-radius:18px;padding:14px;margin-bottom:12px;box-shadow:0 18px 40px rgba(0,0,0,.22)}
+.fasting-card:after{content:"";position:absolute;right:-28px;bottom:-44px;width:150px;height:150px;border-radius:50%;border:24px solid rgba(32,212,146,.055);pointer-events:none}
+.fasting-head{position:relative;z-index:1;display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-bottom:12px}
+.fasting-k{font-size:10px;font-weight:900;text-transform:uppercase;letter-spacing:.12em;color:#8aa1c2}
+.fasting-status{font-size:12px;color:var(--gray);margin-top:3px;line-height:1.35}
+.fasting-time{position:relative;z-index:1;font-size:34px;font-weight:900;color:var(--white);line-height:1;margin:5px 0 6px}
+.fasting-note{position:relative;z-index:1;font-size:12px;color:var(--gray);line-height:1.35;margin-bottom:12px}
+.fasting-grid{position:relative;z-index:1;display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.fasting-mini{background:rgba(0,0,0,.22);border:1px solid rgba(255,255,255,.08);border-radius:14px;padding:10px}
+.fasting-mini label{display:block;font-size:9px;font-weight:900;letter-spacing:.1em;color:var(--gray);text-transform:uppercase;margin-bottom:6px}
+.fasting-mini input{width:100%;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.08);border-radius:10px;color:var(--white);font-size:13px;padding:9px 10px;margin-bottom:8px}
+.fasting-mini button{width:100%;border:none;border-radius:10px;padding:9px 8px;background:rgba(37,99,235,.16);color:#93c5fd;font-size:11px;font-weight:900;cursor:pointer}
+.fasting-mini button.green{background:rgba(16,185,129,.16);color:#34d399}
 .coach-empty{background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-radius:16px;padding:24px 16px;text-align:center;color:var(--gray);font-size:13px;line-height:1.5}
 .active-session-bar{flex-shrink:0;display:flex;align-items:center;justify-content:space-between;gap:10px;background:linear-gradient(90deg,#2563eb,#1d4ed8);color:var(--white);padding:12px 16px;cursor:pointer;font-family:'Montserrat',sans-serif;font-weight:800;font-size:13px;letter-spacing:0}
 .active-session-bar #asb-elapsed{font-family:'Montserrat',sans-serif;font-variant-numeric:tabular-nums}
@@ -1911,7 +1931,7 @@ html,body{background:radial-gradient(circle at 50% -18%,rgba(80,112,164,.16),tra
 // ── CONFIG & SUPABASE ───────────────────────────────────────
 const SUPABASE_URL='https://pmpjteuqjusbiduevbwq.supabase.co';
 const SUPABASE_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBtcGp0ZXVxanVzYmlkdWV2YndxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc2OTI1NjUsImV4cCI6MjA5MzI2ODU2NX0.XbMzZoo2yqtrD8znLnyo_1zDfrdJAvAPj1lqGOyXnLw';
-const APP_VERSION='20260718-30';
+const APP_VERSION='20260718-31';
 const MUSCLE_GROUPS=['Pecho','Espalda','Piernas','Hombros','Brazos','Core','Cardio','Full Body'];
 const DAILY_QUOTES=[
   {text:'Haz hoy lo que tu version de manana agradeceria.',action:'Elige una accion pequeña y cumplible antes de buscar motivacion.'},
@@ -5884,14 +5904,101 @@ function coachRelevantTasks(){
   const today=mazToday();
   return coachTasks.filter(t=>!t.due_date||(t.due_date>=coachWeekStart&&t.due_date<=weekEnd)||(!t.is_done&&t.due_date<today));
 }
-// Las tareas recurrentes ("tareas diarias") no usan is_done (viven para
+// Los hábitos recurrentes no usan is_done (viven para
 // siempre) — su estado de "hecha" es si ya hay un log de hoy.
 function isTaskDoneToday(t){
   return t.is_recurring?coachTaskLogsToday.has(t.id):t.is_done;
 }
+function fastingStorageKey(){
+  return 'habit_fasting_'+(sbUser&&sbUser.id?sbUser.id:'guest');
+}
+function loadFastingLog(){
+  try{return JSON.parse(localStorage.getItem(fastingStorageKey())||'{}')||{};}catch(e){return{};}
+}
+function saveFastingLog(log){
+  localStorage.setItem(fastingStorageKey(),JSON.stringify({...log,updatedAt:new Date().toISOString()}));
+}
+function timeInputValueMaz(iso){
+  if(!iso)return'';
+  const parts=new Intl.DateTimeFormat('en-GB',{timeZone:MAZ_TZ,hour:'2-digit',minute:'2-digit',hourCycle:'h23'}).formatToParts(new Date(iso));
+  const v=Object.fromEntries(parts.filter(p=>p.type!=='literal').map(p=>[p.type,p.value]));
+  return (v.hour||'00')+':'+(v.minute||'00');
+}
+function fastingIsoFromTime(value,baseDs){
+  if(!value)return null;
+  const parts=value.split(':').map(Number);
+  if(parts.length<2||Number.isNaN(parts[0])||Number.isNaN(parts[1]))return null;
+  return mazLocalDateTimeIso(baseDs||mazToday(),parts[0],parts[1],0);
+}
+function fastingElapsedLabel(startIso,endIso){
+  if(!startIso)return'--h --m';
+  let start=new Date(startIso).getTime();
+  let end=endIso?new Date(endIso).getTime():Date.now();
+  if(!Number.isFinite(start)||!Number.isFinite(end))return'--h --m';
+  if(end<start)end=start;
+  const mins=Math.floor((end-start)/60000);
+  return Math.floor(mins/60)+'h '+pad(mins%60)+'m';
+}
+function renderFastingCardHtml(){
+  const log=loadFastingLog();
+  const last=log.lastMealAt||'';
+  const first=log.firstMealAt||'';
+  const active=!!(last&&!first);
+  const closed=!!(last&&first);
+  const elapsed=last?fastingElapsedLabel(last,first):'--h --m';
+  const status=active?'Ayuno en curso':closed?'Ayuno registrado':'Empieza con tu última comida';
+  const note=active
+    ?'Desde '+fmtDateTimeMaz(last)+'. Cuando comas, registra tu primera comida.'
+    :closed
+      ?'Última comida '+fmtDateTimeMaz(last)+' · Primera comida '+fmtDateTimeMaz(first)+'.'
+      :'Guarda la hora de tu última comida del día para ver el conteo.';
+  return '<div class="fasting-card">'
+    +'<div class="fasting-head"><div><div class="fasting-k">Ayuno</div><div class="fasting-status">'+esc(status)+'</div></div><div class="badge '+(active?'bg-green':'')+'">'+(active?'Activo':closed?'Cerrado':'Info')+'</div></div>'
+    +'<div class="fasting-time" id="fasting-elapsed">'+esc(elapsed)+'</div>'
+    +'<div class="fasting-note">'+esc(note)+'</div>'
+    +'<div class="fasting-grid">'
+    +'<div class="fasting-mini"><label>Última comida</label><input type="time" id="fasting-last-time" value="'+esc(timeInputValueMaz(last))+'"><button type="button" onclick="setFastingLastMealFromInput()">Guardar inicio</button></div>'
+    +'<div class="fasting-mini"><label>Primera comida</label><input type="time" id="fasting-first-time" value="'+esc(timeInputValueMaz(first))+'"><button type="button" class="green" onclick="setFastingFirstMealFromInput()">Romper ayuno</button></div>'
+    +'</div></div>';
+}
+function updateFastingElapsedLive(){
+  const el=document.getElementById('fasting-elapsed');
+  if(!el)return;
+  const log=loadFastingLog();
+  el.textContent=fastingElapsedLabel(log.lastMealAt,log.firstMealAt);
+}
+let fastingTickInt=null;
+function ensureFastingTicker(){
+  if(fastingTickInt)return;
+  fastingTickInt=setInterval(updateFastingElapsedLive,60000);
+}
+function setFastingLastMealFromInput(){
+  const input=document.getElementById('fasting-last-time');
+  const value=input&&input.value;
+  if(!value){toast('Selecciona la hora de tu última comida','err');return;}
+  saveFastingLog({lastMealAt:fastingIsoFromTime(value,mazToday()),firstMealAt:null,lastMealDs:mazToday()});
+  renderCoachHoyPanel();
+  toast('Ayuno iniciado','ok');
+}
+function setFastingFirstMealFromInput(){
+  const log=loadFastingLog();
+  if(!log.lastMealAt){toast('Primero registra tu última comida','err');return;}
+  const input=document.getElementById('fasting-first-time');
+  const value=input&&input.value;
+  if(!value){toast('Selecciona la hora de tu primera comida','err');return;}
+  let firstIso=fastingIsoFromTime(value,mazToday());
+  if(new Date(firstIso).getTime()<new Date(log.lastMealAt).getTime()){
+    const p=value.split(':').map(Number);
+    firstIso=mazLocalDateTimeIso(addDaysDS(mazToday(),1),p[0],p[1],0);
+  }
+  saveFastingLog({...log,firstMealAt:firstIso,firstMealDs:dsFromIsoMaz(firstIso)});
+  renderCoachHoyPanel();
+  toast('Ayuno cerrado','ok');
+}
 function renderCoachHoyPanel(){
   const el=document.getElementById('coach-hoy-panel');
   if(!el)return;
+  ensureFastingTicker();
   if(coachDataLoadError){el.innerHTML='<div class="empty">Error al cargar tu entreno: '+esc(coachDataLoadError)+'</div>';return;}
   const today=mazToday();
   const todayRows=coachSchedule.filter(r=>r.ds===today);
@@ -5908,7 +6015,7 @@ function renderCoachHoyPanel(){
     +'</div>'
     +'<div class="coach-hero-stats">'
     +'<div class="coach-hero-stat"><strong>'+doneWorkouts+'/'+todayRows.length+'</strong><span>Entrenos</span></div>'
-    +'<div class="coach-hero-stat"><strong>'+doneTasks+'/'+relevantTasks.length+'</strong><span>Tareas</span></div>'
+    +'<div class="coach-hero-stat"><strong>'+doneTasks+'/'+relevantTasks.length+'</strong><span>Hábitos</span></div>'
     +'</div></div>';
   if(missedRows.length){
     const label=missedRows.length===1?('el entreno de '+fmtDS(missedRows[0].ds)):(missedRows.length+' entrenos esta semana');
@@ -5950,12 +6057,13 @@ function renderCoachHoyPanel(){
     });
   }
   html+='<button class="btn-sm coach-add-workout" onclick="openAddWorkoutModal()">Agregar otro entreno</button>';
-  html+='<div class="board-card"><div class="board-hdr"><span class="board-title">Tareas</span></div><div class="board-body">'
+  html+=renderFastingCardHtml();
+  html+='<div class="board-card"><div class="board-hdr"><span class="board-title">Hábitos</span></div><div class="board-body">'
     +(relevantTasks.length?relevantTasks.map(t=>{
         const done=isTaskDoneToday(t);
         const isOverdue=!t.is_recurring&&!done&&t.due_date&&t.due_date<mazToday();
-        return '<div class="coach-task-row'+(done?' done':'')+(isOverdue?' overdue':'')+'" onclick="toggleTaskSb(&quot;'+t.id+'&quot;)"><div class="coach-task-check">'+(done?'✓':'')+'</div><div class="coach-task-title">'+esc(t.title)+'</div>'+(t.is_recurring?'<div class="coach-task-due">🔁 Diaria</div>':t.due_date?'<div class="coach-task-due">'+(isOverdue?'Atrasada · ':'')+fmtDS(t.due_date)+'</div>':'')+'</div>';
-      }).join(''):'<div class="empty">Sin tareas pendientes.</div>')
+        return '<div class="coach-task-row'+(done?' done':'')+(isOverdue?' overdue':'')+'" onclick="toggleTaskSb(&quot;'+t.id+'&quot;)"><div class="coach-task-check">'+(done?'✓':'')+'</div><div class="coach-task-title">'+esc(t.title)+'</div>'+(t.is_recurring?'<div class="coach-task-due">Diario</div>':t.due_date?'<div class="coach-task-due">'+(isOverdue?'Atrasado · ':'')+fmtDS(t.due_date)+'</div>':'')+'</div>';
+      }).join(''):'<div class="empty">Sin hábitos pendientes.</div>')
     +'</div></div>';
   el.innerHTML=html;
 }
@@ -6263,8 +6371,8 @@ function renderCoachSemanaPanel(){
   const relevantTasks=coachRelevantTasks();
   const doneCount=relevantTasks.filter(isTaskDoneToday).length;
   const pct=relevantTasks.length?Math.round(doneCount/relevantTasks.length*100):0;
-  const tasksHtml='<div class="board-card"><div class="board-hdr"><span class="board-title">Tareas (esta semana)</span></div><div class="board-body">'
-    +'<div>Completaste '+doneCount+'/'+relevantTasks.length+' tareas</div>'
+  const tasksHtml='<div class="board-card"><div class="board-hdr"><span class="board-title">Hábitos (esta semana)</span></div><div class="board-body">'
+    +'<div>Completaste '+doneCount+'/'+relevantTasks.length+' hábitos</div>'
     +'<div class="coach-progress-track"><div class="coach-progress-fill" style="width:'+pct+'%"></div></div>'
     +'</div></div>';
   el.innerHTML=strip+summary+tasksHtml;
@@ -6459,7 +6567,7 @@ async function toggleTaskSb(id){
         coachTaskLogsToday.add(id);
       }
       if(coachHubActiveTab==='programa')renderCoachSemanaPanel();else renderCoachHoyPanel();
-    }catch(e){toast('Error al actualizar tarea: '+e.message,'err');}
+    }catch(e){toast('Error al actualizar hábito: '+e.message,'err');}
     return;
   }
   const newDone=!t.is_done;
@@ -6469,7 +6577,7 @@ async function toggleTaskSb(id){
     const idx=coachTasks.findIndex(x=>x.id===id);
     if(idx>-1)coachTasks[idx]=data;
     if(coachHubActiveTab==='programa')renderCoachSemanaPanel();else renderCoachHoyPanel();
-  }catch(e){toast('Error al actualizar tarea: '+e.message,'err');}
+  }catch(e){toast('Error al actualizar hábito: '+e.message,'err');}
 }
 
 // ── MENSAJES (CHAT 1-A-1) ──────────────────────────────────────
@@ -9832,7 +9940,7 @@ async function loadBoardsSb(){
 // ── COACHING ADMIN (beta oculta) ─────────────────────────────
 // El tab "Coaching" solo lista socios ya inscritos (activar/desactivar se
 // hace desde su perfil individual en Socios). Tocar uno abre su cockpit
-// (Semana/Rutinas/Tareas/Notas/Progreso) en una pantalla dedicada aparte.
+// (Semana/Rutinas/Hábitos/Notas/Progreso) en una pantalla dedicada aparte.
 let _coachingListAll=null;
 function renderCoachingListRows(filter){
   const el=document.getElementById('coaching-list');
@@ -10070,12 +10178,12 @@ function renderCoachingDetail(){
     :'';
 
   const tasksHtml=coachAdminTasks.length?coachAdminTasks.map(t=>
-    '<div style="display:flex;align-items:center;gap:8px;padding:8px 0;border-bottom:1px solid var(--border)">'
-    +'<span style="flex:1;font-size:13px;'+(t.is_done?'color:var(--gray);text-decoration:line-through':'color:var(--white)')+'">'+esc(t.title)+(t.is_recurring?' · 🔁 Diaria':t.due_date?' · '+fmtDS(t.due_date):'')+'</span>'
+    '<div style="display:flex;align-items:center;gap:8px;padding:10px 0;border-bottom:1px solid var(--border)">'
+    +'<span style="flex:1;font-size:13px;'+(t.is_done?'color:var(--gray);text-decoration:line-through':'color:var(--white)')+'">'+esc(t.title)+'<small style="display:block;margin-top:3px;color:var(--gray);font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.08em">'+(t.is_recurring?'Diario':t.due_date?fmtDS(t.due_date):'Sin fecha')+'</small></span>'
     +'<button class="btn-sm" style="padding:4px 8px" data-tid="'+esc(t.id)+'" data-ttitle="'+esc(t.title)+'" data-tdue="'+esc(t.due_date||'')+'" data-trecurring="'+(t.is_recurring?'1':'')+'" onclick="startEditCoachingTaskSb(this)">Editar</button>'
     +'<button class="btn-sm bred" style="padding:4px 8px" onclick="deleteCoachingTaskSb(&quot;'+t.id+'&quot;)">Eliminar</button>'
     +'</div>'
-  ).join(''):'<div class="empty">Sin tareas.</div>';
+  ).join(''):'<div class="empty">Sin hábitos.</div>';
 
   const assignedBoardsList=boards.length?boards.map(b=>
     '<div style="display:flex;align-items:center;gap:10px;padding:9px 0;border-bottom:1px solid var(--border)">'
@@ -10086,7 +10194,7 @@ function renderCoachingDetail(){
     +'</div>'
   ).join(''):'<div class="empty">No hay pizarrones creados todavía.</div>';
 
-  const tabDef=[['semana','Semana'],['rutinas','Rutinas'],['tareas','Tareas'],['notas','Notas'],['progreso','Progreso']];
+  const tabDef=[['semana','Semana'],['rutinas','Rutinas'],['tareas','Hábitos'],['notas','Notas'],['progreso','Progreso']];
   const navHtml='<div class="coach-hub-nav" style="margin-bottom:14px;border-radius:8px;overflow:hidden;border:1px solid var(--border)">'
     +tabDef.map(([k,label])=>'<button class="coach-hub-tab coach-detail-tab'+(coachDetailActiveTab===k?' active':'')+'" data-tab="'+k+'" onclick="coachDetailTab(&quot;'+k+'&quot;)">'+label+'</button>').join('')
     +'</div>';
@@ -10125,20 +10233,24 @@ function renderCoachingDetail(){
 
     +'<div class="coach-detail-panel'+(coachDetailActiveTab==='tareas'?' active':'')+'" data-panel="tareas">'
     +'<div style="background:var(--card);border:1px solid var(--border);border-radius:6px;padding:1rem">'
-    +'<p class="slbl" style="margin-bottom:8px" id="coach-task-form-label">'+(editingCoachTaskId?'Editar tarea':'Nueva tarea')+'</p>'
-    +'<div class="field"><label>Titulo</label><input type="text" id="coach-task-title-in" placeholder="Ej: Registro de peso"></div>'
-    +(editingCoachTaskId?'':'<div style="display:flex;gap:6px;flex-wrap:wrap;margin:-2px 0 12px">'
+    +'<p class="slbl" style="margin-bottom:8px" id="coach-task-form-label">'+(editingCoachTaskId?'Editar hábito':'Nuevo hábito')+'</p>'
+    +'<div class="field"><label>Hábito</label><input type="text" id="coach-task-title-in" placeholder="Ej: Tomar agua"></div>'
+    +(editingCoachTaskId?'':'<div class="habit-presets">'
+      +'<button type="button" class="btn-sm" onclick="fillRecurringTaskPreset(&quot;💧 Tomar agua&quot;)">💧 Tomar agua</button>'
       +'<button type="button" class="btn-sm" onclick="fillRecurringTaskPreset(&quot;💧 Tomar 2L de agua&quot;)">💧 2L de agua</button>'
-      +'<button type="button" class="btn-sm" onclick="fillRecurringTaskPreset(&quot;🍽️ Ayuno intermitente&quot;)">🍽️ Ayuno intermitente</button>'
+      +'<button type="button" class="btn-sm" onclick="fillRecurringTaskPreset(&quot;🚭 No fumar&quot;)">🚭 No fumar</button>'
+      +'<button type="button" class="btn-sm" onclick="fillRecurringTaskPreset(&quot;☀️ Luz solar 20 min&quot;)">☀️ Luz solar</button>'
+      +'<button type="button" class="btn-sm" onclick="fillRecurringTaskPreset(&quot;🍽️ Ayuno intermitente&quot;)">🍽️ Ayuno</button>'
       +'<button type="button" class="btn-sm" onclick="fillRecurringTaskPreset(&quot;🧘 Meditar 10 min&quot;)">🧘 Meditar</button>'
       +'</div>')
-    +'<label style="display:flex;align-items:center;gap:8px;margin-bottom:12px;font-size:13px;color:var(--white)">'
-    +'<input type="checkbox" id="coach-task-recurring-in" style="width:18px;height:18px;accent-color:var(--blue)" onchange="toggleCoachTaskDueVisibility()">'
-    +'Tarea diaria (se repite cada día, el cliente la palomea día a día)'
-    +'</label>'
-    +'<div class="field" id="coach-task-due-field"><label>Fecha limite (opcional)</label><input type="date" id="coach-task-due-in"></div>'
+    +'<input type="checkbox" id="coach-task-recurring-in" '+(editingCoachTaskId?'':'checked')+' style="display:none" onchange="toggleCoachTaskDueVisibility()">'
+    +'<div class="habit-schedule-picker">'
+    +'<button type="button" class="habit-mode-btn" id="habit-mode-daily" onclick="setHabitScheduleMode(&quot;daily&quot;)"><strong>Diario</strong><span>Aparece todos los días para palomear.</span></button>'
+    +'<button type="button" class="habit-mode-btn" id="habit-mode-date" onclick="setHabitScheduleMode(&quot;date&quot;)"><strong>Día específico</strong><span>Ideal para una tarea puntual o revisión.</span></button>'
+    +'</div>'
+    +'<div class="field" id="coach-task-due-field"><label>Día específico (opcional)</label><input type="date" id="coach-task-due-in"></div>'
     +'<div style="display:flex;gap:8px">'
-    +'<button class="btn" style="flex:1" onclick="addCoachingTaskSb()">'+(editingCoachTaskId?'Guardar cambios':'Asignar tarea')+'</button>'
+    +'<button class="btn" style="flex:1" onclick="addCoachingTaskSb()">'+(editingCoachTaskId?'Guardar cambios':'Asignar hábito')+'</button>'
     +(editingCoachTaskId?'<button class="btn-sm" onclick="cancelEditCoachingTaskSb()">Cancelar</button>':'')
     +'</div>'
     +'<div style="margin-top:14px">'+tasksHtml+'</div>'
@@ -10159,6 +10271,7 @@ function renderCoachingDetail(){
     +'</div>'
     +'</div>';
 
+  toggleCoachTaskDueVisibility();
   renderCoachingAdminScores().catch(console.error);
   renderCoachClientNotesAdmin().catch(console.error);
   renderCoachSessionDetailSection().catch(console.error);
@@ -10240,10 +10353,20 @@ function fillRecurringTaskPreset(title){
   toggleCoachTaskDueVisibility();
   titleIn?.focus();
 }
+function setHabitScheduleMode(mode){
+  const recIn=document.getElementById('coach-task-recurring-in');
+  if(recIn)recIn.checked=mode==='daily';
+  toggleCoachTaskDueVisibility();
+}
 function toggleCoachTaskDueVisibility(){
   const recIn=document.getElementById('coach-task-recurring-in');
   const field=document.getElementById('coach-task-due-field');
-  if(field)field.style.display=(recIn&&recIn.checked)?'none':'';
+  const dailyBtn=document.getElementById('habit-mode-daily');
+  const dateBtn=document.getElementById('habit-mode-date');
+  const isDaily=!!(recIn&&recIn.checked);
+  if(field)field.style.display=isDaily?'none':'';
+  if(dailyBtn)dailyBtn.classList.toggle('active',isDaily);
+  if(dateBtn)dateBtn.classList.toggle('active',!isDaily);
 }
 async function addCoachingTaskSb(){
   if(!selectedCoachClientId)return;
@@ -10253,7 +10376,7 @@ async function addCoachingTaskSb(){
   const title=(titleIn.value||'').trim();
   const isRecurring=!!(recIn&&recIn.checked);
   const due=isRecurring?null:(dueIn.value||null);
-  if(!title){toast('Escribe un titulo','err');return;}
+  if(!title){toast('Escribe un hábito','err');return;}
   try{
     if(editingCoachTaskId){
       const{error}=await sb.from('coaching_tasks').update({title,due_date:due,is_recurring:isRecurring}).eq('id',editingCoachTaskId);
@@ -10261,17 +10384,17 @@ async function addCoachingTaskSb(){
       editingCoachTaskId=null;
       await loadCoachingWeekAdminSb();
       renderCoachingDetail();
-      toast('Tarea actualizada','ok');
+      toast('Hábito actualizado','ok');
       return;
     }
     const{error}=await sb.from('coaching_tasks').insert({user_id:selectedCoachClientId,title,due_date:due,is_recurring:isRecurring,created_by:sbUser.id});
     if(error)throw error;
-    titleIn.value='';dueIn.value='';if(recIn)recIn.checked=false;
+    titleIn.value='';dueIn.value='';if(recIn)recIn.checked=true;
     toggleCoachTaskDueVisibility();
-    sendPush('user:'+selectedCoachClientId,'✅ Nueva tarea asignada',title);
+    sendPush('user:'+selectedCoachClientId,'✅ Nuevo hábito asignado',title);
     await loadCoachingWeekAdminSb();
     renderCoachingDetail();
-    toast('Tarea asignada','ok');
+    toast('Hábito asignado','ok');
   }catch(e){toast('Error: '+e.message,'err');}
 }
 async function deleteCoachingTaskSb(id){
