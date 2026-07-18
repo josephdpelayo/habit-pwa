@@ -6,12 +6,12 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="HABIT">
 <meta name="application-name" content="HABIT">
-<link rel="manifest" href="/manifest.json?v=20260718-31">
-<link rel="apple-touch-icon" sizes="120x120" href="/icons/icon-120.png?v=20260718-31">
-<link rel="apple-touch-icon" sizes="152x152" href="/icons/icon-152.png?v=20260718-31">
-<link rel="apple-touch-icon" sizes="167x167" href="/icons/icon-167.png?v=20260718-31">
-<link rel="apple-touch-icon" sizes="180x180" href="/icons/icon-180.png?v=20260718-31">
-<link rel="icon" type="image/png" sizes="32x32" href="/icons/icon-32.png?v=20260718-31">
+<link rel="manifest" href="/manifest.json?v=20260718-33">
+<link rel="apple-touch-icon" sizes="120x120" href="/icons/icon-120.png?v=20260718-33">
+<link rel="apple-touch-icon" sizes="152x152" href="/icons/icon-152.png?v=20260718-33">
+<link rel="apple-touch-icon" sizes="167x167" href="/icons/icon-167.png?v=20260718-33">
+<link rel="apple-touch-icon" sizes="180x180" href="/icons/icon-180.png?v=20260718-33">
+<link rel="icon" type="image/png" sizes="32x32" href="/icons/icon-32.png?v=20260718-33">
 <title>HABIT</title>
 <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700;800;900&family=Share+Tech+Mono&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
@@ -512,12 +512,15 @@ input,select,button,textarea{font-family:'Montserrat',sans-serif}
 .habit-mode-btn strong{display:block;color:inherit;font-size:13px;margin-bottom:3px}
 .habit-mode-btn span{font-size:10.5px;line-height:1.3;color:var(--gray)}
 .habit-mode-btn.active{border-color:rgba(59,130,246,.55);background:rgba(37,99,235,.13);color:#bfdbfe}
-.fasting-card{position:relative;overflow:hidden;background:linear-gradient(135deg,rgba(255,255,255,.055),rgba(16,185,129,.055));border:1px solid rgba(255,255,255,.09);border-radius:18px;padding:14px;margin-bottom:12px;box-shadow:0 18px 40px rgba(0,0,0,.22)}
-.fasting-card:after{content:"";position:absolute;right:-28px;bottom:-44px;width:150px;height:150px;border-radius:50%;border:24px solid rgba(32,212,146,.055);pointer-events:none}
-.fasting-head{position:relative;z-index:1;display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-bottom:12px}
+.fasting-card{position:relative;overflow:hidden;background:linear-gradient(135deg,rgba(255,255,255,.045),rgba(16,185,129,.05));border:1px solid rgba(255,255,255,.09);border-radius:18px;padding:12px;margin-bottom:12px;box-shadow:0 14px 34px rgba(0,0,0,.2)}
+.fasting-card:after{content:"";position:absolute;right:-40px;bottom:-62px;width:138px;height:138px;border-radius:50%;border:22px solid rgba(32,212,146,.04);pointer-events:none}
+.fasting-card.collapsed{padding:12px 13px}
+.fasting-head{position:relative;z-index:1;display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-bottom:8px}
 .fasting-k{font-size:10px;font-weight:900;text-transform:uppercase;letter-spacing:.12em;color:#8aa1c2}
 .fasting-status{font-size:12px;color:var(--gray);margin-top:3px;line-height:1.35}
-.fasting-time{position:relative;z-index:1;font-size:34px;font-weight:900;color:var(--white);line-height:1;margin:5px 0 6px}
+.fasting-toggle{border:1px solid rgba(255,255,255,.1);background:rgba(255,255,255,.055);border-radius:999px;color:var(--white);font-size:11px;font-weight:900;padding:8px 11px;cursor:pointer;white-space:nowrap}
+.fasting-summary{position:relative;z-index:1;display:flex;align-items:flex-end;justify-content:space-between;gap:12px}
+.fasting-time{position:relative;z-index:1;font-size:26px;font-weight:900;color:var(--white);line-height:1;margin:3px 0 3px}
 .fasting-note{position:relative;z-index:1;font-size:12px;color:var(--gray);line-height:1.35;margin-bottom:12px}
 .fasting-grid{position:relative;z-index:1;display:grid;grid-template-columns:1fr 1fr;gap:8px}
 .fasting-mini{background:rgba(0,0,0,.22);border:1px solid rgba(255,255,255,.08);border-radius:14px;padding:10px}
@@ -1931,7 +1934,7 @@ html,body{background:radial-gradient(circle at 50% -18%,rgba(80,112,164,.16),tra
 // ── CONFIG & SUPABASE ───────────────────────────────────────
 const SUPABASE_URL='https://pmpjteuqjusbiduevbwq.supabase.co';
 const SUPABASE_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBtcGp0ZXVxanVzYmlkdWV2YndxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc2OTI1NjUsImV4cCI6MjA5MzI2ODU2NX0.XbMzZoo2yqtrD8znLnyo_1zDfrdJAvAPj1lqGOyXnLw';
-const APP_VERSION='20260718-31';
+const APP_VERSION='20260718-33';
 const MUSCLE_GROUPS=['Pecho','Espalda','Piernas','Hombros','Brazos','Core','Cardio','Full Body'];
 const DAILY_QUOTES=[
   {text:'Haz hoy lo que tu version de manana agradeceria.',action:'Elige una accion pequeña y cumplible antes de buscar motivacion.'},
@@ -2395,15 +2398,23 @@ function getExerciseFocusVideoHtml(url){
     +'</div>';
 }
 function getExerciseVideos(ex){
-  const raw=Array.isArray(ex&&ex.videos)?ex.videos:[];
+  let raw=(ex&&ex.videos)||[];
+  if(typeof raw==='string'){
+    const str=raw.trim();
+    try{raw=JSON.parse(str);}catch(e){raw=str?[str]:[];}
+  }
+  if(!Array.isArray(raw))raw=[];
   const list=raw.map(v=>({
     url:String((v&&v.url)||v||'').trim(),
     title:String((v&&v.title)||(v&&v.name)||'').trim()
   })).filter(v=>v.url);
-  const legacy=String((ex&&(ex.video||ex.videoUrl))||'').trim();
-  if(legacy&&!list.some(v=>v.url===legacy)){
-    list.unshift({url:legacy,title:String((ex&&(ex.videoTitle||ex.videoName))||'').trim()});
-  }
+  const legacyFields=['video','videoUrl','video_url','videoLink','video_link','driveUrl','drive_url','youtube','url'];
+  legacyFields.forEach(field=>{
+    const legacy=String((ex&&ex[field])||'').trim();
+    if(legacy&&!list.some(v=>v.url===legacy)){
+      list.unshift({url:legacy,title:String((ex&&(ex.videoTitle||ex.videoName||ex.video_title))||'').trim()});
+    }
+  });
   return list.slice(0,2);
 }
 
@@ -5305,7 +5316,7 @@ function renderExerciseFocusVideo(){
   if(!d.videos||!d.videos.length){el.innerHTML='';return;}
   el.innerHTML=_exFocusVideoOpen
     ? '<div class="exercise-focus-stage expanded">'+getExerciseFocusVideoHtml(d.videos[0].url)+'</div>'
-    : '<div class="exercise-focus-stage"><button class="ex-focus-video-btn" onclick="toggleExFocusVideo()"><span class="play-icon"><span class="play-tri"></span></span> Ver video</button></div>';
+    : '<div class="exercise-focus-stage"><button class="ex-focus-video-btn" onclick="toggleExFocusVideo()"><span class="play-icon"><span class="play-tri"></span></span> Ver video de ejemplo</button></div>';
 }
 function renderExerciseFocusTools(){
   const d=_exFocusData;
@@ -5947,19 +5958,25 @@ function renderFastingCardHtml(){
   const closed=!!(last&&first);
   const elapsed=last?fastingElapsedLabel(last,first):'--h --m';
   const status=active?'Ayuno en curso':closed?'Ayuno registrado':'Empieza con tu última comida';
+  const shortNote=active
+    ?'Sigue contando aunque cambie el día.'
+    :closed
+      ?'Cerrado en '+elapsed+'.'
+      :'Registra tu cena para iniciar.';
   const note=active
-    ?'Desde '+fmtDateTimeMaz(last)+'. Cuando comas, registra tu primera comida.'
+    ?'Desde '+fmtDateTimeMaz(last)+'. Si amanece y no has comido, mañana seguirá contando desde esa última comida.'
     :closed
       ?'Última comida '+fmtDateTimeMaz(last)+' · Primera comida '+fmtDateTimeMaz(first)+'.'
       :'Guarda la hora de tu última comida del día para ver el conteo.';
-  return '<div class="fasting-card">'
-    +'<div class="fasting-head"><div><div class="fasting-k">Ayuno</div><div class="fasting-status">'+esc(status)+'</div></div><div class="badge '+(active?'bg-green':'')+'">'+(active?'Activo':closed?'Cerrado':'Info')+'</div></div>'
-    +'<div class="fasting-time" id="fasting-elapsed">'+esc(elapsed)+'</div>'
-    +'<div class="fasting-note">'+esc(note)+'</div>'
-    +'<div class="fasting-grid">'
-    +'<div class="fasting-mini"><label>Última comida</label><input type="time" id="fasting-last-time" value="'+esc(timeInputValueMaz(last))+'"><button type="button" onclick="setFastingLastMealFromInput()">Guardar inicio</button></div>'
-    +'<div class="fasting-mini"><label>Primera comida</label><input type="time" id="fasting-first-time" value="'+esc(timeInputValueMaz(first))+'"><button type="button" class="green" onclick="setFastingFirstMealFromInput()">Romper ayuno</button></div>'
-    +'</div></div>';
+  return '<div class="fasting-card '+(fastingExpanded?'':'collapsed')+'">'
+    +'<div class="fasting-head"><div><div class="fasting-k">Ayuno</div><div class="fasting-status">'+esc(status)+'</div></div><button type="button" class="fasting-toggle" onclick="toggleFastingCard()">'+(fastingExpanded?'Minimizar':'Info')+'</button></div>'
+    +'<div class="fasting-summary"><div><div class="fasting-time" id="fasting-elapsed">'+esc(elapsed)+'</div><div class="fasting-status">'+esc(shortNote)+'</div></div><div class="badge '+(active?'bg-green':'')+'">'+(active?'Activo':closed?'Cerrado':'Info')+'</div></div>'
+    +(fastingExpanded?'<div class="fasting-note">'+esc(note)+'</div>'
+      +'<div class="fasting-grid">'
+      +'<div class="fasting-mini"><label>Última comida</label><input type="time" id="fasting-last-time" value="'+esc(timeInputValueMaz(last))+'"><button type="button" onclick="setFastingLastMealFromInput()">Guardar inicio</button></div>'
+      +'<div class="fasting-mini"><label>Primera comida</label><input type="time" id="fasting-first-time" value="'+esc(timeInputValueMaz(first))+'"><button type="button" class="green" onclick="setFastingFirstMealFromInput()">Romper ayuno</button></div>'
+      +'</div>':'')
+    +'</div>';
 }
 function updateFastingElapsedLive(){
   const el=document.getElementById('fasting-elapsed');
@@ -5968,12 +5985,18 @@ function updateFastingElapsedLive(){
   el.textContent=fastingElapsedLabel(log.lastMealAt,log.firstMealAt);
 }
 let fastingTickInt=null;
+let fastingExpanded=false;
 function ensureFastingTicker(){
   if(fastingTickInt)return;
   fastingTickInt=setInterval(updateFastingElapsedLive,60000);
 }
+function toggleFastingCard(){
+  fastingExpanded=!fastingExpanded;
+  renderCoachHoyPanel();
+}
 function setFastingLastMealFromInput(){
   const input=document.getElementById('fasting-last-time');
+  if(!input){fastingExpanded=true;renderCoachHoyPanel();return;}
   const value=input&&input.value;
   if(!value){toast('Selecciona la hora de tu última comida','err');return;}
   saveFastingLog({lastMealAt:fastingIsoFromTime(value,mazToday()),firstMealAt:null,lastMealDs:mazToday()});
@@ -5984,6 +6007,7 @@ function setFastingFirstMealFromInput(){
   const log=loadFastingLog();
   if(!log.lastMealAt){toast('Primero registra tu última comida','err');return;}
   const input=document.getElementById('fasting-first-time');
+  if(!input){fastingExpanded=true;renderCoachHoyPanel();return;}
   const value=input&&input.value;
   if(!value){toast('Selecciona la hora de tu primera comida','err');return;}
   let firstIso=fastingIsoFromTime(value,mazToday());
@@ -6471,17 +6495,28 @@ async function finishCoachingSessionSb(){
 async function cancelCoachingSessionSb(){
   if(!activeCoachingSession)return;
   if(!confirm('¿Cancelar este entreno? Se perderá el progreso de esta sesión.'))return;
+  const sessionId=activeCoachingSession.id;
+  const wasSelfStarted=!!(sbUser&&activeCoachingSession.created_by===sbUser.id);
   try{
-    const{data,error}=await sb.from('coaching_schedule').update({status:'scheduled',started_at:null,duration_sec:null}).eq('id',activeCoachingSession.id).select().single();
-    if(error)throw error;
-    await sb.from('coaching_session_sets').delete().eq('schedule_id',activeCoachingSession.id);
-    const idx=coachSchedule.findIndex(r=>r.id===data.id);
-    if(idx>-1)coachSchedule[idx]=data;
+    await sb.from('coaching_session_sets').delete().eq('schedule_id',sessionId);
+    if(wasSelfStarted){
+      const{data,error}=await sb.from('coaching_schedule').delete().eq('id',sessionId).eq('user_id',sbUser.id).select('id');
+      if(error)throw error;
+      if(!data||!data.length)throw new Error('No se pudo limpiar el entreno cancelado.');
+      coachSchedule=coachSchedule.filter(r=>r.id!==sessionId);
+    }else{
+      const{data,error}=await sb.from('coaching_schedule').update({status:'scheduled',started_at:null,duration_sec:null}).eq('id',sessionId).select().single();
+      if(error)throw error;
+      const idx=coachSchedule.findIndex(r=>r.id===data.id);
+      if(idx>-1)coachSchedule[idx]=data;
+    }
     activeCoachingSession=null;
     coachSessionSets={};
     hideActiveSessionBar();
     stopRestTimer();
     closeExerciseFocus();
+    coachDataLoadedAt=0;
+    await loadCoachWeekDataSb(true);
     renderCoachHoyPanel();
     toast('Entreno cancelado','ok');
   }catch(e){toast('Error al cancelar: '+e.message,'err');}
