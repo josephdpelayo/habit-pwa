@@ -6,12 +6,12 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="HABIT">
 <meta name="application-name" content="HABIT">
-<link rel="manifest" href="/manifest.json?v=20260718-10">
-<link rel="apple-touch-icon" sizes="120x120" href="/icons/icon-120.png?v=20260718-10">
-<link rel="apple-touch-icon" sizes="152x152" href="/icons/icon-152.png?v=20260718-10">
-<link rel="apple-touch-icon" sizes="167x167" href="/icons/icon-167.png?v=20260718-10">
-<link rel="apple-touch-icon" sizes="180x180" href="/icons/icon-180.png?v=20260718-10">
-<link rel="icon" type="image/png" sizes="32x32" href="/icons/icon-32.png?v=20260718-10">
+<link rel="manifest" href="/manifest.json?v=20260718-11">
+<link rel="apple-touch-icon" sizes="120x120" href="/icons/icon-120.png?v=20260718-11">
+<link rel="apple-touch-icon" sizes="152x152" href="/icons/icon-152.png?v=20260718-11">
+<link rel="apple-touch-icon" sizes="167x167" href="/icons/icon-167.png?v=20260718-11">
+<link rel="apple-touch-icon" sizes="180x180" href="/icons/icon-180.png?v=20260718-11">
+<link rel="icon" type="image/png" sizes="32x32" href="/icons/icon-32.png?v=20260718-11">
 <title>HABIT</title>
 <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700;800;900&family=Share+Tech+Mono&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
@@ -856,11 +856,34 @@ html,body{background:radial-gradient(circle at 50% -18%,rgba(80,112,164,.16),tra
 .checkout-block,.shop-cart,.shop-form,.address-box,.delivery-card{border-radius:14px;border-color:var(--hairline);background:rgba(255,255,255,.04)}
 
 /* Admin */
+#s-admin .hdr{min-height:72px;background:linear-gradient(180deg,rgba(11,11,12,.98),rgba(8,8,8,.92));box-shadow:0 10px 30px rgba(0,0,0,.2)}
 #s-admin .scroll-area{padding:14px;background:linear-gradient(180deg,#080808,#050505)}
-.adm-nav{gap:6px;padding:8px;overflow-x:auto;flex-wrap:nowrap;background:rgba(11,11,12,.96);border-bottom-color:var(--hairline)}
-.adm-tab,.fin-subtab{border-radius:999px;border:none;padding:10px 13px;text-transform:none;letter-spacing:0;background:transparent;color:var(--gray)}
-.adm-tab.active,.fin-subtab.active{border:none;background:var(--surface-2);color:var(--white)}
+.adm-nav{gap:6px;padding:8px;overflow-x:auto;flex-wrap:nowrap;background:rgba(11,11,12,.96);border-bottom-color:var(--hairline);scroll-snap-type:x proximity}
+.adm-tab,.fin-subtab{border-radius:999px;border:none;padding:10px 13px;text-transform:none;letter-spacing:0;background:transparent;color:var(--gray);scroll-snap-align:start;min-height:38px}
+.adm-tab.active,.fin-subtab.active{border:none;background:linear-gradient(180deg,rgba(255,255,255,.12),rgba(255,255,255,.07));color:var(--white);box-shadow:inset 0 0 0 1px rgba(255,255,255,.08)}
 .fin-subtab{flex:1;text-align:center}
+#s-admin .adm-section.active{display:block;animation:adminFade .18s ease-out}
+@keyframes adminFade{from{opacity:.65;transform:translateY(4px)}to{opacity:1;transform:translateY(0)}}
+.admin-page-head{display:flex;align-items:flex-end;justify-content:space-between;gap:12px;margin:4px 0 14px}
+.admin-page-title{font-size:25px;font-weight:900;letter-spacing:-.01em;line-height:1.08;color:var(--white)}
+.admin-page-sub{font-size:12px;color:var(--gray);line-height:1.4;margin-top:5px}
+.admin-page-kicker{font-size:10px;font-weight:850;color:#778294;letter-spacing:.08em;text-transform:uppercase;margin-bottom:5px}
+.admin-status-pill{display:inline-flex;align-items:center;gap:7px;flex-shrink:0;border:1px solid rgba(32,212,146,.22);background:rgba(32,212,146,.1);color:var(--green);border-radius:999px;padding:7px 10px;font-size:11px;font-weight:850}
+.admin-status-pill:before{content:'';width:6px;height:6px;border-radius:50%;background:currentColor;box-shadow:0 0 14px currentColor}
+.admin-card{border:1px solid var(--hairline);border-radius:18px;background:linear-gradient(180deg,rgba(255,255,255,.058),rgba(255,255,255,.031));box-shadow:var(--shadow-card);padding:14px;margin-bottom:14px;overflow:hidden}
+.admin-card.flush{padding:0}
+.admin-card-title{font-size:13px;font-weight:850;color:var(--white);line-height:1.25;margin-bottom:10px}
+.admin-chart-card{border:1px solid var(--hairline);border-radius:18px;background:linear-gradient(180deg,rgba(255,255,255,.052),rgba(255,255,255,.028));box-shadow:var(--shadow-card);padding:14px;margin-bottom:14px;position:relative;width:100%;max-width:100%;height:210px;box-sizing:border-box}
+.admin-chart-card.compact{height:auto;min-height:178px;display:flex;align-items:center;gap:14px}
+.admin-filter-strip{display:flex;gap:7px;overflow-x:auto;padding:1px 0 10px;margin-bottom:4px;-webkit-overflow-scrolling:touch}
+.admin-filter-strip .filter-chip{flex:0 0 auto}
+.admin-toolbar{display:grid;grid-template-columns:1fr;gap:10px;margin-bottom:12px}
+.admin-select{background:rgba(255,255,255,.052);border:1px solid var(--hairline);color:var(--white);border-radius:12px;padding:12px 14px;font-size:13px;cursor:pointer;width:100%;color-scheme:dark}
+.admin-soft-action{width:100%;min-height:44px;display:flex;align-items:center;justify-content:center;gap:8px}
+.admin-copy-note{font-size:12px;color:var(--gray);line-height:1.45;margin:0 0 14px}
+#s-admin .adm-search,#s-admin .adm-date{margin-bottom:0}
+#s-admin .field{margin-bottom:12px}
+#s-admin .new-board-form,#s-admin .admin-slot,#s-admin .expiry-card{border-radius:18px}
 .metrics{gap:10px}
 .met{border-radius:var(--radius-md);border-color:var(--hairline);background:linear-gradient(180deg,rgba(255,255,255,.06),rgba(255,255,255,.03));box-shadow:var(--shadow-card);padding:14px}
 .met-l{letter-spacing:.06em;color:var(--gray)}
@@ -873,6 +896,9 @@ html,body{background:radial-gradient(circle at 50% -18%,rgba(80,112,164,.16),tra
 .assign-box,.assign-list{border-radius:14px;border-color:var(--hairline);background:rgba(255,255,255,.035)}
 .mensajes-inbox-row{border-bottom-color:var(--hairline);border-radius:12px;padding:10px}
 .mensajes-inbox-row:active{background:var(--surface)}
+@media (min-width:390px){
+  .admin-toolbar.two{grid-template-columns:1fr auto;align-items:center}
+}
 .new-board-form>h3{letter-spacing:0;text-transform:none}
 
 /* Modals */
@@ -1269,35 +1295,39 @@ html,body{background:radial-gradient(circle at 50% -18%,rgba(80,112,164,.16),tra
     <button class="logout-btn" onclick="doLogout()">Salir</button>
   </div>
   <div class="adm-nav">
-    <button class="adm-tab active" onclick="admTab('dash')">Dashboard</button>
-    <button class="adm-tab" onclick="admTab('slots')">Slots</button>
+    <button class="adm-tab active" onclick="admTab('dash')">Inicio</button>
+    <button class="adm-tab" onclick="admTab('slots')">Agenda</button>
     <button class="adm-tab" onclick="admTab('users')">Socios</button>
-    <button class="adm-tab" onclick="admTab('boards')">Pizarrones</button>
+    <button class="adm-tab" onclick="admTab('boards')">Rutinas</button>
     <button class="adm-tab" onclick="admTab('coaching')">Coaching</button>
     <button class="adm-tab" onclick="admTab('mensajes')">Mensajes<span id="adm-mensajes-badge" class="adm-tab-badge"></span></button>
     <button class="adm-tab" onclick="admTab('payments')">Finanzas</button>
     <button class="adm-tab" onclick="admTab('shop')">Tienda</button>
-    <button class="adm-tab" onclick="admTab('comunidad')">Comunidad</button>
+    <button class="adm-tab" onclick="admTab('comunidad')">Feed</button>
     <button class="adm-tab" onclick="admTab('notifs')">Alertas</button>
     <button class="adm-tab" onclick="admTab('reports')">Reportes</button>
-    <button class="adm-tab" onclick="admTab('gaia')">GAIA</button>
+    <button class="adm-tab" onclick="admTab('gaia')">Alianza</button>
   </div>
   <div class="scroll-area" style="padding-top:.75rem">
 
     <!-- DASHBOARD -->
     <div id="a-dash" class="adm-section active">
+      <div class="admin-page-head">
+        <div><div class="admin-page-kicker">Admin</div><h2 class="admin-page-title">Inicio</h2><div class="admin-page-sub">Vista general del negocio</div></div>
+        <div class="admin-status-pill">En vivo</div>
+      </div>
       <div class="metrics" id="dash-kpis"></div>
-      <p style="font-size:11px;color:var(--gray);margin:6px 0 18px;line-height:1.5">"Ingreso real" es dinero que efectivamente recibiste: Stripe (ya sin su comisión) + GAIA + efectivo/transferencia. No incluye cortesías ni ajustes manuales, que no son dinero real. Detalle completo en Pagos.</p>
+      <p class="admin-copy-note">Ingreso real: Stripe neto + GAIA + efectivo/transferencia.</p>
       <p class="slbl" style="margin-bottom:10px">Ingreso real, por mes</p>
-      <div style="background:var(--card);border:1px solid var(--border);border-radius:6px;padding:1rem;margin-bottom:1rem;position:relative;width:100%;max-width:100%;height:200px;box-sizing:border-box">
+      <div class="admin-chart-card">
         <canvas id="chart-revenue"></canvas>
       </div>
       <p class="slbl" style="margin-bottom:10px">Reservas por día (últimos 7 días)</p>
-      <div style="background:var(--card);border:1px solid var(--border);border-radius:6px;padding:1rem;margin-bottom:1rem;position:relative;width:100%;max-width:100%;height:200px;box-sizing:border-box">
+      <div class="admin-chart-card">
         <canvas id="chart-bookings"></canvas>
       </div>
       <p class="slbl" style="margin-bottom:10px">Distribución de membresías</p>
-      <div style="background:var(--card);border:1px solid var(--border);border-radius:6px;padding:1rem;margin-bottom:1rem;display:flex;align-items:center;gap:1rem">
+      <div class="admin-chart-card compact">
         <div style="position:relative;width:140px;height:140px;flex-shrink:0">
           <canvas id="chart-plans"></canvas>
         </div>
@@ -1308,20 +1338,26 @@ html,body{background:radial-gradient(circle at 50% -18%,rgba(80,112,164,.16),tra
 
     <!-- SLOTS -->
     <div id="a-slots" class="adm-section">
-      <input type="date" class="adm-date" id="adm-date" onchange="renderAdmSlots()">
+      <div class="admin-page-head">
+        <div><div class="admin-page-kicker">Operación</div><h2 class="admin-page-title">Agenda</h2><div class="admin-page-sub">Reservas, cupos y bloqueos</div></div>
+      </div>
+      <div class="admin-card"><input type="date" class="adm-date" id="adm-date" onchange="renderAdmSlots()"></div>
       <div id="adm-slot-content"></div>
     </div>
 
     <!-- SOCIOS -->
     <div id="a-users" class="adm-section">
+      <div class="admin-page-head">
+        <div><div class="admin-page-kicker">CRM</div><h2 class="admin-page-title">Socios</h2><div class="admin-page-sub">Perfiles, planes y seguimiento</div></div>
+      </div>
       <div id="user-profile-view" style="display:none"></div>
       <div id="courtesy-view" style="display:none"></div>
       <div id="user-list-area">
       <!-- Create user form (collapsed) -->
-      <button class="btn" style="width:100%;margin-bottom:1rem;display:flex;align-items:center;justify-content:center;gap:8px" onclick="toggleNewSocioForm()">
-        <span style="font-size:18px;line-height:1">+</span> Crear nuevo socio
+      <button class="btn admin-soft-action" style="margin-bottom:12px" onclick="toggleNewSocioForm()">
+        <span style="font-size:18px;line-height:1">+</span> Crear socio
       </button>
-      <div id="new-socio-form" style="display:none;background:var(--card);border:1px solid var(--border);border-radius:6px;padding:1rem;margin-bottom:1rem">
+      <div id="new-socio-form" class="admin-card" style="display:none">
         <div class="field"><label>Nombre</label><input type="text" id="nu-name" placeholder="Nombre completo"></div>
         <div class="field"><label>Correo</label><input type="email" id="nu-email" placeholder="correo@ejemplo.com"></div>
         <div class="field"><label>Teléfono</label><input type="tel" id="nu-phone" placeholder="+52 55 0000 0000"></div>
@@ -1329,19 +1365,21 @@ html,body{background:radial-gradient(circle at 50% -18%,rgba(80,112,164,.16),tra
         <button class="btn" onclick="adminCreateUserSb()">Crear socio</button>
       </div>
 
-      <button class="btn-sm" style="width:100%;margin-bottom:10px;padding:10px" onclick="adminOpenCourtesyView()">🎁 Ver cortesías activas</button>
+      <button class="btn-sm admin-soft-action" style="margin-bottom:10px" onclick="adminOpenCourtesyView()">Ver cortesías activas</button>
 
-      <input class="adm-search" id="user-search" placeholder="Buscar por nombre, correo o teléfono..." oninput="renderUsersSb()">
-      <div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:6px;">
+      <div class="admin-toolbar">
+        <input class="adm-search" id="user-search" placeholder="Buscar por nombre, correo o teléfono..." oninput="renderUsersSb()">
+      </div>
+      <div class="admin-filter-strip">
           <button class="filter-chip active" data-filter="todos" onclick="setUserFilter(this)">Todos</button>
-          <button class="filter-chip" data-filter="activo" onclick="setUserFilter(this)">✅ Activos</button>
-          <button class="filter-chip" data-filter="vencido" onclick="setUserFilter(this)">🔴 Vencidos</button>
-          <button class="filter-chip" data-filter="por-vencer" onclick="setUserFilter(this)">⚠️ Por vencer</button>
-          <button class="filter-chip" data-filter="sin-plan" onclick="setUserFilter(this)">⬜ Sin plan</button>
-          <button class="filter-chip" data-filter="coaching" onclick="setUserFilter(this)">🏋️ Coaching</button>
+          <button class="filter-chip" data-filter="activo" onclick="setUserFilter(this)">Activos</button>
+          <button class="filter-chip" data-filter="vencido" onclick="setUserFilter(this)">Vencidos</button>
+          <button class="filter-chip" data-filter="por-vencer" onclick="setUserFilter(this)">Por vencer</button>
+          <button class="filter-chip" data-filter="sin-plan" onclick="setUserFilter(this)">Sin plan</button>
+          <button class="filter-chip" data-filter="coaching" onclick="setUserFilter(this)">Coaching</button>
       </div>
       <div style="margin-bottom:8px">
-        <select id="user-sort" onchange="renderUsersSb()" style="background:var(--card2);border:1px solid var(--border);color:var(--white);border-radius:4px;padding:6px 10px;font-size:12px;cursor:pointer;width:100%">
+        <select id="user-sort" onchange="renderUsersSb()" class="admin-select">
           <option value="reciente">Más reciente</option>
           <option value="nombre">A–Z Nombre</option>
           <option value="nombre-z">Z–A Nombre</option>
@@ -1359,8 +1397,11 @@ html,body{background:radial-gradient(circle at 50% -18%,rgba(80,112,164,.16),tra
          hace desde el perfil individual en Socios). Tocar un socio abre su
          cockpit directo. -->
     <div id="a-coaching" class="adm-section">
-      <div style="background:var(--card);border:1px solid var(--border);border-radius:6px;padding:1rem">
-        <p class="slbl" style="margin-bottom:8px">Socios con Coaching activo</p>
+      <div class="admin-page-head">
+        <div><div class="admin-page-kicker">Entrenamiento</div><h2 class="admin-page-title">Coaching</h2><div class="admin-page-sub">Clientes activos y programación</div></div>
+      </div>
+      <div class="admin-card">
+        <div class="admin-card-title">Socios activos</div>
         <input class="adm-search" placeholder="Buscar socio..." oninput="renderCoachingListSb(this.value)">
         <div id="coaching-list"></div>
       </div>
@@ -1374,8 +1415,11 @@ html,body{background:radial-gradient(circle at 50% -18%,rgba(80,112,164,.16),tra
 
     <!-- PIZARRONES -->
     <div id="a-boards" class="adm-section">
-      <div style="background:var(--card);border:1px solid var(--border);border-radius:6px;padding:1rem;margin-bottom:1rem">
-        <p class="slbl" style="margin-bottom:8px">Nuevo pizarron</p>
+      <div class="admin-page-head">
+        <div><div class="admin-page-kicker">Biblioteca</div><h2 class="admin-page-title">Rutinas</h2><div class="admin-page-sub">Pizarrones y ejercicios</div></div>
+      </div>
+      <div class="admin-card">
+        <div class="admin-card-title">Nuevo pizarrón</div>
         <div class="field"><label>Nombre</label><input type="text" id="board-name-in" placeholder="Ej: Fuerza Lunes"></div>
         <div class="field"><label>Color</label><input type="color" id="board-color-in" value="#2563eb" style="width:100%;height:40px;background:var(--card2);border:1px solid var(--border);border-radius:4px;cursor:pointer"></div>
         <button class="btn" onclick="addBoardSb()">Crear pizarron</button>
@@ -1386,9 +1430,12 @@ html,body{background:radial-gradient(circle at 50% -18%,rgba(80,112,164,.16),tra
 
     <!-- MENSAJES (beta oculta) -->
     <div id="a-mensajes" class="adm-section">
+      <div class="admin-page-head">
+        <div><div class="admin-page-kicker">Comunicación</div><h2 class="admin-page-title">Mensajes</h2><div class="admin-page-sub">Conversaciones con socios</div></div>
+      </div>
       <div id="mensajes-list-area">
-        <div style="background:var(--card);border:1px solid var(--border);border-radius:6px;padding:1rem">
-          <p class="slbl" style="margin-bottom:8px">Conversaciones</p>
+        <div class="admin-card">
+          <div class="admin-card-title">Inbox</div>
           <input class="adm-search" placeholder="Buscar socio..." oninput="filterMensajesInbox(this)">
           <div id="mensajes-inbox-list"></div>
         </div>
@@ -1398,7 +1445,10 @@ html,body{background:radial-gradient(circle at 50% -18%,rgba(80,112,164,.16),tra
 
     <!-- FINANZAS -->
     <div id="a-payments" class="adm-section">
-      <div style="display:flex;gap:4px;margin-bottom:14px;border-bottom:1px solid var(--border)">
+      <div class="admin-page-head">
+        <div><div class="admin-page-kicker">Caja</div><h2 class="admin-page-title">Finanzas</h2><div class="admin-page-sub">Ingresos, gastos y cuentas</div></div>
+      </div>
+      <div class="admin-card flush" style="display:flex;gap:4px;margin-bottom:14px;padding:6px">
         <button class="fin-subtab active" onclick="finSubTab('resumen',this)">Resumen</button>
         <button class="fin-subtab" onclick="finSubTab('gastos',this)">Gastos</button>
         <button class="fin-subtab" onclick="finSubTab('cuentas',this)">Cuentas</button>
@@ -1409,15 +1459,28 @@ html,body{background:radial-gradient(circle at 50% -18%,rgba(80,112,164,.16),tra
     </div>
 
     <!-- TIENDA -->
-    <div id="a-shop" class="adm-section"><div id="admin-shop-list"></div></div>
+    <div id="a-shop" class="adm-section">
+      <div class="admin-page-head">
+        <div><div class="admin-page-kicker">Retail</div><h2 class="admin-page-title">Tienda</h2><div class="admin-page-sub">Pedidos e inventario</div></div>
+      </div>
+      <div id="admin-shop-list"></div>
+    </div>
 
     <!-- COMUNIDAD -->
-    <div id="a-comunidad" class="adm-section"><div id="adm-feed-content"></div></div>
+    <div id="a-comunidad" class="adm-section">
+      <div class="admin-page-head">
+        <div><div class="admin-page-kicker">Comunidad</div><h2 class="admin-page-title">Feed</h2><div class="admin-page-sub">Publicaciones y moderación</div></div>
+      </div>
+      <div id="adm-feed-content"></div>
+    </div>
 
     <!-- REPORTES -->
     <div id="a-reports" class="adm-section">
-      <p class="slbl" style="margin-bottom:10px">Generar reporte</p>
-      <div style="background:var(--card);border:1px solid var(--border);border-radius:6px;padding:1rem;margin-bottom:1rem">
+      <div class="admin-page-head">
+        <div><div class="admin-page-kicker">Análisis</div><h2 class="admin-page-title">Reportes</h2><div class="admin-page-sub">Exportables operativos</div></div>
+      </div>
+      <div class="admin-card">
+        <div class="admin-card-title">Generar reporte</div>
         <div class="field"><label>Tipo de reporte</label>
           <select id="rpt-type">
             <option value="reservas-dia">Reservas del día</option>
@@ -1436,13 +1499,19 @@ html,body{background:radial-gradient(circle at 50% -18%,rgba(80,112,164,.16),tra
 
     <!-- ALERTAS -->
     <div id="a-notifs" class="adm-section">
+      <div class="admin-page-head">
+        <div><div class="admin-page-kicker">Centro</div><h2 class="admin-page-title">Alertas</h2><div class="admin-page-sub">Notificaciones del sistema</div></div>
+      </div>
       <div id="push-banner" style="margin-bottom:12px"></div>
       <div id="adm-notif-content"></div>
     </div>
 
     <!-- GAIA ALLIANCE -->
     <div id="a-gaia" class="adm-section">
-      <div style="background:var(--card);border:1px solid var(--border);border-radius:6px;padding:1rem;margin-bottom:1rem">
+      <div class="admin-page-head">
+        <div><div class="admin-page-kicker">Alianza</div><h2 class="admin-page-title">GAIA</h2><div class="admin-page-sub">Paquetes y beneficios cruzados</div></div>
+      </div>
+      <div class="admin-card">
         <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px">
           <img src="icons/logo-original.png" style="height:28px;border-radius:4px" alt="">
           <span style="font-size:13px;color:var(--gray)">+</span>
@@ -1752,7 +1821,7 @@ html,body{background:radial-gradient(circle at 50% -18%,rgba(80,112,164,.16),tra
 // ── CONFIG & SUPABASE ───────────────────────────────────────
 const SUPABASE_URL='https://pmpjteuqjusbiduevbwq.supabase.co';
 const SUPABASE_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBtcGp0ZXVxanVzYmlkdWV2YndxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc2OTI1NjUsImV4cCI6MjA5MzI2ODU2NX0.XbMzZoo2yqtrD8znLnyo_1zDfrdJAvAPj1lqGOyXnLw';
-const APP_VERSION='20260718-10';
+const APP_VERSION='20260718-11';
 const MUSCLE_GROUPS=['Pecho','Espalda','Piernas','Hombros','Brazos','Core','Cardio','Full Body'];
 function muscleGroupSelectHtml(id,selected){
   return '<select id="'+id+'" style="width:100%;background:var(--card);border:1px solid var(--border);border-radius:4px;padding:8px;font-size:12px;color:var(--white);outline:none;margin-bottom:6px;box-sizing:border-box">'
