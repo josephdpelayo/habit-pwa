@@ -6,12 +6,12 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="HABIT">
 <meta name="application-name" content="HABIT">
-<link rel="manifest" href="/manifest.json?v=20260718-13">
-<link rel="apple-touch-icon" sizes="120x120" href="/icons/icon-120.png?v=20260718-13">
-<link rel="apple-touch-icon" sizes="152x152" href="/icons/icon-152.png?v=20260718-13">
-<link rel="apple-touch-icon" sizes="167x167" href="/icons/icon-167.png?v=20260718-13">
-<link rel="apple-touch-icon" sizes="180x180" href="/icons/icon-180.png?v=20260718-13">
-<link rel="icon" type="image/png" sizes="32x32" href="/icons/icon-32.png?v=20260718-13">
+<link rel="manifest" href="/manifest.json?v=20260718-14">
+<link rel="apple-touch-icon" sizes="120x120" href="/icons/icon-120.png?v=20260718-14">
+<link rel="apple-touch-icon" sizes="152x152" href="/icons/icon-152.png?v=20260718-14">
+<link rel="apple-touch-icon" sizes="167x167" href="/icons/icon-167.png?v=20260718-14">
+<link rel="apple-touch-icon" sizes="180x180" href="/icons/icon-180.png?v=20260718-14">
+<link rel="icon" type="image/png" sizes="32x32" href="/icons/icon-32.png?v=20260718-14">
 <title>HABIT</title>
 <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700;800;900&family=Share+Tech+Mono&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
@@ -869,8 +869,9 @@ html,body{background:radial-gradient(circle at 50% -18%,rgba(80,112,164,.16),tra
 .admin-top-actions{display:flex;align-items:center;gap:6px;flex-shrink:0;margin-left:auto}
 .admin-icon-action{position:relative;width:34px;height:34px;border-radius:12px;border:1px solid var(--hairline);background:rgba(255,255,255,.045);color:#8f96a3;display:flex;align-items:center;justify-content:center;cursor:pointer}
 .admin-icon-action.active{background:rgba(255,255,255,.12);color:var(--white);box-shadow:inset 0 0 0 1px rgba(255,255,255,.08)}
+.admin-icon-action.has-alert{border-color:rgba(32,212,146,.38);color:var(--white);background:rgba(32,212,146,.1);box-shadow:0 0 0 3px rgba(32,212,146,.08)}
 .admin-icon-action svg{width:18px;height:18px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
-.admin-icon-action .adm-tab-badge{position:absolute;top:-4px;right:-4px;margin-left:0}
+.admin-icon-action .adm-tab-badge{position:absolute;top:-6px;right:-6px;margin-left:0;min-width:18px;height:18px;font-size:10px;box-shadow:0 0 0 2px #080808}
 .fin-subtab{flex:1;text-align:center}
 #s-admin .adm-section.active{display:block;animation:adminFade .18s ease-out}
 @keyframes adminFade{from{opacity:.65;transform:translateY(4px)}to{opacity:1;transform:translateY(0)}}
@@ -1311,7 +1312,7 @@ html,body{background:radial-gradient(circle at 50% -18%,rgba(80,112,164,.16),tra
     <div class="admin-top-actions">
       <button class="admin-icon-action" data-admin-tab="mensajes" onclick="admTab('mensajes')" title="Mensajes" aria-label="Mensajes"><span id="adm-mensajes-badge" class="adm-tab-badge"></span><svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg></button>
       <button class="admin-icon-action" data-admin-tab="payments" onclick="admTab('payments')" title="Finanzas" aria-label="Finanzas"><svg viewBox="0 0 24 24"><rect x="2" y="5" width="20" height="14" rx="2"/><path d="M2 10h20M6 15h4M15 15h3"/></svg></button>
-      <button class="admin-icon-action" data-admin-tab="notifs" onclick="admTab('notifs')" title="Alertas" aria-label="Alertas"><svg viewBox="0 0 24 24"><path d="M18 8a6 6 0 10-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9"/><path d="M10 21h4"/></svg></button>
+      <button class="admin-icon-action" data-admin-tab="notifs" onclick="admTab('notifs')" title="Alertas" aria-label="Alertas"><span id="adm-alertas-badge" class="adm-tab-badge"></span><svg viewBox="0 0 24 24"><path d="M18 8a6 6 0 10-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9"/><path d="M10 21h4"/></svg></button>
       <button class="admin-icon-action" data-admin-tab="reports" onclick="admTab('reports')" title="Reportes" aria-label="Reportes"><svg viewBox="0 0 24 24"><path d="M4 19V5"/><path d="M4 19h16"/><path d="M8 16v-5M13 16V8M18 16v-8"/></svg></button>
     </div>
     <button class="logout-btn" onclick="doLogout()">Salir</button>
@@ -1839,7 +1840,7 @@ html,body{background:radial-gradient(circle at 50% -18%,rgba(80,112,164,.16),tra
 // ── CONFIG & SUPABASE ───────────────────────────────────────
 const SUPABASE_URL='https://pmpjteuqjusbiduevbwq.supabase.co';
 const SUPABASE_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBtcGp0ZXVxanVzYmlkdWV2YndxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc2OTI1NjUsImV4cCI6MjA5MzI2ODU2NX0.XbMzZoo2yqtrD8znLnyo_1zDfrdJAvAPj1lqGOyXnLw';
-const APP_VERSION='20260718-12';
+const APP_VERSION='20260718-14';
 const MUSCLE_GROUPS=['Pecho','Espalda','Piernas','Hombros','Brazos','Core','Cardio','Full Body'];
 function muscleGroupSelectHtml(id,selected){
   return '<select id="'+id+'" style="width:100%;background:var(--card);border:1px solid var(--border);border-radius:4px;padding:8px;font-size:12px;color:var(--white);outline:none;margin-bottom:6px;box-sizing:border-box">'
@@ -3172,6 +3173,7 @@ function showAdmin(){
   loadBoardsSb();
   startAdminChatRealtime();
   refreshAdminMensajesBadge();
+  refreshAdminAlertsBadge();
 }
 
 function stopReception(){
@@ -7872,6 +7874,7 @@ async function enableAdminPush(){
 }
 async function renderAdmNotifsSb(){
   renderPushBanner();
+  refreshAdminAlertsBadge();
   const el=document.getElementById('adm-notif-content');
   el.innerHTML='<div class="empty">Cargando...</div>';
   try{
@@ -7907,10 +7910,12 @@ async function markAdminNotifRead(el){
   el.removeAttribute('onclick');
   try{await sb.from('admin_notifs').update({is_read:true}).eq('id',id);}catch(e){}
   renderAdmNotifsSb();
+  refreshAdminAlertsBadge();
 }
 async function markAllAdminNotifsRead(){
   try{await sb.from('admin_notifs').update({is_read:true}).or('is_read.is.null,is_read.eq.false');}catch(e){}
   renderAdmNotifsSb();
+  refreshAdminAlertsBadge();
 }
 
 let _userFilter='todos';
@@ -10164,16 +10169,32 @@ function startAdminChatRealtime(){
   adminChatPollInt=setInterval(()=>{
     if(document.getElementById('a-mensajes')?.classList.contains('active'))renderMensajesAdminSb();
     refreshAdminMensajesBadge();
+    refreshAdminAlertsBadge();
   },300000);
+}
+function setAdminHeaderBadge(id,count){
+  const el=document.getElementById(id);
+  if(!el)return;
+  const n=Number(count)||0;
+  el.textContent=n?String(Math.min(n,99))+(n>99?'+':''):'';
+  el.classList.toggle('show',!!n);
+  el.closest('.admin-icon-action')?.classList.toggle('has-alert',!!n);
 }
 async function refreshAdminMensajesBadge(){
   if(!sbUser)return;
   try{
     const{count}=await sb.from('coaching_messages').select('id',{count:'exact',head:true})
       .eq('sender_role','user').is('read_at',null);
-    const el=document.getElementById('adm-mensajes-badge');
-    if(el){el.textContent=count?String(count):'';el.classList.toggle('show',!!count);}
+    setAdminHeaderBadge('adm-mensajes-badge',count);
   }catch(e){console.warn('refreshAdminMensajesBadge:',e);}
+}
+async function refreshAdminAlertsBadge(){
+  if(!sbUser)return;
+  try{
+    const{count}=await sb.from('admin_notifs').select('id',{count:'exact',head:true})
+      .or('is_read.is.null,is_read.eq.false');
+    setAdminHeaderBadge('adm-alertas-badge',count);
+  }catch(e){console.warn('refreshAdminAlertsBadge:',e);}
 }
 function stopAdminChatRealtime(){
   if(adminChatChannel){sb.removeChannel(adminChatChannel);adminChatChannel=null;}
