@@ -6,12 +6,12 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="HABIT">
 <meta name="application-name" content="HABIT">
-<link rel="manifest" href="/manifest.json?v=20260718-03">
-<link rel="apple-touch-icon" sizes="120x120" href="/icons/icon-120.png?v=20260718-03">
-<link rel="apple-touch-icon" sizes="152x152" href="/icons/icon-152.png?v=20260718-03">
-<link rel="apple-touch-icon" sizes="167x167" href="/icons/icon-167.png?v=20260718-03">
-<link rel="apple-touch-icon" sizes="180x180" href="/icons/icon-180.png?v=20260718-03">
-<link rel="icon" type="image/png" sizes="32x32" href="/icons/icon-32.png?v=20260718-03">
+<link rel="manifest" href="/manifest.json?v=20260718-04">
+<link rel="apple-touch-icon" sizes="120x120" href="/icons/icon-120.png?v=20260718-04">
+<link rel="apple-touch-icon" sizes="152x152" href="/icons/icon-152.png?v=20260718-04">
+<link rel="apple-touch-icon" sizes="167x167" href="/icons/icon-167.png?v=20260718-04">
+<link rel="apple-touch-icon" sizes="180x180" href="/icons/icon-180.png?v=20260718-04">
+<link rel="icon" type="image/png" sizes="32x32" href="/icons/icon-32.png?v=20260718-04">
 <title>HABIT</title>
 <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700;800;900&family=Share+Tech+Mono&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
@@ -343,12 +343,10 @@ input,select,button,textarea{font-family:'Montserrat',sans-serif}
 .video-modal-close{border:1px solid var(--border);background:var(--card);color:var(--white);border-radius:6px;padding:10px 12px;font-size:12px;font-weight:800}
 .video-modal-frame{width:min(92vw,430px);height:min(78vh,760px);aspect-ratio:9/16;background:#000;border:1px solid var(--border);overflow:hidden}
 .log-score-btn{display:flex;align-items:center;justify-content:center;gap:8px;padding:10px 12px;background:rgba(139,92,246,.1);border-top:1px solid rgba(139,92,246,.2);cursor:pointer;color:var(--purple);font-size:12px;font-weight:600;letter-spacing:.04em;text-transform:uppercase}
-.ex-menu-wrap{position:relative;flex-shrink:0}
-.ex-menu-btn{width:34px;height:34px;border-radius:4px;background:var(--card2);border:1px solid var(--border);color:var(--gray);font-size:18px;font-weight:900;line-height:1;cursor:pointer;display:flex;align-items:center;justify-content:center}
-.ex-menu-dropdown{display:none;position:absolute;top:40px;right:0;z-index:20;background:var(--card2);border:1px solid var(--border);border-radius:8px;min-width:180px;padding:4px;box-shadow:0 8px 24px rgba(0,0,0,.45)}
-.ex-menu-dropdown.open{display:block}
-.ex-menu-item{display:flex;align-items:center;gap:8px;width:100%;padding:10px;background:transparent;border:none;color:var(--white);font-size:12.5px;font-weight:600;text-align:left;border-radius:6px;cursor:pointer}
-.ex-menu-item:active{background:var(--border)}
+.ex-menu-btn{width:34px;height:34px;flex-shrink:0;border-radius:4px;background:var(--card2);border:1px solid var(--border);color:var(--gray);font-size:18px;font-weight:900;line-height:1;cursor:pointer;display:flex;align-items:center;justify-content:center}
+.ex-menu-item{display:flex;align-items:center;gap:8px;width:100%;padding:12px 10px;background:transparent;border:none;border-bottom:1px solid var(--border);color:var(--white);font-size:13.5px;font-weight:600;text-align:left;cursor:pointer}
+.ex-menu-item:last-child{border-bottom:none}
+.ex-menu-item:active{background:var(--card2)}
 .set-tracker{padding:12px;background:var(--card2);border-top:1px solid var(--border)}
 .set-tracker-hdr{display:grid;grid-template-columns:28px 1fr 1fr 40px;gap:6px;font-size:10px;font-weight:700;color:var(--gray);letter-spacing:.06em;text-transform:uppercase;padding:0 2px 6px;text-align:center}
 .set-tracker-hdr span:first-child{text-align:left}
@@ -1075,6 +1073,7 @@ body.reception-mode{background:#050505}
     <button class="adm-tab" onclick="admTab('slots')">Slots</button>
     <button class="adm-tab" onclick="admTab('users')">Socios</button>
     <button class="adm-tab" onclick="admTab('boards')">Pizarrones</button>
+    <button class="adm-tab" onclick="admTab('coaching')">Coaching</button>
     <button class="adm-tab" onclick="admTab('mensajes')">Mensajes<span id="adm-mensajes-badge" class="adm-tab-badge"></span></button>
     <button class="adm-tab" onclick="admTab('payments')">Finanzas</button>
     <button class="adm-tab" onclick="admTab('shop')">Tienda</button>
@@ -1156,8 +1155,19 @@ body.reception-mode{background:#050505}
       </div><!-- /user-list-area -->
     </div>
 
+    <!-- COACHING: solo lista de socios ya inscritos (activarlo/desactivarlo se
+         hace desde el perfil individual en Socios). Tocar un socio abre su
+         cockpit directo. -->
+    <div id="a-coaching" class="adm-section">
+      <div style="background:var(--card);border:1px solid var(--border);border-radius:6px;padding:1rem">
+        <p class="slbl" style="margin-bottom:8px">Socios con Coaching activo</p>
+        <input class="adm-search" placeholder="Buscar socio..." oninput="renderCoachingListSb(this.value)">
+        <div id="coaching-list"></div>
+      </div>
+    </div>
+
     <!-- COACHING de un socio — pantalla aparte, sin tab propio en el nav.
-         Solo se llega aquí desde el perfil individual (adminOpenCoachingCockpit). -->
+         Se llega desde el perfil individual o desde la lista de arriba. -->
     <div id="a-coaching-detail" class="adm-section">
       <div id="coaching-detail"></div>
     </div>
@@ -1372,6 +1382,17 @@ body.reception-mode{background:#050505}
   </div>
 </div>
 
+<!-- EXERCISE ACTIONS MODAL (menú "más opciones" por ejercicio) -->
+<div id="ex-actions-modal" class="terms-modal" style="display:none">
+  <div class="terms-box">
+    <div class="terms-hdr">
+      <h2 id="ex-actions-modal-name">Ejercicio</h2>
+      <button class="video-modal-close" onclick="closeExMenu()">Cerrar</button>
+    </div>
+    <div class="terms-body" id="ex-actions-modal-body" style="padding:6px"></div>
+  </div>
+</div>
+
 <!-- INSTALL GUIDE MODAL -->
 <div id="install-guide-modal" class="terms-modal" style="display:none">
   <div class="install-box">
@@ -1424,7 +1445,7 @@ body.reception-mode{background:#050505}
 // ── CONFIG & SUPABASE ───────────────────────────────────────
 const SUPABASE_URL='https://pmpjteuqjusbiduevbwq.supabase.co';
 const SUPABASE_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBtcGp0ZXVxanVzYmlkdWV2YndxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc2OTI1NjUsImV4cCI6MjA5MzI2ODU2NX0.XbMzZoo2yqtrD8znLnyo_1zDfrdJAvAPj1lqGOyXnLw';
-const APP_VERSION='20260718-03';
+const APP_VERSION='20260718-04';
 const MUSCLE_GROUPS=['Pecho','Espalda','Piernas','Hombros','Brazos','Core','Cardio','Full Body'];
 function muscleGroupSelectHtml(id,selected){
   return '<select id="'+id+'" style="width:100%;background:var(--card);border:1px solid var(--border);border-radius:4px;padding:8px;font-size:12px;color:var(--white);outline:none;margin-bottom:6px;box-sizing:border-box">'
@@ -3030,13 +3051,14 @@ function admTab(t){
   if(t!=='users'){expandedUsers=new Set();}
   if(t!=='boards'){expandedBoards=new Set();editingBoards=new Set();addingExBoards=new Set();assigningBoards=new Set();}
   document.querySelectorAll('.adm-tab').forEach((b,i)=>b.classList.toggle('active',
-    ['dash','slots','users','boards','mensajes','payments','shop','comunidad','notifs','reports','gaia'][i]===t));
+    ['dash','slots','users','boards','coaching','mensajes','payments','shop','comunidad','notifs','reports','gaia'][i]===t));
   document.querySelectorAll('.adm-section').forEach(el=>el.classList.remove('active'));
   const el=document.getElementById('a-'+t);if(el)el.classList.add('active');
   if(t==='dash')renderDashboard();
   if(t==='slots')renderAdmSlots();
   if(t==='users')renderUsersSb();
   if(t==='boards')renderBoardsAdmin();
+  if(t==='coaching')renderCoachingListSb();
   if(t==='mensajes')renderMensajesAdminSb();
   if(t==='payments')renderPaymentsSb();
   if(t==='shop')renderAdminShopOrders();
@@ -4691,18 +4713,23 @@ function closeExerciseNoteModal(){
   noteCtx=null;
 }
 // Abre el chat 1-a-1 con tu coach con un mensaje pre-armado sobre este ejercicio.
-function closeAllExMenus(){
-  document.querySelectorAll('.ex-menu-dropdown.open').forEach(d=>d.classList.remove('open'));
+// Menú "más opciones" por ejercicio — modal de hoja inferior (mismo patrón que
+// #log-score-modal/#exercise-note-modal) en vez de un dropdown anclado, que se
+// recortaba dentro de la tarjeta por su overflow:hidden.
+function openExMenu(btn){
+  const d=btn.dataset;
+  let html='';
+  if(d.showlog==='1')html+='<button class="ex-menu-item" data-bid="'+esc(d.bid)+'" data-idx="'+esc(d.idx)+'" data-name="'+esc(d.name)+'" data-exid="'+esc(d.exid)+'" onclick="closeExMenu();openLogScore(this)">💪 Registrar peso</button>';
+  html+='<button class="ex-menu-item" data-exkey="'+esc(d.exkey)+'" data-name="'+esc(d.name)+'" onclick="closeExMenu();openExerciseNote(this)">'+(d.hasnote==='1'?'📝 Ver nota':'📝 Agregar nota')+'</button>';
+  if(d.showasesoria==='1')html+='<button class="ex-menu-item" data-name="'+esc(d.name)+'" onclick="closeExMenu();askAboutExercise(this)">🙋 Asesoría</button>';
+  const nameEl=document.getElementById('ex-actions-modal-name');
+  if(nameEl)nameEl.textContent=d.name||'Ejercicio';
+  document.getElementById('ex-actions-modal-body').innerHTML=html;
+  document.getElementById('ex-actions-modal').style.display='flex';
 }
-function toggleExMenu(btn){
-  const dropdown=btn.nextElementSibling;
-  const wasOpen=dropdown.classList.contains('open');
-  closeAllExMenus();
-  if(!wasOpen)dropdown.classList.add('open');
+function closeExMenu(){
+  document.getElementById('ex-actions-modal').style.display='none';
 }
-document.addEventListener('click',e=>{
-  if(!e.target.closest('.ex-menu-wrap'))closeAllExMenus();
-});
 function askAboutExercise(btn){
   const exName=btn.dataset.name||'este ejercicio';
   coachHubActiveTab='mensajes';
@@ -4914,12 +4941,6 @@ function renderExerciseListHtml(exercises,keyPrefix,expandedMap,toggleFnName,boa
     const exKey=ex.id||(boardId||keyPrefix)+'_idx_'+i;
     const hasNote=!!exerciseNotesMap[exKey];
     const hasLiveTracker=!!(sessionCtx&&(sessionCtx.sets[exKey]||[]).length);
-    // Acciones secundarias (registrar peso fuera de sesión, nota, asesoría)
-    // se agrupan en un solo menú "⋯" en vez de 3 botones siempre visibles.
-    const menuItems=[]
-      .concat(hasLiveTracker?[]:['<button class="ex-menu-item" data-bid="'+esc(boardId||keyPrefix)+'" data-idx="'+i+'" data-name="'+esc(ex.name)+'" data-exid="'+esc(ex.id||'')+'" onclick="closeAllExMenus();openLogScore(this)">💪 Registrar peso</button>'])
-      .concat(['<button class="ex-menu-item" data-exkey="'+esc(exKey)+'" data-name="'+esc(ex.name)+'" onclick="closeAllExMenus();openExerciseNote(this)">'+(hasNote?'📝 Ver nota':'📝 Agregar nota')+'</button>'])
-      .concat(canAccessCoaching()?['<button class="ex-menu-item" data-name="'+esc(ex.name)+'" onclick="closeAllExMenus();askAboutExercise(this)">🙋 Asesoría</button>']:[]);
     return '<div class="exercise-detail">'
       +'<div class="exercise-detail-head">'
       +'<div style="display:flex;align-items:flex-start;gap:10px">'
@@ -4929,7 +4950,7 @@ function renderExerciseListHtml(exercises,keyPrefix,expandedMap,toggleFnName,boa
       +(ex.note||ex.notes||ex.description?'<div class="ex-note">'+esc(ex.note||ex.notes||ex.description)+'</div>':'')
       +'</div>'
       +(videos.length?'<button class="btn-sm" style="padding:0 10px;min-width:36px;height:34px;display:flex;align-items:center;justify-content:center;background:rgba(16,185,129,.15);border:1px solid rgba(16,185,129,.4);color:#10b981;border-radius:4px" onclick="'+toggleFnName+'(&quot;'+gKey+'&quot;)" aria-label="Ver videos">'+(groupOpen?'<svg width="14" height="14" viewBox="0 0 14 14" fill="currentColor"><rect x="2" y="1" width="3.5" height="12" rx="1"/><rect x="8.5" y="1" width="3.5" height="12" rx="1"/></svg>':'<svg width="14" height="14" viewBox="0 0 14 14" fill="currentColor"><polygon points="2,1 13,7 2,13"/></svg>')+'</button>':'')
-      +'<div class="ex-menu-wrap"><button class="ex-menu-btn" onclick="toggleExMenu(this)" aria-label="Más opciones">⋯</button><div class="ex-menu-dropdown">'+menuItems.join('')+'</div></div>'
+      +'<button class="ex-menu-btn" data-bid="'+esc(boardId||keyPrefix)+'" data-idx="'+i+'" data-name="'+esc(ex.name)+'" data-exid="'+esc(ex.id||'')+'" data-exkey="'+esc(exKey)+'" data-hasnote="'+(hasNote?'1':'')+'" data-showlog="'+(hasLiveTracker?'':'1')+'" data-showasesoria="'+(canAccessCoaching()?'1':'')+'" onclick="openExMenu(this)" aria-label="Más opciones">⋯</button>'
       +'</div>'
       +'</div>'
       +(sessionCtx?renderSetTrackerHtml(sessionCtx,exKey,ex):'')
@@ -8685,9 +8706,36 @@ async function loadBoardsSb(){
 }
 
 // ── COACHING ADMIN (beta oculta) ─────────────────────────────
-// El cockpit de coaching (Semana/Rutinas/Tareas/Notas/Progreso) vive embebido
-// dentro del perfil individual del socio (adminOpenUserProfile), no en un tab
-// aparte — evita tener que buscar al socio dos veces en dos listas distintas.
+// El tab "Coaching" solo lista socios ya inscritos (activar/desactivar se
+// hace desde su perfil individual en Socios). Tocar uno abre su cockpit
+// (Semana/Rutinas/Tareas/Notas/Progreso) en una pantalla dedicada aparte.
+let _coachingListAll=null;
+function renderCoachingListRows(filter){
+  const el=document.getElementById('coaching-list');
+  if(!el)return;
+  const f=(filter||'').toLowerCase();
+  const list=(_coachingListAll||[]).filter(u=>!f||(u.name||'').toLowerCase().includes(f));
+  el.innerHTML=list.length?list.map(u=>
+    '<div style="cursor:pointer;display:flex;align-items:center;gap:10px;padding:9px 4px;border-bottom:1px solid var(--border)" onclick="adminOpenCoachingCockpit(&quot;'+esc(u.id)+'&quot;,&quot;'+esc(u.name||'')+'&quot;)">'
+    +'<div style="width:32px;height:32px;border-radius:50%;background:var(--bl);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;color:#fff;flex-shrink:0">'+inits(u.name)+'</div>'
+    +'<span style="flex:1;font-size:13px;font-weight:600">'+esc(u.name||'Socio')+'</span>'
+    +'</div>'
+  ).join(''):'<div class="empty">'+(_coachingListAll&&_coachingListAll.length?'Sin resultados.':'Sin socios inscritos en Coaching todavía. Actívalo desde el perfil de un socio en Socios.')+'</div>';
+}
+async function renderCoachingListSb(filter){
+  const el=document.getElementById('coaching-list');
+  if(!el)return;
+  if(filter!==undefined&&_coachingListAll){renderCoachingListRows(filter);return;}
+  el.innerHTML='<div class="empty">Cargando...</div>';
+  try{
+    const{data,error}=await sb.from('profiles').select('id,name').eq('coaching_beta',true).order('name').limit(1000);
+    if(error)throw error;
+    _coachingListAll=data||[];
+    renderCoachingListRows(filter);
+  }catch(e){
+    el.innerHTML='<div class="empty">Error: '+esc(e.message)+'</div>';
+  }
+}
 async function adminToggleCoachingBetaSb(uid,enabled,name){
   try{
     const{error}=await sb.from('profiles').update({coaching_beta:enabled}).eq('id',uid);
