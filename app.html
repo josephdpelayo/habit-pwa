@@ -6,12 +6,12 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="HABIT">
 <meta name="application-name" content="HABIT">
-<link rel="manifest" href="/manifest.json?v=20260718-15">
-<link rel="apple-touch-icon" sizes="120x120" href="/icons/icon-120.png?v=20260718-15">
-<link rel="apple-touch-icon" sizes="152x152" href="/icons/icon-152.png?v=20260718-15">
-<link rel="apple-touch-icon" sizes="167x167" href="/icons/icon-167.png?v=20260718-15">
-<link rel="apple-touch-icon" sizes="180x180" href="/icons/icon-180.png?v=20260718-15">
-<link rel="icon" type="image/png" sizes="32x32" href="/icons/icon-32.png?v=20260718-15">
+<link rel="manifest" href="/manifest.json?v=20260718-16">
+<link rel="apple-touch-icon" sizes="120x120" href="/icons/icon-120.png?v=20260718-16">
+<link rel="apple-touch-icon" sizes="152x152" href="/icons/icon-152.png?v=20260718-16">
+<link rel="apple-touch-icon" sizes="167x167" href="/icons/icon-167.png?v=20260718-16">
+<link rel="apple-touch-icon" sizes="180x180" href="/icons/icon-180.png?v=20260718-16">
+<link rel="icon" type="image/png" sizes="32x32" href="/icons/icon-32.png?v=20260718-16">
 <title>HABIT</title>
 <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700;800;900&family=Share+Tech+Mono&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
@@ -1320,10 +1320,10 @@ html,body{background:radial-gradient(circle at 50% -18%,rgba(80,112,164,.16),tra
   <div class="adm-nav">
     <button class="adm-tab active" data-admin-tab="dash" onclick="admTab('dash')">Inicio</button>
     <button class="adm-tab" data-admin-tab="slots" onclick="admTab('slots')">Agenda</button>
-    <button class="adm-tab" data-admin-tab="users" onclick="admTab('users')">Socios</button>
-    <button class="adm-tab" data-admin-tab="boards" onclick="admTab('boards')">Rutinas</button>
-    <button class="adm-tab" data-admin-tab="coaching" onclick="admTab('coaching')">Coaching</button>
     <button class="adm-tab" data-admin-tab="payments" onclick="admTab('payments')">Finanzas</button>
+    <button class="adm-tab" data-admin-tab="boards" onclick="admTab('boards')">Rutinas</button>
+    <button class="adm-tab" data-admin-tab="users" onclick="admTab('users')">Socios</button>
+    <button class="adm-tab" data-admin-tab="coaching" onclick="admTab('coaching')">Coaching</button>
   </div>
   <div class="scroll-area" style="padding-top:.75rem">
 
@@ -1838,7 +1838,7 @@ html,body{background:radial-gradient(circle at 50% -18%,rgba(80,112,164,.16),tra
 // ── CONFIG & SUPABASE ───────────────────────────────────────
 const SUPABASE_URL='https://pmpjteuqjusbiduevbwq.supabase.co';
 const SUPABASE_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBtcGp0ZXVxanVzYmlkdWV2YndxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc2OTI1NjUsImV4cCI6MjA5MzI2ODU2NX0.XbMzZoo2yqtrD8znLnyo_1zDfrdJAvAPj1lqGOyXnLw';
-const APP_VERSION='20260718-15';
+const APP_VERSION='20260718-16';
 const MUSCLE_GROUPS=['Pecho','Espalda','Piernas','Hombros','Brazos','Core','Cardio','Full Body'];
 function muscleGroupSelectHtml(id,selected){
   return '<select id="'+id+'" style="width:100%;background:var(--card);border:1px solid var(--border);border-radius:4px;padding:8px;font-size:12px;color:var(--white);outline:none;margin-bottom:6px;box-sizing:border-box">'
@@ -3170,6 +3170,7 @@ function showAdmin(){
   admTab('dash');
   loadBoardsSb();
   startAdminChatRealtime();
+  ensureAdminSeenBaselines();
   refreshAdminMensajesBadge();
   refreshAdminAlertsBadge();
   refreshAdminCommunityBadge();
@@ -7877,19 +7878,23 @@ async function renderAdmNotifsSb(){
   const el=document.getElementById('adm-notif-content');
   el.innerHTML='<div class="empty">Cargando...</div>';
   try{
+    const alertSeen=localStorage.getItem(ADMIN_ALERTS_SEEN_KEY)||new Date().toISOString();
     const{data:notifs}=await sb.from('admin_notifs').select('*').order('created_at',{ascending:false}).limit(50);
     const{data:logs}=await sb.from('access_log').select('*').order('accessed_at',{ascending:false}).limit(30);
     let html='';
     if(notifs&&notifs.length){
-      const unreadCount=notifs.filter(n=>n.is_read===false).length;
+      const unreadCount=notifs.filter(n=>n.is_read===false&&(n.created_at||'')>alertSeen).length;
       html+='<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;gap:8px">'
         +'<p class="slbl" style="margin-bottom:0">Actividad reciente'+(unreadCount?' ('+unreadCount+' sin leer)':'')+'</p>'
         +(unreadCount?'<button class="btn-sm bblue" onclick="markAllAdminNotifsRead()">Marcar todo leído</button>':'')
         +'</div>';
-      html+=notifs.map(n=>'<div class="adm-notif'+(n.is_read?'':' unread')+'" data-nid="'+esc(n.id)+'"'
-        +(n.is_read?'':' onclick="markAdminNotifRead(this)"')+'>'
+      html+=notifs.map(n=>{
+        const isUnread=n.is_read===false&&(n.created_at||'')>alertSeen;
+        return '<div class="adm-notif'+(isUnread?' unread':'')+'" data-nid="'+esc(n.id)+'"'
+        +(isUnread?' onclick="markAdminNotifRead(this)"':'')+'>'
         +'<div class="adm-notif-text">'+n.message
-        +'<div class="adm-notif-time">'+timeSince(n.created_at)+'</div></div></div>').join('');
+        +'<div class="adm-notif-time">'+timeSince(n.created_at)+'</div></div></div>';
+      }).join('');
     }
     if(logs&&logs.length){
       html+='<div class="divider"></div><p class="slbl" style="margin-bottom:10px">Accesos al gym</p>';
@@ -7912,6 +7917,7 @@ async function markAdminNotifRead(el){
   refreshAdminAlertsBadge();
 }
 async function markAllAdminNotifsRead(){
+  localStorage.setItem(ADMIN_ALERTS_SEEN_KEY,new Date().toISOString());
   setAdminHeaderBadge('adm-alertas-badge',0);
   try{
     const a=await sb.from('admin_notifs').update({is_read:true}).eq('is_read',false);
@@ -10194,6 +10200,11 @@ function setAdminHeaderBadge(id,count){
   el.classList.toggle('show',!!n);
   el.closest('.admin-icon-action')?.classList.toggle('has-alert',!!n);
 }
+function ensureAdminSeenBaselines(){
+  const now=new Date().toISOString();
+  if(!localStorage.getItem(ADMIN_ALERTS_SEEN_KEY))localStorage.setItem(ADMIN_ALERTS_SEEN_KEY,now);
+  if(!localStorage.getItem(ADMIN_COMMUNITY_SEEN_KEY))localStorage.setItem(ADMIN_COMMUNITY_SEEN_KEY,now);
+}
 async function refreshAdminMensajesBadge(){
   if(!sbUser)return;
   try{
@@ -10205,16 +10216,19 @@ async function refreshAdminMensajesBadge(){
 async function refreshAdminAlertsBadge(){
   if(!sbUser)return;
   try{
+    const seen=localStorage.getItem(ADMIN_ALERTS_SEEN_KEY)||new Date().toISOString();
     const{count}=await sb.from('admin_notifs').select('id',{count:'exact',head:true})
-      .eq('is_read',false);
+      .eq('is_read',false)
+      .gt('created_at',seen);
     setAdminHeaderBadge('adm-alertas-badge',count);
   }catch(e){console.warn('refreshAdminAlertsBadge:',e);}
 }
+const ADMIN_ALERTS_SEEN_KEY='habit_admin_alerts_seen_at';
 const ADMIN_COMMUNITY_SEEN_KEY='habit_admin_community_seen_at';
 async function refreshAdminCommunityBadge(){
   if(!sbUser)return;
   try{
-    const seen=localStorage.getItem(ADMIN_COMMUNITY_SEEN_KEY)||new Date(Date.now()-7*86400000).toISOString();
+    const seen=localStorage.getItem(ADMIN_COMMUNITY_SEEN_KEY)||new Date().toISOString();
     const{count}=await sb.from('posts').select('id',{count:'exact',head:true}).gt('created_at',seen);
     setAdminHeaderBadge('adm-comunidad-badge',count);
   }catch(e){console.warn('refreshAdminCommunityBadge:',e);}
