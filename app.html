@@ -480,6 +480,12 @@ input,select,button,textarea{font-family:'Montserrat',sans-serif}
 .coach-hero.compact .coach-hero-stat span{font-size:9px}
 .coach-alert{display:flex;align-items:center;justify-content:space-between;gap:10px;background:rgba(245,158,11,.09);border:1px solid rgba(245,158,11,.24);border-radius:14px;padding:12px 13px;margin-bottom:12px;font-size:13px;color:var(--white);line-height:1.35}
 .coach-alert-close{width:28px;height:28px;border-radius:999px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.08);color:var(--gray);font-size:16px;cursor:pointer;padding:0;flex-shrink:0}
+.coach-context{display:flex;align-items:center;justify-content:space-between;gap:10px;border:1px solid rgba(255,255,255,.08);background:rgba(255,255,255,.04);border-radius:16px;padding:12px 13px;margin-bottom:10px}
+.coach-context-main{min-width:0}
+.coach-context-k{font-size:9px;font-weight:900;letter-spacing:.12em;text-transform:uppercase;color:#8aa1c2;margin-bottom:4px}
+.coach-context-title{font-size:14px;font-weight:900;color:var(--white);line-height:1.25}
+.coach-context-sub{font-size:11px;color:var(--gray);line-height:1.35;margin-top:3px}
+.coach-primary-action{width:100%;min-height:46px;margin-bottom:12px;border-radius:14px}
 .coach-day-strip{display:grid;grid-template-columns:repeat(7,1fr);gap:6px;background:rgba(255,255,255,.045);border:1px solid rgba(255,255,255,.08);border-radius:16px;padding:10px 8px;margin-bottom:12px;box-shadow:0 12px 30px rgba(0,0,0,.2)}
 .coach-day{display:flex;flex-direction:column;align-items:center;gap:6px;font-family:'Montserrat',sans-serif;min-width:0}
 .coach-day-label{font-size:9px;font-weight:800;letter-spacing:.04em;color:#737985;text-transform:uppercase}
@@ -492,6 +498,9 @@ input,select,button,textarea{font-family:'Montserrat',sans-serif}
 .coach-day.today .coach-day-label{color:var(--white)}
 .coach-day.in-progress .coach-day-num{background:linear-gradient(180deg,#60a5fa,#2563eb);border-color:#60a5fa;color:#fff;animation:coachPulse 1.6s ease-in-out infinite}
 .coach-day.selected .coach-day-num{outline:2px solid rgba(139,92,246,.75);outline-offset:2px}
+.coach-day-dots{display:flex;gap:3px;min-height:4px}
+.coach-day-dot{width:4px;height:4px;border-radius:99px;background:rgba(255,255,255,.16)}
+.coach-day-dot.workout{background:#93c5fd}.coach-day-dot.fast{background:#34d399}.coach-day-dot.habit{background:#cbd5e1}
 @keyframes coachPulse{50%{opacity:.55}}
 #coach-detail-week-strip .coach-day{cursor:pointer}
 .coach-detail-panel{display:none}
@@ -506,6 +515,10 @@ input,select,button,textarea{font-family:'Montserrat',sans-serif}
 .coach-task-title{font-size:13px;font-weight:600;color:var(--white);flex:1}
 .coach-task-due{font-size:11px;color:var(--gray)}
 .coach-task-row.overdue .coach-task-due{color:#ef4444;font-weight:700}
+.coach-task-chips{display:flex;flex-wrap:wrap;gap:7px}
+.coach-task-chip{border:1px solid rgba(255,255,255,.09);background:rgba(255,255,255,.045);border-radius:999px;color:var(--gray);font-size:11.5px;font-weight:850;padding:9px 11px;cursor:pointer;max-width:100%;white-space:nowrap}
+.coach-task-chip.done{background:rgba(16,185,129,.13);border-color:rgba(16,185,129,.28);color:#8bffbf}
+.coach-task-chip.overdue{border-color:rgba(239,68,68,.35);color:#fca5a5}
 .habit-presets{display:flex;gap:6px;flex-wrap:wrap;margin:-2px 0 14px}
 .habit-presets .btn-sm{padding:8px 10px;border-radius:999px;background:rgba(255,255,255,.055)}
 .habit-schedule-picker{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px}
@@ -3652,7 +3665,7 @@ function admTab(t){
   if(t==='gaia')renderGaiaTab();
 }
 
-let coachHubActiveTab='hoy', coachTodayExpandedBoards=new Set(), selectedCoachProgramDs=null, workoutFeedbackScheduleId=null, workoutFeedbackEnergy='normal', workoutFeedbackSoreness=false;
+let coachHubActiveTab='hoy', coachTodayExpandedBoards=new Set(), selectedCoachProgramDs=null, workoutFeedbackScheduleId=null, workoutFeedbackEnergy='normal', workoutFeedbackSoreness=false, workoutFeedbackShare=true;
 function coachHubTab(t,btn){
   coachHubActiveTab=t;
   document.querySelectorAll('.coach-hub-tab').forEach(b=>b.classList.remove('active'));
@@ -6107,8 +6120,8 @@ function renderFastingCardHtml(){
       +'<div class="fasting-stage"><div class="fasting-stage-dot done"></div><div class="fasting-stage-step done"><span></span></div><div class="fasting-stage-dot '+(closed?'done':'')+'"></div><div class="fasting-stage-step '+(closed?'done':'')+'"><span></span></div><div class="fasting-stage-dot '+(closed?'done':'')+'"></div></div>'
       +'<div class="fasting-goals">'+[12,14,16,18].map(h=>'<button type="button" class="fasting-goal '+(h===targetHours?'active':'')+'" onclick="setFastingTargetHours('+h+')">'+h+'h</button>').join('')+'</div>'
       +'<div class="fasting-grid">'
-      +'<div class="fasting-mini"><label>Última comida</label><div class="fasting-quick"><button type="button" onclick="setFastingDateQuick(&quot;fasting-last-date&quot;,&quot;'+addDaysDS(mazToday(),-1)+'&quot;)">Ayer</button><button type="button" onclick="setFastingDateQuick(&quot;fasting-last-date&quot;,&quot;'+mazToday()+'&quot;)">Hoy</button></div><div class="fasting-fields"><input type="date" id="fasting-last-date" value="'+esc(lastDs)+'"><input type="time" id="fasting-last-time" value="'+esc(timeInputValueMaz(last))+'"></div><button type="button" onclick="setFastingLastMealFromInput()">'+(closed?'Guardar nueva cena':'Guardar inicio')+'</button></div>'
-      +'<div class="fasting-mini"><label>Primera comida</label><div class="fasting-fields"><input type="date" id="fasting-first-date" value="'+esc(firstDs)+'"><input type="time" id="fasting-first-time" value="'+esc(timeInputValueMaz(first))+'"></div><button type="button" class="green" onclick="setFastingFirstMealFromInput()">Registrar primera comida</button></div>'
+      +'<div class="fasting-mini"><label>Última comida</label><div class="fasting-quick"><button type="button" onclick="setFastingDateQuick(&quot;fasting-last-date&quot;,&quot;'+addDaysDS(mazToday(),-1)+'&quot;)">Ayer</button><button type="button" onclick="setFastingDateQuick(&quot;fasting-last-date&quot;,&quot;'+mazToday()+'&quot;)">Hoy</button></div><div class="fasting-quick"><button type="button" onclick="setFastingQuickTime(&quot;fasting-last&quot;,&quot;20:00&quot;)">Cena 8</button><button type="button" onclick="setFastingQuickTime(&quot;fasting-last&quot;,&quot;21:00&quot;)">Cena 9</button></div><div class="fasting-fields"><input type="date" id="fasting-last-date" value="'+esc(lastDs)+'"><input type="time" id="fasting-last-time" value="'+esc(timeInputValueMaz(last))+'"></div><button type="button" onclick="setFastingLastMealFromInput()">'+(closed?'Guardar nueva cena':'Guardar inicio')+'</button></div>'
+      +'<div class="fasting-mini"><label>Primera comida</label><div class="fasting-quick"><button type="button" onclick="setFastingQuickTime(&quot;fasting-first&quot;,&quot;10:00&quot;)">Desayuno 10</button><button type="button" onclick="setFastingQuickTime(&quot;fasting-first&quot;,&quot;12:00&quot;)">Comida 12</button></div><div class="fasting-fields"><input type="date" id="fasting-first-date" value="'+esc(firstDs)+'"><input type="time" id="fasting-first-time" value="'+esc(timeInputValueMaz(first))+'"></div><button type="button" class="green" onclick="setFastingFirstMealFromInput()">Registrar primera comida</button></div>'
       +'</div>':'')
     +(fastingExpanded&&history.length?'<div class="fasting-history">'+history.map(r=>'<div class="fasting-history-row"><span>'+esc(fmtDS(r.fast_start_ds||dsFromIsoMaz(r.fast_start_at)))+'</span><strong>'+Math.floor((r.duration_min||0)/60)+'h '+pad((r.duration_min||0)%60)+'m</strong><span>'+(r.duration_min>=(r.target_hours||16)*60?'Meta':'')+'</span></div>').join('')+'</div>':'')
     +'</div>';
@@ -6132,6 +6145,12 @@ function toggleFastingCard(){
 function setFastingDateQuick(inputId,ds){
   const input=document.getElementById(inputId);
   if(input)input.value=ds;
+}
+function setFastingQuickTime(prefix,time){
+  const timeInput=document.getElementById(prefix+'-time');
+  const dateInput=document.getElementById(prefix+'-date');
+  if(timeInput)timeInput.value=time;
+  if(dateInput&&!dateInput.value)dateInput.value=mazToday();
 }
 function setFastingLastMealFromInput(){
   const timeInput=document.getElementById('fasting-last-time');
@@ -6172,6 +6191,34 @@ async function setFastingFirstMealFromInput(){
   renderCoachHoyPanel();
   toast('Ventana de ingesta activa','ok');
 }
+function coachTodayContext(todayRows,relevantTasks,doneTasks,missedRows){
+  const log=loadFastingLog();
+  const activeFast=!!(log.lastMealAt&&!log.firstMealAt);
+  const closedFast=!!(log.lastMealAt&&log.firstMealAt);
+  const pendingHabits=Math.max(0,(relevantTasks||[]).length-(doneTasks||0));
+  let title=activeCoachingSession?'Entreno en curso':todayRows.length?'Tu día está listo':'Día libre';
+  let sub=[];
+  if(todayRows.length)sub.push(todayRows.map(r=>r.board_name).slice(0,2).join(', '));
+  if(activeFast)sub.push('ayuno en curso');
+  else if(closedFast)sub.push('ventana de ingesta');
+  else sub.push('ayuno listo');
+  if(pendingHabits)sub.push(pendingHabits+' hábito'+(pendingHabits===1?'':'s')+' pendiente'+(pendingHabits===1?'':'s'));
+  if(missedRows.length)sub.push('pendiente de revisar ayer');
+  return{title,sub:sub.join(' · ')};
+}
+function coachPrimaryActionHtml(todayRows){
+  const log=loadFastingLog();
+  if(activeCoachingSession)return '<button class="btn coach-primary-action" onclick="openActiveCoachingExercise()">Continuar entreno</button>';
+  const nextWorkout=todayRows.find(r=>r.status==='scheduled');
+  if(nextWorkout)return '<button class="btn coach-primary-action" onclick="startCoachingSessionSb(&quot;'+nextWorkout.id+'&quot;)">Iniciar '+esc(nextWorkout.board_name)+'</button>';
+  if(log.lastMealAt&&!log.firstMealAt){
+    const target=getFastingTargetHours()*60;
+    const done=fastingDurationMin(log.lastMealAt,new Date().toISOString())>=target;
+    return '<button class="btn coach-primary-action" onclick="fastingExpanded=true;renderCoachHoyPanel()">'+(done?'Registrar primera comida':'Ver ayuno')+'</button>';
+  }
+  if(!log.lastMealAt||log.firstMealAt)return '<button class="btn coach-primary-action" onclick="fastingExpanded=true;renderCoachHoyPanel()">Registrar última comida</button>';
+  return '';
+}
 function renderCoachHoyPanel(){
   const el=document.getElementById('coach-hoy-panel');
   if(!el)return;
@@ -6183,20 +6230,13 @@ function renderCoachHoyPanel(){
   const relevantTasks=coachRelevantTasks(today);
   const doneTasks=relevantTasks.filter(isTaskDoneToday).length;
   const doneWorkouts=todayRows.filter(r=>r.status==='done').length;
+  const ctx=coachTodayContext(todayRows,relevantTasks,doneTasks,missedRows);
   let html='';
-  html+='<div class="coach-hero compact">'
-    +'<div>'
-    +'<div class="coach-hero-k">Coaching de hoy</div>'
-    +'<div class="coach-hero-title">'+(activeCoachingSession?'Entreno en curso':todayRows.length?'Tu sesión está lista':'Día libre')+'</div>'
-    +'<div class="coach-hero-sub">'+(activeCoachingSession?'Registra tus series sin perder el ritmo.':todayRows.length?'Abre tu rutina, registra series y deja notas para tu coach.':'No tienes rutina programada. Puedes iniciar una rutina asignada cuando quieras.')+'</div>'
-    +'</div>'
-    +'<div class="coach-hero-stats">'
-    +'<div class="coach-hero-stat"><strong>'+doneWorkouts+'/'+todayRows.length+'</strong><span>Entrenos</span></div>'
-    +'<div class="coach-hero-stat"><strong>'+doneTasks+'/'+relevantTasks.length+'</strong><span>Hábitos</span></div>'
-    +'</div></div>';
+  html+='<div class="coach-context"><div class="coach-context-main"><div class="coach-context-k">Coaching de hoy</div><div class="coach-context-title">'+esc(ctx.title)+'</div><div class="coach-context-sub">'+esc(ctx.sub)+'</div></div><div class="badge bg-blue">'+doneWorkouts+'/'+todayRows.length+' · '+doneTasks+'/'+relevantTasks.length+'</div></div>';
+  html+=coachPrimaryActionHtml(todayRows);
   if(missedRows.length){
     const label=missedRows.length===1?('el entreno de '+fmtDS(missedRows[0].ds)):(missedRows.length+' entrenos esta semana');
-    html+='<div class="coach-alert"><span>👋 Te perdiste '+esc(label)+'</span><button class="coach-alert-close" onclick="this.parentElement.remove()">×</button></div>';
+    html+='<div class="coach-alert"><span>Quedó pendiente '+esc(label)+'. Puedes moverlo o marcar descanso en Calendario.</span><button class="coach-alert-close" onclick="this.parentElement.remove()">×</button></div>';
   }
   if(activeCoachingSession&&activeCoachingSession.ds!==today){
     html+='<div class="coach-alert"><span>⏱ Tienes un entreno sin terminar de '+esc(fmtDS(activeCoachingSession.ds))+' ('+esc(activeCoachingSession.board_name)+')</span></div>'
@@ -6206,7 +6246,7 @@ function renderCoachHoyPanel(){
       +'</div></div>';
   }
   if(!todayRows.length){
-    html+='<div class="coach-empty">No tienes rutina programada para hoy.<br>Descansa o pide a tu coach que te programe una.</div>';
+    html+='<div class="coach-empty">Día libre.<br>Puedes registrar ayuno o hacer una rutina asignada.</div>';
   }else{
     todayRows.forEach(todayRow=>{
       if(todayRow.status==='done'){
@@ -6236,11 +6276,11 @@ function renderCoachHoyPanel(){
   html+='<button class="btn-sm coach-add-workout" onclick="openAddWorkoutModal()">Agregar otro entreno</button>';
   html+=renderFastingCardHtml();
   html+='<div class="board-card"><div class="board-hdr"><span class="board-title">Hábitos</span></div><div class="board-body">'
-    +(relevantTasks.length?relevantTasks.map(t=>{
+    +(relevantTasks.length?'<div class="coach-task-chips">'+relevantTasks.map(t=>{
         const done=isTaskDoneToday(t);
         const isOverdue=!t.is_recurring&&!done&&t.due_date&&t.due_date<mazToday();
-        return '<div class="coach-task-row'+(done?' done':'')+(isOverdue?' overdue':'')+'" onclick="toggleTaskSb(&quot;'+t.id+'&quot;)"><div class="coach-task-check">'+(done?'✓':'')+'</div><div class="coach-task-title">'+esc(t.title)+'</div>'+(t.is_recurring?'<div class="coach-task-due">Diario</div>':t.due_date?'<div class="coach-task-due">'+(isOverdue?'Atrasado · ':'')+fmtDS(t.due_date)+'</div>':'')+'</div>';
-      }).join(''):'<div class="empty">Sin hábitos pendientes.</div>')
+        return '<button class="coach-task-chip '+(done?'done ':'')+(isOverdue?'overdue':'')+'" onclick="toggleTaskSb(&quot;'+t.id+'&quot;)">'+(done?'✓ ':'')+esc(t.title)+'</button>';
+      }).join('')+'</div>':'<div class="empty">Sin hábitos pendientes.</div>')
     +'</div></div>';
   el.innerHTML=html;
 }
@@ -6594,7 +6634,13 @@ function renderCoachSemanaPanel(){
       else if(dayRows.some(r=>r.status==='scheduled')&&ds<today)cls+=' missed';
       else cls+=' scheduled';
     }
-    strip+='<div class="'+cls+'" onclick="selectCoachProgramDay(&quot;'+ds+'&quot;)"><span class="coach-day-label">'+DN_MON[i]+'</span><span class="coach-day-num">'+parseDS(ds).d+'</span></div>';
+    const taskDots=coachRelevantTasks(ds).some(t=>isTaskDoneOnDs(t,ds));
+    const dots='<span class="coach-day-dots">'
+      +(dayRows.length?'<i class="coach-day-dot workout"></i>':'')
+      +(fastingLogsForDs(ds).length?'<i class="coach-day-dot fast"></i>':'')
+      +(taskDots?'<i class="coach-day-dot habit"></i>':'')
+      +'</span>';
+    strip+='<div class="'+cls+'" onclick="selectCoachProgramDay(&quot;'+ds+'&quot;)"><span class="coach-day-label">'+DN_MON[i]+'</span><span class="coach-day-num">'+parseDS(ds).d+'</span>'+dots+'</div>';
   }
   strip+='</div>'
     +'<div style="text-align:center;margin:-6px 0 12px;font-size:11px;font-weight:700;color:var(--bl);cursor:pointer" onclick="openWeekDetailModal()">Ver semana completa ›</div>';
@@ -6727,6 +6773,7 @@ function openWorkoutFeedbackModal(scheduleId){
   workoutFeedbackScheduleId=scheduleId;
   workoutFeedbackEnergy='normal';
   workoutFeedbackSoreness=false;
+  workoutFeedbackShare=true;
   renderWorkoutFeedbackModalBody();
   document.getElementById('workout-feedback-modal').style.display='flex';
 }
@@ -6742,6 +6789,10 @@ function toggleWorkoutFeedbackSoreness(){
   workoutFeedbackSoreness=!workoutFeedbackSoreness;
   renderWorkoutFeedbackModalBody();
 }
+function toggleWorkoutFeedbackShare(){
+  workoutFeedbackShare=!workoutFeedbackShare;
+  renderWorkoutFeedbackModalBody();
+}
 function renderWorkoutFeedbackModalBody(){
   const row=coachSchedule.find(r=>r.id===workoutFeedbackScheduleId)||{};
   const body=document.getElementById('workout-feedback-modal-body');
@@ -6751,8 +6802,24 @@ function renderWorkoutFeedbackModalBody(){
     +'<div class="coach-feedback-grid">'+['baja','normal','alta'].map(v=>'<button class="coach-feedback-choice '+(workoutFeedbackEnergy===v?'active':'')+'" onclick="setWorkoutFeedbackEnergy(&quot;'+v+'&quot;)">'+v+'</button>').join('')+'</div>'
     +'<button class="coach-feedback-choice '+(workoutFeedbackSoreness?'active':'')+'" style="width:100%;margin-bottom:10px" onclick="toggleWorkoutFeedbackSoreness()">Tuve molestia o dolor</button>'
     +'<textarea id="workout-feedback-note" rows="3" placeholder="Nota para tu coach..." style="width:100%;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);border-radius:14px;color:var(--white);padding:12px;font-size:13px;resize:none;margin-bottom:10px"></textarea>'
+    +'<button class="coach-feedback-choice '+(workoutFeedbackShare?'active':'')+'" style="width:100%;margin-bottom:10px" onclick="toggleWorkoutFeedbackShare()">Enviar resumen al chat</button>'
     +'<button class="btn" style="width:100%" onclick="saveWorkoutFeedbackSb()">Guardar feedback</button>'
     +'<button class="btn-sm" style="width:100%;margin-top:8px" onclick="closeWorkoutFeedbackModal()">Omitir</button>';
+}
+async function sendWorkoutFeedbackChatSummary(row,note){
+  if(!sbUser||!row)return;
+  const text='Terminé '+(row.board_name||'mi entreno')+'. Energía '+workoutFeedbackEnergy+(workoutFeedbackSoreness?', con molestia':'')+(note?'. '+note:'');
+  try{
+    const{data,error}=await sb.from('coaching_messages').insert({
+      user_id:sbUser.id,
+      sender_role:'user',
+      sender_id:sbUser.id,
+      body:text
+    }).select().single();
+    if(error)throw error;
+    if(chatSendContext&&chatSendContext.userId===sbUser.id&&!chatMessages.some(m=>m.id===data.id))chatMessages.push(data);
+    sendPush('admin','💬 Nuevo feedback',(curUser&&curUser.name||'Socio')+': '+chatMsgPreview(text),{tag:'new-message'});
+  }catch(e){console.warn('sendWorkoutFeedbackChatSummary:',e.message||e);}
 }
 async function saveWorkoutFeedbackSb(){
   if(!workoutFeedbackScheduleId){closeWorkoutFeedbackModal();return;}
@@ -6766,6 +6833,7 @@ async function saveWorkoutFeedbackSb(){
     if(error)throw error;
     const idx=coachSchedule.findIndex(r=>r.id===data.id);
     if(idx>-1)coachSchedule[idx]=data;
+    if(workoutFeedbackShare)await sendWorkoutFeedbackChatSummary(data,note);
     closeWorkoutFeedbackModal();
     renderCoachHoyPanel();
     if(coachHubActiveTab==='programa')renderCoachSemanaPanel();
