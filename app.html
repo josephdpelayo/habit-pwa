@@ -6,12 +6,12 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="HABIT">
 <meta name="application-name" content="HABIT">
-<link rel="manifest" href="/manifest.json?v=20260718-34">
-<link rel="apple-touch-icon" sizes="120x120" href="/icons/icon-120.png?v=20260718-34">
-<link rel="apple-touch-icon" sizes="152x152" href="/icons/icon-152.png?v=20260718-34">
-<link rel="apple-touch-icon" sizes="167x167" href="/icons/icon-167.png?v=20260718-34">
-<link rel="apple-touch-icon" sizes="180x180" href="/icons/icon-180.png?v=20260718-34">
-<link rel="icon" type="image/png" sizes="32x32" href="/icons/icon-32.png?v=20260718-34">
+<link rel="manifest" href="/manifest.json?v=20260719-01">
+<link rel="apple-touch-icon" sizes="120x120" href="/icons/icon-120.png?v=20260719-01">
+<link rel="apple-touch-icon" sizes="152x152" href="/icons/icon-152.png?v=20260719-01">
+<link rel="apple-touch-icon" sizes="167x167" href="/icons/icon-167.png?v=20260719-01">
+<link rel="apple-touch-icon" sizes="180x180" href="/icons/icon-180.png?v=20260719-01">
+<link rel="icon" type="image/png" sizes="32x32" href="/icons/icon-32.png?v=20260719-01">
 <title>HABIT</title>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Share+Tech+Mono&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
@@ -2005,7 +2005,7 @@ html,body,.app,input,select,button,textarea{font-family:var(--font-ui);font-opti
 // ── CONFIG & SUPABASE ───────────────────────────────────────
 const SUPABASE_URL='https://pmpjteuqjusbiduevbwq.supabase.co';
 const SUPABASE_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBtcGp0ZXVxanVzYmlkdWV2YndxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc2OTI1NjUsImV4cCI6MjA5MzI2ODU2NX0.XbMzZoo2yqtrD8znLnyo_1zDfrdJAvAPj1lqGOyXnLw';
-const APP_VERSION='20260718-34';
+const APP_VERSION='20260719-01';
 const MUSCLE_GROUPS=['Pecho','Espalda','Piernas','Hombros','Brazos','Core','Cardio','Full Body'];
 const DAILY_QUOTES=[
   {text:'Haz hoy lo que tu version de manana agradeceria.',action:'Elige una accion pequeña y cumplible antes de buscar motivacion.'},
@@ -10369,6 +10369,8 @@ function renderCoachingListRows(filter){
     '<div style="cursor:pointer;display:flex;align-items:center;gap:10px;padding:9px 4px;border-bottom:1px solid var(--border)" onclick="adminOpenCoachingCockpit(&quot;'+esc(u.id)+'&quot;,&quot;'+esc(u.name||'')+'&quot;)">'
     +'<div style="width:32px;height:32px;border-radius:50%;background:var(--bl);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;color:#fff;flex-shrink:0">'+inits(u.name)+'</div>'
     +'<span style="flex:1;font-size:13px;font-weight:600">'+esc(u.name||'Socio')+'</span>'
+    +(u.workoutDoneToday?'<span title="Ya entrenó hoy" style="font-size:15px;line-height:1">💪</span>':'')
+    +(u.habitsDoneToday?'<span title="Ya completó sus hábitos de hoy" style="font-size:15px;line-height:1">✅</span>':'')
     +'</div>'
   ).join(''):'<div class="empty">'+(_coachingListAll&&_coachingListAll.length?'Sin resultados.':'Sin socios inscritos en Coaching todavía. Actívalo desde el perfil de un socio en Socios.')+'</div>';
 }
@@ -10381,10 +10383,39 @@ async function renderCoachingListSb(filter){
     const{data,error}=await sb.from('profiles').select('id,name').eq('coaching_beta',true).order('name').limit(1000);
     if(error)throw error;
     _coachingListAll=data||[];
+    await loadCoachingListTodayStatusSb();
     renderCoachingListRows(filter);
   }catch(e){
     el.innerHTML='<div class="empty">Error: '+esc(e.message)+'</div>';
   }
+}
+// Marca en la lista quién ya entrenó y quién ya completó sus hábitos de hoy —
+// meramente informativo, no bloquea ni cambia el flujo de coaching.
+async function loadCoachingListTodayStatusSb(){
+  if(!_coachingListAll||!_coachingListAll.length)return;
+  const ids=_coachingListAll.map(u=>u.id);
+  const today=mazToday();
+  try{
+    const[scheduleRes,tasksRes,logsRes]=await Promise.all([
+      sb.from('coaching_schedule').select('user_id,status').eq('ds',today).in('user_id',ids),
+      sb.from('coaching_tasks').select('id,user_id,is_recurring,due_date,is_done').in('user_id',ids),
+      sb.from('coaching_task_logs').select('task_id,user_id').eq('ds',today).in('user_id',ids)
+    ]);
+    const scheduleByUser={};
+    (scheduleRes.data||[]).forEach(r=>{(scheduleByUser[r.user_id]=scheduleByUser[r.user_id]||[]).push(r);});
+    const loggedIdsByUser={};
+    (logsRes.data||[]).forEach(r=>{(loggedIdsByUser[r.user_id]=loggedIdsByUser[r.user_id]||new Set()).add(r.task_id);});
+    const tasksByUser={};
+    (tasksRes.data||[]).forEach(t=>{(tasksByUser[t.user_id]=tasksByUser[t.user_id]||[]).push(t);});
+    _coachingListAll.forEach(u=>{
+      const dayRows=scheduleByUser[u.id]||[];
+      u.workoutDoneToday=dayRows.length>0&&dayRows.every(r=>r.status==='done');
+      const relevant=(tasksByUser[u.id]||[]).filter(t=>t.is_recurring||t.due_date===today);
+      const loggedIds=loggedIdsByUser[u.id]||new Set();
+      const doneCount=relevant.filter(t=>t.is_recurring?loggedIds.has(t.id):t.is_done).length;
+      u.habitsDoneToday=relevant.length>0&&doneCount===relevant.length;
+    });
+  }catch(e){console.error('loadCoachingListTodayStatusSb:',e);}
 }
 async function adminToggleCoachingBetaSb(uid,enabled,name){
   try{
