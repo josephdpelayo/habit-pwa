@@ -6,12 +6,12 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="HABIT">
 <meta name="application-name" content="HABIT">
-<link rel="manifest" href="/manifest.json?v=20260719-14">
-<link rel="apple-touch-icon" sizes="120x120" href="/icons/icon-120.png?v=20260719-14">
-<link rel="apple-touch-icon" sizes="152x152" href="/icons/icon-152.png?v=20260719-14">
-<link rel="apple-touch-icon" sizes="167x167" href="/icons/icon-167.png?v=20260719-14">
-<link rel="apple-touch-icon" sizes="180x180" href="/icons/icon-180.png?v=20260719-14">
-<link rel="icon" type="image/png" sizes="32x32" href="/icons/icon-32.png?v=20260719-14">
+<link rel="manifest" href="/manifest.json?v=20260719-15">
+<link rel="apple-touch-icon" sizes="120x120" href="/icons/icon-120.png?v=20260719-15">
+<link rel="apple-touch-icon" sizes="152x152" href="/icons/icon-152.png?v=20260719-15">
+<link rel="apple-touch-icon" sizes="167x167" href="/icons/icon-167.png?v=20260719-15">
+<link rel="apple-touch-icon" sizes="180x180" href="/icons/icon-180.png?v=20260719-15">
+<link rel="icon" type="image/png" sizes="32x32" href="/icons/icon-32.png?v=20260719-15">
 <title>HABIT</title>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Share+Tech+Mono&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
@@ -186,23 +186,20 @@ input,select,button,textarea{font-family:'Inter',sans-serif}
 .daily-quote-footer{position:relative;z-index:1;width:100%;max-width:280px;margin-top:16px;padding-top:12px;border-top:1px solid rgba(255,255,255,.08);display:flex;align-items:center;justify-content:center;gap:10px;color:var(--green);font-size:11px;font-weight:800;letter-spacing:.1em;text-transform:uppercase}
 .daily-quote-date{color:var(--gray);letter-spacing:.08em;white-space:nowrap}
 .daily-quote-sep{color:var(--gray);opacity:.5}
-.inicio-coach-action{margin:0 0 10px}
-.inicio-coach-btn{width:100%;min-height:52px;border:1px solid rgba(147,197,253,.28);border-radius:16px;background:linear-gradient(135deg,rgba(37,99,235,.22),rgba(16,185,129,.08));color:var(--white);display:grid;grid-template-columns:auto 1fr auto;align-items:center;gap:11px;padding:11px 13px;text-align:left;cursor:pointer;box-shadow:0 14px 34px rgba(0,0,0,.24)}
-.inicio-coach-icon{width:34px;height:34px;border-radius:12px;background:rgba(147,197,253,.13);display:flex;align-items:center;justify-content:center;color:#bfdbfe;flex-shrink:0}
-.inicio-coach-icon svg{width:20px;height:20px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
-.inicio-coach-k{font-size:9px;font-weight:900;letter-spacing:.14em;text-transform:uppercase;color:#93c5fd;margin-bottom:2px}
-.inicio-coach-title{font-size:14px;font-weight:850;color:var(--white);line-height:1.15}
-.inicio-coach-meta{font-size:11px;color:#9ca3af;margin-top:2px;line-height:1.25}
-.inicio-coach-go{font-size:18px;color:#bfdbfe;padding-right:2px}
-.inicio-fasting-mini{margin:-4px 0 14px}
-.inicio-fast-chip{border:1px solid rgba(255,255,255,.08);border-radius:14px;background:rgba(255,255,255,.035);display:flex;align-items:center;justify-content:space-between;gap:10px;padding:9px 11px}
+.inicio-coach-action{margin:0 0 9px}
+.inicio-coach-btn{width:100%;min-height:44px;border:1px solid rgba(147,197,253,.22);border-radius:14px;background:linear-gradient(135deg,rgba(37,99,235,.16),rgba(16,185,129,.055));color:var(--white);display:grid;grid-template-columns:auto minmax(0,1fr) auto;align-items:center;gap:9px;padding:9px 11px;text-align:left;cursor:pointer;box-shadow:0 10px 24px rgba(0,0,0,.2)}
+.inicio-coach-icon{width:28px;height:28px;border-radius:10px;background:rgba(147,197,253,.11);display:flex;align-items:center;justify-content:center;color:#bfdbfe;flex-shrink:0}
+.inicio-coach-icon svg{width:17px;height:17px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.inicio-coach-title{font-size:13px;font-weight:850;color:var(--white);line-height:1.15;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.inicio-coach-go{border-radius:999px;background:rgba(147,197,253,.12);color:#bfdbfe;font-size:10px;font-weight:900;letter-spacing:.08em;text-transform:uppercase;padding:6px 9px;white-space:nowrap}
+.inicio-fasting-mini{position:relative;z-index:2;width:max-content;max-width:calc(100% - 28px);margin:-50px 14px 18px auto}
+.inicio-fast-chip{border:1px solid rgba(255,255,255,.08);border-radius:999px;background:rgba(8,8,8,.72);backdrop-filter:blur(12px);display:flex;align-items:center;gap:7px;padding:6px 9px;box-shadow:0 10px 22px rgba(0,0,0,.24)}
 .inicio-fast-chip.is-active{border-color:rgba(96,165,250,.26);background:rgba(37,99,235,.09)}
 .inicio-fast-chip.is-feeding{border-color:rgba(52,211,153,.25);background:rgba(16,185,129,.08)}
-.inicio-fast-label{font-size:9px;font-weight:900;letter-spacing:.13em;text-transform:uppercase;color:#9ca3af}
+.inicio-fast-label{font-size:8px;font-weight:900;letter-spacing:.12em;text-transform:uppercase;color:#9ca3af}
 .inicio-fast-chip.is-active .inicio-fast-label{color:#93c5fd}
 .inicio-fast-chip.is-feeding .inicio-fast-label{color:#6ee7b7}
-.inicio-fast-time{font-size:16px;font-weight:850;color:var(--white);line-height:1}
-.inicio-fast-note{font-size:11px;color:#9ca3af;white-space:nowrap}
+.inicio-fast-time{font-size:12px;font-weight:850;color:var(--white);line-height:1;white-space:nowrap}
 .guest-card{background:var(--card);border:1px solid rgba(37,99,235,.35);border-radius:6px;margin-bottom:12px;overflow:hidden}
 .guest-toggle{width:100%;background:var(--card);border:1px solid rgba(37,99,235,.35);border-radius:6px;padding:13px 14px;margin-bottom:12px;display:flex;align-items:center;justify-content:space-between;gap:10px;color:var(--white);cursor:pointer}
 .guest-toggle-title{font-size:13px;font-weight:800;letter-spacing:.1em;text-transform:uppercase}
@@ -2044,7 +2041,7 @@ html,body,.app,input,select,button,textarea{font-family:var(--font-ui);font-opti
 // ── CONFIG & SUPABASE ───────────────────────────────────────
 const SUPABASE_URL='https://pmpjteuqjusbiduevbwq.supabase.co';
 const SUPABASE_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBtcGp0ZXVxanVzYmlkdWV2YndxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc2OTI1NjUsImV4cCI6MjA5MzI2ODU2NX0.XbMzZoo2yqtrD8znLnyo_1zDfrdJAvAPj1lqGOyXnLw';
-const APP_VERSION='20260719-14';
+const APP_VERSION='20260719-15';
 const MUSCLE_GROUPS=['Pecho','Espalda','Piernas','Hombros','Brazos','Core','Cardio','Full Body'];
 const DAILY_QUOTES=[
   {text:'Haz hoy lo que tu version de manana agradeceria.',action:'Elige una accion pequeña y cumplible antes de buscar motivacion.'},
@@ -4009,13 +4006,13 @@ function inicioCoachActionHtml(){
   const row=active||next;
   if(!row)return '';
   const isActive=!!active;
-  const title=(isActive?'Continuar ':'Iniciar ')+esc(row.board_name||'entreno');
-  const meta=isActive?'Entreno en curso':'Programado para hoy';
+  const title=esc(row.board_name||'Entreno');
+  const cta=isActive?'Continuar':'Iniciar';
   const action=isActive?'goToActiveSession()':'startInicioCoachWorkout(&quot;'+esc(row.id)+'&quot;)';
   return '<div class="inicio-coach-action"><button type="button" class="inicio-coach-btn" onclick="'+action+'">'
     +'<span class="inicio-coach-icon"><svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M3 10h18M8 2v4M16 2v4M8 15l2 2 4-4"/></svg></span>'
-    +'<span><span class="inicio-coach-k">Coaching</span><span class="inicio-coach-title">'+title+'</span><span class="inicio-coach-meta">'+esc(meta)+'</span></span>'
-    +'<span class="inicio-coach-go">›</span>'
+    +'<span class="inicio-coach-title">'+title+'</span>'
+    +'<span class="inicio-coach-go">'+cta+'</span>'
     +'</button></div>';
 }
 function inicioFastingMiniHtml(){
@@ -4030,10 +4027,8 @@ function inicioFastingMiniHtml(){
   const cls=active?'is-active':'is-feeding';
   const label=active?'Ayuno':'Ingesta';
   const time=active?fastingElapsedLabel(last):fastingElapsedLabel(first);
-  const note=active?'en curso':'ventana activa';
   return '<div class="inicio-fasting-mini"><div class="inicio-fast-chip '+cls+'">'
-    +'<div><div class="inicio-fast-label">'+label+'</div><div class="inicio-fast-time" id="inicio-fasting-time">'+esc(time)+'</div></div>'
-    +'<div class="inicio-fast-note">'+esc(note)+'</div>'
+    +'<span class="inicio-fast-label">'+label+'</span><span class="inicio-fast-time" id="inicio-fasting-time">'+esc(time)+'</span>'
     +'</div></div>';
 }
 function renderInicioCoachingWidgets(){
