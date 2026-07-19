@@ -399,15 +399,16 @@ input,select,button,textarea{font-family:'Montserrat',sans-serif}
 .coach-workout-summary{display:grid;grid-template-columns:1fr auto;gap:10px;align-items:center;margin-bottom:12px;padding:12px 13px;border:1px solid rgba(255,255,255,.08);background:rgba(255,255,255,.035);border-radius:16px}
 .coach-workout-summary strong{display:block;font-size:13px;color:var(--white);margin-bottom:5px}
 .coach-workout-summary span{font-size:11px;color:var(--gray);line-height:1.35}
-.coach-session-card{border:1px solid rgba(255,255,255,.08);border-radius:18px;background:linear-gradient(180deg,rgba(255,255,255,.058),rgba(255,255,255,.03));box-shadow:0 14px 34px rgba(0,0,0,.22);padding:13px;margin-bottom:10px}
-.coach-session-top{display:grid;grid-template-columns:auto 1fr auto;gap:10px;align-items:center}
-.coach-session-dot{width:9px;height:9px;border-radius:50%;box-shadow:0 0 0 5px rgba(37,99,235,.1)}
-.coach-session-title{font-size:16px;font-weight:900;color:var(--white);line-height:1.1;letter-spacing:0}
-.coach-session-meta{font-size:11px;color:var(--gray);margin-top:4px;line-height:1.35}
-.coach-session-count{border-radius:999px;background:rgba(37,99,235,.15);color:#bfdbfe;padding:7px 10px;font-size:11px;font-weight:850;white-space:nowrap}
-.coach-session-actions{display:grid;grid-template-columns:1fr auto;gap:8px;margin-top:12px}
+.coach-session-card{border:1px solid rgba(255,255,255,.075);border-radius:16px;background:rgba(255,255,255,.035);box-shadow:none;padding:11px 12px;margin-bottom:9px}
+.coach-session-top{display:grid;grid-template-columns:auto 1fr auto;gap:9px;align-items:center}
+.coach-session-dot{width:8px;height:8px;border-radius:50%;box-shadow:0 0 0 4px rgba(37,99,235,.09)}
+.coach-session-title{font-size:14px;font-weight:900;color:var(--white);line-height:1.1;letter-spacing:0}
+.coach-session-meta{font-size:10.5px;color:var(--gray);margin-top:3px;line-height:1.3}
+.coach-session-count{border-radius:999px;background:rgba(37,99,235,.12);color:#bfdbfe;padding:5px 8px;font-size:10.5px;font-weight:850;white-space:nowrap}
+.coach-session-actions{display:grid;grid-template-columns:1fr auto;gap:8px;margin-top:9px}
 .coach-session-actions .btn{min-height:42px;border-radius:14px;font-size:13px}
 .coach-session-actions .btn-sm{min-height:42px;border-radius:14px;padding:8px 12px}
+.coach-session-actions .coach-detail-mini{justify-self:end;min-height:32px;border-radius:999px;padding:7px 12px;font-size:11px}
 .coach-session-details{margin-top:12px}
 .coach-add-workout{width:100%;margin:0 0 10px;min-height:34px}
 .ex-history-row{display:flex;align-items:center;justify-content:space-between;padding:10px 0;border-bottom:1px solid var(--border);font-size:13px}
@@ -6219,6 +6220,11 @@ function coachPrimaryActionHtml(todayRows){
   if(!log.lastMealAt||log.firstMealAt)return '<button class="btn coach-primary-action" onclick="fastingExpanded=true;renderCoachHoyPanel()">Registrar última comida</button>';
   return '';
 }
+function coachPrimaryWorkoutId(todayRows){
+  if(activeCoachingSession)return activeCoachingSession.id;
+  const nextWorkout=todayRows.find(r=>r.status==='scheduled');
+  return nextWorkout?nextWorkout.id:null;
+}
 function renderCoachHoyPanel(){
   const el=document.getElementById('coach-hoy-panel');
   if(!el)return;
@@ -6231,6 +6237,7 @@ function renderCoachHoyPanel(){
   const doneTasks=relevantTasks.filter(isTaskDoneToday).length;
   const doneWorkouts=todayRows.filter(r=>r.status==='done').length;
   const ctx=coachTodayContext(todayRows,relevantTasks,doneTasks,missedRows);
+  const primaryWorkoutId=coachPrimaryWorkoutId(todayRows);
   let html='';
   html+='<div class="coach-context"><div class="coach-context-main"><div class="coach-context-k">Coaching de hoy</div><div class="coach-context-title">'+esc(ctx.title)+'</div><div class="coach-context-sub">'+esc(ctx.sub)+'</div></div><div class="badge bg-blue">'+doneWorkouts+'/'+todayRows.length+' · '+doneTasks+'/'+relevantTasks.length+'</div></div>';
   html+=coachPrimaryActionHtml(todayRows);
@@ -6266,9 +6273,9 @@ function renderCoachHoyPanel(){
           +'<div class="coach-session-top"><div class="coach-session-dot" style="background:'+esc(todayRow.board_color||'#2563eb')+'"></div>'
           +'<div style="min-width:0"><div class="coach-session-title">'+esc(todayRow.board_name)+'</div><div class="coach-session-meta">'+(isActive?'En curso':'Rutina lista')+' · '+esc(progressLabel)+'</div></div>'
           +'<div class="coach-session-count">'+exercises.length+' ej.</div></div>'
-          +'<div class="coach-session-actions">'
-          +'<button class="btn" onclick="'+(isActive?'openActiveCoachingExercise()':'startCoachingSessionSb(&quot;'+todayRow.id+'&quot;)')+'">'+(isActive?'Volver':'Iniciar')+'</button>'
-          +'<button class="btn-sm" onclick="toggleCoachTodayBoard(&quot;'+todayRow.id+'&quot;)">'+(isExpanded?'Ocultar':'Detalle')+'</button></div>'
+          +'<div class="coach-session-actions" style="'+(todayRow.id===primaryWorkoutId?'display:flex;justify-content:flex-end':'')+'">'
+          +(todayRow.id===primaryWorkoutId?'':'<button class="btn" onclick="'+(isActive?'openActiveCoachingExercise()':'startCoachingSessionSb(&quot;'+todayRow.id+'&quot;)')+'">'+(isActive?'Volver':'Iniciar')+'</button>')
+          +'<button class="btn-sm '+(todayRow.id===primaryWorkoutId?'coach-detail-mini':'')+'" onclick="toggleCoachTodayBoard(&quot;'+todayRow.id+'&quot;)">'+(isExpanded?'Ocultar':'Detalle')+'</button></div>'
           +(isExpanded?'<div class="coach-session-details">'+exHtml+'</div>':'')+'</div>';
       }
     });
