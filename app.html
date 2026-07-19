@@ -6,12 +6,12 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="HABIT">
 <meta name="application-name" content="HABIT">
-<link rel="manifest" href="/manifest.json?v=20260719-01">
-<link rel="apple-touch-icon" sizes="120x120" href="/icons/icon-120.png?v=20260719-01">
-<link rel="apple-touch-icon" sizes="152x152" href="/icons/icon-152.png?v=20260719-01">
-<link rel="apple-touch-icon" sizes="167x167" href="/icons/icon-167.png?v=20260719-01">
-<link rel="apple-touch-icon" sizes="180x180" href="/icons/icon-180.png?v=20260719-01">
-<link rel="icon" type="image/png" sizes="32x32" href="/icons/icon-32.png?v=20260719-01">
+<link rel="manifest" href="/manifest.json?v=20260719-02">
+<link rel="apple-touch-icon" sizes="120x120" href="/icons/icon-120.png?v=20260719-02">
+<link rel="apple-touch-icon" sizes="152x152" href="/icons/icon-152.png?v=20260719-02">
+<link rel="apple-touch-icon" sizes="167x167" href="/icons/icon-167.png?v=20260719-02">
+<link rel="apple-touch-icon" sizes="180x180" href="/icons/icon-180.png?v=20260719-02">
+<link rel="icon" type="image/png" sizes="32x32" href="/icons/icon-32.png?v=20260719-02">
 <title>HABIT</title>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Share+Tech+Mono&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
@@ -1286,9 +1286,6 @@ html,body,.app,input,select,button,textarea{font-family:var(--font-ui);font-opti
     <div id="v-coach-programa" class="view">
       <div class="scroll-area">
         <div id="coach-semana-panel"></div>
-        <div class="divider"></div>
-        <p class="slbl">Tus rutinas</p>
-        <div id="coach-rutinas-panel"></div>
       </div>
     </div>
 
@@ -2005,7 +2002,7 @@ html,body,.app,input,select,button,textarea{font-family:var(--font-ui);font-opti
 // ── CONFIG & SUPABASE ───────────────────────────────────────
 const SUPABASE_URL='https://pmpjteuqjusbiduevbwq.supabase.co';
 const SUPABASE_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBtcGp0ZXVxanVzYmlkdWV2YndxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc2OTI1NjUsImV4cCI6MjA5MzI2ODU2NX0.XbMzZoo2yqtrD8znLnyo_1zDfrdJAvAPj1lqGOyXnLw';
-const APP_VERSION='20260719-01';
+const APP_VERSION='20260719-02';
 const MUSCLE_GROUPS=['Pecho','Espalda','Piernas','Hombros','Brazos','Core','Cardio','Full Body'];
 const DAILY_QUOTES=[
   {text:'Haz hoy lo que tu version de manana agradeceria.',action:'Elige una accion pequeña y cumplible antes de buscar motivacion.'},
@@ -2520,7 +2517,7 @@ let users={}; // Local cache only, real data comes from Supabase
 let slots30={};
 let waitlists={}; // waitlists[ds+'_'+slotIdx] = [{userId,name,...}]
 let payments=[], boards=[], scores={}, posts=[], accessLog=[], adminNotifs=[];
-let curUser=null, curDate=dateObjFromDS(mazToday()), selStartIdx=null, selShort=false, selPlan=null, selPT='individual', selectedRoutineBoardId=null, coachRutinasExpanded=false;
+let curUser=null, curDate=dateObjFromDS(mazToday()), selStartIdx=null, selShort=false, selPlan=null, selPT='individual', selectedRoutineBoardId=null;
 let accInt=null, accessDataInt=null, notifChannel=null, userNotifInt=null, receptionClockInt=null, receptionDataInt=null, userNotifBootstrapped=false, userNotifSeen=new Set(), notifs=[], logScoreCtx=null, expandedUsers=new Set();
 let coachWeekStart=null, coachSchedule=[], coachTasks=[], coachBoardsById={}, activeCoachingSession=null, coachSessionTickInt=null, coachSessionSets={}, coachTaskLogsToday=new Set(), coachTaskLogsByDs={}, coachFastingLogs=[];
 let chatMessages=[], chatChannel=null, chatPollInt=null, chatSendContext=null,
@@ -3712,7 +3709,6 @@ async function renderCoachProgramaSb(){
   if(el&&!coachDataLoadedAt)el.innerHTML='<div class="empty">Cargando...</div>';
   await loadCoachWeekDataSb(false);
   renderCoachSemanaPanel();
-  renderCoachRutinasPanel();
 }
 
 function finSubTab(t,btn){
@@ -5311,12 +5307,7 @@ function cancelBoardEdit(bid){
 function toggleNewSocioForm(){const f=document.getElementById('new-socio-form');if(!f)return;const open=f.style.display!=='none';f.style.display=open?'none':'block';}
 function selectRoutineBoard(bid){
   selectedRoutineBoardId=bid;
-  if(canAccessCoaching())renderCoachRutinasPanel();
-  else renderRutinas();
-}
-function toggleCoachRutinasExpanded(){
-  coachRutinasExpanded=!coachRutinasExpanded;
-  renderCoachRutinasPanel();
+  renderRutinas();
 }
 let scoreWeightUnit=localStorage.getItem('habit_weight_unit')||'kg';
 function openLogScore(ctx){
@@ -5874,55 +5865,6 @@ async function renderRutinas(){
   }
 }
 
-async function renderCoachRutinasPanel(){
-  const el=document.getElementById('coach-rutinas-panel');
-  if(!el)return;
-  if(!canUseMemberViews()){
-    el.innerHTML='<div class="empty">Activa una membresia vigente para ver tus rutinas asignadas.</div>';
-    return;
-  }
-  el.innerHTML='<div class="empty">Cargando rutinas...</div>';
-  if(!sbUser){el.innerHTML='<div class="empty">Inicia sesion para ver tus rutinas.</div>';return;}
-  try{
-    const{data:assignments}=await sb.from('board_assignments').select('board_id').eq('user_id',sbUser.id);
-    const boardIds=(assignments||[]).map(a=>a.board_id);
-    if(!boardIds.length){
-      el.innerHTML='<div class="empty">No tienes rutinas asignadas.<br>Pide a tu coach que te asigne un pizarron.</div>';
-      return;
-    }
-    const{data:myBoards}=await sb.from('boards').select('*').in('id',boardIds);
-    if(!myBoards||!myBoards.length){
-      el.innerHTML='<div class="empty">Sin rutinas disponibles.</div>';
-      return;
-    }
-    if(!selectedRoutineBoardId||!myBoards.some(b=>b.id===selectedRoutineBoardId))selectedRoutineBoardId=myBoards[0].id;
-    const selected=myBoards.find(b=>b.id===selectedRoutineBoardId)||myBoards[0];
-    const tabs=myBoards.map(b=>'<button class="routine-tab '+(b.id===selected.id?'active':'')+'" onclick="selectRoutineBoard(&quot;'+esc(b.id)+'&quot;)">'+esc(b.name)+'</button>').join('');
-    const exercises=selected.exercises||[];
-    const exHtml=renderExerciseListHtml(exercises,selected.id,selected.id);
-    const today=mazToday();
-    const todayRowForBoard=coachSchedule.find(r=>r.ds===today&&r.board_id===selected.id&&r.status!=='scheduled');
-    let startBtnHtml;
-    if(todayRowForBoard&&todayRowForBoard.status==='done'){
-      startBtnHtml='<div class="badge bg-green" style="display:block;text-align:center;padding:10px;margin-bottom:12px">Completado hoy ✓</div>'
-        +'<button class="btn-sm" style="width:100%;margin-bottom:12px" onclick="startWorkoutFromBoardSb(&quot;'+esc(selected.id)+'&quot;,&quot;'+esc(selected.name)+'&quot;,&quot;'+esc(selected.color||'#2563eb')+'&quot;)">▶ Hacerlo de nuevo hoy</button>';
-    }else if(todayRowForBoard&&todayRowForBoard.status==='in_progress'){
-      startBtnHtml='<button class="btn" style="width:100%;margin-bottom:12px" onclick="coachHubActiveTab=&quot;hoy&quot;;coachHubTab(&quot;hoy&quot;,null)">▶ Continuar entreno en curso</button>';
-    }else{
-      startBtnHtml='<button class="btn" style="width:100%;margin-bottom:12px" onclick="startWorkoutFromBoardSb(&quot;'+esc(selected.id)+'&quot;,&quot;'+esc(selected.name)+'&quot;,&quot;'+esc(selected.color||'#2563eb')+'&quot;)">▶ Iniciar entreno</button>';
-    }
-    const toggleLabel=coachRutinasExpanded?'Ocultar ejercicios ‹':'Ver ejercicios ›';
-    el.innerHTML='<div class="routine-tabs">'+tabs+'</div>'
-      +startBtnHtml
-      +'<div class="board-card"><div class="board-hdr"><div style="display:flex;align-items:center;gap:8px;min-width:0"><div style="width:10px;height:10px;border-radius:50%;background:'+esc(selected.color||'#2563eb')+'"></div><span class="board-title">'+esc(selected.name)+'</span></div><span class="badge bg-blue">'+exercises.length+' ejercicios</span></div>'
-      +(coachRutinasExpanded?'<div class="board-body">'+exHtml+'</div>':'')
-      +'</div>'
-      +'<div style="text-align:center;margin:10px 0 0;font-size:11px;font-weight:700;color:var(--bl);cursor:pointer" onclick="toggleCoachRutinasExpanded()">'+toggleLabel+'</div>';
-  }catch(e){
-    el.innerHTML='<div class="empty">Error cargando rutinas: '+e.message+'</div>';
-    console.error('renderCoachRutinasPanel:',e);
-  }
-}
 async function startWorkoutFromBoardSb(boardId,boardName,boardColor){
   const today=mazToday();
   try{
