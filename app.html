@@ -6,12 +6,12 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="HABIT">
 <meta name="application-name" content="HABIT">
-<link rel="manifest" href="/manifest.json?v=20260718-33">
-<link rel="apple-touch-icon" sizes="120x120" href="/icons/icon-120.png?v=20260718-33">
-<link rel="apple-touch-icon" sizes="152x152" href="/icons/icon-152.png?v=20260718-33">
-<link rel="apple-touch-icon" sizes="167x167" href="/icons/icon-167.png?v=20260718-33">
-<link rel="apple-touch-icon" sizes="180x180" href="/icons/icon-180.png?v=20260718-33">
-<link rel="icon" type="image/png" sizes="32x32" href="/icons/icon-32.png?v=20260718-33">
+<link rel="manifest" href="/manifest.json?v=20260718-34">
+<link rel="apple-touch-icon" sizes="120x120" href="/icons/icon-120.png?v=20260718-34">
+<link rel="apple-touch-icon" sizes="152x152" href="/icons/icon-152.png?v=20260718-34">
+<link rel="apple-touch-icon" sizes="167x167" href="/icons/icon-167.png?v=20260718-34">
+<link rel="apple-touch-icon" sizes="180x180" href="/icons/icon-180.png?v=20260718-34">
+<link rel="icon" type="image/png" sizes="32x32" href="/icons/icon-32.png?v=20260718-34">
 <title>HABIT</title>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Share+Tech+Mono&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
@@ -2005,7 +2005,7 @@ html,body,.app,input,select,button,textarea{font-family:var(--font-ui);font-opti
 // ── CONFIG & SUPABASE ───────────────────────────────────────
 const SUPABASE_URL='https://pmpjteuqjusbiduevbwq.supabase.co';
 const SUPABASE_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBtcGp0ZXVxanVzYmlkdWV2YndxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc2OTI1NjUsImV4cCI6MjA5MzI2ODU2NX0.XbMzZoo2yqtrD8znLnyo_1zDfrdJAvAPj1lqGOyXnLw';
-const APP_VERSION='20260718-33';
+const APP_VERSION='20260718-34';
 const MUSCLE_GROUPS=['Pecho','Espalda','Piernas','Hombros','Brazos','Core','Cardio','Full Body'];
 const DAILY_QUOTES=[
   {text:'Haz hoy lo que tu version de manana agradeceria.',action:'Elige una accion pequeña y cumplible antes de buscar motivacion.'},
@@ -2520,7 +2520,7 @@ let users={}; // Local cache only, real data comes from Supabase
 let slots30={};
 let waitlists={}; // waitlists[ds+'_'+slotIdx] = [{userId,name,...}]
 let payments=[], boards=[], scores={}, posts=[], accessLog=[], adminNotifs=[];
-let curUser=null, curDate=dateObjFromDS(mazToday()), selStartIdx=null, selShort=false, selPlan=null, selPT='individual', selectedRoutineBoardId=null;
+let curUser=null, curDate=dateObjFromDS(mazToday()), selStartIdx=null, selShort=false, selPlan=null, selPT='individual', selectedRoutineBoardId=null, coachRutinasExpanded=false;
 let accInt=null, accessDataInt=null, notifChannel=null, userNotifInt=null, receptionClockInt=null, receptionDataInt=null, userNotifBootstrapped=false, userNotifSeen=new Set(), notifs=[], logScoreCtx=null, expandedUsers=new Set();
 let coachWeekStart=null, coachSchedule=[], coachTasks=[], coachBoardsById={}, activeCoachingSession=null, coachSessionTickInt=null, coachSessionSets={}, coachTaskLogsToday=new Set(), coachTaskLogsByDs={}, coachFastingLogs=[];
 let chatMessages=[], chatChannel=null, chatPollInt=null, chatSendContext=null,
@@ -5314,6 +5314,10 @@ function selectRoutineBoard(bid){
   if(canAccessCoaching())renderCoachRutinasPanel();
   else renderRutinas();
 }
+function toggleCoachRutinasExpanded(){
+  coachRutinasExpanded=!coachRutinasExpanded;
+  renderCoachRutinasPanel();
+}
 let scoreWeightUnit=localStorage.getItem('habit_weight_unit')||'kg';
 function openLogScore(ctx){
   logScoreCtx=ctx; // {boardId,exIdx,exName,exId}
@@ -5907,9 +5911,13 @@ async function renderCoachRutinasPanel(){
     }else{
       startBtnHtml='<button class="btn" style="width:100%;margin-bottom:12px" onclick="startWorkoutFromBoardSb(&quot;'+esc(selected.id)+'&quot;,&quot;'+esc(selected.name)+'&quot;,&quot;'+esc(selected.color||'#2563eb')+'&quot;)">▶ Iniciar entreno</button>';
     }
+    const toggleLabel=coachRutinasExpanded?'Ocultar ejercicios ‹':'Ver ejercicios ›';
     el.innerHTML='<div class="routine-tabs">'+tabs+'</div>'
       +startBtnHtml
-      +'<div class="board-card"><div class="board-hdr"><div style="display:flex;align-items:center;gap:8px;min-width:0"><div style="width:10px;height:10px;border-radius:50%;background:'+esc(selected.color||'#2563eb')+'"></div><span class="board-title">'+esc(selected.name)+'</span></div><span class="badge bg-blue">'+exercises.length+' ejercicios</span></div><div class="board-body">'+exHtml+'</div></div>';
+      +'<div class="board-card"><div class="board-hdr"><div style="display:flex;align-items:center;gap:8px;min-width:0"><div style="width:10px;height:10px;border-radius:50%;background:'+esc(selected.color||'#2563eb')+'"></div><span class="board-title">'+esc(selected.name)+'</span></div><span class="badge bg-blue">'+exercises.length+' ejercicios</span></div>'
+      +(coachRutinasExpanded?'<div class="board-body">'+exHtml+'</div>':'')
+      +'</div>'
+      +'<div style="text-align:center;margin:10px 0 0;font-size:11px;font-weight:700;color:var(--bl);cursor:pointer" onclick="toggleCoachRutinasExpanded()">'+toggleLabel+'</div>';
   }catch(e){
     el.innerHTML='<div class="empty">Error cargando rutinas: '+e.message+'</div>';
     console.error('renderCoachRutinasPanel:',e);
