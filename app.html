@@ -6,12 +6,12 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="HABIT">
 <meta name="application-name" content="HABIT">
-<link rel="manifest" href="/manifest.json?v=20260719-02">
-<link rel="apple-touch-icon" sizes="120x120" href="/icons/icon-120.png?v=20260719-02">
-<link rel="apple-touch-icon" sizes="152x152" href="/icons/icon-152.png?v=20260719-02">
-<link rel="apple-touch-icon" sizes="167x167" href="/icons/icon-167.png?v=20260719-02">
-<link rel="apple-touch-icon" sizes="180x180" href="/icons/icon-180.png?v=20260719-02">
-<link rel="icon" type="image/png" sizes="32x32" href="/icons/icon-32.png?v=20260719-02">
+<link rel="manifest" href="/manifest.json?v=20260719-03">
+<link rel="apple-touch-icon" sizes="120x120" href="/icons/icon-120.png?v=20260719-03">
+<link rel="apple-touch-icon" sizes="152x152" href="/icons/icon-152.png?v=20260719-03">
+<link rel="apple-touch-icon" sizes="167x167" href="/icons/icon-167.png?v=20260719-03">
+<link rel="apple-touch-icon" sizes="180x180" href="/icons/icon-180.png?v=20260719-03">
+<link rel="icon" type="image/png" sizes="32x32" href="/icons/icon-32.png?v=20260719-03">
 <title>HABIT</title>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Share+Tech+Mono&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
@@ -365,14 +365,16 @@ input,select,button,textarea{font-family:'Inter',sans-serif}
 .ex-menu-item{display:flex;align-items:center;gap:8px;width:100%;padding:12px 10px;background:transparent;border:none;border-bottom:1px solid var(--border);color:var(--white);font-size:13.5px;font-weight:600;text-align:left;cursor:pointer}
 .ex-menu-item:last-child{border-bottom:none}
 .ex-menu-item:active{background:var(--card2)}
-.ex-focus-video-btn{width:100%;display:flex;align-items:center;justify-content:center;gap:8px;background:rgba(37,99,235,.14);border:1px solid rgba(59,130,246,.4);border-radius:14px;padding:13px;color:var(--bl);font-size:12px;font-weight:800;letter-spacing:.04em;text-transform:uppercase;cursor:pointer}
-.ex-focus-video-btn:active{background:rgba(37,99,235,.24)}
 .ex-focus-icon-btn{flex:1;min-width:0;display:flex;flex-direction:column;align-items:center;gap:4px;padding:10px 4px;background:var(--card2);border:1px solid var(--border);border-radius:14px;color:var(--white);font-size:10.5px;font-weight:750;cursor:pointer}
 .ex-focus-icon-btn:active{background:var(--border)}
+.ex-focus-icon-btn.active{background:rgba(37,99,235,.18);border-color:rgba(59,130,246,.4);color:var(--bl)}
 .exercise-session-modal{background:rgba(0,0,0,.9);backdrop-filter:blur(18px)}
 .terms-box.exercise-focus-box{position:relative;width:100%;height:100%;max-width:430px;max-height:none;border-radius:0;background:linear-gradient(180deg,#111214 0%,#08090a 56%,#050505 100%);display:flex;flex-direction:column}
-.terms-box.exercise-focus-box .terms-hdr{padding:calc(env(safe-area-inset-top,0px) + 18px) 18px 16px;border-bottom:1px solid rgba(255,255,255,.07);background:rgba(10,10,10,.8);backdrop-filter:blur(14px)}
-.terms-box.exercise-focus-box .terms-hdr h2{font-size:19px;font-weight:900;line-height:1.08;letter-spacing:0;text-transform:uppercase;max-width:260px}
+.terms-box.exercise-focus-box .terms-hdr{padding:calc(env(safe-area-inset-top,0px) + 18px) 18px 16px;border-bottom:1px solid rgba(255,255,255,.07);background:rgba(10,10,10,.8);backdrop-filter:blur(14px);align-items:flex-start}
+.terms-box.exercise-focus-box .terms-hdr h2{font-size:25px;font-weight:900;line-height:1.1;letter-spacing:0;text-transform:uppercase;white-space:normal;max-width:none;flex:1;min-width:0}
+.exercise-focus-hdr-actions{display:flex;align-items:center;gap:6px;flex-shrink:0;margin-top:2px}
+.exercise-focus-cancel-btn{border:1px solid rgba(239,68,68,.4);background:rgba(239,68,68,.12);color:#fca5a5;border-radius:6px;padding:10px 11px;font-size:11px;font-weight:800}
+.exercise-focus-cancel-btn:active{background:rgba(239,68,68,.24)}
 .exercise-focus-body{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:16px 16px calc(150px + env(safe-area-inset-bottom,0px))}
 .exercise-focus-stage{border:1px solid rgba(255,255,255,.08);background:rgba(255,255,255,.035);border-radius:18px;padding:12px;margin-bottom:14px}
 .exercise-focus-stage.expanded{padding:12px;overflow:hidden;background:linear-gradient(180deg,rgba(37,99,235,.12),rgba(255,255,255,.035));border-color:rgba(59,130,246,.24)}
@@ -395,7 +397,6 @@ input,select,button,textarea{font-family:'Inter',sans-serif}
 .exercise-focus-fab{width:54px;height:54px;border-radius:50%;border:1px solid rgba(255,255,255,.12);background:rgba(22,23,25,.94);color:var(--white);display:flex;align-items:center;justify-content:center;font-size:22px;box-shadow:0 16px 38px rgba(0,0,0,.44);cursor:pointer}
 .exercise-focus-fab.primary{background:linear-gradient(180deg,#f7bd49,#f0a819);color:#1a1200;border-color:rgba(255,255,255,.18)}
 .exercise-focus-fab.help{background:rgba(37,99,235,.9);color:#fff}
-.exercise-focus-danger{width:100%;margin-top:10px;border:1px solid rgba(239,68,68,.28);background:rgba(239,68,68,.09);color:#fca5a5;border-radius:16px;padding:13px;font-size:12px;font-weight:850}
 .coach-workout-summary{display:grid;grid-template-columns:1fr auto;gap:10px;align-items:center;margin-bottom:12px;padding:12px 13px;border:1px solid rgba(255,255,255,.08);background:rgba(255,255,255,.035);border-radius:16px}
 .coach-workout-summary strong{display:block;font-size:13px;color:var(--white);margin-bottom:5px}
 .coach-workout-summary span{font-size:11px;color:var(--gray);line-height:1.35}
@@ -417,12 +418,16 @@ input,select,button,textarea{font-family:'Inter',sans-serif}
 .set-tracker-hdr{display:grid;grid-template-columns:28px 1fr 1fr 40px;gap:6px;font-size:10px;font-weight:700;color:var(--gray);letter-spacing:.06em;text-transform:uppercase;padding:0 2px 6px;text-align:center}
 .set-tracker-hdr span:first-child{text-align:left}
 .set-row{display:grid;grid-template-columns:28px 1fr 1fr 40px;gap:6px;align-items:center;margin-bottom:6px}
+.set-tracker.has-del .set-tracker-hdr,.set-tracker.has-del .set-row{grid-template-columns:28px 1fr 1fr 40px 22px}
 .set-num{font-size:12px;font-weight:700;color:var(--gray);text-align:center}
 .set-reps-in{background:var(--card);border:1px solid var(--border);border-radius:4px;padding:8px;font-size:13px;color:var(--white);width:100%}
 .set-check{width:32px;height:32px;border-radius:6px;border:1.5px solid var(--border);background:var(--card);color:transparent;font-size:14px;font-weight:900;cursor:pointer;justify-self:center}
 .set-check.done{background:var(--green);border-color:var(--green);color:#03120d}
+.set-del-btn{width:22px;height:22px;border-radius:5px;border:1px solid rgba(239,68,68,.3);background:rgba(239,68,68,.08);color:#fca5a5;font-size:12px;line-height:1;cursor:pointer;justify-self:center;display:flex;align-items:center;justify-content:center}
+.set-del-btn:active{background:rgba(239,68,68,.2)}
 .set-tracker-actions{display:flex;gap:8px;margin-top:6px}
 .set-tracker-actions .btn-sm{flex:1;text-align:center}
+.set-tracker-actions .btn-sm.compact{flex:0 0 auto;padding:8px 12px;font-size:11px}
 #v-coaching .board-card,#a-coaching-detail .board-card{border-radius:16px;border-color:rgba(255,255,255,.08);background:linear-gradient(180deg,rgba(255,255,255,.055),rgba(255,255,255,.032));box-shadow:0 14px 36px rgba(0,0,0,.22)}
 #v-coaching .board-hdr,#a-coaching-detail .board-hdr{padding:14px 15px;background:rgba(255,255,255,.035);border-bottom:1px solid rgba(255,255,255,.06)}
 #v-coaching .board-title,#a-coaching-detail .board-title{font-size:15px;letter-spacing:0;text-transform:none;line-height:1.2}
@@ -1825,15 +1830,18 @@ html,body,.app,input,select,button,textarea{font-family:var(--font-ui);font-opti
   <div class="terms-box exercise-focus-box">
     <div class="terms-hdr">
       <h2 id="exercise-focus-name">Ejercicio</h2>
-      <button class="video-modal-close" onclick="closeExerciseFocus()">Pausar</button>
+      <div class="exercise-focus-hdr-actions">
+        <button class="exercise-focus-cancel-btn" onclick="cancelCoachingSessionSb()">Cancelar</button>
+        <button class="video-modal-close" onclick="closeExerciseFocus()">Pausar</button>
+      </div>
     </div>
     <div class="terms-body exercise-focus-body">
-      <div id="exercise-focus-video"></div>
       <div class="exercise-focus-meta">
         <div id="exercise-focus-detail"></div>
         <div id="exercise-focus-progress" class="exercise-focus-progress"></div>
       </div>
       <div id="exercise-focus-tools" class="ex-focus-tools"></div>
+      <div id="exercise-focus-video"></div>
       <div id="exercise-focus-body"></div>
       <div class="exercise-focus-pause-note">Pausa el entreno para salir de esta pantalla.</div>
     </div>
@@ -2002,7 +2010,7 @@ html,body,.app,input,select,button,textarea{font-family:var(--font-ui);font-opti
 // ── CONFIG & SUPABASE ───────────────────────────────────────
 const SUPABASE_URL='https://pmpjteuqjusbiduevbwq.supabase.co';
 const SUPABASE_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBtcGp0ZXVxanVzYmlkdWV2YndxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc2OTI1NjUsImV4cCI6MjA5MzI2ODU2NX0.XbMzZoo2yqtrD8znLnyo_1zDfrdJAvAPj1lqGOyXnLw';
-const APP_VERSION='20260719-02';
+const APP_VERSION='20260719-03';
 const MUSCLE_GROUPS=['Pecho','Espalda','Piernas','Hombros','Brazos','Core','Cardio','Full Body'];
 const DAILY_QUOTES=[
   {text:'Haz hoy lo que tu version de manana agradeceria.',action:'Elige una accion pequeña y cumplible antes de buscar motivacion.'},
@@ -5380,22 +5388,23 @@ function closeExerciseFocus(){
 function toggleExFocusVideo(){
   _exFocusVideoOpen=!_exFocusVideoOpen;
   renderExerciseFocusVideo();
+  renderExerciseFocusTools();
 }
 function renderExerciseFocusVideo(){
   const d=_exFocusData;
   const el=document.getElementById('exercise-focus-video');
   if(!d||!el)return;
-  if(!d.videos||!d.videos.length){el.innerHTML='';return;}
-  el.innerHTML=_exFocusVideoOpen
-    ? '<div class="exercise-focus-stage expanded">'+getExerciseFocusVideoHtml(d.videos[0].url)+'</div>'
-    : '<div class="exercise-focus-stage"><button class="ex-focus-video-btn" onclick="toggleExFocusVideo()"><span class="play-icon"><span class="play-tri"></span></span> Ver video de ejemplo</button></div>';
+  if(!d.videos||!d.videos.length||!_exFocusVideoOpen){el.innerHTML='';return;}
+  el.innerHTML='<div class="exercise-focus-stage expanded">'+getExerciseFocusVideoHtml(d.videos[0].url)+'</div>';
 }
 function renderExerciseFocusTools(){
   const d=_exFocusData;
   const tools=document.getElementById('exercise-focus-tools');
   if(!d||!tools)return;
+  const hasVideo=!!(d.videos&&d.videos.length);
   tools.innerHTML=
-    '<button class="ex-focus-icon-btn" onclick="openExerciseHistoryModal()">Historial</button>'
+    (hasVideo?'<button class="ex-focus-icon-btn'+(_exFocusVideoOpen?' active':'')+'" onclick="toggleExFocusVideo()">'+(_exFocusVideoOpen?'Ocultar video':'▶ Video')+'</button>':'')
+    +'<button class="ex-focus-icon-btn" onclick="openExerciseHistoryModal()">Historial</button>'
     +'<button class="ex-focus-icon-btn" id="exercise-focus-note-btn" onclick="openExerciseNoteFromFocus()">'+(d.hasNote?'Ver nota':'Nota')+'</button>';
 }
 function renderExerciseFocusBodyHtml(){
@@ -5409,8 +5418,7 @@ function renderExerciseFocusBodyHtml(){
     hasPrevExerciseInFocus()?'<button class="btn-sm" onclick="moveExerciseFocus(-1)">Anterior</button>':'',
     hasNextExerciseInFocus()?'<button class="btn" onclick="moveExerciseFocus(1)">Siguiente</button>':'<button class="btn finish" onclick="finishCoachingSessionSb()">Finalizar entreno</button>'
   ].filter(Boolean).join('');
-  return tracker+'<div class="exercise-focus-nav'+(hasPrevExerciseInFocus()?'':' single')+'">'+nav+'</div>'
-    +'<button class="exercise-focus-danger" onclick="cancelCoachingSessionSb()">Cancelar entreno</button>';
+  return tracker+'<div class="exercise-focus-nav'+(hasPrevExerciseInFocus()?'':' single')+'">'+nav+'</div>';
 }
 function renderExerciseFocusModal(){
   const d=_exFocusData;
@@ -5590,16 +5598,17 @@ async function submitScore(){
 function renderSetTrackerHtml(sessionCtx,exKey,ex){
   const sets=sessionCtx.sets[exKey]||[];
   if(!sets.length)return'';
-  return '<div class="set-tracker">'
-    +'<div class="set-tracker-hdr"><span>SERIE</span><span>KG</span><span>REPS</span><span></span></div>'
+  return '<div class="set-tracker has-del">'
+    +'<div class="set-tracker-hdr"><span>SERIE</span><span>KG</span><span>REPS</span><span></span><span></span></div>'
     +sets.map(s=>'<div class="set-row" data-set-id="'+s.id+'">'
       +'<span class="set-num">'+(s.set_idx+1)+'</span>'
       +'<input class="set-reps-in set-weight-in" type="number" inputmode="decimal" placeholder="kg" value="'+(s.weight!=null?s.weight:'')+'" onchange="updateSetWeightSb(&quot;'+s.id+'&quot;,this.value)">'
       +'<input class="set-reps-in set-actual-reps-in" type="text" inputmode="numeric" placeholder="'+esc(s.reps_target||'reps')+'" value="'+esc(s.actual_reps||'')+'" onchange="updateSetRepsSb(&quot;'+s.id+'&quot;,this.value)">'
       +'<button class="set-check'+(s.done?' done':'')+'" onclick="toggleSetDoneSb(&quot;'+s.id+'&quot;,'+(!s.done)+',this)">'+(s.done?'✓':'')+'</button>'
+      +'<button class="set-del-btn" title="Eliminar serie" onclick="deleteSetSb(&quot;'+s.id+'&quot;,&quot;'+esc(exKey)+'&quot;)">✕</button>'
       +'</div>').join('')
     +'<div class="set-tracker-actions">'
-    +'<button class="btn-sm" onclick="addSetSb(&quot;'+sessionCtx.scheduleId+'&quot;,&quot;'+esc(exKey)+'&quot;,&quot;'+esc(ex.reps||'')+'&quot;)">+ Agregar serie</button>'
+    +'<button class="btn-sm compact" onclick="addSetSb(&quot;'+sessionCtx.scheduleId+'&quot;,&quot;'+esc(exKey)+'&quot;,&quot;'+esc(ex.reps||'')+'&quot;)">+ Serie</button>'
     +'<button class="btn-sm" onclick="markAllSetsSb(&quot;'+esc(exKey)+'&quot;)">Marcar Todo</button>'
     +'</div></div>';
 }
@@ -5713,6 +5722,26 @@ async function addSetSb(scheduleId,exKey,defaultReps){
     if(error)throw error;
     if(!coachSessionSets[exKey])coachSessionSets[exKey]=[];
     coachSessionSets[exKey].push(data);
+    refreshSessionUiFor(exKey);
+  }catch(e){toast('Error: '+e.message,'err');}
+}
+async function deleteSetSb(setId,exKey){
+  const arr=coachSessionSets[exKey]||[];
+  if(arr.length<=1){toast('Debe quedar al menos una serie','warn');return;}
+  if(!confirm('¿Eliminar esta serie?'))return;
+  try{
+    const{error}=await sb.from('coaching_session_sets').delete().eq('id',setId);
+    if(error)throw error;
+    // Renumera las series restantes para que el conteo siga consecutivo
+    // (1,2,3…) en vez de dejar un hueco donde estaba la serie borrada.
+    const remaining=arr.filter(s=>s.id!==setId).sort((a,b)=>a.set_idx-b.set_idx);
+    for(let i=0;i<remaining.length;i++){
+      if(remaining[i].set_idx!==i){
+        const{data,error:uErr}=await sb.from('coaching_session_sets').update({set_idx:i}).eq('id',remaining[i].id).select().single();
+        if(!uErr)remaining[i]=data;
+      }
+    }
+    coachSessionSets[exKey]=remaining;
     refreshSessionUiFor(exKey);
   }catch(e){toast('Error: '+e.message,'err');}
 }
