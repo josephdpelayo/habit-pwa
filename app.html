@@ -6,12 +6,12 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="HABIT">
 <meta name="application-name" content="HABIT">
-<link rel="manifest" href="/manifest.json?v=20260719-12">
-<link rel="apple-touch-icon" sizes="120x120" href="/icons/icon-120.png?v=20260719-12">
-<link rel="apple-touch-icon" sizes="152x152" href="/icons/icon-152.png?v=20260719-12">
-<link rel="apple-touch-icon" sizes="167x167" href="/icons/icon-167.png?v=20260719-12">
-<link rel="apple-touch-icon" sizes="180x180" href="/icons/icon-180.png?v=20260719-12">
-<link rel="icon" type="image/png" sizes="32x32" href="/icons/icon-32.png?v=20260719-12">
+<link rel="manifest" href="/manifest.json?v=20260719-13">
+<link rel="apple-touch-icon" sizes="120x120" href="/icons/icon-120.png?v=20260719-13">
+<link rel="apple-touch-icon" sizes="152x152" href="/icons/icon-152.png?v=20260719-13">
+<link rel="apple-touch-icon" sizes="167x167" href="/icons/icon-167.png?v=20260719-13">
+<link rel="apple-touch-icon" sizes="180x180" href="/icons/icon-180.png?v=20260719-13">
+<link rel="icon" type="image/png" sizes="32x32" href="/icons/icon-32.png?v=20260719-13">
 <title>HABIT</title>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Share+Tech+Mono&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
@@ -55,6 +55,7 @@ input,select,button,textarea{font-family:'Inter',sans-serif}
 .bnb.active .nav-logo-img{filter:none;opacity:1}
 .bnb .nav-logo-img{width:30px!important;height:30px!important;object-fit:contain;filter:grayscale(1);opacity:.45;transition:all .2s}
 .bnb-badge{position:absolute;top:7px;right:18px;min-width:18px;height:18px;border-radius:99px;background:var(--green);color:#03120d;font-size:10px;font-weight:900;display:none;align-items:center;justify-content:center;padding:0 5px;border:1px solid rgba(0,0,0,.3)}
+.bnb-badge.coach-pending{background:#ef4444;color:#fff;box-shadow:0 0 0 2px rgba(0,0,0,.55)}
 .bnb-badge.show{display:flex}
 .top-actions{display:flex;align-items:center;gap:6px;margin-left:auto}
 .top-action{width:34px;height:34px;border-radius:4px;border:1px solid var(--border);background:var(--card);color:var(--gray);display:flex;align-items:center;justify-content:center;cursor:pointer;position:relative}
@@ -1402,7 +1403,7 @@ html,body,.app,input,select,button,textarea{font-family:var(--font-ui);font-opti
       <button id="rutinas-nav-btn" class="bnb" onclick="sv('rutinas')">
         <svg viewBox="0 0 24 24"><path d="M6 4h4v16H6zM14 4h4v16h-4zM4 9h2M10 9h4M18 9h2M4 15h2M10 15h4M18 15h2"/></svg>Rutinas</button>
       <button id="coaching-nav-btn" class="bnb" onclick="sv('coaching')" style="display:none">
-        <span id="coaching-nav-badge" class="bnb-badge" data-mensajes-nav-count></span>
+        <span id="coaching-nav-badge" class="bnb-badge coach-pending" data-coaching-pending-count></span>
         <svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M3 10h18M8 2v4M16 2v4M8 15l2 2 4-4"/></svg>Coaching</button>
       <button class="bnb" onclick="sv('comunidad')">
         <svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>Comunidad</button>
@@ -2022,7 +2023,7 @@ html,body,.app,input,select,button,textarea{font-family:var(--font-ui);font-opti
 // ── CONFIG & SUPABASE ───────────────────────────────────────
 const SUPABASE_URL='https://pmpjteuqjusbiduevbwq.supabase.co';
 const SUPABASE_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBtcGp0ZXVxanVzYmlkdWV2YndxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc2OTI1NjUsImV4cCI6MjA5MzI2ODU2NX0.XbMzZoo2yqtrD8znLnyo_1zDfrdJAvAPj1lqGOyXnLw';
-const APP_VERSION='20260719-12';
+const APP_VERSION='20260719-13';
 const MUSCLE_GROUPS=['Pecho','Espalda','Piernas','Hombros','Brazos','Core','Cardio','Full Body'];
 const DAILY_QUOTES=[
   {text:'Haz hoy lo que tu version de manana agradeceria.',action:'Elige una accion pequeña y cumplible antes de buscar motivacion.'},
@@ -2162,8 +2163,9 @@ async function loadUserData(){
   if(rutBtn)rutBtn.style.display=prof.coaching_beta?'none':'';
   const coachBtn=document.getElementById('coaching-nav-btn');
   if(coachBtn)coachBtn.style.display=prof.coaching_beta?'':'none';
-  if(prof.coaching_beta){startChatRealtime();}else{stopChatRealtime();}
+  if(prof.coaching_beta){startChatRealtime();}else{stopChatRealtime();updateCoachingNavBadge();}
   if(prof.coaching_beta)loadActiveCoachingSessionSb().catch(console.error);
+  if(prof.coaching_beta)loadCoachWeekDataSb(true).then(updateCoachingNavBadge).catch(console.error);
   loadExerciseNotesSb().catch(console.error);
   const[bkRes,payRes]=await Promise.allSettled([
     sb.from('bookings').select('*').eq('user_id',sbUser.id).eq('status','active').gte('ds',addDaysDS(mazToday(),-1)).order('ds').order('start_idx').limit(20),
@@ -3666,6 +3668,7 @@ function sv(v){
     b.classList.toggle('locked',MEMBER_LOCKED_VIEWS.includes(name)&&!canUseMemberViews());
   });
   updateShopCartBadge();
+  updateCoachingNavBadge();
   updateTopActions(v);
   ALL_VIEWS.forEach(n=>{const el=document.getElementById('v-'+n);if(el)el.classList.toggle('active',n===v);});
   if(v==='inicio'){renderMembershipStatus();loadAccessData().catch(console.error);renderDailyQuote();renderGuestGroup().catch(console.error);renderActiveBookings().catch(console.error);renderUserNotifsSb().catch(console.error);}
@@ -6032,10 +6035,12 @@ async function loadCoachWeekDataSb(force){
     }
     coachDataLoadedAt=Date.now();
     coachDataLoadError=null;
+    updateCoachingNavBadge();
   }catch(e){
     console.error('loadCoachWeekDataSb:',e);
     coachSchedule=[];coachTasks=[];coachBoardsById={};coachTaskLogsToday=new Set();coachTaskLogsByDs={};coachFastingLogs=[];
     coachDataLoadError=e.message||'Error de red';
+    updateCoachingNavBadge();
   }
 }
 async function renderHoySb(){
@@ -6067,6 +6072,23 @@ function isTaskDoneOnDs(t,ds){
 }
 function isTaskDoneToday(t){
   return isTaskDoneOnDs(t,mazToday());
+}
+function coachPendingCount(){
+  if(!canAccessCoaching()||!coachWeekStart)return 0;
+  const today=mazToday();
+  const todayRows=coachSchedule.filter(r=>r.ds===today);
+  const pendingWorkouts=todayRows.filter(r=>r.status!=='done'&&r.status!=='skipped').length;
+  const missedWorkouts=coachSchedule.filter(r=>r.ds<today&&!r.started_at&&r.status==='scheduled').length;
+  const pendingTasks=coachRelevantTasks(today).filter(t=>!isTaskDoneToday(t)).length;
+  const activeOutsideToday=activeCoachingSession&&activeCoachingSession.ds!==today&&!coachSchedule.some(r=>r.id===activeCoachingSession.id)?1:0;
+  return pendingWorkouts+missedWorkouts+pendingTasks+activeOutsideToday;
+}
+function updateCoachingNavBadge(){
+  const badge=document.getElementById('coaching-nav-badge');
+  if(!badge)return;
+  const count=coachPendingCount();
+  badge.textContent=count>99?'99+':(count?String(count):'');
+  badge.classList.toggle('show',count>0);
 }
 function fastingStorageKey(){
   return 'habit_fasting_'+(sbUser&&sbUser.id?sbUser.id:'guest');
@@ -6449,6 +6471,7 @@ function coachPrimaryWorkoutId(todayRows){
 function renderCoachHoyPanel(){
   const el=document.getElementById('coach-hoy-panel');
   if(!el)return;
+  updateCoachingNavBadge();
   ensureFastingTicker();
   if(coachDataLoadError){el.innerHTML='<div class="empty">Error al cargar tu entreno: '+esc(coachDataLoadError)+'</div>';return;}
   const today=mazToday();
@@ -6855,6 +6878,7 @@ async function markWorkoutSkippedSb(id){
 function renderCoachSemanaPanel(){
   const el=document.getElementById('coach-semana-panel');
   if(!el||!coachWeekStart)return;
+  updateCoachingNavBadge();
   if(coachDataLoadError){el.innerHTML='<div class="empty">Error al cargar tu semana: '+esc(coachDataLoadError)+'</div>';return;}
   const today=mazToday();
   if(!selectedCoachProgramDs||selectedCoachProgramDs<coachWeekStart||selectedCoachProgramDs>addDaysDS(coachWeekStart,6))selectedCoachProgramDs=today;
@@ -7116,7 +7140,9 @@ async function loadActiveCoachingSessionSb(){
   if(!sbUser)return;
   try{
     const{data}=await sb.from('coaching_schedule').select('*').eq('user_id',sbUser.id).eq('status','in_progress').limit(1).maybeSingle();
-    if(data){activeCoachingSession=data;showActiveSessionBar();}
+    activeCoachingSession=data||null;
+    if(data)showActiveSessionBar();
+    updateCoachingNavBadge();
   }catch(e){console.error('loadActiveCoachingSessionSb:',e);}
 }
 function showActiveSessionBar(){
