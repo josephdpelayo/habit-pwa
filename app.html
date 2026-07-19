@@ -6,12 +6,12 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="HABIT">
 <meta name="application-name" content="HABIT">
-<link rel="manifest" href="/manifest.json?v=20260719-15">
-<link rel="apple-touch-icon" sizes="120x120" href="/icons/icon-120.png?v=20260719-15">
-<link rel="apple-touch-icon" sizes="152x152" href="/icons/icon-152.png?v=20260719-15">
-<link rel="apple-touch-icon" sizes="167x167" href="/icons/icon-167.png?v=20260719-15">
-<link rel="apple-touch-icon" sizes="180x180" href="/icons/icon-180.png?v=20260719-15">
-<link rel="icon" type="image/png" sizes="32x32" href="/icons/icon-32.png?v=20260719-15">
+<link rel="manifest" href="/manifest.json?v=20260719-16">
+<link rel="apple-touch-icon" sizes="120x120" href="/icons/icon-120.png?v=20260719-16">
+<link rel="apple-touch-icon" sizes="152x152" href="/icons/icon-152.png?v=20260719-16">
+<link rel="apple-touch-icon" sizes="167x167" href="/icons/icon-167.png?v=20260719-16">
+<link rel="apple-touch-icon" sizes="180x180" href="/icons/icon-180.png?v=20260719-16">
+<link rel="icon" type="image/png" sizes="32x32" href="/icons/icon-32.png?v=20260719-16">
 <title>HABIT</title>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Share+Tech+Mono&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
@@ -192,7 +192,8 @@ input,select,button,textarea{font-family:'Inter',sans-serif}
 .inicio-coach-icon svg{width:17px;height:17px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
 .inicio-coach-title{font-size:13px;font-weight:850;color:var(--white);line-height:1.15;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .inicio-coach-go{border-radius:999px;background:rgba(147,197,253,.12);color:#bfdbfe;font-size:10px;font-weight:900;letter-spacing:.08em;text-transform:uppercase;padding:6px 9px;white-space:nowrap}
-.inicio-fasting-mini{position:relative;z-index:2;width:max-content;max-width:calc(100% - 28px);margin:-50px 14px 18px auto}
+.inicio-fasting-mini{position:fixed;z-index:20;right:max(18px,calc((100vw - 430px)/2 + 18px));bottom:calc(104px + env(safe-area-inset-bottom,0px));width:max-content;max-width:calc(100vw - 36px);pointer-events:none}
+#v-inicio:not(.active) .inicio-fasting-mini{display:none}
 .inicio-fast-chip{border:1px solid rgba(255,255,255,.08);border-radius:999px;background:rgba(8,8,8,.72);backdrop-filter:blur(12px);display:flex;align-items:center;gap:7px;padding:6px 9px;box-shadow:0 10px 22px rgba(0,0,0,.24)}
 .inicio-fast-chip.is-active{border-color:rgba(96,165,250,.26);background:rgba(37,99,235,.09)}
 .inicio-fast-chip.is-feeding{border-color:rgba(52,211,153,.25);background:rgba(16,185,129,.08)}
@@ -2041,7 +2042,7 @@ html,body,.app,input,select,button,textarea{font-family:var(--font-ui);font-opti
 // ── CONFIG & SUPABASE ───────────────────────────────────────
 const SUPABASE_URL='https://pmpjteuqjusbiduevbwq.supabase.co';
 const SUPABASE_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBtcGp0ZXVxanVzYmlkdWV2YndxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc2OTI1NjUsImV4cCI6MjA5MzI2ODU2NX0.XbMzZoo2yqtrD8znLnyo_1zDfrdJAvAPj1lqGOyXnLw';
-const APP_VERSION='20260719-15';
+const APP_VERSION='20260719-16';
 const MUSCLE_GROUPS=['Pecho','Espalda','Piernas','Hombros','Brazos','Core','Cardio','Full Body'];
 const DAILY_QUOTES=[
   {text:'Haz hoy lo que tu version de manana agradeceria.',action:'Elige una accion pequeña y cumplible antes de buscar motivacion.'},
