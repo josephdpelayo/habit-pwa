@@ -6,12 +6,12 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="HABIT">
 <meta name="application-name" content="HABIT">
-<link rel="manifest" href="/manifest.json?v=20260719-13">
-<link rel="apple-touch-icon" sizes="120x120" href="/icons/icon-120.png?v=20260719-13">
-<link rel="apple-touch-icon" sizes="152x152" href="/icons/icon-152.png?v=20260719-13">
-<link rel="apple-touch-icon" sizes="167x167" href="/icons/icon-167.png?v=20260719-13">
-<link rel="apple-touch-icon" sizes="180x180" href="/icons/icon-180.png?v=20260719-13">
-<link rel="icon" type="image/png" sizes="32x32" href="/icons/icon-32.png?v=20260719-13">
+<link rel="manifest" href="/manifest.json?v=20260719-14">
+<link rel="apple-touch-icon" sizes="120x120" href="/icons/icon-120.png?v=20260719-14">
+<link rel="apple-touch-icon" sizes="152x152" href="/icons/icon-152.png?v=20260719-14">
+<link rel="apple-touch-icon" sizes="167x167" href="/icons/icon-167.png?v=20260719-14">
+<link rel="apple-touch-icon" sizes="180x180" href="/icons/icon-180.png?v=20260719-14">
+<link rel="icon" type="image/png" sizes="32x32" href="/icons/icon-32.png?v=20260719-14">
 <title>HABIT</title>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Share+Tech+Mono&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
@@ -186,6 +186,23 @@ input,select,button,textarea{font-family:'Inter',sans-serif}
 .daily-quote-footer{position:relative;z-index:1;width:100%;max-width:280px;margin-top:16px;padding-top:12px;border-top:1px solid rgba(255,255,255,.08);display:flex;align-items:center;justify-content:center;gap:10px;color:var(--green);font-size:11px;font-weight:800;letter-spacing:.1em;text-transform:uppercase}
 .daily-quote-date{color:var(--gray);letter-spacing:.08em;white-space:nowrap}
 .daily-quote-sep{color:var(--gray);opacity:.5}
+.inicio-coach-action{margin:0 0 10px}
+.inicio-coach-btn{width:100%;min-height:52px;border:1px solid rgba(147,197,253,.28);border-radius:16px;background:linear-gradient(135deg,rgba(37,99,235,.22),rgba(16,185,129,.08));color:var(--white);display:grid;grid-template-columns:auto 1fr auto;align-items:center;gap:11px;padding:11px 13px;text-align:left;cursor:pointer;box-shadow:0 14px 34px rgba(0,0,0,.24)}
+.inicio-coach-icon{width:34px;height:34px;border-radius:12px;background:rgba(147,197,253,.13);display:flex;align-items:center;justify-content:center;color:#bfdbfe;flex-shrink:0}
+.inicio-coach-icon svg{width:20px;height:20px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.inicio-coach-k{font-size:9px;font-weight:900;letter-spacing:.14em;text-transform:uppercase;color:#93c5fd;margin-bottom:2px}
+.inicio-coach-title{font-size:14px;font-weight:850;color:var(--white);line-height:1.15}
+.inicio-coach-meta{font-size:11px;color:#9ca3af;margin-top:2px;line-height:1.25}
+.inicio-coach-go{font-size:18px;color:#bfdbfe;padding-right:2px}
+.inicio-fasting-mini{margin:-4px 0 14px}
+.inicio-fast-chip{border:1px solid rgba(255,255,255,.08);border-radius:14px;background:rgba(255,255,255,.035);display:flex;align-items:center;justify-content:space-between;gap:10px;padding:9px 11px}
+.inicio-fast-chip.is-active{border-color:rgba(96,165,250,.26);background:rgba(37,99,235,.09)}
+.inicio-fast-chip.is-feeding{border-color:rgba(52,211,153,.25);background:rgba(16,185,129,.08)}
+.inicio-fast-label{font-size:9px;font-weight:900;letter-spacing:.13em;text-transform:uppercase;color:#9ca3af}
+.inicio-fast-chip.is-active .inicio-fast-label{color:#93c5fd}
+.inicio-fast-chip.is-feeding .inicio-fast-label{color:#6ee7b7}
+.inicio-fast-time{font-size:16px;font-weight:850;color:var(--white);line-height:1}
+.inicio-fast-note{font-size:11px;color:#9ca3af;white-space:nowrap}
 .guest-card{background:var(--card);border:1px solid rgba(37,99,235,.35);border-radius:6px;margin-bottom:12px;overflow:hidden}
 .guest-toggle{width:100%;background:var(--card);border:1px solid rgba(37,99,235,.35);border-radius:6px;padding:13px 14px;margin-bottom:12px;display:flex;align-items:center;justify-content:space-between;gap:10px;color:var(--white);cursor:pointer}
 .guest-toggle-title{font-size:13px;font-weight:800;letter-spacing:.1em;text-transform:uppercase}
@@ -539,9 +556,11 @@ input,select,button,textarea{font-family:'Inter',sans-serif}
 .habit-mode-btn span{font-size:10.5px;line-height:1.3;color:var(--gray)}
 .habit-mode-btn.active{border-color:rgba(59,130,246,.55);background:rgba(37,99,235,.13);color:#bfdbfe}
 .fasting-card{position:relative;overflow:hidden;background:linear-gradient(135deg,rgba(37,99,235,.08),rgba(16,185,129,.045));border:1px solid rgba(255,255,255,.09);border-radius:18px;padding:12px;margin-bottom:12px;box-shadow:0 14px 34px rgba(0,0,0,.2)}
-.fasting-card.is-active{background:linear-gradient(135deg,rgba(37,99,235,.14),rgba(15,23,42,.18))}
-.fasting-card.is-feeding{background:linear-gradient(135deg,rgba(16,185,129,.14),rgba(245,158,11,.055))}
+.fasting-card.is-active{background:linear-gradient(135deg,rgba(37,99,235,.18),rgba(15,23,42,.16));border-color:rgba(96,165,250,.24)}
+.fasting-card.is-feeding{background:linear-gradient(135deg,rgba(16,185,129,.16),rgba(15,23,42,.12));border-color:rgba(52,211,153,.22)}
 .fasting-card:after{content:"";position:absolute;right:-40px;bottom:-62px;width:138px;height:138px;border-radius:50%;border:22px solid rgba(32,212,146,.04);pointer-events:none}
+.fasting-card.is-active:after{border-color:rgba(96,165,250,.055)}
+.fasting-card.is-feeding:after{border-color:rgba(32,212,146,.055)}
 .fasting-card.collapsed{padding:12px 13px}
 .fasting-head{position:relative;z-index:1;display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-bottom:8px}
 .fasting-k{font-size:10px;font-weight:900;text-transform:uppercase;letter-spacing:.12em;color:#8aa1c2}
@@ -1184,8 +1203,10 @@ html,body,.app,input,select,button,textarea{font-family:var(--font-ui);font-opti
   <!-- INICIO -->
   <div id="v-inicio" class="view active">
     <div class="scroll-area">
+      <div id="inicio-coach-action"></div>
       <div id="access-main"></div>
       <div class="daily-quote-wrap"></div>
+      <div id="inicio-fasting-mini"></div>
       <div id="guest-group-wrap"></div>
       <div id="active-bookings-wrap"></div>
       <div id="membership-status-wrap"></div>
@@ -2023,7 +2044,7 @@ html,body,.app,input,select,button,textarea{font-family:var(--font-ui);font-opti
 // ── CONFIG & SUPABASE ───────────────────────────────────────
 const SUPABASE_URL='https://pmpjteuqjusbiduevbwq.supabase.co';
 const SUPABASE_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBtcGp0ZXVxanVzYmlkdWV2YndxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc2OTI1NjUsImV4cCI6MjA5MzI2ODU2NX0.XbMzZoo2yqtrD8znLnyo_1zDfrdJAvAPj1lqGOyXnLw';
-const APP_VERSION='20260719-13';
+const APP_VERSION='20260719-14';
 const MUSCLE_GROUPS=['Pecho','Espalda','Piernas','Hombros','Brazos','Core','Cardio','Full Body'];
 const DAILY_QUOTES=[
   {text:'Haz hoy lo que tu version de manana agradeceria.',action:'Elige una accion pequeña y cumplible antes de buscar motivacion.'},
@@ -2197,6 +2218,7 @@ function showMainSb(){
   renderMembershipStatus();
   loadAccessData();
   renderDailyQuote();
+  renderInicioCoachingWidgets();
   renderGuestGroup().catch(console.error);
   renderActiveBookings().catch(console.error);
   updateShopCartBadge();
@@ -3671,7 +3693,7 @@ function sv(v){
   updateCoachingNavBadge();
   updateTopActions(v);
   ALL_VIEWS.forEach(n=>{const el=document.getElementById('v-'+n);if(el)el.classList.toggle('active',n===v);});
-  if(v==='inicio'){renderMembershipStatus();loadAccessData().catch(console.error);renderDailyQuote();renderGuestGroup().catch(console.error);renderActiveBookings().catch(console.error);renderUserNotifsSb().catch(console.error);}
+  if(v==='inicio'){renderMembershipStatus();loadAccessData().catch(console.error);renderDailyQuote();renderInicioCoachingWidgets();renderGuestGroup().catch(console.error);renderActiveBookings().catch(console.error);renderUserNotifsSb().catch(console.error);}
   if(v==='book'){const _ds=dk(curDate);loadSlotOccupancyFromSb(_ds).then(()=>renderBook().catch(console.error));}
   if(v==='planes')renderPlans();
   if(v==='rutinas'){renderRutinas().catch(console.error);}
@@ -3978,6 +4000,63 @@ function renderDailyQuote(){
     '<div class="daily-quote-footer"><span class="daily-quote-date">'+esc(fmtDS(ds))+'</span><span class="daily-quote-sep">•</span><span>@habit.traininghub</span></div>'+
   '</section>';
   els.forEach(el=>el.innerHTML=html);
+}
+function inicioCoachActionHtml(){
+  if(!canAccessCoaching()||!coachWeekStart)return '';
+  const today=mazToday();
+  const active=activeCoachingSession;
+  const next=coachSchedule.find(r=>r.ds===today&&r.status==='scheduled');
+  const row=active||next;
+  if(!row)return '';
+  const isActive=!!active;
+  const title=(isActive?'Continuar ':'Iniciar ')+esc(row.board_name||'entreno');
+  const meta=isActive?'Entreno en curso':'Programado para hoy';
+  const action=isActive?'goToActiveSession()':'startInicioCoachWorkout(&quot;'+esc(row.id)+'&quot;)';
+  return '<div class="inicio-coach-action"><button type="button" class="inicio-coach-btn" onclick="'+action+'">'
+    +'<span class="inicio-coach-icon"><svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M3 10h18M8 2v4M16 2v4M8 15l2 2 4-4"/></svg></span>'
+    +'<span><span class="inicio-coach-k">Coaching</span><span class="inicio-coach-title">'+title+'</span><span class="inicio-coach-meta">'+esc(meta)+'</span></span>'
+    +'<span class="inicio-coach-go">›</span>'
+    +'</button></div>';
+}
+function inicioFastingMiniHtml(){
+  if(!canAccessCoaching())return '';
+  const log=loadFastingLog();
+  const last=log.lastMealAt||'';
+  const first=log.firstMealAt||'';
+  const active=!!(last&&!first);
+  const feeding=!!(last&&first);
+  if(!active&&!feeding)return '';
+  ensureFastingTicker();
+  const cls=active?'is-active':'is-feeding';
+  const label=active?'Ayuno':'Ingesta';
+  const time=active?fastingElapsedLabel(last):fastingElapsedLabel(first);
+  const note=active?'en curso':'ventana activa';
+  return '<div class="inicio-fasting-mini"><div class="inicio-fast-chip '+cls+'">'
+    +'<div><div class="inicio-fast-label">'+label+'</div><div class="inicio-fast-time" id="inicio-fasting-time">'+esc(time)+'</div></div>'
+    +'<div class="inicio-fast-note">'+esc(note)+'</div>'
+    +'</div></div>';
+}
+function renderInicioCoachingWidgets(){
+  const actionEl=document.getElementById('inicio-coach-action');
+  const fastEl=document.getElementById('inicio-fasting-mini');
+  if(!canAccessCoaching()){
+    if(actionEl)actionEl.innerHTML='';
+    if(fastEl)fastEl.innerHTML='';
+    return;
+  }
+  if(!coachWeekStart){
+    if(actionEl)actionEl.innerHTML='';
+    if(fastEl)fastEl.innerHTML='';
+    loadCoachWeekDataSb(false).then(renderInicioCoachingWidgets).catch(console.error);
+    return;
+  }
+  if(actionEl)actionEl.innerHTML=inicioCoachActionHtml();
+  if(fastEl)fastEl.innerHTML=inicioFastingMiniHtml();
+}
+function startInicioCoachWorkout(id){
+  coachHubActiveTab='hoy';
+  sv('coaching');
+  setTimeout(()=>startCoachingSessionSb(id),80);
 }
 
 // ── MEMBERSHIP STATUS in Inicio ──
@@ -6036,11 +6115,13 @@ async function loadCoachWeekDataSb(force){
     coachDataLoadedAt=Date.now();
     coachDataLoadError=null;
     updateCoachingNavBadge();
+    if(document.getElementById('v-inicio')?.classList.contains('active'))renderInicioCoachingWidgets();
   }catch(e){
     console.error('loadCoachWeekDataSb:',e);
     coachSchedule=[];coachTasks=[];coachBoardsById={};coachTaskLogsToday=new Set();coachTaskLogsByDs={};coachFastingLogs=[];
     coachDataLoadError=e.message||'Error de red';
     updateCoachingNavBadge();
+    if(document.getElementById('v-inicio')?.classList.contains('active'))renderInicioCoachingWidgets();
   }
 }
 async function renderHoySb(){
@@ -6305,9 +6386,13 @@ function renderFastingCardHtml(){
 }
 function updateFastingElapsedLive(){
   const el=document.getElementById('fasting-elapsed');
-  if(!el)return;
   const log=loadFastingLog();
-  el.textContent=fastingElapsedLabel(log.lastMealAt,log.firstMealAt);
+  if(el)el.textContent=fastingElapsedLabel(log.lastMealAt,log.firstMealAt);
+  const homeEl=document.getElementById('inicio-fasting-time');
+  if(homeEl){
+    if(log.lastMealAt&&!log.firstMealAt)homeEl.textContent=fastingElapsedLabel(log.lastMealAt);
+    else if(log.firstMealAt)homeEl.textContent=fastingElapsedLabel(log.firstMealAt);
+  }
 }
 let fastingTickInt=null;
 let fastingExpanded=false;
@@ -6362,6 +6447,7 @@ async function saveFastingEntryFromInput(){
       lastMealOffsetMin:meta.offsetMin
     });
     renderCoachHoyPanel();
+    renderInicioCoachingWidgets();
     toast('Ayuno iniciado','ok');
     return;
   }
@@ -6387,6 +6473,7 @@ async function saveFastingEntryFromInput(){
   saveFastingLog({...log,firstMealAt:iso,firstMealDs:localDsFromIso(iso),firstMealTz:meta.tz,firstMealOffsetMin:meta.offsetMin});
   await persistCompletedFastingLog(row);
   renderCoachHoyPanel();
+  renderInicioCoachingWidgets();
   toast('Ventana de ingesta activa','ok');
 }
 function setFastingLastMealFromInput(){
@@ -6400,6 +6487,7 @@ function setFastingLastMealFromInput(){
   const meta=fastingTimezoneMeta(iso);
   saveFastingLog({lastMealAt:iso,firstMealAt:null,lastMealDs:localDsFromIso(iso),lastMealTz:meta.tz,lastMealOffsetMin:meta.offsetMin});
   renderCoachHoyPanel();
+  renderInicioCoachingWidgets();
   toast('Ayuno iniciado','ok');
 }
 async function setFastingFirstMealFromInput(){
@@ -6433,6 +6521,7 @@ async function setFastingFirstMealFromInput(){
   saveFastingLog({...log,firstMealAt:firstIso,firstMealDs:localDsFromIso(firstIso),firstMealTz:meta.tz,firstMealOffsetMin:meta.offsetMin});
   await persistCompletedFastingLog(row);
   renderCoachHoyPanel();
+  renderInicioCoachingWidgets();
   toast('Ventana de ingesta activa','ok');
 }
 function coachTodayContext(todayRows,relevantTasks,doneTasks,missedRows){
@@ -7011,6 +7100,7 @@ async function startCoachingSessionSb(scheduleId){
     await seedSessionSetsSb(data);
     await loadSessionSetsSb(data.id);
     renderCoachHoyPanel();
+    renderInicioCoachingWidgets();
     openActiveCoachingExercise(0);
   }catch(e){toast('Error al iniciar entreno: '+e.message,'err');}
 }
@@ -7029,6 +7119,7 @@ async function finishCoachingSessionSb(){
     stopRestTimer();
     closeExerciseFocus();
     renderCoachHoyPanel();
+    renderInicioCoachingWidgets();
     toast('¡Entreno completado!','ok');
     openWorkoutFeedbackModal(data.id);
   }catch(e){toast('Error al finalizar entreno: '+e.message,'err');}
@@ -7133,6 +7224,7 @@ async function cancelCoachingSessionSb(){
     coachDataLoadedAt=0;
     await loadCoachWeekDataSb(true);
     renderCoachHoyPanel();
+    renderInicioCoachingWidgets();
     toast('Entreno cancelado','ok');
   }catch(e){toast('Error al cancelar: '+e.message,'err');}
 }
@@ -7143,6 +7235,7 @@ async function loadActiveCoachingSessionSb(){
     activeCoachingSession=data||null;
     if(data)showActiveSessionBar();
     updateCoachingNavBadge();
+    if(document.getElementById('v-inicio')?.classList.contains('active'))renderInicioCoachingWidgets();
   }catch(e){console.error('loadActiveCoachingSessionSb:',e);}
 }
 function showActiveSessionBar(){
