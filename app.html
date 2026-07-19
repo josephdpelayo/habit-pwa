@@ -6,12 +6,12 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="HABIT">
 <meta name="application-name" content="HABIT">
-<link rel="manifest" href="/manifest.json?v=20260719-04">
-<link rel="apple-touch-icon" sizes="120x120" href="/icons/icon-120.png?v=20260719-04">
-<link rel="apple-touch-icon" sizes="152x152" href="/icons/icon-152.png?v=20260719-04">
-<link rel="apple-touch-icon" sizes="167x167" href="/icons/icon-167.png?v=20260719-04">
-<link rel="apple-touch-icon" sizes="180x180" href="/icons/icon-180.png?v=20260719-04">
-<link rel="icon" type="image/png" sizes="32x32" href="/icons/icon-32.png?v=20260719-04">
+<link rel="manifest" href="/manifest.json?v=20260719-05">
+<link rel="apple-touch-icon" sizes="120x120" href="/icons/icon-120.png?v=20260719-05">
+<link rel="apple-touch-icon" sizes="152x152" href="/icons/icon-152.png?v=20260719-05">
+<link rel="apple-touch-icon" sizes="167x167" href="/icons/icon-167.png?v=20260719-05">
+<link rel="apple-touch-icon" sizes="180x180" href="/icons/icon-180.png?v=20260719-05">
+<link rel="icon" type="image/png" sizes="32x32" href="/icons/icon-32.png?v=20260719-05">
 <title>HABIT</title>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Share+Tech+Mono&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
@@ -2010,7 +2010,7 @@ html,body,.app,input,select,button,textarea{font-family:var(--font-ui);font-opti
 // ── CONFIG & SUPABASE ───────────────────────────────────────
 const SUPABASE_URL='https://pmpjteuqjusbiduevbwq.supabase.co';
 const SUPABASE_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBtcGp0ZXVxanVzYmlkdWV2YndxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc2OTI1NjUsImV4cCI6MjA5MzI2ODU2NX0.XbMzZoo2yqtrD8znLnyo_1zDfrdJAvAPj1lqGOyXnLw';
-const APP_VERSION='20260719-04';
+const APP_VERSION='20260719-05';
 const MUSCLE_GROUPS=['Pecho','Espalda','Piernas','Hombros','Brazos','Core','Cardio','Full Body'];
 const DAILY_QUOTES=[
   {text:'Haz hoy lo que tu version de manana agradeceria.',action:'Elige una accion pequeña y cumplible antes de buscar motivacion.'},
@@ -5419,16 +5419,18 @@ function renderExerciseFocusVideo(){
   const d=_exFocusData;
   const el=document.getElementById('exercise-focus-video');
   if(!d||!el)return;
-  if(!d.videos||!d.videos.length||!_exFocusVideoOpen){el.innerHTML='';return;}
-  el.innerHTML='<div class="exercise-focus-stage expanded">'+getExerciseFocusVideoHtml(d.videos[0].url)+'</div>';
+  if(!_exFocusVideoOpen){el.innerHTML='';return;}
+  const hasVideo=!!(d.videos&&d.videos.length);
+  el.innerHTML=hasVideo
+    ?'<div class="exercise-focus-stage expanded">'+getExerciseFocusVideoHtml(d.videos[0].url)+'</div>'
+    :'<div class="exercise-focus-stage"><div class="empty" style="margin:0">Este ejercicio no tiene video configurado. Pídele a tu coach que lo agregue desde Socios &gt; Rutinas.</div></div>';
 }
 function renderExerciseFocusTools(){
   const d=_exFocusData;
   const tools=document.getElementById('exercise-focus-tools');
   if(!d||!tools)return;
-  const hasVideo=!!(d.videos&&d.videos.length);
   tools.innerHTML=
-    (hasVideo?'<button class="ex-focus-icon-btn'+(_exFocusVideoOpen?' active':'')+'" onclick="toggleExFocusVideo()">'+(_exFocusVideoOpen?'Ocultar video':'▶ Video')+'</button>':'')
+    '<button class="ex-focus-icon-btn'+(_exFocusVideoOpen?' active':'')+'" onclick="toggleExFocusVideo()">'+(_exFocusVideoOpen?'Ocultar video':'▶ Video')+'</button>'
     +'<button class="ex-focus-icon-btn" onclick="openExerciseHistoryModal()">Historial</button>'
     +'<button class="ex-focus-icon-btn" id="exercise-focus-note-btn" onclick="openExerciseNoteFromFocus()">'+(d.hasNote?'Ver nota':'Nota')+'</button>';
 }
