@@ -6,12 +6,12 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="HABIT">
 <meta name="application-name" content="HABIT">
-<link rel="manifest" href="/manifest.json?v=20260719-11">
-<link rel="apple-touch-icon" sizes="120x120" href="/icons/icon-120.png?v=20260719-11">
-<link rel="apple-touch-icon" sizes="152x152" href="/icons/icon-152.png?v=20260719-11">
-<link rel="apple-touch-icon" sizes="167x167" href="/icons/icon-167.png?v=20260719-11">
-<link rel="apple-touch-icon" sizes="180x180" href="/icons/icon-180.png?v=20260719-11">
-<link rel="icon" type="image/png" sizes="32x32" href="/icons/icon-32.png?v=20260719-11">
+<link rel="manifest" href="/manifest.json?v=20260719-12">
+<link rel="apple-touch-icon" sizes="120x120" href="/icons/icon-120.png?v=20260719-12">
+<link rel="apple-touch-icon" sizes="152x152" href="/icons/icon-152.png?v=20260719-12">
+<link rel="apple-touch-icon" sizes="167x167" href="/icons/icon-167.png?v=20260719-12">
+<link rel="apple-touch-icon" sizes="180x180" href="/icons/icon-180.png?v=20260719-12">
+<link rel="icon" type="image/png" sizes="32x32" href="/icons/icon-32.png?v=20260719-12">
 <title>HABIT</title>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Share+Tech+Mono&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
@@ -558,12 +558,18 @@ input,select,button,textarea{font-family:'Inter',sans-serif}
 .fasting-entry{position:relative;z-index:1;background:rgba(0,0,0,.22);border:1px solid rgba(255,255,255,.08);border-radius:14px;padding:10px;display:grid;gap:8px}
 .fasting-entry-label{display:flex;align-items:center;justify-content:space-between;gap:10px;font-size:9px;font-weight:900;letter-spacing:.1em;color:var(--gray);text-transform:uppercase}
 .fasting-entry-label span:last-child{letter-spacing:0;text-transform:none;font-size:11px;color:#8bffbf}
-.fasting-entry select,.fasting-entry input{width:100%;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.08);border-radius:10px;color:var(--white);font-size:13px;padding:10px}
+.fasting-entry select,.fasting-entry input{width:100%;background:transparent;border:0;color:var(--white);font-size:15px;padding:0;outline:none}
 .fasting-entry select{appearance:none;background-image:linear-gradient(45deg,transparent 50%,#9ca3af 50%),linear-gradient(135deg,#9ca3af 50%,transparent 50%);background-position:calc(100% - 17px) 50%,calc(100% - 12px) 50%;background-size:5px 5px,5px 5px;background-repeat:no-repeat;padding-right:30px}
 .fasting-entry select option{background:#111827;color:#fff}
-.fasting-fields{display:grid;grid-template-columns:1.25fr .75fr;gap:7px}
+.fasting-entry-type{background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.08);border-radius:12px;padding:12px}
+.fasting-fields{display:grid;grid-template-columns:1.15fr .85fr;gap:8px}
+.fasting-field{display:grid;gap:6px;min-width:0;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.08);border-radius:12px;padding:10px 11px}
+.fasting-field span{font-size:9px;font-weight:900;letter-spacing:.12em;text-transform:uppercase;color:#8aa1c2}
+.fasting-field input{font-size:16px;font-weight:650;color:var(--white);min-height:24px;color-scheme:dark}
+.fasting-field input::-webkit-calendar-picker-indicator{opacity:.65;filter:invert(1)}
 .fasting-entry button{width:100%;border:none;border-radius:10px;padding:10px 8px;background:rgba(16,185,129,.16);color:#34d399;font-size:11px;font-weight:900;cursor:pointer}
 .fasting-entry-hint{font-size:11px;line-height:1.35;color:var(--gray)}
+.fasting-entry-hint strong{display:block;color:#cbd5e1;font-size:10px;text-transform:uppercase;letter-spacing:.1em;margin-bottom:2px}
 .fasting-goals{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin:8px 0 10px}
 .fasting-goal{border:1px solid rgba(255,255,255,.08);background:rgba(255,255,255,.045);border-radius:999px;color:var(--gray);font-size:11px;font-weight:900;padding:8px 4px;cursor:pointer}
 .fasting-goal.active{background:rgba(37,99,235,.18);border-color:rgba(147,197,253,.5);color:#bfdbfe}
@@ -2016,7 +2022,7 @@ html,body,.app,input,select,button,textarea{font-family:var(--font-ui);font-opti
 // ── CONFIG & SUPABASE ───────────────────────────────────────
 const SUPABASE_URL='https://pmpjteuqjusbiduevbwq.supabase.co';
 const SUPABASE_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBtcGp0ZXVxanVzYmlkdWV2YndxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc2OTI1NjUsImV4cCI6MjA5MzI2ODU2NX0.XbMzZoo2yqtrD8znLnyo_1zDfrdJAvAPj1lqGOyXnLw';
-const APP_VERSION='20260719-11';
+const APP_VERSION='20260719-12';
 const MUSCLE_GROUPS=['Pecho','Espalda','Piernas','Hombros','Brazos','Core','Cardio','Full Body'];
 const DAILY_QUOTES=[
   {text:'Haz hoy lo que tu version de manana agradeceria.',action:'Elige una accion pequeña y cumplible antes de buscar motivacion.'},
@@ -6256,6 +6262,8 @@ function renderFastingCardHtml(){
     :closed
       ?'Detectado por tu ventana de ingesta: se guardará con la zona horaria actual del dispositivo e iniciará tu siguiente ayuno.'
       :'Registra tu última comida; se guardará con la zona horaria actual del dispositivo.';
+  const entryTz=fastingDeviceTimeZone()||'Hora local';
+  const entryOffset=fastingOffsetLabel(new Date().getTimezoneOffset());
   return '<div class="'+cardCls+'">'
     +'<div class="fasting-head"><div><div class="fasting-k">Ayuno</div><div class="fasting-status">'+esc(status)+'</div></div><button type="button" class="fasting-toggle" onclick="toggleFastingCard()">'+(fastingExpanded?'Minimizar':'Info')+'</button></div>'
     +'<div class="fasting-summary"><div><div class="fasting-time" id="fasting-elapsed">'+esc(elapsed)+'</div><div class="fasting-status">'+esc(shortNote)+'</div></div><div class="badge '+(active||closed?'bg-green':'')+'">'+(active?'Ayunando':closed?'Ingesta':'Listo')+'</div></div>'
@@ -6265,9 +6273,9 @@ function renderFastingCardHtml(){
       +'<div class="fasting-goals">'+[12,14,16,18].map(h=>'<button type="button" class="fasting-goal '+(h===targetHours?'active':'')+'" onclick="setFastingTargetHours('+h+')">'+h+'h</button>').join('')+'</div>'
       +'<div class="fasting-entry">'
       +'<div class="fasting-entry-label"><span>Estás registrando</span><span id="fasting-entry-name">'+esc(entryName)+'</span></div>'
-      +'<select id="fasting-entry-type" onchange="syncFastingEntryUi()"><option value="first" '+(entryType==='first'?'selected':'')+'>Desayuno / primera comida</option><option value="last" '+(entryType==='last'?'selected':'')+'>Última cena</option></select>'
-      +'<div class="fasting-fields"><input type="date" id="fasting-entry-date" value="'+esc(entryDate)+'"><input type="time" id="fasting-entry-time" value="'+esc(entryTime)+'"></div>'
-      +'<div class="fasting-entry-hint" id="fasting-entry-hint">'+esc(entryHint)+'</div>'
+      +'<div class="fasting-entry-type"><select id="fasting-entry-type" onchange="syncFastingEntryUi()"><option value="first" '+(entryType==='first'?'selected':'')+'>Desayuno / primera comida</option><option value="last" '+(entryType==='last'?'selected':'')+'>Última cena</option></select></div>'
+      +'<div class="fasting-fields"><label class="fasting-field"><span>Fecha</span><input type="date" id="fasting-entry-date" value="'+esc(entryDate)+'"></label><label class="fasting-field"><span>Hora</span><input type="time" id="fasting-entry-time" value="'+esc(entryTime)+'"></label></div>'
+      +'<div class="fasting-entry-hint" id="fasting-entry-hint"><strong>'+esc(entryTz+' · '+entryOffset)+'</strong>'+esc(entryHint)+'</div>'
       +'<button type="button" id="fasting-entry-save" onclick="saveFastingEntryFromInput()">'+esc(entryAction)+'</button>'
       +'</div>':'')
     +(fastingExpanded&&history.length?'<div class="fasting-history">'+history.map(r=>'<div class="fasting-history-row"><span>'+esc(fmtDS(r.fast_start_ds||localDsFromIso(r.fast_start_at)))+'</span><strong>'+Math.floor((r.duration_min||0)/60)+'h '+pad((r.duration_min||0)%60)+'m</strong><span>'+(r.duration_min>=(r.target_hours||16)*60?'Meta':'')+'</span></div>').join('')+'</div>':'')
@@ -6304,10 +6312,13 @@ function syncFastingEntryUi(){
   const name=document.getElementById('fasting-entry-name');
   const hint=document.getElementById('fasting-entry-hint');
   const save=document.getElementById('fasting-entry-save');
-  if(name)name.textContent=type==='first'?'Desayuno':'Última cena';
-  if(hint)hint.textContent=type==='first'
+  const tz=fastingDeviceTimeZone()||'Hora local';
+  const off=fastingOffsetLabel(new Date().getTimezoneOffset());
+  const copy=type==='first'
     ?'Esta fecha, hora y zona horaria cerrarán el ayuno como tu desayuno o primera comida.'
     :'Esta fecha, hora y zona horaria iniciarán tu siguiente ayuno como última cena.';
+  if(name)name.textContent=type==='first'?'Desayuno':'Última cena';
+  if(hint)hint.innerHTML='<strong>'+esc(tz+' · '+off)+'</strong>'+esc(copy);
   if(save)save.textContent=type==='first'?'Registrar primera comida':'Guardar última cena';
 }
 async function saveFastingEntryFromInput(){
