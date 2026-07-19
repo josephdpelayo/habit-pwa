@@ -6,12 +6,12 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="HABIT">
 <meta name="application-name" content="HABIT">
-<link rel="manifest" href="/manifest.json?v=20260719-09">
-<link rel="apple-touch-icon" sizes="120x120" href="/icons/icon-120.png?v=20260719-09">
-<link rel="apple-touch-icon" sizes="152x152" href="/icons/icon-152.png?v=20260719-09">
-<link rel="apple-touch-icon" sizes="167x167" href="/icons/icon-167.png?v=20260719-09">
-<link rel="apple-touch-icon" sizes="180x180" href="/icons/icon-180.png?v=20260719-09">
-<link rel="icon" type="image/png" sizes="32x32" href="/icons/icon-32.png?v=20260719-09">
+<link rel="manifest" href="/manifest.json?v=20260719-11">
+<link rel="apple-touch-icon" sizes="120x120" href="/icons/icon-120.png?v=20260719-11">
+<link rel="apple-touch-icon" sizes="152x152" href="/icons/icon-152.png?v=20260719-11">
+<link rel="apple-touch-icon" sizes="167x167" href="/icons/icon-167.png?v=20260719-11">
+<link rel="apple-touch-icon" sizes="180x180" href="/icons/icon-180.png?v=20260719-11">
+<link rel="icon" type="image/png" sizes="32x32" href="/icons/icon-32.png?v=20260719-11">
 <title>HABIT</title>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Share+Tech+Mono&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
@@ -2016,7 +2016,7 @@ html,body,.app,input,select,button,textarea{font-family:var(--font-ui);font-opti
 // ── CONFIG & SUPABASE ───────────────────────────────────────
 const SUPABASE_URL='https://pmpjteuqjusbiduevbwq.supabase.co';
 const SUPABASE_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBtcGp0ZXVxanVzYmlkdWV2YndxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc2OTI1NjUsImV4cCI6MjA5MzI2ODU2NX0.XbMzZoo2yqtrD8znLnyo_1zDfrdJAvAPj1lqGOyXnLw';
-const APP_VERSION='20260719-09';
+const APP_VERSION='20260719-11';
 const MUSCLE_GROUPS=['Pecho','Espalda','Piernas','Hombros','Brazos','Core','Cardio','Full Body'];
 const DAILY_QUOTES=[
   {text:'Haz hoy lo que tu version de manana agradeceria.',action:'Elige una accion pequeña y cumplible antes de buscar motivacion.'},
@@ -6010,7 +6010,7 @@ async function loadCoachWeekDataSb(force){
     ]);
     coachSchedule=schRes.status==='fulfilled'?(schRes.value.data||[]):[];
     coachTasks=taskRes.status==='fulfilled'?(taskRes.value.data||[]):[];
-    coachFastingLogs=(fastRes.status==='fulfilled'&&!fastRes.value.error)?(fastRes.value.data||[]):loadLocalFastingHistory().filter(r=>r.fast_start_ds>=coachWeekStart&&r.fast_start_ds<=weekEnd);
+    coachFastingLogs=(fastRes.status==='fulfilled'&&!fastRes.value.error)?mergeLocalFastingTimezone(fastRes.value.data||[]):loadLocalFastingHistory().filter(r=>r.fast_start_ds>=coachWeekStart&&r.fast_start_ds<=weekEnd);
     coachTaskLogsByDs={};
     (logRes.status==='fulfilled'?(logRes.value.data||[]):[]).forEach(r=>{
       const ds=r.ds||mazToday();
@@ -6080,6 +6080,15 @@ function loadLocalFastingHistory(){
 function saveLocalFastingHistory(rows){
   localStorage.setItem(fastingHistoryStorageKey(),JSON.stringify((rows||[]).slice(0,60)));
 }
+function mergeLocalFastingTimezone(rows){
+  const local=loadLocalFastingHistory();
+  if(!local.length)return rows||[];
+  const byKey=new Map(local.map(r=>[r.fast_start_at+'|'+r.fast_end_at,r]));
+  return (rows||[]).map(r=>{
+    const meta=byKey.get(r.fast_start_at+'|'+r.fast_end_at);
+    return meta?{...r,...fastingTimezoneFields(meta)}:r;
+  });
+}
 function fastingTargetKey(){
   return fastingStorageKey()+'_target';
 }
@@ -6118,28 +6127,91 @@ async function persistCompletedFastingLog(row){
   saveLocalFastingHistory(local);
   coachFastingLogs=[row,...(coachFastingLogs||[]).filter(r=>!(r.fast_start_at===row.fast_start_at&&r.fast_end_at===row.fast_end_at))];
   if(!sbUser||!sb)return;
+  const dbRow={
+    user_id:row.user_id,
+    fast_start_at:row.fast_start_at,
+    fast_end_at:row.fast_end_at,
+    fast_start_ds:row.fast_start_ds,
+    fast_end_ds:row.fast_end_ds,
+    duration_min:row.duration_min,
+    target_hours:row.target_hours
+  };
   try{
-    const{data,error}=await sb.from('coaching_fasting_logs').insert(row).select().single();
+    const{data,error}=await sb.from('coaching_fasting_logs').insert(dbRow).select().single();
     if(error)throw error;
-    coachFastingLogs=coachFastingLogs.map(r=>(r.fast_start_at===row.fast_start_at&&r.fast_end_at===row.fast_end_at)?data:r);
+    coachFastingLogs=coachFastingLogs.map(r=>(r.fast_start_at===row.fast_start_at&&r.fast_end_at===row.fast_end_at)?{...data,...fastingTimezoneFields(row)}:r);
   }catch(e){
     console.warn('persistCompletedFastingLog fallback local:',e.message||e);
   }
 }
-function timeInputValueMaz(iso){
-  if(!iso)return'';
-  const parts=new Intl.DateTimeFormat('en-GB',{timeZone:MAZ_TZ,hour:'2-digit',minute:'2-digit',hourCycle:'h23'}).formatToParts(new Date(iso));
-  const v=Object.fromEntries(parts.filter(p=>p.type!=='literal').map(p=>[p.type,p.value]));
-  return (v.hour||'00')+':'+(v.minute||'00');
+function fastingTimezoneFields(row){
+  return{
+    fast_start_tz:row.fast_start_tz,
+    fast_end_tz:row.fast_end_tz,
+    fast_start_offset_min:row.fast_start_offset_min,
+    fast_end_offset_min:row.fast_end_offset_min
+  };
 }
-function dateInputValueMaz(iso,fallbackDs){
-  return iso?dsFromIsoMaz(iso):(fallbackDs||mazToday());
+function localDsFromIso(iso){
+  if(!iso)return'';
+  const d=new Date(iso);
+  if(Number.isNaN(d.getTime()))return'';
+  return d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate());
+}
+function localTodayDs(){
+  return localDsFromIso(new Date().toISOString());
+}
+function fmtDateTimeLocal(iso){
+  if(!iso)return'';
+  return new Date(iso).toLocaleString('es-MX');
+}
+function fastingDeviceTimeZone(){
+  try{return Intl.DateTimeFormat().resolvedOptions().timeZone||'';}catch(e){return'';}
+}
+function fastingOffsetLabel(offsetMin){
+  if(!Number.isFinite(offsetMin))return'';
+  const sign=offsetMin<=0?'+':'-';
+  const abs=Math.abs(offsetMin);
+  return 'GMT'+sign+pad(Math.floor(abs/60))+':'+pad(abs%60);
+}
+function fastingTimezoneMeta(iso){
+  const d=new Date(iso);
+  return{
+    tz:fastingDeviceTimeZone(),
+    offsetMin:Number.isNaN(d.getTime())?null:d.getTimezoneOffset()
+  };
+}
+function fmtDateTimeFasting(iso,tz,offsetMin){
+  if(!iso)return'';
+  const d=new Date(iso);
+  if(Number.isNaN(d.getTime()))return'';
+  let label='';
+  if(tz){
+    try{
+      label=new Intl.DateTimeFormat('es-MX',{timeZone:tz,dateStyle:'short',timeStyle:'short'}).format(d);
+    }catch(e){
+      label='';
+    }
+  }
+  if(!label)label=d.toLocaleString('es-MX');
+  const off=offsetMin===null||offsetMin===undefined||offsetMin===''?'':fastingOffsetLabel(Number(offsetMin));
+  return off?label+' '+off:label;
+}
+function timeInputValueLocal(iso){
+  if(!iso)return'';
+  const d=new Date(iso);
+  if(Number.isNaN(d.getTime()))return'';
+  return pad(d.getHours())+':'+pad(d.getMinutes());
+}
+function dateInputValueLocal(iso,fallbackDs){
+  return iso?localDsFromIso(iso):(fallbackDs||localTodayDs());
 }
 function fastingIsoFromTime(value,baseDs){
   if(!value)return null;
   const parts=value.split(':').map(Number);
   if(parts.length<2||Number.isNaN(parts[0])||Number.isNaN(parts[1]))return null;
-  return mazLocalDateTimeIso(baseDs||mazToday(),parts[0],parts[1],0);
+  const p=parseDS(baseDs||localTodayDs());
+  return new Date(p.y,p.m-1,p.d,parts[0],parts[1],0).toISOString();
 }
 function fastingElapsedLabel(startIso,endIso){
   if(!startIso)return'--h --m';
@@ -6165,25 +6237,25 @@ function renderFastingCardHtml(){
       ?feedingWindowLabel(first)
       :'Registra tu cena para iniciar.';
   const note=active
-    ?'Desde '+fmtDateTimeMaz(last)+'. Meta actual: '+targetHours+'h. Si amanece y no has comido, seguirá contando desde esa última comida.'
+    ?'Desde '+fmtDateTimeFasting(last,log.lastMealTz,log.lastMealOffsetMin)+'. Meta actual: '+targetHours+'h. Si viajas, seguirá contando el tiempo real entre comidas.'
     :closed
-      ?'Primera comida registrada a las '+fmtDateTimeMaz(first)+'. Estás en tu ventana de ingesta; cuando cenes, guarda esa hora para iniciar el siguiente ayuno.'
+      ?'Primera comida registrada a las '+fmtDateTimeFasting(first,log.firstMealTz,log.firstMealOffsetMin)+'. Estás en tu ventana de ingesta; cuando cenes, guarda esa hora para iniciar el siguiente ayuno.'
       :'Guarda fecha y hora de tu última comida. Puede ser de ayer si se te olvidó registrarla.';
   const targetPct=last?Math.min(100,Math.round(fastingDurationMin(last,first||new Date().toISOString())/(targetHours*60)*100)):0;
   const history=(coachFastingLogs&&coachFastingLogs.length?coachFastingLogs:loadLocalFastingHistory()).slice(0,3);
   const cardCls='fasting-card '+(active?'is-active ':closed?'is-feeding ':'')+(fastingExpanded?'':'collapsed');
   const entryType=active?'first':'last';
   const entryDate=entryType==='first'
-    ?dateInputValueMaz(first,log.firstMealDs||mazToday())
-    :dateInputValueMaz('',mazToday());
-  const entryTime=entryType==='first'?timeInputValueMaz(first):'';
+    ?dateInputValueLocal(first,log.firstMealDs||localTodayDs())
+    :dateInputValueLocal('',localTodayDs());
+  const entryTime=entryType==='first'?timeInputValueLocal(first):'';
   const entryName=entryType==='first'?'Desayuno':'Última cena';
   const entryAction=entryType==='first'?'Registrar primera comida':'Guardar última cena';
   const entryHint=active
-    ?'Detectado por tu ayuno activo: esta fecha y hora cerrarán el ayuno como tu desayuno o primera comida.'
+    ?'Detectado por tu ayuno activo: se guardará con la zona horaria actual del dispositivo y cerrará el ayuno.'
     :closed
-      ?'Detectado por tu ventana de ingesta: esta fecha y hora iniciarán tu siguiente ayuno como última cena.'
-      :'Registra la fecha y hora de tu última comida para iniciar el ayuno.';
+      ?'Detectado por tu ventana de ingesta: se guardará con la zona horaria actual del dispositivo e iniciará tu siguiente ayuno.'
+      :'Registra tu última comida; se guardará con la zona horaria actual del dispositivo.';
   return '<div class="'+cardCls+'">'
     +'<div class="fasting-head"><div><div class="fasting-k">Ayuno</div><div class="fasting-status">'+esc(status)+'</div></div><button type="button" class="fasting-toggle" onclick="toggleFastingCard()">'+(fastingExpanded?'Minimizar':'Info')+'</button></div>'
     +'<div class="fasting-summary"><div><div class="fasting-time" id="fasting-elapsed">'+esc(elapsed)+'</div><div class="fasting-status">'+esc(shortNote)+'</div></div><div class="badge '+(active||closed?'bg-green':'')+'">'+(active?'Ayunando':closed?'Ingesta':'Listo')+'</div></div>'
@@ -6198,7 +6270,7 @@ function renderFastingCardHtml(){
       +'<div class="fasting-entry-hint" id="fasting-entry-hint">'+esc(entryHint)+'</div>'
       +'<button type="button" id="fasting-entry-save" onclick="saveFastingEntryFromInput()">'+esc(entryAction)+'</button>'
       +'</div>':'')
-    +(fastingExpanded&&history.length?'<div class="fasting-history">'+history.map(r=>'<div class="fasting-history-row"><span>'+esc(fmtDS(r.fast_start_ds||dsFromIsoMaz(r.fast_start_at)))+'</span><strong>'+Math.floor((r.duration_min||0)/60)+'h '+pad((r.duration_min||0)%60)+'m</strong><span>'+(r.duration_min>=(r.target_hours||16)*60?'Meta':'')+'</span></div>').join('')+'</div>':'')
+    +(fastingExpanded&&history.length?'<div class="fasting-history">'+history.map(r=>'<div class="fasting-history-row"><span>'+esc(fmtDS(r.fast_start_ds||localDsFromIso(r.fast_start_at)))+'</span><strong>'+Math.floor((r.duration_min||0)/60)+'h '+pad((r.duration_min||0)%60)+'m</strong><span>'+(r.duration_min>=(r.target_hours||16)*60?'Meta':'')+'</span></div>').join('')+'</div>':'')
     +'</div>';
 }
 function updateFastingElapsedLive(){
@@ -6225,7 +6297,7 @@ function setFastingQuickTime(prefix,time){
   const timeInput=document.getElementById(prefix+'-time');
   const dateInput=document.getElementById(prefix+'-date');
   if(timeInput)timeInput.value=time;
-  if(dateInput&&!dateInput.value)dateInput.value=mazToday();
+  if(dateInput&&!dateInput.value)dateInput.value=localTodayDs();
 }
 function syncFastingEntryUi(){
   const type=(document.getElementById('fasting-entry-type')||{}).value||'last';
@@ -6234,8 +6306,8 @@ function syncFastingEntryUi(){
   const save=document.getElementById('fasting-entry-save');
   if(name)name.textContent=type==='first'?'Desayuno':'Última cena';
   if(hint)hint.textContent=type==='first'
-    ?'Esta fecha y hora cerrarán el ayuno como tu desayuno o primera comida.'
-    :'Esta fecha y hora iniciarán tu siguiente ayuno como última cena.';
+    ?'Esta fecha, hora y zona horaria cerrarán el ayuno como tu desayuno o primera comida.'
+    :'Esta fecha, hora y zona horaria iniciarán tu siguiente ayuno como última cena.';
   if(save)save.textContent=type==='first'?'Registrar primera comida':'Guardar última cena';
 }
 async function saveFastingEntryFromInput(){
@@ -6243,12 +6315,19 @@ async function saveFastingEntryFromInput(){
   const timeInput=document.getElementById('fasting-entry-time');
   const dateInput=document.getElementById('fasting-entry-date');
   const value=timeInput&&timeInput.value;
-  const ds=(dateInput&&dateInput.value)||mazToday();
+  const ds=(dateInput&&dateInput.value)||localTodayDs();
   if(!value){toast('Selecciona una hora','err');return;}
   const iso=fastingIsoFromTime(value,ds);
   if(!iso){toast('Selecciona una hora válida','err');return;}
+  const meta=fastingTimezoneMeta(iso);
   if(type==='last'){
-    saveFastingLog({lastMealAt:iso,firstMealAt:null,lastMealDs:ds});
+    saveFastingLog({
+      lastMealAt:iso,
+      firstMealAt:null,
+      lastMealDs:localDsFromIso(iso),
+      lastMealTz:meta.tz,
+      lastMealOffsetMin:meta.offsetMin
+    });
     renderCoachHoyPanel();
     toast('Ayuno iniciado','ok');
     return;
@@ -6263,12 +6342,16 @@ async function saveFastingEntryFromInput(){
     user_id:sbUser&&sbUser.id?sbUser.id:null,
     fast_start_at:log.lastMealAt,
     fast_end_at:iso,
-    fast_start_ds:dsFromIsoMaz(log.lastMealAt),
-    fast_end_ds:dsFromIsoMaz(iso),
+    fast_start_ds:localDsFromIso(log.lastMealAt),
+    fast_end_ds:localDsFromIso(iso),
     duration_min:fastingDurationMin(log.lastMealAt,iso),
-    target_hours:getFastingTargetHours()
+    target_hours:getFastingTargetHours(),
+    fast_start_tz:log.lastMealTz||'',
+    fast_end_tz:meta.tz,
+    fast_start_offset_min:log.lastMealOffsetMin,
+    fast_end_offset_min:meta.offsetMin
   };
-  saveFastingLog({...log,firstMealAt:iso,firstMealDs:dsFromIsoMaz(iso)});
+  saveFastingLog({...log,firstMealAt:iso,firstMealDs:localDsFromIso(iso),firstMealTz:meta.tz,firstMealOffsetMin:meta.offsetMin});
   await persistCompletedFastingLog(row);
   renderCoachHoyPanel();
   toast('Ventana de ingesta activa','ok');
@@ -6278,9 +6361,11 @@ function setFastingLastMealFromInput(){
   const dateInput=document.getElementById('fasting-last-date');
   if(!timeInput){fastingExpanded=true;renderCoachHoyPanel();return;}
   const value=timeInput&&timeInput.value;
-  const ds=(dateInput&&dateInput.value)||mazToday();
+  const ds=(dateInput&&dateInput.value)||localTodayDs();
   if(!value){toast('Selecciona la hora de tu última comida','err');return;}
-  saveFastingLog({lastMealAt:fastingIsoFromTime(value,ds),firstMealAt:null,lastMealDs:ds});
+  const iso=fastingIsoFromTime(value,ds);
+  const meta=fastingTimezoneMeta(iso);
+  saveFastingLog({lastMealAt:iso,firstMealAt:null,lastMealDs:localDsFromIso(iso),lastMealTz:meta.tz,lastMealOffsetMin:meta.offsetMin});
   renderCoachHoyPanel();
   toast('Ayuno iniciado','ok');
 }
@@ -6291,9 +6376,10 @@ async function setFastingFirstMealFromInput(){
   const dateInput=document.getElementById('fasting-first-date');
   if(!timeInput){fastingExpanded=true;renderCoachHoyPanel();return;}
   const value=timeInput&&timeInput.value;
-  const ds=(dateInput&&dateInput.value)||mazToday();
+  const ds=(dateInput&&dateInput.value)||localTodayDs();
   if(!value){toast('Selecciona la hora de tu primera comida','err');return;}
   let firstIso=fastingIsoFromTime(value,ds);
+  const meta=fastingTimezoneMeta(firstIso);
   if(new Date(firstIso).getTime()<new Date(log.lastMealAt).getTime()){
     toast('La primera comida debe ser después de la última comida','err');
     return;
@@ -6302,12 +6388,16 @@ async function setFastingFirstMealFromInput(){
     user_id:sbUser&&sbUser.id?sbUser.id:null,
     fast_start_at:log.lastMealAt,
     fast_end_at:firstIso,
-    fast_start_ds:dsFromIsoMaz(log.lastMealAt),
-    fast_end_ds:dsFromIsoMaz(firstIso),
+    fast_start_ds:localDsFromIso(log.lastMealAt),
+    fast_end_ds:localDsFromIso(firstIso),
     duration_min:fastingDurationMin(log.lastMealAt,firstIso),
-    target_hours:getFastingTargetHours()
+    target_hours:getFastingTargetHours(),
+    fast_start_tz:log.lastMealTz||'',
+    fast_end_tz:meta.tz,
+    fast_start_offset_min:log.lastMealOffsetMin,
+    fast_end_offset_min:meta.offsetMin
   };
-  saveFastingLog({...log,firstMealAt:firstIso,firstMealDs:dsFromIsoMaz(firstIso)});
+  saveFastingLog({...log,firstMealAt:firstIso,firstMealDs:localDsFromIso(firstIso),firstMealTz:meta.tz,firstMealOffsetMin:meta.offsetMin});
   await persistCompletedFastingLog(row);
   renderCoachHoyPanel();
   toast('Ventana de ingesta activa','ok');
@@ -6796,7 +6886,7 @@ function renderCoachSemanaPanel(){
     return '<div class="coach-task-row" '+(row.status==='done'?'onclick="openEditCompletedWorkoutSb(&quot;'+row.id+'&quot;)"':'')+'><div class="coach-session-dot" style="background:'+esc(row.board_color||'#2563eb')+'"></div><div style="flex:1;min-width:0"><div class="coach-task-title">'+esc(row.board_name)+'</div>'+actions+feedback+'</div><div class="coach-task-due '+statusCls+'">'+statusLabel+'</div></div>';
   }).join(''):'<div class="empty">Sin entrenos registrados en este día.</div>';
   const dayFasts=fastingLogsForDs(selectedCoachProgramDs);
-  const fastingDayHtml=dayFasts.length?'<div class="coach-day-notes">'+dayFasts.map(r=>'<div class="coach-day-note"><strong>Ayuno '+Math.floor((r.duration_min||0)/60)+'h '+pad((r.duration_min||0)%60)+'m</strong>Meta '+(r.target_hours||16)+'h · '+esc(fmtDateTimeMaz(r.fast_start_at))+' a '+esc(fmtDateTimeMaz(r.fast_end_at))+'</div>').join('')+'</div>':'';
+  const fastingDayHtml=dayFasts.length?'<div class="coach-day-notes">'+dayFasts.map(r=>'<div class="coach-day-note"><strong>Ayuno '+Math.floor((r.duration_min||0)/60)+'h '+pad((r.duration_min||0)%60)+'m</strong>Meta '+(r.target_hours||16)+'h · '+esc(fmtDateTimeFasting(r.fast_start_at,r.fast_start_tz,r.fast_start_offset_min))+' a '+esc(fmtDateTimeFasting(r.fast_end_at,r.fast_end_tz,r.fast_end_offset_min))+'</div>').join('')+'</div>':'';
   const summary='<div class="board-card"><div class="board-body">'
     +'<div class="coach-day-summary"><div><strong>'+esc(selectedLabel)+'</strong><span>'+selectedDone+'/'+selectedRows.length+' entrenos completados</span></div><span>'+scheduledCount+' en la semana</span></div>'
     +dayWorkoutHtml
