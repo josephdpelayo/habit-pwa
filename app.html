@@ -6,12 +6,12 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="HABIT">
 <meta name="application-name" content="HABIT">
-<link rel="manifest" href="/manifest.json?v=20260719-07">
-<link rel="apple-touch-icon" sizes="120x120" href="/icons/icon-120.png?v=20260719-07">
-<link rel="apple-touch-icon" sizes="152x152" href="/icons/icon-152.png?v=20260719-07">
-<link rel="apple-touch-icon" sizes="167x167" href="/icons/icon-167.png?v=20260719-07">
-<link rel="apple-touch-icon" sizes="180x180" href="/icons/icon-180.png?v=20260719-07">
-<link rel="icon" type="image/png" sizes="32x32" href="/icons/icon-32.png?v=20260719-07">
+<link rel="manifest" href="/manifest.json?v=20260719-08">
+<link rel="apple-touch-icon" sizes="120x120" href="/icons/icon-120.png?v=20260719-08">
+<link rel="apple-touch-icon" sizes="152x152" href="/icons/icon-152.png?v=20260719-08">
+<link rel="apple-touch-icon" sizes="167x167" href="/icons/icon-167.png?v=20260719-08">
+<link rel="apple-touch-icon" sizes="180x180" href="/icons/icon-180.png?v=20260719-08">
+<link rel="icon" type="image/png" sizes="32x32" href="/icons/icon-32.png?v=20260719-08">
 <title>HABIT</title>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Share+Tech+Mono&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
@@ -424,8 +424,10 @@ input,select,button,textarea{font-family:'Inter',sans-serif}
 .set-reps-in{background:var(--card);border:1px solid var(--border);border-radius:4px;padding:8px;font-size:13px;color:var(--white);width:100%}
 .set-check{width:32px;height:32px;border-radius:6px;border:1.5px solid var(--border);background:var(--card);color:transparent;font-size:14px;font-weight:900;cursor:pointer;justify-self:center}
 .set-check.done{background:var(--green);border-color:var(--green);color:#03120d}
-.set-del-btn{width:22px;height:22px;border-radius:5px;border:1px solid rgba(239,68,68,.3);background:rgba(239,68,68,.08);color:#fca5a5;font-size:12px;line-height:1;cursor:pointer;justify-self:center;display:flex;align-items:center;justify-content:center}
-.set-del-btn:active{background:rgba(239,68,68,.2)}
+.set-del-btn{width:18px;height:18px;margin-left:4px;border-radius:5px;border:none;background:transparent;color:var(--gray);font-size:10px;line-height:1;cursor:pointer;justify-self:center;display:flex;align-items:center;justify-content:center;opacity:.6}
+.set-del-btn:active{background:rgba(239,68,68,.15);color:#fca5a5;opacity:1}
+.unit-toggle-btn{justify-self:center;background:rgba(255,255,255,.06);border:1px solid var(--border);border-radius:999px;color:var(--gray);font-size:9.5px;font-weight:800;letter-spacing:.05em;padding:4px 11px;cursor:pointer}
+.unit-toggle-btn:active{background:rgba(255,255,255,.13);color:var(--white)}
 .set-tracker-actions{display:flex;gap:8px;margin-top:6px}
 .set-tracker-actions .btn-sm{flex:1;text-align:center}
 .set-tracker-actions .btn-sm.compact{flex:0 0 auto;padding:8px 12px;font-size:11px}
@@ -2012,7 +2014,7 @@ html,body,.app,input,select,button,textarea{font-family:var(--font-ui);font-opti
 // ── CONFIG & SUPABASE ───────────────────────────────────────
 const SUPABASE_URL='https://pmpjteuqjusbiduevbwq.supabase.co';
 const SUPABASE_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBtcGp0ZXVxanVzYmlkdWV2YndxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc2OTI1NjUsImV4cCI6MjA5MzI2ODU2NX0.XbMzZoo2yqtrD8znLnyo_1zDfrdJAvAPj1lqGOyXnLw';
-const APP_VERSION='20260719-07';
+const APP_VERSION='20260719-08';
 const MUSCLE_GROUPS=['Pecho','Espalda','Piernas','Hombros','Brazos','Core','Cardio','Full Body'];
 const DAILY_QUOTES=[
   {text:'Haz hoy lo que tu version de manana agradeceria.',action:'Elige una accion pequeña y cumplible antes de buscar motivacion.'},
@@ -5627,15 +5629,35 @@ async function submitScore(){
   }catch(e){hideLoading();toast('Error al guardar: '+(e.message||e),'err');console.error('submitScore:',e);return;}
   hideLoading();closeLogScoreModal();toast('Peso registrado 💪','ok');
 }
+// Cada ejercicio puede pesarse en kg o lb (la misma rutina puede mezclar
+// ambos) — la preferencia se guarda por ejercicio en localStorage, pero
+// siempre se almacena en Supabase convertido a kg para que el historial y
+// las gráficas de progreso comparen manzanas con manzanas.
+function kgToLb(kg){return kg*2.20462;}
+function lbToKg(lb){return lb*0.453592;}
+function exerciseWeightUnit(exKey){
+  return localStorage.getItem('habit_unit_'+exKey)||'kg';
+}
+function toggleExerciseWeightUnit(exKey){
+  const next=exerciseWeightUnit(exKey)==='kg'?'lb':'kg';
+  localStorage.setItem('habit_unit_'+exKey,next);
+  refreshSessionUiFor(exKey);
+}
+function formatWeightForUnit(weightKg,unit){
+  if(weightKg==null)return'';
+  const v=unit==='lb'?kgToLb(weightKg):weightKg;
+  return String(Math.round(v*10)/10);
+}
 function renderSetTrackerHtml(sessionCtx,exKey,ex){
   const sets=sessionCtx.sets[exKey]||[];
   if(!sets.length)return'';
+  const unit=exerciseWeightUnit(exKey);
   return '<div class="set-tracker has-del">'
-    +'<div class="set-tracker-hdr"><span>SERIE</span><span>KG</span><span>REPS</span><span></span><span></span></div>'
-    +sets.map(s=>'<div class="set-row" data-set-id="'+s.id+'">'
+    +'<div class="set-tracker-hdr"><span>SERIE</span><button class="unit-toggle-btn" onclick="toggleExerciseWeightUnit(&quot;'+esc(exKey)+'&quot;)" title="Cambiar unidad de peso">'+unit.toUpperCase()+'</button><span>REPS</span><span></span><span></span></div>'
+    +sets.map(s=>'<div class="set-row" data-set-id="'+s.id+'" data-ex-key="'+esc(exKey)+'">'
       +'<span class="set-num">'+(s.set_idx+1)+'</span>'
-      +'<input class="set-reps-in set-weight-in" type="number" inputmode="decimal" placeholder="kg" value="'+(s.weight!=null?s.weight:'')+'" onchange="updateSetWeightSb(&quot;'+s.id+'&quot;,this.value)">'
-      +'<input class="set-reps-in set-actual-reps-in" type="text" inputmode="numeric" placeholder="'+esc(s.reps_target||'reps')+'" value="'+esc(s.actual_reps||'')+'" onchange="updateSetRepsSb(&quot;'+s.id+'&quot;,this.value)">'
+      +'<input class="set-reps-in set-weight-in" type="number" inputmode="decimal" placeholder="'+unit+'" value="'+formatWeightForUnit(s.weight,unit)+'" onchange="updateSetWeightSb(&quot;'+s.id+'&quot;,this.value,&quot;'+esc(exKey)+'&quot;)">'
+      +'<input class="set-reps-in set-actual-reps-in" type="number" inputmode="numeric" placeholder="'+esc(s.reps_target||'reps')+'" value="'+(s.actual_reps!=null?esc(String(s.actual_reps)):'')+'" onchange="updateSetRepsSb(&quot;'+s.id+'&quot;,this.value)">'
       +'<button class="set-check'+(s.done?' done':'')+'" onclick="toggleSetDoneSb(&quot;'+s.id+'&quot;,'+(!s.done)+',this)">'+(s.done?'✓':'')+'</button>'
       +'<button class="set-del-btn" title="Eliminar serie" onclick="deleteSetSb(&quot;'+s.id+'&quot;,&quot;'+esc(exKey)+'&quot;)">✕</button>'
       +'</div>').join('')
@@ -5703,8 +5725,12 @@ async function toggleSetDoneSb(setId,newDone,btnEl){
     const row=btnEl?btnEl.closest('.set-row'):getSetRowElement(setId);
     const wIn=row?.querySelector('.set-weight-in');
     const rIn=row?.querySelector('.set-actual-reps-in');
-    if(wIn){const w=wIn.value===''?null:parseFloat(wIn.value);patch.weight=(w==null||isNaN(w))?null:w;}
-    if(rIn)patch.actual_reps=rIn.value||null;
+    if(wIn){
+      const w=wIn.value===''?null:parseFloat(wIn.value);
+      const unit=row?.dataset.exKey?exerciseWeightUnit(row.dataset.exKey):'kg';
+      patch.weight=(w==null||isNaN(w))?null:(unit==='lb'?Math.round(lbToKg(w)*100)/100:w);
+    }
+    if(rIn){const r=rIn.value===''?null:parseInt(rIn.value,10);patch.actual_reps=(r==null||isNaN(r))?null:r;}
   }
   try{
     const{data,error}=await sb.from('coaching_session_sets').update(patch).eq('id',setId).select().single();
@@ -5728,17 +5754,21 @@ async function toggleSetDoneSb(setId,newDone,btnEl){
   }catch(e){toast('Error: '+e.message,'err');}
 }
 async function updateSetRepsSb(setId,value){
+  const r=value===''?null:parseInt(value,10);
+  const reps=(r==null||isNaN(r))?null:r;
   try{
-    const{data,error}=await sb.from('coaching_session_sets').update({actual_reps:value||null,updated_at:new Date().toISOString()}).eq('id',setId).select().single();
+    const{data,error}=await sb.from('coaching_session_sets').update({actual_reps:reps,updated_at:new Date().toISOString()}).eq('id',setId).select().single();
     if(error)throw error;
     const arr=coachSessionSets[data.ex_key];
     if(arr){const idx=arr.findIndex(s=>s.id===setId);if(idx>-1)arr[idx]=data;}
   }catch(e){toast('Error: '+e.message,'err');}
 }
-async function updateSetWeightSb(setId,value){
-  const w=value===''?null:parseFloat(value);
+async function updateSetWeightSb(setId,value,exKey){
+  const raw=value===''?null:parseFloat(value);
+  let w=(raw==null||isNaN(raw))?null:raw;
+  if(w!=null&&exKey&&exerciseWeightUnit(exKey)==='lb')w=Math.round(lbToKg(w)*100)/100;
   try{
-    const{data,error}=await sb.from('coaching_session_sets').update({weight:(w==null||isNaN(w))?null:w,updated_at:new Date().toISOString()}).eq('id',setId).select().single();
+    const{data,error}=await sb.from('coaching_session_sets').update({weight:w,updated_at:new Date().toISOString()}).eq('id',setId).select().single();
     if(error)throw error;
     const arr=coachSessionSets[data.ex_key];
     if(arr){const idx=arr.findIndex(s=>s.id===setId);if(idx>-1)arr[idx]=data;}
@@ -5750,7 +5780,7 @@ async function addSetSb(scheduleId,exKey,defaultReps){
   const lastWeight=arr.length?arr[arr.length-1].weight:null;
   const lastReps=arr.length?arr[arr.length-1].actual_reps:null;
   try{
-    const{data,error}=await sb.from('coaching_session_sets').insert({schedule_id:scheduleId,user_id:sbUser.id,ex_key:exKey,set_idx:nextIdx,reps_target:defaultReps||null,weight:lastWeight,actual_reps:lastReps||defaultReps||null,done:false}).select().single();
+    const{data,error}=await sb.from('coaching_session_sets').insert({schedule_id:scheduleId,user_id:sbUser.id,ex_key:exKey,set_idx:nextIdx,reps_target:defaultReps||null,weight:lastWeight,actual_reps:lastReps||null,done:false}).select().single();
     if(error)throw error;
     if(!coachSessionSets[exKey])coachSessionSets[exKey]=[];
     coachSessionSets[exKey].push(data);
@@ -5781,6 +5811,7 @@ async function markAllSetsSb(exKey){
   const arr=coachSessionSets[exKey]||[];
   const undone=arr.filter(s=>!s.done);
   if(!undone.length)return;
+  const unit=exerciseWeightUnit(exKey);
   // Toma el último peso/reps capturado en cualquier serie (leyendo el DOM
   // primero, la fila guardada después) como relleno para las series que
   // quedaron vacías, en vez de dejarlas en null.
@@ -5790,23 +5821,25 @@ async function markAllSetsSb(exKey){
     const wIn=row?.querySelector('.set-weight-in');
     const rIn=row?.querySelector('.set-actual-reps-in');
     const wRaw=wIn&&wIn.value!==''?parseFloat(wIn.value):null;
-    const w=(wRaw!=null&&!isNaN(wRaw))?wRaw:(s.weight!=null?s.weight:null);
-    const r=(rIn&&rIn.value)||s.actual_reps||null;
+    const w=(wRaw!=null&&!isNaN(wRaw))?(unit==='lb'?Math.round(lbToKg(wRaw)*100)/100:wRaw):(s.weight!=null?s.weight:null);
+    const rRaw=rIn&&rIn.value!==''?parseInt(rIn.value,10):null;
+    const r=(rRaw!=null&&!isNaN(rRaw))?rRaw:(s.actual_reps||null);
     if(w!=null)lastWeight=w;
-    if(r)lastReps=r;
+    if(r!=null)lastReps=r;
   });
-  if(lastWeight==null||!lastReps){
+  if(lastWeight==null||lastReps==null){
     const last=await getLastScoreForExKey(exKey);
     if(lastWeight==null&&last.weight!=null)lastWeight=last.weight;
-    if(!lastReps&&last.reps)lastReps=last.reps;
+    if(lastReps==null&&last.reps)lastReps=last.reps;
   }
   const patches=undone.map(s=>{
     const row=getSetRowElement(s.id);
     const wIn=row?.querySelector('.set-weight-in');
     const rIn=row?.querySelector('.set-actual-reps-in');
     const wRaw=wIn&&wIn.value!==''?parseFloat(wIn.value):null;
-    const w=(wRaw!=null&&!isNaN(wRaw))?wRaw:lastWeight;
-    const r=(rIn&&rIn.value)||lastReps||s.reps_target||null;
+    const w=(wRaw!=null&&!isNaN(wRaw))?(unit==='lb'?Math.round(lbToKg(wRaw)*100)/100:wRaw):lastWeight;
+    const rRaw=rIn&&rIn.value!==''?parseInt(rIn.value,10):null;
+    const r=(rRaw!=null&&!isNaN(rRaw))?rRaw:lastReps;
     return{id:s.id,weight:w,actual_reps:r};
   });
   try{
@@ -6725,7 +6758,7 @@ async function seedSessionSetsSb(scheduleRow){
     const exKey=exKeys[i];
     const n=Math.max(1,parseInt(ex.sets,10)||1);
     const prev=lastScores[exKey]||{};
-    for(let s=0;s<n;s++)rows.push({schedule_id:scheduleRow.id,user_id:sbUser.id,ex_key:exKey,set_idx:s,reps_target:ex.reps||null,weight:prev.weight!=null?prev.weight:null,actual_reps:prev.reps||ex.reps||null,done:false});
+    for(let s=0;s<n;s++)rows.push({schedule_id:scheduleRow.id,user_id:sbUser.id,ex_key:exKey,set_idx:s,reps_target:ex.reps||null,weight:prev.weight!=null?prev.weight:null,actual_reps:prev.reps||null,done:false});
   });
   if(!rows.length)return;
   try{
@@ -10531,7 +10564,7 @@ function renderCoachSessionDetailAdmin(){
       +sets.map(s=>'<div class="set-row">'
         +'<span class="set-num">'+(s.set_idx+1)+'</span>'
         +'<input class="set-reps-in" type="number" inputmode="decimal" value="'+(s.weight!=null?s.weight:'')+'" onchange="adminUpdateSetSb(&quot;'+s.id+'&quot;,&quot;weight&quot;,this.value)">'
-        +'<input class="set-reps-in" type="text" value="'+esc(s.actual_reps||s.reps_target||'')+'" onchange="adminUpdateSetSb(&quot;'+s.id+'&quot;,&quot;actual_reps&quot;,this.value)">'
+        +'<input class="set-reps-in" type="number" inputmode="numeric" placeholder="'+esc(s.reps_target||'reps')+'" value="'+(s.actual_reps!=null?esc(String(s.actual_reps)):'')+'" onchange="adminUpdateSetSb(&quot;'+s.id+'&quot;,&quot;actual_reps&quot;,this.value)">'
         +'<button class="set-check'+(s.done?' done':'')+'" onclick="adminUpdateSetSb(&quot;'+s.id+'&quot;,&quot;done&quot;,'+(!s.done)+')">'+(s.done?'✓':'')+'</button>'
         +'</div>').join('')
       +'</div>';
@@ -10541,7 +10574,7 @@ async function adminUpdateSetSb(setId,field,value){
   const patch={updated_at:new Date().toISOString()};
   if(field==='weight')patch.weight=(value===''?null:parseFloat(value));
   else if(field==='done')patch.done=value;
-  else patch.actual_reps=value||null;
+  else{const r=value===''?null:parseInt(value,10);patch.actual_reps=(r==null||isNaN(r))?null:r;}
   try{
     const{data,error}=await sb.from('coaching_session_sets').update(patch).eq('id',setId).select().single();
     if(error)throw error;
