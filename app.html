@@ -487,6 +487,7 @@ input,select,button,textarea{font-family:'Montserrat',sans-serif}
 .coach-day.scheduled .coach-day-num{border-color:rgba(59,130,246,.45);color:#93c5fd;background:rgba(37,99,235,.11)}
 .coach-day.done .coach-day-num{background:rgba(16,185,129,.95);border-color:rgba(16,185,129,.95);color:#03120d}
 .coach-day.missed .coach-day-num{border-color:rgba(239,68,68,.55);color:#fca5a5;background:rgba(239,68,68,.08)}
+.coach-day.skipped .coach-day-num{border-color:rgba(148,163,184,.35);color:#cbd5e1;background:rgba(148,163,184,.08)}
 .coach-day.today .coach-day-num{box-shadow:0 0 0 2px rgba(255,255,255,.82)}
 .coach-day.today .coach-day-label{color:var(--white)}
 .coach-day.in-progress .coach-day-num{background:linear-gradient(180deg,#60a5fa,#2563eb);border-color:#60a5fa;color:#fff;animation:coachPulse 1.6s ease-in-out infinite}
@@ -539,10 +540,25 @@ input,select,button,textarea{font-family:'Montserrat',sans-serif}
 .fasting-mini button.green{background:rgba(16,185,129,.16);color:#34d399}
 .fasting-quick{display:flex;gap:6px;margin-bottom:8px}
 .fasting-quick button{width:auto;flex:1;background:rgba(255,255,255,.055);color:var(--gray);border:1px solid rgba(255,255,255,.08)}
+.fasting-goals{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin:8px 0 10px}
+.fasting-goal{border:1px solid rgba(255,255,255,.08);background:rgba(255,255,255,.045);border-radius:999px;color:var(--gray);font-size:11px;font-weight:900;padding:8px 4px;cursor:pointer}
+.fasting-goal.active{background:rgba(37,99,235,.18);border-color:rgba(147,197,253,.5);color:#bfdbfe}
+.fasting-history{position:relative;z-index:1;margin-top:10px;display:grid;gap:6px}
+.fasting-history-row{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:8px 9px;border-radius:12px;background:rgba(255,255,255,.045);font-size:11.5px;color:var(--gray)}
+.fasting-history-row strong{color:var(--white)}
 .coach-day{cursor:pointer}
 .coach-day.selected .coach-day-num{outline:2px solid rgba(147,197,253,.9);outline-offset:2px;background:rgba(37,99,235,.22);color:#bfdbfe}
 .coach-day-summary{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:12px;color:var(--gray);font-size:12px}
 .coach-day-summary strong{display:block;color:var(--white);font-size:18px;line-height:1.1}
+.coach-week-score{display:grid;grid-template-columns:repeat(4,1fr);gap:7px;margin-bottom:12px}
+.coach-week-score .tu-stat{padding:10px 7px}
+.coach-week-score .tu-stat-n{font-size:17px}
+.coach-day-notes{display:grid;gap:7px;margin-top:10px}
+.coach-day-note{border:1px solid rgba(255,255,255,.08);background:rgba(0,0,0,.18);border-radius:14px;padding:10px;font-size:12px;color:var(--gray);line-height:1.4}
+.coach-day-note strong{display:block;color:var(--white);font-size:13px;margin-bottom:3px}
+.coach-feedback-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:7px;margin:8px 0 12px}
+.coach-feedback-choice{border:1px solid rgba(255,255,255,.1);background:rgba(255,255,255,.045);border-radius:14px;color:var(--gray);font-weight:900;font-size:12px;padding:12px 8px;cursor:pointer}
+.coach-feedback-choice.active{border-color:rgba(16,185,129,.55);background:rgba(16,185,129,.12);color:#8bffbf}
 .coach-empty{background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-radius:16px;padding:24px 16px;text-align:center;color:var(--gray);font-size:13px;line-height:1.5}
 .active-session-bar{flex-shrink:0;display:flex;align-items:center;justify-content:space-between;gap:10px;background:linear-gradient(90deg,#2563eb,#1d4ed8);color:var(--white);padding:12px 16px;cursor:pointer;font-family:'Montserrat',sans-serif;font-weight:800;font-size:13px;letter-spacing:0}
 .active-session-bar #asb-elapsed{font-family:'Montserrat',sans-serif;font-variant-numeric:tabular-nums}
@@ -1857,6 +1873,17 @@ html,body{background:radial-gradient(circle at 50% -18%,rgba(80,112,164,.16),tra
   </div>
 </div>
 
+<!-- FEEDBACK POST-ENTRENO -->
+<div id="workout-feedback-modal" class="terms-modal" style="display:none">
+  <div class="terms-box">
+    <div class="terms-hdr">
+      <h2>¿Cómo te fue?</h2>
+      <button class="video-modal-close" onclick="closeWorkoutFeedbackModal()">Cerrar</button>
+    </div>
+    <div class="terms-body" id="workout-feedback-modal-body" style="padding:12px"></div>
+  </div>
+</div>
+
 <!-- CRONÓMETRO / TEMPORIZADOR MANUAL -->
 <div id="stopwatch-modal" class="terms-modal" style="display:none">
   <div class="terms-box">
@@ -2466,7 +2493,7 @@ let waitlists={}; // waitlists[ds+'_'+slotIdx] = [{userId,name,...}]
 let payments=[], boards=[], scores={}, posts=[], accessLog=[], adminNotifs=[];
 let curUser=null, curDate=dateObjFromDS(mazToday()), selStartIdx=null, selShort=false, selPlan=null, selPT='individual', selectedRoutineBoardId=null;
 let accInt=null, accessDataInt=null, notifChannel=null, userNotifInt=null, receptionClockInt=null, receptionDataInt=null, userNotifBootstrapped=false, userNotifSeen=new Set(), notifs=[], logScoreCtx=null, expandedUsers=new Set();
-let coachWeekStart=null, coachSchedule=[], coachTasks=[], coachBoardsById={}, activeCoachingSession=null, coachSessionTickInt=null, coachSessionSets={}, coachTaskLogsToday=new Set(), coachTaskLogsByDs={};
+let coachWeekStart=null, coachSchedule=[], coachTasks=[], coachBoardsById={}, activeCoachingSession=null, coachSessionTickInt=null, coachSessionSets={}, coachTaskLogsToday=new Set(), coachTaskLogsByDs={}, coachFastingLogs=[];
 let chatMessages=[], chatChannel=null, chatPollInt=null, chatSendContext=null,
     chatMediaRecorder=null, chatRecordChunks=[], chatRecordStartMs=0, chatRecordTimerInt=null,
     chatPendingImgFile=null;
@@ -3312,7 +3339,7 @@ async function doLogout(){
   hideActiveSessionBar();
   stopRestTimer();
   activeCoachingSession=null;coachSchedule=[];coachTasks=[];coachBoardsById={};
-  coachWeekStart=null;coachDataLoadedAt=0;coachDataLoadError=null;coachHubActiveTab='hoy';coachSessionSets={};exerciseNotesMap={};coachTaskLogsToday=new Set();coachTaskLogsByDs={};coachMyBoards=null;selectedCoachProgramDs=null;
+  coachWeekStart=null;coachDataLoadedAt=0;coachDataLoadError=null;coachHubActiveTab='hoy';coachSessionSets={};exerciseNotesMap={};coachTaskLogsToday=new Set();coachTaskLogsByDs={};coachFastingLogs=[];coachMyBoards=null;selectedCoachProgramDs=null;
   selectedRoutineBoardId=null;logScoreCtx=null;
   chatMessages=[];chatSendContext=null;
   Object.values(_tuPrCharts).forEach(c=>{try{c.destroy();}catch(_){}});_tuPrCharts={};_tuScoreRows=null;
@@ -3625,7 +3652,7 @@ function admTab(t){
   if(t==='gaia')renderGaiaTab();
 }
 
-let coachHubActiveTab='hoy', coachTodayExpandedBoards=new Set(), selectedCoachProgramDs=null;
+let coachHubActiveTab='hoy', coachTodayExpandedBoards=new Set(), selectedCoachProgramDs=null, workoutFeedbackScheduleId=null, workoutFeedbackEnergy='normal', workoutFeedbackSoreness=false;
 function coachHubTab(t,btn){
   coachHubActiveTab=t;
   document.querySelectorAll('.coach-hub-tab').forEach(b=>b.classList.remove('active'));
@@ -5093,13 +5120,17 @@ async function renderCoachTuSb(){
   if(!el||!sbUser)return;
   el.innerHTML='<div class="empty">Cargando...</div>';
   try{
-    const[schRes,scRes]=await Promise.allSettled([
+    const[schRes,scRes,fastRes]=await Promise.allSettled([
       sb.from('coaching_schedule').select('ds,duration_sec').eq('user_id',sbUser.id).eq('status','done'),
-      sb.from('user_scores').select('*').eq('user_id',sbUser.id).order('logged_at',{ascending:true}).limit(300)
+      sb.from('user_scores').select('*').eq('user_id',sbUser.id).order('logged_at',{ascending:true}).limit(300),
+      sb.from('coaching_fasting_logs').select('duration_min,target_hours,fast_start_ds').eq('user_id',sbUser.id).order('fast_start_at',{ascending:false}).limit(30)
     ]);
     const doneRows=schRes.status==='fulfilled'?(schRes.value.data||[]):[];
     _tuScoreRows=scRes.status==='fulfilled'?(scRes.value.data||[]):[];
+    const fastRows=(fastRes.status==='fulfilled'&&!fastRes.value.error)?(fastRes.value.data||[]):loadLocalFastingHistory();
     const totalMin=Math.round(doneRows.reduce((s,r)=>s+(r.duration_sec||0),0)/60);
+    const avgFast=fastRows.length?Math.round(fastRows.reduce((s,r)=>s+(r.duration_min||0),0)/fastRows.length):0;
+    const bestFast=fastRows.reduce((m,r)=>Math.max(m,r.duration_min||0),0);
     const doneDates=new Set(doneRows.map(r=>r.ds));
     let streak=0,cursor=mazToday();
     if(!doneDates.has(cursor))cursor=addDaysDS(cursor,-1);
@@ -5107,6 +5138,8 @@ async function renderCoachTuSb(){
     el.innerHTML='<div class="tu-stats-row">'
       +'<div class="tu-stat"><div class="tu-stat-n">'+totalMin+'</div><div class="tu-stat-l">Min de entreno</div></div>'
       +'<div class="tu-stat"><div class="tu-stat-n">'+streak+'</div><div class="tu-stat-l">Días de racha</div></div>'
+      +'<div class="tu-stat"><div class="tu-stat-n">'+Math.floor(avgFast/60)+'h</div><div class="tu-stat-l">Ayuno prom</div></div>'
+      +'<div class="tu-stat"><div class="tu-stat-n">'+Math.floor(bestFast/60)+'h</div><div class="tu-stat-l">Mejor ayuno</div></div>'
       +'</div>'
       +'<div class="score-unit-toggle">'
       +'<button class="tu-unit-pill" data-unit="kg" onclick="setLogScoreUnit(&quot;kg&quot;)">KG</button>'
@@ -5894,13 +5927,15 @@ async function loadCoachWeekDataSb(force){
   coachWeekStart=mazWeekStart(mazToday());
   const weekEnd=addDaysDS(coachWeekStart,6);
   try{
-    const[schRes,taskRes,logRes]=await Promise.allSettled([
+    const[schRes,taskRes,logRes,fastRes]=await Promise.allSettled([
       sb.from('coaching_schedule').select('*').eq('user_id',sbUser.id).gte('ds',coachWeekStart).lte('ds',weekEnd).order('ds'),
       sb.from('coaching_tasks').select('*').eq('user_id',sbUser.id).or('is_done.eq.false,completed_at.gte.'+mazLocalDateTimeIso(coachWeekStart,0,0,0)).order('due_date',{ascending:true,nullsFirst:false}),
-      sb.from('coaching_task_logs').select('task_id,ds').eq('user_id',sbUser.id).gte('ds',coachWeekStart).lte('ds',weekEnd)
+      sb.from('coaching_task_logs').select('task_id,ds').eq('user_id',sbUser.id).gte('ds',coachWeekStart).lte('ds',weekEnd),
+      sb.from('coaching_fasting_logs').select('*').eq('user_id',sbUser.id).gte('fast_start_ds',coachWeekStart).lte('fast_start_ds',weekEnd).order('fast_start_at',{ascending:false})
     ]);
     coachSchedule=schRes.status==='fulfilled'?(schRes.value.data||[]):[];
     coachTasks=taskRes.status==='fulfilled'?(taskRes.value.data||[]):[];
+    coachFastingLogs=(fastRes.status==='fulfilled'&&!fastRes.value.error)?(fastRes.value.data||[]):loadLocalFastingHistory().filter(r=>r.fast_start_ds>=coachWeekStart&&r.fast_start_ds<=weekEnd);
     coachTaskLogsByDs={};
     (logRes.status==='fulfilled'?(logRes.value.data||[]):[]).forEach(r=>{
       const ds=r.ds||mazToday();
@@ -5918,7 +5953,7 @@ async function loadCoachWeekDataSb(force){
     coachDataLoadError=null;
   }catch(e){
     console.error('loadCoachWeekDataSb:',e);
-    coachSchedule=[];coachTasks=[];coachBoardsById={};coachTaskLogsToday=new Set();coachTaskLogsByDs={};
+    coachSchedule=[];coachTasks=[];coachBoardsById={};coachTaskLogsToday=new Set();coachTaskLogsByDs={};coachFastingLogs=[];
     coachDataLoadError=e.message||'Error de red';
   }
 }
@@ -5961,6 +5996,61 @@ function loadFastingLog(){
 function saveFastingLog(log){
   localStorage.setItem(fastingStorageKey(),JSON.stringify({...log,updatedAt:new Date().toISOString()}));
 }
+function fastingHistoryStorageKey(){
+  return fastingStorageKey()+'_history';
+}
+function loadLocalFastingHistory(){
+  try{return JSON.parse(localStorage.getItem(fastingHistoryStorageKey())||'[]')||[];}catch(e){return[];}
+}
+function saveLocalFastingHistory(rows){
+  localStorage.setItem(fastingHistoryStorageKey(),JSON.stringify((rows||[]).slice(0,60)));
+}
+function fastingTargetKey(){
+  return fastingStorageKey()+'_target';
+}
+function getFastingTargetHours(){
+  const n=parseInt(localStorage.getItem(fastingTargetKey())||'16',10);
+  return [12,14,16,18].includes(n)?n:16;
+}
+function setFastingTargetHours(n){
+  const target=parseInt(n,10)||16;
+  localStorage.setItem(fastingTargetKey(),String(target));
+  renderCoachHoyPanel();
+}
+function fastingDurationMin(startIso,endIso){
+  const start=new Date(startIso).getTime();
+  const end=new Date(endIso).getTime();
+  if(!Number.isFinite(start)||!Number.isFinite(end)||end<start)return 0;
+  return Math.round((end-start)/60000);
+}
+function fastingRemainingLabel(startIso,targetHours){
+  const min=fastingDurationMin(startIso,new Date().toISOString());
+  const targetMin=(targetHours||16)*60;
+  if(min>=targetMin)return 'Meta alcanzada';
+  const left=targetMin-min;
+  return 'Faltan '+Math.floor(left/60)+'h '+pad(left%60)+'m';
+}
+function feedingWindowLabel(firstIso){
+  if(!firstIso)return '';
+  const min=fastingDurationMin(firstIso,new Date().toISOString());
+  return 'Llevas '+Math.floor(min/60)+'h '+pad(min%60)+'m en ingesta';
+}
+function fastingLogsForDs(ds){
+  return (coachFastingLogs||[]).filter(r=>r.fast_start_ds===ds||r.fast_end_ds===ds);
+}
+async function persistCompletedFastingLog(row){
+  const local=[row,...loadLocalFastingHistory().filter(r=>!(r.fast_start_at===row.fast_start_at&&r.fast_end_at===row.fast_end_at))];
+  saveLocalFastingHistory(local);
+  coachFastingLogs=[row,...(coachFastingLogs||[]).filter(r=>!(r.fast_start_at===row.fast_start_at&&r.fast_end_at===row.fast_end_at))];
+  if(!sbUser||!sb)return;
+  try{
+    const{data,error}=await sb.from('coaching_fasting_logs').insert(row).select().single();
+    if(error)throw error;
+    coachFastingLogs=coachFastingLogs.map(r=>(r.fast_start_at===row.fast_start_at&&r.fast_end_at===row.fast_end_at)?data:r);
+  }catch(e){
+    console.warn('persistCompletedFastingLog fallback local:',e.message||e);
+  }
+}
 function timeInputValueMaz(iso){
   if(!iso)return'';
   const parts=new Intl.DateTimeFormat('en-GB',{timeZone:MAZ_TZ,hour:'2-digit',minute:'2-digit',hourCycle:'h23'}).formatToParts(new Date(iso));
@@ -5991,18 +6081,21 @@ function renderFastingCardHtml(){
   const first=log.firstMealAt||'';
   const active=!!(last&&!first);
   const closed=!!(last&&first);
+  const targetHours=getFastingTargetHours();
   const elapsed=last?fastingElapsedLabel(last,first):'--h --m';
   const status=active?'Ayuno en curso':closed?'Ventana de ingesta':'Empieza con tu última comida';
   const shortNote=active
-    ?'Sigue contando aunque cambie el día.'
+    ?fastingRemainingLabel(last,targetHours)
     :closed
-      ?'Ayuno completado: '+elapsed+'.'
+      ?feedingWindowLabel(first)
       :'Registra tu cena para iniciar.';
   const note=active
-    ?'Desde '+fmtDateTimeMaz(last)+'. Si amanece y no has comido, mañana seguirá contando desde esa última comida.'
+    ?'Desde '+fmtDateTimeMaz(last)+'. Meta actual: '+targetHours+'h. Si amanece y no has comido, seguirá contando desde esa última comida.'
     :closed
       ?'Primera comida registrada a las '+fmtDateTimeMaz(first)+'. Estás en tu ventana de ingesta; cuando cenes, guarda esa hora para iniciar el siguiente ayuno.'
       :'Guarda fecha y hora de tu última comida. Puede ser de ayer si se te olvidó registrarla.';
+  const targetPct=last?Math.min(100,Math.round(fastingDurationMin(last,first||new Date().toISOString())/(targetHours*60)*100)):0;
+  const history=(coachFastingLogs&&coachFastingLogs.length?coachFastingLogs:loadLocalFastingHistory()).slice(0,3);
   const cardCls='fasting-card '+(active?'is-active ':closed?'is-feeding ':'')+(fastingExpanded?'':'collapsed');
   const lastDs=dateInputValueMaz(last,log.lastMealDs||addDaysDS(mazToday(),-1));
   const firstDs=dateInputValueMaz(first,log.firstMealDs||mazToday());
@@ -6010,11 +6103,14 @@ function renderFastingCardHtml(){
     +'<div class="fasting-head"><div><div class="fasting-k">Ayuno</div><div class="fasting-status">'+esc(status)+'</div></div><button type="button" class="fasting-toggle" onclick="toggleFastingCard()">'+(fastingExpanded?'Minimizar':'Info')+'</button></div>'
     +'<div class="fasting-summary"><div><div class="fasting-time" id="fasting-elapsed">'+esc(elapsed)+'</div><div class="fasting-status">'+esc(shortNote)+'</div></div><div class="badge '+(active||closed?'bg-green':'')+'">'+(active?'Ayunando':closed?'Ingesta':'Listo')+'</div></div>'
     +(fastingExpanded?'<div class="fasting-note">'+esc(note)+'</div>'
+      +'<div class="coach-progress-track"><div class="coach-progress-fill" style="width:'+targetPct+'%"></div></div>'
       +'<div class="fasting-stage"><div class="fasting-stage-dot done"></div><div class="fasting-stage-step done"><span></span></div><div class="fasting-stage-dot '+(closed?'done':'')+'"></div><div class="fasting-stage-step '+(closed?'done':'')+'"><span></span></div><div class="fasting-stage-dot '+(closed?'done':'')+'"></div></div>'
+      +'<div class="fasting-goals">'+[12,14,16,18].map(h=>'<button type="button" class="fasting-goal '+(h===targetHours?'active':'')+'" onclick="setFastingTargetHours('+h+')">'+h+'h</button>').join('')+'</div>'
       +'<div class="fasting-grid">'
       +'<div class="fasting-mini"><label>Última comida</label><div class="fasting-quick"><button type="button" onclick="setFastingDateQuick(&quot;fasting-last-date&quot;,&quot;'+addDaysDS(mazToday(),-1)+'&quot;)">Ayer</button><button type="button" onclick="setFastingDateQuick(&quot;fasting-last-date&quot;,&quot;'+mazToday()+'&quot;)">Hoy</button></div><div class="fasting-fields"><input type="date" id="fasting-last-date" value="'+esc(lastDs)+'"><input type="time" id="fasting-last-time" value="'+esc(timeInputValueMaz(last))+'"></div><button type="button" onclick="setFastingLastMealFromInput()">'+(closed?'Guardar nueva cena':'Guardar inicio')+'</button></div>'
       +'<div class="fasting-mini"><label>Primera comida</label><div class="fasting-fields"><input type="date" id="fasting-first-date" value="'+esc(firstDs)+'"><input type="time" id="fasting-first-time" value="'+esc(timeInputValueMaz(first))+'"></div><button type="button" class="green" onclick="setFastingFirstMealFromInput()">Registrar primera comida</button></div>'
       +'</div>':'')
+    +(fastingExpanded&&history.length?'<div class="fasting-history">'+history.map(r=>'<div class="fasting-history-row"><span>'+esc(fmtDS(r.fast_start_ds||dsFromIsoMaz(r.fast_start_at)))+'</span><strong>'+Math.floor((r.duration_min||0)/60)+'h '+pad((r.duration_min||0)%60)+'m</strong><span>'+(r.duration_min>=(r.target_hours||16)*60?'Meta':'')+'</span></div>').join('')+'</div>':'')
     +'</div>';
 }
 function updateFastingElapsedLive(){
@@ -6048,7 +6144,7 @@ function setFastingLastMealFromInput(){
   renderCoachHoyPanel();
   toast('Ayuno iniciado','ok');
 }
-function setFastingFirstMealFromInput(){
+async function setFastingFirstMealFromInput(){
   const log=loadFastingLog();
   if(!log.lastMealAt){toast('Primero registra tu última comida','err');return;}
   const timeInput=document.getElementById('fasting-first-time');
@@ -6062,7 +6158,17 @@ function setFastingFirstMealFromInput(){
     toast('La primera comida debe ser después de la última comida','err');
     return;
   }
+  const row={
+    user_id:sbUser&&sbUser.id?sbUser.id:null,
+    fast_start_at:log.lastMealAt,
+    fast_end_at:firstIso,
+    fast_start_ds:dsFromIsoMaz(log.lastMealAt),
+    fast_end_ds:dsFromIsoMaz(firstIso),
+    duration_min:fastingDurationMin(log.lastMealAt,firstIso),
+    target_hours:getFastingTargetHours()
+  };
   saveFastingLog({...log,firstMealAt:firstIso,firstMealDs:dsFromIsoMaz(firstIso)});
+  await persistCompletedFastingLog(row);
   renderCoachHoyPanel();
   toast('Ventana de ingesta activa','ok');
 }
@@ -6073,7 +6179,7 @@ function renderCoachHoyPanel(){
   if(coachDataLoadError){el.innerHTML='<div class="empty">Error al cargar tu entreno: '+esc(coachDataLoadError)+'</div>';return;}
   const today=mazToday();
   const todayRows=coachSchedule.filter(r=>r.ds===today);
-  const missedRows=coachSchedule.filter(r=>r.ds<today&&!r.started_at&&r.status!=='done');
+  const missedRows=coachSchedule.filter(r=>r.ds<today&&!r.started_at&&r.status==='scheduled');
   const relevantTasks=coachRelevantTasks(today);
   const doneTasks=relevantTasks.filter(isTaskDoneToday).length;
   const doneWorkouts=todayRows.filter(r=>r.status==='done').length;
@@ -6153,7 +6259,7 @@ function renderWeekDetailBody(){
     if(dayRows.length){
       html+=dayRows.map(row=>{
         const isMissed=row.status==='scheduled'&&ds<today;
-        const statusLabel=row.status==='done'?'Completado ✓':row.status==='in_progress'?'En curso':isMissed?'Omitido':'Programado';
+        const statusLabel=row.status==='done'?'Completado ✓':row.status==='in_progress'?'En curso':row.status==='skipped'?'Descanso':isMissed?'Omitido':'Programado';
         const statusColor=row.status==='done'?'var(--green)':row.status==='in_progress'?'var(--blue)':isMissed?'#ef4444':'var(--gray)';
         return '<div style="display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:6px">'
           +'<div><div style="font-weight:700;font-size:13.5px">'+esc(row.board_name)+'</div><div style="font-size:11px;color:'+statusColor+';font-weight:700">'+statusLabel+'</div></div>'
@@ -6199,6 +6305,26 @@ function closeMoveDayModal(){
 function selectCoachProgramDay(ds){
   selectedCoachProgramDs=ds;
   renderCoachSemanaPanel();
+}
+function renderCoachWeekScoreHtml(){
+  const weekRows=coachSchedule||[];
+  const doneWorkouts=weekRows.filter(r=>r.status==='done').length;
+  const plannedWorkouts=weekRows.filter(r=>r.status!=='skipped').length;
+  let habitDone=0,habitTotal=0;
+  for(let i=0;i<7;i++){
+    const ds=addDaysDS(coachWeekStart,i);
+    const tasks=coachRelevantTasks(ds);
+    habitDone+=tasks.filter(t=>isTaskDoneOnDs(t,ds)).length;
+    habitTotal+=tasks.length;
+  }
+  const fastingDone=(coachFastingLogs||[]).filter(r=>(r.duration_min||0)>=(r.target_hours||getFastingTargetHours())*60).length;
+  const totalMin=Math.round(weekRows.filter(r=>r.status==='done').reduce((s,r)=>s+(r.duration_sec||0),0)/60);
+  return '<div class="coach-week-score">'
+    +'<div class="tu-stat"><div class="tu-stat-n">'+doneWorkouts+'/'+plannedWorkouts+'</div><div class="tu-stat-l">Entrenos</div></div>'
+    +'<div class="tu-stat"><div class="tu-stat-n">'+fastingDone+'/'+(coachFastingLogs||[]).length+'</div><div class="tu-stat-l">Ayunos</div></div>'
+    +'<div class="tu-stat"><div class="tu-stat-n">'+habitDone+'/'+habitTotal+'</div><div class="tu-stat-l">Hábitos</div></div>'
+    +'<div class="tu-stat"><div class="tu-stat-n">'+totalMin+'</div><div class="tu-stat-l">Min</div></div>'
+    +'</div>';
 }
 let coachMyBoards=null;
 async function loadCoachMyBoards(){
@@ -6419,6 +6545,33 @@ async function moveCoachingDaySb(newDs){
     toast('Entreno movido','ok');
   }catch(e){hideLoading();toast('Error: '+e.message,'err');}
 }
+async function moveMissedWorkoutToTodaySb(id){
+  showLoading('Moviendo...');
+  try{
+    const{data,error}=await sb.from('coaching_schedule').update({ds:mazToday(),status:'scheduled'}).eq('id',id).eq('user_id',sbUser.id).select().single();
+    if(error)throw error;
+    const idx=coachSchedule.findIndex(r=>r.id===data.id);
+    if(idx>-1)coachSchedule[idx]=data;
+    hideLoading();
+    selectedCoachProgramDs=mazToday();
+    renderCoachSemanaPanel();
+    if(coachHubActiveTab==='hoy')renderCoachHoyPanel();
+    toast('Entreno movido a hoy','ok');
+  }catch(e){hideLoading();toast('Error: '+e.message,'err');}
+}
+async function markWorkoutSkippedSb(id){
+  showLoading('Guardando...');
+  try{
+    const{data,error}=await sb.from('coaching_schedule').update({status:'skipped'}).eq('id',id).eq('user_id',sbUser.id).select().single();
+    if(error)throw error;
+    const idx=coachSchedule.findIndex(r=>r.id===data.id);
+    if(idx>-1)coachSchedule[idx]=data;
+    hideLoading();
+    renderCoachSemanaPanel();
+    if(coachHubActiveTab==='hoy')renderCoachHoyPanel();
+    toast('Marcado como descanso','ok');
+  }catch(e){hideLoading();toast('Error: '+e.message,'err');}
+}
 function renderCoachSemanaPanel(){
   const el=document.getElementById('coach-semana-panel');
   if(!el||!coachWeekStart)return;
@@ -6437,6 +6590,7 @@ function renderCoachSemanaPanel(){
     if(dayRows.length){
       scheduledCount+=dayRows.length;
       if(dayRows.every(r=>r.status==='done'))cls+=' done';
+      else if(dayRows.every(r=>r.status==='skipped'))cls+=' skipped';
       else if(dayRows.some(r=>r.status==='scheduled')&&ds<today)cls+=' missed';
       else cls+=' scheduled';
     }
@@ -6449,13 +6603,19 @@ function renderCoachSemanaPanel(){
   const selectedLabel=(selectedCoachProgramDs===today?'Hoy':fmtDS(selectedCoachProgramDs));
   const dayWorkoutHtml=selectedRows.length?selectedRows.map(row=>{
     const isMissed=row.status==='scheduled'&&selectedCoachProgramDs<today;
-    const statusLabel=row.status==='done'?'Completado':row.status==='in_progress'?'En curso':isMissed?'Omitido':'Programado';
+    const statusLabel=row.status==='done'?'Completado':row.status==='in_progress'?'En curso':row.status==='skipped'?'Descanso':isMissed?'Omitido':'Programado';
     const statusCls=row.status==='done'?'bg-green':row.status==='in_progress'?'bg-blue':'';
-    return '<div class="coach-task-row" '+(row.status==='done'?'onclick="openEditCompletedWorkoutSb(&quot;'+row.id+'&quot;)"':'')+'><div class="coach-session-dot" style="background:'+esc(row.board_color||'#2563eb')+'"></div><div class="coach-task-title">'+esc(row.board_name)+'</div><div class="coach-task-due '+statusCls+'">'+statusLabel+'</div></div>';
+    const actions=isMissed?'<div style="display:flex;gap:6px;margin-top:8px"><button class="btn-sm" onclick="event.stopPropagation();moveMissedWorkoutToTodaySb(&quot;'+row.id+'&quot;)">Mover a hoy</button><button class="btn-sm" onclick="event.stopPropagation();markWorkoutSkippedSb(&quot;'+row.id+'&quot;)">Descanso</button></div>':'';
+    const feedback=row.status==='done'&&(row.feedback_energy||row.feedback_soreness!=null||row.feedback_note)
+      ?'<div class="coach-day-note"><strong>Feedback</strong>'+(row.feedback_energy?'Energía '+esc(row.feedback_energy)+'. ':'')+(row.feedback_soreness?'Con molestia. ':'')+esc(row.feedback_note||'')+'</div>':'';
+    return '<div class="coach-task-row" '+(row.status==='done'?'onclick="openEditCompletedWorkoutSb(&quot;'+row.id+'&quot;)"':'')+'><div class="coach-session-dot" style="background:'+esc(row.board_color||'#2563eb')+'"></div><div style="flex:1;min-width:0"><div class="coach-task-title">'+esc(row.board_name)+'</div>'+actions+feedback+'</div><div class="coach-task-due '+statusCls+'">'+statusLabel+'</div></div>';
   }).join(''):'<div class="empty">Sin entrenos registrados en este día.</div>';
+  const dayFasts=fastingLogsForDs(selectedCoachProgramDs);
+  const fastingDayHtml=dayFasts.length?'<div class="coach-day-notes">'+dayFasts.map(r=>'<div class="coach-day-note"><strong>Ayuno '+Math.floor((r.duration_min||0)/60)+'h '+pad((r.duration_min||0)%60)+'m</strong>Meta '+(r.target_hours||16)+'h · '+esc(fmtDateTimeMaz(r.fast_start_at))+' a '+esc(fmtDateTimeMaz(r.fast_end_at))+'</div>').join('')+'</div>':'';
   const summary='<div class="board-card"><div class="board-body">'
     +'<div class="coach-day-summary"><div><strong>'+esc(selectedLabel)+'</strong><span>'+selectedDone+'/'+selectedRows.length+' entrenos completados</span></div><span>'+scheduledCount+' en la semana</span></div>'
     +dayWorkoutHtml
+    +fastingDayHtml
     +'</div></div>';
   const relevantTasks=coachRelevantTasks(selectedCoachProgramDs);
   const doneCount=relevantTasks.filter(t=>isTaskDoneOnDs(t,selectedCoachProgramDs)).length;
@@ -6469,7 +6629,7 @@ function renderCoachSemanaPanel(){
       return '<div class="coach-task-row '+(done?'done':'')+'"><div class="coach-task-check">'+(done?'✓':'')+'</div><div class="coach-task-title">'+esc(t.title)+'</div><div class="coach-task-due">'+esc(label)+'</div></div>';
     }).join(''):'<div class="empty">Sin hábitos para este día.</div>')
     +'</div></div>';
-  el.innerHTML=strip+summary+tasksHtml;
+  el.innerHTML=renderCoachWeekScoreHtml()+strip+summary+tasksHtml;
 }
 async function seedSessionSetsSb(scheduleRow){
   const board=coachBoardsById[scheduleRow.board_id];
@@ -6560,7 +6720,60 @@ async function finishCoachingSessionSb(){
     closeExerciseFocus();
     renderCoachHoyPanel();
     toast('¡Entreno completado!','ok');
+    openWorkoutFeedbackModal(data.id);
   }catch(e){toast('Error al finalizar entreno: '+e.message,'err');}
+}
+function openWorkoutFeedbackModal(scheduleId){
+  workoutFeedbackScheduleId=scheduleId;
+  workoutFeedbackEnergy='normal';
+  workoutFeedbackSoreness=false;
+  renderWorkoutFeedbackModalBody();
+  document.getElementById('workout-feedback-modal').style.display='flex';
+}
+function closeWorkoutFeedbackModal(){
+  document.getElementById('workout-feedback-modal').style.display='none';
+  workoutFeedbackScheduleId=null;
+}
+function setWorkoutFeedbackEnergy(v){
+  workoutFeedbackEnergy=v;
+  renderWorkoutFeedbackModalBody();
+}
+function toggleWorkoutFeedbackSoreness(){
+  workoutFeedbackSoreness=!workoutFeedbackSoreness;
+  renderWorkoutFeedbackModalBody();
+}
+function renderWorkoutFeedbackModalBody(){
+  const row=coachSchedule.find(r=>r.id===workoutFeedbackScheduleId)||{};
+  const body=document.getElementById('workout-feedback-modal-body');
+  if(!body)return;
+  body.innerHTML='<div class="coach-day-note"><strong>'+esc(row.board_name||'Entreno completado')+'</strong>Esto ayuda a tu coach a ajustar carga, descansos y próximos ejercicios.</div>'
+    +'<div class="fasting-k" style="margin-top:12px">Energía</div>'
+    +'<div class="coach-feedback-grid">'+['baja','normal','alta'].map(v=>'<button class="coach-feedback-choice '+(workoutFeedbackEnergy===v?'active':'')+'" onclick="setWorkoutFeedbackEnergy(&quot;'+v+'&quot;)">'+v+'</button>').join('')+'</div>'
+    +'<button class="coach-feedback-choice '+(workoutFeedbackSoreness?'active':'')+'" style="width:100%;margin-bottom:10px" onclick="toggleWorkoutFeedbackSoreness()">Tuve molestia o dolor</button>'
+    +'<textarea id="workout-feedback-note" rows="3" placeholder="Nota para tu coach..." style="width:100%;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);border-radius:14px;color:var(--white);padding:12px;font-size:13px;resize:none;margin-bottom:10px"></textarea>'
+    +'<button class="btn" style="width:100%" onclick="saveWorkoutFeedbackSb()">Guardar feedback</button>'
+    +'<button class="btn-sm" style="width:100%;margin-top:8px" onclick="closeWorkoutFeedbackModal()">Omitir</button>';
+}
+async function saveWorkoutFeedbackSb(){
+  if(!workoutFeedbackScheduleId){closeWorkoutFeedbackModal();return;}
+  const note=(document.getElementById('workout-feedback-note')?.value||'').trim();
+  try{
+    const{data,error}=await sb.from('coaching_schedule').update({
+      feedback_energy:workoutFeedbackEnergy,
+      feedback_soreness:workoutFeedbackSoreness,
+      feedback_note:note||null
+    }).eq('id',workoutFeedbackScheduleId).eq('user_id',sbUser.id).select().single();
+    if(error)throw error;
+    const idx=coachSchedule.findIndex(r=>r.id===data.id);
+    if(idx>-1)coachSchedule[idx]=data;
+    closeWorkoutFeedbackModal();
+    renderCoachHoyPanel();
+    if(coachHubActiveTab==='programa')renderCoachSemanaPanel();
+    toast('Feedback guardado','ok');
+  }catch(e){
+    toast('Feedback no guardado: falta correr migración','warn');
+    console.warn('saveWorkoutFeedbackSb:',e.message||e);
+  }
 }
 async function cancelCoachingSessionSb(){
   if(!activeCoachingSession)return;
