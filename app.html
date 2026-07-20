@@ -6,12 +6,12 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="HABIT">
 <meta name="application-name" content="HABIT">
-<link rel="manifest" href="/manifest.json?v=20260720-05">
-<link rel="apple-touch-icon" sizes="120x120" href="/icons/icon-120.png?v=20260720-05">
-<link rel="apple-touch-icon" sizes="152x152" href="/icons/icon-152.png?v=20260720-05">
-<link rel="apple-touch-icon" sizes="167x167" href="/icons/icon-167.png?v=20260720-05">
-<link rel="apple-touch-icon" sizes="180x180" href="/icons/icon-180.png?v=20260720-05">
-<link rel="icon" type="image/png" sizes="32x32" href="/icons/icon-32.png?v=20260720-05">
+<link rel="manifest" href="/manifest.json?v=20260720-06">
+<link rel="apple-touch-icon" sizes="120x120" href="/icons/icon-120.png?v=20260720-06">
+<link rel="apple-touch-icon" sizes="152x152" href="/icons/icon-152.png?v=20260720-06">
+<link rel="apple-touch-icon" sizes="167x167" href="/icons/icon-167.png?v=20260720-06">
+<link rel="apple-touch-icon" sizes="180x180" href="/icons/icon-180.png?v=20260720-06">
+<link rel="icon" type="image/png" sizes="32x32" href="/icons/icon-32.png?v=20260720-06">
 <title>HABIT</title>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Share+Tech+Mono&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
@@ -516,15 +516,17 @@ input,select,button,textarea{font-family:'Inter',sans-serif}
 .admin-report-pill{border-radius:999px;padding:5px 8px;font-size:10.5px;font-weight:850;color:#9aa1ad;background:rgba(255,255,255,.055);white-space:nowrap}
 .admin-report-pill.good{color:#8bffbf;background:rgba(16,185,129,.12)}
 .admin-report-pill.warn{color:#fca5a5;background:rgba(239,68,68,.11)}
-.admin-today-card{border:1px solid rgba(96,165,250,.18);border-radius:18px;background:linear-gradient(145deg,rgba(37,99,235,.14),rgba(16,185,129,.045));padding:13px;display:grid;gap:10px}
+.admin-today-card{border:1px solid rgba(96,165,250,.14);border-radius:16px;background:linear-gradient(145deg,rgba(37,99,235,.1),rgba(16,185,129,.035));padding:12px;display:grid;gap:9px}
 .admin-today-top{display:flex;align-items:flex-start;justify-content:space-between;gap:12px}
 .admin-today-k{font-size:10px;font-weight:900;color:#93c5fd;letter-spacing:.12em;text-transform:uppercase;margin-bottom:4px}
-.admin-today-title{font-size:18px;font-weight:880;color:var(--white);line-height:1.1}
+.admin-today-title{font-size:17px;font-weight:880;color:var(--white);line-height:1.1}
 .admin-today-sub{font-size:11px;color:#9aa1ad;line-height:1.35;margin-top:4px}
-.admin-today-mini{display:grid;grid-template-columns:repeat(3,1fr);gap:7px}
-.admin-today-mini div{border:1px solid rgba(255,255,255,.08);border-radius:13px;background:rgba(0,0,0,.18);padding:8px}
-.admin-today-mini strong{display:block;font-size:16px;color:var(--white);line-height:1;font-variant-numeric:tabular-nums}
-.admin-today-mini span{display:block;font-size:9.5px;color:#9aa1ad;font-weight:800;text-transform:uppercase;letter-spacing:.05em;margin-top:4px}
+.admin-today-mini{display:flex;flex-wrap:wrap;gap:6px}
+.admin-today-mini div{border:1px solid rgba(255,255,255,.075);border-radius:999px;background:rgba(0,0,0,.14);padding:6px 9px;display:flex;align-items:center;gap:5px}
+.admin-today-mini strong{display:block;font-size:13px;color:var(--white);line-height:1;font-variant-numeric:tabular-nums}
+.admin-today-mini span{display:block;font-size:9px;color:#9aa1ad;font-weight:800;text-transform:uppercase;letter-spacing:.04em}
+.admin-today-sets{display:grid;gap:5px}
+.admin-today-sets .admin-report-day{padding:7px 0}
 .admin-progress-tabs{display:grid;grid-template-columns:repeat(3,1fr);gap:7px}
 .admin-progress-tab{border:1px solid rgba(255,255,255,.08);border-radius:999px;background:rgba(255,255,255,.04);color:#9aa1ad;padding:10px 6px;font-size:11px;font-weight:850;cursor:pointer}
 .admin-progress-tab.active{background:rgba(255,255,255,.12);border-color:rgba(255,255,255,.18);color:var(--white)}
@@ -2097,7 +2099,7 @@ html,body,.app,input,select,button,textarea{font-family:var(--font-ui);font-opti
 // ── CONFIG & SUPABASE ───────────────────────────────────────
 const SUPABASE_URL='https://pmpjteuqjusbiduevbwq.supabase.co';
 const SUPABASE_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBtcGp0ZXVxanVzYmlkdWV2YndxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc2OTI1NjUsImV4cCI6MjA5MzI2ODU2NX0.XbMzZoo2yqtrD8znLnyo_1zDfrdJAvAPj1lqGOyXnLw';
-const APP_VERSION='20260720-05';
+const APP_VERSION='20260720-06';
 const MUSCLE_GROUPS=['Pecho','Espalda','Piernas','Hombros','Brazos','Core','Cardio','Full Body'];
 const DAILY_QUOTES=[
   {text:'Haz hoy lo que tu version de manana agradeceria.',action:'Elige una accion pequeña y cumplible antes de buscar motivacion.'},
@@ -10908,7 +10910,42 @@ function selectCoachDetailDay(ds){
 }
 function setCoachProgressView(view){
   coachProgressView=view;
-  renderCoachingDetail();
+  updateCoachProgressPanel();
+}
+function renderCoachAdminDayStripHtml(){
+  const DN_MON=['Lun','Mar','Mié','Jue','Vie','Sáb','Dom'];
+  const today=mazToday();
+  let html='<div class="coach-day-strip coach-admin-day-strip" style="margin-bottom:12px">';
+  for(let i=0;i<7;i++){
+    const ds=addDaysDS(coachAdminWeekStart,i);
+    const row=coachAdminSchedule.find(r=>r.ds===ds);
+    let dayCls='coach-day';
+    if(ds===today)dayCls+=' today';
+    if(ds===selectedCoachDetailDs)dayCls+=' selected';
+    if(row){
+      if(row.status==='in_progress')dayCls+=' in-progress';
+      else if(row.status==='done')dayCls+=' done';
+      else if(ds<today)dayCls+=' missed';
+      else dayCls+=' scheduled';
+    }
+    const habitDots=coachAdminRelevantTasks(ds).some(t=>isCoachAdminTaskDoneOnDs(t,ds));
+    const dots=habitDots?'<span class="coach-day-dots"><i class="coach-day-dot habit"></i></span>':'';
+    html+='<div class="'+dayCls+'" data-ds="'+ds+'" onclick="selectCoachDetailDay(&quot;'+ds+'&quot;)"><span class="coach-day-label">'+DN_MON[i]+'</span><span class="coach-day-num">'+parseDS(ds).d+'</span>'+dots+'</div>';
+  }
+  return html+'</div>';
+}
+function renderCoachProgressPanelHtml(){
+  if(coachProgressView==='habitos')return renderAdminHabitsPanel();
+  if(coachProgressView==='entrenamientos')return renderAdminWorkoutsPanel(renderCoachAdminDayStripHtml());
+  return '<div class="admin-report-section"><div class="admin-report-head"><strong>PRs y progreso de peso</strong><span>Tendencia</span></div><div id="coach-admin-scores"><div class="empty">Cargando...</div></div></div>';
+}
+function updateCoachProgressPanel(){
+  document.querySelectorAll('.admin-progress-tab').forEach(b=>b.classList.toggle('active',b.dataset.view===coachProgressView));
+  const panel=document.getElementById('coach-progress-panel');
+  if(!panel){renderCoachingDetail();return;}
+  panel.innerHTML=renderCoachProgressPanelHtml();
+  if(coachProgressView==='prs')renderCoachingAdminScores().catch(console.error);
+  if(coachProgressView==='entrenamientos')renderCoachSessionDetailSection().catch(console.error);
 }
 function coachAdminDaySummary(ds){
   const dayRows=(coachAdminSchedule||[]).filter(r=>r.ds===ds);
@@ -10954,19 +10991,20 @@ async function renderCoachTodaySummarySection(){
     if(error)throw error;
     const byEx={};
     (data||[]).forEach(r=>{(byEx[r.ex_key]=byEx[r.ex_key]||[]).push(r);});
-    const html=Object.entries(byEx).map(([exKey,sets])=>{
+    const entries=Object.entries(byEx);
+    const html=entries.slice(0,3).map(([exKey,sets])=>{
       const info=resolveExKeyInfo(exKey);
       const compact=sets.map(s=>[
         'S'+(s.set_idx+1),
         s.weight!=null?fmtWeightValue(s.weight,'kg',false):null,
         s.actual_reps!=null?String(s.actual_reps)+' reps':(s.reps_target?esc(s.reps_target)+' reps':null)
-      ].filter(Boolean).join(' · ')).join(' / ');
+      ].filter(Boolean).join(' · ')).slice(0,3).join(' / ');
       return '<div class="admin-report-day" style="grid-template-columns:1fr">'
         +'<div class="admin-report-day-main"><div class="admin-report-day-title">'+esc(info.name)+'</div>'
         +'<div class="admin-report-day-sub">'+(compact||'Sin pesos registrados')+'</div></div>'
         +'</div>';
     }).join('');
-    el.innerHTML=html||'<div class="admin-session-empty">Sin pesos registrados hoy.</div>';
+    el.innerHTML='<div class="admin-today-sets">'+(html||'<div class="admin-session-empty">Sin pesos registrados hoy.</div>')+(entries.length>3?'<div class="admin-session-empty">+'+(entries.length-3)+' ejercicios más en Entrenamientos.</div>':'')+'</div>';
   }catch(e){
     el.innerHTML='<div class="admin-session-empty">No se pudo cargar el resumen de hoy.</div>';
     console.error('renderCoachTodaySummarySection:',e);
@@ -10990,28 +11028,20 @@ function renderCoachAdminReportHtml(statusStrip,weekEnd){
   const todayTotal=todaySummary.dayRows.length;
   const todayTitle=todaySummary.title;
   const progressTabs='<div class="admin-progress-tabs">'
-    +['habitos','entrenamientos','prs'].map(v=>'<button class="admin-progress-tab '+(coachProgressView===v?'active':'')+'" onclick="setCoachProgressView(&quot;'+v+'&quot;)">'+(v==='habitos'?'Hábitos':v==='entrenamientos'?'Entrenamientos':'PRs')+'</button>').join('')
+    +['habitos','entrenamientos','prs'].map(v=>'<button class="admin-progress-tab '+(coachProgressView===v?'active':'')+'" data-view="'+v+'" onclick="setCoachProgressView(&quot;'+v+'&quot;)">'+(v==='habitos'?'Hábitos':v==='entrenamientos'?'Entrenamientos':'PRs')+'</button>').join('')
     +'</div>';
-  let panelHtml='';
-  if(coachProgressView==='habitos')panelHtml=renderAdminHabitsPanel();
-  else if(coachProgressView==='entrenamientos')panelHtml=renderAdminWorkoutsPanel(statusStrip);
-  else panelHtml='<div class="admin-report-section"><div class="admin-report-head"><strong>PRs y progreso de peso</strong><span>Tendencia</span></div><div id="coach-admin-scores"><div class="empty">Cargando...</div></div></div>';
+  const shownHabits=todaySummary.doneTasks.slice(0,3);
+  const extraHabits=todaySummary.doneTasks.length-shownHabits.length;
   return '<div class="admin-report-shell">'
     +'<div class="admin-report-head" style="margin-bottom:0"><button class="btn-sm" onclick="coachAdminWeekShift(-7)">‹</button><strong>'+esc(fmtDS(coachAdminWeekStart))+' – '+esc(fmtDS(weekEnd))+'</strong><button class="btn-sm" onclick="coachAdminWeekShift(7)">›</button></div>'
     +'<div class="admin-today-card">'
       +'<div class="admin-today-top"><div><div class="admin-today-k">Hoy</div><div class="admin-today-title">'+esc(todayTitle)+'</div><div class="admin-today-sub">'+(todaySummary.feedback?esc(todaySummary.feedback):'Resumen operativo del día actual')+'</div></div><div class="admin-report-pill '+(todayTotal&&todayDone===todayTotal?'good':'')+'">'+todayDone+'/'+todayTotal+' entrenos</div></div>'
       +'<div class="admin-today-mini"><div><strong>'+todaySummary.doneTasks.length+'/'+todaySummary.tasks.length+'</strong><span>Hábitos</span></div><div><strong>'+todaySummary.minutes+'</strong><span>Min</span></div><div><strong>'+todayDone+'/'+todayTotal+'</strong><span>Entrenos</span></div></div>'
-      +(todaySummary.doneTasks.length?'<div class="admin-session-habit-list">'+todaySummary.doneTasks.map(t=>'<div class="admin-session-habit done"><span>✓</span><strong>'+esc(t.title)+'</strong></div>').join('')+'</div>':'')
+      +(shownHabits.length?'<div class="admin-session-habit-list">'+shownHabits.map(t=>'<div class="admin-session-habit done"><span>✓</span><strong>'+esc(t.title)+'</strong></div>').join('')+(extraHabits>0?'<div class="admin-session-habit"><strong>+'+extraHabits+'</strong></div>':'')+'</div>':'')
       +'<div id="coach-today-sets"><div class="admin-session-empty">Cargando entrenamiento de hoy...</div></div>'
     +'</div>'
-    +'<div class="admin-report-hero">'
-      +'<div class="admin-report-stat"><strong>'+done+'/'+planned+'</strong><span>Entrenos</span></div>'
-      +'<div class="admin-report-stat"><strong>'+habitDone+'/'+habitTotal+'</strong><span>Hábitos</span></div>'
-      +'<div class="admin-report-stat"><strong>'+minutes+'</strong><span>Minutos</span></div>'
-      +'<div class="admin-report-stat"><strong>'+compliance+'%</strong><span>Cumplimiento</span></div>'
-    +'</div>'
     +progressTabs
-    +panelHtml
+    +'<div id="coach-progress-panel">'+renderCoachProgressPanelHtml()+'</div>'
   +'</div>';
 }
 async function renderCoachSessionDetailSection(){
