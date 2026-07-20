@@ -6,12 +6,12 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="HABIT">
 <meta name="application-name" content="HABIT">
-<link rel="manifest" href="/manifest.json?v=20260720-07">
-<link rel="apple-touch-icon" sizes="120x120" href="/icons/icon-120.png?v=20260720-07">
-<link rel="apple-touch-icon" sizes="152x152" href="/icons/icon-152.png?v=20260720-07">
-<link rel="apple-touch-icon" sizes="167x167" href="/icons/icon-167.png?v=20260720-07">
-<link rel="apple-touch-icon" sizes="180x180" href="/icons/icon-180.png?v=20260720-07">
-<link rel="icon" type="image/png" sizes="32x32" href="/icons/icon-32.png?v=20260720-07">
+<link rel="manifest" href="/manifest.json?v=20260720-08">
+<link rel="apple-touch-icon" sizes="120x120" href="/icons/icon-120.png?v=20260720-08">
+<link rel="apple-touch-icon" sizes="152x152" href="/icons/icon-152.png?v=20260720-08">
+<link rel="apple-touch-icon" sizes="167x167" href="/icons/icon-167.png?v=20260720-08">
+<link rel="apple-touch-icon" sizes="180x180" href="/icons/icon-180.png?v=20260720-08">
+<link rel="icon" type="image/png" sizes="32x32" href="/icons/icon-32.png?v=20260720-08">
 <title>HABIT</title>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Share+Tech+Mono&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
@@ -2113,7 +2113,7 @@ html,body,.app,input,select,button,textarea{font-family:var(--font-ui);font-opti
 // ── CONFIG & SUPABASE ───────────────────────────────────────
 const SUPABASE_URL='https://pmpjteuqjusbiduevbwq.supabase.co';
 const SUPABASE_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBtcGp0ZXVxanVzYmlkdWV2YndxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc2OTI1NjUsImV4cCI6MjA5MzI2ODU2NX0.XbMzZoo2yqtrD8znLnyo_1zDfrdJAvAPj1lqGOyXnLw';
-const APP_VERSION='20260720-07';
+const APP_VERSION='20260720-08';
 const MUSCLE_GROUPS=['Pecho','Espalda','Piernas','Hombros','Brazos','Core','Cardio','Full Body'];
 const DAILY_QUOTES=[
   {text:'Haz hoy lo que tu version de manana agradeceria.',action:'Elige una accion pequeña y cumplible antes de buscar motivacion.'},
@@ -2366,6 +2366,9 @@ function paymentRealAmount(p){
   const amount=Number(p.amount)||0;
   if(method==='stripe')return p.net_amount!=null?Number(p.net_amount):amount;
   return amount;
+}
+function isRealMemberPayment(p){
+  return !!(p&&p.user_id&&REAL_MONEY_METHODS.includes(p.payment_method||'stripe')&&paymentRealAmount(p)>0);
 }
 
 const PLANS={
@@ -8664,7 +8667,7 @@ async function renderDashboard(){
     const monthStart=today.slice(0,7);
     const cutoff14=addDaysDS(today,-14);
     const[{data:allU},{data:pays},{data:bks},{data:logs},{data:recentBks}]=await Promise.all([
-      sb.from('profiles').select('id,credits,plan_expiry,plan_id,role,name,phone').neq('role','admin'),
+      sb.from('profiles').select('id,credits,plan_expiry,plan_id,plan_is_courtesy,role,name,phone').neq('role','admin'),
       sb.from('payments').select('amount,created_at,plan_name,user_id,payment_method,net_amount').order('created_at',{ascending:false}).limit(2000),
       sb.from('bookings').select('ds,status').eq('status','active'),
       sb.from('access_log').select('id'),
@@ -8672,18 +8675,20 @@ async function renderDashboard(){
     ]);
     const allPlans=[...PLANS.individual,...PLANS.grupal];
     const active=(allU||[]).filter(u=>{const pp=allPlans.find(x=>x.id===u.plan_id);const ul=u.credits>=999||(pp&&pp.credits>=999);return(ul||u.credits>0)&&(!u.plan_expiry||new Date(u.plan_expiry)>new Date());});
+    const realPayerIds=new Set((pays||[]).filter(isRealMemberPayment).map(p=>p.user_id));
+    const activePaid=active.filter(u=>!u.plan_is_courtesy&&u.plan_id!=='prueba'&&realPayerIds.has(u.id));
     // Dinero real recibido (Stripe neto + GAIA + efectivo/transferencia); no el cobrado bruto.
     const monthRev=(pays||[]).filter(p=>dsFromIsoMaz(p.created_at).startsWith(monthStart)).reduce((s,p)=>s+paymentRealAmount(p),0);
     const totalRev=(pays||[]).reduce((s,p)=>s+paymentRealAmount(p),0);
     const todayBks=(bks||[]).filter(b=>b.ds===today).length;
     const expiring=(allU||[]).filter(u=>{const d=daysUntil(u.plan_expiry);return d!==null&&d<=5&&d>=0;});
     const recentIds=new Set((recentBks||[]).map(b=>b.user_id));
-    const atRisk=active.filter(u=>!recentIds.has(u.id));
+    const atRisk=activePaid.filter(u=>!recentIds.has(u.id));
 
     // KPI cards — update #dash-kpis without replacing canvas elements
     const kpisEl=document.getElementById('dash-kpis');
     if(kpisEl)kpisEl.innerHTML=
-      '<div class="met"><div class="met-l">Socios activos</div><div class="met-v" style="color:var(--green)">'+active.length+'</div></div>'
+      '<div class="met"><div class="met-l">Socios activos</div><div class="met-v" style="color:var(--green)">'+activePaid.length+'</div></div>'
       +'<div class="met"><div class="met-l">Total socios</div><div class="met-v">'+(allU||[]).length+'</div></div>'
       +'<button class="met" onclick="admTab(\'payments\')" style="text-align:left;cursor:pointer"><div class="met-l">Ingreso real (mes)</div><div class="met-v" style="color:var(--bl)">'+MXN(monthRev)+'</div></button>'
       +'<button class="met" onclick="admTab(\'payments\')" style="text-align:left;cursor:pointer"><div class="met-l">Ingreso real (total)</div><div class="met-v" style="color:var(--bl)">'+MXN(totalRev)+'</div></button>'
@@ -8968,10 +8973,15 @@ async function generateReport(){
         html+='<div class="brow"><div class="brow-info"><div class="brow-name">'+esc(nameMap[p.user_id]||'Usuario')+'</div><div class="brow-meta">'+esc(p.plan_name||'')+' · '+fmtDateTimeMaz(p.created_at)+' · **** '+(p.last4||'----')+'</div></div><div style="font-size:15px;font-weight:700">'+MXN(p.amount)+(real!==p.amount?' <span style="color:var(--gray);font-weight:400;font-size:11px">(real '+MXN(real)+')</span>':'')+'</div></div>';
       });
     } else if(type==='socios-activos'){
-      const{data:allU,error}=await sb.from('profiles').select('*').neq('role','admin');
+      const[{data:allU,error},{data:payRows,error:payErr}]=await Promise.all([
+        sb.from('profiles').select('*').neq('role','admin'),
+        sb.from('payments').select('user_id,amount,payment_method,net_amount')
+      ]);
       if(error)throw error;
-      const active=(allU||[]).filter(isActiveProfile);
-      html+='<p class="slbl" style="margin-bottom:10px">Socios activos · '+active.length+' total</p>';
+      if(payErr)throw payErr;
+      const realPayerIds=new Set((payRows||[]).filter(isRealMemberPayment).map(p=>p.user_id));
+      const active=(allU||[]).filter(u=>isActiveProfile(u)&&!u.plan_is_courtesy&&u.plan_id!=='prueba'&&realPayerIds.has(u.id));
+      html+='<p class="slbl" style="margin-bottom:10px">Socios activos con pago real · '+active.length+' total</p>';
       if(!active.length){html+='<div class="empty">Sin socios activos.</div>';}
       else active.forEach(u=>{
         const d=daysUntil(u.plan_expiry);
@@ -9000,12 +9010,13 @@ async function generateReport(){
     } else if(type==='retencion'){
       const[{data:allU,error:errU},{data:allPays,error:errP}]=await Promise.all([
         sb.from('profiles').select('*').neq('role','admin'),
-        sb.from('payments').select('amount,payment_method,net_amount')
+        sb.from('payments').select('user_id,amount,payment_method,net_amount')
       ]);
       if(errU)throw errU;
       if(errP)throw errP;
       const total=(allU||[]).length;
-      const active=(allU||[]).filter(isActiveProfile).length;
+      const realPayerIds=new Set((allPays||[]).filter(isRealMemberPayment).map(p=>p.user_id));
+      const active=(allU||[]).filter(u=>isActiveProfile(u)&&!u.plan_is_courtesy&&u.plan_id!=='prueba'&&realPayerIds.has(u.id)).length;
       const rate=total?Math.round(active/total*100):0;
       const totalRev=(allPays||[]).reduce((s,p)=>s+paymentRealAmount(p),0);
       html+='<p class="slbl" style="margin-bottom:10px">Retención de socios</p>';
@@ -9147,8 +9158,8 @@ async function renderUsersSb(){
     // de que existiera plan_is_courtesy, sin necesidad de marcarlas a mano.
     let realPayerIds=null;
     if(_userFilter==='activo'){
-      const{data:realPays}=await sb.from('payments').select('user_id').neq('payment_method','courtesy').not('user_id','is',null);
-      realPayerIds=new Set((realPays||[]).map(p=>p.user_id));
+      const{data:realPays}=await sb.from('payments').select('user_id,amount,payment_method,net_amount').not('user_id','is',null);
+      realPayerIds=new Set((realPays||[]).filter(isRealMemberPayment).map(p=>p.user_id));
     }
     let filtered=(allU||[]).filter(u=>u.role!=='admin'&&u.role!=='reception'&&(!q||((u.name||'').toLowerCase().includes(q)||(u.phone||'').includes(q)||(u.email||'').toLowerCase().includes(q))));
     filtered=filtered.filter(u=>{
