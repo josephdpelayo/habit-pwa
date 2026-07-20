@@ -6,12 +6,12 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="HABIT">
 <meta name="application-name" content="HABIT">
-<link rel="manifest" href="/manifest.json?v=20260720-06">
-<link rel="apple-touch-icon" sizes="120x120" href="/icons/icon-120.png?v=20260720-06">
-<link rel="apple-touch-icon" sizes="152x152" href="/icons/icon-152.png?v=20260720-06">
-<link rel="apple-touch-icon" sizes="167x167" href="/icons/icon-167.png?v=20260720-06">
-<link rel="apple-touch-icon" sizes="180x180" href="/icons/icon-180.png?v=20260720-06">
-<link rel="icon" type="image/png" sizes="32x32" href="/icons/icon-32.png?v=20260720-06">
+<link rel="manifest" href="/manifest.json?v=20260720-07">
+<link rel="apple-touch-icon" sizes="120x120" href="/icons/icon-120.png?v=20260720-07">
+<link rel="apple-touch-icon" sizes="152x152" href="/icons/icon-152.png?v=20260720-07">
+<link rel="apple-touch-icon" sizes="167x167" href="/icons/icon-167.png?v=20260720-07">
+<link rel="apple-touch-icon" sizes="180x180" href="/icons/icon-180.png?v=20260720-07">
+<link rel="icon" type="image/png" sizes="32x32" href="/icons/icon-32.png?v=20260720-07">
 <title>HABIT</title>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Share+Tech+Mono&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
@@ -533,6 +533,20 @@ input,select,button,textarea{font-family:'Inter',sans-serif}
 .admin-plan-grid{display:grid;gap:12px}
 .admin-plan-section{border:1px solid rgba(255,255,255,.08);border-radius:16px;background:rgba(255,255,255,.03);padding:12px}
 .admin-plan-section-title{font-size:11px;font-weight:900;color:#a3a9b5;letter-spacing:.11em;text-transform:uppercase;margin-bottom:10px}
+.admin-plan-toggle{width:100%;border:none;background:transparent;color:var(--white);padding:0;display:grid;grid-template-columns:1fr auto;gap:10px;align-items:center;text-align:left;cursor:pointer}
+.admin-plan-toggle-title{font-size:13px;font-weight:850;color:var(--white)}
+.admin-plan-toggle-sub{font-size:11px;color:#9aa1ad;line-height:1.35;margin-top:3px}
+.admin-plan-chevron{width:28px;height:28px;border-radius:999px;background:rgba(255,255,255,.06);display:flex;align-items:center;justify-content:center;color:#9aa1ad;font-size:16px}
+.admin-plan-chips{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px}
+.admin-plan-chip{border:1px solid rgba(59,130,246,.26);background:rgba(37,99,235,.1);color:#bfdbfe;border-radius:999px;padding:6px 9px;font-size:11px;font-weight:800;max-width:100%;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.admin-board-list{display:grid;gap:6px;margin-top:12px;padding-top:12px;border-top:1px solid rgba(255,255,255,.07)}
+.admin-board-row{display:grid;grid-template-columns:auto 1fr auto;gap:9px;align-items:center;min-height:38px;padding:8px 0;border-bottom:1px solid rgba(255,255,255,.055)}
+.admin-board-row:last-child{border-bottom:0}
+.admin-board-check{width:22px;height:22px;border-radius:8px;border:1.5px solid rgba(255,255,255,.18);background:rgba(255,255,255,.04);color:transparent;font-size:14px;font-weight:900;display:flex;align-items:center;justify-content:center}
+.admin-board-check.on{background:var(--blue);border-color:var(--blue);color:#fff}
+.admin-board-name{display:flex;align-items:center;gap:8px;min-width:0;font-size:13px;font-weight:750;color:var(--white)}
+.admin-board-name span:last-child{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.admin-board-edit{border:1px solid rgba(255,255,255,.1);background:rgba(255,255,255,.045);color:#b7bdc8;border-radius:999px;padding:7px 9px;font-size:10.5px;font-weight:800;white-space:nowrap}
 @media(max-width:380px){.admin-report-hero{grid-template-columns:repeat(2,1fr)}.admin-report-day{grid-template-columns:48px 1fr}.admin-report-pill{justify-self:start;grid-column:2}}
 
 /* COACHING */
@@ -2099,7 +2113,7 @@ html,body,.app,input,select,button,textarea{font-family:var(--font-ui);font-opti
 // ── CONFIG & SUPABASE ───────────────────────────────────────
 const SUPABASE_URL='https://pmpjteuqjusbiduevbwq.supabase.co';
 const SUPABASE_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBtcGp0ZXVxanVzYmlkdWV2YndxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc2OTI1NjUsImV4cCI6MjA5MzI2ODU2NX0.XbMzZoo2yqtrD8znLnyo_1zDfrdJAvAPj1lqGOyXnLw';
-const APP_VERSION='20260720-06';
+const APP_VERSION='20260720-07';
 const MUSCLE_GROUPS=['Pecho','Espalda','Piernas','Hombros','Brazos','Core','Cardio','Full Body'];
 const DAILY_QUOTES=[
   {text:'Haz hoy lo que tu version de manana agradeceria.',action:'Elige una accion pequeña y cumplible antes de buscar motivacion.'},
@@ -2623,7 +2637,7 @@ let chatMessages=[], chatChannel=null, chatPollInt=null, chatSendContext=null,
     chatMediaRecorder=null, chatRecordChunks=[], chatRecordStartMs=0, chatRecordTimerInt=null,
     chatPendingImgFile=null;
 let coachingAdminClients=[], selectedCoachClientId=null, coachAdminWeekStart=null, coachAdminSchedule=[], coachAdminTasks=[], coachAdminTaskLogsByDs={}, coachClientAssignedBoardIds=new Set(), editingCoachTaskId=null;
-let selectedCoachDetailDs=null, coachSessionDetailRows=[], coachDetailActiveTab='semana', coachProgressView='habitos';
+let selectedCoachDetailDs=null, coachSessionDetailRows=[], coachDetailActiveTab='semana', coachProgressView='habitos', coachPlanBoardsOpen=false;
 let exerciseNotesMap={}, noteCtx=null;
 let mensajesAdminClients=[], selectedChatClientId=null, adminChatChannel=null, adminChatPollInt=null;
 let receptionSessions=[], receptionLastSync=null, receptionLoading=false;
@@ -11124,7 +11138,12 @@ async function toggleClientBoardAssignSb(boardId,checked){
       if(error)throw error;
       coachClientAssignedBoardIds.delete(boardId);
     }
+    renderCoachingDetail();
   }catch(e){toast('Error: '+e.message,'err');}
+}
+function toggleCoachPlanBoards(){
+  coachPlanBoardsOpen=!coachPlanBoardsOpen;
+  renderCoachingDetail();
 }
 function goToBoardEdit(boardId){
   admTab('boards');
@@ -11202,14 +11221,24 @@ function renderCoachingDetail(){
     +'</div>'
   ).join(''):'<div class="empty">Sin hábitos.</div>';
 
-  const assignedBoardsList=boards.length?boards.map(b=>
-    '<div style="display:flex;align-items:center;gap:10px;padding:9px 0;border-bottom:1px solid var(--border)">'
-    +'<input type="checkbox" '+(coachClientAssignedBoardIds.has(b.id)?'checked':'')+' onchange="toggleClientBoardAssignSb(&quot;'+esc(b.id)+'&quot;,this.checked)" style="width:18px;height:18px;accent-color:var(--blue)">'
-    +'<div style="width:10px;height:10px;border-radius:50%;background:'+esc(b.color||'#2563eb')+';flex-shrink:0"></div>'
-    +'<span style="flex:1;font-size:13px;font-weight:600">'+esc(b.name)+'</span>'
-    +'<button class="btn-sm" onclick="goToBoardEdit(&quot;'+esc(b.id)+'&quot;)">✏️ Editar ejercicios</button>'
-    +'</div>'
-  ).join(''):'<div class="empty">No hay pizarrones creados todavía.</div>';
+  const assignedBoards=boards.filter(b=>coachClientAssignedBoardIds.has(b.id));
+  const assignedNames=assignedBoards.map(b=>b.name).join(' · ');
+  const assignedChips=assignedBoards.slice(0,4).map(b=>'<span class="admin-plan-chip">'+esc(b.name)+'</span>').join('')+(assignedBoards.length>4?'<span class="admin-plan-chip">+'+(assignedBoards.length-4)+'</span>':'');
+  const boardRows=boards.length?boards.map(b=>{
+    const on=coachClientAssignedBoardIds.has(b.id);
+    return '<div class="admin-board-row" onclick="toggleClientBoardAssignSb(&quot;'+esc(b.id)+'&quot;,'+(!on)+')">'
+      +'<div class="admin-board-check '+(on?'on':'')+'">'+(on?'✓':'')+'</div>'
+      +'<div class="admin-board-name"><span style="width:10px;height:10px;border-radius:50%;background:'+esc(b.color||'#2563eb')+';flex-shrink:0"></span><span>'+esc(b.name)+'</span></div>'
+      +'<button class="admin-board-edit" onclick="event.stopPropagation();goToBoardEdit(&quot;'+esc(b.id)+'&quot;)">Editar</button>'
+      +'</div>';
+  }).join(''):'<div class="empty">No hay rutinas creadas todavía.</div>';
+  const assignedBoardsList='<button class="admin-plan-toggle" onclick="toggleCoachPlanBoards()">'
+    +'<div><div class="admin-plan-toggle-title">'+assignedBoards.length+' rutinas asignadas</div>'
+    +'<div class="admin-plan-toggle-sub">'+(assignedNames?esc(assignedNames):'Toca para elegir las rutinas disponibles para este cliente.')+'</div></div>'
+    +'<div class="admin-plan-chevron">'+(coachPlanBoardsOpen?'⌃':'⌄')+'</div>'
+    +'</button>'
+    +(assignedChips?'<div class="admin-plan-chips">'+assignedChips+'</div>':'')
+    +(coachPlanBoardsOpen?'<div class="admin-board-list">'+boardRows+'</div>':'');
 
   const tabDef=[['progreso','Progreso'],['semana','Semana'],['plan','Plan'],['notas','Notas']];
   const navHtml='<div class="coach-hub-nav" style="margin-bottom:14px;border-radius:8px;overflow:hidden;border:1px solid var(--border)">'
@@ -11244,7 +11273,7 @@ function renderCoachingDetail(){
     +'<div class="coach-detail-panel'+(coachDetailActiveTab==='plan'?' active':'')+'" data-panel="plan">'
     +'<div class="admin-plan-grid">'
     +'<div class="admin-plan-section">'
-    +'<div class="admin-plan-section-title">Rutinas disponibles</div>'
+    +'<div class="admin-plan-section-title">Rutinas del cliente</div>'
     +assignedBoardsList
     +'</div>'
     +'<div class="admin-plan-section">'
