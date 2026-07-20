@@ -6,12 +6,12 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="HABIT">
 <meta name="application-name" content="HABIT">
-<link rel="manifest" href="/manifest.json?v=20260720-10">
-<link rel="apple-touch-icon" sizes="120x120" href="/icons/icon-120.png?v=20260720-10">
-<link rel="apple-touch-icon" sizes="152x152" href="/icons/icon-152.png?v=20260720-10">
-<link rel="apple-touch-icon" sizes="167x167" href="/icons/icon-167.png?v=20260720-10">
-<link rel="apple-touch-icon" sizes="180x180" href="/icons/icon-180.png?v=20260720-10">
-<link rel="icon" type="image/png" sizes="32x32" href="/icons/icon-32.png?v=20260720-10">
+<link rel="manifest" href="/manifest.json?v=20260720-11">
+<link rel="apple-touch-icon" sizes="120x120" href="/icons/icon-120.png?v=20260720-11">
+<link rel="apple-touch-icon" sizes="152x152" href="/icons/icon-152.png?v=20260720-11">
+<link rel="apple-touch-icon" sizes="167x167" href="/icons/icon-167.png?v=20260720-11">
+<link rel="apple-touch-icon" sizes="180x180" href="/icons/icon-180.png?v=20260720-11">
+<link rel="icon" type="image/png" sizes="32x32" href="/icons/icon-32.png?v=20260720-11">
 <title>HABIT</title>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Share+Tech+Mono&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
@@ -548,7 +548,7 @@ input,select,button,textarea{font-family:'Inter',sans-serif}
 .admin-board-name span:last-child{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .admin-board-edit{border:1px solid rgba(255,255,255,.1);background:rgba(255,255,255,.045);color:#b7bdc8;border-radius:999px;padding:7px 9px;font-size:10.5px;font-weight:800;white-space:nowrap}
 @media(max-width:380px){.admin-report-hero{grid-template-columns:repeat(2,1fr)}.admin-report-day{grid-template-columns:48px 1fr}.admin-report-pill{justify-self:start;grid-column:2}}
-.coach-cockpit-head{position:sticky;top:0;z-index:7;background:linear-gradient(180deg,#080808 0%,rgba(8,8,8,.96) 82%,rgba(8,8,8,0));padding-bottom:10px;margin-bottom:4px}
+.coach-cockpit-head{background:#080808;padding-bottom:10px;margin-bottom:4px}
 .coach-cockpit-top{display:flex;align-items:center;gap:10px;margin-bottom:8px}
 .coach-back-btn{border:1px solid rgba(255,255,255,.1);background:rgba(255,255,255,.055);border-radius:999px;color:var(--white);padding:8px 12px;font-size:12px;font-weight:850;cursor:pointer;white-space:nowrap}
 .coach-client-title{min-width:0;flex:1}
@@ -1003,6 +1003,15 @@ body.reception-mode{background:#050505}
 .adm-ex-name{font-size:13px;font-weight:600;color:var(--white)}
 .adm-ex-meta{font-size:11px;color:var(--gray);margin-top:2px}
 .adm-ex-video{font-size:10px;color:var(--bl);margin-top:2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.exercise-form-grid{display:grid;gap:8px;margin-bottom:8px}
+.exercise-form-two{display:grid;grid-template-columns:1fr 1fr;gap:7px}
+.exercise-form-control{width:100%;background:var(--card);border:1px solid var(--border);border-radius:8px;padding:10px;font-size:13px;color:var(--white);outline:none;box-sizing:border-box}
+.exercise-form-control.small{font-size:12px;padding:9px}
+.exercise-target-row{display:grid;grid-template-columns:.8fr 1.2fr;gap:7px}
+.exercise-field-label{font-size:9.5px;font-weight:850;letter-spacing:.1em;text-transform:uppercase;color:var(--gray);margin:2px 0 5px}
+.muscle-secondary-grid{display:flex;flex-wrap:wrap;gap:6px;margin:7px 0 8px}
+.muscle-chip{display:flex;align-items:center;gap:6px;border:1px solid rgba(255,255,255,.09);background:rgba(255,255,255,.04);border-radius:999px;padding:7px 9px;font-size:11px;font-weight:750;color:#aeb4c0}
+.muscle-chip input{width:14px;height:14px;accent-color:var(--blue)}
 .assign-box{background:rgba(37,99,235,.06);border:1px solid rgba(37,99,235,.2);border-radius:4px;padding:10px 12px;margin-top:10px}
 .assign-title{font-size:10px;font-weight:700;color:var(--bl);letter-spacing:.1em;text-transform:uppercase;margin-bottom:8px}
 .assign-row{display:flex;align-items:center;justify-content:space-between;padding:6px 0;border-bottom:1px solid rgba(37,99,235,.1)}
@@ -2151,7 +2160,7 @@ html,body,.app,input,select,button,textarea{font-family:var(--font-ui);font-opti
 // ── CONFIG & SUPABASE ───────────────────────────────────────
 const SUPABASE_URL='https://pmpjteuqjusbiduevbwq.supabase.co';
 const SUPABASE_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBtcGp0ZXVxanVzYmlkdWV2YndxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc2OTI1NjUsImV4cCI6MjA5MzI2ODU2NX0.XbMzZoo2yqtrD8znLnyo_1zDfrdJAvAPj1lqGOyXnLw';
-const APP_VERSION='20260720-10';
+const APP_VERSION='20260720-11';
 const MUSCLE_GROUPS=['Pecho','Espalda','Piernas','Hombros','Brazos','Core','Cardio','Full Body'];
 const DAILY_QUOTES=[
   {text:'Haz hoy lo que tu version de manana agradeceria.',action:'Elige una accion pequeña y cumplible antes de buscar motivacion.'},
@@ -2191,6 +2200,69 @@ function muscleGroupSelectHtml(id,selected){
     +'<option value="">Grupo muscular (opcional)</option>'
     +MUSCLE_GROUPS.map(g=>'<option value="'+g+'" '+(selected===g?'selected':'')+'>'+g+'</option>').join('')
     +'</select>';
+}
+function musclePrimarySelectHtml(id,selected){
+  return '<div><div class="exercise-field-label">Grupo principal</div><select class="exercise-form-control small" id="'+id+'">'
+    +'<option value="">Seleccionar</option>'
+    +MUSCLE_GROUPS.map(g=>'<option value="'+g+'" '+(selected===g?'selected':'')+'>'+g+'</option>').join('')
+    +'</select></div>';
+}
+function muscleSecondaryPickerHtml(name,selected){
+  const picked=new Set(Array.isArray(selected)?selected:((selected||'').split(',').map(x=>x.trim()).filter(Boolean)));
+  return '<div><div class="exercise-field-label">Grupos secundarios</div><div class="muscle-secondary-grid">'
+    +MUSCLE_GROUPS.map(g=>'<label class="muscle-chip"><input type="checkbox" name="'+name+'" value="'+esc(g)+'" '+(picked.has(g)?'checked':'')+'><span>'+esc(g)+'</span></label>').join('')
+    +'</div></div>';
+}
+function inferTargetType(ex){
+  if(ex&&ex.repsType)return ex.repsType;
+  const v=String((ex&&ex.reps)||'').trim().toLowerCase();
+  return /[:sm]/.test(v)?'time':'reps';
+}
+function normalizeTimeText(raw){
+  const v=String(raw||'').trim().toLowerCase().replace(/\s+/g,'');
+  if(!v)return'';
+  if(/^\d+$/.test(v))return String(parseInt(v,10))+'s';
+  let m=v.match(/^(\d{1,2}):([0-5]?\d)$/);
+  if(m)return parseInt(m[1],10)+':'+pad(parseInt(m[2],10));
+  m=v.match(/^(\d+)m(?:(\d{1,2})s?)?$/);
+  if(m)return parseInt(m[1],10)+':'+pad(parseInt(m[2]||0,10));
+  m=v.match(/^(\d+)s$/);
+  if(m)return String(parseInt(m[1],10))+'s';
+  return null;
+}
+function exerciseTargetLabel(ex){
+  const reps=String((ex&&ex.reps)||'').trim();
+  if(!reps)return'';
+  return inferTargetType(ex)==='time'?reps:reps+' reps';
+}
+function exerciseDetailParts(ex){
+  return [ex?.sets?ex.sets+' series':null,exerciseTargetLabel(ex)||null,ex?.rest?ex.rest+' descanso':null].filter(Boolean);
+}
+function exerciseMuscleLabel(ex){
+  const groups=[ex?.muscleGroup,...(Array.isArray(ex?.secondaryMuscleGroups)?ex.secondaryMuscleGroups:[])].filter(Boolean);
+  return groups.length?groups.join(' + '):'';
+}
+function getSelectedSecondaryMuscles(name,primary){
+  return Array.from(document.querySelectorAll('input[name="'+name+'"]:checked')).map(i=>i.value).filter(v=>v&&v!==primary);
+}
+function syncExerciseTargetInput(idBase){
+  const type=(document.getElementById('exrt-'+idBase)||document.getElementById('exedit-rt-'+idBase)||{value:'reps'}).value;
+  const input=document.getElementById('exr-'+idBase)||document.getElementById('exedit-reps-'+idBase);
+  if(!input)return;
+  input.placeholder=type==='time'?'Duración: 0:30 o 30s':'Repeticiones';
+  input.inputMode='numeric';
+  input.dataset.targetType=type;
+}
+function cleanExerciseInput(el){
+  if(!el)return;
+  const type=el.dataset.targetType||'reps';
+  el.value=type==='time'?el.value.replace(/[^\d:ms\s]/gi,''):el.value.replace(/\D/g,'');
+}
+function validateExerciseTiming(value,label,required){
+  const normalized=normalizeTimeText(value);
+  if(!value&&!required)return'';
+  if(!normalized)throw new Error(label+' debe ser segundos o mm:ss. Ej: 90, 90s o 1:30');
+  return normalized;
 }
 const PUBLIC_APP_URL='https://habittraininghub.app/app.html';
 const PUBLIC_API_ORIGIN='https://www.habittraininghub.app';
@@ -5617,10 +5689,10 @@ async function refreshExerciseFocusFromServer(){
   const board=coachBoardsById[d.bid];
   const fresh=buildExerciseFocusData((board&&board.exercises)||[],d.idx,d.bid,d.scheduleId);
   if(!fresh)return;
-  _exFocusData={..._exFocusData,name:fresh.name,sets:fresh.sets,reps:fresh.reps,rest:fresh.rest,videos:fresh.videos,hasNote:fresh.hasNote};
+  _exFocusData={..._exFocusData,name:fresh.name,sets:fresh.sets,reps:fresh.reps,repsType:fresh.repsType,rest:fresh.rest,videos:fresh.videos,hasNote:fresh.hasNote};
   document.getElementById('exercise-focus-name').textContent=_exFocusData.name;
   const detailEl=document.getElementById('exercise-focus-detail');
-  if(detailEl)detailEl.textContent=[_exFocusData.sets?_exFocusData.sets+' series':null,_exFocusData.reps?_exFocusData.reps+' reps':null,_exFocusData.rest?_exFocusData.rest+' descanso':null].filter(Boolean).join(' · ')||'Sin detalle';
+  if(detailEl)detailEl.textContent=exerciseDetailParts(_exFocusData).join(' · ')||'Sin detalle';
   renderExerciseFocusVideo();
   renderExerciseFocusTools();
 }
@@ -5667,7 +5739,7 @@ function renderExerciseFocusModal(){
   document.getElementById('exercise-focus-name').textContent=d.name;
   renderExerciseFocusVideo();
   document.getElementById('exercise-focus-detail').textContent=
-    [d.sets?d.sets+' series':null,d.reps?d.reps+' reps':null,d.rest?d.rest+' descanso':null].filter(Boolean).join(' · ')||'Sin detalle';
+    exerciseDetailParts(d).join(' · ')||'Sin detalle';
   const progressEl=document.getElementById('exercise-focus-progress');
   if(progressEl)progressEl.textContent=(typeof d.idx==='number'?('Ejercicio '+(d.idx+1)+(activeCoachingSession&&coachBoardsById[activeCoachingSession.board_id]?'/'+((coachBoardsById[activeCoachingSession.board_id].exercises||[]).length):'')):'');
   renderExerciseFocusTools();
@@ -5678,7 +5750,7 @@ function buildExerciseFocusData(exercises,idx,boardId,scheduleId){
   const ex=exercises[idx];
   if(!ex)return null;
   const exKey=ex.id||boardId+'_idx_'+idx;
-  return {name:ex.name,sets:ex.sets||'',reps:ex.reps||'',rest:ex.rest||'',
+  return {name:ex.name,sets:ex.sets||'',reps:ex.reps||'',repsType:inferTargetType(ex),rest:ex.rest||'',
     videos:getExerciseVideos(ex),exKey,hasNote:!!exerciseNotesMap[exKey],
     bid:boardId,idx,exid:ex.id||'',scheduleId:scheduleId||null,
     showAsesoria:canAccessCoaching()};
@@ -6096,7 +6168,7 @@ function renderExerciseListHtml(exercises,keyPrefix,boardId,sessionCtx){
     const sets=sessionCtx?(sessionCtx.sets[exKey]||[]):[];
     const doneCount=sets.filter(s=>s.done).length;
     const showProgress=!!(sessionCtx&&sets.length);
-    const exData={name:ex.name,sets:ex.sets||'',reps:ex.reps||'',rest:ex.rest||'',videos,exKey,
+    const exData={name:ex.name,sets:ex.sets||'',reps:ex.reps||'',repsType:inferTargetType(ex),rest:ex.rest||'',videos,exKey,
       hasNote,bid:boardId||keyPrefix,idx:i,exid:ex.id||'',scheduleId:sessionCtx?sessionCtx.scheduleId:null,
       showAsesoria:canAccessCoaching()};
     const isActionable=!!sessionCtx;
@@ -6104,7 +6176,7 @@ function renderExerciseListHtml(exercises,keyPrefix,boardId,sessionCtx){
       +'<div class="exercise-detail-head" style="display:flex;align-items:center;gap:10px">'
       +'<div class="ex-num">'+(i+1)+'</div>'
       +'<div class="ex-body"><div class="ex-name">'+esc(ex.name)+'</div>'
-      +'<div class="ex-detail">'+[ex.sets?esc(ex.sets)+' series':null,ex.reps?esc(ex.reps)+' reps':null,ex.rest?esc(ex.rest)+' descanso':null].filter(Boolean).join(' · ')+(ex.muscleGroup?' · '+esc(ex.muscleGroup):'')+'</div>'
+      +'<div class="ex-detail">'+exerciseDetailParts(ex).map(esc).join(' · ')+(exerciseMuscleLabel(ex)?' · '+esc(exerciseMuscleLabel(ex)):'')+'</div>'
       +(ex.note||ex.notes||ex.description?'<div class="ex-note">'+esc(ex.note||ex.notes||ex.description)+'</div>':'')
       +'</div>'
       +(showProgress?'<span class="ex-progress-badge'+(doneCount===sets.length?' done':'')+'">'+doneCount+'/'+sets.length+'</span>':'')
@@ -6124,7 +6196,7 @@ function renderWorkoutEditListHtml(exercises,boardId,scheduleId){
       +'<div class="exercise-detail-head" style="display:flex;align-items:center;gap:10px">'
       +'<div class="ex-num">'+(i+1)+'</div>'
       +'<div class="ex-body"><div class="ex-name">'+esc(ex.name)+'</div>'
-      +'<div class="ex-detail">'+[ex.sets?esc(ex.sets)+' series':null,ex.reps?esc(ex.reps)+' reps':null,ex.rest?esc(ex.rest)+' descanso':null].filter(Boolean).join(' · ')+(ex.muscleGroup?' · '+esc(ex.muscleGroup):'')+'</div>'
+      +'<div class="ex-detail">'+exerciseDetailParts(ex).map(esc).join(' · ')+(exerciseMuscleLabel(ex)?' · '+esc(exerciseMuscleLabel(ex)):'')+'</div>'
       +(ex.note||ex.notes||ex.description?'<div class="ex-note">'+esc(ex.note||ex.notes||ex.description)+'</div>':'')
       +'</div>'
       +'<span class="ex-progress-badge'+(sets.length&&doneCount===sets.length?' done':'')+'">'+doneCount+'/'+sets.length+'</span>'
@@ -8411,7 +8483,7 @@ async function renderBoardsAdmin(){
         +'<span style="font-size:12px;color:var(--bl);font-weight:700;min-width:20px;margin-top:1px">'+(i+1)+'.</span>'
         +'<div style="flex:1;min-width:0">'
         +'<div style="font-size:14px;font-weight:700;color:var(--white)">'+esc(ex.name||'Sin nombre')+'</div>'
-        +(ex.sets?'<div style="font-size:12px;color:var(--gray);margin-top:3px">'+esc(ex.sets)+' series · '+esc(ex.reps||'')+' reps'+(ex.rest?' · '+esc(ex.rest):'')+(ex.muscleGroup?' · '+esc(ex.muscleGroup):'')+'</div>':'')
+        +(ex.sets?'<div style="font-size:12px;color:var(--gray);margin-top:3px">'+esc(ex.sets)+' series'+(exerciseTargetLabel(ex)?' · '+esc(exerciseTargetLabel(ex)):'')+(ex.rest?' · descanso '+esc(ex.rest):'')+(exerciseMuscleLabel(ex)?' · '+esc(exerciseMuscleLabel(ex)):'')+'</div>':'')
         +(ex.note||ex.notes||ex.description?'<div style="font-size:11px;color:var(--gray);margin-top:2px;opacity:.75;font-style:italic">'+esc(ex.note||ex.notes||ex.description)+'</div>':'')
         +(vids.length?'<div style="font-size:11px;color:var(--bl);margin-top:3px">▶ '+vids.length+' video'+(vids.length>1?'s':'')+'</div>':'')
         +'</div></div>';
@@ -8422,15 +8494,16 @@ async function renderBoardsAdmin(){
       +'<button class="btn-sm bred" style="padding:2px 8px" data-bid="'+board.id+'" data-idx="'+i+'" onclick="removeExerciseSb(this.dataset.bid,parseInt(this.dataset.idx))">Eliminar</button>'
       +'</div>'
       +'<input type="text" placeholder="Nombre *" id="exedit-name-'+board.id+'-'+i+'" value="'+esc(ex.name||'')+'" style="width:100%;background:var(--card);border:1px solid var(--border);border-radius:4px;padding:9px;font-size:13px;font-weight:700;color:var(--white);outline:none;margin-bottom:6px;box-sizing:border-box">'
-      +'<div style="display:grid;grid-template-columns:1fr 1fr;gap:5px;margin-bottom:6px">'
-      +'<input type="text" placeholder="Series" id="exedit-sets-'+board.id+'-'+i+'" value="'+esc(ex.sets||'')+'" style="background:var(--card);border:1px solid var(--border);border-radius:4px;padding:8px;font-size:12px;color:var(--white);outline:none">'
-      +'<input type="text" placeholder="Reps" id="exedit-reps-'+board.id+'-'+i+'" value="'+esc(ex.reps||'')+'" style="background:var(--card);border:1px solid var(--border);border-radius:4px;padding:8px;font-size:12px;color:var(--white);outline:none">'
+      +'<div class="exercise-form-two">'
+      +'<input class="exercise-form-control small" type="number" min="1" step="1" placeholder="Series" id="exedit-sets-'+board.id+'-'+i+'" value="'+esc(ex.sets||'')+'">'
+      +'<div class="exercise-target-row"><select class="exercise-form-control small" id="exedit-rt-'+board.id+'-'+i+'" onchange="syncExerciseTargetInput(&quot;'+board.id+'-'+i+'&quot;)"><option value="reps" '+(inferTargetType(ex)==='reps'?'selected':'')+'>Reps</option><option value="time" '+(inferTargetType(ex)==='time'?'selected':'')+'>Tiempo</option></select><input class="exercise-form-control small" type="text" inputmode="numeric" data-target-type="'+inferTargetType(ex)+'" oninput="cleanExerciseInput(this)" placeholder="'+(inferTargetType(ex)==='time'?'0:30 o 30s':'Repeticiones')+'" id="exedit-reps-'+board.id+'-'+i+'" value="'+esc(ex.reps||'')+'"></div>'
       +'</div>'
-      +'<div style="display:grid;grid-template-columns:1fr 1fr;gap:5px;margin-bottom:6px">'
-      +'<input type="text" placeholder="Descanso entre series" id="exedit-rest-'+board.id+'-'+i+'" value="'+esc(ex.rest||'')+'" style="background:var(--card);border:1px solid var(--border);border-radius:4px;padding:8px;font-size:12px;color:var(--white);outline:none">'
-      +'<input type="text" placeholder="Descanso antes del siguiente" id="exedit-restnext-'+board.id+'-'+i+'" value="'+esc(ex.restNext||'')+'" style="background:var(--card);border:1px solid var(--border);border-radius:4px;padding:8px;font-size:12px;color:var(--white);outline:none">'
+      +'<div class="exercise-form-two">'
+      +'<input class="exercise-form-control small" type="text" inputmode="numeric" oninput="this.value=this.value.replace(/[^\\d:ms\\s]/gi,\'\')" placeholder="Descanso series: 90 o 1:30" id="exedit-rest-'+board.id+'-'+i+'" value="'+esc(ex.rest||'')+'">'
+      +'<input class="exercise-form-control small" type="text" inputmode="numeric" oninput="this.value=this.value.replace(/[^\\d:ms\\s]/gi,\'\')" placeholder="Descanso sig.: 90 o 1:30" id="exedit-restnext-'+board.id+'-'+i+'" value="'+esc(ex.restNext||'')+'">'
       +'</div>'
-      +muscleGroupSelectHtml('exedit-mg-'+board.id+'-'+i,ex.muscleGroup||'')
+      +musclePrimarySelectHtml('exedit-mg-'+board.id+'-'+i,ex.muscleGroup||'')
+      +muscleSecondaryPickerHtml('exedit-secondary-'+board.id+'-'+i,ex.secondaryMuscleGroups||[])
       +'<textarea placeholder="Indicaciones (opcional)" id="exedit-desc-'+board.id+'-'+i+'" style="width:100%;background:var(--card);border:1px solid var(--border);border-radius:4px;padding:8px;font-size:12px;color:var(--white);outline:none;resize:none;min-height:44px;margin-bottom:6px;box-sizing:border-box">'+esc(ex.note||ex.notes||ex.description||'')+'</textarea>'
       +'<input type="url" placeholder="Video 1 URL" id="exedit-video-'+board.id+'-'+i+'-0" value="'+esc((getExerciseVideos(ex)[0]||{}).url||'')+'" style="width:100%;background:var(--card);border:1px solid var(--border);border-radius:4px;padding:8px;font-size:12px;color:var(--white);outline:none;margin-bottom:4px;box-sizing:border-box">'
       +'<input type="text" placeholder="Nombre video 1" id="exedit-title-'+board.id+'-'+i+'-0" value="'+esc((getExerciseVideos(ex)[0]||{}).title||'')+'" style="width:100%;background:var(--card);border:1px solid var(--border);border-radius:4px;padding:8px;font-size:12px;color:var(--white);outline:none;margin-bottom:4px;box-sizing:border-box">'
@@ -8445,15 +8518,16 @@ async function renderBoardsAdmin(){
       '<div style="background:var(--card2);border:1px solid var(--blue);border-radius:8px;padding:14px;margin-bottom:10px">'
       +'<div style="font-size:11px;font-weight:700;color:var(--bl);margin-bottom:10px;letter-spacing:.06em">NUEVO EJERCICIO</div>'
       +'<input type="text" placeholder="Nombre del ejercicio *" id="exn-'+board.id+'" style="width:100%;background:var(--card);border:1px solid var(--border);border-radius:4px;padding:9px;font-size:13px;color:var(--white);outline:none;margin-bottom:6px;box-sizing:border-box">'
-      +'<div style="display:grid;grid-template-columns:1fr 1fr;gap:5px;margin-bottom:6px">'
-      +'<input type="text" placeholder="Series" id="exs-'+board.id+'" style="background:var(--card);border:1px solid var(--border);border-radius:4px;padding:8px;font-size:12px;color:var(--white);outline:none">'
-      +'<input type="text" placeholder="Reps" id="exr-'+board.id+'" style="background:var(--card);border:1px solid var(--border);border-radius:4px;padding:8px;font-size:12px;color:var(--white);outline:none">'
+      +'<div class="exercise-form-two">'
+      +'<input class="exercise-form-control small" type="number" min="1" step="1" placeholder="Series" id="exs-'+board.id+'">'
+      +'<div class="exercise-target-row"><select class="exercise-form-control small" id="exrt-'+board.id+'" onchange="syncExerciseTargetInput(&quot;'+board.id+'&quot;)"><option value="reps">Reps</option><option value="time">Tiempo</option></select><input class="exercise-form-control small" type="text" inputmode="numeric" data-target-type="reps" oninput="cleanExerciseInput(this)" placeholder="Repeticiones" id="exr-'+board.id+'"></div>'
       +'</div>'
-      +'<div style="display:grid;grid-template-columns:1fr 1fr;gap:5px;margin-bottom:6px">'
-      +'<input type="text" placeholder="Descanso entre series" id="exrest-'+board.id+'" style="background:var(--card);border:1px solid var(--border);border-radius:4px;padding:8px;font-size:12px;color:var(--white);outline:none">'
-      +'<input type="text" placeholder="Descanso antes del siguiente" id="exrestnext-'+board.id+'" style="background:var(--card);border:1px solid var(--border);border-radius:4px;padding:8px;font-size:12px;color:var(--white);outline:none">'
+      +'<div class="exercise-form-two">'
+      +'<input class="exercise-form-control small" type="text" inputmode="numeric" oninput="this.value=this.value.replace(/[^\\d:ms\\s]/gi,\'\')" placeholder="Descanso series: 90 o 1:30" id="exrest-'+board.id+'">'
+      +'<input class="exercise-form-control small" type="text" inputmode="numeric" oninput="this.value=this.value.replace(/[^\\d:ms\\s]/gi,\'\')" placeholder="Descanso sig.: 90 o 1:30" id="exrestnext-'+board.id+'">'
       +'</div>'
-      +muscleGroupSelectHtml('exmg-'+board.id,'')
+      +musclePrimarySelectHtml('exmg-'+board.id,'')
+      +muscleSecondaryPickerHtml('exsecondary-'+board.id,[])
       +'<textarea placeholder="Indicaciones (opcional)" id="exd-'+board.id+'" style="width:100%;background:var(--card);border:1px solid var(--border);border-radius:4px;padding:8px;font-size:12px;color:var(--white);outline:none;resize:none;min-height:44px;margin-bottom:6px;box-sizing:border-box"></textarea>'
       +'<input type="url" placeholder="Video 1 URL" id="exv-'+board.id+'" style="width:100%;background:var(--card);border:1px solid var(--border);border-radius:4px;padding:8px;font-size:12px;color:var(--white);outline:none;margin-bottom:4px;box-sizing:border-box">'
       +'<input type="text" placeholder="Nombre video 1" id="ext-'+board.id+'" style="width:100%;background:var(--card);border:1px solid var(--border);border-radius:4px;padding:8px;font-size:12px;color:var(--white);outline:none;margin-bottom:4px;box-sizing:border-box">'
@@ -8596,10 +8670,12 @@ async function addExerciseSb(bid){
   const name=document.getElementById('exn-'+bid).value.trim();
   if(!name){toast('Escribe el nombre del ejercicio','err');return;}
   const sets=document.getElementById('exs-'+bid).value.trim();
-  const reps=document.getElementById('exr-'+bid).value.trim();
-  const rest=document.getElementById('exrest-'+bid).value.trim();
-  const restNext=(document.getElementById('exrestnext-'+bid)?.value||'').trim();
+  const repsType=(document.getElementById('exrt-'+bid)?.value||'reps');
+  let reps=document.getElementById('exr-'+bid).value.trim();
+  let rest=document.getElementById('exrest-'+bid).value.trim();
+  let restNext=(document.getElementById('exrestnext-'+bid)?.value||'').trim();
   const muscleGroup=(document.getElementById('exmg-'+bid)?.value||'').trim();
+  const secondaryMuscleGroups=getSelectedSecondaryMuscles('exsecondary-'+bid,muscleGroup);
   const note=document.getElementById('exd-'+bid).value.trim();
   const video=document.getElementById('exv-'+bid).value.trim();
   const videoTitle=document.getElementById('ext-'+bid).value.trim();
@@ -8607,12 +8683,22 @@ async function addExerciseSb(bid){
   const videoTitle2=(document.getElementById('ext2-'+bid)?.value||'').trim();
   if(video&&!isUrl(video)){toast('El video debe empezar con https://','err');return;}
   if(video2&&!isUrl(video2)){toast('El video 2 debe empezar con https://','err');return;}
+  try{
+    if(sets&&(!/^\d+$/.test(sets)||Number(sets)<=0))throw new Error('Series debe ser un número.');
+    if(repsType==='reps'){
+      if(reps&&!/^\d+$/.test(reps))throw new Error('Reps debe admitir solo números.');
+    }else{
+      reps=validateExerciseTiming(reps,'Tiempo del ejercicio',true);
+    }
+    rest=validateExerciseTiming(rest,'Descanso entre series',false);
+    restNext=validateExerciseTiming(restNext,'Descanso antes del siguiente ejercicio',false);
+  }catch(e){toast(e.message,'err');return;}
   const b=boards.find(x=>x.id===bid);
   if(!b)return;
   const videos=[];
   if(video)videos.push({url:video,title:videoTitle});
   if(video2)videos.push({url:video2,title:videoTitle2});
-  b.exercises.push({id:crypto.randomUUID(),name,sets,reps,rest,restNext,muscleGroup,note,description:note,video:video||'',videoTitle:videoTitle||'',videos});
+  b.exercises.push({id:crypto.randomUUID(),name,sets,reps,repsType,rest,restNext,muscleGroup,secondaryMuscleGroups,note,description:note,video:video||'',videoTitle:videoTitle||'',videos});
   await sb.from('boards').update({exercises:b.exercises}).eq('id',bid);
   document.getElementById('exn-'+bid).value='';
   document.getElementById('exs-'+bid).value='';
@@ -8620,6 +8706,7 @@ async function addExerciseSb(bid){
   document.getElementById('exrest-'+bid).value='';
   const exrestnext=document.getElementById('exrestnext-'+bid);if(exrestnext)exrestnext.value='';
   const exmg=document.getElementById('exmg-'+bid);if(exmg)exmg.value='';
+  document.querySelectorAll('input[name="exsecondary-'+bid+'"]').forEach(i=>i.checked=false);
   document.getElementById('exd-'+bid).value='';
   document.getElementById('exv-'+bid).value='';
   document.getElementById('ext-'+bid).value='';
@@ -8634,10 +8721,12 @@ async function updateExerciseSb(bid,idx){
   if(!b||!b.exercises||!b.exercises[idx])return;
   const name=(document.getElementById('exedit-name-'+bid+'-'+idx)?.value||'').trim();
   const sets=(document.getElementById('exedit-sets-'+bid+'-'+idx)?.value||'').trim();
-  const reps=(document.getElementById('exedit-reps-'+bid+'-'+idx)?.value||'').trim();
-  const rest=(document.getElementById('exedit-rest-'+bid+'-'+idx)?.value||'').trim();
-  const restNext=(document.getElementById('exedit-restnext-'+bid+'-'+idx)?.value||'').trim();
+  const repsType=(document.getElementById('exedit-rt-'+bid+'-'+idx)?.value||'reps');
+  let reps=(document.getElementById('exedit-reps-'+bid+'-'+idx)?.value||'').trim();
+  let rest=(document.getElementById('exedit-rest-'+bid+'-'+idx)?.value||'').trim();
+  let restNext=(document.getElementById('exedit-restnext-'+bid+'-'+idx)?.value||'').trim();
   const muscleGroup=(document.getElementById('exedit-mg-'+bid+'-'+idx)?.value||'').trim();
+  const secondaryMuscleGroups=getSelectedSecondaryMuscles('exedit-secondary-'+bid+'-'+idx,muscleGroup);
   const desc=(document.getElementById('exedit-desc-'+bid+'-'+idx)?.value||'').trim();
   const video=(document.getElementById('exedit-video-'+bid+'-'+idx+'-0')?.value||document.getElementById('exedit-video-'+bid+'-'+idx)?.value||'').trim();
   const videoTitle=(document.getElementById('exedit-title-'+bid+'-'+idx+'-0')?.value||document.getElementById('exedit-title-'+bid+'-'+idx)?.value||'').trim();
@@ -8646,10 +8735,20 @@ async function updateExerciseSb(bid,idx){
   if(!name){toast('El ejercicio necesita nombre','err');return;}
   if(video&&!isUrl(video)){toast('El link debe empezar con https://','err');return;}
   if(video2&&!isUrl(video2)){toast('El link 2 debe empezar con https://','err');return;}
+  try{
+    if(sets&&(!/^\d+$/.test(sets)||Number(sets)<=0))throw new Error('Series debe ser un número.');
+    if(repsType==='reps'){
+      if(reps&&!/^\d+$/.test(reps))throw new Error('Reps debe admitir solo números.');
+    }else{
+      reps=validateExerciseTiming(reps,'Tiempo del ejercicio',true);
+    }
+    rest=validateExerciseTiming(rest,'Descanso entre series',false);
+    restNext=validateExerciseTiming(restNext,'Descanso antes del siguiente ejercicio',false);
+  }catch(e){toast(e.message,'err');return;}
   const videos=[];
   if(video)videos.push({url:video,title:videoTitle});
   if(video2)videos.push({url:video2,title:videoTitle2});
-  b.exercises[idx]={...b.exercises[idx],name,sets,reps,rest,restNext,muscleGroup,note:desc,description:desc,video,videoTitle,videos};
+  b.exercises[idx]={...b.exercises[idx],name,sets,reps,repsType,rest,restNext,muscleGroup,secondaryMuscleGroups,note:desc,description:desc,video,videoTitle,videos};
   try{
     const{error}=await sb.from('boards').update({exercises:b.exercises}).eq('id',bid);
     if(error)throw error;
