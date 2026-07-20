@@ -6,12 +6,12 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="HABIT">
 <meta name="application-name" content="HABIT">
-<link rel="manifest" href="/manifest.json?v=20260719-16">
-<link rel="apple-touch-icon" sizes="120x120" href="/icons/icon-120.png?v=20260719-16">
-<link rel="apple-touch-icon" sizes="152x152" href="/icons/icon-152.png?v=20260719-16">
-<link rel="apple-touch-icon" sizes="167x167" href="/icons/icon-167.png?v=20260719-16">
-<link rel="apple-touch-icon" sizes="180x180" href="/icons/icon-180.png?v=20260719-16">
-<link rel="icon" type="image/png" sizes="32x32" href="/icons/icon-32.png?v=20260719-16">
+<link rel="manifest" href="/manifest.json?v=20260720-02">
+<link rel="apple-touch-icon" sizes="120x120" href="/icons/icon-120.png?v=20260720-02">
+<link rel="apple-touch-icon" sizes="152x152" href="/icons/icon-152.png?v=20260720-02">
+<link rel="apple-touch-icon" sizes="167x167" href="/icons/icon-167.png?v=20260720-02">
+<link rel="apple-touch-icon" sizes="180x180" href="/icons/icon-180.png?v=20260720-02">
+<link rel="icon" type="image/png" sizes="32x32" href="/icons/icon-32.png?v=20260720-02">
 <title>HABIT</title>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Share+Tech+Mono&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
@@ -477,6 +477,17 @@ input,select,button,textarea{font-family:'Inter',sans-serif}
 .edit-workout-exercise{cursor:default;margin-bottom:12px}
 .edit-workout-exercise .exercise-detail-head{border-bottom:1px solid rgba(255,255,255,.06)}
 .edit-workout-exercise .set-tracker{margin:0;border:none;border-radius:0;background:rgba(255,255,255,.025)}
+.admin-session-summary{display:grid;gap:12px}
+.admin-session-comment{border-left:2px solid rgba(32,212,146,.7);padding:8px 10px;background:rgba(16,185,129,.07);border-radius:0 10px 10px 0;color:#d1fae5;font-size:12px;line-height:1.45}
+.admin-session-ex{border-bottom:1px solid rgba(255,255,255,.07);padding-bottom:12px}
+.admin-session-ex:last-child{border-bottom:0;padding-bottom:0}
+.admin-session-ex-title{font-size:12px;font-weight:850;color:#93c5fd;letter-spacing:.01em;line-height:1.25;text-transform:uppercase;margin-bottom:8px}
+.admin-session-sets{display:grid;gap:5px}
+.admin-session-set{display:grid;grid-template-columns:34px minmax(0,1fr) minmax(0,1fr);gap:8px;align-items:center;min-height:30px;color:var(--white);font-size:12.5px}
+.admin-session-set-num{color:#9aa1ad;font-weight:850}
+.admin-session-metric{font-weight:750;color:#f5f7fb}
+.admin-session-metric.muted{color:#6b7280;font-weight:650}
+.admin-session-empty{font-size:12px;color:var(--gray);line-height:1.45}
 
 /* COACHING */
 .coach-hub-nav{gap:6px;padding:8px;background:rgba(17,17,17,.94);border-bottom:1px solid rgba(255,255,255,.08)}
@@ -2042,7 +2053,7 @@ html,body,.app,input,select,button,textarea{font-family:var(--font-ui);font-opti
 // ── CONFIG & SUPABASE ───────────────────────────────────────
 const SUPABASE_URL='https://pmpjteuqjusbiduevbwq.supabase.co';
 const SUPABASE_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBtcGp0ZXVxanVzYmlkdWV2YndxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc2OTI1NjUsImV4cCI6MjA5MzI2ODU2NX0.XbMzZoo2yqtrD8znLnyo_1zDfrdJAvAPj1lqGOyXnLw';
-const APP_VERSION='20260719-16';
+const APP_VERSION='20260720-02';
 const MUSCLE_GROUPS=['Pecho','Espalda','Piernas','Hombros','Brazos','Core','Cardio','Full Body'];
 const DAILY_QUOTES=[
   {text:'Haz hoy lo que tu version de manana agradeceria.',action:'Elige una accion pequeña y cumplible antes de buscar motivacion.'},
@@ -5176,7 +5187,11 @@ async function adminUpdateShopOrder(orderId,status){
 // ── REGISTRO DE PESO: gráficas compartidas (Historial + Tú) ──
 function scoreGroupKey(row){return row.ex_key||(row.board_id+'_idx_'+row.ex_idx);}
 function kgToUnit(kg,unit){return unit==='lb'?kg*2.20462262:kg;}
-function fmtScoreWeight(kg,unit){return (Math.round(kgToUnit(kg,unit)*10)/10)+' '+unit;}
+function fmtWeightValue(value,unit,compact){
+  const rounded=Math.round((Number(value)||0)*10)/10;
+  return (Number.isInteger(rounded)?String(rounded):rounded.toFixed(1))+(compact?'':' ')+unit;
+}
+function fmtScoreWeight(kg,unit){return fmtWeightValue(kgToUnit(kg,unit),unit,false);}
 function renderPrCardsInto(containerEl,chartsRegistry,scoreRows,unit,canvasPrefix){
   if(!containerEl)return;
   Object.values(chartsRegistry).forEach(c=>{try{c.destroy();}catch(_){}});
@@ -5227,7 +5242,7 @@ function renderPrCardsInto(containerEl,chartsRegistry,scoreRows,unit,canvasPrefi
           plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>fmtScoreWeight(recent[c.dataIndex].w,unit)+(recent[c.dataIndex].reps?' x '+recent[c.dataIndex].reps:'')}}},
           scales:{
             x:{grid:{color:'rgba(255,255,255,.04)'},ticks:{color:'#6b7280',font:{size:10},maxRotation:0}},
-            y:{grid:{color:'rgba(255,255,255,.04)'},ticks:{color:'#6b7280',font:{size:11},callback:v=>v+unit}}
+            y:{grid:{color:'rgba(255,255,255,.04)'},ticks:{color:'#6b7280',font:{size:11},callback:v=>fmtWeightValue(v,unit,true)}}
           }
         }
       });
@@ -10845,19 +10860,26 @@ function renderCoachSessionDetailAdmin(){
   if(!coachSessionDetailRows.length){el.innerHTML='<div class="empty">Sin series registradas este día.</div>';return;}
   const byEx={};
   coachSessionDetailRows.forEach(r=>{(byEx[r.ex_key]=byEx[r.ex_key]||[]).push(r);});
-  el.innerHTML=Object.entries(byEx).map(([exKey,sets])=>{
+  const scheduleRow=coachAdminSchedule.find(r=>r.ds===selectedCoachDetailDs)||{};
+  const comment=(scheduleRow.feedback_note||'').trim();
+  const commentHtml=comment?'<div class="admin-session-comment">'+esc(comment)+'</div>':'';
+  const exercisesHtml=Object.entries(byEx).map(([exKey,sets])=>{
     const info=resolveExKeyInfo(exKey);
-    return '<div style="margin-bottom:16px">'
-      +'<div style="font-size:12px;font-weight:700;color:var(--bl);margin-bottom:6px">'+esc(info.name)+'</div>'
-      +'<div class="set-tracker-hdr"><span>SERIE</span><span>KG</span><span>REPS</span><span>✓</span></div>'
-      +sets.map(s=>'<div class="set-row">'
-        +'<span class="set-num">'+(s.set_idx+1)+'</span>'
-        +'<input class="set-reps-in" type="number" inputmode="decimal" value="'+(s.weight!=null?s.weight:'')+'" onchange="adminUpdateSetSb(&quot;'+s.id+'&quot;,&quot;weight&quot;,this.value)">'
-        +'<input class="set-reps-in" type="number" inputmode="numeric" placeholder="'+esc(s.reps_target||'reps')+'" value="'+(s.actual_reps!=null?esc(String(s.actual_reps)):'')+'" onchange="adminUpdateSetSb(&quot;'+s.id+'&quot;,&quot;actual_reps&quot;,this.value)">'
-        +'<button class="set-check'+(s.done?' done':'')+'" onclick="adminUpdateSetSb(&quot;'+s.id+'&quot;,&quot;done&quot;,'+(!s.done)+')">'+(s.done?'✓':'')+'</button>'
-        +'</div>').join('')
+    const rows=sets.map(s=>{
+      const weight=s.weight!=null?fmtWeightValue(s.weight,'kg',false):'Sin peso';
+      const reps=s.actual_reps!=null?String(s.actual_reps)+' reps':(s.reps_target?esc(s.reps_target)+' reps':'Sin reps');
+      return '<div class="admin-session-set">'
+        +'<span class="admin-session-set-num">S'+(s.set_idx+1)+'</span>'
+        +'<span class="admin-session-metric'+(s.weight==null?' muted':'')+'">'+weight+'</span>'
+        +'<span class="admin-session-metric'+(s.actual_reps==null&&!s.reps_target?' muted':'')+'">'+reps+'</span>'
+        +'</div>';
+    }).join('');
+    return '<div class="admin-session-ex">'
+      +'<div class="admin-session-ex-title">'+esc(info.name)+'</div>'
+      +'<div class="admin-session-sets">'+(rows||'<div class="admin-session-empty">Sin datos.</div>')+'</div>'
       +'</div>';
   }).join('');
+  el.innerHTML='<div class="admin-session-summary">'+commentHtml+exercisesHtml+'</div>';
 }
 async function adminUpdateSetSb(setId,field,value){
   const patch={updated_at:new Date().toISOString()};
