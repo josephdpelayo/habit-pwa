@@ -6,12 +6,12 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="HABIT">
 <meta name="application-name" content="HABIT">
-<link rel="manifest" href="/manifest.json?v=20260720-02">
-<link rel="apple-touch-icon" sizes="120x120" href="/icons/icon-120.png?v=20260720-02">
-<link rel="apple-touch-icon" sizes="152x152" href="/icons/icon-152.png?v=20260720-02">
-<link rel="apple-touch-icon" sizes="167x167" href="/icons/icon-167.png?v=20260720-02">
-<link rel="apple-touch-icon" sizes="180x180" href="/icons/icon-180.png?v=20260720-02">
-<link rel="icon" type="image/png" sizes="32x32" href="/icons/icon-32.png?v=20260720-02">
+<link rel="manifest" href="/manifest.json?v=20260720-05">
+<link rel="apple-touch-icon" sizes="120x120" href="/icons/icon-120.png?v=20260720-05">
+<link rel="apple-touch-icon" sizes="152x152" href="/icons/icon-152.png?v=20260720-05">
+<link rel="apple-touch-icon" sizes="167x167" href="/icons/icon-167.png?v=20260720-05">
+<link rel="apple-touch-icon" sizes="180x180" href="/icons/icon-180.png?v=20260720-05">
+<link rel="icon" type="image/png" sizes="32x32" href="/icons/icon-32.png?v=20260720-05">
 <title>HABIT</title>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Share+Tech+Mono&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
@@ -488,6 +488,50 @@ input,select,button,textarea{font-family:'Inter',sans-serif}
 .admin-session-metric{font-weight:750;color:#f5f7fb}
 .admin-session-metric.muted{color:#6b7280;font-weight:650}
 .admin-session-empty{font-size:12px;color:var(--gray);line-height:1.45}
+.admin-session-habits{padding-top:2px}
+.admin-session-habits-head{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:8px;color:#a3a9b5;font-size:10.5px;font-weight:850;letter-spacing:.1em;text-transform:uppercase}
+.admin-session-habits-head strong{color:var(--white);font-size:12px;letter-spacing:0}
+.admin-session-habit-list{display:flex;flex-wrap:wrap;gap:6px}
+.admin-session-habit{display:inline-flex;align-items:center;gap:6px;min-height:27px;border-radius:999px;padding:6px 9px;border:1px solid rgba(255,255,255,.08);background:rgba(255,255,255,.035);color:#9aa1ad;font-size:11.5px;line-height:1}
+.admin-session-habit span{width:14px;height:14px;border-radius:999px;border:1px solid rgba(255,255,255,.12);display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:900;flex-shrink:0}
+.admin-session-habit strong{font-weight:750}
+.admin-session-habit.done{background:rgba(16,185,129,.1);border-color:rgba(16,185,129,.24);color:#b7f7d5}
+.admin-session-habit.done span{background:var(--green);border-color:var(--green);color:#03120d}
+.admin-report-shell{display:grid;gap:12px}
+.admin-report-hero{display:grid;grid-template-columns:repeat(4,1fr);gap:7px}
+.admin-report-stat{border:1px solid rgba(255,255,255,.08);border-radius:14px;padding:10px 9px;background:rgba(255,255,255,.035);min-width:0}
+.admin-report-stat strong{display:block;font-size:18px;color:var(--white);line-height:1;font-variant-numeric:tabular-nums}
+.admin-report-stat span{display:block;margin-top:5px;font-size:9.5px;color:#9aa1ad;font-weight:800;letter-spacing:.06em;text-transform:uppercase;line-height:1.2}
+.admin-report-section{border:1px solid rgba(255,255,255,.08);border-radius:16px;background:rgba(255,255,255,.03);padding:12px}
+.admin-report-head{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:10px}
+.admin-report-head strong{font-size:13px;color:var(--white)}
+.admin-report-head span{font-size:11px;color:#9aa1ad;font-weight:750}
+.admin-report-days{display:grid;gap:7px}
+.admin-report-day{display:grid;grid-template-columns:58px 1fr auto;gap:9px;align-items:center;padding:8px 0;border-bottom:1px solid rgba(255,255,255,.06)}
+.admin-report-day:last-child{border-bottom:0}
+.admin-report-day-date{font-size:11px;font-weight:850;color:#9aa1ad;text-transform:uppercase}
+.admin-report-day-main{min-width:0}
+.admin-report-day-title{font-size:12.5px;font-weight:780;color:var(--white);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.admin-report-day-sub{font-size:10.5px;color:#8b93a1;line-height:1.35;margin-top:2px}
+.admin-report-pill{border-radius:999px;padding:5px 8px;font-size:10.5px;font-weight:850;color:#9aa1ad;background:rgba(255,255,255,.055);white-space:nowrap}
+.admin-report-pill.good{color:#8bffbf;background:rgba(16,185,129,.12)}
+.admin-report-pill.warn{color:#fca5a5;background:rgba(239,68,68,.11)}
+.admin-today-card{border:1px solid rgba(96,165,250,.18);border-radius:18px;background:linear-gradient(145deg,rgba(37,99,235,.14),rgba(16,185,129,.045));padding:13px;display:grid;gap:10px}
+.admin-today-top{display:flex;align-items:flex-start;justify-content:space-between;gap:12px}
+.admin-today-k{font-size:10px;font-weight:900;color:#93c5fd;letter-spacing:.12em;text-transform:uppercase;margin-bottom:4px}
+.admin-today-title{font-size:18px;font-weight:880;color:var(--white);line-height:1.1}
+.admin-today-sub{font-size:11px;color:#9aa1ad;line-height:1.35;margin-top:4px}
+.admin-today-mini{display:grid;grid-template-columns:repeat(3,1fr);gap:7px}
+.admin-today-mini div{border:1px solid rgba(255,255,255,.08);border-radius:13px;background:rgba(0,0,0,.18);padding:8px}
+.admin-today-mini strong{display:block;font-size:16px;color:var(--white);line-height:1;font-variant-numeric:tabular-nums}
+.admin-today-mini span{display:block;font-size:9.5px;color:#9aa1ad;font-weight:800;text-transform:uppercase;letter-spacing:.05em;margin-top:4px}
+.admin-progress-tabs{display:grid;grid-template-columns:repeat(3,1fr);gap:7px}
+.admin-progress-tab{border:1px solid rgba(255,255,255,.08);border-radius:999px;background:rgba(255,255,255,.04);color:#9aa1ad;padding:10px 6px;font-size:11px;font-weight:850;cursor:pointer}
+.admin-progress-tab.active{background:rgba(255,255,255,.12);border-color:rgba(255,255,255,.18);color:var(--white)}
+.admin-plan-grid{display:grid;gap:12px}
+.admin-plan-section{border:1px solid rgba(255,255,255,.08);border-radius:16px;background:rgba(255,255,255,.03);padding:12px}
+.admin-plan-section-title{font-size:11px;font-weight:900;color:#a3a9b5;letter-spacing:.11em;text-transform:uppercase;margin-bottom:10px}
+@media(max-width:380px){.admin-report-hero{grid-template-columns:repeat(2,1fr)}.admin-report-day{grid-template-columns:48px 1fr}.admin-report-pill{justify-self:start;grid-column:2}}
 
 /* COACHING */
 .coach-hub-nav{gap:6px;padding:8px;background:rgba(17,17,17,.94);border-bottom:1px solid rgba(255,255,255,.08)}
@@ -2053,7 +2097,7 @@ html,body,.app,input,select,button,textarea{font-family:var(--font-ui);font-opti
 // ── CONFIG & SUPABASE ───────────────────────────────────────
 const SUPABASE_URL='https://pmpjteuqjusbiduevbwq.supabase.co';
 const SUPABASE_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBtcGp0ZXVxanVzYmlkdWV2YndxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc2OTI1NjUsImV4cCI6MjA5MzI2ODU2NX0.XbMzZoo2yqtrD8znLnyo_1zDfrdJAvAPj1lqGOyXnLw';
-const APP_VERSION='20260720-02';
+const APP_VERSION='20260720-05';
 const MUSCLE_GROUPS=['Pecho','Espalda','Piernas','Hombros','Brazos','Core','Cardio','Full Body'];
 const DAILY_QUOTES=[
   {text:'Haz hoy lo que tu version de manana agradeceria.',action:'Elige una accion pequeña y cumplible antes de buscar motivacion.'},
@@ -2576,8 +2620,8 @@ let coachWeekStart=null, coachSchedule=[], coachTasks=[], coachBoardsById={}, ac
 let chatMessages=[], chatChannel=null, chatPollInt=null, chatSendContext=null,
     chatMediaRecorder=null, chatRecordChunks=[], chatRecordStartMs=0, chatRecordTimerInt=null,
     chatPendingImgFile=null;
-let coachingAdminClients=[], selectedCoachClientId=null, coachAdminWeekStart=null, coachAdminSchedule=[], coachAdminTasks=[], coachClientAssignedBoardIds=new Set(), editingCoachTaskId=null;
-let selectedCoachDetailDs=null, coachSessionDetailRows=[], coachDetailActiveTab='semana';
+let coachingAdminClients=[], selectedCoachClientId=null, coachAdminWeekStart=null, coachAdminSchedule=[], coachAdminTasks=[], coachAdminTaskLogsByDs={}, coachClientAssignedBoardIds=new Set(), editingCoachTaskId=null;
+let selectedCoachDetailDs=null, coachSessionDetailRows=[], coachDetailActiveTab='semana', coachProgressView='habitos';
 let exerciseNotesMap={}, noteCtx=null;
 let mensajesAdminClients=[], selectedChatClientId=null, adminChatChannel=null, adminChatPollInt=null;
 let receptionSessions=[], receptionLastSync=null, receptionLoading=false;
@@ -10792,7 +10836,7 @@ async function loadAndRenderCoachingCockpit(uid,name){
   coachingAdminClients=[{id:uid,name}];
   editingCoachTaskId=null;
   selectedCoachDetailDs=null;
-  coachDetailActiveTab='semana';
+  coachDetailActiveTab='progreso';
   if(!coachAdminWeekStart)coachAdminWeekStart=mazWeekStart(mazToday());
   const detailEl=document.getElementById('coaching-detail');
   if(detailEl)detailEl.innerHTML='<div class="empty">Cargando coaching...</div>';
@@ -10809,17 +10853,41 @@ function coachAdminWeekShift(days){
 async function loadCoachingWeekAdminSb(){
   if(!selectedCoachClientId||!coachAdminWeekStart)return;
   const weekEnd=addDaysDS(coachAdminWeekStart,6);
-  const[schRes,taskRes]=await Promise.allSettled([
+  const[schRes,taskRes,logRes]=await Promise.allSettled([
     sb.from('coaching_schedule').select('*').eq('user_id',selectedCoachClientId).gte('ds',coachAdminWeekStart).lte('ds',weekEnd),
-    sb.from('coaching_tasks').select('*').eq('user_id',selectedCoachClientId).order('due_date',{ascending:true,nullsFirst:false}).order('created_at',{ascending:false}).limit(50)
+    sb.from('coaching_tasks').select('*').eq('user_id',selectedCoachClientId).order('due_date',{ascending:true,nullsFirst:false}).order('created_at',{ascending:false}).limit(50),
+    sb.from('coaching_task_logs').select('task_id,ds').eq('user_id',selectedCoachClientId).gte('ds',coachAdminWeekStart).lte('ds',weekEnd)
   ]);
   coachAdminSchedule=schRes.status==='fulfilled'?(schRes.value.data||[]):[];
   coachAdminTasks=taskRes.status==='fulfilled'?(taskRes.value.data||[]):[];
+  coachAdminTaskLogsByDs={};
+  (logRes.status==='fulfilled'?(logRes.value.data||[]):[]).forEach(r=>{
+    const ds=r.ds||mazToday();
+    if(!coachAdminTaskLogsByDs[ds])coachAdminTaskLogsByDs[ds]=new Set();
+    coachAdminTaskLogsByDs[ds].add(r.task_id);
+  });
 }
 function coachDetailTab(t){
   coachDetailActiveTab=t;
   document.querySelectorAll('.coach-detail-tab').forEach(b=>b.classList.toggle('active',b.dataset.tab===t));
   document.querySelectorAll('.coach-detail-panel').forEach(p=>p.classList.toggle('active',p.dataset.panel===t));
+}
+function coachAdminRelevantTasks(ds){
+  if(!coachAdminWeekStart)return[];
+  const weekEnd=addDaysDS(coachAdminWeekStart,6);
+  const refDs=ds||mazToday();
+  return coachAdminTasks.filter(t=>{
+    if(t.is_recurring)return !t.due_date||t.due_date<=refDs;
+    if(!t.due_date)return refDs===mazToday()||dsFromIsoMaz(t.completed_at)===refDs;
+    return t.due_date===refDs||(!t.is_done&&refDs===mazToday()&&t.due_date<refDs)||dsFromIsoMaz(t.completed_at)===refDs;
+  }).filter(t=>!t.due_date||(t.due_date>=coachAdminWeekStart&&t.due_date<=weekEnd)||dsFromIsoMaz(t.completed_at)===refDs);
+}
+function isCoachAdminTaskDoneOnDs(t,ds){
+  const refDs=ds||mazToday();
+  if(t.is_recurring)return !!(coachAdminTaskLogsByDs[refDs]&&coachAdminTaskLogsByDs[refDs].has(t.id));
+  if(!t.is_done)return false;
+  const doneDs=dsFromIsoMaz(t.completed_at);
+  return !ds||doneDs===refDs||t.due_date===refDs;
 }
 function resolveExKeyInfo(exKey){
   for(const b of boards){
@@ -10833,17 +10901,125 @@ function resolveExKeyInfo(exKey){
 }
 function selectCoachDetailDay(ds){
   selectedCoachDetailDs=ds;
-  document.querySelectorAll('#coach-detail-week-strip .coach-day').forEach(d=>d.classList.toggle('selected',d.dataset.ds===ds));
+  document.querySelectorAll('.coach-admin-day-strip .coach-day').forEach(d=>d.classList.toggle('selected',d.dataset.ds===ds));
   const lbl=document.getElementById('coach-session-detail-label');
-  if(lbl)lbl.textContent='Detalle de la sesión · '+fmtDS(ds);
+  if(lbl)lbl.textContent='Informe del día · '+fmtDS(ds);
   renderCoachSessionDetailSection();
+}
+function setCoachProgressView(view){
+  coachProgressView=view;
+  renderCoachingDetail();
+}
+function coachAdminDaySummary(ds){
+  const dayRows=(coachAdminSchedule||[]).filter(r=>r.ds===ds);
+  const doneRows=dayRows.filter(r=>r.status==='done');
+  const tasks=coachAdminRelevantTasks(ds);
+  const doneTasks=tasks.filter(t=>isCoachAdminTaskDoneOnDs(t,ds));
+  const minutes=Math.round(doneRows.reduce((s,r)=>s+(r.duration_sec||0),0)/60);
+  const title=dayRows.length?dayRows.map(r=>r.board_name).join(' · '):'Sin entreno programado';
+  const feedback=dayRows.map(r=>[r.feedback_energy?('Energía '+r.feedback_energy):'',r.feedback_soreness?'Molestia':'',r.feedback_note||''].filter(Boolean).join(' · ')).filter(Boolean).join(' | ');
+  return{dayRows,doneRows,tasks,doneTasks,minutes,title,feedback};
+}
+function renderAdminHabitsPanel(){
+  const dayHtml=[];
+  const DN_MON=['Lun','Mar','Mié','Jue','Vie','Sáb','Dom'];
+  for(let i=0;i<7;i++){
+    const ds=addDaysDS(coachAdminWeekStart,i);
+    const s=coachAdminDaySummary(ds);
+    const pending=s.tasks.length-s.doneTasks.length;
+    dayHtml.push('<div class="admin-report-day" onclick="selectCoachDetailDay(&quot;'+ds+'&quot;)">'
+      +'<div class="admin-report-day-date">'+DN_MON[i]+' '+parseDS(ds).d+'</div>'
+      +'<div class="admin-report-day-main"><div class="admin-report-day-title">'+s.doneTasks.length+'/'+s.tasks.length+' hábitos completados</div>'
+      +'<div class="admin-report-day-sub">'+(s.doneTasks.map(t=>esc(t.title)).join(' · ')||'Sin hábitos completados')+'</div></div>'
+      +'<div class="admin-report-pill '+(pending?'':'good')+'">'+(pending?pending+' pendientes':'Listo')+'</div>'
+      +'</div>');
+  }
+  return '<div class="admin-report-section"><div class="admin-report-head"><strong>Hábitos por día</strong><span>Completados y pendientes</span></div><div class="admin-report-days">'+dayHtml.join('')+'</div></div>';
+}
+function renderAdminWorkoutsPanel(statusStrip){
+  return '<div class="admin-report-section"><div class="admin-report-head"><strong>Entrenamientos</strong><span>'+esc(fmtDS(selectedCoachDetailDs||coachAdminWeekStart))+'</span></div>'
+    +statusStrip
+    +'<div id="coach-session-detail"><div class="empty">Cargando...</div></div>'
+    +'</div>';
+}
+async function renderCoachTodaySummarySection(){
+  const el=document.getElementById('coach-today-sets');
+  if(!el||!selectedCoachClientId)return;
+  const today=mazToday();
+  const rows=(coachAdminSchedule||[]).filter(r=>r.ds===today&&r.status==='done');
+  if(!rows.length){el.innerHTML='<div class="admin-session-empty">Aún no hay entrenamiento completado hoy.</div>';return;}
+  try{
+    const ids=rows.map(r=>r.id);
+    const{data,error}=await sb.from('coaching_session_sets').select('*').in('schedule_id',ids).order('ex_key').order('set_idx');
+    if(error)throw error;
+    const byEx={};
+    (data||[]).forEach(r=>{(byEx[r.ex_key]=byEx[r.ex_key]||[]).push(r);});
+    const html=Object.entries(byEx).map(([exKey,sets])=>{
+      const info=resolveExKeyInfo(exKey);
+      const compact=sets.map(s=>[
+        'S'+(s.set_idx+1),
+        s.weight!=null?fmtWeightValue(s.weight,'kg',false):null,
+        s.actual_reps!=null?String(s.actual_reps)+' reps':(s.reps_target?esc(s.reps_target)+' reps':null)
+      ].filter(Boolean).join(' · ')).join(' / ');
+      return '<div class="admin-report-day" style="grid-template-columns:1fr">'
+        +'<div class="admin-report-day-main"><div class="admin-report-day-title">'+esc(info.name)+'</div>'
+        +'<div class="admin-report-day-sub">'+(compact||'Sin pesos registrados')+'</div></div>'
+        +'</div>';
+    }).join('');
+    el.innerHTML=html||'<div class="admin-session-empty">Sin pesos registrados hoy.</div>';
+  }catch(e){
+    el.innerHTML='<div class="admin-session-empty">No se pudo cargar el resumen de hoy.</div>';
+    console.error('renderCoachTodaySummarySection:',e);
+  }
+}
+function renderCoachAdminReportHtml(statusStrip,weekEnd){
+  const rows=coachAdminSchedule||[];
+  const planned=rows.filter(r=>r.status!=='skipped').length;
+  const done=rows.filter(r=>r.status==='done').length;
+  const minutes=Math.round(rows.filter(r=>r.status==='done').reduce((s,r)=>s+(r.duration_sec||0),0)/60);
+  let habitDone=0,habitTotal=0;
+  for(let i=0;i<7;i++){
+    const ds=addDaysDS(coachAdminWeekStart,i);
+    const tasks=coachAdminRelevantTasks(ds);
+    habitDone+=tasks.filter(t=>isCoachAdminTaskDoneOnDs(t,ds)).length;
+    habitTotal+=tasks.length;
+  }
+  const compliance=(planned+habitTotal)?Math.round(((done+habitDone)/(planned+habitTotal))*100):0;
+  const todaySummary=coachAdminDaySummary(mazToday());
+  const todayDone=todaySummary.doneRows.length;
+  const todayTotal=todaySummary.dayRows.length;
+  const todayTitle=todaySummary.title;
+  const progressTabs='<div class="admin-progress-tabs">'
+    +['habitos','entrenamientos','prs'].map(v=>'<button class="admin-progress-tab '+(coachProgressView===v?'active':'')+'" onclick="setCoachProgressView(&quot;'+v+'&quot;)">'+(v==='habitos'?'Hábitos':v==='entrenamientos'?'Entrenamientos':'PRs')+'</button>').join('')
+    +'</div>';
+  let panelHtml='';
+  if(coachProgressView==='habitos')panelHtml=renderAdminHabitsPanel();
+  else if(coachProgressView==='entrenamientos')panelHtml=renderAdminWorkoutsPanel(statusStrip);
+  else panelHtml='<div class="admin-report-section"><div class="admin-report-head"><strong>PRs y progreso de peso</strong><span>Tendencia</span></div><div id="coach-admin-scores"><div class="empty">Cargando...</div></div></div>';
+  return '<div class="admin-report-shell">'
+    +'<div class="admin-report-head" style="margin-bottom:0"><button class="btn-sm" onclick="coachAdminWeekShift(-7)">‹</button><strong>'+esc(fmtDS(coachAdminWeekStart))+' – '+esc(fmtDS(weekEnd))+'</strong><button class="btn-sm" onclick="coachAdminWeekShift(7)">›</button></div>'
+    +'<div class="admin-today-card">'
+      +'<div class="admin-today-top"><div><div class="admin-today-k">Hoy</div><div class="admin-today-title">'+esc(todayTitle)+'</div><div class="admin-today-sub">'+(todaySummary.feedback?esc(todaySummary.feedback):'Resumen operativo del día actual')+'</div></div><div class="admin-report-pill '+(todayTotal&&todayDone===todayTotal?'good':'')+'">'+todayDone+'/'+todayTotal+' entrenos</div></div>'
+      +'<div class="admin-today-mini"><div><strong>'+todaySummary.doneTasks.length+'/'+todaySummary.tasks.length+'</strong><span>Hábitos</span></div><div><strong>'+todaySummary.minutes+'</strong><span>Min</span></div><div><strong>'+todayDone+'/'+todayTotal+'</strong><span>Entrenos</span></div></div>'
+      +(todaySummary.doneTasks.length?'<div class="admin-session-habit-list">'+todaySummary.doneTasks.map(t=>'<div class="admin-session-habit done"><span>✓</span><strong>'+esc(t.title)+'</strong></div>').join('')+'</div>':'')
+      +'<div id="coach-today-sets"><div class="admin-session-empty">Cargando entrenamiento de hoy...</div></div>'
+    +'</div>'
+    +'<div class="admin-report-hero">'
+      +'<div class="admin-report-stat"><strong>'+done+'/'+planned+'</strong><span>Entrenos</span></div>'
+      +'<div class="admin-report-stat"><strong>'+habitDone+'/'+habitTotal+'</strong><span>Hábitos</span></div>'
+      +'<div class="admin-report-stat"><strong>'+minutes+'</strong><span>Minutos</span></div>'
+      +'<div class="admin-report-stat"><strong>'+compliance+'%</strong><span>Cumplimiento</span></div>'
+    +'</div>'
+    +progressTabs
+    +panelHtml
+  +'</div>';
 }
 async function renderCoachSessionDetailSection(){
   const el=document.getElementById('coach-session-detail');
   if(!el)return;
   const row=coachAdminSchedule.find(r=>r.ds===selectedCoachDetailDs);
-  if(!row){el.innerHTML='<div class="empty">Sin sesión registrada este día.</div>';return;}
   el.innerHTML='<div class="empty">Cargando...</div>';
+  if(!row){coachSessionDetailRows=[];renderCoachSessionDetailAdmin();return;}
   try{
     const{data,error}=await sb.from('coaching_session_sets').select('*').eq('schedule_id',row.id).order('ex_key').order('set_idx');
     if(error)throw error;
@@ -10857,10 +11033,23 @@ async function renderCoachSessionDetailSection(){
 function renderCoachSessionDetailAdmin(){
   const el=document.getElementById('coach-session-detail');
   if(!el)return;
-  if(!coachSessionDetailRows.length){el.innerHTML='<div class="empty">Sin series registradas este día.</div>';return;}
+  const refDs=selectedCoachDetailDs||mazToday();
+  const relevantTasks=coachAdminRelevantTasks(refDs);
+  const doneTasks=relevantTasks.filter(t=>isCoachAdminTaskDoneOnDs(t,refDs));
+  const pendingTasks=relevantTasks.filter(t=>!isCoachAdminTaskDoneOnDs(t,refDs));
+  const habitsHtml='<div class="admin-session-habits">'
+    +'<div class="admin-session-habits-head"><span>Hábitos del día</span><strong>'+doneTasks.length+'/'+relevantTasks.length+'</strong></div>'
+    +(relevantTasks.length
+      ?'<div class="admin-session-habit-list">'
+        +doneTasks.map(t=>'<div class="admin-session-habit done"><span>✓</span><strong>'+esc(t.title)+'</strong></div>').join('')
+        +pendingTasks.map(t=>'<div class="admin-session-habit pending"><span></span><strong>'+esc(t.title)+'</strong></div>').join('')
+        +'</div>'
+      :'<div class="admin-session-empty">Sin hábitos para este día.</div>')
+    +'</div>';
+  if(!coachSessionDetailRows.length){el.innerHTML='<div class="admin-session-summary"><div class="admin-session-empty">Sin series registradas este día.</div>'+habitsHtml+'</div>';return;}
   const byEx={};
   coachSessionDetailRows.forEach(r=>{(byEx[r.ex_key]=byEx[r.ex_key]||[]).push(r);});
-  const scheduleRow=coachAdminSchedule.find(r=>r.ds===selectedCoachDetailDs)||{};
+  const scheduleRow=coachAdminSchedule.find(r=>r.ds===refDs)||{};
   const comment=(scheduleRow.feedback_note||'').trim();
   const commentHtml=comment?'<div class="admin-session-comment">'+esc(comment)+'</div>':'';
   const exercisesHtml=Object.entries(byEx).map(([exKey,sets])=>{
@@ -10879,7 +11068,7 @@ function renderCoachSessionDetailAdmin(){
       +'<div class="admin-session-sets">'+(rows||'<div class="admin-session-empty">Sin datos.</div>')+'</div>'
       +'</div>';
   }).join('');
-  el.innerHTML='<div class="admin-session-summary">'+commentHtml+exercisesHtml+'</div>';
+  el.innerHTML='<div class="admin-session-summary">'+commentHtml+exercisesHtml+habitsHtml+'</div>';
 }
 async function adminUpdateSetSb(setId,field,value){
   const patch={updated_at:new Date().toISOString()};
@@ -10936,7 +11125,12 @@ function renderCoachingDetail(){
   const weekEnd=addDaysDS(coachAdminWeekStart,6);
   const DN_MON=['Lun','Mar','Mié','Jue','Vie','Sáb','Dom'];
   const today=mazToday();
-  let dayRows='',statusStrip='<div class="coach-day-strip" id="coach-detail-week-strip" style="margin-bottom:12px">';
+  if(!selectedCoachDetailDs||selectedCoachDetailDs<coachAdminWeekStart||selectedCoachDetailDs>weekEnd){
+    const sorted=[...coachAdminSchedule].sort((a,b)=>b.ds.localeCompare(a.ds));
+    const candidate=coachAdminSchedule.find(r=>r.ds===today)||sorted[0];
+    selectedCoachDetailDs=(today>=coachAdminWeekStart&&today<=weekEnd)?today:(candidate?candidate.ds:coachAdminWeekStart);
+  }
+  let dayRows='',statusStrip='<div class="coach-day-strip coach-admin-day-strip" style="margin-bottom:12px">';
   for(let i=0;i<7;i++){
     const ds=addDaysDS(coachAdminWeekStart,i);
     const row=coachAdminSchedule.find(r=>r.ds===ds);
@@ -10959,15 +11153,11 @@ function renderCoachingDetail(){
       else if(ds<today)dayCls+=' missed';
       else dayCls+=' scheduled';
     }
-    statusStrip+='<div class="'+dayCls+'" data-ds="'+ds+'" onclick="selectCoachDetailDay(&quot;'+ds+'&quot;)"><span class="coach-day-label">'+DN_MON[i]+'</span><span class="coach-day-num">'+parseDS(ds).d+'</span></div>';
+    const habitDots=coachAdminRelevantTasks(ds).some(t=>isCoachAdminTaskDoneOnDs(t,ds));
+    const dots=habitDots?'<span class="coach-day-dots"><i class="coach-day-dot habit"></i></span>':'';
+    statusStrip+='<div class="'+dayCls+'" data-ds="'+ds+'" onclick="selectCoachDetailDay(&quot;'+ds+'&quot;)"><span class="coach-day-label">'+DN_MON[i]+'</span><span class="coach-day-num">'+parseDS(ds).d+'</span>'+dots+'</div>';
   }
   statusStrip+='</div>';
-
-  if(!selectedCoachDetailDs||!coachAdminSchedule.some(r=>r.ds===selectedCoachDetailDs)){
-    const sorted=[...coachAdminSchedule].sort((a,b)=>b.ds.localeCompare(a.ds));
-    const candidate=coachAdminSchedule.find(r=>r.ds===today)||sorted[0];
-    selectedCoachDetailDs=candidate?candidate.ds:null;
-  }
 
   const todayRow=coachAdminSchedule.find(r=>r.ds===today);
   const liveBanner=(todayRow&&todayRow.status==='in_progress')
@@ -10991,7 +11181,7 @@ function renderCoachingDetail(){
     +'</div>'
   ).join(''):'<div class="empty">No hay pizarrones creados todavía.</div>';
 
-  const tabDef=[['semana','Semana'],['rutinas','Rutinas'],['tareas','Hábitos'],['notas','Notas'],['progreso','Progreso']];
+  const tabDef=[['progreso','Progreso'],['semana','Semana'],['plan','Plan'],['notas','Notas']];
   const navHtml='<div class="coach-hub-nav" style="margin-bottom:14px;border-radius:8px;overflow:hidden;border:1px solid var(--border)">'
     +tabDef.map(([k,label])=>'<button class="coach-hub-tab coach-detail-tab'+(coachDetailActiveTab===k?' active':'')+'" data-tab="'+k+'" onclick="coachDetailTab(&quot;'+k+'&quot;)">'+label+'</button>').join('')
     +'</div>';
@@ -11004,6 +11194,10 @@ function renderCoachingDetail(){
     +'<button onclick="adminToggleCoachingBetaSb(&quot;'+selectedCoachClientId+'&quot;,false)" style="background:none;border:none;color:var(--gray);font-size:11px;text-decoration:underline;cursor:pointer;padding:0;margin-bottom:14px">Desactivar coaching para este socio</button>'
     +navHtml
 
+    +'<div class="coach-detail-panel'+(coachDetailActiveTab==='progreso'?' active':'')+'" data-panel="progreso">'
+    +renderCoachAdminReportHtml(statusStrip,weekEnd)
+    +'</div>'
+
     +'<div class="coach-detail-panel'+(coachDetailActiveTab==='semana'?' active':'')+'" data-panel="semana">'
     +'<div style="background:var(--card);border:1px solid var(--border);border-radius:6px;padding:1rem;margin-bottom:1rem">'
     +'<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">'
@@ -11015,22 +11209,16 @@ function renderCoachingDetail(){
     +dayRows
     +'<button class="btn" style="margin-top:12px" onclick="saveCoachingWeekSb()">Guardar semana</button>'
     +'</div>'
-    +'<div style="background:var(--card);border:1px solid var(--border);border-radius:6px;padding:1rem">'
-    +'<p class="slbl" style="margin-bottom:8px" id="coach-session-detail-label">Detalle de la sesión'+(selectedCoachDetailDs?' · '+fmtDS(selectedCoachDetailDs):'')+'</p>'
-    +'<div id="coach-session-detail"><div class="empty">Cargando...</div></div>'
-    +'</div>'
     +'</div>'
 
-    +'<div class="coach-detail-panel'+(coachDetailActiveTab==='rutinas'?' active':'')+'" data-panel="rutinas">'
-    +'<div style="background:var(--card);border:1px solid var(--border);border-radius:6px;padding:1rem">'
-    +'<p class="slbl" style="margin-bottom:8px">Rutinas asignadas</p>'
+    +'<div class="coach-detail-panel'+(coachDetailActiveTab==='plan'?' active':'')+'" data-panel="plan">'
+    +'<div class="admin-plan-grid">'
+    +'<div class="admin-plan-section">'
+    +'<div class="admin-plan-section-title">Rutinas disponibles</div>'
     +assignedBoardsList
     +'</div>'
-    +'</div>'
-
-    +'<div class="coach-detail-panel'+(coachDetailActiveTab==='tareas'?' active':'')+'" data-panel="tareas">'
-    +'<div style="background:var(--card);border:1px solid var(--border);border-radius:6px;padding:1rem">'
-    +'<p class="slbl" style="margin-bottom:8px" id="coach-task-form-label">'+(editingCoachTaskId?'Editar hábito':'Nuevo hábito')+'</p>'
+    +'<div class="admin-plan-section">'
+    +'<div class="admin-plan-section-title" id="coach-task-form-label">'+(editingCoachTaskId?'Editar hábito':'Hábitos asignados')+'</div>'
     +'<div class="field"><label>Hábito</label><input type="text" id="coach-task-title-in" placeholder="Ej: Tomar agua"></div>'
     +(editingCoachTaskId?'':'<div class="habit-presets">'
       +'<button type="button" class="btn-sm" onclick="fillRecurringTaskPreset(&quot;💧 Tomar agua&quot;)">💧 Tomar agua</button>'
@@ -11053,22 +11241,17 @@ function renderCoachingDetail(){
     +'<div style="margin-top:14px">'+tasksHtml+'</div>'
     +'</div>'
     +'</div>'
+    +'</div>'
 
     +'<div class="coach-detail-panel'+(coachDetailActiveTab==='notas'?' active':'')+'" data-panel="notas">'
     +'<div style="background:var(--card);border:1px solid var(--border);border-radius:6px;padding:1rem">'
     +'<p class="slbl" style="margin-bottom:8px">Notas del cliente</p>'
     +'<div id="coach-admin-notes"><div class="empty">Cargando...</div></div>'
     +'</div>'
-    +'</div>'
-
-    +'<div class="coach-detail-panel'+(coachDetailActiveTab==='progreso'?' active':'')+'" data-panel="progreso">'
-    +'<div style="background:var(--card);border:1px solid var(--border);border-radius:6px;padding:1rem">'
-    +'<p class="slbl" style="margin-bottom:8px">Progreso de peso</p>'
-    +'<div id="coach-admin-scores"><div class="empty">Cargando...</div></div>'
-    +'</div>'
     +'</div>';
 
   toggleCoachTaskDueVisibility();
+  renderCoachTodaySummarySection().catch(console.error);
   renderCoachingAdminScores().catch(console.error);
   renderCoachClientNotesAdmin().catch(console.error);
   renderCoachSessionDetailSection().catch(console.error);
@@ -11128,6 +11311,7 @@ async function saveCoachingWeekSb(){
 }
 function startEditCoachingTaskSb(btn){
   editingCoachTaskId=btn.dataset.tid;
+  coachDetailActiveTab='plan';
   renderCoachingDetail();
   const titleIn=document.getElementById('coach-task-title-in');
   const dueIn=document.getElementById('coach-task-due-in');
@@ -11140,6 +11324,7 @@ function startEditCoachingTaskSb(btn){
 }
 function cancelEditCoachingTaskSb(){
   editingCoachTaskId=null;
+  coachDetailActiveTab='plan';
   renderCoachingDetail();
 }
 function fillRecurringTaskPreset(title){
@@ -11179,6 +11364,7 @@ async function addCoachingTaskSb(){
       const{error}=await sb.from('coaching_tasks').update({title,due_date:due,is_recurring:isRecurring}).eq('id',editingCoachTaskId);
       if(error)throw error;
       editingCoachTaskId=null;
+      coachDetailActiveTab='plan';
       await loadCoachingWeekAdminSb();
       renderCoachingDetail();
       toast('Hábito actualizado','ok');
@@ -11189,6 +11375,7 @@ async function addCoachingTaskSb(){
     titleIn.value='';dueIn.value='';if(recIn)recIn.checked=true;
     toggleCoachTaskDueVisibility();
     sendPush('user:'+selectedCoachClientId,'✅ Nuevo hábito asignado',title);
+    coachDetailActiveTab='plan';
     await loadCoachingWeekAdminSb();
     renderCoachingDetail();
     toast('Hábito asignado','ok');
@@ -11199,6 +11386,7 @@ async function deleteCoachingTaskSb(id){
     const{error}=await sb.from('coaching_tasks').delete().eq('id',id);
     if(error)throw error;
     if(editingCoachTaskId===id)editingCoachTaskId=null;
+    coachDetailActiveTab='plan';
     await loadCoachingWeekAdminSb();
     renderCoachingDetail();
   }catch(e){toast('Error: '+e.message,'err');}
