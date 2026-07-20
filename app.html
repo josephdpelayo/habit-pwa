@@ -6,12 +6,12 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="HABIT">
 <meta name="application-name" content="HABIT">
-<link rel="manifest" href="/manifest.json?v=20260720-08">
-<link rel="apple-touch-icon" sizes="120x120" href="/icons/icon-120.png?v=20260720-08">
-<link rel="apple-touch-icon" sizes="152x152" href="/icons/icon-152.png?v=20260720-08">
-<link rel="apple-touch-icon" sizes="167x167" href="/icons/icon-167.png?v=20260720-08">
-<link rel="apple-touch-icon" sizes="180x180" href="/icons/icon-180.png?v=20260720-08">
-<link rel="icon" type="image/png" sizes="32x32" href="/icons/icon-32.png?v=20260720-08">
+<link rel="manifest" href="/manifest.json?v=20260720-09">
+<link rel="apple-touch-icon" sizes="120x120" href="/icons/icon-120.png?v=20260720-09">
+<link rel="apple-touch-icon" sizes="152x152" href="/icons/icon-152.png?v=20260720-09">
+<link rel="apple-touch-icon" sizes="167x167" href="/icons/icon-167.png?v=20260720-09">
+<link rel="apple-touch-icon" sizes="180x180" href="/icons/icon-180.png?v=20260720-09">
+<link rel="icon" type="image/png" sizes="32x32" href="/icons/icon-32.png?v=20260720-09">
 <title>HABIT</title>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Share+Tech+Mono&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
@@ -2113,7 +2113,7 @@ html,body,.app,input,select,button,textarea{font-family:var(--font-ui);font-opti
 // ── CONFIG & SUPABASE ───────────────────────────────────────
 const SUPABASE_URL='https://pmpjteuqjusbiduevbwq.supabase.co';
 const SUPABASE_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBtcGp0ZXVxanVzYmlkdWV2YndxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc2OTI1NjUsImV4cCI6MjA5MzI2ODU2NX0.XbMzZoo2yqtrD8znLnyo_1zDfrdJAvAPj1lqGOyXnLw';
-const APP_VERSION='20260720-08';
+const APP_VERSION='20260720-09';
 const MUSCLE_GROUPS=['Pecho','Espalda','Piernas','Hombros','Brazos','Core','Cardio','Full Body'];
 const DAILY_QUOTES=[
   {text:'Haz hoy lo que tu version de manana agradeceria.',action:'Elige una accion pequeña y cumplible antes de buscar motivacion.'},
@@ -2369,6 +2369,13 @@ function paymentRealAmount(p){
 }
 function isRealMemberPayment(p){
   return !!(p&&p.user_id&&REAL_MONEY_METHODS.includes(p.payment_method||'stripe')&&paymentRealAmount(p)>0);
+}
+function profilePlanExpired(profile){
+  return !!(profile&&profile.plan_expiry&&new Date(profile.plan_expiry)<new Date());
+}
+function addOnlyValidCredits(profile,creditsToAdd){
+  const base=profilePlanExpired(profile)?0:Number(profile?.credits||0);
+  return Math.min(999,base+(Number(creditsToAdd)||0));
 }
 
 const PLANS={
@@ -9525,9 +9532,9 @@ async function adminTryLogManualPayment(uid,name,plan,amount,method,note){
 
 // ── ADMIN: GAIA ALLIANCE ─────────────────────────────────────
 const GAIA_PKGS=[
-  {id:'gaia1',name:'GAIA · 5 Pilates + 5 HABIT',pilates:5,credits:5,total:890,amount:256},
-  {id:'gaia2',name:'GAIA · 10 Pilates + 8 HABIT',pilates:10,credits:8,total:1600,amount:369},
-  {id:'gaia3',name:'GAIA · 13 Pilates + 8 HABIT',pilates:13,credits:8,total:1900,amount:356},
+  {id:'gaia1',name:'GAIA · 5 Pilates + 5 HABIT',pilates:5,credits:5,days:30,total:890,amount:256},
+  {id:'gaia2',name:'GAIA · 10 Pilates + 8 HABIT',pilates:10,credits:8,days:30,total:1600,amount:369},
+  {id:'gaia3',name:'GAIA · 13 Pilates + 8 HABIT',pilates:13,credits:8,days:30,total:1900,amount:356},
 ];
 
 async function renderGaiaTab(){
@@ -9537,13 +9544,13 @@ async function renderGaiaTab(){
   if(q.length<2){list.innerHTML='<div class="empty" style="color:var(--gray);font-size:13px">Escribe para buscar un socio.</div>';return;}
   list.innerHTML='<div class="empty">Buscando...</div>';
   try{
-    const{data,error}=await sb.from('profiles').select('id,name,phone,email,credits').neq('role','admin').neq('role','reception').or('name.ilike.%'+q+'%,phone.ilike.%'+q+'%,email.ilike.%'+q+'%').order('name').limit(20);
+    const{data,error}=await sb.from('profiles').select('id,name,phone,email,credits,plan_expiry').neq('role','admin').neq('role','reception').or('name.ilike.%'+q+'%,phone.ilike.%'+q+'%,email.ilike.%'+q+'%').order('name').limit(20);
     if(error)throw error;
     if(!data||!data.length){list.innerHTML='<div class="empty">Sin resultados.</div>';return;}
     list.innerHTML=data.map(u=>
       '<div class="brow"><div class="brow-info"><div class="brow-name">'+esc(u.name||'')+'</div>'
-      +'<div class="brow-meta">'+(u.phone||u.email||'')+' · '+u.credits+' visita'+(u.credits===1?'':'s')+'</div></div>'
-      +'<button class="btn-sm bblue" onclick="gaiaOpenModal(\''+u.id+'\',\''+esc(u.name||'')+'\','+u.credits+')">Asignar</button></div>'
+      +'<div class="brow-meta">'+(u.phone||u.email||'')+' · '+(profilePlanExpired(u)?'visitas vencidas':((u.credits||0)+' visita'+(u.credits===1?'':'s')))+'</div></div>'
+      +'<button class="btn-sm bblue" onclick="gaiaOpenModal(\''+u.id+'\',\''+esc(u.name||'')+'\','+(profilePlanExpired(u)?0:(u.credits||0))+')">Asignar</button></div>'
     ).join('');
   }catch(e){
     list.innerHTML='<div class="empty" style="color:var(--red)">Error: '+esc(e.message)+'</div>';
@@ -9588,10 +9595,10 @@ async function gaiaConfirm(uid,name){
   if(!pkg)return;
   showLoading('Registrando paquete GAIA...');
   try{
-    const{data:curr,error:fe}=await sb.from('profiles').select('credits').eq('id',uid).single();
+    const{data:curr,error:fe}=await sb.from('profiles').select('credits,plan_expiry').eq('id',uid).single();
     if(fe)throw fe;
-    const newCredits=(curr.credits||0)+pkg.credits;
-    const{error:ue}=await sb.from('profiles').update({credits:newCredits}).eq('id',uid);
+    const newCredits=addOnlyValidCredits(curr,pkg.credits);
+    const{error:ue}=await sb.from('profiles').update({plan_id:pkg.id,plan_type:'gaia',credits:newCredits,plan_expiry:mazPlanExpiryIso(pkg.days||30),plan_is_courtesy:false}).eq('id',uid);
     if(ue)throw ue;
     const{error:pe}=await sb.from('payments').insert({
       user_id:uid,
@@ -9632,9 +9639,9 @@ async function adminGrantSelectedPlanSb(uid,name){
   showLoading('Activando membresia...');
   try{
     if(plan.type==='gaia'){
-      const{data:curr,error:fe}=await sb.from('profiles').select('credits').eq('id',uid).single();
+      const{data:curr,error:fe}=await sb.from('profiles').select('credits,plan_expiry').eq('id',uid).single();
       if(fe)throw fe;
-      const{error:ue}=await sb.from('profiles').update({credits:(curr.credits||0)+plan.credits}).eq('id',uid);
+      const{error:ue}=await sb.from('profiles').update({plan_id:plan.id,plan_type:'gaia',credits:addOnlyValidCredits(curr,plan.credits),plan_expiry:mazPlanExpiryIso(plan.days||30),plan_is_courtesy:false}).eq('id',uid);
       if(ue)throw ue;
       const{error:pe}=await sb.from('payments').insert({
         user_id:uid,plan_id:plan.id,plan_name:plan.name,plan_type:'gaia',
@@ -9890,7 +9897,7 @@ async function adminAddCreditsSb(uid){
     // Read current credits first
     const{data:prof,error}=await sb.from('profiles').select('credits,name,plan_id,plan_type,plan_expiry').eq('id',uid).single();
     if(error)throw error;
-    const newCredits=Math.min(999,(prof.credits||0)+1);
+    const newCredits=addOnlyValidCredits(prof,1);
     const patch={credits:newCredits};
     const expired=prof.plan_expiry&&new Date(prof.plan_expiry)<new Date();
     if(!prof.plan_id||expired){
@@ -9943,7 +9950,7 @@ async function adminGrantCourtesySb(uid,name){
   try{
     const{data:prof,error}=await sb.from('profiles').select('credits,name,plan_id,plan_type,plan_expiry').eq('id',uid).single();
     if(error)throw error;
-    const newCredits=Math.min(999,(prof.credits||0)+qty);
+    const newCredits=addOnlyValidCredits(prof,qty);
     const patch={credits:newCredits,plan_is_courtesy:true};
     const expired=prof.plan_expiry&&new Date(prof.plan_expiry)<new Date();
     if(!prof.plan_id||expired){
@@ -10690,9 +10697,9 @@ async function adminApplyPlanCorrection(paymentId,uid,name){
   if(btn){btn.disabled=true;btn.textContent='Aplicando...';}
   try{
     if(plan.type==='gaia'){
-      const{data:curr,error:fe}=await sb.from('profiles').select('credits').eq('id',uid).single();
+      const{data:curr,error:fe}=await sb.from('profiles').select('credits,plan_expiry').eq('id',uid).single();
       if(fe)throw fe;
-      const{error:ue}=await sb.from('profiles').update({credits:(curr.credits||0)+plan.credits}).eq('id',uid);
+      const{error:ue}=await sb.from('profiles').update({plan_id:plan.id,plan_type:'gaia',credits:addOnlyValidCredits(curr,plan.credits),plan_expiry:mazPlanExpiryIso(plan.days||30),plan_is_courtesy:false}).eq('id',uid);
       if(ue)throw ue;
     }else{
       const expiry=mazPlanExpiryIso(plan.days);
