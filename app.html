@@ -6,12 +6,12 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="HABIT">
 <meta name="application-name" content="HABIT">
-<link rel="manifest" href="/manifest.json?v=20260720-11">
-<link rel="apple-touch-icon" sizes="120x120" href="/icons/icon-120.png?v=20260720-11">
-<link rel="apple-touch-icon" sizes="152x152" href="/icons/icon-152.png?v=20260720-11">
-<link rel="apple-touch-icon" sizes="167x167" href="/icons/icon-167.png?v=20260720-11">
-<link rel="apple-touch-icon" sizes="180x180" href="/icons/icon-180.png?v=20260720-11">
-<link rel="icon" type="image/png" sizes="32x32" href="/icons/icon-32.png?v=20260720-11">
+<link rel="manifest" href="/manifest.json?v=20260720-13">
+<link rel="apple-touch-icon" sizes="120x120" href="/icons/icon-120.png?v=20260720-13">
+<link rel="apple-touch-icon" sizes="152x152" href="/icons/icon-152.png?v=20260720-13">
+<link rel="apple-touch-icon" sizes="167x167" href="/icons/icon-167.png?v=20260720-13">
+<link rel="apple-touch-icon" sizes="180x180" href="/icons/icon-180.png?v=20260720-13">
+<link rel="icon" type="image/png" sizes="32x32" href="/icons/icon-32.png?v=20260720-13">
 <title>HABIT</title>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Share+Tech+Mono&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
@@ -1007,11 +1007,23 @@ body.reception-mode{background:#050505}
 .exercise-form-two{display:grid;grid-template-columns:1fr 1fr;gap:7px}
 .exercise-form-control{width:100%;background:var(--card);border:1px solid var(--border);border-radius:8px;padding:10px;font-size:13px;color:var(--white);outline:none;box-sizing:border-box}
 .exercise-form-control.small{font-size:12px;padding:9px}
-.exercise-target-row{display:grid;grid-template-columns:.8fr 1.2fr;gap:7px}
+.exercise-target-row{display:grid;grid-template-columns:118px 1fr;gap:7px;margin-bottom:8px}
 .exercise-field-label{font-size:9.5px;font-weight:850;letter-spacing:.1em;text-transform:uppercase;color:var(--gray);margin:2px 0 5px}
 .muscle-secondary-grid{display:flex;flex-wrap:wrap;gap:6px;margin:7px 0 8px}
 .muscle-chip{display:flex;align-items:center;gap:6px;border:1px solid rgba(255,255,255,.09);background:rgba(255,255,255,.04);border-radius:999px;padding:7px 9px;font-size:11px;font-weight:750;color:#aeb4c0}
 .muscle-chip input{width:14px;height:14px;accent-color:var(--blue)}
+.board-ex-compact{border:1px solid rgba(255,255,255,.08);background:rgba(255,255,255,.035);border-radius:12px;margin-bottom:8px;overflow:hidden}
+.board-ex-summary{display:flex;align-items:center;gap:9px;padding:11px;cursor:pointer}
+.board-ex-index{width:24px;height:24px;border-radius:9px;background:rgba(37,99,235,.16);color:#93c5fd;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:900;flex-shrink:0}
+.board-ex-main{flex:1;min-width:0}
+.board-ex-name{font-size:13.5px;font-weight:850;color:var(--white);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.board-ex-meta{font-size:10.5px;color:#9aa1ad;margin-top:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.board-ex-chevron{width:24px;height:24px;border-radius:999px;background:rgba(255,255,255,.055);display:flex;align-items:center;justify-content:center;color:#9aa1ad;font-size:15px;flex-shrink:0}
+.board-ex-detail{padding:0 11px 11px}
+.board-ex-actions{display:flex;align-items:center;gap:5px;flex-shrink:0}
+.board-ex-icon{width:28px;height:28px;border-radius:10px;border:1px solid rgba(255,255,255,.1);background:rgba(255,255,255,.045);color:#cbd5e1;font-size:13px;font-weight:900;display:flex;align-items:center;justify-content:center;cursor:pointer}
+.board-ex-icon:disabled{opacity:.28;cursor:not-allowed}
+.board-ex-badge{display:inline-flex;align-items:center;border-radius:999px;background:rgba(16,185,129,.13);border:1px solid rgba(16,185,129,.25);color:#86efac;font-size:9px;font-weight:900;letter-spacing:.08em;text-transform:uppercase;padding:2px 6px;margin-right:5px}
 .assign-box{background:rgba(37,99,235,.06);border:1px solid rgba(37,99,235,.2);border-radius:4px;padding:10px 12px;margin-top:10px}
 .assign-title{font-size:10px;font-weight:700;color:var(--bl);letter-spacing:.1em;text-transform:uppercase;margin-bottom:8px}
 .assign-row{display:flex;align-items:center;justify-content:space-between;padding:6px 0;border-bottom:1px solid rgba(37,99,235,.1)}
@@ -2160,8 +2172,9 @@ html,body,.app,input,select,button,textarea{font-family:var(--font-ui);font-opti
 // ── CONFIG & SUPABASE ───────────────────────────────────────
 const SUPABASE_URL='https://pmpjteuqjusbiduevbwq.supabase.co';
 const SUPABASE_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBtcGp0ZXVxanVzYmlkdWV2YndxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc2OTI1NjUsImV4cCI6MjA5MzI2ODU2NX0.XbMzZoo2yqtrD8znLnyo_1zDfrdJAvAPj1lqGOyXnLw';
-const APP_VERSION='20260720-11';
-const MUSCLE_GROUPS=['Pecho','Espalda','Piernas','Hombros','Brazos','Core','Cardio','Full Body'];
+const APP_VERSION='20260720-13';
+const MUSCLE_GROUPS=['Pecho','Espalda','Piernas','Hombros','Bíceps','Tríceps','Core','Cardio','Full Body'];
+const EXERCISE_TYPES=['Fuerza','Calistenia','Isométrico','Cardio','Movilidad','Potencia','Técnica','Accesorio'];
 const DAILY_QUOTES=[
   {text:'Haz hoy lo que tu version de manana agradeceria.',action:'Elige una accion pequeña y cumplible antes de buscar motivacion.'},
   {text:'La disciplina no grita; aparece cuando nadie esta mirando.',action:'Entrena el estandar, no el animo del momento.'},
@@ -2213,6 +2226,15 @@ function muscleSecondaryPickerHtml(name,selected){
     +MUSCLE_GROUPS.map(g=>'<label class="muscle-chip"><input type="checkbox" name="'+name+'" value="'+esc(g)+'" '+(picked.has(g)?'checked':'')+'><span>'+esc(g)+'</span></label>').join('')
     +'</div></div>';
 }
+function exerciseTypeSelectHtml(id,selected){
+  return '<div><div class="exercise-field-label">Tipo de ejercicio</div><select class="exercise-form-control small" id="'+id+'">'
+    +'<option value="">Seleccionar</option>'
+    +EXERCISE_TYPES.map(t=>'<option value="'+t+'" '+(selected===t?'selected':'')+'>'+t+'</option>').join('')
+    +'</select></div>';
+}
+function exerciseSlug(name){
+  return String(name||'').trim().toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[^a-z0-9]+/g,'-').replace(/^-+|-+$/g,'');
+}
 function inferTargetType(ex){
   if(ex&&ex.repsType)return ex.repsType;
   const v=String((ex&&ex.reps)||'').trim().toLowerCase();
@@ -2242,6 +2264,13 @@ function exerciseMuscleLabel(ex){
   const groups=[ex?.muscleGroup,...(Array.isArray(ex?.secondaryMuscleGroups)?ex.secondaryMuscleGroups:[])].filter(Boolean);
   return groups.length?groups.join(' + '):'';
 }
+function exerciseTypeLabel(ex){
+  return ex?.exerciseType||ex?.type||'';
+}
+function exerciseGroupLabel(ex){
+  const group=String(ex?.supersetGroup||ex?.block||ex?.sequenceGroup||'').trim();
+  return group?'Biserie '+group:'';
+}
 function getSelectedSecondaryMuscles(name,primary){
   return Array.from(document.querySelectorAll('input[name="'+name+'"]:checked')).map(i=>i.value).filter(v=>v&&v!==primary);
 }
@@ -2263,6 +2292,16 @@ function validateExerciseTiming(value,label,required){
   if(!value&&!required)return'';
   if(!normalized)throw new Error(label+' debe ser segundos o mm:ss. Ej: 90, 90s o 1:30');
   return normalized;
+}
+function boardExerciseKey(bid,ex,idx){
+  return bid+'::'+(ex?.id||idx);
+}
+function toggleBoardExerciseDetails(bid,idx){
+  const b=boards.find(x=>x.id===bid);
+  const key=boardExerciseKey(bid,b?.exercises?.[idx],idx);
+  if(expandedBoardExercises.has(key))expandedBoardExercises.delete(key);
+  else expandedBoardExercises.add(key);
+  renderBoardsAdmin();
 }
 const PUBLIC_APP_URL='https://habittraininghub.app/app.html';
 const PUBLIC_API_ORIGIN='https://www.habittraininghub.app';
@@ -3895,7 +3934,7 @@ function sv(v){
 function admTab(t){
   // Reset expanded states when leaving sections
   if(t!=='users'){expandedUsers=new Set();}
-  if(t!=='boards'){expandedBoards=new Set();editingBoards=new Set();addingExBoards=new Set();assigningBoards=new Set();}
+  if(t!=='boards'){expandedBoards=new Set();editingBoards=new Set();addingExBoards=new Set();assigningBoards=new Set();expandedBoardExercises=new Set();}
   document.querySelectorAll('[data-admin-tab]').forEach(b=>b.classList.toggle('active',b.dataset.adminTab===t));
   document.querySelectorAll('.adm-section').forEach(el=>el.classList.remove('active'));
   const el=document.getElementById('a-'+t);if(el)el.classList.add('active');
@@ -5567,6 +5606,7 @@ let expandedBoards=new Set();
 let editingBoards=new Set();
 let addingExBoards=new Set();
 let assigningBoards=new Set();
+let expandedBoardExercises=new Set();
 function toggleBoardEx(bid){if(expandedBoards.has(bid))expandedBoards.delete(bid);else expandedBoards.add(bid);renderBoardsAdmin();}
 let _boardOriginalNames={};
 function toggleBoardEdit(bid){
@@ -8478,30 +8518,30 @@ async function renderBoardsAdmin(){
     // ── Exercise list ──────────────────────────────
     const exHtml=board.exercises.map((ex,i)=>{
       const vids=getExerciseVideos(ex);
+      const exKey=boardExerciseKey(board.id,ex,i);
+      const isOpen=expandedBoardExercises.has(exKey);
+      const groupLabel=exerciseGroupLabel(ex);
+      const meta=[groupLabel,exerciseTypeLabel(ex),ex.sets?ex.sets+' series':null,exerciseTargetLabel(ex),ex.rest?'descanso '+ex.rest:null,exerciseMuscleLabel(ex)].filter(Boolean).join(' · ');
+      const summary='<div class="board-ex-summary" onclick="toggleBoardExerciseDetails(&quot;'+board.id+'&quot;,'+i+')">'
+        +'<div class="board-ex-index">'+(i+1)+'</div><div class="board-ex-main"><div class="board-ex-name">'+(groupLabel?'<span class="board-ex-badge">'+esc(groupLabel)+'</span>':'')+esc(ex.name||'Sin nombre')+'</div><div class="board-ex-meta">'+esc(meta||'Toca para ver detalles')+'</div></div>'
+        +(isEditing?'<div class="board-ex-actions"><button class="board-ex-icon" '+(i===0?'disabled':'')+' data-bid="'+board.id+'" data-idx="'+i+'" onclick="event.stopPropagation();moveExerciseSb(this.dataset.bid,parseInt(this.dataset.idx),-1)">↑</button><button class="board-ex-icon" '+(i===board.exercises.length-1?'disabled':'')+' data-bid="'+board.id+'" data-idx="'+i+'" onclick="event.stopPropagation();moveExerciseSb(this.dataset.bid,parseInt(this.dataset.idx),1)">↓</button></div>':'')
+        +'<div class="board-ex-chevron">'+(isOpen?'⌃':'⌄')+'</div></div>';
       if(!isEditing){
-        return '<div style="padding:10px 0;border-bottom:1px solid var(--border);display:flex;align-items:flex-start;gap:10px">'
-        +'<span style="font-size:12px;color:var(--bl);font-weight:700;min-width:20px;margin-top:1px">'+(i+1)+'.</span>'
-        +'<div style="flex:1;min-width:0">'
-        +'<div style="font-size:14px;font-weight:700;color:var(--white)">'+esc(ex.name||'Sin nombre')+'</div>'
-        +(ex.sets?'<div style="font-size:12px;color:var(--gray);margin-top:3px">'+esc(ex.sets)+' series'+(exerciseTargetLabel(ex)?' · '+esc(exerciseTargetLabel(ex)):'')+(ex.rest?' · descanso '+esc(ex.rest):'')+(exerciseMuscleLabel(ex)?' · '+esc(exerciseMuscleLabel(ex)):'')+'</div>':'')
-        +(ex.note||ex.notes||ex.description?'<div style="font-size:11px;color:var(--gray);margin-top:2px;opacity:.75;font-style:italic">'+esc(ex.note||ex.notes||ex.description)+'</div>':'')
-        +(vids.length?'<div style="font-size:11px;color:var(--bl);margin-top:3px">▶ '+vids.length+' video'+(vids.length>1?'s':'')+'</div>':'')
-        +'</div></div>';
+        return '<div class="board-ex-compact">'+summary
+        +(isOpen?'<div class="board-ex-detail">'
+          +(meta?'<div style="font-size:12px;color:var(--gray);margin-bottom:6px">'+esc(meta)+'</div>':'')
+          +(ex.note||ex.notes||ex.description?'<div style="font-size:11px;color:var(--gray);opacity:.8;font-style:italic;margin-bottom:6px">'+esc(ex.note||ex.notes||ex.description)+'</div>':'')
+          +(vids.length?'<div style="font-size:11px;color:var(--bl)">▶ '+vids.length+' video'+(vids.length>1?'s':'')+'</div>':'')
+          +'</div>':'')+'</div>';
       }
-      return '<div style="background:var(--card2);border:1px solid var(--border);border-radius:8px;padding:12px;margin-bottom:8px">'
-      +'<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">'
-      +'<span style="font-size:12px;font-weight:700;color:var(--bl)">Ejercicio '+(i+1)+'</span>'
-      +'<button class="btn-sm bred" style="padding:2px 8px" data-bid="'+board.id+'" data-idx="'+i+'" onclick="removeExerciseSb(this.dataset.bid,parseInt(this.dataset.idx))">Eliminar</button>'
-      +'</div>'
+      return '<div class="board-ex-compact">'+summary+(isOpen?'<div class="board-ex-detail">'
+      +'<div style="display:flex;justify-content:flex-end;margin-bottom:8px"><button class="btn-sm bred" style="padding:4px 10px" data-bid="'+board.id+'" data-idx="'+i+'" onclick="event.stopPropagation();removeExerciseSb(this.dataset.bid,parseInt(this.dataset.idx))">Eliminar</button></div>'
       +'<input type="text" placeholder="Nombre *" id="exedit-name-'+board.id+'-'+i+'" value="'+esc(ex.name||'')+'" style="width:100%;background:var(--card);border:1px solid var(--border);border-radius:4px;padding:9px;font-size:13px;font-weight:700;color:var(--white);outline:none;margin-bottom:6px;box-sizing:border-box">'
-      +'<div class="exercise-form-two">'
-      +'<input class="exercise-form-control small" type="number" min="1" step="1" placeholder="Series" id="exedit-sets-'+board.id+'-'+i+'" value="'+esc(ex.sets||'')+'">'
-      +'<div class="exercise-target-row"><select class="exercise-form-control small" id="exedit-rt-'+board.id+'-'+i+'" onchange="syncExerciseTargetInput(&quot;'+board.id+'-'+i+'&quot;)"><option value="reps" '+(inferTargetType(ex)==='reps'?'selected':'')+'>Reps</option><option value="time" '+(inferTargetType(ex)==='time'?'selected':'')+'>Tiempo</option></select><input class="exercise-form-control small" type="text" inputmode="numeric" data-target-type="'+inferTargetType(ex)+'" oninput="cleanExerciseInput(this)" placeholder="'+(inferTargetType(ex)==='time'?'0:30 o 30s':'Repeticiones')+'" id="exedit-reps-'+board.id+'-'+i+'" value="'+esc(ex.reps||'')+'"></div>'
-      +'</div>'
-      +'<div class="exercise-form-two">'
-      +'<input class="exercise-form-control small" type="text" inputmode="numeric" oninput="this.value=this.value.replace(/[^\\d:ms\\s]/gi,\'\')" placeholder="Descanso series: 90 o 1:30" id="exedit-rest-'+board.id+'-'+i+'" value="'+esc(ex.rest||'')+'">'
-      +'<input class="exercise-form-control small" type="text" inputmode="numeric" oninput="this.value=this.value.replace(/[^\\d:ms\\s]/gi,\'\')" placeholder="Descanso sig.: 90 o 1:30" id="exedit-restnext-'+board.id+'-'+i+'" value="'+esc(ex.restNext||'')+'">'
-      +'</div>'
+      +exerciseTypeSelectHtml('exedit-type-'+board.id+'-'+i,exerciseTypeLabel(ex))
+      +'<div class="exercise-field-label">Series</div><input class="exercise-form-control small" type="number" min="1" step="1" inputmode="numeric" placeholder="Solo números" id="exedit-sets-'+board.id+'-'+i+'" value="'+esc(ex.sets||'')+'">'
+      +'<div class="exercise-field-label">Objetivo</div><div class="exercise-target-row"><select class="exercise-form-control small" id="exedit-rt-'+board.id+'-'+i+'" onchange="syncExerciseTargetInput(&quot;'+board.id+'-'+i+'&quot;)"><option value="reps" '+(inferTargetType(ex)==='reps'?'selected':'')+'>Reps</option><option value="time" '+(inferTargetType(ex)==='time'?'selected':'')+'>Tiempo</option></select><input class="exercise-form-control small" type="text" inputmode="numeric" data-target-type="'+inferTargetType(ex)+'" oninput="cleanExerciseInput(this)" placeholder="'+(inferTargetType(ex)==='time'?'0:30 o 30s':'Repeticiones')+'" id="exedit-reps-'+board.id+'-'+i+'" value="'+esc(ex.reps||'')+'"></div>'
+      +'<div class="exercise-field-label">Descanso entre series</div><input class="exercise-form-control small" type="text" inputmode="numeric" oninput="this.value=this.value.replace(/[^\\d:ms\\s]/gi,\'\')" placeholder="Solo segundos o mm:ss. Ej: 90 o 1:30" id="exedit-rest-'+board.id+'-'+i+'" value="'+esc(ex.rest||'')+'">'
+      +'<div class="exercise-field-label">Biserie / bloque opcional</div><input class="exercise-form-control small" type="text" placeholder="Ej: A, B o Biserie 1" id="exedit-group-'+board.id+'-'+i+'" value="'+esc(ex.supersetGroup||ex.block||ex.sequenceGroup||'')+'">'
       +musclePrimarySelectHtml('exedit-mg-'+board.id+'-'+i,ex.muscleGroup||'')
       +muscleSecondaryPickerHtml('exedit-secondary-'+board.id+'-'+i,ex.secondaryMuscleGroups||[])
       +'<textarea placeholder="Indicaciones (opcional)" id="exedit-desc-'+board.id+'-'+i+'" style="width:100%;background:var(--card);border:1px solid var(--border);border-radius:4px;padding:8px;font-size:12px;color:var(--white);outline:none;resize:none;min-height:44px;margin-bottom:6px;box-sizing:border-box">'+esc(ex.note||ex.notes||ex.description||'')+'</textarea>'
@@ -8510,7 +8550,7 @@ async function renderBoardsAdmin(){
       +'<input type="url" placeholder="Video 2 URL (opcional)" id="exedit-video-'+board.id+'-'+i+'-1" value="'+esc((getExerciseVideos(ex)[1]||{}).url||'')+'" style="width:100%;background:var(--card);border:1px solid var(--border);border-radius:4px;padding:8px;font-size:12px;color:var(--white);outline:none;margin-bottom:4px;box-sizing:border-box">'
       +'<input type="text" placeholder="Nombre video 2" id="exedit-title-'+board.id+'-'+i+'-1" value="'+esc((getExerciseVideos(ex)[1]||{}).title||'')+'" style="width:100%;background:var(--card);border:1px solid var(--border);border-radius:4px;padding:8px;font-size:12px;color:var(--white);outline:none;margin-bottom:6px;box-sizing:border-box">'
       +'<button class="btn-sm bblue" style="width:100%" data-bid="'+board.id+'" data-idx="'+i+'" onclick="updateExerciseSb(this.dataset.bid,parseInt(this.dataset.idx))">Guardar cambios</button>'
-      +'</div>';
+      +'</div>':'')+'</div>';
     }).join('');
 
     // ── Add exercise form ──────────────────────────
@@ -8518,14 +8558,11 @@ async function renderBoardsAdmin(){
       '<div style="background:var(--card2);border:1px solid var(--blue);border-radius:8px;padding:14px;margin-bottom:10px">'
       +'<div style="font-size:11px;font-weight:700;color:var(--bl);margin-bottom:10px;letter-spacing:.06em">NUEVO EJERCICIO</div>'
       +'<input type="text" placeholder="Nombre del ejercicio *" id="exn-'+board.id+'" style="width:100%;background:var(--card);border:1px solid var(--border);border-radius:4px;padding:9px;font-size:13px;color:var(--white);outline:none;margin-bottom:6px;box-sizing:border-box">'
-      +'<div class="exercise-form-two">'
-      +'<input class="exercise-form-control small" type="number" min="1" step="1" placeholder="Series" id="exs-'+board.id+'">'
-      +'<div class="exercise-target-row"><select class="exercise-form-control small" id="exrt-'+board.id+'" onchange="syncExerciseTargetInput(&quot;'+board.id+'&quot;)"><option value="reps">Reps</option><option value="time">Tiempo</option></select><input class="exercise-form-control small" type="text" inputmode="numeric" data-target-type="reps" oninput="cleanExerciseInput(this)" placeholder="Repeticiones" id="exr-'+board.id+'"></div>'
-      +'</div>'
-      +'<div class="exercise-form-two">'
-      +'<input class="exercise-form-control small" type="text" inputmode="numeric" oninput="this.value=this.value.replace(/[^\\d:ms\\s]/gi,\'\')" placeholder="Descanso series: 90 o 1:30" id="exrest-'+board.id+'">'
-      +'<input class="exercise-form-control small" type="text" inputmode="numeric" oninput="this.value=this.value.replace(/[^\\d:ms\\s]/gi,\'\')" placeholder="Descanso sig.: 90 o 1:30" id="exrestnext-'+board.id+'">'
-      +'</div>'
+      +exerciseTypeSelectHtml('extype-'+board.id,'')
+      +'<div class="exercise-field-label">Series</div><input class="exercise-form-control small" type="number" min="1" step="1" inputmode="numeric" placeholder="Solo números" id="exs-'+board.id+'">'
+      +'<div class="exercise-field-label">Objetivo</div><div class="exercise-target-row"><select class="exercise-form-control small" id="exrt-'+board.id+'" onchange="syncExerciseTargetInput(&quot;'+board.id+'&quot;)"><option value="reps">Reps</option><option value="time">Tiempo</option></select><input class="exercise-form-control small" type="text" inputmode="numeric" data-target-type="reps" oninput="cleanExerciseInput(this)" placeholder="Repeticiones" id="exr-'+board.id+'"></div>'
+      +'<div class="exercise-field-label">Descanso entre series</div><input class="exercise-form-control small" type="text" inputmode="numeric" oninput="this.value=this.value.replace(/[^\\d:ms\\s]/gi,\'\')" placeholder="Solo segundos o mm:ss. Ej: 90 o 1:30" id="exrest-'+board.id+'">'
+      +'<div class="exercise-field-label">Biserie / bloque opcional</div><input class="exercise-form-control small" type="text" placeholder="Ej: A, B o Biserie 1" id="exgroup-'+board.id+'">'
       +musclePrimarySelectHtml('exmg-'+board.id,'')
       +muscleSecondaryPickerHtml('exsecondary-'+board.id,[])
       +'<textarea placeholder="Indicaciones (opcional)" id="exd-'+board.id+'" style="width:100%;background:var(--card);border:1px solid var(--border);border-radius:4px;padding:8px;font-size:12px;color:var(--white);outline:none;resize:none;min-height:44px;margin-bottom:6px;box-sizing:border-box"></textarea>'
@@ -8670,10 +8707,12 @@ async function addExerciseSb(bid){
   const name=document.getElementById('exn-'+bid).value.trim();
   if(!name){toast('Escribe el nombre del ejercicio','err');return;}
   const sets=document.getElementById('exs-'+bid).value.trim();
+  const exerciseType=(document.getElementById('extype-'+bid)?.value||'').trim();
   const repsType=(document.getElementById('exrt-'+bid)?.value||'reps');
   let reps=document.getElementById('exr-'+bid).value.trim();
   let rest=document.getElementById('exrest-'+bid).value.trim();
-  let restNext=(document.getElementById('exrestnext-'+bid)?.value||'').trim();
+  let restNext='';
+  const supersetGroup=(document.getElementById('exgroup-'+bid)?.value||'').trim();
   const muscleGroup=(document.getElementById('exmg-'+bid)?.value||'').trim();
   const secondaryMuscleGroups=getSelectedSecondaryMuscles('exsecondary-'+bid,muscleGroup);
   const note=document.getElementById('exd-'+bid).value.trim();
@@ -8691,20 +8730,22 @@ async function addExerciseSb(bid){
       reps=validateExerciseTiming(reps,'Tiempo del ejercicio',true);
     }
     rest=validateExerciseTiming(rest,'Descanso entre series',false);
-    restNext=validateExerciseTiming(restNext,'Descanso antes del siguiente ejercicio',false);
+    restNext=rest;
   }catch(e){toast(e.message,'err');return;}
   const b=boards.find(x=>x.id===bid);
   if(!b)return;
   const videos=[];
   if(video)videos.push({url:video,title:videoTitle});
   if(video2)videos.push({url:video2,title:videoTitle2});
-  b.exercises.push({id:crypto.randomUUID(),name,sets,reps,repsType,rest,restNext,muscleGroup,secondaryMuscleGroups,note,description:note,video:video||'',videoTitle:videoTitle||'',videos});
+  const canonicalName=name.trim();
+  b.exercises.push({id:crypto.randomUUID(),name:canonicalName,canonicalName,exerciseKey:exerciseSlug(canonicalName),exerciseType,sets,reps,repsType,rest,restNext,supersetGroup,block:supersetGroup,isSuperset:!!supersetGroup,muscleGroup,secondaryMuscleGroups,muscles:{primary:muscleGroup||null,secondary:secondaryMuscleGroups},note,description:note,video:video||'',videoTitle:videoTitle||'',videos});
   await sb.from('boards').update({exercises:b.exercises}).eq('id',bid);
   document.getElementById('exn-'+bid).value='';
   document.getElementById('exs-'+bid).value='';
   document.getElementById('exr-'+bid).value='';
   document.getElementById('exrest-'+bid).value='';
-  const exrestnext=document.getElementById('exrestnext-'+bid);if(exrestnext)exrestnext.value='';
+  const exgroup=document.getElementById('exgroup-'+bid);if(exgroup)exgroup.value='';
+  const extype=document.getElementById('extype-'+bid);if(extype)extype.value='';
   const exmg=document.getElementById('exmg-'+bid);if(exmg)exmg.value='';
   document.querySelectorAll('input[name="exsecondary-'+bid+'"]').forEach(i=>i.checked=false);
   document.getElementById('exd-'+bid).value='';
@@ -8721,10 +8762,12 @@ async function updateExerciseSb(bid,idx){
   if(!b||!b.exercises||!b.exercises[idx])return;
   const name=(document.getElementById('exedit-name-'+bid+'-'+idx)?.value||'').trim();
   const sets=(document.getElementById('exedit-sets-'+bid+'-'+idx)?.value||'').trim();
+  const exerciseType=(document.getElementById('exedit-type-'+bid+'-'+idx)?.value||'').trim();
   const repsType=(document.getElementById('exedit-rt-'+bid+'-'+idx)?.value||'reps');
   let reps=(document.getElementById('exedit-reps-'+bid+'-'+idx)?.value||'').trim();
   let rest=(document.getElementById('exedit-rest-'+bid+'-'+idx)?.value||'').trim();
-  let restNext=(document.getElementById('exedit-restnext-'+bid+'-'+idx)?.value||'').trim();
+  let restNext='';
+  const supersetGroup=(document.getElementById('exedit-group-'+bid+'-'+idx)?.value||'').trim();
   const muscleGroup=(document.getElementById('exedit-mg-'+bid+'-'+idx)?.value||'').trim();
   const secondaryMuscleGroups=getSelectedSecondaryMuscles('exedit-secondary-'+bid+'-'+idx,muscleGroup);
   const desc=(document.getElementById('exedit-desc-'+bid+'-'+idx)?.value||'').trim();
@@ -8743,12 +8786,13 @@ async function updateExerciseSb(bid,idx){
       reps=validateExerciseTiming(reps,'Tiempo del ejercicio',true);
     }
     rest=validateExerciseTiming(rest,'Descanso entre series',false);
-    restNext=validateExerciseTiming(restNext,'Descanso antes del siguiente ejercicio',false);
+    restNext=rest;
   }catch(e){toast(e.message,'err');return;}
   const videos=[];
   if(video)videos.push({url:video,title:videoTitle});
   if(video2)videos.push({url:video2,title:videoTitle2});
-  b.exercises[idx]={...b.exercises[idx],name,sets,reps,repsType,rest,restNext,muscleGroup,secondaryMuscleGroups,note:desc,description:desc,video,videoTitle,videos};
+  const canonicalName=name.trim();
+  b.exercises[idx]={...b.exercises[idx],name:canonicalName,canonicalName,exerciseKey:b.exercises[idx].exerciseKey||exerciseSlug(canonicalName),exerciseType,sets,reps,repsType,rest,restNext,supersetGroup,block:supersetGroup,isSuperset:!!supersetGroup,muscleGroup,secondaryMuscleGroups,muscles:{primary:muscleGroup||null,secondary:secondaryMuscleGroups},note:desc,description:desc,video,videoTitle,videos};
   try{
     const{error}=await sb.from('boards').update({exercises:b.exercises}).eq('id',bid);
     if(error)throw error;
@@ -8761,6 +8805,28 @@ async function updateExerciseSb(bid,idx){
 
 async function updateExerciseMediaSb(bid,idx){
   return updateExerciseSb(bid,idx);
+}
+
+async function moveExerciseSb(bid,idx,dir){
+  const b=boards.find(x=>x.id===bid);
+  if(!b||!Array.isArray(b.exercises))return;
+  const next=idx+dir;
+  if(next<0||next>=b.exercises.length)return;
+  const moving=b.exercises[idx];
+  const movingKey=boardExerciseKey(bid,moving,idx);
+  const wasOpen=expandedBoardExercises.has(movingKey);
+  [b.exercises[idx],b.exercises[next]]=[b.exercises[next],b.exercises[idx]];
+  try{
+    const{error}=await sb.from('boards').update({exercises:b.exercises}).eq('id',bid);
+    if(error)throw error;
+    expandedBoardExercises.delete(movingKey);
+    if(wasOpen)expandedBoardExercises.add(boardExerciseKey(bid,moving,next));
+    toast('Orden actualizado','ok');
+    renderBoardsAdmin();
+  }catch(e){
+    [b.exercises[idx],b.exercises[next]]=[b.exercises[next],b.exercises[idx]];
+    toast('Error al ordenar: '+(e.message||e),'err');
+  }
 }
 
 async function removeExerciseSb(bid,idx){
