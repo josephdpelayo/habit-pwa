@@ -6,12 +6,12 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="HABIT">
 <meta name="application-name" content="HABIT">
-<link rel="manifest" href="/manifest.json?v=20260720-13">
-<link rel="apple-touch-icon" sizes="120x120" href="/icons/icon-120.png?v=20260720-13">
-<link rel="apple-touch-icon" sizes="152x152" href="/icons/icon-152.png?v=20260720-13">
-<link rel="apple-touch-icon" sizes="167x167" href="/icons/icon-167.png?v=20260720-13">
-<link rel="apple-touch-icon" sizes="180x180" href="/icons/icon-180.png?v=20260720-13">
-<link rel="icon" type="image/png" sizes="32x32" href="/icons/icon-32.png?v=20260720-13">
+<link rel="manifest" href="/manifest.json?v=20260720-15">
+<link rel="apple-touch-icon" sizes="120x120" href="/icons/icon-120.png?v=20260720-15">
+<link rel="apple-touch-icon" sizes="152x152" href="/icons/icon-152.png?v=20260720-15">
+<link rel="apple-touch-icon" sizes="167x167" href="/icons/icon-167.png?v=20260720-15">
+<link rel="apple-touch-icon" sizes="180x180" href="/icons/icon-180.png?v=20260720-15">
+<link rel="icon" type="image/png" sizes="32x32" href="/icons/icon-32.png?v=20260720-15">
 <title>HABIT</title>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Share+Tech+Mono&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
@@ -444,11 +444,14 @@ input,select,button,textarea{font-family:'Inter',sans-serif}
 .set-check.done{background:var(--green);border-color:var(--green);color:#03120d}
 .set-del-btn{width:18px;height:18px;margin-left:4px;border-radius:5px;border:none;background:transparent;color:var(--gray);font-size:10px;line-height:1;cursor:pointer;justify-self:center;display:flex;align-items:center;justify-content:center;opacity:.6}
 .set-del-btn:active{background:rgba(239,68,68,.15);color:#fca5a5;opacity:1}
+.set-row.next{border-radius:10px;background:rgba(59,130,246,.12);box-shadow:0 0 0 1px rgba(59,130,246,.25);padding:5px 4px;margin-left:-4px;margin-right:-4px}
 .unit-toggle-btn{justify-self:center;background:rgba(255,255,255,.06);border:1px solid var(--border);border-radius:999px;color:var(--gray);font-size:9.5px;font-weight:800;letter-spacing:.05em;padding:4px 11px;cursor:pointer}
 .unit-toggle-btn:active{background:rgba(255,255,255,.13);color:var(--white)}
 .set-tracker-actions{display:flex;gap:8px;margin-top:6px}
 .set-tracker-actions .btn-sm{flex:1;text-align:center}
 .set-tracker-actions .btn-sm.compact{flex:0 0 auto;padding:8px 12px;font-size:11px}
+.superset-flow-note{margin-bottom:10px;border:1px solid rgba(16,185,129,.2);background:rgba(16,185,129,.08);color:#9af7c4;border-radius:12px;padding:9px 10px;font-size:11px;font-weight:800;line-height:1.35}
+.ex-superset-mini{display:inline-flex;align-items:center;border-radius:999px;background:rgba(16,185,129,.13);border:1px solid rgba(16,185,129,.24);color:#8bffbf;font-size:9px;font-weight:900;letter-spacing:.08em;text-transform:uppercase;padding:2px 6px;margin-right:6px;vertical-align:middle}
 #v-coaching .board-card,#a-coaching-detail .board-card{border-radius:16px;border-color:rgba(255,255,255,.08);background:linear-gradient(180deg,rgba(255,255,255,.055),rgba(255,255,255,.032));box-shadow:0 14px 36px rgba(0,0,0,.22)}
 #v-coaching .board-hdr,#a-coaching-detail .board-hdr{padding:14px 15px;background:rgba(255,255,255,.035);border-bottom:1px solid rgba(255,255,255,.06)}
 #v-coaching .board-title,#a-coaching-detail .board-title{font-size:15px;letter-spacing:0;text-transform:none;line-height:1.2}
@@ -2172,9 +2175,35 @@ html,body,.app,input,select,button,textarea{font-family:var(--font-ui);font-opti
 // ── CONFIG & SUPABASE ───────────────────────────────────────
 const SUPABASE_URL='https://pmpjteuqjusbiduevbwq.supabase.co';
 const SUPABASE_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBtcGp0ZXVxanVzYmlkdWV2YndxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc2OTI1NjUsImV4cCI6MjA5MzI2ODU2NX0.XbMzZoo2yqtrD8znLnyo_1zDfrdJAvAPj1lqGOyXnLw';
-const APP_VERSION='20260720-13';
-const MUSCLE_GROUPS=['Pecho','Espalda','Piernas','Hombros','Bíceps','Tríceps','Core','Cardio','Full Body'];
+const APP_VERSION='20260720-15';
+const MUSCLE_GROUPS=['Pecho','Espalda','Piernas','Glúteos','Hombros','Bíceps','Tríceps','Antebrazo','Core','Cardio','Full Body'];
 const EXERCISE_TYPES=['Fuerza','Calistenia','Isométrico','Cardio','Movilidad','Potencia','Técnica','Accesorio'];
+const EXERCISE_CATALOG_FALLBACK=[
+  {name:'Bench press barra',slug:'bench-press-barra',category:'Fuerza',primary_muscle:'Pecho',secondary_muscles:['Tríceps','Hombros'],equipment:['Barra'],movement_pattern:'Empuje horizontal',default_tracking:'reps',difficulty:'basico',aliases:['press banca']},
+  {name:'Bench press mancuernas',slug:'bench-press-mancuernas',category:'Fuerza',primary_muscle:'Pecho',secondary_muscles:['Tríceps','Hombros'],equipment:['Mancuernas'],movement_pattern:'Empuje horizontal',default_tracking:'reps',difficulty:'basico',aliases:['press pecho mancuernas']},
+  {name:'Cross over polea alta',slug:'cross-over-polea-alta',category:'Fuerza',primary_muscle:'Pecho',secondary_muscles:['Hombros'],equipment:['Polea'],movement_pattern:'Aducción',default_tracking:'reps',difficulty:'basico',aliases:['cruce polea alta']},
+  {name:'Dominadas pronas',slug:'dominadas-pronas',category:'Calistenia',primary_muscle:'Espalda',secondary_muscles:['Bíceps','Core'],equipment:['Peso corporal','Barra fija'],movement_pattern:'Jalón vertical',default_tracking:'reps',difficulty:'intermedio',aliases:['pull up']},
+  {name:'Jalón al pecho',slug:'jalon-al-pecho',category:'Fuerza',primary_muscle:'Espalda',secondary_muscles:['Bíceps'],equipment:['Polea'],movement_pattern:'Jalón vertical',default_tracking:'reps',difficulty:'basico',aliases:['lat pulldown']},
+  {name:'Remo con barra',slug:'remo-con-barra',category:'Fuerza',primary_muscle:'Espalda',secondary_muscles:['Bíceps','Core'],equipment:['Barra'],movement_pattern:'Jalón horizontal',default_tracking:'reps',difficulty:'basico',aliases:['barbell row']},
+  {name:'Sentadilla barra',slug:'sentadilla-barra',category:'Fuerza',primary_muscle:'Piernas',secondary_muscles:['Glúteos','Core'],equipment:['Barra'],movement_pattern:'Sentadilla',default_tracking:'reps',difficulty:'basico',aliases:['back squat']},
+  {name:'Prensa de pierna',slug:'prensa-de-pierna',category:'Fuerza',primary_muscle:'Piernas',secondary_muscles:['Glúteos'],equipment:['Máquina'],movement_pattern:'Sentadilla',default_tracking:'reps',difficulty:'basico',aliases:['leg press']},
+  {name:'Hip thrust',slug:'hip-thrust',category:'Fuerza',primary_muscle:'Glúteos',secondary_muscles:['Piernas','Core'],equipment:['Barra','Banco'],movement_pattern:'Extensión cadera',default_tracking:'reps',difficulty:'basico',aliases:['empuje de cadera']},
+  {name:'Peso muerto rumano',slug:'peso-muerto-rumano',category:'Fuerza',primary_muscle:'Piernas',secondary_muscles:['Glúteos','Espalda'],equipment:['Barra','Mancuernas'],movement_pattern:'Bisagra',default_tracking:'reps',difficulty:'basico',aliases:['romanian deadlift']},
+  {name:'Curl bíceps mancuernas',slug:'curl-biceps-mancuernas',category:'Fuerza',primary_muscle:'Bíceps',secondary_muscles:['Antebrazo'],equipment:['Mancuernas'],movement_pattern:'Flexión codo',default_tracking:'reps',difficulty:'basico',aliases:['dumbbell curl']},
+  {name:'Extensión tríceps cuerda',slug:'extension-triceps-cuerda',category:'Fuerza',primary_muscle:'Tríceps',secondary_muscles:[],equipment:['Polea'],movement_pattern:'Extensión codo',default_tracking:'reps',difficulty:'basico',aliases:['pushdown cuerda']},
+  {name:'Press militar mancuernas',slug:'press-militar-mancuernas',category:'Fuerza',primary_muscle:'Hombros',secondary_muscles:['Tríceps','Core'],equipment:['Mancuernas'],movement_pattern:'Empuje vertical',default_tracking:'reps',difficulty:'basico',aliases:['shoulder press']},
+  {name:'Elevaciones laterales mancuernas',slug:'elevaciones-laterales-mancuernas',category:'Fuerza',primary_muscle:'Hombros',secondary_muscles:[],equipment:['Mancuernas'],movement_pattern:'Abducción',default_tracking:'reps',difficulty:'basico',aliases:['laterales mancuernas']},
+  {name:'Plank',slug:'plank',category:'Isométrico',primary_muscle:'Core',secondary_muscles:['Hombros'],equipment:['Peso corporal'],movement_pattern:'Anti-extensión',default_tracking:'time',difficulty:'basico',aliases:['plancha']},
+  {name:'Hollow hold',slug:'hollow-hold',category:'Isométrico',primary_muscle:'Core',secondary_muscles:['Piernas'],equipment:['Peso corporal'],movement_pattern:'Anti-extensión',default_tracking:'time',difficulty:'intermedio',aliases:['hollow body hold']},
+  {name:'Push up',slug:'push-up',category:'Calistenia',primary_muscle:'Pecho',secondary_muscles:['Tríceps','Hombros','Core'],equipment:['Peso corporal'],movement_pattern:'Empuje horizontal',default_tracking:'reps',difficulty:'basico',aliases:['lagartija']},
+  {name:'Fondos en paralelas',slug:'fondos-en-paralelas',category:'Calistenia',primary_muscle:'Tríceps',secondary_muscles:['Pecho','Hombros'],equipment:['Peso corporal','Paralelas'],movement_pattern:'Empuje vertical',default_tracking:'reps',difficulty:'intermedio',aliases:['dips']},
+  {name:'Assisted handstand',slug:'assisted-handstand',category:'Calistenia',primary_muscle:'Hombros',secondary_muscles:['Tríceps','Core'],equipment:['Peso corporal','Pared'],movement_pattern:'Empuje vertical',default_tracking:'time',difficulty:'intermedio',aliases:['handstand asistido']},
+  {name:'Pike push up',slug:'pike-push-up',category:'Calistenia',primary_muscle:'Hombros',secondary_muscles:['Tríceps','Core'],equipment:['Peso corporal'],movement_pattern:'Empuje vertical',default_tracking:'reps',difficulty:'intermedio',aliases:['flexion pike']},
+  {name:'L-sit',slug:'l-sit',category:'Isométrico',primary_muscle:'Core',secondary_muscles:['Tríceps','Hombros'],equipment:['Peso corporal','Paralelas'],movement_pattern:'Compresión',default_tracking:'time',difficulty:'avanzado',aliases:['lsit']},
+  {name:'Muscle up',slug:'muscle-up',category:'Calistenia',primary_muscle:'Full Body',secondary_muscles:['Espalda','Bíceps','Tríceps','Core'],equipment:['Peso corporal','Barra fija'],movement_pattern:'Jalón + empuje',default_tracking:'reps',difficulty:'avanzado',aliases:['bar muscle up']},
+  {name:'Burpees',slug:'burpees',category:'Cardio',primary_muscle:'Full Body',secondary_muscles:['Pecho','Piernas','Core'],equipment:['Peso corporal'],movement_pattern:'Acondicionamiento',default_tracking:'reps',difficulty:'intermedio',aliases:['burpee']},
+  {name:'Remadora',slug:'remadora',category:'Cardio',primary_muscle:'Full Body',secondary_muscles:['Espalda','Piernas','Core'],equipment:['Remadora'],movement_pattern:'Cardio',default_tracking:'time',difficulty:'basico',aliases:['rowing machine']}
+];
 const DAILY_QUOTES=[
   {text:'Haz hoy lo que tu version de manana agradeceria.',action:'Elige una accion pequeña y cumplible antes de buscar motivacion.'},
   {text:'La disciplina no grita; aparece cuando nadie esta mirando.',action:'Entrena el estandar, no el animo del momento.'},
@@ -2235,6 +2264,60 @@ function exerciseTypeSelectHtml(id,selected){
 function exerciseSlug(name){
   return String(name||'').trim().toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[^a-z0-9]+/g,'-').replace(/^-+|-+$/g,'');
 }
+function normalizeExerciseCatalogRow(row){
+  return {
+    id:row.id||'',
+    name:row.name||'',
+    slug:row.slug||exerciseSlug(row.name),
+    category:row.category||row.exerciseType||'Fuerza',
+    primary_muscle:row.primary_muscle||row.primaryMuscle||row.muscleGroup||'',
+    secondary_muscles:Array.isArray(row.secondary_muscles)?row.secondary_muscles:(row.secondaryMuscleGroups||[]),
+    equipment:Array.isArray(row.equipment)?row.equipment:[],
+    movement_pattern:row.movement_pattern||row.movementPattern||'',
+    default_tracking:row.default_tracking||row.defaultTracking||'reps',
+    difficulty:row.difficulty||'basico',
+    instructions:row.instructions||'',
+    video_url:row.video_url||row.video||'',
+    aliases:Array.isArray(row.aliases)?row.aliases:[]
+  };
+}
+function exerciseCatalogOptionsHtml(id){
+  const rows=(exerciseCatalog&&exerciseCatalog.length?exerciseCatalog:EXERCISE_CATALOG_FALLBACK).slice(0,500);
+  return '<datalist id="'+id+'">'+rows.map(ex=>'<option value="'+esc(ex.name)+'">'+esc([ex.primary_muscle,ex.category,(ex.equipment||[]).join('/')].filter(Boolean).join(' · '))+'</option>').join('')+'</datalist>';
+}
+function findExerciseCatalogMatch(value){
+  const q=String(value||'').trim().toLowerCase();
+  if(!q)return null;
+  const rows=exerciseCatalog&&exerciseCatalog.length?exerciseCatalog:EXERCISE_CATALOG_FALLBACK;
+  return rows.find(ex=>(ex.name||'').toLowerCase()===q||(ex.slug||'')===exerciseSlug(q)||(ex.aliases||[]).some(a=>String(a).toLowerCase()===q))||null;
+}
+function applyExerciseCatalogPick(bid,value){
+  const ex=findExerciseCatalogMatch(value);
+  const nameInput=document.getElementById('exn-'+bid);
+  if(!nameInput)return;
+  if(!ex){nameInput.dataset.catalogId='';return;}
+  nameInput.dataset.catalogId=ex.id||'';
+  nameInput.value=ex.name;
+  const type=document.getElementById('extype-'+bid);
+  if(type&&EXERCISE_TYPES.includes(ex.category))type.value=ex.category;
+  const target=document.getElementById('exrt-'+bid);
+  if(target){target.value=ex.default_tracking==='time'?'time':'reps';syncExerciseTargetInput(bid);}
+  const primary=document.getElementById('exmg-'+bid);
+  if(primary&&MUSCLE_GROUPS.includes(ex.primary_muscle))primary.value=ex.primary_muscle;
+  document.querySelectorAll('input[name="exsecondary-'+bid+'"]').forEach(i=>{i.checked=(ex.secondary_muscles||[]).includes(i.value)&&i.value!==ex.primary_muscle;});
+}
+async function loadExerciseCatalogSb(){
+  if(exerciseCatalogLoaded)return;
+  exerciseCatalogLoaded=true;
+  try{
+    const{data,error}=await sb.from('exercise_catalog').select('*').eq('is_active',true).order('primary_muscle').order('name').limit(500);
+    if(error)throw error;
+    exerciseCatalog=(data||[]).map(normalizeExerciseCatalogRow);
+  }catch(e){
+    console.warn('exercise catalog unavailable, using fallback:',e.message||e);
+    exerciseCatalog=EXERCISE_CATALOG_FALLBACK.map(normalizeExerciseCatalogRow);
+  }
+}
 function inferTargetType(ex){
   if(ex&&ex.repsType)return ex.repsType;
   const v=String((ex&&ex.reps)||'').trim().toLowerCase();
@@ -2269,7 +2352,19 @@ function exerciseTypeLabel(ex){
 }
 function exerciseGroupLabel(ex){
   const group=String(ex?.supersetGroup||ex?.block||ex?.sequenceGroup||'').trim();
-  return group?'Biserie '+group:'';
+  return group?'Superserie '+group:'';
+}
+function exerciseGroupRaw(ex){
+  return String(ex?.supersetGroup||ex?.block||ex?.sequenceGroup||'').trim().toUpperCase();
+}
+function boardSupersetOptions(board,selected){
+  const base=['A','B','C','D','E','F'];
+  const existing=[...new Set(((board&&board.exercises)||[]).map(exerciseGroupRaw).filter(Boolean))];
+  const opts=[...new Set([...existing,...base])];
+  return '<option value="">Normal</option>'+opts.map(g=>'<option value="'+esc(g)+'" '+(String(selected||'').toUpperCase()===g?'selected':'')+'>Superserie '+esc(g)+'</option>').join('');
+}
+function supersetSelectHtml(id,selected,board){
+  return '<div><div class="exercise-field-label">Agrupación</div><select class="exercise-form-control small" id="'+id+'">'+boardSupersetOptions(board,selected)+'</select><div style="font-size:10.5px;color:var(--gray);line-height:1.35;margin:-2px 0 8px">Mismo bloque = el socio avanza por rondas entre esos ejercicios.</div></div>';
 }
 function getSelectedSecondaryMuscles(name,primary){
   return Array.from(document.querySelectorAll('input[name="'+name+'"]:checked')).map(i=>i.value).filter(v=>v&&v!==primary);
@@ -2789,6 +2884,7 @@ let users={}; // Local cache only, real data comes from Supabase
 let slots30={};
 let waitlists={}; // waitlists[ds+'_'+slotIdx] = [{userId,name,...}]
 let payments=[], boards=[], scores={}, posts=[], accessLog=[], adminNotifs=[];
+let exerciseCatalog=[], exerciseCatalogLoaded=false;
 let curUser=null, curDate=dateObjFromDS(mazToday()), selStartIdx=null, selShort=false, selPlan=null, selPT='individual', selectedRoutineBoardId=null;
 let accInt=null, accessDataInt=null, notifChannel=null, userNotifInt=null, receptionClockInt=null, receptionDataInt=null, userNotifBootstrapped=false, userNotifSeen=new Set(), notifs=[], logScoreCtx=null, expandedUsers=new Set();
 let coachWeekStart=null, coachSchedule=[], coachTasks=[], coachBoardsById={}, activeCoachingSession=null, coachSessionTickInt=null, coachSessionSets={}, coachTaskLogsToday=new Set(), coachTaskLogsByDs={}, coachFastingLogs=[];
@@ -5727,9 +5823,9 @@ async function refreshExerciseFocusFromServer(){
   }catch(e){console.error('refreshExerciseFocusFromServer:',e);return;}
   if(!_exFocusData||_exFocusData.bid!==d.bid||_exFocusData.idx!==d.idx)return;
   const board=coachBoardsById[d.bid];
-  const fresh=buildExerciseFocusData((board&&board.exercises)||[],d.idx,d.bid,d.scheduleId);
+  const fresh=buildExerciseFocusData((board&&board.exercises)||[],d.idx,d.bid,d.scheduleId,d.focusSetIdx);
   if(!fresh)return;
-  _exFocusData={..._exFocusData,name:fresh.name,sets:fresh.sets,reps:fresh.reps,repsType:fresh.repsType,rest:fresh.rest,videos:fresh.videos,hasNote:fresh.hasNote};
+  _exFocusData={..._exFocusData,name:fresh.name,sets:fresh.sets,reps:fresh.reps,repsType:fresh.repsType,rest:fresh.rest,videos:fresh.videos,hasNote:fresh.hasNote,supersetGroup:fresh.supersetGroup,focusSetIdx:fresh.focusSetIdx};
   document.getElementById('exercise-focus-name').textContent=_exFocusData.name;
   const detailEl=document.getElementById('exercise-focus-detail');
   if(detailEl)detailEl.textContent=exerciseDetailParts(_exFocusData).join(' · ')||'Sin detalle';
@@ -5764,14 +5860,15 @@ function renderExerciseFocusBodyHtml(){
   const d=_exFocusData;
   if(!d)return'';
   if(!d.scheduleId)return'<button class="btn" style="width:100%" onclick="openLogScoreFromFocus()">Registrar peso</button>';
-  const sessionCtx={scheduleId:d.scheduleId,sets:coachSessionSets};
+  const sessionCtx={scheduleId:d.scheduleId,sets:coachSessionSets,focusSetIdx:d.focusSetIdx};
   const tracker=renderSetTrackerHtml(sessionCtx,d.exKey,{rest:d.rest,reps:d.reps})
     ||'<div class="empty">Sin series configuradas.</div>';
   const nav=[
     hasPrevExerciseInFocus()?'<button class="btn-sm" onclick="moveExerciseFocus(-1)">Anterior</button>':'',
     hasNextExerciseInFocus()?'<button class="btn" onclick="moveExerciseFocus(1)">Siguiente</button>':'<button class="btn finish" onclick="finishCoachingSessionSb()">Finalizar entreno</button>'
   ].filter(Boolean).join('');
-  return tracker+'<div class="exercise-focus-nav'+(hasPrevExerciseInFocus()?'':' single')+'">'+nav+'</div>';
+  const groupNote=d.supersetGroup?'<div class="superset-flow-note">'+esc(exerciseGroupLabel(d))+' · marca una serie y avanzas al siguiente ejercicio del bloque.</div>':'';
+  return groupNote+tracker+'<div class="exercise-focus-nav'+(hasPrevExerciseInFocus()?'':' single')+'">'+nav+'</div>';
 }
 function renderExerciseFocusModal(){
   const d=_exFocusData;
@@ -5793,6 +5890,7 @@ function buildExerciseFocusData(exercises,idx,boardId,scheduleId){
   return {name:ex.name,sets:ex.sets||'',reps:ex.reps||'',repsType:inferTargetType(ex),rest:ex.rest||'',
     videos:getExerciseVideos(ex),exKey,hasNote:!!exerciseNotesMap[exKey],
     bid:boardId,idx,exid:ex.id||'',scheduleId:scheduleId||null,
+    supersetGroup:exerciseGroupRaw(ex),focusSetIdx:arguments.length>4?arguments[4]:null,
     showAsesoria:canAccessCoaching()};
 }
 function hasNextExerciseInFocus(){
@@ -5863,13 +5961,13 @@ function getActiveExerciseIndex(){
   });
   return idx>-1?idx:exercises.length-1;
 }
-function openActiveCoachingExercise(idx){
+function openActiveCoachingExercise(idx,focusSetIdx){
   if(!activeCoachingSession)return;
   const board=coachBoardsById[activeCoachingSession.board_id];
   const exercises=(board&&board.exercises)||[];
   if(!exercises.length)return;
   const safeIdx=typeof idx==='number'?Math.max(0,Math.min(exercises.length-1,idx)):getActiveExerciseIndex();
-  _exFocusData=buildExerciseFocusData(exercises,safeIdx,activeCoachingSession.board_id,activeCoachingSession.id);
+  _exFocusData=buildExerciseFocusData(exercises,safeIdx,activeCoachingSession.board_id,activeCoachingSession.id,focusSetIdx);
   _exFocusVideoOpen=false;
   renderExerciseFocusModal();
   const modal=document.getElementById('exercise-focus-modal');
@@ -5884,7 +5982,7 @@ function moveExerciseFocus(delta){
   const board=coachBoardsById[activeCoachingSession.board_id];
   const exercises=(board&&board.exercises)||[];
   const nextIdx=Math.max(0,Math.min(exercises.length-1,_exFocusData.idx+delta));
-  _exFocusData=buildExerciseFocusData(exercises,nextIdx,activeCoachingSession.board_id,activeCoachingSession.id);
+  _exFocusData=buildExerciseFocusData(exercises,nextIdx,activeCoachingSession.board_id,activeCoachingSession.id,null);
   _exFocusVideoOpen=false;
   renderExerciseFocusModal();
   refreshExerciseFocusFromServer();
@@ -5973,9 +6071,10 @@ function renderSetTrackerHtml(sessionCtx,exKey,ex){
   const sets=sessionCtx.sets[exKey]||[];
   if(!sets.length)return'';
   const unit=exerciseWeightUnit(exKey);
+  const focusSetIdx=typeof sessionCtx.focusSetIdx==='number'?sessionCtx.focusSetIdx:null;
   return '<div class="set-tracker has-del">'
     +'<div class="set-tracker-hdr"><span>SERIE</span><button class="unit-toggle-btn" onclick="toggleExerciseWeightUnit(&quot;'+esc(exKey)+'&quot;)" title="Cambiar unidad de peso">'+unit.toUpperCase()+'</button><span>REPS</span><span></span><span></span></div>'
-    +sets.map(s=>'<div class="set-row" data-set-id="'+s.id+'" data-ex-key="'+esc(exKey)+'">'
+    +sets.map(s=>'<div class="set-row'+(focusSetIdx===s.set_idx&&!s.done?' next':'')+'" data-set-id="'+s.id+'" data-ex-key="'+esc(exKey)+'">'
       +'<span class="set-num">'+(s.set_idx+1)+'</span>'
       +'<input class="set-reps-in set-weight-in" type="number" inputmode="decimal" placeholder="'+unit+'" value="'+formatWeightForUnit(s.weight,unit)+'" onchange="updateSetWeightSb(&quot;'+s.id+'&quot;,this.value,&quot;'+esc(exKey)+'&quot;)">'
       +'<input class="set-reps-in set-actual-reps-in" type="number" inputmode="numeric" placeholder="'+esc(s.reps_target||'reps')+'" value="'+(s.actual_reps!=null?esc(String(s.actual_reps)):'')+'" onchange="updateSetRepsSb(&quot;'+s.id+'&quot;,this.value)">'
@@ -5995,6 +6094,55 @@ function findExerciseByExKey(exKey){
   for(let i=0;i<exercises.length;i++){
     const k=exercises[i].id||(activeCoachingSession.board_id+'_idx_'+i);
     if(k===exKey)return{ex:exercises[i],idx:i};
+  }
+  return null;
+}
+function exerciseKeyForSession(boardId,ex,idx){
+  return ex.id||(boardId+'_idx_'+idx);
+}
+function isSetPending(exKey,setIdx){
+  const sets=coachSessionSets[exKey]||[];
+  const row=sets.find(s=>s.set_idx===setIdx);
+  return !!(row&&!row.done);
+}
+function exerciseHasPendingSets(exKey){
+  return (coachSessionSets[exKey]||[]).some(s=>!s.done);
+}
+function nextTrainingTargetAfterSet(exKey,setIdx){
+  if(!activeCoachingSession)return null;
+  const board=coachBoardsById[activeCoachingSession.board_id];
+  const exercises=(board&&board.exercises)||[];
+  const found=findExerciseByExKey(exKey);
+  if(!found)return null;
+  const group=exerciseGroupRaw(found.ex);
+  if(group){
+    const members=exercises.map((ex,idx)=>({ex,idx,exKey:exerciseKeyForSession(activeCoachingSession.board_id,ex,idx)}))
+      .filter(item=>exerciseGroupRaw(item.ex)===group)
+      .sort((a,b)=>a.idx-b.idx);
+    if(members.length>1){
+      const currentPos=members.findIndex(item=>item.exKey===exKey);
+      for(let p=currentPos+1;p<members.length;p++){
+        if(isSetPending(members[p].exKey,setIdx))return{idx:members[p].idx,setIdx,sameRoundSuperset:true,group};
+      }
+      const maxSets=Math.max(...members.map(item=>(coachSessionSets[item.exKey]||[]).length),0);
+      for(let round=setIdx+1;round<maxSets;round++){
+        for(const item of members){
+          if(isSetPending(item.exKey,round))return{idx:item.idx,setIdx:round,sameRoundSuperset:false,group};
+        }
+      }
+      const lastIdx=Math.max(...members.map(item=>item.idx));
+      for(let idx=lastIdx+1;idx<exercises.length;idx++){
+        const k=exerciseKeyForSession(activeCoachingSession.board_id,exercises[idx],idx);
+        if(exerciseHasPendingSets(k))return{idx,setIdx:null,sameRoundSuperset:false,group:''};
+      }
+      return null;
+    }
+  }
+  if(!exerciseHasPendingSets(exKey)){
+    for(let idx=found.idx+1;idx<exercises.length;idx++){
+      const k=exerciseKeyForSession(activeCoachingSession.board_id,exercises[idx],idx);
+      if(exerciseHasPendingSets(k))return{idx,setIdx:null,sameRoundSuperset:false,group:''};
+    }
   }
   return null;
 }
@@ -6068,7 +6216,14 @@ async function toggleSetDoneSb(setId,newDone,btnEl){
           if(!nErr){const ni=arr.findIndex(s=>s.id===next.id);if(ni>-1)arr[ni]=nextData;}
         }
         const found=findExerciseByExKey(data.ex_key);
-        if(found)startRestTimerForExercise(found.ex);
+        const isLiveFocus=_exFocusData&&_exFocusData.exKey===data.ex_key&&activeCoachingSession&&_exFocusData.scheduleId===activeCoachingSession.id;
+        const target=isLiveFocus?nextTrainingTargetAfterSet(data.ex_key,data.set_idx):null;
+        if(found&&(!target||!target.sameRoundSuperset))startRestTimerForExercise(found.ex);
+        if(target){
+          openActiveCoachingExercise(target.idx,target.setIdx);
+          if(target.sameRoundSuperset)toast('Siguiente en '+exerciseGroupLabel({supersetGroup:target.group}),'ok');
+          return;
+        }
       }
     }
     refreshSessionUiFor(data.ex_key);
@@ -6208,14 +6363,16 @@ function renderExerciseListHtml(exercises,keyPrefix,boardId,sessionCtx){
     const sets=sessionCtx?(sessionCtx.sets[exKey]||[]):[];
     const doneCount=sets.filter(s=>s.done).length;
     const showProgress=!!(sessionCtx&&sets.length);
+    const groupLabel=exerciseGroupLabel(ex);
     const exData={name:ex.name,sets:ex.sets||'',reps:ex.reps||'',repsType:inferTargetType(ex),rest:ex.rest||'',videos,exKey,
       hasNote,bid:boardId||keyPrefix,idx:i,exid:ex.id||'',scheduleId:sessionCtx?sessionCtx.scheduleId:null,
+      supersetGroup:exerciseGroupRaw(ex),focusSetIdx:null,
       showAsesoria:canAccessCoaching()};
     const isActionable=!!sessionCtx;
     return '<div class="exercise-detail'+(isActionable?'':' static')+'"'+(isActionable?' onclick="openExerciseFocus(this)" data-ex="'+esc(JSON.stringify(exData))+'"':'')+'>'
       +'<div class="exercise-detail-head" style="display:flex;align-items:center;gap:10px">'
       +'<div class="ex-num">'+(i+1)+'</div>'
-      +'<div class="ex-body"><div class="ex-name">'+esc(ex.name)+'</div>'
+      +'<div class="ex-body"><div class="ex-name">'+(groupLabel?'<span class="ex-superset-mini">'+esc(groupLabel)+'</span>':'')+esc(ex.name)+'</div>'
       +'<div class="ex-detail">'+exerciseDetailParts(ex).map(esc).join(' · ')+(exerciseMuscleLabel(ex)?' · '+esc(exerciseMuscleLabel(ex)):'')+'</div>'
       +(ex.note||ex.notes||ex.description?'<div class="ex-note">'+esc(ex.note||ex.notes||ex.description)+'</div>':'')
       +'</div>'
@@ -6232,10 +6389,11 @@ function renderWorkoutEditListHtml(exercises,boardId,scheduleId){
     const exKey=ex.id||(boardId+'_idx_'+i);
     const sets=coachSessionSets[exKey]||[];
     const doneCount=sets.filter(s=>s.done).length;
+    const groupLabel=exerciseGroupLabel(ex);
     return '<div class="exercise-detail edit-workout-exercise">'
       +'<div class="exercise-detail-head" style="display:flex;align-items:center;gap:10px">'
       +'<div class="ex-num">'+(i+1)+'</div>'
-      +'<div class="ex-body"><div class="ex-name">'+esc(ex.name)+'</div>'
+      +'<div class="ex-body"><div class="ex-name">'+(groupLabel?'<span class="ex-superset-mini">'+esc(groupLabel)+'</span>':'')+esc(ex.name)+'</div>'
       +'<div class="ex-detail">'+exerciseDetailParts(ex).map(esc).join(' · ')+(exerciseMuscleLabel(ex)?' · '+esc(exerciseMuscleLabel(ex)):'')+'</div>'
       +(ex.note||ex.notes||ex.description?'<div class="ex-note">'+esc(ex.note||ex.notes||ex.description)+'</div>':'')
       +'</div>'
@@ -8501,6 +8659,7 @@ function filterBoardAssignees(input){
 
 async function renderBoardsAdmin(){
   await loadBoardsSb();
+  await loadExerciseCatalogSb();
   const{data:allU}=await sb.from('profiles').select('id,name').neq('role','admin').order('name').limit(1000);
   const users=allU||[];
   const el=document.getElementById('boards-list');
@@ -8541,7 +8700,7 @@ async function renderBoardsAdmin(){
       +'<div class="exercise-field-label">Series</div><input class="exercise-form-control small" type="number" min="1" step="1" inputmode="numeric" placeholder="Solo números" id="exedit-sets-'+board.id+'-'+i+'" value="'+esc(ex.sets||'')+'">'
       +'<div class="exercise-field-label">Objetivo</div><div class="exercise-target-row"><select class="exercise-form-control small" id="exedit-rt-'+board.id+'-'+i+'" onchange="syncExerciseTargetInput(&quot;'+board.id+'-'+i+'&quot;)"><option value="reps" '+(inferTargetType(ex)==='reps'?'selected':'')+'>Reps</option><option value="time" '+(inferTargetType(ex)==='time'?'selected':'')+'>Tiempo</option></select><input class="exercise-form-control small" type="text" inputmode="numeric" data-target-type="'+inferTargetType(ex)+'" oninput="cleanExerciseInput(this)" placeholder="'+(inferTargetType(ex)==='time'?'0:30 o 30s':'Repeticiones')+'" id="exedit-reps-'+board.id+'-'+i+'" value="'+esc(ex.reps||'')+'"></div>'
       +'<div class="exercise-field-label">Descanso entre series</div><input class="exercise-form-control small" type="text" inputmode="numeric" oninput="this.value=this.value.replace(/[^\\d:ms\\s]/gi,\'\')" placeholder="Solo segundos o mm:ss. Ej: 90 o 1:30" id="exedit-rest-'+board.id+'-'+i+'" value="'+esc(ex.rest||'')+'">'
-      +'<div class="exercise-field-label">Biserie / bloque opcional</div><input class="exercise-form-control small" type="text" placeholder="Ej: A, B o Biserie 1" id="exedit-group-'+board.id+'-'+i+'" value="'+esc(ex.supersetGroup||ex.block||ex.sequenceGroup||'')+'">'
+      +supersetSelectHtml('exedit-group-'+board.id+'-'+i,exerciseGroupRaw(ex),board)
       +musclePrimarySelectHtml('exedit-mg-'+board.id+'-'+i,ex.muscleGroup||'')
       +muscleSecondaryPickerHtml('exedit-secondary-'+board.id+'-'+i,ex.secondaryMuscleGroups||[])
       +'<textarea placeholder="Indicaciones (opcional)" id="exedit-desc-'+board.id+'-'+i+'" style="width:100%;background:var(--card);border:1px solid var(--border);border-radius:4px;padding:8px;font-size:12px;color:var(--white);outline:none;resize:none;min-height:44px;margin-bottom:6px;box-sizing:border-box">'+esc(ex.note||ex.notes||ex.description||'')+'</textarea>'
@@ -8557,12 +8716,13 @@ async function renderBoardsAdmin(){
     const addExForm=isAddingEx?
       '<div style="background:var(--card2);border:1px solid var(--blue);border-radius:8px;padding:14px;margin-bottom:10px">'
       +'<div style="font-size:11px;font-weight:700;color:var(--bl);margin-bottom:10px;letter-spacing:.06em">NUEVO EJERCICIO</div>'
-      +'<input type="text" placeholder="Nombre del ejercicio *" id="exn-'+board.id+'" style="width:100%;background:var(--card);border:1px solid var(--border);border-radius:4px;padding:9px;font-size:13px;color:var(--white);outline:none;margin-bottom:6px;box-sizing:border-box">'
+      +'<input type="text" list="catalog-'+board.id+'" placeholder="Buscar o crear ejercicio *" id="exn-'+board.id+'" oninput="applyExerciseCatalogPick(&quot;'+board.id+'&quot;,this.value)" style="width:100%;background:var(--card);border:1px solid var(--border);border-radius:4px;padding:9px;font-size:13px;color:var(--white);outline:none;margin-bottom:6px;box-sizing:border-box">'
+      +exerciseCatalogOptionsHtml('catalog-'+board.id)
       +exerciseTypeSelectHtml('extype-'+board.id,'')
       +'<div class="exercise-field-label">Series</div><input class="exercise-form-control small" type="number" min="1" step="1" inputmode="numeric" placeholder="Solo números" id="exs-'+board.id+'">'
       +'<div class="exercise-field-label">Objetivo</div><div class="exercise-target-row"><select class="exercise-form-control small" id="exrt-'+board.id+'" onchange="syncExerciseTargetInput(&quot;'+board.id+'&quot;)"><option value="reps">Reps</option><option value="time">Tiempo</option></select><input class="exercise-form-control small" type="text" inputmode="numeric" data-target-type="reps" oninput="cleanExerciseInput(this)" placeholder="Repeticiones" id="exr-'+board.id+'"></div>'
       +'<div class="exercise-field-label">Descanso entre series</div><input class="exercise-form-control small" type="text" inputmode="numeric" oninput="this.value=this.value.replace(/[^\\d:ms\\s]/gi,\'\')" placeholder="Solo segundos o mm:ss. Ej: 90 o 1:30" id="exrest-'+board.id+'">'
-      +'<div class="exercise-field-label">Biserie / bloque opcional</div><input class="exercise-form-control small" type="text" placeholder="Ej: A, B o Biserie 1" id="exgroup-'+board.id+'">'
+      +supersetSelectHtml('exgroup-'+board.id,'',board)
       +musclePrimarySelectHtml('exmg-'+board.id,'')
       +muscleSecondaryPickerHtml('exsecondary-'+board.id,[])
       +'<textarea placeholder="Indicaciones (opcional)" id="exd-'+board.id+'" style="width:100%;background:var(--card);border:1px solid var(--border);border-radius:4px;padding:8px;font-size:12px;color:var(--white);outline:none;resize:none;min-height:44px;margin-bottom:6px;box-sizing:border-box"></textarea>'
@@ -8704,15 +8864,18 @@ async function updateBoardNameSb(bid){
 }
 
 async function addExerciseSb(bid){
-  const name=document.getElementById('exn-'+bid).value.trim();
+  const nameInput=document.getElementById('exn-'+bid);
+  const name=nameInput.value.trim();
   if(!name){toast('Escribe el nombre del ejercicio','err');return;}
+  const catalogMatch=findExerciseCatalogMatch(name);
+  const catalogId=nameInput.dataset.catalogId||catalogMatch?.id||'';
   const sets=document.getElementById('exs-'+bid).value.trim();
   const exerciseType=(document.getElementById('extype-'+bid)?.value||'').trim();
   const repsType=(document.getElementById('exrt-'+bid)?.value||'reps');
   let reps=document.getElementById('exr-'+bid).value.trim();
   let rest=document.getElementById('exrest-'+bid).value.trim();
   let restNext='';
-  const supersetGroup=(document.getElementById('exgroup-'+bid)?.value||'').trim();
+  const supersetGroup=(document.getElementById('exgroup-'+bid)?.value||'').trim().toUpperCase();
   const muscleGroup=(document.getElementById('exmg-'+bid)?.value||'').trim();
   const secondaryMuscleGroups=getSelectedSecondaryMuscles('exsecondary-'+bid,muscleGroup);
   const note=document.getElementById('exd-'+bid).value.trim();
@@ -8738,9 +8901,15 @@ async function addExerciseSb(bid){
   if(video)videos.push({url:video,title:videoTitle});
   if(video2)videos.push({url:video2,title:videoTitle2});
   const canonicalName=name.trim();
-  b.exercises.push({id:crypto.randomUUID(),name:canonicalName,canonicalName,exerciseKey:exerciseSlug(canonicalName),exerciseType,sets,reps,repsType,rest,restNext,supersetGroup,block:supersetGroup,isSuperset:!!supersetGroup,muscleGroup,secondaryMuscleGroups,muscles:{primary:muscleGroup||null,secondary:secondaryMuscleGroups},note,description:note,video:video||'',videoTitle:videoTitle||'',videos});
+  const exToSave={id:crypto.randomUUID(),catalogId,name:canonicalName,canonicalName,exerciseKey:(catalogMatch&&catalogMatch.slug)||exerciseSlug(canonicalName),exerciseType,sets,reps,repsType,rest,restNext,supersetGroup,block:supersetGroup,isSuperset:!!supersetGroup,muscleGroup,secondaryMuscleGroups,muscles:{primary:muscleGroup||null,secondary:secondaryMuscleGroups},equipment:catalogMatch?.equipment||[],movementPattern:catalogMatch?.movement_pattern||'',difficulty:catalogMatch?.difficulty||'basico',note,description:note,video:video||'',videoTitle:videoTitle||'',videos};
+  if(!exToSave.catalogId){
+    const savedCatalogId=await saveExerciseCatalogFromBoardExercise(exToSave);
+    if(savedCatalogId)exToSave.catalogId=savedCatalogId;
+  }
+  b.exercises.push(exToSave);
   await sb.from('boards').update({exercises:b.exercises}).eq('id',bid);
-  document.getElementById('exn-'+bid).value='';
+  nameInput.value='';
+  nameInput.dataset.catalogId='';
   document.getElementById('exs-'+bid).value='';
   document.getElementById('exr-'+bid).value='';
   document.getElementById('exrest-'+bid).value='';
@@ -8767,7 +8936,7 @@ async function updateExerciseSb(bid,idx){
   let reps=(document.getElementById('exedit-reps-'+bid+'-'+idx)?.value||'').trim();
   let rest=(document.getElementById('exedit-rest-'+bid+'-'+idx)?.value||'').trim();
   let restNext='';
-  const supersetGroup=(document.getElementById('exedit-group-'+bid+'-'+idx)?.value||'').trim();
+  const supersetGroup=(document.getElementById('exedit-group-'+bid+'-'+idx)?.value||'').trim().toUpperCase();
   const muscleGroup=(document.getElementById('exedit-mg-'+bid+'-'+idx)?.value||'').trim();
   const secondaryMuscleGroups=getSelectedSecondaryMuscles('exedit-secondary-'+bid+'-'+idx,muscleGroup);
   const desc=(document.getElementById('exedit-desc-'+bid+'-'+idx)?.value||'').trim();
@@ -8792,8 +8961,11 @@ async function updateExerciseSb(bid,idx){
   if(video)videos.push({url:video,title:videoTitle});
   if(video2)videos.push({url:video2,title:videoTitle2});
   const canonicalName=name.trim();
-  b.exercises[idx]={...b.exercises[idx],name:canonicalName,canonicalName,exerciseKey:b.exercises[idx].exerciseKey||exerciseSlug(canonicalName),exerciseType,sets,reps,repsType,rest,restNext,supersetGroup,block:supersetGroup,isSuperset:!!supersetGroup,muscleGroup,secondaryMuscleGroups,muscles:{primary:muscleGroup||null,secondary:secondaryMuscleGroups},note:desc,description:desc,video,videoTitle,videos};
+  const catalogMatch=findExerciseCatalogMatch(canonicalName);
+  b.exercises[idx]={...b.exercises[idx],catalogId:b.exercises[idx].catalogId||catalogMatch?.id||'',name:canonicalName,canonicalName,exerciseKey:b.exercises[idx].exerciseKey||catalogMatch?.slug||exerciseSlug(canonicalName),exerciseType,sets,reps,repsType,rest,restNext,supersetGroup,block:supersetGroup,isSuperset:!!supersetGroup,muscleGroup,secondaryMuscleGroups,muscles:{primary:muscleGroup||null,secondary:secondaryMuscleGroups},equipment:b.exercises[idx].equipment||catalogMatch?.equipment||[],movementPattern:b.exercises[idx].movementPattern||catalogMatch?.movement_pattern||'',difficulty:b.exercises[idx].difficulty||catalogMatch?.difficulty||'basico',note:desc,description:desc,video,videoTitle,videos};
   try{
+    const savedCatalogId=await saveExerciseCatalogFromBoardExercise(b.exercises[idx]);
+    if(savedCatalogId)b.exercises[idx].catalogId=savedCatalogId;
     const{error}=await sb.from('boards').update({exercises:b.exercises}).eq('id',bid);
     if(error)throw error;
     toast('Ejercicio guardado','ok');
@@ -10975,6 +11147,37 @@ async function loadBoardsSb(){
     const{data}=await sb.from('boards').select('*,board_assignments(user_id)');
     if(data) boards=data.map(b=>({...b,assignedTo:(b.board_assignments||[]).map(a=>a.user_id)}));
   }catch(e){console.error('loadBoardsSb:',e);}
+}
+
+async function saveExerciseCatalogFromBoardExercise(ex){
+  if(!ex||!ex.name)return null;
+  const canonicalName=(ex.canonicalName||ex.name||'').trim();
+  if(!canonicalName)return null;
+  const videos=getExerciseVideos(ex);
+  const row={
+    name:canonicalName,
+    slug:ex.exerciseKey||exerciseSlug(canonicalName),
+    category:ex.exerciseType||'Fuerza',
+    primary_muscle:ex.muscleGroup||null,
+    secondary_muscles:Array.isArray(ex.secondaryMuscleGroups)?ex.secondaryMuscleGroups:[],
+    equipment:Array.isArray(ex.equipment)?ex.equipment:[],
+    movement_pattern:ex.movementPattern||'',
+    default_tracking:ex.repsType==='time'?'time':'reps',
+    difficulty:ex.difficulty||'basico',
+    instructions:ex.description||ex.note||'',
+    video_url:(videos[0]&&videos[0].url)||ex.video||'',
+    aliases:Array.isArray(ex.aliases)?ex.aliases:[]
+  };
+  try{
+    const{data,error}=await sb.from('exercise_catalog').upsert(row,{onConflict:'slug'}).select('id').single();
+    if(error)throw error;
+    const normalized=normalizeExerciseCatalogRow({...row,id:data?.id||ex.catalogId||''});
+    exerciseCatalog=exerciseCatalog.filter(x=>x.slug!==normalized.slug).concat(normalized).sort((a,b)=>(a.primary_muscle||'').localeCompare(b.primary_muscle||'')||a.name.localeCompare(b.name));
+    return data?.id||null;
+  }catch(e){
+    console.warn('save exercise catalog skipped:',e.message||e);
+    return null;
+  }
 }
 
 // ── COACHING ADMIN (beta oculta) ─────────────────────────────
