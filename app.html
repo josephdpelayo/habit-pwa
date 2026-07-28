@@ -6,12 +6,12 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="HABIT">
 <meta name="application-name" content="HABIT">
-<link rel="manifest" href="/manifest.json?v=20260720-15">
-<link rel="apple-touch-icon" sizes="120x120" href="/icons/icon-120.png?v=20260720-15">
-<link rel="apple-touch-icon" sizes="152x152" href="/icons/icon-152.png?v=20260720-15">
-<link rel="apple-touch-icon" sizes="167x167" href="/icons/icon-167.png?v=20260720-15">
-<link rel="apple-touch-icon" sizes="180x180" href="/icons/icon-180.png?v=20260720-15">
-<link rel="icon" type="image/png" sizes="32x32" href="/icons/icon-32.png?v=20260720-15">
+<link rel="manifest" href="/manifest.json?v=20260728-01">
+<link rel="apple-touch-icon" sizes="120x120" href="/icons/icon-120.png?v=20260728-01">
+<link rel="apple-touch-icon" sizes="152x152" href="/icons/icon-152.png?v=20260728-01">
+<link rel="apple-touch-icon" sizes="167x167" href="/icons/icon-167.png?v=20260728-01">
+<link rel="apple-touch-icon" sizes="180x180" href="/icons/icon-180.png?v=20260728-01">
+<link rel="icon" type="image/png" sizes="32x32" href="/icons/icon-32.png?v=20260728-01">
 <title>HABIT</title>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Share+Tech+Mono&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
@@ -1381,6 +1381,7 @@ html,body,.app,input,select,button,textarea{font-family:var(--font-ui);font-opti
         <div class="date-pill" id="dp"></div>
         <button id="nb" onclick="changeDay(1)">&#8594;</button>
       </div>
+      <div id="book-expiry-hint" style="display:none;font-size:12px;color:var(--amber,#d97706);background:rgba(217,119,6,.1);border:1px solid rgba(217,119,6,.25);border-radius:4px;padding:6px 10px;margin:6px 0"></div>
       <div id="book-my-bks" style="margin-bottom:6px"></div>
       <p class="slbl" style="margin-bottom:4px">Horarios · toca tu hora de entrada <span style="color:#444;font-weight:400;text-transform:none;letter-spacing:0">· desliza</span></p>
     </div>
@@ -2175,7 +2176,7 @@ html,body,.app,input,select,button,textarea{font-family:var(--font-ui);font-opti
 // ── CONFIG & SUPABASE ───────────────────────────────────────
 const SUPABASE_URL='https://pmpjteuqjusbiduevbwq.supabase.co';
 const SUPABASE_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBtcGp0ZXVxanVzYmlkdWV2YndxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc2OTI1NjUsImV4cCI6MjA5MzI2ODU2NX0.XbMzZoo2yqtrD8znLnyo_1zDfrdJAvAPj1lqGOyXnLw';
-const APP_VERSION='20260720-15';
+const APP_VERSION='20260728-01';
 const MUSCLE_GROUPS=['Pecho','Espalda','Piernas','Glúteos','Hombros','Bíceps','Tríceps','Antebrazo','Core','Cardio','Full Body'];
 const EXERCISE_TYPES=['Fuerza','Calistenia','Isométrico','Cardio','Movilidad','Potencia','Técnica','Accesorio'];
 const EXERCISE_CATALOG_FALLBACK=[
@@ -2796,6 +2797,13 @@ function fmtD(d){
 }
 function fmtDS(ds){const p=parseDS(ds),dow=new Date(Date.UTC(p.y,p.m-1,p.d,12,0,0)).getUTCDay();return DN[dow]+' '+p.d+' '+MO[p.m-1];}
 function maxD(){return dateObjFromDS(addDaysDS(mazToday(),BOOKING_ADVANCE_DAYS));}
+// Caps how far ahead a member can book: the usual advance window, or their
+// membership/visit expiry date if that comes sooner (avoids bookings past vigencia).
+function maxBookableDS(){
+  const cap=addDaysDS(mazToday(),BOOKING_ADVANCE_DAYS);
+  const exp=curUser&&curUser.planExpiry?dsFromIsoMaz(curUser.planExpiry):null;
+  return exp&&exp<cap?exp:cap;
+}
 function getYTId(url){if(!url)return null;const m=String(url).match(/(?:youtu\.be\/|youtube\.com\/(?:watch\?v=|embed\/|shorts\/))([A-Za-z0-9_-]{11})/);return m?m[1]:null;}
 function getDriveId(url){
   if(!url)return null;
@@ -2929,6 +2937,7 @@ function isGroupBlocked(ds,idx){return getSlotOccupancy(ds,idx).isGroup;}
 function canStartAt(ds,idx,isGrupal,slotsNeeded){
   slotsNeeded=slotsNeeded||BOOKING_SLOTS;
   if(isSlotPast(ds,idx)) return{ok:false,reason:'past'};
+  if(curUser&&curUser.planExpiry&&ds>dsFromIsoMaz(curUser.planExpiry)) return{ok:false,reason:'expired'};
   if(curUser&&curUser.bookings){
     const newStart=mazDateMs(ds,idx);
     const newEnd=newStart+slotsNeeded*SLOT_DUR*60000;
@@ -4438,7 +4447,7 @@ function renderMembershipStatus(){
 function changeDay(delta){
   const nd=new Date(curDate);nd.setDate(nd.getDate()+delta);
   const nds=dk(nd);
-  if(nds<mazToday()||nds>addDaysDS(mazToday(),BOOKING_ADVANCE_DAYS))return;
+  if(nds<mazToday()||nds>maxBookableDS())return;
   curDate=nd;const sl=document.getElementById('sl');if(sl)sl.dataset.loaded='';
   clearSel();renderBook();
 }
@@ -4452,9 +4461,24 @@ async function renderBook(){
     selStartIdx=null;
     selShort=false;
   }
+  const maxDS=maxBookableDS();
+  if(curDS>maxDS){
+    curDate=dateObjFromDS(maxDS);
+    curDS=dk(curDate);
+    selStartIdx=null;
+    selShort=false;
+  }
   document.getElementById('pb').disabled=curDS<=mazToday();
-  document.getElementById('nb').disabled=curDS>=addDaysDS(mazToday(),BOOKING_ADVANCE_DAYS);
+  document.getElementById('nb').disabled=curDS>=maxDS;
   document.getElementById('dp').textContent=fmtD(curDate);
+  const expHintEl=document.getElementById('book-expiry-hint');
+  if(expHintEl){
+    const capDS=addDaysDS(mazToday(),BOOKING_ADVANCE_DAYS);
+    expHintEl.innerHTML=(curUser&&curUser.planExpiry&&maxDS<capDS)
+      ?'Tu membresía/visitas vencen el <strong>'+fmtDateMaz(curUser.planExpiry)+'</strong>. Solo puedes reservar hasta ese día.'
+      :'';
+    expHintEl.style.display=expHintEl.innerHTML?'block':'none';
+  }
   const ds=curDS;
   const nextDs=addDaysDS(ds,1);
   if(!slots30[ds])await loadSlotOccupancyFromSb(ds);
@@ -4590,6 +4614,10 @@ function renderConfPanel(ds,isGrupal){
   if(check.reason==='past'){
     pt.textContent='Horario pasado';
     wb.style.display='block';wb.innerHTML='Este horario ya pas\u00f3. Elige un horario futuro.';
+    bc.style.display='none';bw.style.display='none';cb.style.display='none';
+  } else if(check.reason==='expired'){
+    pt.textContent='Fuera de tu vigencia';
+    wb.style.display='block';wb.innerHTML='Tu membresía/visitas vencen el <strong>'+fmtDateMaz(curUser.planExpiry)+'</strong>. Elige una fecha dentro de tu vigencia o renueva tu membresía.';
     bc.style.display='none';bw.style.display='none';cb.style.display='none';
   } else if(check.reason==='duplicate'){
     pt.textContent='Ya reservaste este horario';
