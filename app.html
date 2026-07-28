@@ -6,12 +6,12 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="HABIT">
 <meta name="application-name" content="HABIT">
-<link rel="manifest" href="/manifest.json?v=20260728-01">
-<link rel="apple-touch-icon" sizes="120x120" href="/icons/icon-120.png?v=20260728-01">
-<link rel="apple-touch-icon" sizes="152x152" href="/icons/icon-152.png?v=20260728-01">
-<link rel="apple-touch-icon" sizes="167x167" href="/icons/icon-167.png?v=20260728-01">
-<link rel="apple-touch-icon" sizes="180x180" href="/icons/icon-180.png?v=20260728-01">
-<link rel="icon" type="image/png" sizes="32x32" href="/icons/icon-32.png?v=20260728-01">
+<link rel="manifest" href="/manifest.json?v=20260728-02">
+<link rel="apple-touch-icon" sizes="120x120" href="/icons/icon-120.png?v=20260728-02">
+<link rel="apple-touch-icon" sizes="152x152" href="/icons/icon-152.png?v=20260728-02">
+<link rel="apple-touch-icon" sizes="167x167" href="/icons/icon-167.png?v=20260728-02">
+<link rel="apple-touch-icon" sizes="180x180" href="/icons/icon-180.png?v=20260728-02">
+<link rel="icon" type="image/png" sizes="32x32" href="/icons/icon-32.png?v=20260728-02">
 <title>HABIT</title>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Share+Tech+Mono&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
@@ -1382,6 +1382,7 @@ html,body,.app,input,select,button,textarea{font-family:var(--font-ui);font-opti
         <button id="nb" onclick="changeDay(1)">&#8594;</button>
       </div>
       <div id="book-expiry-hint" style="display:none;font-size:12px;color:var(--amber,#d97706);background:rgba(217,119,6,.1);border:1px solid rgba(217,119,6,.25);border-radius:4px;padding:6px 10px;margin:6px 0"></div>
+      <div id="book-reschedule-banner" style="display:none;font-size:12px;color:var(--bl);background:rgba(37,99,235,.08);border:1px solid rgba(37,99,235,.25);border-radius:4px;padding:8px 10px;margin:6px 0"></div>
       <div id="book-my-bks" style="margin-bottom:6px"></div>
       <p class="slbl" style="margin-bottom:4px">Horarios · toca tu hora de entrada <span style="color:#444;font-weight:400;text-transform:none;letter-spacing:0">· desliza</span></p>
     </div>
@@ -2176,7 +2177,7 @@ html,body,.app,input,select,button,textarea{font-family:var(--font-ui);font-opti
 // ── CONFIG & SUPABASE ───────────────────────────────────────
 const SUPABASE_URL='https://pmpjteuqjusbiduevbwq.supabase.co';
 const SUPABASE_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBtcGp0ZXVxanVzYmlkdWV2YndxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc2OTI1NjUsImV4cCI6MjA5MzI2ODU2NX0.XbMzZoo2yqtrD8znLnyo_1zDfrdJAvAPj1lqGOyXnLw';
-const APP_VERSION='20260728-01';
+const APP_VERSION='20260728-02';
 const MUSCLE_GROUPS=['Pecho','Espalda','Piernas','Glúteos','Hombros','Bíceps','Tríceps','Antebrazo','Core','Cardio','Full Body'];
 const EXERCISE_TYPES=['Fuerza','Calistenia','Isométrico','Cardio','Movilidad','Potencia','Técnica','Accesorio'];
 const EXERCISE_CATALOG_FALLBACK=[
@@ -2508,7 +2509,7 @@ async function loadUserData(){
   ]);
   curUser.bookings=bkRes.status==='fulfilled'?(bkRes.value.data||[]).map(b=>({
     id:b.id,ds:b.ds,startIdx:b.start_idx,slotsUsed:b.slots_used||3,
-    isGroup:b.is_group,grupalSpots:b.grupal_spots,timeStr:b.time_str,durMin:b.dur_min||90
+    isGroup:b.is_group,grupalSpots:b.grupal_spots,timeStr:b.time_str,durMin:b.dur_min||90,createdAt:b.created_at
   })):[];
   curUser.payments=payRes.status==='fulfilled'?(payRes.value.data||[]).map(p=>({
     id:p.id,plan:p.plan_name,planType:p.plan_type,amount:p.amount,
@@ -2599,7 +2600,7 @@ async function initApp(){
 // No slot affects any other slot's count — they are fully independent.
 
 const CAP=4, SLOTS_PER_HOUR=2, TOTAL_SLOTS=48, SLOT_DUR=30, BOOKING_SLOTS=3, BOOKING_SLOTS_SHORT=2, BOOKING_ADVANCE_DAYS=7, ADMIN_BLOCK_ADVANCE_DAYS=14; // 3×30=90min, 2×30=60min
-const BEFORE_MIN=10, CANCEL_H=12;
+const BEFORE_MIN=10, CANCEL_H=12, CANCEL_WINDOW_H=2;
 const MXN=v=>'$'+Number(v).toLocaleString('es-MX');
 // Dinero real recibido: Stripe (neto, ya con su comisión descontada),
 // GAIA y efectivo/transferencia son ingresos reales. Cortesías y ajustes
@@ -2893,7 +2894,7 @@ let slots30={};
 let waitlists={}; // waitlists[ds+'_'+slotIdx] = [{userId,name,...}]
 let payments=[], boards=[], scores={}, posts=[], accessLog=[], adminNotifs=[];
 let exerciseCatalog=[], exerciseCatalogLoaded=false;
-let curUser=null, curDate=dateObjFromDS(mazToday()), selStartIdx=null, selShort=false, selPlan=null, selPT='individual', selectedRoutineBoardId=null;
+let curUser=null, curDate=dateObjFromDS(mazToday()), selStartIdx=null, selShort=false, selPlan=null, selPT='individual', selectedRoutineBoardId=null, rescheduleBk=null;
 let accInt=null, accessDataInt=null, notifChannel=null, userNotifInt=null, receptionClockInt=null, receptionDataInt=null, userNotifBootstrapped=false, userNotifSeen=new Set(), notifs=[], logScoreCtx=null, expandedUsers=new Set();
 let coachWeekStart=null, coachSchedule=[], coachTasks=[], coachBoardsById={}, activeCoachingSession=null, coachSessionTickInt=null, coachSessionSets={}, coachTaskLogsToday=new Set(), coachTaskLogsByDs={}, coachFastingLogs=[];
 let chatMessages=[], chatChannel=null, chatPollInt=null, chatSendContext=null,
@@ -2913,9 +2914,10 @@ function getDaySlots(ds){
   if(!slots30[ds]){slots30[ds]=Array.from({length:TOTAL_SLOTS},()=>[]);}
   return slots30[ds];
 }
-function getSlotOccupancy(ds,idx){
+function getSlotOccupancy(ds,idx,excludeBookingId){
   const day=getDaySlots(ds);
-  const arr=day[idx]||[];
+  let arr=day[idx]||[];
+  if(excludeBookingId)arr=arr.filter(b=>b.bookingId!==excludeBookingId);
   const blocked=arr.filter(b=>b.isBlocked).reduce((sum,b)=>sum+(Number(b.spot)||1),0);
   if(blocked>=CAP) return{count:CAP,isGroup:true,isBlocked:true};
   // A full group booking fills all 4. Partial group bookings reserve their saved spot count.
@@ -2934,25 +2936,26 @@ function isGroupBlocked(ds,idx){return getSlotOccupancy(ds,idx).isGroup;}
 // Can a user start a 90-min reservation at slotIdx?
 // Returns {ok, reason, grupalSpots} 
 // grupalSpots = how many people can actually go (for partial grupal)
-function canStartAt(ds,idx,isGrupal,slotsNeeded){
+function canStartAt(ds,idx,isGrupal,slotsNeeded,excludeBookingId){
   slotsNeeded=slotsNeeded||BOOKING_SLOTS;
   if(isSlotPast(ds,idx)) return{ok:false,reason:'past'};
   if(curUser&&curUser.planExpiry&&ds>dsFromIsoMaz(curUser.planExpiry)) return{ok:false,reason:'expired'};
   if(curUser&&curUser.bookings){
+    const otherBookings=excludeBookingId?curUser.bookings.filter(b=>b.id!==excludeBookingId):curUser.bookings;
     const newStart=mazDateMs(ds,idx);
     const newEnd=newStart+slotsNeeded*SLOT_DUR*60000;
-    for(const bk of curUser.bookings||[]){
+    for(const bk of otherBookings){
       const bkLen=bk.slotsUsed||BOOKING_SLOTS;
       const bkStart=mazDateMs(bk.ds,bk.startIdx);
       const bkEnd=bkStart+bkLen*SLOT_DUR*60000;
       if(newStart<bkEnd&&newEnd>bkStart) return{ok:false,reason:'duplicate'};
     }
-    if(curUser.bookings.filter(b=>b.ds===ds).length>=1) return{ok:false,reason:'max1'};
+    if(!excludeBookingId&&otherBookings.filter(b=>b.ds===ds).length>=1) return{ok:false,reason:'max1'};
   }
   if(isGrupal){
     let minFree=CAP;
     for(const part of slotRange(ds,idx,slotsNeeded)){
-      const occ=getSlotOccupancy(part.ds,part.idx);
+      const occ=getSlotOccupancy(part.ds,part.idx,excludeBookingId);
       if(occ.isGroup) return{ok:false,reason:'blocked'};
       const free=CAP-occ.count;
       if(free<minFree) minFree=free;
@@ -2961,7 +2964,7 @@ function canStartAt(ds,idx,isGrupal,slotsNeeded){
     return{ok:true,grupalSpots:minFree};
   } else {
     for(const part of slotRange(ds,idx,slotsNeeded)){
-      const occ=getSlotOccupancy(part.ds,part.idx);
+      const occ=getSlotOccupancy(part.ds,part.idx,excludeBookingId);
       if(occ.isGroup) return{ok:false,reason:'blocked'};
       if(CAP-occ.count<1) return{ok:false,reason:'full_slot',slotTime:fmtSlot(part.idx)};
     }
@@ -3410,7 +3413,7 @@ async function loadAccessData(){
       .gte('ds',yday2).order('ds').order('start_idx').limit(10);
     curUser.bookings=(bks||[]).map(b=>({
       id:b.id,ds:b.ds,startIdx:b.start_idx,slotsUsed:b.slots_used||3,
-      isGroup:b.is_group,grupalSpots:b.grupal_spots,timeStr:b.time_str,durMin:b.dur_min||90
+      isGroup:b.is_group,grupalSpots:b.grupal_spots,timeStr:b.time_str,durMin:b.dur_min||90,createdAt:b.created_at
     }));
     curUser.guestBookings=[];
     const{data:sessionData}=await sb.auth.getSession();
@@ -4260,7 +4263,7 @@ async function renderActiveBookings(){
     // Update local cache
     curUser.bookings=uniqueBks.map(b=>({
       id:b.id,ds:b.ds,startIdx:b.start_idx,slotsUsed:b.slots_used||3,
-      isGroup:b.is_group,grupalSpots:b.grupal_spots,timeStr:b.time_str,durMin:b.dur_min||90
+      isGroup:b.is_group,grupalSpots:b.grupal_spots,timeStr:b.time_str,durMin:b.dur_min||90,createdAt:b.created_at
     }));
     if(!upcoming.length){el.innerHTML='';return;}
     el.innerHTML='<p class="slbl" style="margin-bottom:10px">Mis reservas activas</p>';
@@ -4269,15 +4272,22 @@ async function renderActiveBookings(){
       const dl=b.ds===_today?'Hoy':b.ds===_yday?'Anoche':'Mañana';
       const slotsUsed=b.slots_used||3;
       const aw=getAW({ds:b.ds,startIdx:b.start_idx,slotsUsed});
-      const canC=(aw.sessionStart-mazNow())/3600000>=CANCEL_H;
+      const started=aw.sessionStart.getTime()<=mazNow().getTime();
+      const hoursUntilSession=(aw.sessionStart.getTime()-mazNow().getTime())/3600000;
+      const bookedRecently=!!b.created_at&&(mazNow().getTime()-new Date(b.created_at).getTime())/3600000<=CANCEL_WINDOW_H;
+      const canC=!started&&(hoursUntilSession>=CANCEL_H||bookedRecently);
+      const canR=!started;
       const div=document.createElement('div');
       div.className='active-bk-card';
       div.innerHTML='<div style="flex:1">'
         +'<div style="font-size:14px;font-weight:600;color:var(--white)">'+dl+' · '+(b.time_str||fmtTimeRange(b.start_idx,b.slots_used||3))+'</div>'
         +'<div style="font-size:11px;color:var(--gray);margin-top:2px">'+(b.is_group?'Grupal':'Individual')+' · '+(b.dur_min||90)+' min</div>'
         +'</div>'
+        +'<div style="display:flex;gap:6px;align-items:center">'
+        +(canR?'<button class="btn-sm bblue" data-bid="'+b.id+'" onclick="handleRescheduleBk(this)">Cambiar hora</button>':'')
         +(canC?'<button class="btn-sm bred" data-bid="'+b.id+'" onclick="handleCancelBk(this)">Cancelar</button>'
-               :'<span class="badge bg-amber" style="font-size:9px">-12h</span>');
+               :'<span class="badge bg-amber" style="font-size:9px">No cancelable</span>')
+        +'</div>';
       el.appendChild(div);
     });
   }catch(e){console.error('renderActiveBookings:',e);}
@@ -4468,8 +4478,10 @@ async function renderBook(){
     selStartIdx=null;
     selShort=false;
   }
-  document.getElementById('pb').disabled=curDS<=mazToday();
-  document.getElementById('nb').disabled=curDS>=maxDS;
+  const ds=curDS;
+  const rescheduling=!!(rescheduleBk&&rescheduleBk.ds===ds);
+  document.getElementById('pb').disabled=rescheduling||curDS<=mazToday();
+  document.getElementById('nb').disabled=rescheduling||curDS>=maxDS;
   document.getElementById('dp').textContent=fmtD(curDate);
   const expHintEl=document.getElementById('book-expiry-hint');
   if(expHintEl){
@@ -4479,32 +4491,43 @@ async function renderBook(){
       :'';
     expHintEl.style.display=expHintEl.innerHTML?'block':'none';
   }
-  const ds=curDS;
+  const rescheduleBanner=document.getElementById('book-reschedule-banner');
+  if(rescheduleBanner){
+    rescheduleBanner.innerHTML=rescheduling
+      ?'Cambiando tu reserva de las <strong>'+rescheduleBk.timeStr+'</strong>. Toca un nuevo horario abajo. <span style="text-decoration:underline;cursor:pointer" onclick="cancelRescheduleMode()">Cancelar cambio</span>'
+      :'';
+    rescheduleBanner.style.display=rescheduleBanner.innerHTML?'block':'none';
+  }
   const nextDs=addDaysDS(ds,1);
   if(!slots30[ds])await loadSlotOccupancyFromSb(ds);
   if(!slots30[nextDs])await loadSlotOccupancyFromSb(nextDs);
-  // Show user's own bookings for this day with cancel option
+  // Show user's own bookings for this day with cancel/reschedule options
   const myBkEl=document.getElementById('book-my-bks');
   if(myBkEl&&curUser){
-    const myBks=(curUser.bookings||[]).filter(b=>b.ds===ds);
+    const myBks=rescheduling?[]:(curUser.bookings||[]).filter(b=>b.ds===ds);
     if(myBks.length){
       myBkEl.innerHTML='<p class="slbl" style="margin-bottom:4px">Mis reservas este día</p>'+
         myBks.map(b=>{
           const canC=canCancelBk(b);
           const isPast=isBookingPast(b);
+          const canR=!isPast&&mazDateMs(b.ds,b.startIdx)>mazNow().getTime();
           return '<div style="background:rgba(37,99,235,.08);border:1px solid rgba(37,99,235,.2);border-radius:4px;padding:8px 12px;display:flex;align-items:center;justify-content:space-between;margin-bottom:4px">'+
             '<span style="font-size:13px;color:var(--bl);font-weight:600">'+b.timeStr+' · 90 min</span>'+
-            (isPast?'<span class="badge bg-gray">Pasada</span>':
-             canC?'<button class="btn-sm bred" data-bid="'+b.id+'" onclick="handleCancelBook(this)">Cancelar</button>':
-                  '<span class="badge bg-amber" style="font-size:9px">-12h</span>')+
-            '</div>';
+            '<div style="display:flex;gap:6px;align-items:center">'+
+            (isPast?'<span class="badge bg-gray">Pasada</span>':(
+              (canR?'<button class="btn-sm bblue" data-bid="'+b.id+'" onclick="handleRescheduleBk(this)">Cambiar hora</button>':'')+
+              (canC?'<button class="btn-sm bred" data-bid="'+b.id+'" onclick="handleCancelBook(this)">Cancelar</button>':
+                    '<span class="badge bg-amber" style="font-size:9px">No cancelable</span>')
+            ))+
+            '</div></div>';
         }).join('');
     } else {
       myBkEl.innerHTML='';
     }
   }
   const day=getDaySlots(ds);
-  const isGrupal=curUser&&curUser.planType==='grupal';
+  const isGrupal=rescheduling?rescheduleBk.isGroup:(curUser&&curUser.planType==='grupal');
+  const excludeBid=rescheduling?rescheduleBk.id:null;
   const list=document.getElementById('sl');
   // Preserve scroll position when re-rendering after slot selection
   const prevScroll=list.scrollTop;
@@ -4517,10 +4540,10 @@ async function renderBook(){
   let scrollTarget=null;
 
   for(let idx=0;idx<TOTAL_SLOTS;idx++){
-    const occ=getSlotOccupancy(ds,idx);
+    const occ=getSlotOccupancy(ds,idx,excludeBid);
     const free=CAP-occ.count;
     const past=isSlotPast(ds,idx);
-    const slotsUsed=selStartIdx!==null?(selShort?BOOKING_SLOTS_SHORT:BOOKING_SLOTS):BOOKING_SLOTS;
+    const slotsUsed=selStartIdx!==null?(rescheduling?rescheduleBk.slotsUsed:(selShort?BOOKING_SLOTS_SHORT:BOOKING_SLOTS)):BOOKING_SLOTS;
     const isSelectedBlock=selStartIdx!==null&&idx>=selStartIdx&&idx<selStartIdx+slotsUsed;
 
     const row=document.createElement('div');
@@ -4596,22 +4619,28 @@ function renderConfPanel(ds,isGrupal){
   const strip=document.getElementById('sel-strip');
   const panel=document.getElementById('conf-panel');
   if(selStartIdx===null){strip.style.display='none';panel.style.display='none';return;}
-  const slotsUsed=selShort?BOOKING_SLOTS_SHORT:BOOKING_SLOTS;
+  const rescheduling=!!(rescheduleBk&&rescheduleBk.ds===ds);
+  const slotsUsed=rescheduling?rescheduleBk.slotsUsed:(selShort?BOOKING_SLOTS_SHORT:BOOKING_SLOTS);
   const startTime=fmtSlot(selStartIdx);
   const endTime=fmtSlot(selStartIdx+slotsUsed);
   const timeStr=fmtTimeRange(selStartIdx,slotsUsed);
   strip.style.display='block';
-  strip.innerHTML='Seleccionado: <strong>'+startTime+' \u2013 '+endTime+'</strong> \u00b7 '+(selShort?'60':'90')+' min'+(isGrupal?' \u00b7 <strong>4 espacios</strong>':'');
+  strip.innerHTML='Seleccionado: <strong>'+startTime+' \u2013 '+endTime+'</strong> \u00b7 '+(slotsUsed===BOOKING_SLOTS_SHORT?'60':'90')+' min'+(isGrupal?' \u00b7 <strong>4 espacios</strong>':'');
   panel.style.display='block';
   const wb=document.getElementById('bwarn'),cb=document.getElementById('bcred');
   const bc=document.getElementById('bc'),bw=document.getElementById('bw'),pt=document.getElementById('pt'),sb=document.getElementById('sb');
-  const check=canStartAt(ds,selStartIdx,isGrupal,slotsUsed);
-  const active=hasActive(curUser);
-  sb.innerHTML='<strong>'+fmtD(curDate)+'</strong><br>'+timeStr+' \u00b7 '+(selShort?'60':'90')+' min'+(isGrupal?'<br>Reserva grupal \u00b7 bloquea los 4 espacios':'');
+  const check=canStartAt(ds,selStartIdx,isGrupal,slotsUsed,rescheduling?rescheduleBk.id:null);
+  const active=rescheduling?true:hasActive(curUser);
+  sb.innerHTML=(rescheduling?'Cambiando de <strong>'+rescheduleBk.timeStr+'</strong> a:<br>':'')
+    +'<strong>'+fmtD(curDate)+'</strong><br>'+timeStr+' \u00b7 '+(slotsUsed===BOOKING_SLOTS_SHORT?'60':'90')+' min'+(isGrupal?'<br>Reserva grupal \u00b7 bloquea los 4 espacios':'');
   // Reset button handlers
-  bc.onclick=doConfirm;
+  bc.onclick=rescheduling?doReschedule:doConfirm;
   bw.onclick=doWaitlist;
-  if(check.reason==='past'){
+  if(rescheduling&&selStartIdx===rescheduleBk.startIdx){
+    pt.textContent='Mismo horario';
+    wb.style.display='block';wb.innerHTML='Ya tienes este horario. Elige uno distinto para cambiarlo.';
+    bc.style.display='none';bw.style.display='none';cb.style.display='none';
+  } else if(check.reason==='past'){
     pt.textContent='Horario pasado';
     wb.style.display='block';wb.innerHTML='Este horario ya pas\u00f3. Elige un horario futuro.';
     bc.style.display='none';bw.style.display='none';cb.style.display='none';
@@ -4632,21 +4661,21 @@ function renderConfPanel(ds,isGrupal){
     wb.style.display='block';wb.innerHTML='Este horario tiene una reserva grupal activa. Elige otro.';
     bc.style.display='none';bw.style.display='none';cb.style.display='none';
   } else if(check.reason==='full'||check.reason==='full_slot'){
-    if(!selShort&&find60minGap(ds,selStartIdx)){
+    if(!rescheduling&&!selShort&&find60minGap(ds,selStartIdx)){
       pt.textContent='Solo hay 60 minutos disponibles';
       wb.style.display='block';
       wb.innerHTML='El espacio de 90 min no est\u00e1 disponible, pero tienes <strong>60 minutos libres</strong> ('+startTime+' \u2013 '+fmtSlot(selStartIdx+BOOKING_SLOTS_SHORT)+'). \u00bfQuieres reservar 60 min?';
       bc.style.display='block';bc.disabled=false;bc.textContent='Reservar 60 minutos';
       bc.onclick=function(){selShort=true;renderBook();};
       bw.style.display='none';cb.style.display='none';
-    } else if(check.reason==='full'){
+    } else if(check.reason==='full'&&!rescheduling){
       pt.textContent='Lista de espera';
       const wc=(waitlists[ds+'_'+selStartIdx]||[]).length;
       wb.style.display='block';wb.innerHTML='Este horario est\u00e1 lleno. '+(wc?'Hay '+wc+' persona'+(wc>1?'s':'')+' antes que t\u00fa.':'Ser\u00edas el/la primero/a.');
       bc.style.display='none';bw.style.display='block';cb.style.display='none';
     } else {
       pt.textContent='Sin espacio';
-      wb.style.display='block';wb.innerHTML='El bloque de las <strong>'+check.slotTime+'</strong> est\u00e1 lleno. Elige otro horario.';
+      wb.style.display='block';wb.innerHTML=(check.slotTime?'El bloque de las <strong>'+check.slotTime+'</strong> est\u00e1 lleno.':'Este horario est\u00e1 lleno.')+' Elige otro horario.';
       bc.style.display='none';bw.style.display='none';cb.style.display='none';
     }
   } else if(!active){
@@ -4657,17 +4686,21 @@ function renderConfPanel(ds,isGrupal){
     cb.style.display='none';bw.style.display='none';
   } else {
     if(isGrupal&&check.grupalSpots<CAP){
-      pt.textContent='Confirmar reserva';
+      pt.textContent=rescheduling?'Confirmar cambio':'Confirmar reserva';
       wb.style.display='block';
       wb.innerHTML='\u26a0\ufe0f Solo hay <strong>'+check.grupalSpots+' espacio'+(check.grupalSpots>1?'s':'')+' disponible'+(check.grupalSpots>1?'s':'')+'</strong> durante todo este bloque. Tu reserva grupal quedar\u00e1 limitada a '+check.grupalSpots+' persona'+(check.grupalSpots>1?'s':'')+'.';
       bc.style.display='block';bc.disabled=false;bc.textContent='Confirmar ('+check.grupalSpots+' personas)';
       bw.style.display='none';
     } else {
-      pt.textContent='Confirmar reserva';
+      pt.textContent=rescheduling?'Confirmar cambio':'Confirmar reserva';
       wb.style.display='none';bc.style.display='block';bw.style.display='none';bc.disabled=false;
-      bc.textContent=selShort?'Confirmar 60 minutos':'Confirmar reserva';
+      bc.textContent=rescheduling?'Cambiar a este horario':(selShort?'Confirmar 60 minutos':'Confirmar reserva');
     }
-    {const _allP=[...PLANS.individual,...PLANS.grupal];const _cp=_allP.find(x=>x.id===curUser.plan);const _unlim=curUser.credits>=999||(_cp&&_cp.credits>=999);cb.style.display='block';cb.innerHTML='Members\u00eda activa \u00b7 '+(_unlim?'Mensual ilimitado':curUser.credits+' visita'+(curUser.credits===1?'':'s')+' restantes');}
+    if(rescheduling){
+      cb.style.display='none';
+    } else {
+      const _allP=[...PLANS.individual,...PLANS.grupal];const _cp=_allP.find(x=>x.id===curUser.plan);const _unlim=curUser.credits>=999||(_cp&&_cp.credits>=999);cb.style.display='block';cb.innerHTML='Members\u00eda activa \u00b7 '+(_unlim?'Mensual ilimitado':curUser.credits+' visita'+(curUser.credits===1?'':'s')+' restantes');
+    }
   }
 }
 
@@ -4759,7 +4792,7 @@ async function doConfirm(){
       else targetDay[part.idx].push(entry);
     }
     curUser.bookings=curUser.bookings||[];
-    curUser.bookings.push({id:bk.id,ds,startIdx:selStartIdx,slotsUsed,isGroup:isGrupal,grupalSpots,timeStr,durMin});
+    curUser.bookings.push({id:bk.id,ds,startIdx:selStartIdx,slotsUsed,isGroup:isGrupal,grupalSpots,timeStr,durMin,createdAt:bk.created_at});
 
     // 5. Notify admin
     try{await sb.from('admin_notifs').insert({message:'Reserva: '+curUser.name+' - '+fmtDS(ds)+' '+timeStr+(isGrupal?' (grupal)':'')});}catch(e){}
@@ -4811,12 +4844,16 @@ async function doWaitlist(){
 
 function canCancelBk(b){
   const sessionMs=mazDateMs(b.ds,b.startIdx);
-  return(sessionMs-mazNow().getTime())/3600000>=CANCEL_H;
+  if(sessionMs<=mazNow().getTime())return false;
+  const hoursUntilSession=(sessionMs-mazNow().getTime())/3600000;
+  if(hoursUntilSession>=CANCEL_H)return true;
+  if(!b.createdAt)return false;
+  return(mazNow().getTime()-new Date(b.createdAt).getTime())/3600000<=CANCEL_WINDOW_H;
 }
 async function cancelBooking(bid){
   const b=(curUser.bookings||[]).find(x=>x.id===bid);
   if(!b){toast('No encontrada','err');return;}
-  if(!canCancelBk(b)){toast('Solo puedes cancelar con mas de 12h de anticipacion','err');return;}
+  if(!canCancelBk(b)){toast('Solo puedes cancelar con más de '+CANCEL_H+'h de anticipación, o dentro de las '+CANCEL_WINDOW_H+'h después de reservar. Prueba cambiar el horario.','err');return;}
   showLoading('Cancelando...');
   try{
     await sb.from('bookings').update({status:'cancelled'}).eq('id',bid);
@@ -4837,6 +4874,91 @@ async function cancelBooking(bid){
   }catch(e){
     hideLoading();
     toast('Error: '+e.message,'err');
+  }
+}
+
+// ── RESCHEDULE (same-day time change, allowed even after the cancel window closes) ──
+function startReschedule(bid){
+  const b=(curUser.bookings||[]).find(x=>x.id===bid);
+  if(!b){toast('No encontrada','err');return;}
+  if(mazDateMs(b.ds,b.startIdx)<=mazNow().getTime()){toast('Esta reserva ya no se puede cambiar','err');return;}
+  rescheduleBk={id:b.id,ds:b.ds,startIdx:b.startIdx,slotsUsed:b.slotsUsed||BOOKING_SLOTS,isGroup:b.isGroup,timeStr:b.timeStr};
+  curDate=dateObjFromDS(b.ds);
+  selStartIdx=null;selShort=false;
+  sv('book');
+  toast('Elige el nuevo horario para tu reserva','warn');
+}
+function cancelRescheduleMode(){
+  rescheduleBk=null;
+  clearSel();
+}
+async function doReschedule(){
+  if(bookingSubmitting)return;
+  if(!rescheduleBk||selStartIdx===null)return;
+  const ds=dk(curDate);
+  if(ds!==rescheduleBk.ds){toast('Solo puedes cambiar el horario dentro del mismo día','err');return;}
+  if(selStartIdx===rescheduleBk.startIdx){toast('Ya tienes ese horario','warn');return;}
+  bookingSubmitting=true;
+  const isGrupal=rescheduleBk.isGroup;
+  const slotsUsed=rescheduleBk.slotsUsed;
+  try{
+    await loadSlotOccupancyFromSb(ds);
+    await loadSlotOccupancyFromSb(addDaysDS(ds,1));
+  }catch(e){}
+  const check=canStartAt(ds,selStartIdx,isGrupal,slotsUsed,rescheduleBk.id);
+  if(!check.ok){bookingSubmitting=false;toast('Este horario ya no está disponible','err');renderBook();return;}
+  showLoading('Cambiando horario...');
+  try{
+    const grupalSpots=isGrupal?(check.grupalSpots||CAP):1;
+    const durMin=slotsUsed*30;
+    const timeStr=fmtTimeRange(selStartIdx,slotsUsed);
+    const oldStartIdx=rescheduleBk.startIdx,oldDs=rescheduleBk.ds,bid=rescheduleBk.id;
+
+    const{error:bkErr}=await sb.from('bookings').update({
+      start_idx:selStartIdx,time_str:timeStr,grupal_spots:grupalSpots
+    }).eq('id',bid);
+    if(bkErr)throw bkErr;
+
+    await sb.from('slot_occupancy').delete().eq('booking_id',bid);
+    const occRows=[];
+    for(const part of slotRange(ds,selStartIdx,slotsUsed)){
+      if(isGrupal)occRows.push({ds:part.ds,slot_idx:part.idx,user_id:sbUser.id,booking_id:bid,is_group:true,spot:grupalSpots});
+      else occRows.push({ds:part.ds,slot_idx:part.idx,user_id:sbUser.id,booking_id:bid,is_group:false});
+    }
+    const{error:occErr}=await sb.from('slot_occupancy').insert(occRows);
+    if(occErr)throw occErr;
+
+    // Update local state: remove old slot entries, add new ones
+    const oldDay=getDaySlots(oldDs);
+    for(let i=0;i<rescheduleBk.slotsUsed;i++){
+      const si=oldStartIdx+i;
+      if(oldDay[si])oldDay[si]=oldDay[si].filter(x=>x.bookingId!==bid);
+    }
+    const entry={userId:curUser.id,name:curUser.name,phone:curUser.phone||'',isGroup:isGrupal,bookingId:bid};
+    for(const part of slotRange(ds,selStartIdx,slotsUsed)){
+      const targetDay=getDaySlots(part.ds);
+      if(!targetDay[part.idx])targetDay[part.idx]=[];
+      if(isGrupal)targetDay[part.idx].push({...entry,spot:grupalSpots});
+      else targetDay[part.idx].push(entry);
+    }
+    const bkIdx=curUser.bookings.findIndex(x=>x.id===bid);
+    if(bkIdx>=0)curUser.bookings[bkIdx]={...curUser.bookings[bkIdx],startIdx:selStartIdx,slotsUsed,grupalSpots,timeStr,durMin};
+
+    try{await sb.from('admin_notifs').insert({message:'Cambio de horario: '+curUser.name+' - '+fmtDS(ds)+' → '+timeStr+(isGrupal?' (grupal)':'')});}catch(e){}
+    sendPush('admin','🔁 Cambio de horario',curUser.name+' · '+fmtDS(ds)+' ahora '+timeStr,{tag:'booking-reschedule'});
+
+    hideLoading();
+    addN('Horario actualizado - '+fmtDS(ds)+' '+timeStr+'.','success');
+    toast('Horario actualizado','ok');
+    rescheduleBk=null;
+    clearSel();
+    renderActiveBookings().catch(()=>{});
+  }catch(e){
+    hideLoading();
+    toast('Error al cambiar horario: '+e.message,'err');
+    console.error('doReschedule error:',e);
+  }finally{
+    bookingSubmitting=false;
   }
 }
 
@@ -12469,6 +12591,11 @@ function handleCancelBk(btn){
     loadAccessData();
     renderMembershipStatus();
   }).catch(e=>toast('Error: '+e.message,'err'));
+}
+function handleRescheduleBk(btn){
+  const bid=btn.dataset.bid;
+  if(!bid)return;
+  startReschedule(bid);
 }
 
 document.addEventListener('visibilitychange',()=>{
