@@ -193,7 +193,7 @@ const DOW=['MON','TUE','WED','THU','FRI','SAT','SUN'];
 const MUSCLE_GROUP_ORDER=['Chest','Back','Shoulders','Arms','Legs','Core','Other'];
 const MUSCLE_GROUP_MAP={Chest:'Chest',Back:'Back',Shoulders:'Shoulders',Biceps:'Arms',Triceps:'Arms',Forearms:'Arms',Quads:'Legs',Hamstrings:'Legs',Glutes:'Legs','Hip Flexors':'Legs',Core:'Core'};
 const state={user:null,profile:null,view:'home',authMode:'login',exercises:[],templates:[],items:[],sessions:[],sets:[],active:null,activeItems:[],timer:null,elapsed:0,rest:0};
-let builderState={selected:new Set(),group:'All'};
+let builderState={selected:new Map(),group:'All'};
 
 const $=id=>document.getElementById(id);
 const esc=s=>(s??'').toString().replace(/[&<>"']/g,m=>({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[m]));
@@ -437,10 +437,18 @@ function groupExercisesByMuscle(list){
 }
 
 function templateExerciseOption(e){
-  const checked=builderState.selected.has(e.id);
-  return `<label class="row card" style="margin:0 0 8px">
-    <div><strong>${esc(e.name)}</strong><p>${esc(e.category)}</p></div>
-    <input class="tplEx" type="checkbox" value="${e.id}" ${checked?'checked':''} onchange="toggleBuilderExercise('${e.id}',this.checked)">
+  const cfg=builderState.selected.get(e.id);
+  const checked=!!cfg;
+  return `<label class="card" style="display:block;margin:0 0 8px">
+    <div class="row">
+      <div><strong>${esc(e.name)}</strong><p>${esc(e.category)}</p></div>
+      <input class="tplEx" type="checkbox" value="${e.id}" ${checked?'checked':''} onchange="toggleBuilderExercise('${e.id}',this.checked)">
+    </div>
+    ${checked?`<div class="row" style="margin-top:10px;gap:8px">
+      <input class="field" type="number" min="1" max="12" inputmode="numeric" value="${cfg.sets}" placeholder="sets" onclick="event.preventDefault()" onchange="updateBuilderConfig('${e.id}','sets',this.value)">
+      <input class="field" type="text" value="${esc(cfg.reps)}" placeholder="reps" onclick="event.preventDefault()" onchange="updateBuilderConfig('${e.id}','reps',this.value)">
+      <input class="field" type="number" min="0" step="15" inputmode="numeric" value="${cfg.rest}" placeholder="rest s" onclick="event.preventDefault()" onchange="updateBuilderConfig('${e.id}','rest',this.value)">
+    </div>`:''}
   </label>`;
 }
 
@@ -655,8 +663,8 @@ function openExercise(id){
 
 function openTemplateBuilder(day=null,id=null){
   const t=state.templates.find(x=>x.id===id)||{name:'',weekday:day??todayDow(),notes:''};
-  const selected=state.items.filter(i=>i.template_id===id).map(i=>i.exercise_id);
-  builderState={selected:new Set(selected),group:'All'};
+  const items=state.items.filter(i=>i.template_id===id);
+  builderState={selected:new Map(items.map(i=>[i.exercise_id,{sets:i.target_sets||3,reps:i.target_reps||'8-12',rest:i.target_rest_sec??90}])),group:'All'};
   $('modal').classList.add('show');
   $('modalCard').innerHTML=`
     <div class="row"><h1>${id?'Edit':'New'} routine</h1><button class="x" onclick="closeModal()">×</button></div>
@@ -693,11 +701,20 @@ function setBuilderGroup(group){
 }
 
 function toggleBuilderExercise(id,checked){
-  if(checked) builderState.selected.add(id); else builderState.selected.delete(id);
+  if(checked) builderState.selected.set(id,{sets:3,reps:'8-12',rest:90});
+  else builderState.selected.delete(id);
+  renderTemplateExercisePicker();
+}
+
+function updateBuilderConfig(id,key,value){
+  const cfg=builderState.selected.get(id);
+  if(!cfg) return;
+  if(key==='reps') cfg.reps=value.trim()||'8-12';
+  else cfg[key]=Math.max(0,Number(value)||0)||(key==='sets'?1:0);
 }
 
 async function saveTemplate(id){
-  const checked=[...builderState.selected];
+  const checked=[...builderState.selected.keys()];
   if(!$('tplName').value.trim()||!checked.length) return alert('Add a name and at least one exercise.');
   const payload={user_id:state.user.id,name:$('tplName').value.trim(),weekday:Number($('tplDay').value),notes:$('tplNotes').value.trim()||null,is_public:true,updated_at:new Date().toISOString()};
   let templateId=id;
@@ -708,7 +725,10 @@ async function saveTemplate(id){
     templateId=data.id;
   }
   await sb.from('skandi_template_items').delete().eq('template_id',templateId);
-  const rows=checked.map((exercise_id,idx)=>({template_id:templateId,exercise_id,sort_order:idx,target_sets:3,target_reps:'8-12',target_rest_sec:90}));
+  const rows=checked.map((exercise_id,idx)=>{
+    const cfg=builderState.selected.get(exercise_id);
+    return {template_id:templateId,exercise_id,sort_order:idx,target_sets:cfg.sets,target_reps:cfg.reps,target_rest_sec:cfg.rest};
+  });
   await sb.from('skandi_template_items').insert(rows);
   closeModal();
   await loadAll();
