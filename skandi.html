@@ -96,20 +96,23 @@ textarea.field{min-height:112px;text-align:left;resize:vertical}
 .check{height:48px;border-radius:15px;background:var(--panel2);color:var(--muted);border:1px solid var(--line);font-weight:1000}
 .check.done{background:var(--lime);color:#08090d}
 .set-remove{width:30px;height:48px;border-radius:12px;background:transparent;color:var(--muted);border:1px solid var(--line);font-size:18px;font-weight:900;line-height:1}
-.timer-hero{display:grid;justify-items:center;gap:14px;margin:14px 0}
-.rest-ring{position:relative;width:180px;height:180px}
-.rest-ring svg{width:100%;height:100%;transform:rotate(-90deg)}
-.rest-ring .ring-track{fill:none;stroke:var(--panel2);stroke-width:10}
-.rest-ring .ring-fg{fill:none;stroke:var(--lime);stroke-width:10;stroke-linecap:round;transition:stroke-dashoffset .3s linear}
-.rest-ring-center{position:absolute;inset:0;display:grid;place-items:center;text-align:center}
-.rest-ring-center small{display:block;letter-spacing:.18em;color:var(--muted);font-weight:900;font-size:11px;margin-bottom:4px}
-.rest-ring-center strong{font-size:38px;line-height:1}
-.rest-presets{display:flex;gap:8px;flex-wrap:wrap;justify-content:center}
-.chip{background:var(--panel2);color:var(--muted);border:1px solid var(--line);border-radius:999px;padding:8px 14px;font-weight:900;font-size:13px}
+.workout-bar{position:sticky;top:-20px;z-index:5;margin:-20px -20px 16px;padding:16px 20px 14px;background:var(--panel);border-bottom:1px solid var(--line);border-radius:28px 28px 0 0}
+.workout-bar-title{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:12px}
+.workout-bar-title h1{font-size:20px}
+.workout-bar-top{display:flex;align-items:center;gap:12px}
+.mini-ring{position:relative;width:56px;height:56px;flex:0 0 auto}
+.mini-ring svg{width:100%;height:100%;transform:rotate(-90deg)}
+.mini-ring .ring-track{fill:none;stroke:var(--panel2);stroke-width:6}
+.mini-ring .ring-fg{fill:none;stroke:var(--lime);stroke-width:6;stroke-linecap:round;transition:stroke-dashoffset .3s linear}
+.mini-ring-center{position:absolute;inset:0;display:grid;place-items:center;font-size:11px;font-weight:1000}
+.workout-bar-info{flex:1;min-width:0}
+.workout-bar-info small{display:block;color:var(--muted);font-weight:800;letter-spacing:.08em;text-transform:uppercase;font-size:10px}
+.workout-bar-info strong{font-size:20px}
+.icon-btn{width:40px;height:40px;border-radius:50%;background:var(--panel2);border:1px solid var(--line);color:var(--text);display:grid;place-items:center;font-size:16px;flex:0 0 auto}
+.icon-btn.danger{color:var(--pink)}
+.rest-presets{display:flex;gap:6px;flex-wrap:wrap;margin-top:12px}
+.chip{background:var(--panel2);color:var(--muted);border:1px solid var(--line);border-radius:999px;padding:7px 12px;font-weight:900;font-size:12px}
 .chip.active{background:var(--lime);color:#07080b;border-color:var(--lime)}
-.stopwatch-pill{background:#0b0c12;border:1px solid var(--line);border-radius:16px;padding:10px 16px;text-align:center}
-.stopwatch-pill small{display:block;color:var(--muted);font-weight:800;font-size:11px}
-.stopwatch-pill strong{font-size:18px}
 .feed{padding:16px;margin:12px 0}
 .feed-title{display:flex;align-items:center;gap:10px}
 .dot{width:10px;height:10px;border-radius:50%;background:var(--green)}
@@ -235,7 +238,7 @@ const MUSCLE_BODY_REGIONS=[
 ];
 const MUSCLE_BODY_SCAFFOLD_ARMS=[{shape:'ellipse',cx:24,cy:172,rx:11,ry:30},{shape:'ellipse',cx:146,cy:172,rx:11,ry:30}];
 const state={user:null,profile:null,view:'home',authMode:'login',exercises:[],templates:[],items:[],sessions:[],sets:[],active:null,activeItems:[],timer:null,elapsed:0,rest:0,restTotal:0};
-const REST_RING_C=2*Math.PI*52;
+const REST_RING_C=2*Math.PI*24;
 let builderState={selected:new Map(),group:'All'};
 
 const $=id=>document.getElementById(id);
@@ -751,24 +754,27 @@ function renderActiveWorkout(){
   const running=!!state.timer;
   const restPresets=[30,60,90,120,180];
   $('modalCard').innerHTML=`
-    <div class="row"><div><p class="muted">Today workout</p><h1>${esc(state.active.title)}</h1></div><button class="x" onclick="closeModal()">×</button></div>
-    <section class="timer-hero">
-      <div class="rest-ring">
-        <svg viewBox="0 0 120 120">
-          <circle class="ring-track" cx="60" cy="60" r="52"></circle>
-          <circle id="restRingFg" class="ring-fg" cx="60" cy="60" r="52" stroke-dasharray="${REST_RING_C.toFixed(1)}" stroke-dashoffset="${restRingOffset().toFixed(1)}"></circle>
-        </svg>
-        <div class="rest-ring-center"><small>Rest</small><strong id="activeRest">${fmtSec(state.rest)}</strong></div>
+    <div class="workout-bar">
+      <div class="workout-bar-title">
+        <div><small class="muted">Today workout</small><h1>${esc(state.active.title)}</h1></div>
+        <button class="x" onclick="closeModal()">×</button>
+      </div>
+      <div class="workout-bar-top">
+        <div class="mini-ring">
+          <svg viewBox="0 0 60 60">
+            <circle class="ring-track" cx="30" cy="30" r="24"></circle>
+            <circle id="restRingFg" class="ring-fg" cx="30" cy="30" r="24" stroke-dasharray="${REST_RING_C.toFixed(1)}" stroke-dashoffset="${restRingOffset().toFixed(1)}"></circle>
+          </svg>
+          <div class="mini-ring-center" id="activeRest">${fmtSec(state.rest)}</div>
+        </div>
+        <div class="workout-bar-info"><small>Elapsed</small><strong id="activeStopwatch">${fmtSec(state.elapsed)}</strong></div>
+        <button class="icon-btn" onclick="toggleWorkoutTimer()" aria-label="${running?'Pause':'Resume'}">${running?'⏸':'▶'}</button>
+        <button class="icon-btn danger" onclick="cancelWorkout()" aria-label="Cancel workout">✕</button>
       </div>
       <div class="rest-presets">
         ${restPresets.map(s=>`<button type="button" class="chip ${state.restTotal===s?'active':''}" onclick="setRest(${s})">${s<60?s+'s':(s/60)+'m'}</button>`).join('')}
       </div>
-      <div class="row" style="width:100%;gap:10px">
-        <div class="stopwatch-pill"><small>Elapsed</small><strong id="activeStopwatch">${fmtSec(state.elapsed)}</strong></div>
-        <button class="btn ${running?'':'primary'}" style="flex:1" onclick="toggleWorkoutTimer()">${running?'⏸ Pause':'▶ Resume'}</button>
-        <button class="btn danger" onclick="cancelWorkout()">Cancel</button>
-      </div>
-    </section>
+    </div>
     <p style="margin:14px 0"><span class="pill">${done}/${allSets.length}</span></p>
     ${state.activeItems.map(item=>activeExercise(item,allSets.filter(s=>s.exercise_id===item.exercise_id))).join('')}
     <button class="btn primary" style="width:100%;margin-top:12px" onclick="openReport()">Send report</button>`;
