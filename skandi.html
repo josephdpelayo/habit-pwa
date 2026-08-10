@@ -392,7 +392,6 @@ function progressView(){
 function libraryView(){
   return `
     <div class="row"><h1>Library</h1><button class="btn primary" onclick="openExerciseBuilder()">+ Exercise</button></div>
-    <button class="btn" style="width:100%;margin:4px 0 10px" onclick="autoFillExerciseGifs()">Auto-fill missing GIFs</button>
     <div class="search"><input id="q" class="field left" placeholder="Search exercise..." oninput="renderLibraryList()"><button class="btn" onclick="renderLibraryList()">Search</button></div>
     <div id="libraryList">${exerciseList(state.exercises)}</div>`;
 }
@@ -416,7 +415,6 @@ function exerciseCard(e,tracking){
       <div class="play">▶</div>
     </div>
     <div class="muscles">${muscles.map(([m,p])=>`<span class="pill dark">${esc(m)} ${p}%</span>`).join('')}</div>
-    <button class="btn small" onclick="event.stopPropagation(); findExerciseGif('${e.id}')">${e.media_url?'Replace GIF':'Find GIF'}</button>
     ${muscles.slice(0,3).map(([m,p])=>`<div><div class="row"><small>${esc(m)}</small><small>${p}%</small></div><div class="bar"><i style="width:${p}%"></i></div></div>`).join('')}
   </article>`;
 }
@@ -611,95 +609,10 @@ function openExercise(id){
     <div class="card">
       ${e.media_url?`<img src="${esc(e.media_url)}" alt="${esc(e.name)}" style="width:100%;border-radius:20px;max-height:520px;object-fit:cover">`:empty('Paste a Gymvisual GIF or another source in the library to see technique here.')}
       ${e.media_page_url?`<p style="margin-top:12px"><a class="accent" href="${esc(e.media_page_url)}" target="_blank" rel="noreferrer">Open Gymvisual reference</a></p>`:''}
-      <button class="btn primary" style="margin-top:12px" onclick="findExerciseGif('${e.id}')">${e.media_url?'Find a better GIF':'Find GIF automatically'}</button>
     </div>
     <section class="card"><div class="eyebrow">Muscles involved</div>${muscles.map(([m,p])=>`<div style="margin-top:10px"><div class="row"><strong>${esc(m)}</strong><span>${p}%</span></div><div class="bar"><i style="width:${p}%"></i></div></div>`).join('')}</section>
     <section class="card"><div class="eyebrow">How to do it</div><ol>${(e.instructions||[]).map(x=>`<li>${esc(x)}</li>`).join('')}</ol></section>
     <section class="card"><div class="eyebrow">Coach tips</div><ul>${(e.coach_tips||[]).map(x=>`<li>${esc(x)}</li>`).join('')}</ul></section>`;
-}
-
-async function findExerciseGif(id){
-  const e=state.exercises.find(x=>x.id===id);
-  if(!e) return;
-  $('modal').classList.add('show');
-  $('modalCard').innerHTML=`
-    <div class="row"><div><p class="muted">Gymvisual search</p><h1>${esc(e.name)}</h1></div><button class="x" onclick="closeModal()">×</button></div>
-    <section class="card"><p>Searching for lightweight technique GIFs...</p></section>`;
-  try{
-    const res=await fetch(`/api/skandi-gif-search?q=${encodeURIComponent(e.english_name||e.name)}`);
-    const json=await res.json();
-    const results=json.results||[];
-    $('modalCard').innerHTML=`
-      <div class="row"><div><p class="muted">Gymvisual search</p><h1>${esc(e.name)}</h1></div><button class="x" onclick="closeModal()">×</button></div>
-      ${results.length?results.map((r,idx)=>gifResult(e,r,idx)).join(''):empty('No direct result found. Open Gymvisual, copy a GIF URL, and paste it in the exercise editor.')}
-      <a class="btn" style="width:100%;margin-top:12px" target="_blank" rel="noreferrer" href="https://gymvisual.com/16-animated-gifs">Open Gymvisual library</a>`;
-  }catch(error){
-    $('modalCard').innerHTML=`
-      <div class="row"><h1>GIF search failed</h1><button class="x" onclick="closeModal()">×</button></div>
-      ${empty('The automatic search could not connect right now. You can still paste any GIF/video URL manually.')}
-      <a class="btn" style="width:100%;margin-top:12px" target="_blank" rel="noreferrer" href="https://gymvisual.com/16-animated-gifs">Open Gymvisual library</a>`;
-  }
-}
-
-async function autoFillExerciseGifs(){
-  const missing=state.exercises.filter(e=>!e.media_url).slice(0,20);
-  if(!missing.length) return alert('All exercises already have GIFs.');
-  $('modal').classList.add('show');
-  $('modalCard').innerHTML=`
-    <div class="row"><h1>Auto-fill GIFs</h1><button class="x" onclick="closeModal()">×</button></div>
-    <section class="card"><p id="gifProgress">Starting...</p></section>`;
-  let saved=0;
-  for(const e of missing){
-    $('gifProgress').textContent=`Searching ${e.name}... ${saved}/${missing.length} saved`;
-    try{
-      const res=await fetch(`/api/skandi-gif-search?q=${encodeURIComponent(e.english_name||e.name)}`);
-      const json=await res.json();
-      const hit=(json.results||[]).find(r=>r.mediaUrl);
-      if(hit){
-        const {error}=await sb.rpc('skandi_update_exercise_media',{
-          p_exercise_id:e.id,
-          p_media_url:hit.mediaUrl,
-          p_media_page_url:hit.pageUrl||null
-        });
-        if(!error) saved++;
-      }
-    }catch{
-      // Keep moving so one search failure does not stop the batch.
-    }
-  }
-  await loadAll();
-  $('modalCard').innerHTML=`
-    <div class="row"><h1>Auto-fill complete</h1><button class="x" onclick="closeModal()">×</button></div>
-    <section class="card"><p>${saved} of ${missing.length} missing GIFs were updated.</p></section>
-    <button class="btn primary" style="width:100%" onclick="closeModal();render()">Done</button>`;
-}
-
-function gifResult(e,result,idx){
-  const preview=result.mediaUrl?`<img src="${esc(result.mediaUrl)}" alt="${esc(result.title)}" style="width:100%;max-height:180px;object-fit:cover;border-radius:16px" loading="lazy">`:'';
-  const page=result.pageUrl?`<a class="accent" target="_blank" rel="noreferrer" href="${esc(result.pageUrl)}">Open source page</a>`:'';
-  const disabled=result.mediaUrl?'':'disabled';
-  return `<article class="card">
-    ${preview}
-    <h3 style="margin-top:10px">${esc(result.title||`Result ${idx+1}`)}</h3>
-    <p>${esc(result.source||'Gymvisual')}</p>
-    <div class="row" style="margin-top:12px">
-      <button class="btn primary" ${disabled} onclick="saveExerciseGif('${e.id}', '${esc(result.mediaUrl||'')}', '${esc(result.pageUrl||'')}')">Use this GIF</button>
-      ${page}
-    </div>
-  </article>`;
-}
-
-async function saveExerciseGif(id,mediaUrl,pageUrl){
-  if(!mediaUrl) return;
-  const {error}=await sb.rpc('skandi_update_exercise_media',{
-    p_exercise_id:id,
-    p_media_url:mediaUrl,
-    p_media_page_url:pageUrl||null
-  });
-  if(error) return alert(error.message);
-  await loadAll();
-  closeModal();
-  render();
 }
 
 function openTemplateBuilder(day=null,id=null){
