@@ -109,6 +109,7 @@ textarea.field{min-height:112px;text-align:left;resize:vertical}
 .workout-bar-info small{display:block;color:var(--muted);font-weight:800;letter-spacing:.08em;text-transform:uppercase;font-size:10px}
 .workout-bar-info strong{font-size:20px}
 .icon-btn{width:40px;height:40px;border-radius:50%;background:var(--panel2);border:1px solid var(--line);color:var(--text);display:grid;place-items:center;font-size:16px;flex:0 0 auto}
+.icon-btn.tiny{width:30px;height:30px;font-size:13px}
 .icon-btn.danger{color:var(--pink)}
 .rest-presets{display:flex;gap:6px;flex-wrap:wrap;margin-top:12px}
 .chip{background:var(--panel2);color:var(--muted);border:1px solid var(--line);border-radius:999px;padding:7px 12px;font-weight:900;font-size:12px}
@@ -389,17 +390,22 @@ function trainView(){
   const community=state.templates.filter(t=>t.user_id!==state.user.id);
   return `
     ${activeWorkoutBanner()}
-    <div class="row"><h1>Train</h1><button class="btn primary" onclick="openTemplateBuilder()">+ Routine</button></div>
+    <div class="row"><h1>Train</h1><button class="btn primary" onclick="openDayPicker(todayDow())">+ Routine</button></div>
     <section class="card">
       <div class="row"><h2>Your week</h2><span class="muted">${mine.length} routines</span></div>
       <div class="week">
         ${DOW.map((d,i)=>{
           const t=mine.find(x=>x.weekday===i);
-          return `<button class="day ${i===todayDow()?'today':''}" onclick="${t?`startWorkout('${t.id}')`:'openTemplateBuilder('+i+')'}"><span>${d}</span><span>${esc(t?.name||'Add routine')}</span><span>›</span></button>`;
+          if(!t) return `<button class="day ${i===todayDow()?'today':''}" onclick="openDayPicker(${i})"><span>${d}</span><span>Add routine</span><span>›</span></button>`;
+          return `<div class="day ${i===todayDow()?'today':''}" style="grid-template-columns:64px 1fr auto">
+            <span>${d}</span>
+            <span style="cursor:pointer" onclick="startWorkout('${t.id}')">${esc(t.name)}</span>
+            <button class="icon-btn tiny" onclick="openDayManage('${t.id}',${i})" aria-label="Manage ${d}">⋯</button>
+          </div>`;
         }).join('')}
       </div>
     </section>
-    <h2>My routines</h2>
+    <div class="row"><h2>My routines</h2><button class="btn small" onclick="openTemplateBuilder()">+ New routine</button></div>
     ${mine.length?mine.map(t=>workoutCard(t)).join(''):empty('You have not created a routine yet.')}
     <h2>Community routines</h2>
     ${community.length?community.map(t=>workoutCard(t)).join(''):empty('No routines shared by other crew yet.')}`;
@@ -996,18 +1002,102 @@ function openAddToWeek(templateId){
 }
 
 async function confirmAddToWeek(templateId){
-  const t=state.templates.find(x=>x.id===templateId);
-  if(!t) return;
   const weekday=Number($('forkDay').value);
-  const sourceItems=state.items.filter(i=>i.template_id===templateId).sort((a,b)=>a.sort_order-b.sort_order);
-  const payload={user_id:state.user.id,name:t.name,notes:t.notes,weekday,is_public:true,forked_from:t.id,forked_from_name:t.profile?.name||'Crew member',updated_at:new Date().toISOString()};
-  const {data,error}=await sb.from('skandi_templates').insert(payload).select().single();
+  const {error}=await forkTemplateToDay(templateId,weekday);
   if(error) return alert(error.message);
-  const rows=sourceItems.map((i,idx)=>({template_id:data.id,exercise_id:i.exercise_id,sort_order:idx,target_sets:i.target_sets,target_reps:i.target_reps,target_rest_sec:i.target_rest_sec,note:i.note}));
-  if(rows.length) await sb.from('skandi_template_items').insert(rows);
   closeModal();
   await loadAll();
   setView('train');
+}
+
+async function forkTemplateToDay(templateId,weekday){
+  const t=state.templates.find(x=>x.id===templateId);
+  if(!t) return {error:{message:'Routine not found.'}};
+  const sourceItems=state.items.filter(i=>i.template_id===templateId).sort((a,b)=>a.sort_order-b.sort_order);
+  const payload={user_id:state.user.id,name:t.name,notes:t.notes,weekday,is_public:true,forked_from:t.id,forked_from_name:t.profile?.name||'Crew member',updated_at:new Date().toISOString()};
+  const {data,error}=await sb.from('skandi_templates').insert(payload).select().single();
+  if(error) return {error};
+  const rows=sourceItems.map((i,idx)=>({template_id:data.id,exercise_id:i.exercise_id,sort_order:idx,target_sets:i.target_sets,target_reps:i.target_reps,target_rest_sec:i.target_rest_sec,note:i.note}));
+  if(rows.length) await sb.from('skandi_template_items').insert(rows);
+  return {data};
+}
+
+async function assignOwnRoutineToDay(templateId,weekday){
+  const bumped=state.templates.find(x=>x.user_id===state.user.id&&x.weekday===weekday&&x.id!==templateId);
+  if(bumped) await sb.from('skandi_templates').update({weekday:null,updated_at:new Date().toISOString()}).eq('id',bumped.id);
+  const {error}=await sb.from('skandi_templates').update({weekday,updated_at:new Date().toISOString()}).eq('id',templateId);
+  if(error) return alert(error.message);
+  closeModal();
+  await loadAll();
+  setView('train');
+}
+
+async function removeRoutineFromDay(templateId){
+  if(!confirm('Remove this routine from that day? The routine itself is kept, just unscheduled.')) return;
+  const {error}=await sb.from('skandi_templates').update({weekday:null,updated_at:new Date().toISOString()}).eq('id',templateId);
+  if(error) return alert(error.message);
+  closeModal();
+  await loadAll();
+  setView('train');
+}
+
+function openDayPicker(day){
+  const mine=state.templates.filter(t=>t.user_id===state.user.id);
+  const community=state.templates.filter(t=>t.user_id!==state.user.id);
+  const pickerRow=(t,isMine)=>`<div class="row card" style="margin:0 0 8px">
+    <div><strong>${esc(t.name)}</strong><p>${state.items.filter(i=>i.template_id===t.id).length} exercises${isMine?'':' · by '+esc(t.profile?.name||'Crew member')}</p></div>
+    <button class="btn small primary" onclick="${isMine?`assignOwnRoutineToDay('${t.id}',Number($('dayPickerDay').value))`:`useCommunityRoutineForDay('${t.id}')`}">Use</button>
+  </div>`;
+  $('modal').classList.add('show');
+  $('modalCard').innerHTML=`
+    <div class="row"><h1>Choose a routine</h1><button class="x" onclick="closeModal()">×</button></div>
+    <select id="dayPickerDay" class="field left">${DOW.map((d,i)=>`<option value="${i}" ${i===day?'selected':''}>${d}</option>`).join('')}</select>
+    <h2 style="margin-top:16px">My routines</h2>
+    ${mine.length?mine.map(t=>pickerRow(t,true)).join(''):empty('You have not created a routine yet.')}
+    <h2 style="margin-top:16px">Community routines</h2>
+    ${community.length?community.map(t=>pickerRow(t,false)).join(''):empty('No routines shared by other crew yet.')}
+    <button class="btn" style="width:100%;margin-top:6px" onclick="createRoutineForPickedDay()">+ Create a new routine instead</button>`;
+}
+
+async function useCommunityRoutineForDay(templateId){
+  const weekday=Number($('dayPickerDay').value);
+  const {error}=await forkTemplateToDay(templateId,weekday);
+  if(error) return alert(error.message);
+  closeModal();
+  await loadAll();
+  setView('train');
+}
+
+function createRoutineForPickedDay(){
+  const day=Number($('dayPickerDay').value);
+  closeModal();
+  openTemplateBuilder(day);
+}
+
+function openDayManage(templateId,day){
+  const t=state.templates.find(x=>x.id===templateId);
+  if(!t) return;
+  $('modal').classList.add('show');
+  $('modalCard').innerHTML=`
+    <div class="row"><h1>${esc(t.name)}</h1><button class="x" onclick="closeModal()">×</button></div>
+    <p class="muted">Scheduled for ${DOW[day]}</p>
+    <div class="stack" style="margin-top:14px">
+      <button class="btn primary" style="width:100%" onclick="closeModal();startWorkout('${t.id}')">▶ Start workout</button>
+      <button class="btn" style="width:100%" onclick="openDayPicker(${day})">🔁 Replace routine</button>
+      <button class="btn" style="width:100%" onclick="openTemplateBuilder(null,'${t.id}')">✎ Edit routine</button>
+      <button class="btn" style="width:100%" onclick="openMoveRoutine('${t.id}',${day})">📅 Move to another day</button>
+      <button class="btn danger" style="width:100%" onclick="removeRoutineFromDay('${t.id}')">✕ Remove from ${DOW[day]}</button>
+    </div>`;
+}
+
+function openMoveRoutine(templateId,day){
+  const t=state.templates.find(x=>x.id===templateId);
+  if(!t) return;
+  $('modalCard').innerHTML=`
+    <div class="row"><h1>Move ${esc(t.name)}</h1><button class="x" onclick="closeModal()">×</button></div>
+    <p class="muted">Currently on ${DOW[day]}</p>
+    <select id="moveDay" class="field left">${DOW.map((d,i)=>`<option value="${i}" ${i===day?'selected':''}>${d}</option>`).join('')}</select>
+    <button class="btn primary" style="width:100%;margin-top:14px" onclick="assignOwnRoutineToDay('${templateId}',Number($('moveDay').value))">Move routine</button>`;
 }
 
 function openExerciseBuilder(){
