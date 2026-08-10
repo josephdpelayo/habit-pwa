@@ -126,7 +126,7 @@ textarea.field{min-height:112px;text-align:left;resize:vertical}
     </div>
     <p>Entra con tu correo. La app vive en la misma base de Supabase de HABIT, pero con datos separados y sin cobros.</p>
     <input id="email" class="field left" type="email" placeholder="tu@email.com">
-    <button class="btn primary" onclick="signIn()">Enviar acceso</button>
+    <button class="btn primary" onclick="signIn()">Send access link</button>
     <p id="authMsg"></p>
   </div>
 </div>
@@ -141,11 +141,11 @@ textarea.field{min-height:112px;text-align:left;resize:vertical}
 
 <nav class="tabs hidden" id="tabs">
   <div class="tabs-inner">
-    <button class="tab active" data-view="home" onclick="setView('home')"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg>Inicio</button>
-    <button class="tab" data-view="train" onclick="setView('train')"><svg viewBox="0 0 24 24"><path d="M4 14h2m12 0h2M7 10v8m10-8v8M9 12h6"/></svg>Entreno</button>
+    <button class="tab active" data-view="home" onclick="setView('home')"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg>Home</button>
+    <button class="tab" data-view="train" onclick="setView('train')"><svg viewBox="0 0 24 24"><path d="M4 14h2m12 0h2M7 10v8m10-8v8M9 12h6"/></svg>Train</button>
     <button class="tab" data-view="crew" onclick="setView('crew')"><svg viewBox="0 0 24 24"><path d="M16 11a4 4 0 1 0-8 0"/><path d="M4 21a8 8 0 0 1 16 0"/></svg>Crew</button>
-    <button class="tab" data-view="progress" onclick="setView('progress')"><svg viewBox="0 0 24 24"><path d="M4 19V5"/><path d="M4 19h16"/><path d="m7 15 3-3 3 2 5-7"/></svg>Progreso</button>
-    <button class="tab" data-view="library" onclick="setView('library')"><svg viewBox="0 0 24 24"><path d="M4 5h16M4 12h16M4 19h16"/></svg>Biblioteca</button>
+    <button class="tab" data-view="progress" onclick="setView('progress')"><svg viewBox="0 0 24 24"><path d="M4 19V5"/><path d="M4 19h16"/><path d="m7 15 3-3 3 2 5-7"/></svg>Progress</button>
+    <button class="tab" data-view="library" onclick="setView('library')"><svg viewBox="0 0 24 24"><path d="M4 5h16M4 12h16M4 19h16"/></svg>Library</button>
   </div>
 </nav>
 
@@ -155,7 +155,7 @@ textarea.field{min-height:112px;text-align:left;resize:vertical}
 const SUPABASE_URL='https://pmpjteuqjusbiduevbwq.supabase.co';
 const SUPABASE_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBtcGp0ZXVxanVzYmlkdWV2YndxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc2OTI1NjUsImV4cCI6MjA5MzI2ODU2NX0.XbMzZoo2yqtrD8znLnyo_1zDfrdJAvAPj1lqGOyXnLw';
 const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-const DOW=['LUN','MAR','MIE','JUE','VIE','SAB','DOM'];
+const DOW=['MON','TUE','WED','THU','FRI','SAT','SUN'];
 const state={user:null,profile:null,view:'home',exercises:[],templates:[],items:[],sessions:[],sets:[],active:null,activeItems:[],timer:null,elapsed:0,rest:0};
 
 const $=id=>document.getElementById(id);
@@ -190,9 +190,9 @@ function showApp(){
 async function signIn(){
   const email=$('email').value.trim();
   if(!email) return;
-  $('authMsg').textContent='Enviando acceso...';
+  $('authMsg').textContent='Sending access link...';
   const {error}=await sb.auth.signInWithOtp({email,options:{emailRedirectTo:location.href}});
-  $('authMsg').textContent=error?error.message:'Listo. Revisa tu correo para entrar.';
+  $('authMsg').textContent=error?error.message:'Done. Check your email to sign in.';
 }
 
 async function signOut(){
@@ -235,60 +235,60 @@ function homeView(){
   const pct=Math.min(100,Math.round((weekCount/5)*100));
   return `
     <section class="hero">
-      <div class="eyebrow">Lunes a domingo</div>
-      <h1>Hola, ${esc((state.profile?.name||'crew').split(' ')[0])}</h1>
+      <div class="eyebrow">Monday to Sunday</div>
+      <h1>Hey, ${esc((state.profile?.name||'crew').split(' ')[0])}</h1>
       <div class="focus">
         <div class="row">
           <div>
-            <div class="eyebrow" style="color:#4c620b">Tu foco ahora</div>
-            <h2>${esc(todayTpl?.name||'Crea tu primera rutina')}</h2>
-            <p>${weekCount} entrenos completados esta semana. ${weekCount?'Vas construyendo ritmo.':'Hoy puede ser el arranque.'}</p>
+            <div class="eyebrow" style="color:#4c620b">Your focus now</div>
+            <h2>${esc(todayTpl?.name||'Create your first routine')}</h2>
+            <p>${weekCount} workouts completed this week. ${weekCount?'You are building rhythm.':'Today can be the start.'}</p>
           </div>
           <div class="ring" style="--p:${pct}%"><span>${pct}%</span></div>
         </div>
       </div>
     </section>
     <section class="grid">
-      <div class="stat"><strong>${weekCount}</strong><small>esta semana</small></div>
-      <div class="stat"><strong>${state.templates.filter(t=>t.user_id===state.user.id).length}</strong><small>rutinas tuyas</small></div>
+      <div class="stat"><strong>${weekCount}</strong><small>this week</small></div>
+      <div class="stat"><strong>${state.templates.filter(t=>t.user_id===state.user.id).length}</strong><small>your routines</small></div>
     </section>
-    ${muscleLoadCard('Tu carga muscular',true)}
-    ${todayTpl?workoutCard(todayTpl,true):empty('No tienes rutina todavia. Crea una desde Entreno.')}
+    ${muscleLoadCard('Muscle load',true)}
+    ${todayTpl?workoutCard(todayTpl,true):empty('You do not have a routine yet. Create one from Train.')}
     <section class="card">
-      <div class="row"><h2>Lo ultimo del barco</h2><button class="btn small" onclick="setView('crew')">Ver crew</button></div>
-      ${state.sessions.filter(s=>s.completed_at&&s.visibility==='crew').slice(0,4).map(feedItem).join('')||empty('Cuando alguien termine un entreno, aparecera aqui.')}
+      <div class="row"><h2>Latest from the boat</h2><button class="btn small" onclick="setView('crew')">View crew</button></div>
+      ${state.sessions.filter(s=>s.completed_at&&s.visibility==='crew').slice(0,4).map(feedItem).join('')||empty('When someone finishes a workout, it will show up here.')}
     </section>`;
 }
 
 function trainView(){
   const mine=state.templates.filter(t=>t.user_id===state.user.id);
   return `
-    <div class="row"><h1>Entreno</h1><button class="btn primary" onclick="openTemplateBuilder()">+ Rutina</button></div>
+    <div class="row"><h1>Train</h1><button class="btn primary" onclick="openTemplateBuilder()">+ Routine</button></div>
     <section class="card">
-      <div class="row"><h2>Tu semana base</h2><span class="muted">${mine.length} rutinas</span></div>
+      <div class="row"><h2>Your base week</h2><span class="muted">${mine.length} routines</span></div>
       <div class="week">
         ${DOW.map((d,i)=>{
           const t=mine.find(x=>x.weekday===i);
-          return `<button class="day ${i===todayDow()?'today':''}" onclick="${t?`startWorkout('${t.id}')`:'openTemplateBuilder('+i+')'}"><span>${d}</span><span>${esc(t?.name||'Agregar rutina')}</span><span>›</span></button>`;
+          return `<button class="day ${i===todayDow()?'today':''}" onclick="${t?`startWorkout('${t.id}')`:'openTemplateBuilder('+i+')'}"><span>${d}</span><span>${esc(t?.name||'Add routine')}</span><span>›</span></button>`;
         }).join('')}
       </div>
     </section>
-    <h2>Rutinas compartidas</h2>
-    ${state.templates.map(t=>workoutCard(t,false)).join('')||empty('Aun no hay rutinas compartidas.')}`;
+    <h2>Shared routines</h2>
+    ${state.templates.map(t=>workoutCard(t,false)).join('')||empty('No shared routines yet.')}`;
 }
 
 function workoutCard(t,featured){
   const its=state.items.filter(i=>i.template_id===t.id);
-  const names=its.slice(0,4).map(i=>`<span class="pill dark">${esc(i.exercise?.name||'Ejercicio')}</span>`).join('');
+  const names=its.slice(0,4).map(i=>`<span class="pill dark">${esc(i.exercise?.name||'Exercise')}</span>`).join('');
   return `<article class="workout card">
     <div class="row">
-      <div><h2>${esc(t.name)}</h2><p>${its.length} ejercicios ${t.weekday!=null?'· '+DOW[t.weekday]:''}</p></div>
+      <div><h2>${esc(t.name)}</h2><p>${its.length} exercises ${t.weekday!=null?'· '+DOW[t.weekday]:''}</p></div>
       <span class="pill">${its.length} ej.</span>
     </div>
     <div class="muscles">${names}${its.length>4?`<span class="pill dark">+${its.length-4}</span>`:''}</div>
     <div class="row" style="margin-top:16px">
-      <button class="btn primary" onclick="startWorkout('${t.id}')">▶ Empezar</button>
-      ${t.user_id===state.user.id?`<button class="btn" onclick="openTemplateBuilder(null,'${t.id}')">Editar</button>`:''}
+      <button class="btn primary" onclick="startWorkout('${t.id}')">▶ Start</button>
+      ${t.user_id===state.user.id?`<button class="btn" onclick="openTemplateBuilder(null,'${t.id}')">Edit</button>`:''}
     </div>
   </article>`;
 }
@@ -296,39 +296,39 @@ function workoutCard(t,featured){
 function crewView(){
   const leaders=leaderboard();
   return `
-    <div class="row"><h1>Crew</h1><button class="btn" onclick="loadAll().then(render)">Actualizar</button></div>
+    <div class="row"><h1>Crew</h1><button class="btn" onclick="loadAll().then(render)">Refresh</button></div>
     <section class="card">
-      <h2>Marcas recientes</h2>
-      ${leaders.map(x=>`<div class="leader"><div><strong>${esc(x.exercise)}</strong><p>${esc(x.name)} · ${x.reps||0} reps</p></div><strong class="accent">${x.weight||0} kg</strong></div>`).join('')||empty('Registra pesos para crear ranking.')}
+      <h2>Recent lifts</h2>
+      ${leaders.map(x=>`<div class="leader"><div><strong>${esc(x.exercise)}</strong><p>${esc(x.name)} · ${x.reps||0} reps</p></div><strong class="accent">${x.weight||0} kg</strong></div>`).join('')||empty('Log weights to build the leaderboard.')}
     </section>
-    <h2>Feed de entrenos</h2>
-    ${state.sessions.filter(s=>s.completed_at&&s.visibility==='crew').map(feedItem).join('')||empty('Todavia no hay entrenos compartidos.')}`;
+    <h2>Workout feed</h2>
+    ${state.sessions.filter(s=>s.completed_at&&s.visibility==='crew').map(feedItem).join('')||empty('No shared workouts yet.')}`;
 }
 
 function progressView(){
   const mine=state.sessions.filter(s=>s.user_id===state.user.id&&s.completed_at);
   const prs=leaderboard().filter(x=>x.user_id===state.user.id).slice(0,8);
   return `
-    <h1>Progreso</h1>
+    <h1>Progress</h1>
     <section class="grid">
-      <div class="stat"><strong>${mine.length}</strong><small>entrenos guardados</small></div>
-      <div class="stat"><strong>${Math.round(mine.reduce((a,s)=>a+(s.duration_sec||0),0)/60)}</strong><small>minutos</small></div>
+      <div class="stat"><strong>${mine.length}</strong><small>saved workouts</small></div>
+      <div class="stat"><strong>${Math.round(mine.reduce((a,s)=>a+(s.duration_sec||0),0)/60)}</strong><small>minutes</small></div>
     </section>
-    ${muscleLoadCard('Recovery muscular',true)}
+    ${muscleLoadCard('Muscle recovery',true)}
     <section class="card">
-      <h2>Tus mejores levantamientos</h2>
-      ${prs.map(x=>`<div class="leader"><div><strong>${esc(x.exercise)}</strong><p>${x.reps||0} reps</p></div><strong class="accent">${x.weight||0} kg</strong></div>`).join('')||empty('Aun no hay pesos registrados.')}
+      <h2>Your best lifts</h2>
+      ${prs.map(x=>`<div class="leader"><div><strong>${esc(x.exercise)}</strong><p>${x.reps||0} reps</p></div><strong class="accent">${x.weight||0} kg</strong></div>`).join('')||empty('No weights logged yet.')}
     </section>
     <section class="card">
-      <h2>Reportes recientes</h2>
-      ${mine.slice(0,8).map(feedItem).join('')||empty('Completa un entrenamiento para ver reportes.')}
+      <h2>Recent reports</h2>
+      ${mine.slice(0,8).map(feedItem).join('')||empty('Complete a workout to see reports.')}
     </section>`;
 }
 
 function libraryView(){
   return `
-    <div class="row"><h1>Biblioteca</h1><button class="btn primary" onclick="openExerciseBuilder()">+ Ejercicio</button></div>
-    <div class="search"><input id="q" class="field left" placeholder="Buscar ejercicio..." oninput="renderLibraryList()"><button class="btn" onclick="renderLibraryList()">Buscar</button></div>
+    <div class="row"><h1>Library</h1><button class="btn primary" onclick="openExerciseBuilder()">+ Exercise</button></div>
+    <div class="search"><input id="q" class="field left" placeholder="Search exercise..." oninput="renderLibraryList()"><button class="btn" onclick="renderLibraryList()">Search</button></div>
     <div id="libraryList">${exerciseList(state.exercises)}</div>`;
 }
 
@@ -339,7 +339,7 @@ function renderLibraryList(){
 }
 
 function exerciseList(list){
-  return list.map(e=>exerciseCard(e,false)).join('')||empty('No encontre ejercicios.');
+  return list.map(e=>exerciseCard(e,false)).join('')||empty('No exercises found.');
 }
 
 function exerciseCard(e,tracking){
@@ -361,23 +361,23 @@ function mediaThumb(e){
 }
 
 function feedItem(s){
-  const name=s.profile?.name||'Tripulante';
+  const name=s.profile?.name||'Crew member';
   const doneSets=state.sets.filter(x=>x.session_id===s.id&&x.done).length;
   return `<article class="feed">
     <div class="feed-title"><span class="dot"></span><div><h3>${esc(name)} · ${esc(s.title)}</h3><p>${doneSets} series · ${Math.round((s.duration_sec||0)/60)} min</p></div></div>
     ${s.report_note?`<p style="margin-top:10px">${esc(s.report_note)}</p>`:''}
-    ${s.report_soreness?`<span class="pill dark" style="margin-top:10px;color:var(--pink)">Molestia: ${esc(s.report_soreness_area||'sin area')}</span>`:''}
+      ${s.report_soreness?`<span class="pill dark" style="margin-top:10px;color:var(--pink)">Soreness: ${esc(s.report_soreness_area||'no area')}</span>`:''}
   </article>`;
 }
 
 function leaderboard(){
-  const profiles=new Map(state.sessions.map(s=>[s.user_id,s.profile?.name||'Tripulante']));
+  const profiles=new Map(state.sessions.map(s=>[s.user_id,s.profile?.name||'Crew member']));
   const best=new Map();
   state.sets.filter(s=>s.done&&Number(s.weight_kg)>0).forEach(s=>{
     const key=`${s.user_id}:${s.exercise_id}`;
     const current=best.get(key);
     if(!current||Number(s.weight_kg)>current.weight) best.set(key,{
-      user_id:s.user_id,name:profiles.get(s.user_id)||'Tripulante',exercise:s.exercise?.name||'Ejercicio',weight:Number(s.weight_kg),reps:s.reps
+      user_id:s.user_id,name:profiles.get(s.user_id)||'Crew member',exercise:s.exercise?.name||'Exercise',weight:Number(s.weight_kg),reps:s.reps
     });
   });
   return [...best.values()].sort((a,b)=>b.weight-a.weight);
@@ -389,15 +389,15 @@ function muscleLoadCard(title,userOnly){
   const fresh=rows.filter(r=>r.score<20).length;
   return `<section class="card">
     <div class="row">
-      <div><h2>${esc(title)}</h2><p>${hottest?`${hottest.name} va al ${hottest.score}% esta semana`:'Sin carga registrada esta semana'}</p></div>
-      <span class="pill">${fresh} frescos</span>
+      <div><h2>${esc(title)}</h2><p>${hottest?`${hottest.name} is at ${hottest.score}% this week`:'No muscle load logged this week'}</p></div>
+      <span class="pill">${fresh} fresh</span>
     </div>
     <div class="load-grid" style="margin-top:14px">
       ${rows.map(r=>`<div class="load-card">
         <strong>${esc(r.name)}</strong>
         <small>${loadLabel(r.score)} · ${r.score}%</small>
         <div class="heat"><i style="width:${r.score}%"></i></div>
-      </div>`).join('')||empty('Registra series para calcular que tan cargados estan tus musculos.')}
+      </div>`).join('')||empty('Log sets to calculate how loaded your muscles are.')}
     </div>
   </section>`;
 }
@@ -419,16 +419,16 @@ function muscleLoad(userOnly){
     });
   });
   const max=Math.max(1,...scores.values());
-  const all=['Pecho','Espalda','Hombros','Biceps','Triceps','Cuadriceps','Gluteos','Isquios','Core','Antebrazo'];
+  const all=['Chest','Back','Shoulders','Biceps','Triceps','Quads','Glutes','Hamstrings','Core','Forearms'];
   return all.map(name=>({name,score:Math.min(100,Math.round(((scores.get(name)||0)/max)*100))}))
     .sort((a,b)=>b.score-a.score);
 }
 
 function loadLabel(score){
-  if(score>=75) return 'muy cargado';
-  if(score>=45) return 'cargado';
-  if(score>=20) return 'moderado';
-  return 'fresco';
+  if(score>=75) return 'very loaded';
+  if(score>=45) return 'loaded';
+  if(score>=20) return 'moderate';
+  return 'fresh';
 }
 
 async function startWorkout(templateId){
@@ -461,14 +461,14 @@ function renderActiveWorkout(){
   const allSets=state.sets.filter(s=>s.session_id===state.active.id);
   const done=allSets.filter(s=>s.done).length;
   $('modalCard').innerHTML=`
-    <div class="row"><div><p class="muted">Entrenamiento de hoy</p><h1>${esc(state.active.title)}</h1></div><button class="x" onclick="closeModal()">×</button></div>
+    <div class="row"><div><p class="muted">Today workout</p><h1>${esc(state.active.title)}</h1></div><button class="x" onclick="closeModal()">×</button></div>
     <section class="timer">
-      <div class="clock"><p>Cronometro</p><strong>${fmtSec(state.elapsed)}</strong></div>
-      <div class="clock"><p>Descanso</p><strong>${fmtSec(state.rest)}</strong><div class="row"><button class="btn small" onclick="state.rest=90">90s</button><button class="btn small" onclick="state.rest=180">3m</button></div></div>
+      <div class="clock"><p>Stopwatch</p><strong>${fmtSec(state.elapsed)}</strong></div>
+      <div class="clock"><p>Rest</p><strong>${fmtSec(state.rest)}</strong><div class="row"><button class="btn small" onclick="state.rest=90">90s</button><button class="btn small" onclick="state.rest=180">3m</button></div></div>
     </section>
     <p style="margin:14px 0"><span class="pill">${done}/${allSets.length}</span></p>
     ${state.activeItems.map(item=>activeExercise(item,allSets.filter(s=>s.exercise_id===item.exercise_id))).join('')}
-    <button class="btn primary" style="width:100%;margin-top:12px" onclick="openReport()">Enviar reporte</button>`;
+    <button class="btn primary" style="width:100%;margin-top:12px" onclick="openReport()">Send report</button>`;
 }
 
 function activeExercise(item,sets){
@@ -504,16 +504,16 @@ async function toggleSet(id,rest){
 
 function openReport(){
   $('modalCard').innerHTML=`
-    <div class="row"><h1>Entrenamiento guardado</h1><button class="x" onclick="closeModal()">×</button></div>
+    <div class="row"><h1>Workout saved</h1><button class="x" onclick="closeModal()">×</button></div>
     <section class="card" style="border-color:#42591b;background:#14200f"><h2>${esc(state.active.title)}</h2><p>${fmtSec(state.elapsed)} de trabajo registrado</p></section>
-    <label class="eyebrow">Dificultad</label>
-    <select id="difficulty" class="field left"><option value="normal">Normal</option><option value="facil">Facil</option><option value="pesado">Pesado</option></select>
-    <label class="eyebrow">Energia</label>
+    <label class="eyebrow">Difficulty</label>
+    <select id="difficulty" class="field left"><option value="normal">Normal</option><option value="facil">Easy</option><option value="pesado">Heavy</option></select>
+    <label class="eyebrow">Energy</label>
     <select id="energy" class="field left"><option value="3">3 / 5</option><option value="1">1 / 5</option><option value="2">2 / 5</option><option value="4">4 / 5</option><option value="5">5 / 5</option></select>
-    <label class="card row" style="border-color:#6b3040"><div><h3>He notado molestia o dolor</h3><p>Marca zona para seguirlo semana a semana.</p></div><input id="sore" type="checkbox"></label>
-    <input id="soreArea" class="field left" placeholder="Zona: hombro, codo, lumbar...">
-    <textarea id="note" class="field" placeholder="Como te sentiste, que costo mas, que cambiarias..."></textarea>
-    <button class="btn primary" style="width:100%" onclick="finishWorkout()">Guardar y compartir</button>`;
+    <label class="card row" style="border-color:#6b3040"><div><h3>I noticed soreness or pain</h3><p>Mark the area so we can track it week by week.</p></div><input id="sore" type="checkbox"></label>
+    <input id="soreArea" class="field left" placeholder="Area: shoulder, elbow, lower back...">
+    <textarea id="note" class="field" placeholder="How did you feel, what was harder, what would you change..."></textarea>
+    <button class="btn primary" style="width:100%" onclick="finishWorkout()">Save and share</button>`;
 }
 
 async function finishWorkout(){
@@ -543,12 +543,12 @@ function openExercise(id){
   $('modalCard').innerHTML=`
     <div class="row"><h1>${esc(e.name)}</h1><button class="x" onclick="closeModal()">×</button></div>
     <div class="card">
-      ${e.media_url?`<img src="${esc(e.media_url)}" alt="${esc(e.name)}" style="width:100%;border-radius:20px;max-height:520px;object-fit:cover">`:empty('Pega un GIF de Gymvisual u otra fuente en la biblioteca para ver tecnica aqui.')}
-      ${e.media_page_url?`<p style="margin-top:12px"><a class="accent" href="${esc(e.media_page_url)}" target="_blank" rel="noreferrer">Ver referencia Gymvisual</a></p>`:''}
+      ${e.media_url?`<img src="${esc(e.media_url)}" alt="${esc(e.name)}" style="width:100%;border-radius:20px;max-height:520px;object-fit:cover">`:empty('Paste a Gymvisual GIF or another source in the library to see technique here.')}
+      ${e.media_page_url?`<p style="margin-top:12px"><a class="accent" href="${esc(e.media_page_url)}" target="_blank" rel="noreferrer">Open Gymvisual reference</a></p>`:''}
     </div>
-    <section class="card"><div class="eyebrow">Musculos implicados</div>${muscles.map(([m,p])=>`<div style="margin-top:10px"><div class="row"><strong>${esc(m)}</strong><span>${p}%</span></div><div class="bar"><i style="width:${p}%"></i></div></div>`).join('')}</section>
-    <section class="card"><div class="eyebrow">Como se hace</div><ol>${(e.instructions||[]).map(x=>`<li>${esc(x)}</li>`).join('')}</ol></section>
-    <section class="card"><div class="eyebrow">Consejos</div><ul>${(e.coach_tips||[]).map(x=>`<li>${esc(x)}</li>`).join('')}</ul></section>`;
+    <section class="card"><div class="eyebrow">Muscles involved</div>${muscles.map(([m,p])=>`<div style="margin-top:10px"><div class="row"><strong>${esc(m)}</strong><span>${p}%</span></div><div class="bar"><i style="width:${p}%"></i></div></div>`).join('')}</section>
+    <section class="card"><div class="eyebrow">How to do it</div><ol>${(e.instructions||[]).map(x=>`<li>${esc(x)}</li>`).join('')}</ol></section>
+    <section class="card"><div class="eyebrow">Coach tips</div><ul>${(e.coach_tips||[]).map(x=>`<li>${esc(x)}</li>`).join('')}</ul></section>`;
 }
 
 function openTemplateBuilder(day=null,id=null){
@@ -556,18 +556,18 @@ function openTemplateBuilder(day=null,id=null){
   const selected=state.items.filter(i=>i.template_id===id).map(i=>i.exercise_id);
   $('modal').classList.add('show');
   $('modalCard').innerHTML=`
-    <div class="row"><h1>${id?'Editar':'Nueva'} rutina</h1><button class="x" onclick="closeModal()">×</button></div>
-    <input id="tplName" class="field left" placeholder="Nombre de rutina" value="${esc(t.name)}">
+    <div class="row"><h1>${id?'Edit':'New'} routine</h1><button class="x" onclick="closeModal()">×</button></div>
+    <input id="tplName" class="field left" placeholder="Routine name" value="${esc(t.name)}">
     <select id="tplDay" class="field left">${DOW.map((d,i)=>`<option value="${i}" ${t.weekday===i?'selected':''}>${d}</option>`).join('')}</select>
-    <textarea id="tplNotes" class="field" placeholder="Nota para el entreno">${esc(t.notes||'')}</textarea>
-    <h2>Ejercicios</h2>
+    <textarea id="tplNotes" class="field" placeholder="Workout note">${esc(t.notes||'')}</textarea>
+    <h2>Exercises</h2>
     <div class="stack">${state.exercises.map(e=>`<label class="row card" style="margin:0"><div><strong>${esc(e.name)}</strong><p>${esc(e.category)}</p></div><input class="tplEx" type="checkbox" value="${e.id}" ${selected.includes(e.id)?'checked':''}></label>`).join('')}</div>
-    <button class="btn primary" style="width:100%;margin-top:14px" onclick="saveTemplate('${id||''}')">Guardar rutina</button>`;
+    <button class="btn primary" style="width:100%;margin-top:14px" onclick="saveTemplate('${id||''}')">Save routine</button>`;
 }
 
 async function saveTemplate(id){
   const checked=[...document.querySelectorAll('.tplEx:checked')].map(x=>x.value);
-  if(!$('tplName').value.trim()||!checked.length) return alert('Pon nombre y al menos un ejercicio.');
+  if(!$('tplName').value.trim()||!checked.length) return alert('Add a name and at least one exercise.');
   const payload={user_id:state.user.id,name:$('tplName').value.trim(),weekday:Number($('tplDay').value),notes:$('tplNotes').value.trim()||null,is_public:true,updated_at:new Date().toISOString()};
   let templateId=id;
   if(id) await sb.from('skandi_templates').update(payload).eq('id',id);
@@ -587,13 +587,13 @@ async function saveTemplate(id){
 function openExerciseBuilder(){
   $('modal').classList.add('show');
   $('modalCard').innerHTML=`
-    <div class="row"><h1>Nuevo ejercicio</h1><button class="x" onclick="closeModal()">×</button></div>
-    <input id="exName" class="field left" placeholder="Nombre">
-    <input id="exEnglish" class="field left" placeholder="Nombre en ingles">
-    <input id="exMedia" class="field left" placeholder="URL directa del GIF/video">
-    <input id="exPage" class="field left" placeholder="URL de referencia Gymvisual">
-    <textarea id="exMuscles" class="field" placeholder='Musculos JSON: {"Pecho":60,"Triceps":25}'></textarea>
-    <button class="btn primary" style="width:100%" onclick="saveExercise()">Guardar ejercicio</button>`;
+    <div class="row"><h1>New exercise</h1><button class="x" onclick="closeModal()">×</button></div>
+    <input id="exName" class="field left" placeholder="Name">
+    <input id="exEnglish" class="field left" placeholder="Alternative name">
+    <input id="exMedia" class="field left" placeholder="Direct GIF/video URL">
+    <input id="exPage" class="field left" placeholder="Gymvisual reference URL">
+    <textarea id="exMuscles" class="field" placeholder='Muscles JSON: {"Chest":60,"Triceps":25}'></textarea>
+    <button class="btn primary" style="width:100%" onclick="saveExercise()">Save exercise</button>`;
 }
 
 async function saveExercise(){
@@ -603,7 +603,7 @@ async function saveExercise(){
   try{ muscles=JSON.parse($('exMuscles').value||'{}'); }catch{ return alert('El JSON de musculos no es valido.'); }
   const slug=name.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'');
   const {error}=await sb.from('skandi_exercises').insert({
-    slug,name,english_name:$('exEnglish').value.trim()||null,category:'Fuerza',
+    slug,name,english_name:$('exEnglish').value.trim()||null,category:'Strength',
     muscles,media_url:$('exMedia').value.trim()||null,media_page_url:$('exPage').value.trim()||null,
     instructions:[],coach_tips:[],created_by:state.user.id
   });
