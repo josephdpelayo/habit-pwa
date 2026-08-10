@@ -2961,7 +2961,7 @@ let coachWeekStart=null, coachSchedule=[], coachTasks=[], coachBoardsById={}, ac
 let chatMessages=[], chatChannel=null, chatPollInt=null, chatSendContext=null,
     chatMediaRecorder=null, chatRecordChunks=[], chatRecordStartMs=0, chatRecordTimerInt=null,
     chatPendingImgFile=null;
-let coachingAdminClients=[], selectedCoachClientId=null, coachAdminWeekStart=null, coachAdminSchedule=[], coachAdminTasks=[], coachAdminTaskLogsByDs={}, coachAdminFastingLogs=[], coachClientAssignedBoardIds=new Set(), editingCoachTaskId=null, coachingListFilter='todos';
+let coachingAdminClients=[], selectedCoachClientId=null, coachAdminWeekStart=null, coachAdminSchedule=[], coachAdminWeekTemplate={}, coachAdminTasks=[], coachAdminTaskLogsByDs={}, coachAdminFastingLogs=[], coachClientAssignedBoardIds=new Set(), editingCoachTaskId=null, coachingListFilter='todos';
 let selectedCoachDetailDs=null, coachSessionDetailRows=[], coachDetailActiveTab='semana', coachProgressView='habitos', coachPlanBoardsOpen=false;
 let exerciseNotesMap={}, noteCtx=null;
 let mensajesAdminClients=[], selectedChatClientId=null, adminChatChannel=null, adminChatPollInt=null;
@@ -6747,12 +6747,26 @@ function mazWeekStart(ds){
 }
 let coachDataLoadedAt=0, coachDataLoadError=null;
 const COACH_DATA_TTL_MS=30000;
+async function ensureCoachingWeekFromTemplateSb(userId,weekStart){
+  if(!sb||!userId||!weekStart)return false;
+  try{
+    const{error}=await sb.rpc('ensure_coaching_week_from_template',{p_user_id:userId,p_week_start:weekStart});
+    if(error)throw error;
+    return true;
+  }catch(e){
+    // La app puede desplegar antes de correr la migración; en ese caso solo
+    // cae al comportamiento anterior de semanas cargadas manualmente.
+    console.warn('ensureCoachingWeekFromTemplateSb:',e.message||e);
+    return false;
+  }
+}
 async function loadCoachWeekDataSb(force){
   if(!sbUser)return;
   if(!force&&coachDataLoadedAt&&(Date.now()-coachDataLoadedAt<COACH_DATA_TTL_MS)&&coachWeekStart===mazWeekStart(mazToday()))return;
   coachWeekStart=mazWeekStart(mazToday());
   const weekEnd=addDaysDS(coachWeekStart,6);
   try{
+    await ensureCoachingWeekFromTemplateSb(sbUser.id,coachWeekStart);
     const[schRes,taskRes,logRes,fastRes]=await Promise.allSettled([
       sb.from('coaching_schedule').select('*').eq('user_id',sbUser.id).gte('ds',coachWeekStart).lte('ds',weekEnd).order('ds'),
       sb.from('coaching_tasks').select('*').eq('user_id',sbUser.id).or('is_done.eq.false,completed_at.gte.'+mazLocalDateTimeIso(coachWeekStart,0,0,0)).order('due_date',{ascending:true,nullsFirst:false}),
@@ -11756,13 +11770,17 @@ function coachAdminWeekShift(days){
 async function loadCoachingWeekAdminSb(){
   if(!selectedCoachClientId||!coachAdminWeekStart)return;
   const weekEnd=addDaysDS(coachAdminWeekStart,6);
-  const[schRes,taskRes,logRes,fastingRes]=await Promise.allSettled([
+  await ensureCoachingWeekFromTemplateSb(selectedCoachClientId,coachAdminWeekStart);
+  const[schRes,tplRes,taskRes,logRes,fastingRes]=await Promise.allSettled([
     sb.from('coaching_schedule').select('*').eq('user_id',selectedCoachClientId).gte('ds',coachAdminWeekStart).lte('ds',weekEnd),
+    sb.from('coaching_week_templates').select('*').eq('user_id',selectedCoachClientId).order('dow'),
     sb.from('coaching_tasks').select('*').eq('user_id',selectedCoachClientId).order('due_date',{ascending:true,nullsFirst:false}).order('created_at',{ascending:false}).limit(50),
     sb.from('coaching_task_logs').select('task_id,ds').eq('user_id',selectedCoachClientId).gte('ds',coachAdminWeekStart).lte('ds',weekEnd),
     sb.from('coaching_fasting_logs').select('*').eq('user_id',selectedCoachClientId).or('fast_start_ds.gte.'+coachAdminWeekStart+',fast_end_ds.gte.'+coachAdminWeekStart).order('fast_start_at',{ascending:false}).limit(30)
   ]);
   coachAdminSchedule=schRes.status==='fulfilled'?(schRes.value.data||[]):[];
+  coachAdminWeekTemplate={};
+  (tplRes.status==='fulfilled'?(tplRes.value.data||[]):[]).forEach(r=>{coachAdminWeekTemplate[r.dow]=r;});
   coachAdminTasks=taskRes.status==='fulfilled'?(taskRes.value.data||[]):[];
   coachAdminFastingLogs=(fastingRes.status==='fulfilled'?(fastingRes.value.data||[]):[]).filter(r=>(r.fast_start_ds&&r.fast_start_ds<=weekEnd)||(r.fast_end_ds&&r.fast_end_ds<=weekEnd));
   coachAdminTaskLogsByDs={};
@@ -11869,13 +11887,13 @@ function renderCoachAdminDayStripHtml(){
   let html='<div class="coach-day-strip coach-admin-day-strip" style="margin-bottom:12px">';
   for(let i=0;i<7;i++){
     const ds=addDaysDS(coachAdminWeekStart,i);
-    const row=coachAdminSchedule.find(r=>r.ds===ds);
+    const rowsForDay=coachAdminScheduleRowsForDs(ds);
     let dayCls='coach-day';
     if(ds===today)dayCls+=' today';
     if(ds===selectedCoachDetailDs)dayCls+=' selected';
-    if(row){
-      if(row.status==='in_progress')dayCls+=' in-progress';
-      else if(row.status==='done')dayCls+=' done';
+    if(rowsForDay.length){
+      if(rowsForDay.some(r=>r.status==='in_progress'))dayCls+=' in-progress';
+      else if(rowsForDay.some(r=>r.status==='done'))dayCls+=' done';
       else if(ds<today)dayCls+=' missed';
       else dayCls+=' scheduled';
     }
@@ -12094,6 +12112,13 @@ function goToBoardEdit(boardId){
   editingBoards.add(boardId);
   renderBoardsAdmin();
 }
+function coachAdminScheduleRowsForDs(ds){
+  return (coachAdminSchedule||[]).filter(r=>r.ds===ds);
+}
+function coachAdminPrimaryScheduleForDs(ds,dow){
+  const rows=coachAdminScheduleRowsForDs(ds);
+  return rows.find(r=>r.base_template_dow===dow)||rows.find(r=>r.generated_from_base)||rows[0]||null;
+}
 async function renderCoachClientNotesAdmin(){
   const el=document.getElementById('coach-admin-notes');
   if(!el||!selectedCoachClientId)return;
@@ -12126,8 +12151,11 @@ function renderCoachingDetail(){
   let dayRows='',statusStrip='<div class="coach-day-strip coach-admin-day-strip" style="margin-bottom:12px">';
   for(let i=0;i<7;i++){
     const ds=addDaysDS(coachAdminWeekStart,i);
-    const row=coachAdminSchedule.find(r=>r.ds===ds);
-    const boardOpt=b=>'<option value="'+esc(b.id)+'" '+(row&&row.board_id===b.id?'selected':'')+'>'+esc(b.name)+'</option>';
+    const rowsForDay=coachAdminScheduleRowsForDs(ds);
+    const row=coachAdminPrimaryScheduleForDs(ds,i);
+    const tpl=coachAdminWeekTemplate[i]||null;
+    const selectedBoardId=(tpl&&tpl.board_id)||(row&&row.board_id)||'';
+    const boardOpt=b=>'<option value="'+esc(b.id)+'" '+(selectedBoardId===b.id?'selected':'')+'>'+esc(b.name)+'</option>';
     const assignedBoards=boards.filter(b=>coachClientAssignedBoardIds.has(b.id));
     const otherBoards=boards.filter(b=>!coachClientAssignedBoardIds.has(b.id));
     const opts='<option value="">— Descanso —</option>'
@@ -12135,14 +12163,14 @@ function renderCoachingDetail(){
       +(otherBoards.length?'<optgroup label="Resto del catálogo">'+otherBoards.map(boardOpt).join('')+'</optgroup>':'');
     dayRows+='<div style="display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--border)">'
       +'<div style="width:64px;font-size:12px;font-weight:700;color:var(--gray)">'+DN_MON[i]+' '+parseDS(ds).d+'</div>'
-      +'<select data-coach-day="'+ds+'" style="flex:1;background:var(--card2);border:1px solid var(--border);border-radius:4px;padding:9px;font-size:13px;color:var(--white)">'+opts+'</select>'
+      +'<select data-coach-day="'+ds+'" data-coach-dow="'+i+'" style="flex:1;background:var(--card2);border:1px solid var(--border);border-radius:4px;padding:9px;font-size:13px;color:var(--white)">'+opts+'</select>'
       +'</div>';
     let dayCls='coach-day';
     if(ds===today)dayCls+=' today';
     if(ds===selectedCoachDetailDs)dayCls+=' selected';
-    if(row){
-      if(row.status==='in_progress')dayCls+=' in-progress';
-      else if(row.status==='done')dayCls+=' done';
+    if(rowsForDay.length){
+      if(rowsForDay.some(r=>r.status==='in_progress'))dayCls+=' in-progress';
+      else if(rowsForDay.some(r=>r.status==='done'))dayCls+=' done';
       else if(ds<today)dayCls+=' missed';
       else dayCls+=' scheduled';
     }
@@ -12152,7 +12180,7 @@ function renderCoachingDetail(){
   }
   statusStrip+='</div>';
 
-  const todayRow=coachAdminSchedule.find(r=>r.ds===today);
+  const todayRow=coachAdminSchedule.find(r=>r.ds===today&&r.status==='in_progress')||coachAdminPrimaryScheduleForDs(today,coachDaysBetweenDS(coachAdminWeekStart,today));
   const liveBanner=(todayRow&&todayRow.status==='in_progress')
     ?'<div class="coach-alert" style="background:rgba(37,99,235,.12);border-left-color:var(--blue);margin-bottom:12px">🔴 Entreno en curso ahora: <b>'+esc(todayRow.board_name)+'</b></div>'
     :'';
@@ -12216,9 +12244,10 @@ function renderCoachingDetail(){
     +'<div class="admin-plan-grid">'
     +'<div class="admin-plan-section" id="coach-plan-week">'
     +'<div class="admin-report-head"><button class="btn-sm" onclick="coachAdminWeekShift(-7)">‹</button><strong>'+fmtDS(coachAdminWeekStart)+' – '+fmtDS(weekEnd)+'</strong><button class="btn-sm" onclick="coachAdminWeekShift(7)">›</button></div>'
+    +'<div class="admin-session-empty" style="margin-bottom:10px">Esta es la semana base del cliente. Se repite automáticamente de lunes a domingo y solo se cambia cuando la modificas aquí.</div>'
     +statusStrip
     +dayRows
-    +'<button class="btn" style="margin-top:12px" onclick="saveCoachingWeekSb()">Guardar semana</button>'
+    +'<button class="btn" style="margin-top:12px" onclick="saveCoachingWeekSb()">Guardar semana base</button>'
     +'</div>'
     +'<div class="admin-plan-section" id="coach-plan-routines">'
     +'<div class="admin-plan-section-title">Rutinas del cliente</div>'
@@ -12280,39 +12309,51 @@ async function renderCoachingAdminScores(){
 async function saveCoachingWeekSb(){
   if(!selectedCoachClientId)return;
   const selects=document.querySelectorAll('#coaching-detail select[data-coach-day]');
-  // Un cliente ahora puede tener más de un entreno el mismo día (se agregan
-  // desde su propia app), así que ya no hay unique(user_id,ds) para hacer
-  // upsert por conflicto — se resuelve a mano: update si ya existe una fila
-  // para ese día, insert si no.
-  const updates=[],inserts=[],deletes=[];
+  const templateRows=[], updates=[], inserts=[], deletes=[];
+  const today=mazToday();
   selects.forEach(sel=>{
     const ds=sel.dataset.coachDay;
+    const dow=parseInt(sel.dataset.coachDow,10);
     const boardId=sel.value||null;
-    const existing=coachAdminSchedule.find(r=>r.ds===ds);
+    const existing=coachAdminPrimaryScheduleForDs(ds,dow);
+    const generatedRows=coachAdminScheduleRowsForDs(ds).filter(r=>(r.generated_from_base||r.base_template_dow===dow)&&r.status==='scheduled');
     if(!boardId){
-      if(existing)deletes.push(existing.id);
+      generatedRows.forEach(r=>deletes.push(r.id));
       return;
     }
-    if(existing&&existing.board_id===boardId)return; // sin cambios
     const board=boards.find(b=>b.id===boardId);
     if(!board)return;
-    if(existing)updates.push({id:existing.id,board_id:boardId,board_name:board.name,board_color:board.color||'#2563eb'});
-    else inserts.push({user_id:selectedCoachClientId,ds,board_id:boardId,board_name:board.name,board_color:board.color||'#2563eb',created_by:sbUser.id});
+    templateRows.push({user_id:selectedCoachClientId,dow,board_id:boardId,board_name:board.name,board_color:board.color||'#2563eb',created_by:sbUser.id,updated_at:new Date().toISOString()});
+    if(ds<today&&(!existing||existing.status!=='scheduled'))return;
+    if(existing&&existing.status==='scheduled'){
+      if(existing.board_id!==boardId||!existing.generated_from_base||existing.base_template_dow!==dow){
+        updates.push({id:existing.id,board_id:boardId,board_name:board.name,board_color:board.color||'#2563eb',dow});
+      }
+    }else if(!coachAdminScheduleRowsForDs(ds).some(r=>r.status==='done'||r.status==='in_progress')){
+      inserts.push({user_id:selectedCoachClientId,ds,board_id:boardId,board_name:board.name,board_color:board.color||'#2563eb',created_by:sbUser.id,generated_from_base:true,base_template_dow:dow});
+    }
   });
   try{
+    const{error:delTplErr}=await sb.from('coaching_week_templates').delete().eq('user_id',selectedCoachClientId);
+    if(delTplErr)throw delTplErr;
+    if(templateRows.length){
+      const{error:tplErr}=await sb.from('coaching_week_templates').insert(templateRows);
+      if(tplErr)throw tplErr;
+    }
     if(deletes.length){const{error}=await sb.from('coaching_schedule').delete().in('id',deletes);if(error)throw error;}
     for(const u of updates){
-      const{error}=await sb.from('coaching_schedule').update({board_id:u.board_id,board_name:u.board_name,board_color:u.board_color}).eq('id',u.id);
+      const{error}=await sb.from('coaching_schedule').update({board_id:u.board_id,board_name:u.board_name,board_color:u.board_color,generated_from_base:true,base_template_dow:u.dow}).eq('id',u.id);
       if(error)throw error;
     }
     if(inserts.length){
       const{error}=await sb.from('coaching_schedule').insert(inserts);
       if(error)throw error;
     }
-    if(inserts.length||updates.length){
-      sendPush('user:'+selectedCoachClientId,'🏋️ Nueva rutina asignada','Tu coach programo tu semana de entrenamiento.');
+    await ensureCoachingWeekFromTemplateSb(selectedCoachClientId,coachAdminWeekStart);
+    if(inserts.length||updates.length||deletes.length||templateRows.length){
+      sendPush('user:'+selectedCoachClientId,'🏋️ Semana de entrenamiento actualizada','Tu coach ajustó tu semana base de entrenamiento.');
     }
-    toast('Semana guardada','ok');
+    toast('Semana base guardada','ok');
     await loadCoachingWeekAdminSb();
     renderCoachingDetail();
   }catch(e){toast('Error al guardar: '+e.message,'err');}
