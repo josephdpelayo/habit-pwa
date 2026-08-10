@@ -30,7 +30,17 @@ button{border:0;cursor:pointer}
 .app{max-width:820px;margin:0 auto;padding:28px 16px 112px}
 .top{display:flex;align-items:center;justify-content:space-between;gap:14px;padding:14px 0 26px}
 .brand{display:flex;align-items:center;gap:12px;font-weight:900;font-size:24px}
-.mark{width:34px;height:34px;border-radius:10px;background:linear-gradient(140deg,#d7b766,#7b5a14);display:grid;place-items:center;color:#08090d;font-weight:1000}
+.ship-mark{width:84px;height:48px;border-radius:16px;background:#0b0c12;border:1px solid var(--line);display:grid;place-items:center;overflow:hidden}
+.ship-mark img{width:92px;height:42px;object-fit:contain}
+.brand-text{display:grid;line-height:1.05}
+.brand-text small{color:var(--muted);font-size:11px;letter-spacing:.16em;text-transform:uppercase;font-weight:1000}
+.dof-badge{height:34px;max-width:74px;object-fit:contain;background:#fff;border-radius:10px;padding:6px}
+.auth-brand{display:flex;align-items:center;justify-content:space-between;gap:14px}
+.auth-ship{width:100%;height:128px;border-radius:24px;background:#0b0c12;border:1px solid var(--line);display:grid;place-items:center;overflow:hidden}
+.auth-ship img{width:96%;height:112px;object-fit:contain}
+.auth-tabs{display:grid;grid-template-columns:1fr 1fr;gap:8px;background:#0b0c12;border:1px solid var(--line);border-radius:18px;padding:5px}
+.auth-tab{background:transparent;color:var(--muted);border-radius:14px;padding:11px;font-weight:1000}
+.auth-tab.active{background:var(--panel2);color:var(--text)}
 .avatar{width:46px;height:46px;border-radius:50%;background:#222532;display:grid;place-items:center;font-weight:900;color:#07080b;overflow:hidden}
 .avatar img{width:100%;height:100%;object-fit:cover}
 .hero{display:grid;gap:18px;margin-bottom:22px}
@@ -119,22 +129,35 @@ textarea.field{min-height:112px;text-align:left;resize:vertical}
 <body>
 <div id="auth" class="auth hidden">
   <div class="auth-box stack">
-    <div class="auth-logo">S</div>
+    <div class="auth-brand">
+      <img class="dof-badge" src="/assets/skandi/dof-logo.png" alt="DOF">
+      <div class="eyebrow">Skandi Nomad</div>
+    </div>
+    <div class="auth-ship"><img src="/assets/skandi/skandi-nomad-cutout.png" alt="Skandi Nomad"></div>
     <div>
       <div class="eyebrow">Skandi Fit</div>
-      <h1>Entrena con la tripulación</h1>
+      <h1>Train with the crew</h1>
     </div>
-    <p>Entra con tu correo. La app vive en la misma base de Supabase de HABIT, pero con datos separados y sin cobros.</p>
-    <input id="email" class="field left" type="email" placeholder="tu@email.com">
-    <button class="btn primary" onclick="signIn()">Send access link</button>
+    <p>A lightweight DOF crew training app for the Skandi Nomad. Sign in or create an account to build routines, log lifts, and follow the boat's progress.</p>
+    <div class="auth-tabs">
+      <button id="loginTab" class="auth-tab active" onclick="setAuthMode('login')">Sign in</button>
+      <button id="signupTab" class="auth-tab" onclick="setAuthMode('signup')">Create account</button>
+    </div>
+    <input id="name" class="field left hidden" type="text" placeholder="Full name">
+    <input id="email" class="field left" type="email" placeholder="you@email.com">
+    <input id="password" class="field left" type="password" placeholder="Password">
+    <button id="authBtn" class="btn primary" onclick="submitAuth()">Sign in</button>
     <p id="authMsg"></p>
   </div>
 </div>
 
 <main id="app" class="app hidden">
   <header class="top">
-    <div class="brand"><div class="mark">S</div><span>Skandi Fit</span></div>
-    <button class="avatar" onclick="signOut()" title="Salir" id="avatar">SF</button>
+    <div class="brand">
+      <div class="ship-mark"><img src="/assets/skandi/skandi-nomad-cutout.png" alt="Skandi Nomad"></div>
+      <div class="brand-text"><span>Skandi Fit</span><small>Skandi Nomad · DOF</small></div>
+    </div>
+    <button class="avatar" onclick="signOut()" title="Sign out" id="avatar">SF</button>
   </header>
   <section id="screen"></section>
 </main>
@@ -156,7 +179,7 @@ const SUPABASE_URL='https://pmpjteuqjusbiduevbwq.supabase.co';
 const SUPABASE_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBtcGp0ZXVxanVzYmlkdWV2YndxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc2OTI1NjUsImV4cCI6MjA5MzI2ODU2NX0.XbMzZoo2yqtrD8znLnyo_1zDfrdJAvAPj1lqGOyXnLw';
 const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 const DOW=['MON','TUE','WED','THU','FRI','SAT','SUN'];
-const state={user:null,profile:null,view:'home',exercises:[],templates:[],items:[],sessions:[],sets:[],active:null,activeItems:[],timer:null,elapsed:0,rest:0};
+const state={user:null,profile:null,view:'home',authMode:'login',exercises:[],templates:[],items:[],sessions:[],sets:[],active:null,activeItems:[],timer:null,elapsed:0,rest:0};
 
 const $=id=>document.getElementById(id);
 const esc=s=>(s??'').toString().replace(/[&<>"']/g,m=>({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[m]));
@@ -176,6 +199,7 @@ function showAuth(){
   $('auth').classList.remove('hidden');
   $('app').classList.add('hidden');
   $('tabs').classList.add('hidden');
+  setAuthMode(state.authMode);
 }
 
 function showApp(){
@@ -187,12 +211,36 @@ function showApp(){
   render();
 }
 
-async function signIn(){
+function setAuthMode(mode){
+  state.authMode=mode;
+  $('loginTab')?.classList.toggle('active',mode==='login');
+  $('signupTab')?.classList.toggle('active',mode==='signup');
+  $('name')?.classList.toggle('hidden',mode!=='signup');
+  if($('authBtn')) $('authBtn').textContent=mode==='login'?'Sign in':'Create account';
+  if($('authMsg')) $('authMsg').textContent='';
+}
+
+async function submitAuth(){
   const email=$('email').value.trim();
-  if(!email) return;
-  $('authMsg').textContent='Sending access link...';
-  const {error}=await sb.auth.signInWithOtp({email,options:{emailRedirectTo:location.href}});
-  $('authMsg').textContent=error?error.message:'Done. Check your email to sign in.';
+  const password=$('password').value;
+  const name=$('name').value.trim();
+  if(!email||!password) return $('authMsg').textContent='Email and password are required.';
+  $('authMsg').textContent=state.authMode==='login'?'Signing in...':'Creating account...';
+  if(state.authMode==='login'){
+    const {data,error}=await sb.auth.signInWithPassword({email,password});
+    if(error) return $('authMsg').textContent=error.message;
+    state.user=data.user;
+    await loadAll();
+    return showApp();
+  }
+  const {data,error}=await sb.auth.signUp({email,password,options:{data:{name:name||email.split('@')[0]},emailRedirectTo:location.href}});
+  if(error) return $('authMsg').textContent=error.message;
+  if(data.session){
+    state.user=data.user;
+    await loadAll();
+    return showApp();
+  }
+  $('authMsg').textContent='Account created. Check your email if confirmation is required, then sign in.';
 }
 
 async function signOut(){
