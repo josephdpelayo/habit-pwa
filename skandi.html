@@ -193,6 +193,7 @@ const DOW=['MON','TUE','WED','THU','FRI','SAT','SUN'];
 const MUSCLE_GROUP_ORDER=['Chest','Back','Shoulders','Arms','Legs','Core','Other'];
 const MUSCLE_GROUP_MAP={Chest:'Chest',Back:'Back',Shoulders:'Shoulders',Biceps:'Arms',Triceps:'Arms',Forearms:'Arms',Quads:'Legs',Hamstrings:'Legs',Glutes:'Legs','Hip Flexors':'Legs',Core:'Core'};
 const state={user:null,profile:null,view:'home',authMode:'login',exercises:[],templates:[],items:[],sessions:[],sets:[],active:null,activeItems:[],timer:null,elapsed:0,rest:0};
+let builderState={selected:new Set(),group:'All'};
 
 const $=id=>document.getElementById(id);
 const esc=s=>(s??'').toString().replace(/[&<>"']/g,m=>({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[m]));
@@ -435,10 +436,11 @@ function groupExercisesByMuscle(list){
     .map(g=>[g,groups.get(g).sort((a,b)=>a.name.localeCompare(b.name))]);
 }
 
-function templateExerciseOption(e,selected){
+function templateExerciseOption(e){
+  const checked=builderState.selected.has(e.id);
   return `<label class="row card" style="margin:0 0 8px">
     <div><strong>${esc(e.name)}</strong><p>${esc(e.category)}</p></div>
-    <input class="tplEx" type="checkbox" value="${e.id}" ${selected.includes(e.id)?'checked':''}>
+    <input class="tplEx" type="checkbox" value="${e.id}" ${checked?'checked':''} onchange="toggleBuilderExercise('${e.id}',this.checked)">
   </label>`;
 }
 
@@ -654,6 +656,7 @@ function openExercise(id){
 function openTemplateBuilder(day=null,id=null){
   const t=state.templates.find(x=>x.id===id)||{name:'',weekday:day??todayDow(),notes:''};
   const selected=state.items.filter(i=>i.template_id===id).map(i=>i.exercise_id);
+  builderState={selected:new Set(selected),group:'All'};
   $('modal').classList.add('show');
   $('modalCard').innerHTML=`
     <div class="row"><h1>${id?'Edit':'New'} routine</h1><button class="x" onclick="closeModal()">×</button></div>
@@ -661,15 +664,40 @@ function openTemplateBuilder(day=null,id=null){
     <select id="tplDay" class="field left">${DOW.map((d,i)=>`<option value="${i}" ${t.weekday===i?'selected':''}>${d}</option>`).join('')}</select>
     <textarea id="tplNotes" class="field" placeholder="Workout note">${esc(t.notes||'')}</textarea>
     <h2>Exercises</h2>
-    <div class="stack">${groupExercisesByMuscle(state.exercises).map(([group,list])=>`
-      <div class="eyebrow" style="margin-top:14px">${esc(group)} · ${list.length}</div>
-      ${list.map(e=>templateExerciseOption(e,selected)).join('')}
-    `).join('')}</div>
+    <input id="tplExSearch" class="field left" placeholder="Search exercise..." oninput="renderTemplateExercisePicker()">
+    <div id="tplExPicker"></div>
     <button class="btn primary" style="width:100%;margin-top:14px" onclick="saveTemplate('${id||''}')">Save routine</button>`;
+  renderTemplateExercisePicker();
+}
+
+function renderTemplateExercisePicker(){
+  const q=($('tplExSearch')?.value||'').trim().toLowerCase();
+  const list=state.exercises.filter(e=>{
+    if(builderState.group!=='All'&&muscleGroupOf(e)!==builderState.group) return false;
+    if(q&&!`${e.name} ${e.english_name||''}`.toLowerCase().includes(q)) return false;
+    return true;
+  });
+  const filters=['All',...MUSCLE_GROUP_ORDER].map(g=>
+    `<button type="button" class="btn small ${builderState.group===g?'primary':''}" style="margin:0 6px 8px 0" onclick="setBuilderGroup('${esc(g)}')">${esc(g)}</button>`
+  ).join('');
+  const groups=groupExercisesByMuscle(list).map(([group,items])=>`
+    <div class="eyebrow" style="margin-top:14px">${esc(group)} · ${items.length}</div>
+    ${items.map(e=>templateExerciseOption(e)).join('')}
+  `).join('')||empty('No exercises match your search.');
+  $('tplExPicker').innerHTML=`<div style="margin-top:10px">${filters}</div><div class="stack">${groups}</div>`;
+}
+
+function setBuilderGroup(group){
+  builderState.group=group;
+  renderTemplateExercisePicker();
+}
+
+function toggleBuilderExercise(id,checked){
+  if(checked) builderState.selected.add(id); else builderState.selected.delete(id);
 }
 
 async function saveTemplate(id){
-  const checked=[...document.querySelectorAll('.tplEx:checked')].map(x=>x.value);
+  const checked=[...builderState.selected];
   if(!$('tplName').value.trim()||!checked.length) return alert('Add a name and at least one exercise.');
   const payload={user_id:state.user.id,name:$('tplName').value.trim(),weekday:Number($('tplDay').value),notes:$('tplNotes').value.trim()||null,is_public:true,updated_at:new Date().toISOString()};
   let templateId=id;
