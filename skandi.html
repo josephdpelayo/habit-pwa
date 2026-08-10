@@ -89,15 +89,27 @@ p{color:var(--muted);line-height:1.45;margin:0}
 .muscles{display:flex;flex-wrap:wrap;gap:8px}
 .bar{height:8px;background:#0b0c12;border-radius:999px;overflow:hidden}
 .bar i{display:block;height:100%;background:var(--lime);width:0}
-.set-row{display:grid;grid-template-columns:34px 1fr 1fr 52px;gap:8px;align-items:center}
+.set-row{display:grid;grid-template-columns:26px 1fr 1fr 46px 30px;gap:6px;align-items:center}
 .field{width:100%;background:var(--panel2);border:1px solid var(--line);color:var(--text);border-radius:16px;padding:13px;text-align:center}
 .field.left{text-align:left}
 textarea.field{min-height:112px;text-align:left;resize:vertical}
 .check{height:48px;border-radius:15px;background:var(--panel2);color:var(--muted);border:1px solid var(--line);font-weight:1000}
 .check.done{background:var(--lime);color:#08090d}
-.timer{display:grid;grid-template-columns:1fr 1fr;gap:12px}
-.clock{background:#0b0c12;border:1px solid var(--line);border-radius:18px;padding:16px;text-align:center}
-.clock strong{font-size:30px}
+.set-remove{width:30px;height:48px;border-radius:12px;background:transparent;color:var(--muted);border:1px solid var(--line);font-size:18px;font-weight:900;line-height:1}
+.timer-hero{display:grid;justify-items:center;gap:14px;margin:14px 0}
+.rest-ring{position:relative;width:180px;height:180px}
+.rest-ring svg{width:100%;height:100%;transform:rotate(-90deg)}
+.rest-ring .ring-track{fill:none;stroke:var(--panel2);stroke-width:10}
+.rest-ring .ring-fg{fill:none;stroke:var(--lime);stroke-width:10;stroke-linecap:round;transition:stroke-dashoffset .3s linear}
+.rest-ring-center{position:absolute;inset:0;display:grid;place-items:center;text-align:center}
+.rest-ring-center small{display:block;letter-spacing:.18em;color:var(--muted);font-weight:900;font-size:11px;margin-bottom:4px}
+.rest-ring-center strong{font-size:38px;line-height:1}
+.rest-presets{display:flex;gap:8px;flex-wrap:wrap;justify-content:center}
+.chip{background:var(--panel2);color:var(--muted);border:1px solid var(--line);border-radius:999px;padding:8px 14px;font-weight:900;font-size:13px}
+.chip.active{background:var(--lime);color:#07080b;border-color:var(--lime)}
+.stopwatch-pill{background:#0b0c12;border:1px solid var(--line);border-radius:16px;padding:10px 16px;text-align:center}
+.stopwatch-pill small{display:block;color:var(--muted);font-weight:800;font-size:11px}
+.stopwatch-pill strong{font-size:18px}
 .feed{padding:16px;margin:12px 0}
 .feed-title{display:flex;align-items:center;gap:10px}
 .dot{width:10px;height:10px;border-radius:50%;background:var(--green)}
@@ -123,7 +135,7 @@ textarea.field{min-height:112px;text-align:left;resize:vertical}
   .grid{grid-template-columns:1fr 1fr}
   .ex-head{grid-template-columns:58px 1fr auto}
   .thumb{width:58px;height:58px}
-  .set-row{grid-template-columns:28px 1fr 1fr 46px}
+  .set-row{grid-template-columns:24px 1fr 1fr 42px 26px}
   .app{padding-left:13px;padding-right:13px}
   .brand{font-size:22px}
   .brand-text small{font-size:10px}
@@ -192,7 +204,8 @@ const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 const DOW=['MON','TUE','WED','THU','FRI','SAT','SUN'];
 const MUSCLE_GROUP_ORDER=['Chest','Back','Shoulders','Arms','Legs','Core','Other'];
 const MUSCLE_GROUP_MAP={Chest:'Chest',Back:'Back',Shoulders:'Shoulders',Biceps:'Arms',Triceps:'Arms',Forearms:'Arms',Quads:'Legs',Hamstrings:'Legs',Glutes:'Legs','Hip Flexors':'Legs',Core:'Core'};
-const state={user:null,profile:null,view:'home',authMode:'login',exercises:[],templates:[],items:[],sessions:[],sets:[],active:null,activeItems:[],timer:null,elapsed:0,rest:0};
+const state={user:null,profile:null,view:'home',authMode:'login',exercises:[],templates:[],items:[],sessions:[],sets:[],active:null,activeItems:[],timer:null,elapsed:0,rest:0,restTotal:0};
+const REST_RING_C=2*Math.PI*52;
 let builderState={selected:new Map(),group:'All'};
 
 const $=id=>document.getElementById(id);
@@ -459,7 +472,11 @@ function templateExerciseOption(e){
     ${checked?`<div class="row" style="margin-top:10px;gap:8px">
       <input class="field" type="number" min="1" max="12" inputmode="numeric" value="${cfg.sets}" placeholder="sets" onclick="event.preventDefault()" onchange="updateBuilderConfig('${e.id}','sets',this.value)">
       <input class="field" type="text" value="${esc(cfg.reps)}" placeholder="reps" onclick="event.preventDefault()" onchange="updateBuilderConfig('${e.id}','reps',this.value)">
-      <input class="field" type="number" min="0" step="15" inputmode="numeric" value="${cfg.rest}" placeholder="rest s" onclick="event.preventDefault()" onchange="updateBuilderConfig('${e.id}','rest',this.value)">
+    </div>
+    <p class="muted" style="margin:10px 0 6px;font-size:12px;font-weight:800;letter-spacing:.1em;text-transform:uppercase">Rest between sets</p>
+    <div class="rest-presets" style="justify-content:flex-start">
+      ${[30,45,60,90,120,180].map(s=>`<button type="button" class="chip ${cfg.rest===s?'active':''}" onclick="event.preventDefault();updateBuilderConfig('${e.id}','rest',${s});renderTemplateExercisePicker()">${s<60?s+'s':(s/60)+'m'}</button>`).join('')}
+      <input class="field" type="number" min="0" step="5" inputmode="numeric" value="${cfg.rest}" placeholder="custom" style="width:80px;flex:0 0 auto" onclick="event.preventDefault()" onchange="updateBuilderConfig('${e.id}','rest',this.value);renderTemplateExercisePicker()">
     </div>`:''}
   </label>`;
 }
@@ -571,6 +588,7 @@ async function startWorkout(templateId){
   state.activeItems=its;
   state.elapsed=0;
   state.rest=0;
+  state.restTotal=0;
   await loadAll();
   resumeWorkoutTimer();
   openActiveWorkout();
@@ -590,11 +608,19 @@ function pauseWorkoutTimer(){
   state.timer=null;
 }
 
+function restRingOffset(){
+  if(!state.restTotal) return REST_RING_C;
+  const frac=Math.max(0,Math.min(1,state.rest/state.restTotal));
+  return REST_RING_C*(1-frac);
+}
+
 function updateWorkoutClocks(){
   const stopwatch=$('activeStopwatch');
   const rest=$('activeRest');
+  const ring=$('restRingFg');
   if(stopwatch) stopwatch.textContent=fmtSec(state.elapsed);
   if(rest) rest.textContent=fmtSec(state.rest);
+  if(ring) ring.setAttribute('stroke-dashoffset',restRingOffset().toFixed(1));
 }
 
 function toggleWorkoutTimer(){
@@ -604,7 +630,8 @@ function toggleWorkoutTimer(){
 
 function setRest(seconds){
   state.rest=seconds;
-  updateWorkoutClocks();
+  state.restTotal=seconds;
+  renderActiveWorkout();
 }
 
 function openActiveWorkout(){
@@ -617,16 +644,26 @@ function renderActiveWorkout(){
   const allSets=state.sets.filter(s=>s.session_id===state.active.id);
   const done=allSets.filter(s=>s.done).length;
   const running=!!state.timer;
+  const restPresets=[30,60,90,120,180];
   $('modalCard').innerHTML=`
     <div class="row"><div><p class="muted">Today workout</p><h1>${esc(state.active.title)}</h1></div><button class="x" onclick="closeModal()">×</button></div>
-    <section class="timer">
-      <div class="clock"><p>Stopwatch</p><strong id="activeStopwatch">${fmtSec(state.elapsed)}</strong></div>
-      <div class="clock"><p>Rest</p><strong id="activeRest">${fmtSec(state.rest)}</strong><div class="row"><button class="btn small" onclick="setRest(90)">90s</button><button class="btn small" onclick="setRest(180)">3m</button></div></div>
+    <section class="timer-hero">
+      <div class="rest-ring">
+        <svg viewBox="0 0 120 120">
+          <circle class="ring-track" cx="60" cy="60" r="52"></circle>
+          <circle id="restRingFg" class="ring-fg" cx="60" cy="60" r="52" stroke-dasharray="${REST_RING_C.toFixed(1)}" stroke-dashoffset="${restRingOffset().toFixed(1)}"></circle>
+        </svg>
+        <div class="rest-ring-center"><small>Rest</small><strong id="activeRest">${fmtSec(state.rest)}</strong></div>
+      </div>
+      <div class="rest-presets">
+        ${restPresets.map(s=>`<button type="button" class="chip ${state.restTotal===s?'active':''}" onclick="setRest(${s})">${s<60?s+'s':(s/60)+'m'}</button>`).join('')}
+      </div>
+      <div class="row" style="width:100%;gap:10px">
+        <div class="stopwatch-pill"><small>Elapsed</small><strong id="activeStopwatch">${fmtSec(state.elapsed)}</strong></div>
+        <button class="btn ${running?'':'primary'}" style="flex:1" onclick="toggleWorkoutTimer()">${running?'⏸ Pause':'▶ Resume'}</button>
+        <button class="btn danger" onclick="cancelWorkout()">Cancel</button>
+      </div>
     </section>
-    <div class="row" style="margin:12px 0;gap:10px">
-      <button class="btn ${running?'':'primary'}" style="flex:1" onclick="toggleWorkoutTimer()">${running?'⏸ Pause':'▶ Resume'}</button>
-      <button class="btn danger" style="flex:1" onclick="cancelWorkout()">Cancel</button>
-    </div>
     <p style="margin:14px 0"><span class="pill">${done}/${allSets.length}</span></p>
     ${state.activeItems.map(item=>activeExercise(item,allSets.filter(s=>s.exercise_id===item.exercise_id))).join('')}
     <button class="btn primary" style="width:100%;margin-top:12px" onclick="openReport()">Send report</button>`;
@@ -637,14 +674,16 @@ function activeExercise(item,sets){
   return `<article class="exercise">
     <div class="ex-head" onclick="openExercise('${e.id}')">${mediaThumb(e)}<div><h3>${esc(e.name)}</h3><p>${esc(e.english_name||'')} · ${item.target_sets} x ${esc(item.target_reps)} · rest ${item.target_rest_sec}s</p></div><span class="muted">${sets.filter(s=>s.done).length}/${sets.length}</span></div>
     <div class="stack">
-      <div class="set-row"><span></span><small class="muted">KG</small><small class="muted">REPS</small><span></span></div>
+      <div class="set-row"><span></span><small class="muted">KG</small><small class="muted">REPS</small><span></span><span></span></div>
       ${sets.map(s=>`<div class="set-row">
         <strong>${s.set_idx}</strong>
         <input class="field" inputmode="decimal" value="${s.weight_kg??''}" placeholder="kg" onchange="updateSet('${s.id}','weight_kg',this.value)">
         <input class="field" inputmode="numeric" value="${s.reps??''}" placeholder="${esc(s.target_reps||'reps')}" onchange="updateSet('${s.id}','reps',this.value)">
         <button class="check ${s.done?'done':''}" onclick="toggleSet('${s.id}',${item.target_rest_sec})">✓</button>
+        <button class="set-remove" onclick="removeSet('${s.id}')" aria-label="Remove set">×</button>
       </div>`).join('')}
     </div>
+    <button class="btn small ghost" style="width:100%;margin-top:8px" onclick="addSet('${item.exercise_id}','${esc(item.target_reps)}')">+ Add set</button>
   </article>`;
 }
 
@@ -665,6 +704,27 @@ async function toggleSet(id,rest){
   if(error) return alert(error.message);
   s.done=done;
   state.rest=done?rest:0;
+  state.restTotal=done?rest:0;
+  renderActiveWorkout();
+}
+
+async function addSet(exerciseId,targetReps){
+  if(!state.active) return;
+  const sessionId=state.active.id;
+  const existing=state.sets.filter(s=>s.session_id===sessionId&&s.exercise_id===exerciseId);
+  const nextIdx=(existing.length?Math.max(...existing.map(s=>s.set_idx)):0)+1;
+  const {data,error}=await sb.from('skandi_sets').insert({
+    session_id:sessionId,user_id:state.user.id,exercise_id:exerciseId,set_idx:nextIdx,target_reps:targetReps
+  }).select().single();
+  if(error) return alert(error.message);
+  state.sets.push(data);
+  renderActiveWorkout();
+}
+
+async function removeSet(id){
+  const {error}=await sb.from('skandi_sets').delete().eq('id',id);
+  if(error) return alert(error.message);
+  state.sets=state.sets.filter(s=>s.id!==id);
   renderActiveWorkout();
 }
 
@@ -679,6 +739,7 @@ async function cancelWorkout(){
   state.activeItems=[];
   state.elapsed=0;
   state.rest=0;
+  state.restTotal=0;
   closeModal();
   await loadAll();
   render();
