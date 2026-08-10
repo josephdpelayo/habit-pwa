@@ -395,6 +395,27 @@ input,select,button,textarea{font-family:'Inter',sans-serif}
 .exercise-focus-body{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:16px 16px calc(150px + env(safe-area-inset-bottom,0px))}
 .exercise-focus-stage{border:1px solid rgba(255,255,255,.08);background:rgba(255,255,255,.035);border-radius:18px;padding:12px;margin-bottom:14px}
 .exercise-focus-stage.expanded{padding:12px;overflow:hidden;background:linear-gradient(180deg,rgba(37,99,235,.12),rgba(255,255,255,.035));border-color:rgba(59,130,246,.24)}
+.exercise-focus-stage.primary-video{padding:0;border-radius:18px;overflow:hidden;background:#050505}
+.exercise-focus-tech{display:grid;gap:10px;margin-top:14px}
+.exercise-focus-tech-card{border:1px solid rgba(255,255,255,.08);border-radius:16px;background:rgba(255,255,255,.035);padding:12px}
+.exercise-focus-tech-k{display:flex;align-items:center;gap:8px;margin-bottom:8px;color:#a3a9b5;font-size:10.5px;font-weight:900;letter-spacing:.1em;text-transform:uppercase}
+.exercise-focus-tech-card p{margin:0;color:#d8dce4;font-size:13px;line-height:1.5}
+.exercise-focus-steps{display:grid;gap:8px;margin:0;padding:0;list-style:none}
+.exercise-focus-steps li{display:grid;grid-template-columns:26px 1fr;gap:9px;align-items:flex-start;color:#d8dce4;font-size:13px;line-height:1.45}
+.exercise-focus-steps span{width:26px;height:26px;border-radius:9px;background:var(--green);color:#03120d;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:950}
+.exercise-focus-bullets{margin:0;padding-left:18px;color:#d8dce4;font-size:13px;line-height:1.55}
+.exercise-focus-bullets li{margin-bottom:5px}
+.exercise-progression-card{border:1px solid rgba(183,255,47,.22);border-radius:16px;background:rgba(183,255,47,.075);padding:11px 12px;margin-bottom:12px;color:#dfffb6}
+.exercise-progression-card strong{display:block;color:var(--green);font-size:12px;margin-bottom:4px;text-transform:uppercase;letter-spacing:.07em}
+.exercise-progression-card span{display:block;font-size:12.5px;line-height:1.45;color:#d8f7b6}
+.feedback-pain-panel{border:1px solid rgba(251,113,133,.24);background:rgba(251,113,133,.08);border-radius:16px;padding:12px;margin-bottom:10px}
+.feedback-chip-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:7px;margin-bottom:10px}
+.feedback-chip{border:1px solid rgba(255,255,255,.1);background:rgba(0,0,0,.25);color:var(--white);border-radius:12px;padding:10px 6px;font-size:11.5px;font-weight:850}
+.feedback-chip.active{background:var(--green);border-color:var(--green);color:#03120d}
+.feedback-scale{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:10px}
+.feedback-scale .feedback-chip{width:38px;height:38px;padding:0}
+.feedback-progression{border:1px solid rgba(183,255,47,.22);background:rgba(183,255,47,.07);border-radius:16px;padding:12px;margin:10px 0;color:#dfffb6;font-size:12.5px;line-height:1.45}
+.feedback-progression strong{color:var(--green)}
 .exercise-video-preview{display:flex;align-items:center;gap:12px;padding:10px 2px 14px}
 .exercise-video-preview-icon{width:42px;height:42px;border-radius:16px;background:rgba(37,99,235,.95);display:flex;align-items:center;justify-content:center;flex-shrink:0}
 .exercise-video-preview-title{font-size:13px;font-weight:900;color:var(--white);line-height:1.2}
@@ -4099,7 +4120,7 @@ function admTab(t){
   if(t==='gaia')renderGaiaTab();
 }
 
-let coachHubActiveTab='hoy', coachTodayExpandedBoards=new Set(), selectedCoachProgramDs=null, workoutFeedbackScheduleId=null, workoutFeedbackEnergy='normal', workoutFeedbackSoreness=false, workoutFeedbackShare=true;
+let coachHubActiveTab='hoy', coachTodayExpandedBoards=new Set(), selectedCoachProgramDs=null, workoutFeedbackScheduleId=null, workoutFeedbackEnergy='normal', workoutFeedbackDifficulty='normal', workoutFeedbackSoreness=false, workoutFeedbackSorenessArea='', workoutFeedbackSorenessLevel=0, workoutFeedbackSorenessTrend='igual', workoutFeedbackShare=true, workoutFeedbackSets={};
 function coachHubTab(t,btn){
   coachHubActiveTab=t;
   document.querySelectorAll('.coach-hub-tab').forEach(b=>b.classList.remove('active'));
@@ -5989,7 +6010,7 @@ function askAboutExercise(exName){
 let _exFocusData=null, _exFocusVideoOpen=false, _editingWorkoutContext=null;
 function openExerciseFocus(rowEl){
   try{_exFocusData=JSON.parse(rowEl.dataset.ex);}catch(e){return;}
-  _exFocusVideoOpen=false;
+  _exFocusVideoOpen=!!(_exFocusData.videos&&_exFocusData.videos.length);
   renderExerciseFocusModal();
   document.getElementById('exercise-focus-modal').style.display='flex';
   refreshExerciseFocusFromServer();
@@ -6015,12 +6036,14 @@ async function refreshExerciseFocusFromServer(){
   const board=coachBoardsById[d.bid];
   const fresh=buildExerciseFocusData((board&&board.exercises)||[],d.idx,d.bid,d.scheduleId,d.focusSetIdx);
   if(!fresh)return;
-  _exFocusData={..._exFocusData,name:fresh.name,sets:fresh.sets,reps:fresh.reps,repsType:fresh.repsType,rest:fresh.rest,videos:fresh.videos,hasNote:fresh.hasNote,supersetGroup:fresh.supersetGroup,focusSetIdx:fresh.focusSetIdx};
+  _exFocusData={..._exFocusData,...fresh};
   document.getElementById('exercise-focus-name').textContent=_exFocusData.name;
   const detailEl=document.getElementById('exercise-focus-detail');
   if(detailEl)detailEl.textContent=exerciseDetailParts(_exFocusData).join(' · ')||'Sin detalle';
   renderExerciseFocusVideo();
   renderExerciseFocusTools();
+  const bodyEl=document.getElementById('exercise-focus-body');
+  if(bodyEl)bodyEl.innerHTML=renderExerciseFocusBodyHtml();
 }
 function toggleExFocusVideo(){
   _exFocusVideoOpen=!_exFocusVideoOpen;
@@ -6034,7 +6057,7 @@ function renderExerciseFocusVideo(){
   if(!_exFocusVideoOpen){el.innerHTML='';return;}
   const hasVideo=!!(d.videos&&d.videos.length);
   el.innerHTML=hasVideo
-    ?'<div class="exercise-focus-stage expanded">'+getExerciseFocusVideoHtml(d.videos[0].url)+'</div>'
+    ?'<div class="exercise-focus-stage expanded primary-video">'+getExerciseFocusVideoHtml(d.videos[0].url)+'</div>'
     :'<div class="exercise-focus-stage"><div class="empty" style="margin:0">Este ejercicio no tiene video configurado. Pídele a tu coach que lo agregue desde Socios &gt; Rutinas.</div></div>';
 }
 function renderExerciseFocusTools(){
@@ -6046,10 +6069,61 @@ function renderExerciseFocusTools(){
     +'<button class="ex-focus-icon-btn" onclick="openExerciseHistoryModal()">Historial</button>'
     +'<button class="ex-focus-icon-btn" id="exercise-focus-note-btn" onclick="openExerciseNoteFromFocus()">'+(d.hasNote?'Ver nota':'Nota')+'</button>';
 }
+function techniqueLines(value){
+  if(Array.isArray(value))return value.map(x=>String(x||'').trim()).filter(Boolean);
+  return String(value||'').split(/\n+|(?:^|\s)(?:\d+[\).\]]\s+)/).map(x=>x.replace(/^[-•]\s*/,'').trim()).filter(Boolean);
+}
+function techniqueBullets(value){
+  if(Array.isArray(value))return value.map(x=>String(x||'').trim()).filter(Boolean);
+  return String(value||'').split(/\n+|[;•]/).map(x=>x.replace(/^[-•]\s*/,'').trim()).filter(Boolean);
+}
+function targetRepRange(raw){
+  const txt=String(raw||'').toLowerCase();
+  if(/max|máx|amrap/.test(txt))return null;
+  const nums=(txt.match(/\d+/g)||[]).map(Number);
+  if(!nums.length)return null;
+  return{min:nums[0],max:nums.length>1?nums[nums.length-1]:nums[0]};
+}
+function exerciseProgressionSummary(d){
+  if(!d||!d.scheduleId)return'';
+  const sets=(coachSessionSets[d.exKey]||[]).filter(s=>s.done);
+  const total=(coachSessionSets[d.exKey]||[]).length;
+  if(!total)return'';
+  const done=sets.length;
+  if(done<total)return 'Completa las series y deja reps reales para calcular el siguiente ajuste.';
+  const range=targetRepRange(d.reps);
+  const reps=sets.map(s=>parseFloat(s.actual_reps)).filter(n=>!isNaN(n));
+  const weights=sets.map(s=>parseFloat(s.weight)).filter(n=>!isNaN(n));
+  if(!reps.length)return 'Entreno terminado, pero faltan reps para decidir progresión.';
+  const minReps=Math.min(...reps);
+  const avgReps=Math.round((reps.reduce((a,b)=>a+b,0)/reps.length)*10)/10;
+  const hasWeight=weights.some(w=>w>0);
+  if(range&&minReps>=range.max)return hasWeight
+    ?'Rango alto completado ('+avgReps+' reps media). Próxima vez: sube un poco el peso y vuelve al rango bajo.'
+    :'Rango alto completado ('+avgReps+' reps media). Próxima vez: añade 1-2 reps o una variante un poco más difícil.';
+  if(range&&minReps<range.min)return 'Se quedó por debajo del rango. Próxima vez mantén o baja un poco la carga y cuida técnica.';
+  return 'Rango cumplido. Próxima vez repite buscando una repetición más limpia antes de subir.';
+}
+function renderExerciseProgressionCard(d){
+  const txt=exerciseProgressionSummary(d);
+  return txt?'<div class="exercise-progression-card"><strong>Siguiente progresión</strong><span>'+esc(txt)+'</span></div>':'';
+}
+function renderExerciseTechniqueHtml(d){
+  const muscles=d.muscles||d.primaryMuscle||exerciseMuscleLabel(d);
+  const steps=techniqueLines(d.instructions||d.howTo||d.steps);
+  const mistakes=techniqueBullets(d.commonMistakes||d.common_mistakes||d.mistakes||d.errors);
+  const tips=techniqueBullets(d.coachTips||d.coach_tips||d.tips);
+  let html='';
+  if(muscles)html+='<div class="exercise-focus-tech-card"><div class="exercise-focus-tech-k">Músculos implicados</div><p>'+esc(muscles)+'</p></div>';
+  if(steps.length)html+='<div class="exercise-focus-tech-card"><div class="exercise-focus-tech-k">Cómo se hace</div><ol class="exercise-focus-steps">'+steps.slice(0,6).map((s,i)=>'<li><span>'+(i+1)+'</span><div>'+esc(s)+'</div></li>').join('')+'</ol></div>';
+  if(mistakes.length)html+='<div class="exercise-focus-tech-card"><div class="exercise-focus-tech-k">Errores comunes</div><ul class="exercise-focus-bullets">'+mistakes.slice(0,5).map(s=>'<li>'+esc(s)+'</li>').join('')+'</ul></div>';
+  if(tips.length)html+='<div class="exercise-focus-tech-card"><div class="exercise-focus-tech-k">Consejos del coach</div><ul class="exercise-focus-bullets">'+tips.slice(0,5).map(s=>'<li>'+esc(s)+'</li>').join('')+'</ul></div>';
+  return html?'<div class="exercise-focus-tech">'+html+'</div>':'';
+}
 function renderExerciseFocusBodyHtml(){
   const d=_exFocusData;
   if(!d)return'';
-  if(!d.scheduleId)return'<button class="btn" style="width:100%" onclick="openLogScoreFromFocus()">Registrar peso</button>';
+  if(!d.scheduleId)return renderExerciseTechniqueHtml(d)+'<button class="btn" style="width:100%;margin-top:12px" onclick="openLogScoreFromFocus()">Registrar peso</button>';
   const sessionCtx={scheduleId:d.scheduleId,sets:coachSessionSets,focusSetIdx:d.focusSetIdx};
   const tracker=renderSetTrackerHtml(sessionCtx,d.exKey,{rest:d.rest,reps:d.reps})
     ||'<div class="empty">Sin series configuradas.</div>';
@@ -6058,7 +6132,7 @@ function renderExerciseFocusBodyHtml(){
     hasNextExerciseInFocus()?'<button class="btn" onclick="moveExerciseFocus(1)">Siguiente</button>':'<button class="btn finish" onclick="finishCoachingSessionSb()">Finalizar entreno</button>'
   ].filter(Boolean).join('');
   const groupNote=d.supersetGroup?'<div class="superset-flow-note">'+esc(exerciseGroupLabel(d))+' · marca una serie y avanzas al siguiente ejercicio del bloque.</div>':'';
-  return groupNote+tracker+'<div class="exercise-focus-nav'+(hasPrevExerciseInFocus()?'':' single')+'">'+nav+'</div>';
+  return groupNote+renderExerciseProgressionCard(d)+tracker+renderExerciseTechniqueHtml(d)+'<div class="exercise-focus-nav'+(hasPrevExerciseInFocus()?'':' single')+'">'+nav+'</div>';
 }
 function renderExerciseFocusModal(){
   const d=_exFocusData;
@@ -6081,7 +6155,12 @@ function buildExerciseFocusData(exercises,idx,boardId,scheduleId){
     videos:getExerciseVideos(ex),exKey,hasNote:!!exerciseNotesMap[exKey],
     bid:boardId,idx,exid:ex.id||'',scheduleId:scheduleId||null,
     supersetGroup:exerciseGroupRaw(ex),focusSetIdx:arguments.length>4?arguments[4]:null,
-    showAsesoria:canAccessCoaching()};
+    showAsesoria:canAccessCoaching(),
+    muscles:exerciseMuscleLabel(ex)||ex.primary_muscle||ex.primaryMuscle||'',
+    primaryMuscle:ex.primary_muscle||ex.primaryMuscle||'',
+    instructions:ex.instructions||ex.howTo||ex.steps||'',
+    commonMistakes:ex.common_mistakes||ex.commonMistakes||ex.mistakes||ex.errors||'',
+    coachTips:ex.coach_tips||ex.coachTips||ex.tips||''};
 }
 function hasNextExerciseInFocus(){
   if(!_exFocusData||!activeCoachingSession||_exFocusData.scheduleId!==activeCoachingSession.id)return false;
@@ -6158,7 +6237,7 @@ function openActiveCoachingExercise(idx,focusSetIdx){
   if(!exercises.length)return;
   const safeIdx=typeof idx==='number'?Math.max(0,Math.min(exercises.length-1,idx)):getActiveExerciseIndex();
   _exFocusData=buildExerciseFocusData(exercises,safeIdx,activeCoachingSession.board_id,activeCoachingSession.id,focusSetIdx);
-  _exFocusVideoOpen=false;
+  _exFocusVideoOpen=!!(_exFocusData&&_exFocusData.videos&&_exFocusData.videos.length);
   renderExerciseFocusModal();
   const modal=document.getElementById('exercise-focus-modal');
   if(modal)modal.style.display='flex';
@@ -6173,7 +6252,7 @@ function moveExerciseFocus(delta){
   const exercises=(board&&board.exercises)||[];
   const nextIdx=Math.max(0,Math.min(exercises.length-1,_exFocusData.idx+delta));
   _exFocusData=buildExerciseFocusData(exercises,nextIdx,activeCoachingSession.board_id,activeCoachingSession.id,null);
-  _exFocusVideoOpen=false;
+  _exFocusVideoOpen=!!(_exFocusData&&_exFocusData.videos&&_exFocusData.videos.length);
   renderExerciseFocusModal();
   refreshExerciseFocusFromServer();
 }
@@ -6557,7 +6636,12 @@ function renderExerciseListHtml(exercises,keyPrefix,boardId,sessionCtx){
     const exData={name:ex.name,sets:ex.sets||'',reps:ex.reps||'',repsType:inferTargetType(ex),rest:ex.rest||'',videos,exKey,
       hasNote,bid:boardId||keyPrefix,idx:i,exid:ex.id||'',scheduleId:sessionCtx?sessionCtx.scheduleId:null,
       supersetGroup:exerciseGroupRaw(ex),focusSetIdx:null,
-      showAsesoria:canAccessCoaching()};
+      showAsesoria:canAccessCoaching(),
+      muscles:exerciseMuscleLabel(ex)||ex.primary_muscle||ex.primaryMuscle||'',
+      primaryMuscle:ex.primary_muscle||ex.primaryMuscle||'',
+      instructions:ex.instructions||ex.howTo||ex.steps||'',
+      commonMistakes:ex.common_mistakes||ex.commonMistakes||ex.mistakes||ex.errors||'',
+      coachTips:ex.coach_tips||ex.coachTips||ex.tips||''};
     const isActionable=!!sessionCtx;
     return '<div class="exercise-detail'+(isActionable?'':' static')+'"'+(isActionable?' onclick="openExerciseFocus(this)" data-ex="'+esc(JSON.stringify(exData))+'"':'')+'>'
       +'<div class="exercise-detail-head" style="display:flex;align-items:center;gap:10px">'
@@ -7584,8 +7668,8 @@ function renderCoachSemanaPanel(){
     const statusLabel=row.status==='done'?'Completado':row.status==='in_progress'?'En curso':row.status==='skipped'?'Descanso':isMissed?'Omitido':'Programado';
     const statusCls=row.status==='done'?'bg-green':row.status==='in_progress'?'bg-blue':'';
     const actions=isMissed?'<div style="display:flex;gap:6px;margin-top:8px"><button class="btn-sm" onclick="event.stopPropagation();moveMissedWorkoutToTodaySb(&quot;'+row.id+'&quot;)">Mover a hoy</button><button class="btn-sm" onclick="event.stopPropagation();markWorkoutSkippedSb(&quot;'+row.id+'&quot;)">Descanso</button></div>':'';
-    const feedback=row.status==='done'&&(row.feedback_energy||row.feedback_soreness!=null||row.feedback_note)
-      ?'<div class="coach-day-note"><strong>Feedback</strong>'+(row.feedback_energy?'Energía '+esc(row.feedback_energy)+'. ':'')+(row.feedback_soreness?'Con molestia. ':'')+esc(row.feedback_note||'')+'</div>':'';
+    const feedback=row.status==='done'&&(row.feedback_energy||row.feedback_soreness||row.feedback_note||row.progression_hint||row.feedback_difficulty)
+      ?'<div class="coach-day-note"><strong>Feedback</strong>'+esc(coachingFeedbackText(row))+'</div>':'';
     return '<div class="coach-task-row" '+(row.status==='done'?'onclick="openEditCompletedWorkoutSb(&quot;'+row.id+'&quot;)"':'')+'><div class="coach-session-dot" style="background:'+esc(row.board_color||'#2563eb')+'"></div><div style="flex:1;min-width:0"><div class="coach-task-title">'+esc(row.board_name)+'</div>'+actions+feedback+'</div><div class="coach-task-due '+statusCls+'">'+statusLabel+'</div></div>';
   }).join(''):'<div class="empty">Sin entrenos registrados en este día.</div>';
   const dayFasts=fastingLogsForDs(selectedCoachProgramDs);
@@ -7688,6 +7772,7 @@ async function finishCoachingSessionSb(){
   try{
     const startedMs=new Date(activeCoachingSession.started_at).getTime();
     const durationSec=Math.max(0,Math.round((Date.now()-startedMs)/1000));
+    workoutFeedbackSets=JSON.parse(JSON.stringify(coachSessionSets||{}));
     const{data,error}=await sb.from('coaching_schedule').update({status:'done',completed_at:new Date().toISOString(),duration_sec:durationSec}).eq('id',activeCoachingSession.id).select().single();
     if(error)throw error;
     const idx=coachSchedule.findIndex(r=>r.id===data.id);
@@ -7706,7 +7791,11 @@ async function finishCoachingSessionSb(){
 function openWorkoutFeedbackModal(scheduleId){
   workoutFeedbackScheduleId=scheduleId;
   workoutFeedbackEnergy='normal';
+  workoutFeedbackDifficulty='normal';
   workoutFeedbackSoreness=false;
+  workoutFeedbackSorenessArea='';
+  workoutFeedbackSorenessLevel=0;
+  workoutFeedbackSorenessTrend='igual';
   workoutFeedbackShare=true;
   renderWorkoutFeedbackModalBody();
   document.getElementById('workout-feedback-modal').style.display='flex';
@@ -7719,22 +7808,75 @@ function setWorkoutFeedbackEnergy(v){
   workoutFeedbackEnergy=v;
   renderWorkoutFeedbackModalBody();
 }
+function setWorkoutFeedbackDifficulty(v){
+  workoutFeedbackDifficulty=v;
+  renderWorkoutFeedbackModalBody();
+}
 function toggleWorkoutFeedbackSoreness(){
   workoutFeedbackSoreness=!workoutFeedbackSoreness;
+  if(!workoutFeedbackSoreness){
+    workoutFeedbackSorenessArea='';
+    workoutFeedbackSorenessLevel=0;
+    workoutFeedbackSorenessTrend='igual';
+  }
+  renderWorkoutFeedbackModalBody();
+}
+function setWorkoutFeedbackSorenessArea(v){
+  workoutFeedbackSorenessArea=v;
+  renderWorkoutFeedbackModalBody();
+}
+function setWorkoutFeedbackSorenessLevel(v){
+  workoutFeedbackSorenessLevel=parseInt(v,10)||0;
+  renderWorkoutFeedbackModalBody();
+}
+function setWorkoutFeedbackSorenessTrend(v){
+  workoutFeedbackSorenessTrend=v;
   renderWorkoutFeedbackModalBody();
 }
 function toggleWorkoutFeedbackShare(){
   workoutFeedbackShare=!workoutFeedbackShare;
   renderWorkoutFeedbackModalBody();
 }
+function buildWorkoutProgressionSummary(scheduleId){
+  const row=coachSchedule.find(r=>r.id===scheduleId)||{};
+  const setGroups=workoutFeedbackSets||{};
+  const allSets=Object.values(setGroups).flat();
+  const doneSets=allSets.filter(s=>s.done);
+  if(!allSets.length)return 'Sin series registradas. Mantener plan y revisar adherencia.';
+  const donePct=Math.round(doneSets.length/allSets.length*100);
+  const reps=doneSets.map(s=>parseFloat(s.actual_reps)).filter(n=>!isNaN(n));
+  const avgReps=reps.length?Math.round((reps.reduce((a,b)=>a+b,0)/reps.length)*10)/10:null;
+  if(workoutFeedbackSoreness&&workoutFeedbackSorenessLevel>=5)return 'Bajar o mantener carga: molestia '+workoutFeedbackSorenessLevel+'/10'+(workoutFeedbackSorenessArea?' en '+workoutFeedbackSorenessArea:'')+'. Revisar técnica antes de progresar.';
+  if(workoutFeedbackEnergy==='baja'||workoutFeedbackDifficulty==='pesado')return 'Mantener carga la próxima sesión. Buscar ejecución limpia antes de subir.';
+  if(donePct>=90&&workoutFeedbackDifficulty==='facil')return 'Progresar: subir 1-2 reps por serie o 2.5-5% de peso en ejercicios con carga.';
+  if(donePct>=80)return 'Buen margen. Repetir o subir muy poco si la técnica se mantuvo sólida.';
+  return 'Mantener plan: faltaron series/reps para justificar progresión.';
+}
+function renderWorkoutPainPanel(){
+  if(!workoutFeedbackSoreness)return'';
+  const areas=['Hombro','Codo','Muñeca','Lumbar','Rodilla','Cadera','Cuello','Otra'];
+  return '<div class="feedback-pain-panel">'
+    +'<div class="fasting-k">¿Dónde?</div>'
+    +'<div class="feedback-chip-grid">'+areas.map(a=>'<button class="feedback-chip '+(workoutFeedbackSorenessArea===a?'active':'')+'" onclick="setWorkoutFeedbackSorenessArea(&quot;'+a+'&quot;)">'+a+'</button>').join('')+'</div>'
+    +'<div class="fasting-k">Intensidad 0-10</div>'
+    +'<div class="feedback-scale">'+Array.from({length:11},(_,i)=>'<button class="feedback-chip '+(workoutFeedbackSorenessLevel===i?'active':'')+'" onclick="setWorkoutFeedbackSorenessLevel('+i+')">'+i+'</button>').join('')+'</div>'
+    +'<div class="fasting-k">Evolución</div>'
+    +'<div class="coach-feedback-grid">'+['mejor','igual','peor'].map(v=>'<button class="coach-feedback-choice '+(workoutFeedbackSorenessTrend===v?'active':'')+'" onclick="setWorkoutFeedbackSorenessTrend(&quot;'+v+'&quot;)">'+v+'</button>').join('')+'</div>'
+    +'</div>';
+}
 function renderWorkoutFeedbackModalBody(){
   const row=coachSchedule.find(r=>r.id===workoutFeedbackScheduleId)||{};
   const body=document.getElementById('workout-feedback-modal-body');
   if(!body)return;
+  const progression=buildWorkoutProgressionSummary(workoutFeedbackScheduleId);
   body.innerHTML='<div class="coach-day-note"><strong>'+esc(row.board_name||'Entreno completado')+'</strong>Esto ayuda a tu coach a ajustar carga, descansos y próximos ejercicios.</div>'
     +'<div class="fasting-k" style="margin-top:12px">Energía</div>'
     +'<div class="coach-feedback-grid">'+['baja','normal','alta'].map(v=>'<button class="coach-feedback-choice '+(workoutFeedbackEnergy===v?'active':'')+'" onclick="setWorkoutFeedbackEnergy(&quot;'+v+'&quot;)">'+v+'</button>').join('')+'</div>'
-    +'<button class="coach-feedback-choice '+(workoutFeedbackSoreness?'active':'')+'" style="width:100%;margin-bottom:10px" onclick="toggleWorkoutFeedbackSoreness()">Tuve molestia o dolor</button>'
+    +'<div class="fasting-k">Dificultad</div>'
+    +'<div class="coach-feedback-grid">'+['facil','normal','pesado'].map(v=>'<button class="coach-feedback-choice '+(workoutFeedbackDifficulty===v?'active':'')+'" onclick="setWorkoutFeedbackDifficulty(&quot;'+v+'&quot;)">'+(v==='facil'?'fácil':v)+'</button>').join('')+'</div>'
+    +'<button class="coach-feedback-choice '+(workoutFeedbackSoreness?'active':'')+'" style="width:100%;margin-bottom:10px" onclick="toggleWorkoutFeedbackSoreness()">He notado alguna molestia o dolor</button>'
+    +renderWorkoutPainPanel()
+    +'<div class="feedback-progression"><strong>Progresión sugerida:</strong> '+esc(progression)+'</div>'
     +'<textarea id="workout-feedback-note" rows="3" placeholder="Nota para tu coach..." style="width:100%;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);border-radius:14px;color:var(--white);padding:12px;font-size:13px;resize:none;margin-bottom:10px"></textarea>'
     +'<button class="coach-feedback-choice '+(workoutFeedbackShare?'active':'')+'" style="width:100%;margin-bottom:10px" onclick="toggleWorkoutFeedbackShare()">Enviar resumen al chat</button>'
     +'<button class="btn" style="width:100%" onclick="saveWorkoutFeedbackSb()">Guardar feedback</button>'
@@ -7742,7 +7884,8 @@ function renderWorkoutFeedbackModalBody(){
 }
 async function sendWorkoutFeedbackChatSummary(row,note){
   if(!sbUser||!row)return;
-  const text='Terminé '+(row.board_name||'mi entreno')+'. Energía '+workoutFeedbackEnergy+(workoutFeedbackSoreness?', con molestia':'')+(note?'. '+note:'');
+  const pain=workoutFeedbackSoreness?(', molestia '+(workoutFeedbackSorenessArea||'sin zona')+' '+workoutFeedbackSorenessLevel+'/10 '+workoutFeedbackSorenessTrend):'';
+  const text='Terminé '+(row.board_name||'mi entreno')+'. Energía '+workoutFeedbackEnergy+', dificultad '+workoutFeedbackDifficulty+pain+'. Progresión: '+buildWorkoutProgressionSummary(row.id)+(note?'. '+note:'');
   try{
     const{data,error}=await sb.from('coaching_messages').insert({
       user_id:sbUser.id,
@@ -7758,12 +7901,28 @@ async function sendWorkoutFeedbackChatSummary(row,note){
 async function saveWorkoutFeedbackSb(){
   if(!workoutFeedbackScheduleId){closeWorkoutFeedbackModal();return;}
   const note=(document.getElementById('workout-feedback-note')?.value||'').trim();
+  const progression=buildWorkoutProgressionSummary(workoutFeedbackScheduleId);
+  const fullPatch={
+    feedback_energy:workoutFeedbackEnergy,
+    feedback_soreness:workoutFeedbackSoreness,
+    feedback_note:note||null,
+    feedback_difficulty:workoutFeedbackDifficulty,
+    feedback_soreness_area:workoutFeedbackSoreness?workoutFeedbackSorenessArea||null:null,
+    feedback_soreness_level:workoutFeedbackSoreness?workoutFeedbackSorenessLevel:null,
+    feedback_soreness_trend:workoutFeedbackSoreness?workoutFeedbackSorenessTrend:null,
+    progression_hint:progression
+  };
+  const basicPatch={
+    feedback_energy:workoutFeedbackEnergy,
+    feedback_soreness:workoutFeedbackSoreness,
+    feedback_note:note||null
+  };
   try{
-    const{data,error}=await sb.from('coaching_schedule').update({
-      feedback_energy:workoutFeedbackEnergy,
-      feedback_soreness:workoutFeedbackSoreness,
-      feedback_note:note||null
-    }).eq('id',workoutFeedbackScheduleId).eq('user_id',sbUser.id).select().single();
+    let{data,error}=await sb.from('coaching_schedule').update(fullPatch).eq('id',workoutFeedbackScheduleId).eq('user_id',sbUser.id).select().single();
+    if(error&&/feedback_difficulty|feedback_soreness_area|feedback_soreness_level|feedback_soreness_trend|progression_hint|schema cache|column/i.test(error.message||'')){
+      const retry=await sb.from('coaching_schedule').update(basicPatch).eq('id',workoutFeedbackScheduleId).eq('user_id',sbUser.id).select().single();
+      data=retry.data;error=retry.error;
+    }
     if(error)throw error;
     const idx=coachSchedule.findIndex(r=>r.id===data.id);
     if(idx>-1)coachSchedule[idx]=data;
@@ -11732,6 +11891,21 @@ function renderCoachProgressPanelHtml(){
   if(coachProgressView==='ayuno')return renderCoachAdminFastingReportHtml();
   return '<div class="admin-report-section"><div class="admin-report-head"><strong>PRs y progreso de peso</strong><span>Tendencia</span></div><div id="coach-admin-scores"><div class="empty">Cargando...</div></div></div>';
 }
+function coachingFeedbackText(row){
+  const parts=[];
+  if(row.feedback_energy)parts.push('Energía '+row.feedback_energy);
+  if(row.feedback_difficulty)parts.push('Dificultad '+row.feedback_difficulty);
+  if(row.feedback_soreness){
+    let pain='Molestia';
+    if(row.feedback_soreness_area)pain+=': '+row.feedback_soreness_area;
+    if(row.feedback_soreness_level!=null)pain+=' '+row.feedback_soreness_level+'/10';
+    if(row.feedback_soreness_trend)pain+=' ('+row.feedback_soreness_trend+')';
+    parts.push(pain);
+  }
+  if(row.progression_hint)parts.push('Progresión: '+row.progression_hint);
+  if(row.feedback_note)parts.push(row.feedback_note);
+  return parts.join(' · ');
+}
 function updateCoachProgressPanel(){
   document.querySelectorAll('.admin-progress-tab').forEach(b=>b.classList.toggle('active',b.dataset.view===coachProgressView));
   document.querySelectorAll('.coach-report-tab').forEach(b=>b.classList.toggle('active',b.dataset.view===coachProgressView));
@@ -11748,7 +11922,7 @@ function coachAdminDaySummary(ds){
   const doneTasks=tasks.filter(t=>isCoachAdminTaskDoneOnDs(t,ds));
   const minutes=Math.round(doneRows.reduce((s,r)=>s+(r.duration_sec||0),0)/60);
   const title=dayRows.length?dayRows.map(r=>r.board_name).join(' · '):'Sin entreno programado';
-  const feedback=dayRows.map(r=>[r.feedback_energy?('Energía '+r.feedback_energy):'',r.feedback_soreness?'Molestia':'',r.feedback_note||''].filter(Boolean).join(' · ')).filter(Boolean).join(' | ');
+  const feedback=dayRows.map(coachingFeedbackText).filter(Boolean).join(' | ');
   return{dayRows,doneRows,tasks,doneTasks,minutes,title,feedback};
 }
 function renderAdminHabitsPanel(){
@@ -11864,8 +12038,8 @@ function renderCoachSessionDetailAdmin(){
   const byEx={};
   coachSessionDetailRows.forEach(r=>{(byEx[r.ex_key]=byEx[r.ex_key]||[]).push(r);});
   const scheduleRow=coachAdminSchedule.find(r=>r.ds===refDs)||{};
-  const comment=(scheduleRow.feedback_note||'').trim();
-  const commentHtml=comment?'<div class="admin-session-comment">'+esc(comment)+'</div>':'';
+  const feedbackText=coachingFeedbackText(scheduleRow);
+  const commentHtml=feedbackText?'<div class="admin-session-comment">'+esc(feedbackText)+'</div>':'';
   const exercisesHtml=Object.entries(byEx).map(([exKey,sets])=>{
     const info=resolveExKeyInfo(exKey);
     const rows=sets.map(s=>{
