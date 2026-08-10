@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
 <meta name="theme-color" content="#07080b">
 <title>Skandi Fit</title>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -190,6 +190,8 @@ const SUPABASE_URL='https://pmpjteuqjusbiduevbwq.supabase.co';
 const SUPABASE_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBtcGp0ZXVxanVzYmlkdWV2YndxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc2OTI1NjUsImV4cCI6MjA5MzI2ODU2NX0.XbMzZoo2yqtrD8znLnyo_1zDfrdJAvAPj1lqGOyXnLw';
 const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 const DOW=['MON','TUE','WED','THU','FRI','SAT','SUN'];
+const MUSCLE_GROUP_ORDER=['Chest','Back','Shoulders','Arms','Legs','Core','Other'];
+const MUSCLE_GROUP_MAP={Chest:'Chest',Back:'Back',Shoulders:'Shoulders',Biceps:'Arms',Triceps:'Arms',Forearms:'Arms',Quads:'Legs',Hamstrings:'Legs',Glutes:'Legs','Hip Flexors':'Legs',Core:'Core'};
 const state={user:null,profile:null,view:'home',authMode:'login',exercises:[],templates:[],items:[],sessions:[],sets:[],active:null,activeItems:[],timer:null,elapsed:0,rest:0};
 
 const $=id=>document.getElementById(id);
@@ -268,7 +270,7 @@ async function loadAll(){
   const [{data:profile},{data:exercises},{data:templates},{data:items},{data:sessions},{data:sets}]=await Promise.all([
     sb.from('profiles').select('id,name,email,avatar_url').eq('id',state.user.id).maybeSingle(),
     sb.from('skandi_exercises').select('*').order('name'),
-    sb.from('skandi_templates').select('*').order('weekday',{nullsFirst:false}).order('created_at',{ascending:false}),
+    sb.from('skandi_templates').select('*, profile:profiles(name,avatar_url)').order('weekday',{nullsFirst:false}).order('created_at',{ascending:false}),
     sb.from('skandi_template_items').select('*, exercise:skandi_exercises(*)').order('sort_order'),
     sb.from('skandi_sessions').select('*, profile:profiles(name,avatar_url)').order('started_at',{ascending:false}).limit(60),
     sb.from('skandi_sets').select('*, exercise:skandi_exercises(name,slug)').order('created_at',{ascending:false}).limit(600)
@@ -326,10 +328,11 @@ function homeView(){
 
 function trainView(){
   const mine=state.templates.filter(t=>t.user_id===state.user.id);
+  const community=state.templates.filter(t=>t.user_id!==state.user.id);
   return `
     <div class="row"><h1>Train</h1><button class="btn primary" onclick="openTemplateBuilder()">+ Routine</button></div>
     <section class="card">
-      <div class="row"><h2>Your base week</h2><span class="muted">${mine.length} routines</span></div>
+      <div class="row"><h2>Your week</h2><span class="muted">${mine.length} routines</span></div>
       <div class="week">
         ${DOW.map((d,i)=>{
           const t=mine.find(x=>x.weekday===i);
@@ -337,22 +340,30 @@ function trainView(){
         }).join('')}
       </div>
     </section>
-    <h2>Shared routines</h2>
-    ${state.templates.map(t=>workoutCard(t,false)).join('')||empty('No shared routines yet.')}`;
+    <h2>My routines</h2>
+    ${mine.length?mine.map(t=>workoutCard(t)).join(''):empty('You have not created a routine yet.')}
+    <h2>Community routines</h2>
+    ${community.length?community.map(t=>workoutCard(t)).join(''):empty('No routines shared by other crew yet.')}`;
 }
 
-function workoutCard(t,featured){
+function workoutCard(t){
   const its=state.items.filter(i=>i.template_id===t.id);
   const names=its.slice(0,4).map(i=>`<span class="pill dark">${esc(i.exercise?.name||'Exercise')}</span>`).join('');
+  const mine=t.user_id===state.user.id;
+  const creator=t.profile?.name||'Crew member';
   return `<article class="workout card">
     <div class="row">
-      <div><h2>${esc(t.name)}</h2><p>${its.length} exercises ${t.weekday!=null?'· '+DOW[t.weekday]:''}</p></div>
+      <div>
+        <h2>${esc(t.name)}</h2>
+        <p>${its.length} exercises ${t.weekday!=null?'· '+DOW[t.weekday]:''}${mine?'':' · by '+esc(creator)}</p>
+        ${t.forked_from_name?`<p class="muted" style="margin-top:4px">Adapted from ${esc(t.forked_from_name)}</p>`:''}
+      </div>
       <span class="pill">${its.length} ex.</span>
     </div>
     <div class="muscles">${names}${its.length>4?`<span class="pill dark">+${its.length-4}</span>`:''}</div>
     <div class="row" style="margin-top:16px">
       <button class="btn primary" onclick="startWorkout('${t.id}')">▶ Start</button>
-      ${t.user_id===state.user.id?`<button class="btn" onclick="openTemplateBuilder(null,'${t.id}')">Edit</button>`:''}
+      ${mine?`<button class="btn" onclick="openTemplateBuilder(null,'${t.id}')">Edit</button>`:`<button class="btn" onclick="openAddToWeek('${t.id}')">+ Add to my week</button>`}
     </div>
   </article>`;
 }
@@ -404,6 +415,31 @@ function renderLibraryList(){
 
 function exerciseList(list){
   return list.map(e=>exerciseCard(e,false)).join('')||empty('No exercises found.');
+}
+
+function muscleGroupOf(e){
+  const muscles=Object.entries(e.muscles||{}).sort((a,b)=>b[1]-a[1]);
+  if(!muscles.length) return 'Other';
+  return MUSCLE_GROUP_MAP[muscles[0][0]]||'Other';
+}
+
+function groupExercisesByMuscle(list){
+  const groups=new Map();
+  list.forEach(e=>{
+    const g=muscleGroupOf(e);
+    if(!groups.has(g)) groups.set(g,[]);
+    groups.get(g).push(e);
+  });
+  return MUSCLE_GROUP_ORDER
+    .filter(g=>groups.has(g))
+    .map(g=>[g,groups.get(g).sort((a,b)=>a.name.localeCompare(b.name))]);
+}
+
+function templateExerciseOption(e,selected){
+  return `<label class="row card" style="margin:0 0 8px">
+    <div><strong>${esc(e.name)}</strong><p>${esc(e.category)}</p></div>
+    <input class="tplEx" type="checkbox" value="${e.id}" ${selected.includes(e.id)?'checked':''}>
+  </label>`;
 }
 
 function exerciseCard(e,tracking){
@@ -625,7 +661,10 @@ function openTemplateBuilder(day=null,id=null){
     <select id="tplDay" class="field left">${DOW.map((d,i)=>`<option value="${i}" ${t.weekday===i?'selected':''}>${d}</option>`).join('')}</select>
     <textarea id="tplNotes" class="field" placeholder="Workout note">${esc(t.notes||'')}</textarea>
     <h2>Exercises</h2>
-    <div class="stack">${state.exercises.map(e=>`<label class="row card" style="margin:0"><div><strong>${esc(e.name)}</strong><p>${esc(e.category)}</p></div><input class="tplEx" type="checkbox" value="${e.id}" ${selected.includes(e.id)?'checked':''}></label>`).join('')}</div>
+    <div class="stack">${groupExercisesByMuscle(state.exercises).map(([group,list])=>`
+      <div class="eyebrow" style="margin-top:14px">${esc(group)} · ${list.length}</div>
+      ${list.map(e=>templateExerciseOption(e,selected)).join('')}
+    `).join('')}</div>
     <button class="btn primary" style="width:100%;margin-top:14px" onclick="saveTemplate('${id||''}')">Save routine</button>`;
 }
 
@@ -646,6 +685,36 @@ async function saveTemplate(id){
   closeModal();
   await loadAll();
   render();
+}
+
+function openAddToWeek(templateId){
+  const t=state.templates.find(x=>x.id===templateId);
+  if(!t) return;
+  const mine=state.templates.filter(x=>x.user_id===state.user.id);
+  $('modal').classList.add('show');
+  $('modalCard').innerHTML=`
+    <div class="row"><h1>Add to my week</h1><button class="x" onclick="closeModal()">×</button></div>
+    <p class="muted">${esc(t.name)} · by ${esc(t.profile?.name||'Crew member')}</p>
+    <select id="forkDay" class="field left">${DOW.map((d,i)=>{
+      const taken=mine.find(x=>x.weekday===i);
+      return `<option value="${i}" ${i===todayDow()?'selected':''}>${d}${taken?' — already has '+esc(taken.name):''}</option>`;
+    }).join('')}</select>
+    <button class="btn primary" style="width:100%;margin-top:14px" onclick="confirmAddToWeek('${templateId}')">Add to my week</button>`;
+}
+
+async function confirmAddToWeek(templateId){
+  const t=state.templates.find(x=>x.id===templateId);
+  if(!t) return;
+  const weekday=Number($('forkDay').value);
+  const sourceItems=state.items.filter(i=>i.template_id===templateId).sort((a,b)=>a.sort_order-b.sort_order);
+  const payload={user_id:state.user.id,name:t.name,notes:t.notes,weekday,is_public:true,forked_from:t.id,forked_from_name:t.profile?.name||'Crew member',updated_at:new Date().toISOString()};
+  const {data,error}=await sb.from('skandi_templates').insert(payload).select().single();
+  if(error) return alert(error.message);
+  const rows=sourceItems.map((i,idx)=>({template_id:data.id,exercise_id:i.exercise_id,sort_order:idx,target_sets:i.target_sets,target_reps:i.target_reps,target_rest_sec:i.target_rest_sec,note:i.note}));
+  if(rows.length) await sb.from('skandi_template_items').insert(rows);
+  closeModal();
+  await loadAll();
+  setView('train');
 }
 
 function openExerciseBuilder(){
