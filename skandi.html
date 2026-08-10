@@ -102,12 +102,14 @@ textarea.field{min-height:112px;text-align:left;resize:vertical}
 .feed-title{display:flex;align-items:center;gap:10px}
 .dot{width:10px;height:10px;border-radius:50%;background:var(--green)}
 .leader{display:grid;grid-template-columns:1fr auto;gap:8px;border-top:1px solid var(--line);padding-top:12px;margin-top:12px}
-.load-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
-.load-card{background:var(--panel2);border:1px solid var(--line);border-radius:16px;padding:11px}
-.load-card strong{display:block;font-size:18px}
-.load-card small{display:block;color:var(--muted);margin:5px 0 9px;font-weight:800}
-.heat{height:10px;border-radius:999px;background:#0b0c12;overflow:hidden}
-.heat i{display:block;height:100%;border-radius:999px;background:linear-gradient(90deg,var(--green),var(--amber),var(--pink));width:0}
+.body-diagram{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:14px}
+.body-figure{text-align:center}
+.body-figure svg{width:100%;height:auto}
+.muscle-region{cursor:pointer;transition:opacity .15s}
+.muscle-region:hover,.muscle-region:active{opacity:.82}
+.muscle-legend{display:flex;align-items:center;justify-content:center;gap:14px;margin-top:12px;flex-wrap:wrap}
+.muscle-legend span{display:flex;align-items:center;gap:6px;font-size:11px;color:var(--muted);font-weight:800;text-transform:uppercase;letter-spacing:.06em}
+.muscle-legend i{width:10px;height:10px;border-radius:50%;display:inline-block}
 .auth{min-height:100dvh;display:grid;place-items:center;padding:24px}
 .auth-box{width:min(460px,100%);background:var(--panel);border:1px solid var(--line);border-radius:28px;padding:24px}
 .auth-logo{font-size:54px;font-weight:1000;color:var(--lime)}
@@ -192,6 +194,34 @@ const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 const DOW=['MON','TUE','WED','THU','FRI','SAT','SUN'];
 const MUSCLE_GROUP_ORDER=['Chest','Back','Shoulders','Arms','Legs','Core','Other'];
 const MUSCLE_GROUP_MAP={Chest:'Chest',Back:'Back',Shoulders:'Shoulders',Biceps:'Arms',Triceps:'Arms',Forearms:'Arms',Quads:'Legs',Hamstrings:'Legs',Glutes:'Legs','Hip Flexors':'Legs',Core:'Core'};
+const MUSCLE_BODY_SCAFFOLD=[
+  {shape:'ellipse',cx:85,cy:26,rx:18,ry:19},
+  {shape:'rect',x:76,y:42,w:18,h:16,rx:6},
+  {shape:'rect',x:56,y:160,w:58,h:22,rx:11},
+  {shape:'rect',x:55,y:255,w:22,h:74,rx:10},
+  {shape:'rect',x:93,y:255,w:22,h:74,rx:10},
+  {shape:'ellipse',cx:66,cy:336,rx:13,ry:8},
+  {shape:'ellipse',cx:104,cy:336,rx:13,ry:8}
+];
+const MUSCLE_BODY_REGIONS=[
+  {name:'Shoulders',view:'front',shape:'ellipse',cx:38,cy:66,rx:17,ry:14},
+  {name:'Shoulders',view:'front',shape:'ellipse',cx:132,cy:66,rx:17,ry:14},
+  {name:'Chest',view:'front',shape:'rect',x:56,y:58,w:58,h:48,rx:16},
+  {name:'Biceps',view:'front',shape:'ellipse',cx:30,cy:112,rx:14,ry:32},
+  {name:'Biceps',view:'front',shape:'ellipse',cx:140,cy:112,rx:14,ry:32},
+  {name:'Core',view:'front',shape:'rect',x:61,y:108,w:48,h:56,rx:12},
+  {name:'Forearms',view:'front',shape:'ellipse',cx:24,cy:172,rx:11,ry:30},
+  {name:'Forearms',view:'front',shape:'ellipse',cx:146,cy:172,rx:11,ry:30},
+  {name:'Quads',view:'front',shape:'rect',x:53,y:184,w:28,h:76,rx:14},
+  {name:'Quads',view:'front',shape:'rect',x:89,y:184,w:28,h:76,rx:14},
+  {name:'Back',view:'back',shape:'rect',x:50,y:56,w:70,h:112,rx:18},
+  {name:'Triceps',view:'back',shape:'ellipse',cx:30,cy:112,rx:14,ry:32},
+  {name:'Triceps',view:'back',shape:'ellipse',cx:140,cy:112,rx:14,ry:32},
+  {name:'Glutes',view:'back',shape:'rect',x:58,y:168,w:54,h:34,rx:16},
+  {name:'Hamstrings',view:'back',shape:'rect',x:53,y:204,w:28,h:56,rx:14},
+  {name:'Hamstrings',view:'back',shape:'rect',x:89,y:204,w:28,h:56,rx:14}
+];
+const MUSCLE_BODY_SCAFFOLD_ARMS=[{shape:'ellipse',cx:24,cy:172,rx:11,ry:30},{shape:'ellipse',cx:146,cy:172,rx:11,ry:30}];
 const state={user:null,profile:null,view:'home',authMode:'login',exercises:[],templates:[],items:[],sessions:[],sets:[],active:null,activeItems:[],timer:null,elapsed:0,rest:0};
 let builderState={selected:new Map(),group:'All'};
 
@@ -509,19 +539,94 @@ function muscleLoadCard(title,userOnly){
   const rows=muscleLoad(userOnly);
   const hottest=rows[0];
   const fresh=rows.filter(r=>r.score<20).length;
+  const scoreByName=new Map(rows.map(r=>[r.name,r.score]));
   return `<section class="card">
     <div class="row">
-      <div><h2>${esc(title)}</h2><p>${hottest?`${hottest.name} is at ${hottest.score}% this week`:'No muscle load logged this week'}</p></div>
+      <div><h2>${esc(title)}</h2><p>${hottest&&hottest.score>0?`${hottest.name} is at ${hottest.score}% this week`:'No muscle load logged this week'}</p></div>
       <span class="pill">${fresh} fresh</span>
     </div>
-    <div class="load-grid" style="margin-top:14px">
-      ${rows.map(r=>`<div class="load-card">
-        <strong>${esc(r.name)}</strong>
-        <small>${loadLabel(r.score)} · ${r.score}%</small>
-        <div class="heat"><i style="width:${r.score}%"></i></div>
-      </div>`).join('')||empty('Log sets to calculate how loaded your muscles are.')}
-    </div>
+    ${bodyDiagram(scoreByName,userOnly)}
   </section>`;
+}
+
+function heatColor(score){
+  const stops=[[47,211,125],[255,189,57],[255,100,120]];
+  const t=Math.max(0,Math.min(100,score))/100;
+  const seg=t<0.5?0:1;
+  const local=t<0.5?t/0.5:(t-0.5)/0.5;
+  const a=stops[seg],b=stops[seg+1];
+  const mix=i=>Math.round(a[i]+(b[i]-a[i])*local);
+  return `rgb(${mix(0)},${mix(1)},${mix(2)})`;
+}
+
+function bodyRegionShape(r,fill,clickable){
+  const attrs=`fill="${fill}" stroke="#07080b" stroke-width="1.5"`;
+  const inner=r.shape==='ellipse'
+    ?`<ellipse cx="${r.cx}" cy="${r.cy}" rx="${r.rx}" ry="${r.ry}" ${attrs}/>`
+    :`<rect x="${r.x}" y="${r.y}" width="${r.w}" height="${r.h}" rx="${r.rx}" ${attrs}/>`;
+  return clickable?`<g class="muscle-region" onclick="openMuscleDetail('${r.name}')">${inner}</g>`:inner;
+}
+
+function bodyFigureSVG(view,scoreByName){
+  const scaffold=MUSCLE_BODY_SCAFFOLD.map(r=>bodyRegionShape(r,'#1d1e27',false)).join('');
+  const armFiller=view==='back'?MUSCLE_BODY_SCAFFOLD_ARMS.map(r=>bodyRegionShape(r,'#1d1e27',false)).join(''):'';
+  const regions=MUSCLE_BODY_REGIONS.filter(r=>r.view===view)
+    .map(r=>bodyRegionShape(r,heatColor(scoreByName.get(r.name)||0),true)).join('');
+  return `<svg viewBox="0 0 170 350" xmlns="http://www.w3.org/2000/svg">${scaffold}${armFiller}${regions}</svg>`;
+}
+
+function bodyDiagram(scoreByName,userOnly){
+  return `<div class="body-diagram">
+    <div class="body-figure"><small class="muted">FRONT</small>${bodyFigureSVG('front',scoreByName)}</div>
+    <div class="body-figure"><small class="muted">BACK</small>${bodyFigureSVG('back',scoreByName)}</div>
+  </div>
+  <div class="muscle-legend">
+    <span><i style="background:${heatColor(5)}"></i>Fresh</span>
+    <span><i style="background:${heatColor(50)}"></i>Moderate</span>
+    <span><i style="background:${heatColor(100)}"></i>Very loaded</span>
+  </div>
+  <p class="muted" style="text-align:center;margin-top:8px;font-size:12px">Tap a muscle for details</p>`;
+}
+
+function muscleDetailBreakdown(name,userOnly){
+  const since=Date.now()-7*864e5;
+  const exById=new Map(state.exercises.map(e=>[e.id,e]));
+  const byExercise=new Map();
+  state.sets.filter(s=>{
+    const session=state.sessions.find(x=>x.id===s.session_id);
+    const when=new Date(session?.completed_at||s.created_at).getTime();
+    return s.done && when>=since && (!userOnly || s.user_id===state.user.id);
+  }).forEach(s=>{
+    const ex=exById.get(s.exercise_id);
+    const pct=ex?.muscles?.[name];
+    if(!ex||!pct) return;
+    const cur=byExercise.get(ex.id)||{name:ex.name,pct,sets:0};
+    cur.sets++;
+    byExercise.set(ex.id,cur);
+  });
+  return [...byExercise.values()].sort((a,b)=>b.sets-a.sets);
+}
+
+function openMuscleDetail(name){
+  const row=muscleLoad(true).find(r=>r.name===name)||{name,score:0};
+  const breakdown=muscleDetailBreakdown(name,true);
+  const library=state.exercises.filter(e=>e.muscles&&e.muscles[name])
+    .sort((a,b)=>(b.muscles[name]||0)-(a.muscles[name]||0)).slice(0,6);
+  $('modal').classList.add('show');
+  $('modalCard').innerHTML=`
+    <div class="row"><h1>${esc(name)}</h1><button class="x" onclick="closeModal()">×</button></div>
+    <section class="card" style="text-align:center">
+      <div style="width:96px;height:96px;border-radius:50%;margin:0 auto;background:${heatColor(row.score)};display:grid;place-items:center;font-weight:1000;font-size:22px;color:#07080b">${row.score}%</div>
+      <p style="margin-top:10px">${esc(loadLabel(row.score))} this week</p>
+    </section>
+    <section class="card">
+      <div class="eyebrow">Exercises that trained ${esc(name)} this week</div>
+      ${breakdown.length?breakdown.map(b=>`<div class="row" style="margin-top:10px"><div><strong>${esc(b.name)}</strong><p>${b.sets} set${b.sets===1?'':'s'} logged</p></div><span class="pill dark">${b.pct}% of exercise</span></div>`).join(''):empty('No sets logged for this muscle this week.')}
+    </section>
+    <section class="card">
+      <div class="eyebrow">Best exercises for ${esc(name)}</div>
+      ${library.length?library.map(e=>`<div class="row" style="margin-top:8px;cursor:pointer" onclick="closeModal();openExercise('${e.id}')"><strong>${esc(e.name)}</strong><span class="pill dark">${e.muscles[name]}%</span></div>`).join(''):empty('No exercises target this muscle yet.')}
+    </section>`;
 }
 
 function muscleLoad(userOnly){
