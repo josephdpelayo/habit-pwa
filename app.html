@@ -550,6 +550,39 @@ input,select,button,textarea{font-family:'Inter',sans-serif}
 .admin-board-name{display:flex;align-items:center;gap:8px;min-width:0;font-size:13px;font-weight:750;color:var(--white)}
 .admin-board-name span:last-child{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .admin-board-edit{border:1px solid rgba(255,255,255,.1);background:rgba(255,255,255,.045);color:#b7bdc8;border-radius:999px;padding:7px 9px;font-size:10.5px;font-weight:800;white-space:nowrap}
+.coach-admin-kpis{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin-bottom:12px}
+.coach-admin-kpi{border:1px solid rgba(255,255,255,.08);border-radius:16px;background:rgba(255,255,255,.035);padding:12px;min-width:0}
+.coach-admin-kpi strong{display:block;font-size:26px;line-height:1;color:var(--white);font-variant-numeric:tabular-nums}
+.coach-admin-kpi strong.hot{color:var(--amber)}
+.coach-admin-kpi strong.good{color:var(--gl)}
+.coach-admin-kpi span{display:block;margin-top:5px;font-size:10.5px;color:#9aa1ad;font-weight:850;letter-spacing:.06em;text-transform:uppercase;line-height:1.25}
+.coach-admin-filters{display:grid;grid-template-columns:repeat(4,1fr);gap:7px;margin:10px 0 12px;border:1px solid rgba(255,255,255,.08);border-radius:16px;background:rgba(255,255,255,.035);padding:6px}
+.coach-admin-filter{border:0;background:transparent;color:#8b93a1;border-radius:12px;padding:9px 4px;font-size:11px;font-weight:850;cursor:pointer}
+.coach-admin-filter.active{background:rgba(255,255,255,.13);color:var(--white)}
+.coach-client-row{cursor:pointer;display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:10px;align-items:center;border:1px solid rgba(255,255,255,.08);border-radius:16px;background:rgba(255,255,255,.035);padding:11px;margin-bottom:8px}
+.coach-client-avatar{width:42px;height:42px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:900;color:#080808;flex-shrink:0}
+.coach-client-main{min-width:0}
+.coach-client-name{font-size:14px;font-weight:850;color:var(--white);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.coach-client-meta{font-size:11px;color:#8b93a1;line-height:1.35;margin-top:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.coach-client-tags{display:flex;flex-wrap:wrap;gap:5px;margin-top:7px}
+.coach-client-tag{border-radius:999px;padding:5px 8px;background:rgba(255,255,255,.06);color:#a3a9b5;font-size:10.5px;font-weight:850;line-height:1}
+.coach-client-tag.warn{background:rgba(245,158,11,.13);color:#f7c76a}
+.coach-client-tag.hot{background:rgba(239,68,68,.13);color:#fca5a5}
+.coach-client-status{display:flex;flex-direction:column;align-items:flex-end;gap:6px;min-width:70px}
+.coach-client-pill{border-radius:999px;padding:6px 9px;font-size:10.5px;font-weight:900;background:rgba(163,255,42,.14);color:var(--gl);white-space:nowrap}
+.coach-client-pill.attn{background:rgba(245,158,11,.14);color:#f7c76a}
+.coach-client-arrow{font-size:22px;color:#6b7280;line-height:1}
+.coach-attention-list{display:grid;gap:8px;margin-bottom:12px}
+.coach-attention-item{display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:10px;align-items:center;border:1px solid rgba(245,158,11,.18);border-left:3px solid rgba(245,158,11,.74);border-radius:14px;background:rgba(245,158,11,.06);padding:10px;cursor:pointer}
+.coach-attention-dot{width:8px;height:8px;border-radius:99px;background:#f59e0b;box-shadow:0 0 0 5px rgba(245,158,11,.12)}
+.coach-attention-title{font-size:13px;font-weight:850;color:var(--white);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.coach-attention-sub{font-size:11.5px;color:#a3a9b5;line-height:1.35;margin-top:3px}
+.coach-automation-list{display:grid;gap:8px}
+.coach-automation-row{display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:10px;align-items:center;border:1px solid rgba(255,255,255,.08);border-radius:16px;background:rgba(255,255,255,.035);padding:12px}
+.coach-automation-light{width:12px;height:12px;border-radius:99px;background:#ef4444;box-shadow:0 0 0 7px rgba(239,68,68,.13)}
+.coach-automation-light.on{background:#22c55e;box-shadow:0 0 0 7px rgba(34,197,94,.13)}
+.coach-automation-title{font-size:13.5px;font-weight:850;color:var(--white);line-height:1.2}
+.coach-automation-sub{font-size:11.5px;color:#9aa1ad;line-height:1.35;margin-top:4px}
 @media(max-width:380px){.admin-report-hero{grid-template-columns:repeat(2,1fr)}.admin-report-day{grid-template-columns:48px 1fr}.admin-report-pill{justify-self:start;grid-column:2}}
 .coach-cockpit-head{background:#080808;padding-bottom:10px;margin-bottom:4px}
 .coach-cockpit-top{display:flex;align-items:center;gap:10px;margin-bottom:8px}
@@ -1740,9 +1773,16 @@ html,body,.app,input,select,button,textarea{font-family:var(--font-ui);font-opti
       <div class="admin-page-head">
         <div><div class="admin-page-kicker">Entrenamiento</div><h2 class="admin-page-title">Coaching</h2><div class="admin-page-sub">Clientes activos y programación</div></div>
       </div>
+      <div id="coaching-command-center"></div>
       <div class="admin-card">
         <div class="admin-card-title">Socios activos</div>
-        <input class="adm-search" placeholder="Buscar socio..." oninput="renderCoachingListSb(this.value)">
+        <input class="adm-search" id="coaching-search" placeholder="Buscar socio..." oninput="renderCoachingListRows(this.value)">
+        <div class="coach-admin-filters">
+          <button class="coach-admin-filter active" data-coach-filter="todos" onclick="setCoachingListFilter(this)">Todos</button>
+          <button class="coach-admin-filter" data-coach-filter="atencion" onclick="setCoachingListFilter(this)">Atención</button>
+          <button class="coach-admin-filter" data-coach-filter="activos" onclick="setCoachingListFilter(this)">Activos</button>
+          <button class="coach-admin-filter" data-coach-filter="sin-plan" onclick="setCoachingListFilter(this)">Sin plan</button>
+        </div>
         <div id="coaching-list"></div>
       </div>
     </div>
@@ -2900,7 +2940,7 @@ let coachWeekStart=null, coachSchedule=[], coachTasks=[], coachBoardsById={}, ac
 let chatMessages=[], chatChannel=null, chatPollInt=null, chatSendContext=null,
     chatMediaRecorder=null, chatRecordChunks=[], chatRecordStartMs=0, chatRecordTimerInt=null,
     chatPendingImgFile=null;
-let coachingAdminClients=[], selectedCoachClientId=null, coachAdminWeekStart=null, coachAdminSchedule=[], coachAdminTasks=[], coachAdminTaskLogsByDs={}, coachAdminFastingLogs=[], coachClientAssignedBoardIds=new Set(), editingCoachTaskId=null;
+let coachingAdminClients=[], selectedCoachClientId=null, coachAdminWeekStart=null, coachAdminSchedule=[], coachAdminTasks=[], coachAdminTaskLogsByDs={}, coachAdminFastingLogs=[], coachClientAssignedBoardIds=new Set(), editingCoachTaskId=null, coachingListFilter='todos';
 let selectedCoachDetailDs=null, coachSessionDetailRows=[], coachDetailActiveTab='semana', coachProgressView='habitos', coachPlanBoardsOpen=false;
 let exerciseNotesMap={}, noteCtx=null;
 let mensajesAdminClients=[], selectedChatClientId=null, adminChatChannel=null, adminChatPollInt=null;
@@ -11335,17 +11375,92 @@ async function saveExerciseCatalogFromBoardExercise(ex){
 // hace desde su perfil individual en Socios). Tocar uno abre su cockpit
 // (Semana/Rutinas/Hábitos/Notas/Progreso) en una pantalla dedicada aparte.
 let _coachingListAll=null;
+function coachDaysBetweenDS(a,b){
+  if(!a||!b)return 999;
+  return Math.round((dateObjFromDS(b).getTime()-dateObjFromDS(a).getTime())/86400000);
+}
+function coachListAvatarColor(i){
+  return ['#facc15','#fb923c','#f9a8d4','#86efac','#93c5fd','#c4b5fd','#fca5a5'][Math.abs(i)%7];
+}
+function setCoachingListFilter(btn){
+  coachingListFilter=btn.dataset.coachFilter||'todos';
+  document.querySelectorAll('.coach-admin-filter').forEach(b=>b.classList.toggle('active',b.dataset.coachFilter===coachingListFilter));
+  renderCoachingListRows((document.getElementById('coaching-search')||{}).value||'');
+}
+function coachListRelevantTask(t,today){
+  if(t.is_recurring)return !t.due_date||t.due_date<=today;
+  return !t.is_done&&(t.due_date===today||(!t.due_date&&today===mazToday())||(t.due_date&&t.due_date<today));
+}
+function coachBuildAttentionSignals(u){
+  const signals=[];
+  if((u.unreadChats||0)>0)signals.push({kind:'chat',label:u.unreadChats+' chat'+(u.unreadChats===1?'':'s')+' sin leer'});
+  if((u.missedWorkouts||0)>0)signals.push({kind:'workout',label:u.missedWorkouts+' entreno'+(u.missedWorkouts===1?'':'s')+' vencido'+(u.missedWorkouts===1?'':'s')});
+  if(u.lowEnergy)signals.push({kind:'feedback',label:'Energía baja'});
+  if(u.soreness)signals.push({kind:'feedback',label:'Molestia reportada'});
+  if((u.pendingHabitsToday||0)>0)signals.push({kind:'habit',label:u.pendingHabitsToday+' hábito'+(u.pendingHabitsToday===1?'':'s')+' pendiente'+(u.pendingHabitsToday===1?'':'s')});
+  if(u.fastingBehind)signals.push({kind:'fasting',label:'Ayuno sin registro reciente'});
+  return signals;
+}
+function renderCoachingCommandCenter(){
+  const el=document.getElementById('coaching-command-center');
+  if(!el)return;
+  const rows=_coachingListAll||[];
+  if(!rows.length){el.innerHTML='';return;}
+  const active=rows.filter(u=>u.activeRecently).length;
+  const attention=rows.filter(u=>(u.attentionSignals||[]).length).length;
+  const noPlan=rows.filter(u=>u.noPlanToday).length;
+  const unread=rows.reduce((s,u)=>s+(u.unreadChats||0),0);
+  const topAttention=rows.filter(u=>(u.attentionSignals||[]).length).sort((a,b)=>(b.attentionSignals.length-a.attentionSignals.length)||(b.unreadChats||0)-(a.unreadChats||0)).slice(0,3);
+  const attentionHtml=topAttention.length
+    ?'<div class="coach-attention-list">'+topAttention.map((u,idx)=>'<div class="coach-attention-item" onclick="adminOpenCoachingCockpit(&quot;'+esc(u.id)+'&quot;,&quot;'+esc(u.name||'')+'&quot;)">'
+      +'<div class="coach-attention-dot"></div>'
+      +'<div style="min-width:0"><div class="coach-attention-title">'+esc(u.name||'Socio')+'</div><div class="coach-attention-sub">'+esc((u.attentionSignals||[]).map(s=>s.label).slice(0,2).join(' · '))+'</div></div>'
+      +'<div class="coach-client-avatar" style="width:34px;height:34px;background:'+coachListAvatarColor(idx)+'">'+inits(u.name||'?')+'</div>'
+      +'</div>').join('')+'</div>'
+    :'<div class="empty" style="margin-bottom:12px">Sin clientes que requieran atención inmediata.</div>';
+  const automations=[
+    {title:'Seguimiento inteligente',sub:'Alertas por entrenos, hábitos, feedback y chats.',on:true},
+    {title:'Resumen semanal',sub:'Se calcula al abrir la ficha del cliente.',on:true},
+    {title:'Hábitos recurrentes',sub:'Check-list diario con historial por fecha.',on:rows.some(u=>u.hasRecurringTasks)},
+    {title:'Lectura automática de chats',sub:'Pendiente de conectar IA para detectar temas.',on:false}
+  ];
+  el.innerHTML='<div class="coach-admin-kpis">'
+    +'<div class="coach-admin-kpi"><strong class="good">'+active+'</strong><span>Activos recientes</span></div>'
+    +'<div class="coach-admin-kpi"><strong class="hot">'+attention+'</strong><span>Requieren atención</span></div>'
+    +'<div class="coach-admin-kpi"><strong>'+noPlan+'</strong><span>Sin plan hoy</span></div>'
+    +'<div class="coach-admin-kpi"><strong>'+unread+'</strong><span>Chats sin leer</span></div>'
+    +'</div>'
+    +'<div class="coach-window-card"><div class="coach-card-head"><div><div class="coach-card-k">Requiere atención</div><div class="coach-card-sub">Prioridad diaria de seguimiento.</div></div><div class="admin-report-pill '+(attention?'warn':'good')+'">'+attention+'</div></div>'+attentionHtml+'</div>'
+    +'<div class="coach-window-card" style="margin-bottom:12px"><div class="coach-card-head"><div><div class="coach-card-k">Automatizaciones</div><div class="coach-card-sub">Estado de procesos de coaching.</div></div></div><div class="coach-automation-list">'
+    +automations.map(a=>'<div class="coach-automation-row"><div class="coach-automation-light '+(a.on?'on':'')+'"></div><div><div class="coach-automation-title">'+esc(a.title)+'</div><div class="coach-automation-sub">'+esc(a.sub)+'</div></div><div class="admin-report-pill '+(a.on?'good':'warn')+'">'+(a.on?'Activo':'Pendiente')+'</div></div>').join('')
+    +'</div></div>';
+}
 function renderCoachingListRows(filter){
   const el=document.getElementById('coaching-list');
   if(!el)return;
   const f=(filter||'').toLowerCase();
-  const list=(_coachingListAll||[]).filter(u=>!f||(u.name||'').toLowerCase().includes(f));
-  el.innerHTML=list.length?list.map(u=>
-    '<div style="cursor:pointer;display:flex;align-items:center;gap:10px;padding:9px 4px;border-bottom:1px solid var(--border)" onclick="adminOpenCoachingCockpit(&quot;'+esc(u.id)+'&quot;,&quot;'+esc(u.name||'')+'&quot;)">'
-    +'<div style="width:32px;height:32px;border-radius:50%;background:var(--bl);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;color:#fff;flex-shrink:0">'+inits(u.name)+'</div>'
-    +'<span style="flex:1;font-size:13px;font-weight:600">'+esc(u.name||'Socio')+'</span>'
-    +(u.workoutDoneToday?'<span title="Ya entrenó hoy" style="font-size:15px;line-height:1">💪</span>':'')
-    +(u.habitsDoneToday?'<span title="Ya completó sus hábitos de hoy" style="font-size:15px;line-height:1">✅</span>':'')
+  document.querySelectorAll('.coach-admin-filter').forEach(b=>b.classList.toggle('active',b.dataset.coachFilter===coachingListFilter));
+  renderCoachingCommandCenter();
+  const list=(_coachingListAll||[]).filter(u=>{
+    if(f&&!(u.name||'').toLowerCase().includes(f))return false;
+    if(coachingListFilter==='atencion')return (u.attentionSignals||[]).length>0;
+    if(coachingListFilter==='activos')return !!u.activeRecently;
+    if(coachingListFilter==='sin-plan')return !!u.noPlanToday;
+    return true;
+  });
+  el.innerHTML=list.length?list.map((u,idx)=>
+    '<div class="coach-client-row" onclick="adminOpenCoachingCockpit(&quot;'+esc(u.id)+'&quot;,&quot;'+esc(u.name||'')+'&quot;)">'
+    +'<div class="coach-client-avatar" style="background:'+coachListAvatarColor(idx)+'">'+inits(u.name||'?')+'</div>'
+    +'<div class="coach-client-main">'
+    +'<div class="coach-client-name">'+esc(u.name||'Socio')+'</div>'
+    +'<div class="coach-client-meta">'+esc(u.lastActivityLabel||'Sin actividad reciente')+' · '+(u.plannedToday?u.doneWorkoutsToday+'/'+u.plannedToday+' entrenos hoy':'sin plan hoy')+'</div>'
+    +'<div class="coach-client-tags">'
+    +(u.attentionSignals||[]).slice(0,3).map(s=>'<span class="coach-client-tag '+(s.kind==='chat'||s.kind==='workout'?'hot':'warn')+'">'+esc(s.label)+'</span>').join('')
+    +(!(u.attentionSignals||[]).length&&u.habitsDoneToday?'<span class="coach-client-tag">Hábitos listos</span>':'')
+    +(!(u.attentionSignals||[]).length&&u.workoutDoneToday?'<span class="coach-client-tag">Entreno listo</span>':'')
+    +'</div>'
+    +'</div>'
+    +'<div class="coach-client-status"><div class="coach-client-pill '+((u.attentionSignals||[]).length?'attn':'')+'">'+((u.attentionSignals||[]).length?'Atención':'Activo')+'</div><div class="coach-client-arrow">›</div></div>'
     +'</div>'
   ).join(''):'<div class="empty">'+(_coachingListAll&&_coachingListAll.length?'Sin resultados.':'Sin socios inscritos en Coaching todavía. Actívalo desde el perfil de un socio en Socios.')+'</div>';
 }
@@ -11370,26 +11485,65 @@ async function loadCoachingListTodayStatusSb(){
   if(!_coachingListAll||!_coachingListAll.length)return;
   const ids=_coachingListAll.map(u=>u.id);
   const today=mazToday();
+  const weekAgo=addDaysDS(today,-6);
   try{
-    const[scheduleRes,tasksRes,logsRes]=await Promise.all([
-      sb.from('coaching_schedule').select('user_id,status').eq('ds',today).in('user_id',ids),
+    const[scheduleRes,tasksRes,logsRes,fastingRes,msgRes]=await Promise.all([
+      sb.from('coaching_schedule').select('user_id,ds,status,completed_at,duration_sec,feedback_energy,feedback_soreness,feedback_note').gte('ds',weekAgo).lte('ds',today).in('user_id',ids),
       sb.from('coaching_tasks').select('id,user_id,is_recurring,due_date,is_done').in('user_id',ids),
-      sb.from('coaching_task_logs').select('task_id,user_id').eq('ds',today).in('user_id',ids)
+      sb.from('coaching_task_logs').select('task_id,user_id,ds').gte('ds',weekAgo).lte('ds',today).in('user_id',ids),
+      sb.from('coaching_fasting_logs').select('user_id,fast_end_ds,duration_min,target_hours').gte('fast_end_ds',weekAgo).in('user_id',ids),
+      sb.from('coaching_messages').select('user_id,sender_role,read_at,created_at').in('user_id',ids).order('created_at',{ascending:false}).limit(500)
     ]);
     const scheduleByUser={};
     (scheduleRes.data||[]).forEach(r=>{(scheduleByUser[r.user_id]=scheduleByUser[r.user_id]||[]).push(r);});
-    const loggedIdsByUser={};
-    (logsRes.data||[]).forEach(r=>{(loggedIdsByUser[r.user_id]=loggedIdsByUser[r.user_id]||new Set()).add(r.task_id);});
+    const loggedIdsTodayByUser={},lastLogDsByUser={};
+    (logsRes.data||[]).forEach(r=>{
+      if(r.ds===today)(loggedIdsTodayByUser[r.user_id]=loggedIdsTodayByUser[r.user_id]||new Set()).add(r.task_id);
+      if(!lastLogDsByUser[r.user_id]||r.ds>lastLogDsByUser[r.user_id])lastLogDsByUser[r.user_id]=r.ds;
+    });
     const tasksByUser={};
     (tasksRes.data||[]).forEach(t=>{(tasksByUser[t.user_id]=tasksByUser[t.user_id]||[]).push(t);});
-    _coachingListAll.forEach(u=>{
-      const dayRows=scheduleByUser[u.id]||[];
-      u.workoutDoneToday=dayRows.length>0&&dayRows.every(r=>r.status==='done');
-      const relevant=(tasksByUser[u.id]||[]).filter(t=>t.is_recurring||t.due_date===today);
-      const loggedIds=loggedIdsByUser[u.id]||new Set();
+    const fastingLastDsByUser={};
+    (fastingRes.data||[]).forEach(r=>{
+      const ds=r.fast_end_ds||'';
+      if(ds&&(!fastingLastDsByUser[r.user_id]||ds>fastingLastDsByUser[r.user_id]))fastingLastDsByUser[r.user_id]=ds;
+    });
+    const unreadByUser={},lastMsgDsByUser={};
+    (msgRes.data||[]).forEach(m=>{
+      if(m.sender_role==='user'&&!m.read_at)unreadByUser[m.user_id]=(unreadByUser[m.user_id]||0)+1;
+      const ds=dsFromIsoMaz(m.created_at);
+      if(ds&&(!lastMsgDsByUser[m.user_id]||ds>lastMsgDsByUser[m.user_id]))lastMsgDsByUser[m.user_id]=ds;
+    });
+    _coachingListAll.forEach((u,idx)=>{
+      const rows=scheduleByUser[u.id]||[];
+      const dayRows=rows.filter(r=>r.ds===today);
+      u.plannedToday=dayRows.length;
+      u.doneWorkoutsToday=dayRows.filter(r=>r.status==='done').length;
+      u.workoutDoneToday=dayRows.length>0&&u.doneWorkoutsToday===dayRows.length;
+      u.noPlanToday=dayRows.length===0;
+      u.missedWorkouts=rows.filter(r=>r.ds<today&&r.status!=='done'&&r.status!=='skipped').length;
+      u.lowEnergy=rows.some(r=>r.feedback_energy==='baja');
+      u.soreness=rows.some(r=>r.feedback_soreness);
+      const relevant=(tasksByUser[u.id]||[]).filter(t=>coachListRelevantTask(t,today));
+      const loggedIds=loggedIdsTodayByUser[u.id]||new Set();
       const doneCount=relevant.filter(t=>t.is_recurring?loggedIds.has(t.id):t.is_done).length;
       u.habitsDoneToday=relevant.length>0&&doneCount===relevant.length;
+      u.pendingHabitsToday=Math.max(0,relevant.length-doneCount);
+      u.hasRecurringTasks=(tasksByUser[u.id]||[]).some(t=>t.is_recurring);
+      const hasFastingHabit=(tasksByUser[u.id]||[]).some(t=>(t.title||'').toLowerCase().includes('ayuno'));
+      const fastLag=coachDaysBetweenDS(fastingLastDsByUser[u.id],today);
+      u.fastingBehind=hasFastingHabit&&fastLag>2;
+      u.unreadChats=unreadByUser[u.id]||0;
+      const lastWorkoutDs=rows.filter(r=>r.status==='done').map(r=>r.ds).sort().pop()||'';
+      const lastDs=[lastWorkoutDs,lastLogDsByUser[u.id]||'',lastMsgDsByUser[u.id]||'',fastingLastDsByUser[u.id]||''].filter(Boolean).sort().pop()||'';
+      const lag=coachDaysBetweenDS(lastDs,today);
+      u.activeRecently=lag<=2||u.plannedToday>0||u.unreadChats>0;
+      u.lastActivityLabel=lastDs?(lag===0?'activo hoy':lag===1?'activo ayer':'activo hace '+lag+'d'):'sin actividad';
+      u.sortAttention=(u.unreadChats*3)+(u.missedWorkouts*2)+(u.lowEnergy?2:0)+(u.soreness?2:0)+u.pendingHabitsToday+(u.fastingBehind?1:0);
+      u.attentionSignals=coachBuildAttentionSignals(u);
+      u._listIdx=idx;
     });
+    _coachingListAll.sort((a,b)=>(b.sortAttention-a.sortAttention)||(b.activeRecently-a.activeRecently)||(a.name||'').localeCompare(b.name||''));
   }catch(e){console.error('loadCoachingListTodayStatusSb:',e);}
 }
 async function adminToggleCoachingBetaSb(uid,enabled,name){
