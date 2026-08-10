@@ -460,8 +460,8 @@ function progressView(){
       ${prs.map(x=>`<div class="leader"><div><strong>${esc(x.exercise)}</strong><p>${x.reps||0} reps</p></div><strong class="accent">${x.weight||0} kg</strong></div>`).join('')||empty('No weights logged yet.')}
     </section>
     <section class="card">
-      <h2>Recent reports</h2>
-      ${mine.slice(0,8).map(feedItem).join('')||empty('Complete a workout to see reports.')}
+      <h2>Workout history</h2>
+      ${mine.slice(0,20).map(feedItem).join('')||empty('Complete a workout to see it here.')}
     </section>`;
 }
 
@@ -541,11 +541,58 @@ function mediaThumb(e){
 function feedItem(s){
   const name=s.profile?.name||'Crew member';
   const doneSets=state.sets.filter(x=>x.session_id===s.id&&x.done).length;
-  return `<article class="feed">
+  return `<article class="feed" style="cursor:pointer" onclick="openSessionDetail('${s.id}')">
     <div class="feed-title"><span class="dot"></span><div><h3>${esc(name)} · ${esc(s.title)}</h3><p>${doneSets} series · ${Math.round((s.duration_sec||0)/60)} min</p></div></div>
     ${s.report_note?`<p style="margin-top:10px">${esc(s.report_note)}</p>`:''}
       ${s.report_soreness?`<span class="pill dark" style="margin-top:10px;color:var(--pink)">Soreness: ${esc(s.report_soreness_area||'no area')}</span>`:''}
   </article>`;
+}
+
+function openSessionDetail(sessionId){
+  const s=state.sessions.find(x=>x.id===sessionId);
+  if(!s) return;
+  const sets=state.sets.filter(x=>x.session_id===sessionId).sort((a,b)=>a.set_idx-b.set_idx);
+  const byExercise=new Map();
+  sets.forEach(x=>{
+    if(!byExercise.has(x.exercise_id)) byExercise.set(x.exercise_id,{name:x.exercise?.name||'Exercise',sets:[]});
+    byExercise.get(x.exercise_id).sets.push(x);
+  });
+  const mine=s.user_id===state.user.id;
+  const when=new Date(s.completed_at||s.started_at);
+  $('modal').classList.add('show');
+  $('modalCard').innerHTML=`
+    <div class="row">
+      <div><p class="muted">${when.toLocaleDateString(undefined,{weekday:'long',month:'short',day:'numeric'})}${mine?'':' · by '+esc(s.profile?.name||'Crew member')}</p><h1>${esc(s.title)}</h1></div>
+      <button class="x" onclick="closeModal()">×</button>
+    </div>
+    <section class="grid">
+      <div class="stat"><strong>${Math.round((s.duration_sec||0)/60)}</strong><small>minutes</small></div>
+      <div class="stat"><strong>${sets.filter(x=>x.done).length}</strong><small>sets logged</small></div>
+    </section>
+    ${s.report_difficulty||s.report_energy?`<section class="card"><div class="row"><span class="pill dark">${esc(s.report_difficulty||'normal')}</span><span class="pill dark">Energy ${s.report_energy||'-'}/5</span></div></section>`:''}
+    ${s.report_soreness?`<section class="card" style="border-color:#6b3040"><strong style="color:var(--pink)">Soreness</strong><p style="margin-top:6px">${esc(s.report_soreness_area||'Not specified')}</p></section>`:''}
+    ${s.report_note?`<section class="card"><div class="eyebrow">Notes</div><p style="margin-top:8px">${esc(s.report_note)}</p></section>`:''}
+    <section class="card">
+      <div class="eyebrow">Exercises</div>
+      ${[...byExercise.values()].map(ex=>`
+        <div style="margin-top:12px">
+          <strong>${esc(ex.name)}</strong>
+          <div class="stack" style="margin-top:6px">
+            ${ex.sets.map(x=>`<div class="row"><small class="muted">Set ${x.set_idx}</small><small>${x.done?`${x.weight_kg??'-'} kg × ${x.reps??'-'}`:'not logged'}</small></div>`).join('')}
+          </div>
+        </div>
+      `).join('')||empty('No sets logged.')}
+    </section>
+    ${mine?`<button class="btn danger" style="width:100%;margin-top:14px" onclick="deleteSession('${s.id}')">Delete this workout</button>`:''}`;
+}
+
+async function deleteSession(sessionId){
+  if(!confirm('Delete this workout? This cannot be undone.')) return;
+  const {error}=await sb.from('skandi_sessions').delete().eq('id',sessionId);
+  if(error) return alert(error.message);
+  closeModal();
+  await loadAll();
+  render();
 }
 
 function leaderboard(){
