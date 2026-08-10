@@ -295,12 +295,23 @@ function render(){
   $('screen').innerHTML=map[state.view]();
 }
 
+function activeWorkoutBanner(){
+  if(!state.active) return '';
+  return `<section class="card" style="border-color:#42591b;background:#14200f;cursor:pointer" onclick="openActiveWorkout()">
+    <div class="row">
+      <div><h2>${esc(state.active.title)}</h2><p>Workout in progress · ${fmtSec(state.elapsed)}</p></div>
+      <span class="pill">Resume ▶</span>
+    </div>
+  </section>`;
+}
+
 function homeView(){
   const mine=state.sessions.filter(s=>s.user_id===state.user.id&&s.completed_at);
   const weekCount=mine.filter(s=>Date.now()-new Date(s.completed_at).getTime()<7*864e5).length;
   const todayTpl=state.templates.find(t=>t.user_id===state.user.id&&t.weekday===todayDow())||state.templates.find(t=>t.user_id===state.user.id)||state.templates[0];
   const pct=Math.min(100,Math.round((weekCount/5)*100));
   return `
+    ${activeWorkoutBanner()}
     <section class="hero">
       <div class="eyebrow">Monday to Sunday</div>
       <h1>Hey, ${esc(firstName())}</h1>
@@ -331,6 +342,7 @@ function trainView(){
   const mine=state.templates.filter(t=>t.user_id===state.user.id);
   const community=state.templates.filter(t=>t.user_id!==state.user.id);
   return `
+    ${activeWorkoutBanner()}
     <div class="row"><h1>Train</h1><button class="btn primary" onclick="openTemplateBuilder()">+ Routine</button></div>
     <section class="card">
       <div class="row"><h2>Your week</h2><span class="muted">${mine.length} routines</span></div>
@@ -542,6 +554,10 @@ function loadLabel(score){
 }
 
 async function startWorkout(templateId){
+  if(state.active){
+    if(state.active.template_id===templateId){ openActiveWorkout(); return; }
+    return alert('Finish or cancel your current workout before starting another.');
+  }
   const tpl=state.templates.find(t=>t.id===templateId);
   const its=state.items.filter(i=>i.template_id===templateId).sort((a,b)=>a.sort_order-b.sort_order);
   if(!tpl||!its.length) return;
@@ -555,10 +571,40 @@ async function startWorkout(templateId){
   state.activeItems=its;
   state.elapsed=0;
   state.rest=0;
-  clearInterval(state.timer);
-  state.timer=setInterval(()=>{state.elapsed++; if(state.rest>0) state.rest--; renderActiveWorkout();},1000);
   await loadAll();
+  resumeWorkoutTimer();
   openActiveWorkout();
+}
+
+function resumeWorkoutTimer(){
+  clearInterval(state.timer);
+  state.timer=setInterval(()=>{
+    state.elapsed++;
+    if(state.rest>0) state.rest--;
+    updateWorkoutClocks();
+  },1000);
+}
+
+function pauseWorkoutTimer(){
+  clearInterval(state.timer);
+  state.timer=null;
+}
+
+function updateWorkoutClocks(){
+  const stopwatch=$('activeStopwatch');
+  const rest=$('activeRest');
+  if(stopwatch) stopwatch.textContent=fmtSec(state.elapsed);
+  if(rest) rest.textContent=fmtSec(state.rest);
+}
+
+function toggleWorkoutTimer(){
+  if(state.timer) pauseWorkoutTimer(); else resumeWorkoutTimer();
+  renderActiveWorkout();
+}
+
+function setRest(seconds){
+  state.rest=seconds;
+  updateWorkoutClocks();
 }
 
 function openActiveWorkout(){
@@ -570,12 +616,17 @@ function renderActiveWorkout(){
   if(!state.active) return;
   const allSets=state.sets.filter(s=>s.session_id===state.active.id);
   const done=allSets.filter(s=>s.done).length;
+  const running=!!state.timer;
   $('modalCard').innerHTML=`
     <div class="row"><div><p class="muted">Today workout</p><h1>${esc(state.active.title)}</h1></div><button class="x" onclick="closeModal()">×</button></div>
     <section class="timer">
-      <div class="clock"><p>Stopwatch</p><strong>${fmtSec(state.elapsed)}</strong></div>
-      <div class="clock"><p>Rest</p><strong>${fmtSec(state.rest)}</strong><div class="row"><button class="btn small" onclick="state.rest=90">90s</button><button class="btn small" onclick="state.rest=180">3m</button></div></div>
+      <div class="clock"><p>Stopwatch</p><strong id="activeStopwatch">${fmtSec(state.elapsed)}</strong></div>
+      <div class="clock"><p>Rest</p><strong id="activeRest">${fmtSec(state.rest)}</strong><div class="row"><button class="btn small" onclick="setRest(90)">90s</button><button class="btn small" onclick="setRest(180)">3m</button></div></div>
     </section>
+    <div class="row" style="margin:12px 0;gap:10px">
+      <button class="btn ${running?'':'primary'}" style="flex:1" onclick="toggleWorkoutTimer()">${running?'⏸ Pause':'▶ Resume'}</button>
+      <button class="btn danger" style="flex:1" onclick="cancelWorkout()">Cancel</button>
+    </div>
     <p style="margin:14px 0"><span class="pill">${done}/${allSets.length}</span></p>
     ${state.activeItems.map(item=>activeExercise(item,allSets.filter(s=>s.exercise_id===item.exercise_id))).join('')}
     <button class="btn primary" style="width:100%;margin-top:12px" onclick="openReport()">Send report</button>`;
@@ -600,16 +651,37 @@ function activeExercise(item,sets){
 async function updateSet(id,key,value){
   const patch={updated_at:new Date().toISOString()};
   patch[key]=value===''?null:Number(value);
-  await sb.from('skandi_sets').update(patch).eq('id',id);
-  await loadAll();
+  const {error}=await sb.from('skandi_sets').update(patch).eq('id',id);
+  if(error) return alert(error.message);
+  const s=state.sets.find(x=>x.id===id);
+  if(s) Object.assign(s,patch);
 }
 
 async function toggleSet(id,rest){
   const s=state.sets.find(x=>x.id===id);
-  await sb.from('skandi_sets').update({done:!s.done,updated_at:new Date().toISOString()}).eq('id',id);
-  state.rest=s.done?0:rest;
-  await loadAll();
+  if(!s) return;
+  const done=!s.done;
+  const {error}=await sb.from('skandi_sets').update({done,updated_at:new Date().toISOString()}).eq('id',id);
+  if(error) return alert(error.message);
+  s.done=done;
+  state.rest=done?rest:0;
   renderActiveWorkout();
+}
+
+async function cancelWorkout(){
+  if(!state.active) return;
+  if(!confirm('Cancel this workout? Your logged sets will be deleted.')) return;
+  const sessionId=state.active.id;
+  pauseWorkoutTimer();
+  const {error}=await sb.from('skandi_sessions').delete().eq('id',sessionId);
+  if(error) return alert(error.message);
+  state.active=null;
+  state.activeItems=[];
+  state.elapsed=0;
+  state.rest=0;
+  closeModal();
+  await loadAll();
+  render();
 }
 
 function openReport(){
@@ -638,8 +710,9 @@ async function finishWorkout(){
     visibility:'crew'
   };
   await sb.from('skandi_sessions').update(patch).eq('id',state.active.id);
-  clearInterval(state.timer);
+  pauseWorkoutTimer();
   state.active=null;
+  state.activeItems=[];
   closeModal();
   await loadAll();
   setView('crew');
@@ -796,7 +869,7 @@ async function saveExercise(){
 
 function closeModal(){
   $('modal').classList.remove('show');
-  if(!state.active) clearInterval(state.timer);
+  pauseWorkoutTimer();
 }
 
 function empty(msg){ return `<div class="empty">${esc(msg)}</div>`; }
