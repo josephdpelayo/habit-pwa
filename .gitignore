@@ -17,3 +17,5 @@ android/
 # IDE / tooling
 AutoImport/
 habit-pwa/
+.env*
+supabase/.temp/
