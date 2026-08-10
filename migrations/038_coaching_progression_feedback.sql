@@ -11,6 +11,11 @@ alter table coaching_schedule
 
 -- Optional technique metadata for exercise cards. Existing routines continue
 -- to work from the JSON stored in boards.exercises; this prepares the catalog.
-alter table exercise_catalog
-  add column if not exists common_mistakes text,
-  add column if not exists coach_tips text;
+do $$
+begin
+  if to_regclass('public.exercise_catalog') is not null then
+    alter table public.exercise_catalog
+      add column if not exists common_mistakes text,
+      add column if not exists coach_tips text;
+  end if;
+end $$;
