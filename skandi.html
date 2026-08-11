@@ -339,7 +339,7 @@ async function signOut(){
 
 async function loadAll(){
   const [{data:profile},{data:exercises},{data:templates},{data:items},{data:sessions},{data:sets},{data:externalActivities}]=await Promise.all([
-    sb.from('profiles').select('id,name,email,avatar_url').eq('id',state.user.id).maybeSingle(),
+    sb.from('profiles').select('id,name,avatar_url').eq('id',state.user.id).maybeSingle(),
     sb.from('skandi_exercises').select('*').order('name'),
     sb.from('skandi_templates').select('*, profile:profiles(name,avatar_url)').order('weekday',{nullsFirst:false}).order('created_at',{ascending:false}),
     sb.from('skandi_template_items').select('*, exercise:skandi_exercises(*)').order('sort_order'),
