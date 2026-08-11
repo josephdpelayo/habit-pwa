@@ -338,7 +338,7 @@ async function signOut(){
 }
 
 async function loadAll(){
-  const [{data:profile},{data:exercises},{data:templates},{data:items},{data:sessions},{data:sets},{data:externalActivities}]=await Promise.all([
+  let [{data:profile},{data:exercises},{data:templates},{data:items},{data:sessions},{data:sets},{data:externalActivities}]=await Promise.all([
     sb.from('profiles').select('id,name,avatar_url').eq('id',state.user.id).maybeSingle(),
     sb.from('skandi_exercises').select('*').order('name'),
     sb.from('skandi_templates').select('*, profile:profiles(name,avatar_url)').order('weekday',{nullsFirst:false}).order('created_at',{ascending:false}),
@@ -347,6 +347,12 @@ async function loadAll(){
     sb.from('skandi_sets').select('*, exercise:skandi_exercises(name,slug)').order('created_at',{ascending:false}).limit(600),
     sb.from('skandi_external_activities').select('*').eq('user_id',state.user.id).order('performed_at',{ascending:false}).limit(200)
   ]);
+  if(!profile){
+    // Some signups end up with an auth user but no profiles row (trigger race condition).
+    // Every Skandi write is FK'd to profiles(id), so self-heal it here before anything breaks.
+    await sb.rpc('ensure_own_profile',{p_name:state.user?.user_metadata?.name||state.user?.email?.split('@')[0]||''});
+    ({data:profile}=await sb.from('profiles').select('id,name,avatar_url').eq('id',state.user.id).maybeSingle());
+  }
   state.profile=profile||{name:state.user.email};
   state.exercises=exercises||[];
   state.templates=templates||[];
