@@ -6,6 +6,7 @@
 <meta name="theme-color" content="#07080b">
 <title>Skandi Fit</title>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="skandi-recovery.js"></script>
 <style>
 :root{
   --bg:#07080b;
@@ -71,7 +72,7 @@ p{color:var(--muted);line-height:1.45;margin:0}
 .btn.danger{color:var(--pink)}
 .btn.small{padding:9px 12px;border-radius:14px;font-size:14px}
 .tabs{position:fixed;left:0;right:0;bottom:0;background:rgba(13,14,20,.92);backdrop-filter:blur(18px);border-top:1px solid var(--line);z-index:20}
-.tabs-inner{max-width:820px;margin:0 auto;display:grid;grid-template-columns:repeat(5,1fr);gap:2px;padding:8px 8px calc(8px + env(safe-area-inset-bottom))}
+.tabs-inner{max-width:820px;margin:0 auto;display:grid;grid-template-columns:repeat(6,1fr);gap:2px;padding:8px 8px calc(8px + env(safe-area-inset-bottom))}
 .tab{background:transparent;color:#727482;display:grid;gap:4px;place-items:center;font-weight:900;font-size:12px;padding:8px 2px}
 .tab svg{width:26px;height:26px;stroke:currentColor;stroke-width:2.4;fill:none}
 .tab.active{color:var(--lime)}
@@ -119,9 +120,9 @@ textarea.field{min-height:112px;text-align:left;resize:vertical}
 .feed-title{display:flex;align-items:center;gap:10px}
 .dot{width:10px;height:10px;border-radius:50%;background:var(--green)}
 .leader{display:grid;grid-template-columns:1fr auto;gap:8px;border-top:1px solid var(--line);padding-top:12px;margin-top:12px}
-.body-diagram{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:14px}
-.body-figure{text-align:center}
-.body-figure svg{width:100%;height:auto}
+.body-fig-wrap{position:relative;margin-top:14px;text-align:center}
+.body-fig-wrap svg{width:auto;height:auto;max-width:100%;max-height:56vh;display:inline-block}
+.body-flip-btn{position:absolute;left:12px;bottom:12px;width:44px;height:44px;border-radius:50%;background:var(--panel2);border:1px solid var(--line);display:grid;place-items:center;color:var(--text)}
 .muscle-region{cursor:pointer;transition:opacity .15s}
 .muscle-region:hover,.muscle-region:active{opacity:.82}
 .muscle-legend{display:flex;align-items:center;justify-content:center;gap:14px;margin-top:12px;flex-wrap:wrap}
@@ -198,6 +199,7 @@ textarea.field{min-height:112px;text-align:left;resize:vertical}
     <button class="tab" data-view="train" onclick="setView('train')"><svg viewBox="0 0 24 24"><path d="M4 14h2m12 0h2M7 10v8m10-8v8M9 12h6"/></svg>Train</button>
     <button class="tab" data-view="crew" onclick="setView('crew')"><svg viewBox="0 0 24 24"><path d="M16 11a4 4 0 1 0-8 0"/><path d="M4 21a8 8 0 0 1 16 0"/></svg>Crew</button>
     <button class="tab" data-view="progress" onclick="setView('progress')"><svg viewBox="0 0 24 24"><path d="M4 19V5"/><path d="M4 19h16"/><path d="m7 15 3-3 3 2 5-7"/></svg>Progress</button>
+    <button class="tab" data-view="body" onclick="setView('body')"><svg viewBox="0 0 24 24"><circle cx="12" cy="6" r="3"/><path d="M6 21v-2a6 6 0 0 1 12 0v2"/></svg>Body</button>
     <button class="tab" data-view="library" onclick="setView('library')"><svg viewBox="0 0 24 24"><path d="M4 5h16M4 12h16M4 19h16"/></svg>Library</button>
   </div>
 </nav>
@@ -210,36 +212,41 @@ const SUPABASE_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSI
 const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 const DOW=['MON','TUE','WED','THU','FRI','SAT','SUN'];
 const MUSCLE_GROUP_ORDER=['Chest','Back','Shoulders','Arms','Legs','Core','Other'];
-const MUSCLE_GROUP_MAP={Chest:'Chest',Back:'Back',Shoulders:'Shoulders',Biceps:'Arms',Triceps:'Arms',Forearms:'Arms',Quads:'Legs',Hamstrings:'Legs',Glutes:'Legs','Hip Flexors':'Legs',Core:'Core'};
-const MUSCLE_BODY_SCAFFOLD=[
-  {shape:'ellipse',cx:85,cy:26,rx:18,ry:19},
-  {shape:'rect',x:76,y:42,w:18,h:16,rx:6},
-  {shape:'rect',x:56,y:160,w:58,h:22,rx:11},
-  {shape:'rect',x:55,y:255,w:22,h:74,rx:10},
-  {shape:'rect',x:93,y:255,w:22,h:74,rx:10},
-  {shape:'ellipse',cx:66,cy:336,rx:13,ry:8},
-  {shape:'ellipse',cx:104,cy:336,rx:13,ry:8}
+const MUSCLE_GROUP_MAP={Chest:'Chest',Back:'Back',Shoulders:'Shoulders',Biceps:'Arms',Triceps:'Arms',Forearms:'Arms',Quads:'Legs',Hamstrings:'Legs',Glutes:'Legs',Calves:'Legs','Hip Flexors':'Legs',Core:'Core'};
+
+// Single anatomical figure (front OR back, toggled) on a 240x480 viewBox. Paired muscles are
+// authored as a left-side shape only and mirrored (cx/x reflected about the vertical center)
+// when rendered - see mirrorShape()/bodyRegionMarkup() below.
+const BODY_VIEWBOX_W=240, BODY_VIEWBOX_H=480;
+const BODY_SILHOUETTE_SHARED=[
+  {shape:'ellipse',cx:120,cy:34,rx:25,ry:29},              // head
+  {shape:'rect',x:108,y:56,w:24,h:16,rx:6},                 // neck
+  {shape:'ellipse',cx:51,cy:270,rx:14,ry:18,mirror:true},   // hands
+  {shape:'ellipse',cx:83,cy:336,rx:17,ry:14,mirror:true},   // knees
+  {shape:'ellipse',cx:83,cy:444,rx:20,ry:12,mirror:true}    // feet
 ];
-const MUSCLE_BODY_REGIONS=[
-  {name:'Shoulders',view:'front',shape:'ellipse',cx:38,cy:66,rx:17,ry:14},
-  {name:'Shoulders',view:'front',shape:'ellipse',cx:132,cy:66,rx:17,ry:14},
-  {name:'Chest',view:'front',shape:'rect',x:56,y:58,w:58,h:48,rx:16},
-  {name:'Biceps',view:'front',shape:'ellipse',cx:30,cy:112,rx:14,ry:32},
-  {name:'Biceps',view:'front',shape:'ellipse',cx:140,cy:112,rx:14,ry:32},
-  {name:'Core',view:'front',shape:'rect',x:61,y:108,w:48,h:56,rx:12},
-  {name:'Forearms',view:'front',shape:'ellipse',cx:24,cy:172,rx:11,ry:30},
-  {name:'Forearms',view:'front',shape:'ellipse',cx:146,cy:172,rx:11,ry:30},
-  {name:'Quads',view:'front',shape:'rect',x:53,y:184,w:28,h:76,rx:14},
-  {name:'Quads',view:'front',shape:'rect',x:89,y:184,w:28,h:76,rx:14},
-  {name:'Back',view:'back',shape:'rect',x:50,y:56,w:70,h:112,rx:18},
-  {name:'Triceps',view:'back',shape:'ellipse',cx:30,cy:112,rx:14,ry:32},
-  {name:'Triceps',view:'back',shape:'ellipse',cx:140,cy:112,rx:14,ry:32},
-  {name:'Glutes',view:'back',shape:'rect',x:58,y:168,w:54,h:34,rx:16},
-  {name:'Hamstrings',view:'back',shape:'rect',x:53,y:204,w:28,h:56,rx:14},
-  {name:'Hamstrings',view:'back',shape:'rect',x:89,y:204,w:28,h:56,rx:14}
+const BODY_SILHOUETTE_FRONT=[...BODY_SILHOUETTE_SHARED,
+  {shape:'rect',x:68,y:344,w:30,h:90,rx:14,mirror:true}     // shins (not individually tracked)
 ];
-const MUSCLE_BODY_SCAFFOLD_ARMS=[{shape:'ellipse',cx:24,cy:172,rx:11,ry:30},{shape:'ellipse',cx:146,cy:172,rx:11,ry:30}];
-const state={user:null,profile:null,view:'home',authMode:'login',exercises:[],templates:[],items:[],sessions:[],sets:[],active:null,activeItems:[],timer:null,elapsed:0,rest:0,restTotal:0};
+const BODY_SILHOUETTE_BACK=[...BODY_SILHOUETTE_SHARED,
+  {shape:'rect',x:40,y:178,w:22,h:80,rx:11,mirror:true}     // forearms (not tracked from behind)
+];
+const BODY_REGIONS_FRONT=[
+  {name:'Chest',shape:'rect',x:70,y:78,w:100,h:70,rx:26},
+  {name:'Core',shape:'rect',x:82,y:150,w:76,h:70,rx:20},
+  {name:'Quads',shape:'rect',x:62,y:222,w:42,h:110,rx:20,mirror:true},
+  {name:'Shoulders',shape:'ellipse',cx:76,cy:84,rx:20,ry:17,mirror:true},
+  {name:'Biceps',shape:'rect',x:46,y:95,w:26,h:80,rx:13,mirror:true},
+  {name:'Forearms',shape:'rect',x:40,y:178,w:22,h:80,rx:11,mirror:true}
+];
+const BODY_REGIONS_BACK=[
+  {name:'Back',shape:'rect',x:64,y:76,w:112,h:90,rx:26},
+  {name:'Glutes',shape:'rect',x:72,y:166,w:96,h:56,rx:24},
+  {name:'Hamstrings',shape:'rect',x:62,y:224,w:42,h:100,rx:20,mirror:true},
+  {name:'Calves',shape:'rect',x:68,y:340,w:30,h:90,rx:14,mirror:true},
+  {name:'Triceps',shape:'rect',x:46,y:95,w:26,h:80,rx:13,mirror:true}
+];
+const state={user:null,profile:null,view:'home',authMode:'login',exercises:[],templates:[],items:[],sessions:[],sets:[],externalActivities:[],active:null,activeItems:[],timer:null,elapsed:0,rest:0,restTotal:0,bodyFlip:'front'};
 const REST_RING_C=2*Math.PI*24;
 let builderState={selected:new Map(),group:'All'};
 
@@ -331,13 +338,14 @@ async function signOut(){
 }
 
 async function loadAll(){
-  const [{data:profile},{data:exercises},{data:templates},{data:items},{data:sessions},{data:sets}]=await Promise.all([
+  const [{data:profile},{data:exercises},{data:templates},{data:items},{data:sessions},{data:sets},{data:externalActivities}]=await Promise.all([
     sb.from('profiles').select('id,name,email,avatar_url').eq('id',state.user.id).maybeSingle(),
     sb.from('skandi_exercises').select('*').order('name'),
     sb.from('skandi_templates').select('*, profile:profiles(name,avatar_url)').order('weekday',{nullsFirst:false}).order('created_at',{ascending:false}),
     sb.from('skandi_template_items').select('*, exercise:skandi_exercises(*)').order('sort_order'),
     sb.from('skandi_sessions').select('*, profile:profiles(name,avatar_url)').order('started_at',{ascending:false}).limit(60),
-    sb.from('skandi_sets').select('*, exercise:skandi_exercises(name,slug)').order('created_at',{ascending:false}).limit(600)
+    sb.from('skandi_sets').select('*, exercise:skandi_exercises(name,slug)').order('created_at',{ascending:false}).limit(600),
+    sb.from('skandi_external_activities').select('*').eq('user_id',state.user.id).order('performed_at',{ascending:false}).limit(200)
   ]);
   state.profile=profile||{name:state.user.email};
   state.exercises=exercises||[];
@@ -345,6 +353,7 @@ async function loadAll(){
   state.items=items||[];
   state.sessions=sessions||[];
   state.sets=sets||[];
+  state.externalActivities=externalActivities||[];
 }
 
 function setView(view){
@@ -354,7 +363,7 @@ function setView(view){
 }
 
 function render(){
-  const map={home:homeView,train:trainView,crew:crewView,progress:progressView,library:libraryView};
+  const map={home:homeView,train:trainView,crew:crewView,progress:progressView,body:bodyView,library:libraryView};
   $('screen').innerHTML=map[state.view]();
 }
 
@@ -393,7 +402,7 @@ function homeView(){
       <div class="stat"><strong>${weekCount}</strong><small>this week</small></div>
       <div class="stat"><strong>${state.templates.filter(t=>t.user_id===state.user.id).length}</strong><small>your routines</small></div>
     </section>
-    ${muscleLoadCard('Muscle load',true)}
+    ${muscleLoadCard('Muscle load')}
     ${todayTpl?workoutCard(todayTpl,true):empty('You do not have a routine yet. Create one from Train.')}
     <section class="card">
       <div class="row"><h2>Latest from the boat</h2><button class="btn small" onclick="setView('crew')">View crew</button></div>
@@ -470,7 +479,11 @@ function progressView(){
       <div class="stat"><strong>${mine.length}</strong><small>saved workouts</small></div>
       <div class="stat"><strong>${Math.round(mine.reduce((a,s)=>a+(s.duration_sec||0),0)/60)}</strong><small>minutes</small></div>
     </section>
-    ${muscleLoadCard('Muscle recovery',true)}
+    ${muscleLoadCard('Muscle recovery')}
+    <section class="card">
+      <div class="row"><h2>External activities</h2><button class="btn small" onclick="openLogActivity()">+ Log activity</button></div>
+      ${(state.externalActivities||[]).slice(0,4).map(externalActivityRow).join('')||empty('Log a run, ride, or swim to factor it into recovery.')}
+    </section>
     <section class="card">
       <h2>Your best lifts</h2>
       ${prs.map(x=>`<div class="leader"><div><strong>${esc(x.exercise)}</strong><p>${x.reps||0} reps</p></div><strong class="accent">${x.weight||0} kg</strong></div>`).join('')||empty('No weights logged yet.')}
@@ -624,22 +637,26 @@ function leaderboard(){
   return [...best.values()].sort((a,b)=>b.weight-a.weight);
 }
 
-function muscleLoadCard(title,userOnly){
-  const rows=muscleLoad(userOnly);
-  const hottest=rows[0];
-  const fresh=rows.filter(r=>r.score<20).length;
-  const scoreByName=new Map(rows.map(r=>[r.name,r.score]));
-  return `<section class="card">
-    <div class="row">
-      <div><h2>${esc(title)}</h2><p>${hottest&&hottest.score>0?`${hottest.name} is at ${hottest.score}% this week`:'No muscle load logged this week'}</p></div>
-      <span class="pill">${fresh} fresh</span>
-    </div>
-    ${bodyDiagram(scoreByName,userOnly)}
-  </section>`;
+// ---- Recovery engine wiring (math itself lives in skandi-recovery.js) ----
+
+function getMyRecovery(){
+  return SkandiRecovery.computeMuscleRecovery({
+    sets:state.sets, sessions:state.sessions, exercises:state.exercises,
+    activities:state.externalActivities, userId:state.user.id, now:Date.now()
+  });
 }
 
-function heatColor(score){
-  const stops=[[47,211,125],[255,189,57],[255,100,120]];
+function formatHours(h){
+  if(h<=0) return 'now';
+  if(h<1) return '<1h';
+  if(h<24) return `${Math.ceil(h)}h`;
+  const d=Math.floor(h/24),r=Math.round(h%24);
+  return r?`${d}d ${r}h`:`${d}d`;
+}
+
+// score 0 (still fatigued) -> muted grey, score 100 (rested & ready) -> bright accent.
+function freshColor(score){
+  const stops=[[42,44,56],[255,189,57],[255,100,120]];
   const t=Math.max(0,Math.min(100,score))/100;
   const seg=t<0.5?0:1;
   const local=t<0.5?t/0.5:(t-0.5)/0.5;
@@ -648,43 +665,113 @@ function heatColor(score){
   return `rgb(${mix(0)},${mix(1)},${mix(2)})`;
 }
 
-function bodyRegionShape(r,fill,clickable){
-  const attrs=`fill="${fill}" stroke="#07080b" stroke-width="1.5"`;
-  const inner=r.shape==='ellipse'
-    ?`<ellipse cx="${r.cx}" cy="${r.cy}" rx="${r.rx}" ry="${r.ry}" ${attrs}/>`
-    :`<rect x="${r.x}" y="${r.y}" width="${r.w}" height="${r.h}" rx="${r.rx}" ${attrs}/>`;
-  return clickable?`<g class="muscle-region" onclick="openMuscleDetail('${r.name}')">${inner}</g>`:inner;
+function muscleLoadCard(title){
+  const rows=getMyRecovery();
+  const needsWork=rows[0];
+  const restedCount=rows.filter(r=>r.rested).length;
+  return `<section class="card">
+    <div class="row">
+      <div><h2>${esc(title)}</h2><p>${needsWork&&!needsWork.rested?`${esc(needsWork.name)} ready in ${formatHours(needsWork.hoursUntilFresh)}`:'All muscles fresh'}</p></div>
+      <span class="pill">${restedCount} rested</span>
+    </div>
+    <div class="row" style="margin-top:14px;flex-wrap:wrap;gap:8px">
+      ${rows.slice(0,4).map(r=>`<span class="pill dark" style="background:${freshColor(r.score)};color:#07080b">${esc(r.name)} ${r.score}%</span>`).join('')}
+    </div>
+    <button class="btn" style="width:100%;margin-top:14px" onclick="setView('body')">View full body map</button>
+  </section>`;
+}
+
+// ---- Body figure: single anatomical silhouette (front/back toggle), left-side shapes mirrored ----
+
+function bodyPrim(s,fill,extraAttrs){
+  const common=`${extraAttrs||''} fill="${fill}" stroke="#07080b" stroke-width="1.5"`;
+  return s.shape==='ellipse'
+    ?`<ellipse cx="${s.cx}" cy="${s.cy}" rx="${s.rx}" ry="${s.ry}" ${common}/>`
+    :`<rect x="${s.x}" y="${s.y}" width="${s.w}" height="${s.h}" rx="${s.rx}" ${common}/>`;
+}
+
+function mirrorShape(s){
+  return s.shape==='ellipse'?{...s,cx:BODY_VIEWBOX_W-s.cx}:{...s,x:BODY_VIEWBOX_W-s.x-s.w};
+}
+
+function bodySilhouetteMarkup(pieces){
+  return pieces.map(s=>{
+    const base=bodyPrim(s,'#1d1e27');
+    return s.mirror?base+bodyPrim(mirrorShape(s),'#1d1e27'):base;
+  }).join('');
+}
+
+function bodyRegionMarkup(region,score){
+  const fill=freshColor(score);
+  const attrs=` data-muscle="${esc(region.name)}" class="muscle-region"`;
+  const base=bodyPrim(region,fill,attrs);
+  return region.mirror?base+bodyPrim(mirrorShape(region),fill,attrs):base;
+}
+
+function onBodyFigureClick(evt){
+  const el=evt.target.closest('[data-muscle]');
+  if(el) openMuscleDetail(el.getAttribute('data-muscle'));
 }
 
 function bodyFigureSVG(view,scoreByName){
-  const scaffold=MUSCLE_BODY_SCAFFOLD.map(r=>bodyRegionShape(r,'#1d1e27',false)).join('');
-  const armFiller=view==='back'?MUSCLE_BODY_SCAFFOLD_ARMS.map(r=>bodyRegionShape(r,'#1d1e27',false)).join(''):'';
-  const regions=MUSCLE_BODY_REGIONS.filter(r=>r.view===view)
-    .map(r=>bodyRegionShape(r,heatColor(scoreByName.get(r.name)||0),true)).join('');
-  return `<svg viewBox="0 0 170 350" xmlns="http://www.w3.org/2000/svg">${scaffold}${armFiller}${regions}</svg>`;
+  const silhouette=view==='back'?BODY_SILHOUETTE_BACK:BODY_SILHOUETTE_FRONT;
+  const regions=view==='back'?BODY_REGIONS_BACK:BODY_REGIONS_FRONT;
+  return `<svg viewBox="0 0 ${BODY_VIEWBOX_W} ${BODY_VIEWBOX_H}" xmlns="http://www.w3.org/2000/svg" onclick="onBodyFigureClick(event)">${bodySilhouetteMarkup(silhouette)}${regions.map(r=>bodyRegionMarkup(r,scoreByName.get(r.name)||0)).join('')}</svg>`;
 }
 
-function bodyDiagram(scoreByName,userOnly){
-  return `<div class="body-diagram">
-    <div class="body-figure"><small class="muted">FRONT</small>${bodyFigureSVG('front',scoreByName)}</div>
-    <div class="body-figure"><small class="muted">BACK</small>${bodyFigureSVG('back',scoreByName)}</div>
-  </div>
-  <div class="muscle-legend">
-    <span><i style="background:${heatColor(5)}"></i>Fresh</span>
-    <span><i style="background:${heatColor(50)}"></i>Moderate</span>
-    <span><i style="background:${heatColor(100)}"></i>Very loaded</span>
-  </div>
-  <p class="muted" style="text-align:center;margin-top:8px;font-size:12px">Tap a muscle for details</p>`;
+function toggleBodyView(){
+  state.bodyFlip=state.bodyFlip==='back'?'front':'back';
+  render();
 }
 
-function muscleDetailBreakdown(name,userOnly){
-  const since=Date.now()-7*864e5;
+function bodyView(){
+  const rows=getMyRecovery();
+  const scoreByName=new Map(rows.map(r=>[r.name,r.score]));
+  const restedCount=rows.filter(r=>r.rested).length;
+  const mine=state.sessions.filter(s=>s.user_id===state.user.id&&s.completed_at);
+  const lastCompletedAt=mine.reduce((max,s)=>Math.max(max,new Date(s.completed_at).getTime()),0);
+  const daysSince=lastCompletedAt?Math.floor((Date.now()-lastCompletedAt)/864e5):null;
+  const view=state.bodyFlip==='back'?'back':'front';
+  return `
+    <h1>Body</h1>
+    <section class="grid">
+      <div class="stat"><strong>${daysSince===null?'-':daysSince}</strong><small>days since last training</small></div>
+      <div class="stat"><strong>${restedCount}</strong><small>muscles rested</small></div>
+    </section>
+    <section class="card">
+      <div class="body-fig-wrap">
+        ${bodyFigureSVG(view,scoreByName)}
+        <button class="body-flip-btn" onclick="toggleBodyView()" aria-label="Flip front and back">${icon('swap',18)}</button>
+      </div>
+      <div class="muscle-legend">
+        <span><i style="background:${freshColor(0)}"></i>Recovering</span>
+        <span><i style="background:${freshColor(100)}"></i>Rested</span>
+      </div>
+      <p class="muted" style="text-align:center;margin-top:8px;font-size:12px">Tap a muscle for details · showing ${view}</p>
+    </section>
+    <section class="card">
+      <div class="row"><h2>Muscle status</h2><button class="btn small" onclick="openLogActivity()">+ Log activity</button></div>
+      ${rows.map(r=>`<div class="row" style="margin-top:10px;cursor:pointer" onclick="openMuscleDetail('${r.name}')">
+        <div><strong>${esc(r.name)}</strong><p>${r.rested?'Ready now':'Ready in '+formatHours(r.hoursUntilFresh)}</p></div>
+        <span class="pill dark" style="background:${freshColor(r.score)};color:#07080b">${r.score}%</span>
+      </div>`).join('')}
+    </section>
+    <section class="card">
+      <h2>Recent activities</h2>
+      ${(state.externalActivities||[]).slice(0,6).map(externalActivityRow).join('')||empty('No manual activities logged yet.')}
+    </section>`;
+}
+
+// ---- Muscle detail modal ----
+
+function muscleDetailBreakdown(name){
+  const since=Date.now()-SkandiRecovery.RECOVERY_LOOKBACK_DAYS*864e5;
   const exById=new Map(state.exercises.map(e=>[e.id,e]));
   const byExercise=new Map();
   state.sets.filter(s=>{
     const session=state.sessions.find(x=>x.id===s.session_id);
     const when=new Date(session?.completed_at||s.created_at).getTime();
-    return s.done && when>=since && (!userOnly || s.user_id===state.user.id);
+    return s.done && when>=since && s.user_id===state.user.id;
   }).forEach(s=>{
     const ex=exById.get(s.exercise_id);
     const pct=ex?.muscles?.[name];
@@ -693,24 +780,33 @@ function muscleDetailBreakdown(name,userOnly){
     cur.sets++;
     byExercise.set(ex.id,cur);
   });
-  return [...byExercise.values()].sort((a,b)=>b.sets-a.sets);
+  const activityRows=(state.externalActivities||[]).filter(a=>{
+    const t=new Date(a.performed_at).getTime();
+    const map=SkandiRecovery.ACTIVITY_MUSCLE_MAP[a.activity_type]||SkandiRecovery.ACTIVITY_MUSCLE_MAP.other;
+    return t>=since && !!map[name];
+  }).map(a=>({label:activityTypeLabel(a.activity_type),pct:(SkandiRecovery.ACTIVITY_MUSCLE_MAP[a.activity_type]||SkandiRecovery.ACTIVITY_MUSCLE_MAP.other)[name],when:a.performed_at}));
+  return {exerciseRows:[...byExercise.values()].sort((a,b)=>b.sets-a.sets),activityRows};
 }
 
 function openMuscleDetail(name){
-  const row=muscleLoad(true).find(r=>r.name===name)||{name,score:0};
-  const breakdown=muscleDetailBreakdown(name,true);
+  const row=getMyRecovery().find(r=>r.name===name)||{name,score:100,hoursUntilFresh:0,rested:true};
+  const {exerciseRows,activityRows}=muscleDetailBreakdown(name);
   const library=state.exercises.filter(e=>e.muscles&&e.muscles[name])
     .sort((a,b)=>(b.muscles[name]||0)-(a.muscles[name]||0)).slice(0,6);
   $('modal').classList.add('show');
   $('modalCard').innerHTML=`
     <div class="row"><h1>${esc(name)}</h1><button class="x" onclick="closeModal()">${icon('close',20)}</button></div>
     <section class="card" style="text-align:center">
-      <div style="width:96px;height:96px;border-radius:50%;margin:0 auto;background:${heatColor(row.score)};display:grid;place-items:center;font-weight:1000;font-size:22px;color:#07080b">${row.score}%</div>
-      <p style="margin-top:10px">${esc(loadLabel(row.score))} this week</p>
+      <div style="width:96px;height:96px;border-radius:50%;margin:0 auto;background:${freshColor(row.score)};display:grid;place-items:center;font-weight:1000;font-size:22px;color:#07080b">${row.score}%</div>
+      <p style="margin-top:10px">${row.rested?'Ready now':'Ready in '+formatHours(row.hoursUntilFresh)}</p>
     </section>
     <section class="card">
-      <div class="eyebrow">Exercises that trained ${esc(name)} this week</div>
-      ${breakdown.length?breakdown.map(b=>`<div class="row" style="margin-top:10px"><div><strong>${esc(b.name)}</strong><p>${b.sets} set${b.sets===1?'':'s'} logged</p></div><span class="pill dark">${b.pct}% of exercise</span></div>`).join(''):empty('No sets logged for this muscle this week.')}
+      <div class="eyebrow">Exercises that trained ${esc(name)} recently</div>
+      ${exerciseRows.length?exerciseRows.map(b=>`<div class="row" style="margin-top:10px"><div><strong>${esc(b.name)}</strong><p>${b.sets} set${b.sets===1?'':'s'} logged</p></div><span class="pill dark">${b.pct}% of exercise</span></div>`).join(''):empty('No sets logged for this muscle recently.')}
+    </section>
+    <section class="card">
+      <div class="eyebrow">Activities that trained ${esc(name)} recently</div>
+      ${activityRows.length?activityRows.map(a=>`<div class="row" style="margin-top:10px"><div><strong>${esc(a.label)}</strong><p>${new Date(a.when).toLocaleDateString()}</p></div><span class="pill dark">${a.pct}% split</span></div>`).join(''):empty('No manual activities logged for this muscle recently.')}
     </section>
     <section class="card">
       <div class="eyebrow">Best exercises for ${esc(name)}</div>
@@ -718,33 +814,68 @@ function openMuscleDetail(name){
     </section>`;
 }
 
-function muscleLoad(userOnly){
-  const since=Date.now()-7*864e5;
-  const exById=new Map(state.exercises.map(e=>[e.id,e]));
-  const scores=new Map();
-  state.sets.filter(s=>{
-    const session=state.sessions.find(x=>x.id===s.session_id);
-    const when=new Date(session?.completed_at||s.created_at).getTime();
-    return s.done && when>=since && (!userOnly || s.user_id===state.user.id);
-  }).forEach(s=>{
-    const ex=exById.get(s.exercise_id);
-    const muscles=ex?.muscles||{};
-    const work=(Number(s.weight_kg)||1)*(Number(s.reps)||Math.max(1,(Number(s.seconds)||30)/30));
-    Object.entries(muscles).forEach(([muscle,pct])=>{
-      scores.set(muscle,(scores.get(muscle)||0)+(work*(Number(pct)||0)/100));
-    });
-  });
-  const max=Math.max(1,...scores.values());
-  const all=['Chest','Back','Shoulders','Biceps','Triceps','Quads','Glutes','Hamstrings','Core','Forearms'];
-  return all.map(name=>({name,score:Math.min(100,Math.round(((scores.get(name)||0)/max)*100))}))
-    .sort((a,b)=>b.score-a.score);
+// ---- External activity logging ----
+
+const ACTIVITY_LABELS={running:'Running',cycling:'Cycling',swimming:'Swimming',rowing:'Rowing',walking:'Walking',other:'Other'};
+const activityTypeLabel=t=>ACTIVITY_LABELS[t]||'Activity';
+
+function localDatetimeValue(d){
+  const pad=n=>String(n).padStart(2,'0');
+  return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
 }
 
-function loadLabel(score){
-  if(score>=75) return 'very loaded';
-  if(score>=45) return 'loaded';
-  if(score>=20) return 'moderate';
-  return 'fresh';
+function openLogActivity(){
+  $('modal').classList.add('show');
+  $('modalCard').innerHTML=`
+    <div class="row"><h1>Log activity</h1><button class="x" onclick="closeModal()">${icon('close',20)}</button></div>
+    <label class="eyebrow">Activity type</label>
+    <select id="actType" class="field left">${Object.entries(ACTIVITY_LABELS).map(([v,l])=>`<option value="${v}">${l}</option>`).join('')}</select>
+    <label class="eyebrow">Duration (minutes)</label>
+    <input id="actDuration" class="field left" type="number" min="1" max="600" inputmode="numeric" placeholder="e.g. 40">
+    <label class="eyebrow">Distance (km, optional)</label>
+    <input id="actDistance" class="field left" type="number" min="0" step="0.1" inputmode="decimal" placeholder="e.g. 6.5">
+    <label class="eyebrow">Intensity (effort, 1-10)</label>
+    <input id="actIntensity" class="field left" type="number" min="1" max="10" inputmode="numeric" value="5">
+    <label class="eyebrow">When</label>
+    <input id="actWhen" class="field left" type="datetime-local" value="${localDatetimeValue(new Date())}">
+    <textarea id="actNote" class="field" placeholder="Notes (optional)"></textarea>
+    <button class="btn primary" style="width:100%" onclick="saveExternalActivity()">Save activity</button>`;
+}
+
+async function saveExternalActivity(){
+  const duration=Number($('actDuration').value);
+  const intensity=Number($('actIntensity').value);
+  if(!duration||duration<1) return alert('Enter a duration in minutes.');
+  if(!intensity||intensity<1||intensity>10) return alert('Intensity must be between 1 and 10.');
+  const payload={
+    user_id:state.user.id,
+    activity_type:$('actType').value,
+    duration_min:duration,
+    distance_km:$('actDistance').value?Number($('actDistance').value):null,
+    intensity,
+    performed_at:new Date($('actWhen').value).toISOString(),
+    note:$('actNote').value.trim()||null
+  };
+  const {error}=await sb.from('skandi_external_activities').insert(payload);
+  if(error) return alert(error.message);
+  closeModal();
+  await loadAll();
+  render();
+}
+
+function externalActivityRow(a){
+  return `<div class="row" style="margin-top:10px">
+    <div><strong>${esc(activityTypeLabel(a.activity_type))}</strong><p>${a.duration_min} min · intensity ${a.intensity}/10${a.distance_km?' · '+a.distance_km+' km':''} · ${new Date(a.performed_at).toLocaleDateString()}</p></div>
+    <button class="icon-btn tiny danger" onclick="deleteExternalActivity('${a.id}')" aria-label="Delete">${icon('trash',16)}</button>
+  </div>`;
+}
+
+async function deleteExternalActivity(id){
+  if(!confirm('Delete this activity?')) return;
+  const {error}=await sb.from('skandi_external_activities').delete().eq('id',id);
+  if(error) return alert(error.message);
+  await loadAll();
+  render();
 }
 
 async function startWorkout(templateId){
