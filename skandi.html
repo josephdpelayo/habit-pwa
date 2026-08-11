@@ -54,7 +54,7 @@ p{color:var(--muted);line-height:1.45;margin:0}
 .focus p{color:#223006}
 .ring{width:62px;height:62px;border-radius:50%;display:grid;place-items:center;background:conic-gradient(#07080b var(--p),rgba(7,8,11,.22) 0);position:relative;font-weight:1000;flex:0 0 auto}
 .ring:after{content:"";position:absolute;inset:10px;border-radius:50%;background:var(--lime)}
-.ring span{position:relative;z-index:1}
+.ring span{position:relative;z-index:1;color:#07080b}
 .grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
 .stat,.card,.workout,.exercise,.feed,.modal-card{background:var(--panel);border:1px solid var(--line);border-radius:24px}
 .stat{padding:18px;min-height:100px}
@@ -78,12 +78,13 @@ p{color:var(--muted);line-height:1.45;margin:0}
 .week{display:grid;gap:9px}
 .day{display:grid;grid-template-columns:64px 1fr auto;align-items:center;gap:10px;background:var(--panel2);border-radius:18px;padding:13px 14px;color:var(--muted);font-weight:900}
 .day.today{background:var(--lime);color:#08090d}
+.day.today .icon-btn{background:rgba(7,8,11,.16);border-color:rgba(7,8,11,.25);color:#08090d}
 .day span:nth-child(2){color:inherit;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .exercise{padding:14px;display:grid;gap:10px;margin:10px 0}
 .ex-head{display:grid;grid-template-columns:72px 1fr auto;gap:12px;align-items:center}
 .thumb{width:72px;height:72px;border-radius:16px;background:#0b0c12;object-fit:cover;display:grid;place-items:center;color:var(--muted);overflow:hidden}
 .thumb img,.thumb video{width:100%;height:100%;object-fit:cover}
-.play{color:var(--lime);font-weight:1000}
+.play{color:var(--lime);display:grid;place-items:center}
 .pill{display:inline-flex;align-items:center;gap:6px;padding:8px 11px;background:rgba(184,255,44,.14);color:var(--lime);border-radius:999px;font-weight:1000}
 .pill.dark{background:#0b0c12;color:var(--muted)}
 .muscles{display:flex;flex-wrap:wrap;gap:8px}
@@ -93,9 +94,9 @@ p{color:var(--muted);line-height:1.45;margin:0}
 .field{width:100%;background:var(--panel2);border:1px solid var(--line);color:var(--text);border-radius:16px;padding:13px;text-align:center}
 .field.left{text-align:left}
 textarea.field{min-height:112px;text-align:left;resize:vertical}
-.check{height:48px;border-radius:15px;background:var(--panel2);color:var(--muted);border:1px solid var(--line);font-weight:1000}
+.check{height:48px;border-radius:15px;background:var(--panel2);color:var(--muted);border:1px solid var(--line);display:grid;place-items:center}
 .check.done{background:var(--lime);color:#08090d}
-.set-remove{width:30px;height:48px;border-radius:12px;background:transparent;color:var(--muted);border:1px solid var(--line);font-size:18px;font-weight:900;line-height:1}
+.set-remove{width:30px;height:48px;border-radius:12px;background:transparent;color:var(--muted);border:1px solid var(--line);display:grid;place-items:center}
 .workout-bar{position:sticky;top:-20px;z-index:5;margin:-20px -20px 16px;padding:16px 20px 14px;background:var(--panel);border-bottom:1px solid var(--line);border-radius:28px 28px 0 0}
 .workout-bar-title{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:12px}
 .workout-bar-title h1{font-size:20px}
@@ -132,7 +133,7 @@ textarea.field{min-height:112px;text-align:left;resize:vertical}
 .modal{position:fixed;inset:0;background:rgba(0,0,0,.72);z-index:40;display:none;align-items:flex-end;justify-content:center}
 .modal.show{display:flex}
 .modal-card{width:min(820px,100%);max-height:88dvh;overflow:auto;border-radius:28px 28px 0 0;padding:20px}
-.x{width:48px;height:48px;border-radius:50%;background:var(--panel2);color:var(--text);font-size:28px}
+.x{width:44px;height:44px;border-radius:50%;background:var(--panel2);color:var(--text);display:grid;place-items:center;flex:0 0 auto}
 .search{display:grid;grid-template-columns:1fr auto;gap:10px;margin:12px 0}
 .signup-names{display:grid;grid-template-columns:1fr 1fr;gap:10px}
 .hidden{display:none!important}
@@ -245,6 +246,21 @@ let builderState={selected:new Map(),group:'All'};
 const $=id=>document.getElementById(id);
 const esc=s=>(s??'').toString().replace(/[&<>"']/g,m=>({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[m]));
 const initials=name=>(name||'SF').split(/\s+/).slice(0,2).map(x=>x[0]).join('').toUpperCase();
+const ICON_PATHS={
+  play:'<path d="M6 4l14 8-14 8V4z"/>',
+  pause:'<path d="M8 4h3v16H8zM13 4h3v16h-3z"/>',
+  close:'<path d="M6 6l12 12M18 6L6 18"/>',
+  check:'<path d="M5 13l4 4L19 7"/>',
+  chevronRight:'<path d="M9 6l6 6-6 6"/>',
+  edit:'<path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"/>',
+  swap:'<path d="M17 3l4 4-4 4"/><path d="M3 7h11"/><path d="M7 21l-4-4 4-4"/><path d="M21 17H10"/>',
+  calendar:'<rect x="3" y="5" width="18" height="16" rx="3"/><path d="M16 3v4M8 3v4M3 10h18"/>',
+  trash:'<path d="M4 7h16"/><path d="M10 11v6M14 11v6"/><path d="M6 7l1 13a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2l1-13"/><path d="M9 7V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v3"/>',
+  image:'<rect x="3" y="3" width="18" height="18" rx="3"/><circle cx="9" cy="9" r="1.75"/><path d="M21 15l-5.5-5.5L5 20"/>',
+  ellipsis:'<circle cx="5" cy="12" r="1.6"/><circle cx="12" cy="12" r="1.6"/><circle cx="19" cy="12" r="1.6"/>'
+};
+const icon=(name,size=20)=>`<svg viewBox="0 0 24 24" width="${size}" height="${size}" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex:0 0 auto">${ICON_PATHS[name]||''}</svg>`;
+const THUMB_FALLBACK=icon('image',26);
 const fmtSec=s=>`${String(Math.floor((s||0)/60)).padStart(2,'0')}:${String((s||0)%60).padStart(2,'0')}`;
 const todayDow=()=>{const d=new Date().getDay();return d===0?6:d-1};
 const displayName=()=>state.profile?.name||state.user?.user_metadata?.name||state.user?.email?.split('@')[0]||'crew';
@@ -347,7 +363,7 @@ function activeWorkoutBanner(){
   return `<section class="card" style="border-color:#42591b;background:#14200f;cursor:pointer" onclick="openActiveWorkout()">
     <div class="row">
       <div><h2>${esc(state.active.title)}</h2><p>Workout in progress · ${fmtSec(state.elapsed)}</p></div>
-      <span class="pill">Resume ▶</span>
+      <span class="pill">Resume ${icon('play',14)}</span>
     </div>
   </section>`;
 }
@@ -396,11 +412,11 @@ function trainView(){
       <div class="week">
         ${DOW.map((d,i)=>{
           const t=mine.find(x=>x.weekday===i);
-          if(!t) return `<button class="day ${i===todayDow()?'today':''}" onclick="openDayPicker(${i})"><span>${d}</span><span>Add routine</span><span>›</span></button>`;
+          if(!t) return `<button class="day ${i===todayDow()?'today':''}" onclick="openDayPicker(${i})"><span>${d}</span><span>Add routine</span><span>${icon('chevronRight',18)}</span></button>`;
           return `<div class="day ${i===todayDow()?'today':''}" style="grid-template-columns:64px 1fr auto">
             <span>${d}</span>
             <span style="cursor:pointer" onclick="startWorkout('${t.id}')">${esc(t.name)}</span>
-            <button class="icon-btn tiny" onclick="openDayManage('${t.id}',${i})" aria-label="Manage ${d}">⋯</button>
+            <button class="icon-btn tiny" onclick="openDayManage('${t.id}',${i})" aria-label="Manage ${d}">${icon('ellipsis',16)}</button>
           </div>`;
         }).join('')}
       </div>
@@ -427,7 +443,7 @@ function workoutCard(t){
     </div>
     <div class="muscles">${names}${its.length>4?`<span class="pill dark">+${its.length-4}</span>`:''}</div>
     <div class="row" style="margin-top:16px">
-      <button class="btn primary" onclick="startWorkout('${t.id}')">▶ Start</button>
+      <button class="btn primary" onclick="startWorkout('${t.id}')">${icon('play',16)} Start</button>
       ${mine?`<button class="btn" onclick="openTemplateBuilder(null,'${t.id}')">Edit</button>`:`<button class="btn" onclick="openAddToWeek('${t.id}')">+ Add to my week</button>`}
     </div>
   </article>`;
@@ -526,7 +542,7 @@ function exerciseCard(e,tracking){
     <div class="ex-head" onclick="openExercise('${e.id}')">
       ${mediaThumb(e)}
       <div><h3>${esc(e.name)}</h3><p>${esc(e.english_name||e.category||'')}</p></div>
-      <div class="play">▶</div>
+      <div class="play">${icon('play',18)}</div>
     </div>
     <div class="muscles">${muscles.map(([m,p])=>`<span class="pill dark">${esc(m)} ${p}%</span>`).join('')}</div>
     ${muscles.slice(0,3).map(([m,p])=>`<div><div class="row"><small>${esc(m)}</small><small>${p}%</small></div><div class="bar"><i style="width:${p}%"></i></div></div>`).join('')}
@@ -534,8 +550,8 @@ function exerciseCard(e,tracking){
 }
 
 function mediaThumb(e){
-  if(e.media_url) return `<div class="thumb"><img src="${esc(e.media_url)}" alt="${esc(e.name)}" loading="lazy" onerror="this.parentElement.innerHTML='GIF'"></div>`;
-  return `<div class="thumb"><span>GIF</span></div>`;
+  if(e.media_url) return `<div class="thumb"><img src="${esc(e.media_url)}" alt="${esc(e.name)}" loading="lazy" onerror="this.parentElement.innerHTML=THUMB_FALLBACK"></div>`;
+  return `<div class="thumb">${THUMB_FALLBACK}</div>`;
 }
 
 function feedItem(s){
@@ -563,7 +579,7 @@ function openSessionDetail(sessionId){
   $('modalCard').innerHTML=`
     <div class="row">
       <div><p class="muted">${when.toLocaleDateString(undefined,{weekday:'long',month:'short',day:'numeric'})}${mine?'':' · by '+esc(s.profile?.name||'Crew member')}</p><h1>${esc(s.title)}</h1></div>
-      <button class="x" onclick="closeModal()">×</button>
+      <button class="x" onclick="closeModal()">${icon('close',20)}</button>
     </div>
     <section class="grid">
       <div class="stat"><strong>${Math.round((s.duration_sec||0)/60)}</strong><small>minutes</small></div>
@@ -583,7 +599,7 @@ function openSessionDetail(sessionId){
         </div>
       `).join('')||empty('No sets logged.')}
     </section>
-    ${mine?`<button class="btn danger" style="width:100%;margin-top:14px" onclick="deleteSession('${s.id}')">Delete this workout</button>`:''}`;
+    ${mine?`<button class="btn danger" style="width:100%;margin-top:14px" onclick="deleteSession('${s.id}')">${icon('trash',16)} Delete this workout</button>`:''}`;
 }
 
 async function deleteSession(sessionId){
@@ -687,7 +703,7 @@ function openMuscleDetail(name){
     .sort((a,b)=>(b.muscles[name]||0)-(a.muscles[name]||0)).slice(0,6);
   $('modal').classList.add('show');
   $('modalCard').innerHTML=`
-    <div class="row"><h1>${esc(name)}</h1><button class="x" onclick="closeModal()">×</button></div>
+    <div class="row"><h1>${esc(name)}</h1><button class="x" onclick="closeModal()">${icon('close',20)}</button></div>
     <section class="card" style="text-align:center">
       <div style="width:96px;height:96px;border-radius:50%;margin:0 auto;background:${heatColor(row.score)};display:grid;place-items:center;font-weight:1000;font-size:22px;color:#07080b">${row.score}%</div>
       <p style="margin-top:10px">${esc(loadLabel(row.score))} this week</p>
@@ -810,7 +826,7 @@ function renderActiveWorkout(){
     <div class="workout-bar">
       <div class="workout-bar-title">
         <div><small class="muted">Today workout</small><h1>${esc(state.active.title)}</h1></div>
-        <button class="x" onclick="closeModal()">×</button>
+        <button class="x" onclick="closeModal()">${icon('close',20)}</button>
       </div>
       <div class="workout-bar-top">
         <div class="mini-ring">
@@ -821,8 +837,8 @@ function renderActiveWorkout(){
           <div class="mini-ring-center" id="activeRest">${fmtSec(state.rest)}</div>
         </div>
         <div class="workout-bar-info"><small>Elapsed</small><strong id="activeStopwatch">${fmtSec(state.elapsed)}</strong></div>
-        <button class="icon-btn" onclick="toggleWorkoutTimer()" aria-label="${running?'Pause':'Resume'}">${running?'⏸':'▶'}</button>
-        <button class="icon-btn danger" onclick="cancelWorkout()" aria-label="Cancel workout">✕</button>
+        <button class="icon-btn" onclick="toggleWorkoutTimer()" aria-label="${running?'Pause':'Resume'}">${running?icon('pause',16):icon('play',16)}</button>
+        <button class="icon-btn danger" onclick="cancelWorkout()" aria-label="Cancel workout">${icon('close',16)}</button>
       </div>
       <div class="rest-presets">
         ${restPresets.map(s=>`<button type="button" class="chip ${state.restTotal===s?'active':''}" onclick="setRest(${s})">${s<60?s+'s':(s/60)+'m'}</button>`).join('')}
@@ -843,8 +859,8 @@ function activeExercise(item,sets){
         <strong>${s.set_idx}</strong>
         <input class="field" inputmode="decimal" value="${s.weight_kg??''}" placeholder="kg" onchange="updateSet('${s.id}','weight_kg',this.value)">
         <input class="field" inputmode="numeric" value="${s.reps??''}" placeholder="${esc(s.target_reps||'reps')}" onchange="updateSet('${s.id}','reps',this.value)">
-        <button class="check ${s.done?'done':''}" onclick="toggleSet('${s.id}',${item.target_rest_sec})">✓</button>
-        <button class="set-remove" onclick="removeSet('${s.id}')" aria-label="Remove set">×</button>
+        <button class="check ${s.done?'done':''}" onclick="toggleSet('${s.id}',${item.target_rest_sec})">${icon('check',18)}</button>
+        <button class="set-remove" onclick="removeSet('${s.id}')" aria-label="Remove set">${icon('close',14)}</button>
       </div>`).join('')}
     </div>
     <button class="btn small ghost" style="width:100%;margin-top:8px" onclick="addSet('${item.exercise_id}','${esc(item.target_reps)}')">+ Add set</button>
@@ -911,7 +927,7 @@ async function cancelWorkout(){
 
 function openReport(){
   $('modalCard').innerHTML=`
-    <div class="row"><h1>Workout saved</h1><button class="x" onclick="closeModal()">×</button></div>
+    <div class="row"><h1>Workout saved</h1><button class="x" onclick="closeModal()">${icon('close',20)}</button></div>
     <section class="card" style="border-color:#42591b;background:#14200f"><h2>${esc(state.active.title)}</h2><p>${fmtSec(state.elapsed)} of work logged</p></section>
     <label class="eyebrow">Difficulty</label>
     <select id="difficulty" class="field left"><option value="normal">Normal</option><option value="facil">Easy</option><option value="pesado">Heavy</option></select>
@@ -949,7 +965,7 @@ function openExercise(id){
   const muscles=Object.entries(e.muscles||{}).sort((a,b)=>b[1]-a[1]);
   $('modal').classList.add('show');
   $('modalCard').innerHTML=`
-    <div class="row"><h1>${esc(e.name)}</h1><button class="x" onclick="closeModal()">×</button></div>
+    <div class="row"><h1>${esc(e.name)}</h1><button class="x" onclick="closeModal()">${icon('close',20)}</button></div>
     <div class="card">
       ${e.media_url?`<img src="${esc(e.media_url)}" alt="${esc(e.name)}" style="width:100%;border-radius:20px;max-height:520px;object-fit:cover">`:empty('Paste a Gymvisual GIF or another source in the library to see technique here.')}
       ${e.media_page_url?`<p style="margin-top:12px"><a class="accent" href="${esc(e.media_page_url)}" target="_blank" rel="noreferrer">Open Gymvisual reference</a></p>`:''}
@@ -965,7 +981,7 @@ function openTemplateBuilder(day=null,id=null){
   builderState={selected:new Map(items.map(i=>[i.exercise_id,{sets:i.target_sets||3,reps:i.target_reps||'8-12',rest:i.target_rest_sec??90}])),group:'All'};
   $('modal').classList.add('show');
   $('modalCard').innerHTML=`
-    <div class="row"><h1>${id?'Edit':'New'} routine</h1><button class="x" onclick="closeModal()">×</button></div>
+    <div class="row"><h1>${id?'Edit':'New'} routine</h1><button class="x" onclick="closeModal()">${icon('close',20)}</button></div>
     <input id="tplName" class="field left" placeholder="Routine name" value="${esc(t.name)}">
     <select id="tplDay" class="field left">${DOW.map((d,i)=>`<option value="${i}" ${t.weekday===i?'selected':''}>${d}</option>`).join('')}</select>
     <textarea id="tplNotes" class="field" placeholder="Workout note">${esc(t.notes||'')}</textarea>
@@ -1039,7 +1055,7 @@ function openAddToWeek(templateId){
   const mine=state.templates.filter(x=>x.user_id===state.user.id);
   $('modal').classList.add('show');
   $('modalCard').innerHTML=`
-    <div class="row"><h1>Add to my week</h1><button class="x" onclick="closeModal()">×</button></div>
+    <div class="row"><h1>Add to my week</h1><button class="x" onclick="closeModal()">${icon('close',20)}</button></div>
     <p class="muted">${esc(t.name)} · by ${esc(t.profile?.name||'Crew member')}</p>
     <select id="forkDay" class="field left">${DOW.map((d,i)=>{
       const taken=mine.find(x=>x.weekday===i);
@@ -1097,7 +1113,7 @@ function openDayPicker(day){
   </div>`;
   $('modal').classList.add('show');
   $('modalCard').innerHTML=`
-    <div class="row"><h1>Choose a routine</h1><button class="x" onclick="closeModal()">×</button></div>
+    <div class="row"><h1>Choose a routine</h1><button class="x" onclick="closeModal()">${icon('close',20)}</button></div>
     <select id="dayPickerDay" class="field left">${DOW.map((d,i)=>`<option value="${i}" ${i===day?'selected':''}>${d}</option>`).join('')}</select>
     <h2 style="margin-top:16px">My routines</h2>
     ${mine.length?mine.map(t=>pickerRow(t,true)).join(''):empty('You have not created a routine yet.')}
@@ -1126,14 +1142,14 @@ function openDayManage(templateId,day){
   if(!t) return;
   $('modal').classList.add('show');
   $('modalCard').innerHTML=`
-    <div class="row"><h1>${esc(t.name)}</h1><button class="x" onclick="closeModal()">×</button></div>
+    <div class="row"><h1>${esc(t.name)}</h1><button class="x" onclick="closeModal()">${icon('close',20)}</button></div>
     <p class="muted">Scheduled for ${DOW[day]}</p>
     <div class="stack" style="margin-top:14px">
-      <button class="btn primary" style="width:100%" onclick="closeModal();startWorkout('${t.id}')">▶ Start workout</button>
-      <button class="btn" style="width:100%" onclick="openDayPicker(${day})">🔁 Replace routine</button>
-      <button class="btn" style="width:100%" onclick="openTemplateBuilder(null,'${t.id}')">✎ Edit routine</button>
-      <button class="btn" style="width:100%" onclick="openMoveRoutine('${t.id}',${day})">📅 Move to another day</button>
-      <button class="btn danger" style="width:100%" onclick="removeRoutineFromDay('${t.id}')">✕ Remove from ${DOW[day]}</button>
+      <button class="btn primary" style="width:100%" onclick="closeModal();startWorkout('${t.id}')">${icon('play',16)} Start workout</button>
+      <button class="btn" style="width:100%" onclick="openDayPicker(${day})">${icon('swap',16)} Replace routine</button>
+      <button class="btn" style="width:100%" onclick="openTemplateBuilder(null,'${t.id}')">${icon('edit',16)} Edit routine</button>
+      <button class="btn" style="width:100%" onclick="openMoveRoutine('${t.id}',${day})">${icon('calendar',16)} Move to another day</button>
+      <button class="btn danger" style="width:100%" onclick="removeRoutineFromDay('${t.id}')">${icon('trash',16)} Remove from ${DOW[day]}</button>
     </div>`;
 }
 
@@ -1141,7 +1157,7 @@ function openMoveRoutine(templateId,day){
   const t=state.templates.find(x=>x.id===templateId);
   if(!t) return;
   $('modalCard').innerHTML=`
-    <div class="row"><h1>Move ${esc(t.name)}</h1><button class="x" onclick="closeModal()">×</button></div>
+    <div class="row"><h1>Move ${esc(t.name)}</h1><button class="x" onclick="closeModal()">${icon('close',20)}</button></div>
     <p class="muted">Currently on ${DOW[day]}</p>
     <select id="moveDay" class="field left">${DOW.map((d,i)=>`<option value="${i}" ${i===day?'selected':''}>${d}</option>`).join('')}</select>
     <button class="btn primary" style="width:100%;margin-top:14px" onclick="assignOwnRoutineToDay('${templateId}',Number($('moveDay').value))">Move routine</button>`;
@@ -1150,7 +1166,7 @@ function openMoveRoutine(templateId,day){
 function openExerciseBuilder(){
   $('modal').classList.add('show');
   $('modalCard').innerHTML=`
-    <div class="row"><h1>New exercise</h1><button class="x" onclick="closeModal()">×</button></div>
+    <div class="row"><h1>New exercise</h1><button class="x" onclick="closeModal()">${icon('close',20)}</button></div>
     <input id="exName" class="field left" placeholder="Name">
     <input id="exEnglish" class="field left" placeholder="Alternative name">
     <input id="exMedia" class="field left" placeholder="Direct GIF/video URL">
