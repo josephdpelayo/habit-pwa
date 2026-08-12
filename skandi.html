@@ -119,29 +119,27 @@ textarea.field{min-height:112px;text-align:left;resize:vertical}
 .check{height:48px;border-radius:10px;background:var(--panel2);color:var(--muted);border:1px solid var(--line);display:grid;place-items:center}
 .check.done{background:var(--dof-navy);color:#fff}
 .set-remove{width:30px;height:48px;border-radius:10px;background:transparent;color:var(--muted);border:1px solid var(--line);display:grid;place-items:center}
-.workout-bar{position:sticky;top:-20px;z-index:5;margin:-20px -20px 0;padding:14px 18px 18px;background:rgba(255,255,255,.96);backdrop-filter:blur(16px);border-bottom:1px solid var(--line);border-radius:8px 8px 0 0;overflow:hidden;box-shadow:0 18px 38px rgba(1,36,86,.10)}
+.workout-bar{position:sticky;top:-20px;z-index:5;margin:-20px -20px 0;padding:14px 18px 12px;background:linear-gradient(180deg,rgba(247,251,254,.98),rgba(247,251,254,.82));backdrop-filter:blur(18px);border-bottom:1px solid rgba(1,36,86,.08);border-radius:8px 8px 0 0;overflow:visible}
 .workout-bar-title{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-bottom:12px}
-.workout-bar-title h1{font-size:24px;line-height:1}
-.workout-bar-title small{display:block;color:var(--muted);font-weight:800;font-size:13px;margin-bottom:3px}
-.workout-status{display:grid;grid-template-columns:minmax(0,1.08fr) minmax(0,.92fr);gap:10px;align-items:stretch;width:100%;min-width:0}
-.timer-metric{position:relative;overflow:hidden;background:#fff;border:1px solid #d8e3ec;border-radius:8px;padding:14px 14px 12px;min-width:0;box-shadow:0 12px 26px rgba(1,36,86,.08)}
-.timer-metric:before{content:"";position:absolute;left:14px;right:14px;top:0;height:3px;background:#d6e3ee;border-radius:0 0 999px 999px}
-.timer-metric small{display:flex;align-items:center;gap:7px;color:#6a7788;font-size:10px;font-weight:1000;letter-spacing:.14em;text-transform:uppercase;margin-bottom:10px;white-space:nowrap}
-.timer-metric small:before{content:"";width:7px;height:7px;border-radius:50%;background:#9aa9b8}
-.timer-metric strong{display:block;color:#071b3d;font-size:clamp(32px,8vw,52px);line-height:.9;font-variant-numeric:tabular-nums;letter-spacing:0;white-space:nowrap}
-.timer-metric em{display:block;margin-top:8px;color:#758397;font-style:normal;font-size:12px;font-weight:800;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.timer-metric.elapsed{background:linear-gradient(180deg,#ffffff,#f7faff)}
-.timer-metric.elapsed:before{background:linear-gradient(90deg,#141e30,#5d7594)}
-.timer-metric.elapsed small:before{background:#141e30;box-shadow:0 0 0 4px rgba(20,30,48,.10)}
-.timer-metric.resting{background:linear-gradient(180deg,#ffffff,#fbf8f4);border-color:#e4d8ca}
-.timer-metric.resting:before{background:linear-gradient(90deg,#d8922f,#f2c166)}
-.timer-metric.resting small:before{background:#d8922f;box-shadow:0 0 0 4px rgba(216,146,47,.14)}
-.rest-progress{height:7px;background:#d9e7ef;border-radius:999px;overflow:hidden;margin-top:10px}
-.rest-progress i{display:block;height:100%;width:0;background:linear-gradient(90deg,#d8922f,#f2c166);border-radius:999px;transition:width .25s linear}
-.workout-actions{grid-column:1/-1;display:grid;grid-template-columns:56px 1fr;align-items:stretch;gap:10px;min-width:0}
-.workout-actions .icon-btn{width:56px;height:48px;min-height:48px}
-.workout-cancel{height:48px;min-height:48px;padding:0 12px;color:var(--pink);box-shadow:none}
-.workout-content{margin:0 -20px -20px;padding:18px 20px 20px;background:linear-gradient(180deg,#eef4f8,#f7fbfe 92px,#f7fbfe)}
+.workout-bar-title h1{font-size:22px;line-height:1}
+.workout-bar-title small{display:block;color:var(--muted);font-weight:800;font-size:12px;margin-bottom:3px}
+.timer-console{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:10px;align-items:center;background:rgba(255,255,255,.88);border:1px solid rgba(1,36,86,.10);border-radius:14px;padding:10px;box-shadow:0 18px 38px rgba(1,36,86,.14);color:var(--text)}
+.timer-main{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:10px;align-items:center;min-width:0}
+.timer-label{display:flex;align-items:center;gap:7px;color:var(--muted);font-size:9px;font-weight:1000;letter-spacing:.14em;text-transform:uppercase}
+.timer-label:before{content:"";width:6px;height:6px;border-radius:50%;background:var(--dof-navy);box-shadow:0 0 0 4px rgba(1,36,86,.08)}
+.timer-main strong{display:block;margin-top:4px;color:var(--text);font-size:34px;line-height:.95;font-variant-numeric:tabular-nums;letter-spacing:0;white-space:nowrap}
+.timer-main em{display:block;margin-top:4px;color:var(--muted);font-style:normal;font-size:10px;font-weight:800;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.timer-toggle{width:46px;height:46px;border-radius:50%;background:linear-gradient(180deg,#082653,#031833);border:1px solid rgba(1,36,86,.18);color:#fff;display:grid;place-items:center;box-shadow:0 10px 20px rgba(1,36,86,.20),inset 0 1px 0 rgba(255,255,255,.20)}
+.timer-side{display:grid;grid-template-columns:auto auto;gap:8px;align-items:center}
+.timer-step{width:44px;height:44px;border-radius:50%;background:#fff;border:1px solid rgba(1,36,86,.12);color:var(--dof-navy);font-size:12px;font-weight:1000;box-shadow:0 8px 18px rgba(1,36,86,.08)}
+.timer-rest{min-width:74px;text-align:center;background:linear-gradient(180deg,#fff,#f7fbfe);border:1px solid rgba(1,36,86,.10);border-radius:999px;padding:7px 10px;box-shadow:inset 0 1px 0 rgba(255,255,255,.8)}
+.timer-rest span{display:block;color:#d8922f;font-size:8px;font-weight:1000;letter-spacing:.12em;text-transform:uppercase}
+.timer-rest strong{display:block;color:var(--text);font-size:18px;line-height:1.05;font-variant-numeric:tabular-nums;white-space:nowrap}
+.timer-meta{grid-column:1/-1;display:grid;grid-template-columns:1fr auto;gap:10px;align-items:center}
+.rest-progress{height:5px;background:#dce8f1;border-radius:999px;overflow:hidden}
+.rest-progress i{display:block;height:100%;width:0;background:linear-gradient(90deg,#ffb451,#2dd4bf);border-radius:999px;transition:width .25s linear}
+.timer-meta .unit-toggle{background:#eef4f8;border-color:rgba(1,36,86,.08)}
+.workout-content{margin:0 -20px -20px;padding:22px 20px 20px;background:linear-gradient(180deg,#f3f8fc,#f7fbfe 88px,#f7fbfe)}
 .workout-section-head{display:flex;align-items:center;justify-content:space-between;gap:10px;margin:0 0 12px}
 .workout-section-head h2{font-size:20px;margin:0}
 .workout-progress-row{display:flex;align-items:center;justify-content:space-between;gap:10px;margin:0}
@@ -151,6 +149,9 @@ textarea.field{min-height:112px;text-align:left;resize:vertical}
 .unit-toggle{display:inline-grid;grid-template-columns:1fr 1fr;gap:3px;background:var(--panel2);border:1px solid var(--line);border-radius:999px;padding:3px}
 .unit-toggle button{background:transparent;color:var(--muted);border-radius:999px;padding:6px 10px;font-size:12px;font-weight:1000}
 .unit-toggle button.active{background:var(--dof-navy);color:#fff}
+.workout-footer{display:grid;grid-template-columns:minmax(0,.82fr) minmax(0,1.18fr);gap:10px;margin:14px 0 0;padding:4px 0 0}
+.workout-footer .btn{min-height:52px;box-shadow:none}
+.workout-footer .danger-action{color:var(--pink);border-color:rgba(212,72,84,.32);background:#fff}
 .modal-card .exercise{box-shadow:0 10px 26px rgba(1,36,86,.08);background:rgba(255,255,255,.92)}
 .modal-card .exercise h3{font-size:18px}
 .modal-card .field{box-shadow:none}
@@ -214,19 +215,23 @@ textarea.field{min-height:112px;text-align:left;resize:vertical}
   .row{align-items:flex-start}
   .row>.btn,.row>.pill{flex:0 0 auto}
   .signup-names{grid-template-columns:1fr}
-  .workout-bar{margin:-16px -16px 0;padding:12px 14px 16px}
-  .workout-status{grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:8px}
-  .timer-metric{padding:12px 10px 10px}
-  .timer-metric:before{left:10px;right:10px}
-  .timer-metric small{font-size:9px;margin-bottom:8px}
-  .timer-metric strong{font-size:32px}
-  .timer-metric em{font-size:11px}
-  .workout-actions{grid-template-columns:52px 1fr;gap:8px}
-  .workout-actions .icon-btn,.workout-cancel{height:44px;min-height:44px}
-  .workout-actions .icon-btn{width:52px}
+  .workout-bar{margin:-16px -16px 0;padding:12px 12px 10px}
+  .workout-bar-title{margin-bottom:10px}
+  .workout-bar-title h1{font-size:21px}
+  .timer-console{grid-template-columns:1fr;gap:8px;padding:9px}
+  .timer-main{grid-template-columns:minmax(0,1fr) 44px;gap:8px}
+  .timer-main strong{font-size:32px}
+  .timer-main em{font-size:10px}
+  .timer-toggle{width:44px;height:44px}
+  .timer-side{grid-template-columns:44px minmax(68px,1fr) 44px;gap:7px}
+  .timer-step{width:44px;height:40px;border-radius:999px;font-size:11px}
+  .timer-rest{min-width:0;padding:6px 8px}
+  .timer-rest strong{font-size:17px}
+  .timer-meta{grid-template-columns:1fr auto;gap:8px}
   .modal-card{width:calc(100vw - 16px);max-width:calc(100vw - 16px);padding:16px}
   .workout-content{margin:0 -16px -16px;padding:16px}
   .workout-section-head{margin-bottom:10px}
+  .workout-footer{grid-template-columns:1fr 1fr;margin:12px 0 0;padding:0}
   .modal-card .exercise{padding:12px;margin:8px 0}
   .modal-card .field{padding:10px 8px}
   .modal-card .set-row{gap:5px}
@@ -1147,6 +1152,20 @@ function setRest(seconds){
   renderActiveWorkout();
 }
 
+function adjustRest(delta){
+  const next=Math.max(0,state.rest+delta);
+  state.rest=next;
+  state.restTotal=next>0?Math.max(next,state.restTotal+delta):0;
+  if(state.restTotal<state.rest) state.restTotal=state.rest;
+  renderActiveWorkout();
+}
+
+function confirmFinishWorkout(){
+  if(!state.active) return;
+  if(!confirm('Finish this workout and prepare the final report?')) return;
+  openReport();
+}
+
 function openActiveWorkout(){
   $('modal').classList.add('show');
   renderActiveWorkout();
@@ -1157,39 +1176,36 @@ function renderActiveWorkout(){
   const allSets=state.sets.filter(s=>s.session_id===state.active.id);
   const done=allSets.filter(s=>s.done).length;
   const running=!!state.timer;
-  const restPresets=[30,60,90,120,180];
   $('modalCard').innerHTML=`
     <div class="workout-bar">
       <div class="workout-bar-title">
         <div><small>Today workout</small><h1>${esc(state.active.title)}</h1></div>
         <button class="x" onclick="closeModal()" aria-label="Minimize workout" title="Minimize workout">${icon('minimize',22)}</button>
       </div>
-      <div class="row" style="margin:-2px 0 12px">
-        <p class="muted" style="font-size:12px">Loads shown in ${state.weightUnit.toUpperCase()}</p>
-        <div class="unit-toggle" aria-label="Weight unit">
-          <button class="${state.weightUnit==='kg'?'active':''}" onclick="setWeightUnit('kg')">KG</button>
-          <button class="${state.weightUnit==='lb'?'active':''}" onclick="setWeightUnit('lb')">LB</button>
+      <div class="timer-console">
+        <div class="timer-main">
+          <div>
+            <span class="timer-label">Elapsed</span>
+            <strong id="activeStopwatch">${fmtWorkoutTime(state.elapsed)}</strong>
+            <em id="activeStopwatchHint">${workoutTimeHint(state.elapsed)}</em>
+          </div>
+          <button class="timer-toggle" onclick="toggleWorkoutTimer()" aria-label="${running?'Pause timer':'Resume timer'}" title="${running?'Pause timer':'Resume timer'}">${running?icon('pause',22):icon('play',22)}</button>
         </div>
-      </div>
-      <div class="workout-status">
-        <div class="timer-metric elapsed">
-          <small>Elapsed</small>
-          <strong id="activeStopwatch">${fmtWorkoutTime(state.elapsed)}</strong>
-          <em id="activeStopwatchHint">${workoutTimeHint(state.elapsed)}</em>
+        <div class="timer-side">
+          <button class="timer-step" onclick="adjustRest(-30)" aria-label="Remove 30 seconds from rest">-30s</button>
+          <div class="timer-rest">
+            <span>Rest</span>
+            <strong id="activeRest">${fmtSec(state.rest)}</strong>
+          </div>
+          <button class="timer-step" onclick="adjustRest(30)" aria-label="Add 30 seconds to rest">+30s</button>
         </div>
-        <div class="timer-metric resting">
-          <small>Rest</small>
-          <strong id="activeRest">${fmtSec(state.rest)}</strong>
-          <em>${state.restTotal?`${state.restTotal}s timer`:'tap a preset'}</em>
-          <div class="rest-progress"><i id="restProgress" style="width:${restProgressPct()}%"></i></div>
+        <div class="timer-meta">
+          <div class="rest-progress" aria-label="Rest progress"><i id="restProgress" style="width:${restProgressPct()}%"></i></div>
+          <div class="unit-toggle" aria-label="Weight unit">
+            <button class="${state.weightUnit==='kg'?'active':''}" onclick="setWeightUnit('kg')">KG</button>
+            <button class="${state.weightUnit==='lb'?'active':''}" onclick="setWeightUnit('lb')">LB</button>
+          </div>
         </div>
-        <div class="workout-actions">
-          <button class="icon-btn" onclick="toggleWorkoutTimer()" aria-label="${running?'Pause timer':'Resume timer'}">${running?icon('pause',16):icon('play',16)}</button>
-          <button class="btn workout-cancel" onclick="cancelWorkout()">${icon('close',15)} Cancel</button>
-        </div>
-      </div>
-      <div class="rest-presets">
-        ${restPresets.map(s=>`<button type="button" class="chip ${state.restTotal===s?'active':''}" onclick="setRest(${s})">${s<60?s+'s':(s/60)+'m'}</button>`).join('')}
       </div>
     </div>
     <div class="workout-content">
@@ -1197,11 +1213,13 @@ function renderActiveWorkout(){
         <h2>Exercises</h2>
         <div class="workout-progress-row">
           <span class="progress-pill"><strong>${done}</strong><small>/ ${allSets.length} sets</small></span>
-          <button class="btn small primary" onclick="openReport()">Finish</button>
         </div>
       </div>
       ${state.activeItems.map(item=>activeExercise(item,allSets.filter(s=>s.exercise_id===item.exercise_id))).join('')}
-      <button class="btn primary" style="width:100%;margin-top:12px" onclick="openReport()">Finish workout</button>
+      <div class="workout-footer">
+        <button class="btn danger-action" onclick="cancelWorkout()">${icon('close',15)} Cancel</button>
+        <button class="btn primary" onclick="confirmFinishWorkout()">${icon('check',17)} Finish workout</button>
+      </div>
     </div>
     `;
 }
