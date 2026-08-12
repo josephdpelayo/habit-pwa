@@ -39,7 +39,7 @@ button,input,textarea,select{font:inherit}
 button{border:0;cursor:pointer}
 button:focus-visible,input:focus-visible,textarea:focus-visible,select:focus-visible{outline:2px solid var(--blue);outline-offset:2px}
 .app{position:relative;z-index:1;max-width:820px;margin:0 auto;padding:18px 14px 104px;overflow:hidden}
-.top{position:sticky;top:0;z-index:10;display:grid;grid-template-columns:1fr 42px;align-items:center;gap:12px;margin:-18px -14px 14px;padding:14px 14px 12px;background:rgba(244,250,254,.86);backdrop-filter:blur(18px);border-bottom:1px solid rgba(1,36,86,.08)}
+.top{position:sticky;top:0;z-index:10;display:grid;grid-template-columns:1fr 42px;align-items:center;gap:12px;margin:-18px -14px 22px;padding:14px 14px 12px;background:rgba(244,250,254,.86);backdrop-filter:blur(18px);border-bottom:1px solid rgba(1,36,86,.08)}
 .brand{min-width:0;display:flex;align-items:center;gap:10px;font-weight:900;font-size:24px}
 .ship-mark{width:70px;height:42px;border-radius:10px;background:#fff;display:grid;place-items:center;overflow:hidden;flex:0 0 auto;border:1px solid var(--line);box-shadow:0 8px 22px rgba(1,36,86,.10)}
 .ship-mark img{width:72px;height:34px;object-fit:contain}
@@ -55,7 +55,7 @@ button:focus-visible,input:focus-visible,textarea:focus-visible,select:focus-vis
 .auth-tab.active{background:var(--dof-navy);color:#fff;box-shadow:0 10px 20px rgba(1,36,86,.18)}
 .avatar{width:42px;height:42px;border-radius:50%;background:var(--dof-navy);display:grid;place-items:center;font-weight:900;color:#fff;overflow:hidden;box-shadow:0 10px 22px rgba(1,36,86,.18)}
 .avatar img{width:100%;height:100%;object-fit:cover}
-.hero{display:grid;gap:14px;margin-bottom:16px}
+.hero{display:grid;gap:14px;margin-bottom:16px;padding-top:4px}
 .eyebrow{letter-spacing:.16em;text-transform:uppercase;color:var(--dof-steel);font-weight:900;font-size:12px}
 h1{font-size:clamp(32px,7.8vw,52px);line-height:.98;margin:0;letter-spacing:0;overflow-wrap:anywhere}
 h2{font-size:24px;margin:0 0 10px;line-height:1.05}
@@ -75,6 +75,8 @@ p{color:var(--muted);line-height:1.45;margin:0}
 .ring span{position:relative;z-index:1;color:#fff}
 .grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
 .stat,.card,.workout,.exercise,.feed,.modal-card{background:rgba(255,255,255,.86);border:1px solid rgba(1,36,86,.10);border-radius:8px;box-shadow:var(--shadow)}
+.click-card{cursor:pointer;transition:transform .14s ease,box-shadow .14s ease,border-color .14s ease}
+.click-card:hover{transform:translateY(-1px);border-color:rgba(1,36,86,.20);box-shadow:0 22px 48px rgba(1,36,86,.16)}
 .stat{padding:18px;min-height:100px;position:relative;overflow:hidden}
 .stat:after{content:"";position:absolute;left:0;right:0;bottom:0;height:4px;background:linear-gradient(90deg,var(--dof-navy),var(--blue),#a9bac9);opacity:.82}
 .stat strong{display:block;font-size:36px;line-height:1;color:var(--text)}
@@ -117,7 +119,7 @@ textarea.field{min-height:112px;text-align:left;resize:vertical}
 .check{height:48px;border-radius:10px;background:var(--panel2);color:var(--muted);border:1px solid var(--line);display:grid;place-items:center}
 .check.done{background:var(--dof-navy);color:#fff}
 .set-remove{width:30px;height:48px;border-radius:10px;background:transparent;color:var(--muted);border:1px solid var(--line);display:grid;place-items:center}
-.workout-bar{position:sticky;top:-20px;z-index:5;margin:-20px -20px 14px;padding:14px 18px 12px;background:rgba(255,255,255,.96);backdrop-filter:blur(16px);border-bottom:1px solid var(--line);border-radius:8px 8px 0 0;overflow:hidden}
+.workout-bar{position:sticky;top:-20px;z-index:5;margin:-20px -20px 0;padding:14px 18px 18px;background:rgba(255,255,255,.96);backdrop-filter:blur(16px);border-bottom:1px solid var(--line);border-radius:8px 8px 0 0;overflow:hidden;box-shadow:0 18px 38px rgba(1,36,86,.10)}
 .workout-bar-title{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-bottom:12px}
 .workout-bar-title h1{font-size:24px;line-height:1}
 .workout-bar-title small{display:block;color:var(--muted);font-weight:800;font-size:13px;margin-bottom:3px}
@@ -139,10 +141,16 @@ textarea.field{min-height:112px;text-align:left;resize:vertical}
 .workout-actions{grid-column:1/-1;display:grid;grid-template-columns:56px 1fr;align-items:stretch;gap:10px;min-width:0}
 .workout-actions .icon-btn{width:56px;height:48px;min-height:48px}
 .workout-cancel{height:48px;min-height:48px;padding:0 12px;color:var(--pink);box-shadow:none}
-.workout-progress-row{display:flex;align-items:center;justify-content:space-between;gap:10px;margin:10px 0 4px}
+.workout-content{margin:0 -20px -20px;padding:18px 20px 20px;background:linear-gradient(180deg,#eef4f8,#f7fbfe 92px,#f7fbfe)}
+.workout-section-head{display:flex;align-items:center;justify-content:space-between;gap:10px;margin:0 0 12px}
+.workout-section-head h2{font-size:20px;margin:0}
+.workout-progress-row{display:flex;align-items:center;justify-content:space-between;gap:10px;margin:0}
 .progress-pill{display:inline-flex;align-items:baseline;gap:4px;background:#e7f0f7;color:var(--dof-navy);border-radius:999px;padding:8px 12px;font-weight:1000}
 .progress-pill strong{font-size:18px}
 .progress-pill small{color:var(--muted);font-weight:900}
+.unit-toggle{display:inline-grid;grid-template-columns:1fr 1fr;gap:3px;background:var(--panel2);border:1px solid var(--line);border-radius:999px;padding:3px}
+.unit-toggle button{background:transparent;color:var(--muted);border-radius:999px;padding:6px 10px;font-size:12px;font-weight:1000}
+.unit-toggle button.active{background:var(--dof-navy);color:#fff}
 .modal-card .exercise{box-shadow:0 10px 26px rgba(1,36,86,.08);background:rgba(255,255,255,.92)}
 .modal-card .exercise h3{font-size:18px}
 .modal-card .field{box-shadow:none}
@@ -163,6 +171,12 @@ textarea.field{min-height:112px;text-align:left;resize:vertical}
 .mini-body-fig svg{height:152px;max-width:100%}
 .mini-body-card h2{margin-bottom:5px}
 .mini-body-chips{display:flex;flex-wrap:wrap;gap:7px;margin-top:12px}
+.muscle-builder{display:grid;gap:8px;margin:10px 0 14px}
+.muscle-builder-row{display:grid;grid-template-columns:92px 1fr 64px;gap:10px;align-items:center;background:var(--panel2);border:1px solid var(--line);border-radius:8px;padding:10px}
+.muscle-builder-row strong{font-size:14px}
+.muscle-builder-row input[type="range"]{width:100%;accent-color:var(--dof-navy)}
+.muscle-builder-row .field{padding:8px}
+.form-note{font-size:12px;color:var(--muted);margin:-4px 0 10px}
 .body-flip-btn{position:absolute;left:12px;bottom:12px;width:44px;height:44px;border-radius:50%;background:#fff;border:1px solid var(--line);display:grid;place-items:center;color:var(--text);box-shadow:0 10px 22px rgba(1,36,86,.14)}
 .muscle-region{cursor:pointer;transition:opacity .15s}
 .muscle-region:hover,.muscle-region:active{opacity:.82}
@@ -200,7 +214,7 @@ textarea.field{min-height:112px;text-align:left;resize:vertical}
   .row{align-items:flex-start}
   .row>.btn,.row>.pill{flex:0 0 auto}
   .signup-names{grid-template-columns:1fr}
-  .workout-bar{margin:-16px -16px 12px;padding:12px 14px 10px}
+  .workout-bar{margin:-16px -16px 0;padding:12px 14px 16px}
   .workout-status{grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:8px}
   .timer-metric{padding:12px 10px 10px}
   .timer-metric:before{left:10px;right:10px}
@@ -211,12 +225,15 @@ textarea.field{min-height:112px;text-align:left;resize:vertical}
   .workout-actions .icon-btn,.workout-cancel{height:44px;min-height:44px}
   .workout-actions .icon-btn{width:52px}
   .modal-card{width:calc(100vw - 16px);max-width:calc(100vw - 16px);padding:16px}
+  .workout-content{margin:0 -16px -16px;padding:16px}
+  .workout-section-head{margin-bottom:10px}
   .modal-card .exercise{padding:12px;margin:8px 0}
   .modal-card .field{padding:10px 8px}
   .modal-card .set-row{gap:5px}
   .mini-body-card{grid-template-columns:92px 1fr;gap:12px}
   .mini-body-fig{height:142px}
   .mini-body-fig svg{height:128px}
+  .muscle-builder-row{grid-template-columns:78px 1fr 56px;gap:7px;padding:9px}
 }
 </style>
 </head>
@@ -279,6 +296,13 @@ const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 const DOW=['MON','TUE','WED','THU','FRI','SAT','SUN'];
 const MUSCLE_GROUP_ORDER=['Chest','Back','Shoulders','Arms','Legs','Core','Other'];
 const MUSCLE_GROUP_MAP={Chest:'Chest',Back:'Back',Shoulders:'Shoulders',Biceps:'Arms',Triceps:'Arms',Forearms:'Arms',Quads:'Legs',Hamstrings:'Legs',Glutes:'Legs',Calves:'Legs','Hip Flexors':'Legs',Core:'Core'};
+const EXERCISE_MUSCLES=['Chest','Back','Shoulders','Biceps','Triceps','Forearms','Quads','Hamstrings','Glutes','Calves','Core'];
+const EXERCISE_PRESETS={
+  Push:{Chest:55,Shoulders:20,Triceps:25},
+  Pull:{Back:60,Biceps:25,Forearms:15},
+  Legs:{Quads:35,Hamstrings:25,Glutes:25,Calves:15},
+  Core:{Core:100}
+};
 
 // Single anatomical figure (front OR back, toggled) on a 240x480 viewBox. Paired muscles are
 // authored as a left-side shape only and mirrored (cx/x reflected about the vertical center)
@@ -313,7 +337,7 @@ const BODY_REGIONS_BACK=[
   {name:'Triceps',shape:'rect',x:46,y:95,w:26,h:80,rx:13,mirror:true}
 ];
 const ACTIVE_WORKOUT_MAX_HOURS=18;
-const state={user:null,profile:null,view:'home',authMode:'login',exercises:[],templates:[],items:[],sessions:[],sets:[],externalActivities:[],active:null,activeItems:[],timer:null,elapsed:0,rest:0,restTotal:0,bodyFlip:'front'};
+const state={user:null,profile:null,view:'home',authMode:'login',exercises:[],templates:[],items:[],sessions:[],sets:[],externalActivities:[],active:null,activeItems:[],timer:null,elapsed:0,rest:0,restTotal:0,bodyFlip:'front',weightUnit:localStorage.getItem('skandi_weight_unit')||'kg'};
 let builderState={selected:new Map(),group:'All'};
 
 const $=id=>document.getElementById(id);
@@ -336,6 +360,18 @@ const ICON_PATHS={
 const icon=(name,size=20)=>`<svg viewBox="0 0 24 24" width="${size}" height="${size}" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex:0 0 auto">${ICON_PATHS[name]||''}</svg>`;
 const THUMB_FALLBACK=icon('image',26);
 const fmtSec=s=>`${String(Math.floor((s||0)/60)).padStart(2,'0')}:${String((s||0)%60).padStart(2,'0')}`;
+const kgToDisplay=kg=>state.weightUnit==='lb'?Number(kg)*2.2046226218:Number(kg);
+const displayToKg=value=>state.weightUnit==='lb'?Number(value)/2.2046226218:Number(value);
+function fmtWeightInput(kg){
+  if(kg==null||kg==='') return '';
+  const n=kgToDisplay(kg);
+  return Number.isInteger(n)?String(n):String(Math.round(n*10)/10);
+}
+function setWeightUnit(unit){
+  state.weightUnit=unit==='lb'?'lb':'kg';
+  localStorage.setItem('skandi_weight_unit',state.weightUnit);
+  renderActiveWorkout();
+}
 function fmtWorkoutTime(sec){
   sec=Math.max(0,Math.floor(sec||0));
   const d=Math.floor(sec/86400);
@@ -522,13 +558,12 @@ function homeView(){
       </button>
     </section>
     <section class="grid">
-      <div class="stat"><strong>${weekCount}</strong><small>this week</small></div>
-      <div class="stat"><strong>${state.templates.filter(t=>t.user_id===state.user.id).length}</strong><small>your routines</small></div>
+      <div class="stat click-card" onclick="setView('progress')"><strong>${weekCount}</strong><small>this week</small></div>
+      <div class="stat click-card" onclick="setView('train')"><strong>${state.templates.filter(t=>t.user_id===state.user.id).length}</strong><small>your routines</small></div>
     </section>
     ${miniBodyRecoveryCard()}
-    ${muscleLoadCard('Muscle load')}
-    ${todayTpl?workoutCard(todayTpl,true):empty('You do not have a routine yet. Create one from Train.')}
-    <section class="card">
+    ${todayTpl?`<div class="click-card" onclick="setView('train')">${workoutCard(todayTpl,true)}</div>`:empty('You do not have a routine yet. Create one from Train.')}
+    <section class="card click-card" onclick="setView('crew')">
       <div class="row"><h2>Latest from the boat</h2><button class="btn small" onclick="setView('crew')">View crew</button></div>
       ${state.sessions.filter(s=>s.completed_at&&s.visibility==='crew').slice(0,4).map(feedItem).join('')||empty('When someone finishes a workout, it will show up here.')}
     </section>`;
@@ -576,8 +611,8 @@ function workoutCard(t){
     </div>
     <div class="muscles">${names}${its.length>4?`<span class="pill dark">+${its.length-4}</span>`:''}</div>
     <div class="row" style="margin-top:16px">
-      <button class="btn primary" onclick="startWorkout('${t.id}')">${icon('play',16)} Start</button>
-      ${mine?`<button class="btn" onclick="openTemplateBuilder(null,'${t.id}')">Edit</button>`:`<button class="btn" onclick="openAddToWeek('${t.id}')">+ Add to my week</button>`}
+      <button class="btn primary" onclick="event.stopPropagation();startWorkout('${t.id}')">${icon('play',16)} Start</button>
+      ${mine?`<button class="btn" onclick="event.stopPropagation();openTemplateBuilder(null,'${t.id}')">Edit</button>`:`<button class="btn" onclick="event.stopPropagation();openAddToWeek('${t.id}')">+ Add to my week</button>`}
     </div>
   </article>`;
 }
@@ -810,10 +845,10 @@ function miniBodyRecoveryCard(){
   const scoreByName=new Map(rows.map(r=>[r.name,r.score]));
   const needsWork=rows[0];
   const restedCount=rows.filter(r=>r.rested).length;
-  return `<section class="card mini-body-card">
-    <button class="mini-body-fig" onclick="setView('body')" aria-label="Open body recovery map">
+  return `<section class="card mini-body-card click-card" onclick="setView('body')">
+    <div class="mini-body-fig" aria-label="Open body recovery map">
       ${bodyFigureSVG('front',scoreByName,false)}
-    </button>
+    </div>
     <div>
       <div class="eyebrow">Body readiness</div>
       <h2>${needsWork&&!needsWork.rested?`${esc(needsWork.name)} needs recovery`:'Body is ready'}</h2>
@@ -1023,6 +1058,19 @@ async function deleteExternalActivity(id){
   render();
 }
 
+function previousCompletedSetsForExercise(exerciseId){
+  const completed=state.sessions
+    .filter(s=>s.user_id===state.user.id&&s.completed_at&&s.id!==state.active?.id)
+    .sort((a,b)=>new Date(b.completed_at).getTime()-new Date(a.completed_at).getTime());
+  for(const session of completed){
+    const rows=state.sets
+      .filter(s=>s.session_id===session.id&&s.exercise_id===exerciseId&&s.done)
+      .sort((a,b)=>a.set_idx-b.set_idx);
+    if(rows.length) return rows;
+  }
+  return [];
+}
+
 async function startWorkout(templateId){
   if(state.active){
     if(state.active.template_id===templateId){ openActiveWorkout(); return; }
@@ -1033,9 +1081,16 @@ async function startWorkout(templateId){
   if(!tpl||!its.length) return;
   const {data:session,error}=await sb.from('skandi_sessions').insert({user_id:state.user.id,template_id:tpl.id,title:tpl.name}).select().single();
   if(error) return alert(error.message);
-  const rows=its.flatMap(item=>Array.from({length:item.target_sets},(_,idx)=>({
-    session_id:session.id,user_id:state.user.id,exercise_id:item.exercise_id,set_idx:idx+1,target_reps:item.target_reps
-  })));
+  const rows=its.flatMap(item=>{
+    const previous=previousCompletedSetsForExercise(item.exercise_id);
+    return Array.from({length:item.target_sets},(_,idx)=>{
+      const prev=previous[idx]||previous[previous.length-1]||{};
+      return {
+        session_id:session.id,user_id:state.user.id,exercise_id:item.exercise_id,set_idx:idx+1,target_reps:item.target_reps,
+        weight_kg:prev.weight_kg??null,reps:prev.reps??null
+      };
+    });
+  });
   const {error:setsError}=await sb.from('skandi_sets').insert(rows);
   if(setsError){
     await sb.from('skandi_sessions').delete().eq('id',session.id);
@@ -1109,6 +1164,13 @@ function renderActiveWorkout(){
         <div><small>Today workout</small><h1>${esc(state.active.title)}</h1></div>
         <button class="x" onclick="closeModal()" aria-label="Minimize workout" title="Minimize workout">${icon('minimize',22)}</button>
       </div>
+      <div class="row" style="margin:-2px 0 12px">
+        <p class="muted" style="font-size:12px">Loads shown in ${state.weightUnit.toUpperCase()}</p>
+        <div class="unit-toggle" aria-label="Weight unit">
+          <button class="${state.weightUnit==='kg'?'active':''}" onclick="setWeightUnit('kg')">KG</button>
+          <button class="${state.weightUnit==='lb'?'active':''}" onclick="setWeightUnit('lb')">LB</button>
+        </div>
+      </div>
       <div class="workout-status">
         <div class="timer-metric elapsed">
           <small>Elapsed</small>
@@ -1130,12 +1192,18 @@ function renderActiveWorkout(){
         ${restPresets.map(s=>`<button type="button" class="chip ${state.restTotal===s?'active':''}" onclick="setRest(${s})">${s<60?s+'s':(s/60)+'m'}</button>`).join('')}
       </div>
     </div>
-    <div class="workout-progress-row">
-      <span class="progress-pill"><strong>${done}</strong><small>/ ${allSets.length} sets</small></span>
-      <button class="btn small primary" onclick="openReport()">Finish</button>
+    <div class="workout-content">
+      <div class="workout-section-head">
+        <h2>Exercises</h2>
+        <div class="workout-progress-row">
+          <span class="progress-pill"><strong>${done}</strong><small>/ ${allSets.length} sets</small></span>
+          <button class="btn small primary" onclick="openReport()">Finish</button>
+        </div>
+      </div>
+      ${state.activeItems.map(item=>activeExercise(item,allSets.filter(s=>s.exercise_id===item.exercise_id))).join('')}
+      <button class="btn primary" style="width:100%;margin-top:12px" onclick="openReport()">Finish workout</button>
     </div>
-    ${state.activeItems.map(item=>activeExercise(item,allSets.filter(s=>s.exercise_id===item.exercise_id))).join('')}
-    <button class="btn primary" style="width:100%;margin-top:12px" onclick="openReport()">Finish workout</button>`;
+    `;
 }
 
 function activeExercise(item,sets){
@@ -1143,10 +1211,10 @@ function activeExercise(item,sets){
   return `<article class="exercise">
     <div class="ex-head" onclick="openExercise('${e.id}')">${mediaThumb(e)}<div><h3>${esc(e.name)}</h3><p>${esc(e.english_name||'')} · ${item.target_sets} x ${esc(item.target_reps)} · rest ${item.target_rest_sec}s</p></div><span class="muted">${sets.filter(s=>s.done).length}/${sets.length}</span></div>
     <div class="stack">
-      <div class="set-row"><span></span><small class="muted">KG</small><small class="muted">REPS</small><span></span><span></span></div>
+      <div class="set-row"><span></span><small class="muted">${state.weightUnit.toUpperCase()}</small><small class="muted">REPS</small><span></span><span></span></div>
       ${sets.map(s=>`<div class="set-row">
         <strong>${s.set_idx}</strong>
-        <input class="field" inputmode="decimal" value="${s.weight_kg??''}" placeholder="kg" onchange="updateSet('${s.id}','weight_kg',this.value)">
+        <input class="field" inputmode="decimal" value="${fmtWeightInput(s.weight_kg)}" placeholder="${state.weightUnit}" onchange="updateSet('${s.id}','weight_kg',this.value)">
         <input class="field" inputmode="numeric" value="${s.reps??''}" placeholder="${esc(s.target_reps||'reps')}" onchange="updateSet('${s.id}','reps',this.value)">
         <button class="check ${s.done?'done':''}" onclick="toggleSet('${s.id}',${item.target_rest_sec})">${icon('check',18)}</button>
         <button class="set-remove" onclick="removeSet('${s.id}')" aria-label="Remove set">${icon('close',14)}</button>
@@ -1158,11 +1226,22 @@ function activeExercise(item,sets){
 
 async function updateSet(id,key,value){
   const patch={updated_at:new Date().toISOString()};
-  patch[key]=value===''?null:Number(value);
+  const parsed=value===''?null:(key==='weight_kg'?displayToKg(value):Number(value));
+  if(parsed!==null&&!Number.isFinite(parsed)) return alert('Enter a valid number.');
+  patch[key]=parsed===null?null:(key==='weight_kg'?Math.round(parsed*100)/100:Math.round(parsed));
   const {error}=await sb.from('skandi_sets').update(patch).eq('id',id);
   if(error) return alert(error.message);
   const s=state.sets.find(x=>x.id===id);
   if(s) Object.assign(s,patch);
+  if(s&&s.set_idx===1&&patch[key]!=null&&(key==='weight_kg'||key==='reps')){
+    const targets=state.sets.filter(x=>x.session_id===s.session_id&&x.exercise_id===s.exercise_id&&x.id!==s.id&&!x.done&&(x[key]==null||x[key]===''));
+    if(targets.length){
+      const ids=targets.map(x=>x.id);
+      const {error:fillError}=await sb.from('skandi_sets').update({[key]:patch[key],updated_at:new Date().toISOString()}).in('id',ids);
+      if(!fillError) targets.forEach(x=>{ x[key]=patch[key]; });
+      renderActiveWorkout();
+    }
+  }
 }
 
 async function toggleSet(id,rest){
@@ -1182,8 +1261,10 @@ async function addSet(exerciseId,targetReps){
   const sessionId=state.active.id;
   const existing=state.sets.filter(s=>s.session_id===sessionId&&s.exercise_id===exerciseId);
   const nextIdx=(existing.length?Math.max(...existing.map(s=>s.set_idx)):0)+1;
+  const seed=existing.find(s=>s.set_idx===1)||{};
   const {data,error}=await sb.from('skandi_sets').insert({
-    session_id:sessionId,user_id:state.user.id,exercise_id:exerciseId,set_idx:nextIdx,target_reps:targetReps
+    session_id:sessionId,user_id:state.user.id,exercise_id:exerciseId,set_idx:nextIdx,target_reps:targetReps,
+    weight_kg:seed.weight_kg??null,reps:seed.reps??null
   }).select().single();
   if(error) return alert(error.message);
   state.sets.push(data);
@@ -1483,23 +1564,65 @@ function openExerciseBuilder(){
   $('modal').classList.add('show');
   $('modalCard').innerHTML=`
     <div class="row"><h1>New exercise</h1><button class="x" onclick="closeModal()">${icon('close',20)}</button></div>
-    <input id="exName" class="field left" placeholder="Name">
-    <input id="exEnglish" class="field left" placeholder="Alternative name">
-    <input id="exMedia" class="field left" placeholder="Direct GIF/video URL">
-    <input id="exPage" class="field left" placeholder="Gymvisual reference URL">
-    <textarea id="exMuscles" class="field" placeholder='Muscles JSON: {"Chest":60,"Triceps":25}'></textarea>
+    <label class="eyebrow">Exercise name</label>
+    <input id="exName" class="field left" placeholder="e.g. Dumbbell Row">
+    <label class="eyebrow">Alternative name</label>
+    <input id="exEnglish" class="field left" placeholder="Optional">
+    <label class="eyebrow">Category</label>
+    <select id="exCategory" class="field left">
+      ${['Strength','Cardio','Mobility','Core','Conditioning','Rehab'].map(c=>`<option value="${c}">${c}</option>`).join('')}
+    </select>
+    <label class="eyebrow">Equipment</label>
+    <input id="exEquipment" class="field left" placeholder="Optional: dumbbells, bench">
+    <label class="eyebrow">Media</label>
+    <input id="exMedia" class="field left" placeholder="Direct GIF/video URL (optional)">
+    <input id="exPage" class="field left" placeholder="Reference page URL (optional)">
+    <div class="row" style="margin-top:12px"><div><h2>Muscles</h2><p class="form-note">Set only the muscles this exercise actually uses. Total does not need to equal 100.</p></div><button class="btn small" onclick="resetExerciseMuscles()">Clear</button></div>
+    <div class="rest-presets" style="margin-top:0">
+      ${Object.keys(EXERCISE_PRESETS).map(p=>`<button type="button" class="chip" onclick="applyExercisePreset('${p}')">${p}</button>`).join('')}
+    </div>
+    <div class="muscle-builder">
+      ${EXERCISE_MUSCLES.map(m=>`<div class="muscle-builder-row">
+        <strong>${m}</strong>
+        <input id="muscleRange${m}" type="range" min="0" max="100" step="5" value="0" oninput="setExerciseMuscle('${m}',this.value,'range')">
+        <input id="muscleVal${m}" class="field" type="number" min="0" max="100" step="5" value="0" inputmode="numeric" onchange="setExerciseMuscle('${m}',this.value,'number')">
+      </div>`).join('')}
+    </div>
     <button class="btn primary" style="width:100%" onclick="saveExercise()">Save exercise</button>`;
+}
+
+function setExerciseMuscle(name,value,source){
+  const n=Math.max(0,Math.min(100,Number(value)||0));
+  const range=$(`muscleRange${name}`);
+  const input=$(`muscleVal${name}`);
+  if(range&&source!=='range') range.value=n;
+  if(input&&source!=='number') input.value=n;
+}
+
+function resetExerciseMuscles(){
+  EXERCISE_MUSCLES.forEach(m=>setExerciseMuscle(m,0));
+}
+
+function applyExercisePreset(name){
+  resetExerciseMuscles();
+  Object.entries(EXERCISE_PRESETS[name]||{}).forEach(([muscle,value])=>setExerciseMuscle(muscle,value));
 }
 
 async function saveExercise(){
   const name=$('exName').value.trim();
-  if(!name) return;
+  if(!name) return alert('Add an exercise name.');
   let muscles={};
-  try{ muscles=JSON.parse($('exMuscles').value||'{}'); }catch{ return alert('El JSON de musculos no es valido.'); }
+  document.querySelectorAll('[id^="muscleVal"]').forEach(input=>{
+    const muscle=input.id.replace('muscleVal','');
+    const value=Math.max(0,Math.min(100,Number(input.value)||0));
+    if(value>0) muscles[muscle]=value;
+  });
+  if(!Object.keys(muscles).length) return alert('Set at least one muscle above 0%.');
   const slug=name.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'');
+  const equipment=$('exEquipment').value.split(',').map(x=>x.trim()).filter(Boolean);
   const {error}=await sb.from('skandi_exercises').insert({
-    slug,name,english_name:$('exEnglish').value.trim()||null,category:'Strength',
-    muscles,media_url:$('exMedia').value.trim()||null,media_page_url:$('exPage').value.trim()||null,
+    slug,name,english_name:$('exEnglish').value.trim()||null,category:$('exCategory').value,
+    equipment,muscles,media_url:$('exMedia').value.trim()||null,media_page_url:$('exPage').value.trim()||null,
     instructions:[],coach_tips:[],created_by:state.user.id
   });
   if(error) return alert(error.message);
