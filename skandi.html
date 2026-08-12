@@ -3,149 +3,171 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-<meta name="theme-color" content="#07080b">
+<meta name="theme-color" content="#012456">
 <title>Skandi Fit</title>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="skandi-recovery.js"></script>
 <style>
 :root{
-  --bg:#07080b;
-  --panel:#11131a;
-  --panel2:#1b1e29;
-  --panel3:#242838;
-  --line:#2d3140;
-  --text:#f4f5f7;
-  --muted:#9698a6;
-  --lime:#b8ff2c;
-  --green:#2fd37d;
-  --amber:#ffbd39;
-  --pink:#ff6478;
-  --blue:#62a4ff;
-  --wash:rgba(98,164,255,.12);
-  --shadow:0 18px 42px rgba(0,0,0,.34);
-  --glow:0 18px 44px rgba(184,255,44,.16);
+  --bg:#eef4f8;
+  --panel:#ffffff;
+  --panel2:#f5f8fb;
+  --panel3:#e7eef5;
+  --line:#d7e1ea;
+  --text:#071f42;
+  --muted:#607086;
+  --dof-navy:#012456;
+  --dof-deep:#000f32;
+  --dof-blue:#334c6d;
+  --dof-steel:#788ba1;
+  --dof-ice:#f4fafe;
+  --lime:#00a8c8;
+  --green:#1d9a6c;
+  --amber:#f0a22e;
+  --pink:#d44854;
+  --blue:#245f9f;
+  --wash:rgba(1,36,86,.08);
+  --shadow:0 18px 44px rgba(1,36,86,.12);
+  --glow:0 18px 38px rgba(0,168,200,.18);
   font-family:Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
 }
 *{box-sizing:border-box}
 html,body{margin:0;background:var(--bg);color:var(--text)}
-body{min-height:100dvh;padding-bottom:88px}
-body:before{content:"";position:fixed;inset:0;pointer-events:none;background:linear-gradient(180deg,rgba(98,164,255,.10),transparent 260px),linear-gradient(140deg,rgba(184,255,44,.10),transparent 36%,rgba(255,100,120,.08));opacity:.78}
+body{position:relative;min-height:100dvh;padding-bottom:76px}
+body:before{content:"";position:fixed;z-index:0;inset:0;pointer-events:none;background:radial-gradient(circle at 18% -8%,rgba(1,36,86,.18),transparent 34%),linear-gradient(180deg,#f8fbfe 0%,#eef4f8 48%,#e7eff5 100%);opacity:1}
 button,input,textarea,select{font:inherit}
 button{border:0;cursor:pointer}
-button:focus-visible,input:focus-visible,textarea:focus-visible,select:focus-visible{outline:2px solid var(--lime);outline-offset:2px}
-.app{position:relative;max-width:820px;margin:0 auto;padding:18px 14px 104px;overflow:hidden}
-.top{position:sticky;top:0;z-index:10;display:grid;grid-template-columns:1fr 42px;align-items:center;gap:12px;margin:-18px -14px 8px;padding:14px 14px 12px;background:rgba(7,8,11,.84);backdrop-filter:blur(18px);border-bottom:1px solid rgba(255,255,255,.05)}
+button:focus-visible,input:focus-visible,textarea:focus-visible,select:focus-visible{outline:2px solid var(--blue);outline-offset:2px}
+.app{position:relative;z-index:1;max-width:820px;margin:0 auto;padding:18px 14px 104px;overflow:hidden}
+.top{position:sticky;top:0;z-index:10;display:grid;grid-template-columns:1fr 42px;align-items:center;gap:12px;margin:-18px -14px 14px;padding:14px 14px 12px;background:rgba(244,250,254,.86);backdrop-filter:blur(18px);border-bottom:1px solid rgba(1,36,86,.08)}
 .brand{min-width:0;display:flex;align-items:center;gap:10px;font-weight:900;font-size:24px}
-.ship-mark{width:66px;height:40px;border-radius:8px;background:#0c0e15;display:grid;place-items:center;overflow:hidden;flex:0 0 auto;border:1px solid var(--line)}
+.ship-mark{width:70px;height:42px;border-radius:10px;background:#fff;display:grid;place-items:center;overflow:hidden;flex:0 0 auto;border:1px solid var(--line);box-shadow:0 8px 22px rgba(1,36,86,.10)}
 .ship-mark img{width:72px;height:34px;object-fit:contain}
 .brand-text{display:grid;line-height:1.05}
 .brand-text small{color:var(--muted);font-size:11px;letter-spacing:.16em;text-transform:uppercase;font-weight:1000}
 .brand-text span,.brand-text small{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.dof-badge{height:34px;max-width:74px;object-fit:contain;background:#fff;border-radius:8px;padding:6px}
+.dof-badge{height:36px;max-width:78px;object-fit:contain;background:#fff;border-radius:10px;padding:6px;border:1px solid var(--line);box-shadow:0 10px 22px rgba(1,36,86,.10)}
 .auth-brand{display:flex;align-items:center;justify-content:space-between;gap:14px}
-.auth-ship{width:100%;height:128px;border-radius:12px;background:#0b0c12;border:1px solid var(--line);display:grid;place-items:center;overflow:hidden}
+.auth-ship{width:100%;height:138px;border-radius:14px;background:linear-gradient(180deg,#fff,#e9f1f7);border:1px solid var(--line);display:grid;place-items:center;overflow:hidden;box-shadow:inset 0 -18px 32px rgba(1,36,86,.08)}
 .auth-ship img{width:96%;height:112px;object-fit:contain}
-.auth-tabs{display:grid;grid-template-columns:1fr 1fr;gap:8px;background:#0b0c12;border:1px solid var(--line);border-radius:12px;padding:5px}
+.auth-tabs{display:grid;grid-template-columns:1fr 1fr;gap:8px;background:var(--panel2);border:1px solid var(--line);border-radius:12px;padding:5px}
 .auth-tab{background:transparent;color:var(--muted);border-radius:8px;padding:11px;font-weight:1000}
-.auth-tab.active{background:var(--panel2);color:var(--text)}
-.avatar{width:42px;height:42px;border-radius:50%;background:#222532;display:grid;place-items:center;font-weight:900;color:#07080b;overflow:hidden}
+.auth-tab.active{background:var(--dof-navy);color:#fff;box-shadow:0 10px 20px rgba(1,36,86,.18)}
+.avatar{width:42px;height:42px;border-radius:50%;background:var(--dof-navy);display:grid;place-items:center;font-weight:900;color:#fff;overflow:hidden;box-shadow:0 10px 22px rgba(1,36,86,.18)}
 .avatar img{width:100%;height:100%;object-fit:cover}
 .hero{display:grid;gap:14px;margin-bottom:16px}
-.eyebrow{letter-spacing:.18em;text-transform:uppercase;color:var(--muted);font-weight:900;font-size:13px}
+.eyebrow{letter-spacing:.16em;text-transform:uppercase;color:var(--dof-steel);font-weight:900;font-size:12px}
 h1{font-size:clamp(32px,7.8vw,52px);line-height:.98;margin:0;letter-spacing:0;overflow-wrap:anywhere}
 h2{font-size:24px;margin:0 0 10px;line-height:1.05}
 h3{font-size:19px;margin:0;line-height:1.1}
 p{color:var(--muted);line-height:1.45;margin:0}
-.focus{background:linear-gradient(135deg,var(--lime),#d8ff77 58%,#ffffff);color:#07080b;border-radius:12px;padding:18px;box-shadow:var(--glow)}
-.focus p{color:#223006}
-.ring{width:62px;height:62px;border-radius:50%;display:grid;place-items:center;background:conic-gradient(#07080b var(--p),rgba(7,8,11,.22) 0);position:relative;font-weight:1000;flex:0 0 auto}
-.ring:after{content:"";position:absolute;inset:10px;border-radius:50%;background:var(--lime)}
-.ring span{position:relative;z-index:1;color:#07080b}
+.focus{position:relative;overflow:hidden;background:linear-gradient(135deg,var(--dof-navy),#183d68 64%,#55708b);color:#fff;border-radius:14px;padding:18px;box-shadow:0 22px 52px rgba(1,36,86,.22)}
+.focus:after{content:"";position:absolute;right:-18px;bottom:-24px;width:210px;height:110px;background:url('/assets/skandi/skandi-nomad-cutout.png') center/contain no-repeat;opacity:.20}
+.focus>*{position:relative;z-index:1}
+.focus p{color:#d9e5ee}
+.focus .eyebrow{color:#aebdca!important}
+.ring{width:62px;height:62px;border-radius:50%;display:grid;place-items:center;background:conic-gradient(#fff var(--p),rgba(255,255,255,.24) 0);position:relative;font-weight:1000;flex:0 0 auto}
+.ring:after{content:"";position:absolute;inset:10px;border-radius:50%;background:var(--dof-navy)}
+.ring span{position:relative;z-index:1;color:#fff}
 .grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
-.stat,.card,.workout,.exercise,.feed,.modal-card{background:linear-gradient(180deg,rgba(255,255,255,.035),rgba(255,255,255,.01)),var(--panel);border:1px solid var(--line);border-radius:8px;box-shadow:var(--shadow)}
+.stat,.card,.workout,.exercise,.feed,.modal-card{background:rgba(255,255,255,.86);border:1px solid rgba(1,36,86,.10);border-radius:8px;box-shadow:var(--shadow)}
 .stat{padding:18px;min-height:100px;position:relative;overflow:hidden}
-.stat:after{content:"";position:absolute;left:0;right:0;bottom:0;height:3px;background:linear-gradient(90deg,var(--lime),var(--blue),var(--pink));opacity:.72}
+.stat:after{content:"";position:absolute;left:0;right:0;bottom:0;height:4px;background:linear-gradient(90deg,var(--dof-navy),var(--blue),#a9bac9);opacity:.82}
 .stat strong{display:block;font-size:36px;line-height:1;color:var(--text)}
 .stat small{display:block;color:var(--muted);font-weight:800;margin-top:12px}
 .card{padding:16px;margin:12px 0}
 .row{display:flex;align-items:center;justify-content:space-between;gap:12px}
 .stack{display:grid;gap:12px}
 .muted{color:var(--muted)}
-.accent{color:var(--lime)}
-.btn{background:var(--panel2);color:var(--text);border:1px solid var(--line);border-radius:8px;padding:13px 18px;font-weight:900;display:inline-flex;align-items:center;justify-content:center;gap:9px;transition:transform .14s ease,background .14s ease,border-color .14s ease}
+.accent{color:var(--blue)}
+.btn{background:#fff;color:var(--dof-navy);border:1px solid var(--line);border-radius:10px;padding:13px 18px;font-weight:900;display:inline-flex;align-items:center;justify-content:center;gap:9px;transition:transform .14s ease,background .14s ease,border-color .14s ease,box-shadow .14s ease;box-shadow:0 8px 18px rgba(1,36,86,.06)}
 .btn:hover{transform:translateY(-1px);background:var(--panel3)}
-.btn.primary{background:var(--lime);color:#07080b;box-shadow:var(--glow);border-color:rgba(184,255,44,.78)}
-.btn.ghost{background:#0b0c11}
+.btn.primary{background:var(--dof-navy);color:#fff;box-shadow:0 16px 30px rgba(1,36,86,.22);border-color:var(--dof-navy)}
+.btn.ghost{background:var(--panel2)}
 .btn.danger{color:var(--pink)}
-.btn.small{padding:9px 12px;border-radius:8px;font-size:14px}
-.tabs{position:fixed;left:0;right:0;bottom:0;background:rgba(13,14,20,.92);backdrop-filter:blur(18px);border-top:1px solid var(--line);z-index:20}
-.tabs-inner{max-width:820px;margin:0 auto;display:grid;grid-template-columns:repeat(6,1fr);gap:2px;padding:8px 8px calc(8px + env(safe-area-inset-bottom))}
-.tab{background:transparent;color:#727482;display:grid;gap:4px;place-items:center;font-weight:900;font-size:12px;padding:8px 2px;border-radius:8px;min-height:58px}
-.tab svg{width:26px;height:26px;stroke:currentColor;stroke-width:2.4;fill:none}
-.tab.active{color:var(--lime);background:rgba(184,255,44,.09)}
+.btn.small{padding:9px 12px;border-radius:10px;font-size:14px}
+.tabs{position:fixed;left:0;right:0;bottom:0;background:rgba(255,255,255,.88);backdrop-filter:blur(18px);border-top:1px solid rgba(1,36,86,.10);z-index:20;box-shadow:0 -16px 34px rgba(1,36,86,.10)}
+.tabs-inner{max-width:820px;margin:0 auto;display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:2px;padding:6px 6px calc(6px + env(safe-area-inset-bottom))}
+.tab{background:transparent;color:#727482;display:grid;gap:2px;place-items:center;font-weight:900;font-size:11px;padding:6px 1px;border-radius:8px;min-height:50px}
+.tab svg{width:22px;height:22px;stroke:currentColor;stroke-width:2.4;fill:none}
+.tab.active{color:var(--dof-navy);background:rgba(1,36,86,.08)}
 .week{display:grid;gap:9px}
-.day{display:grid;grid-template-columns:64px 1fr auto;align-items:center;gap:10px;background:var(--panel2);border-radius:8px;padding:13px 14px;color:var(--muted);font-weight:900;border:1px solid rgba(255,255,255,.04)}
-.day.today{background:var(--lime);color:#08090d}
-.day.today .icon-btn{background:rgba(7,8,11,.16);border-color:rgba(7,8,11,.25);color:#08090d}
+.day{display:grid;grid-template-columns:64px 1fr auto;align-items:center;gap:10px;background:var(--panel2);border-radius:8px;padding:13px 14px;color:var(--muted);font-weight:900;border:1px solid rgba(1,36,86,.08)}
+.day.today{background:var(--dof-navy);color:#fff;box-shadow:0 14px 28px rgba(1,36,86,.16)}
+.day.today .icon-btn{background:rgba(255,255,255,.14);border-color:rgba(255,255,255,.25);color:#fff}
 .day span:nth-child(2){color:inherit;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .exercise{padding:14px;display:grid;gap:10px;margin:10px 0}
 .ex-head{display:grid;grid-template-columns:72px 1fr auto;gap:12px;align-items:center}
-.thumb{width:72px;height:72px;border-radius:8px;background:#0b0c12;object-fit:cover;display:grid;place-items:center;color:var(--muted);overflow:hidden;border:1px solid rgba(255,255,255,.05)}
+.thumb{width:72px;height:72px;border-radius:12px;background:linear-gradient(180deg,#eef4f8,#dfe9f1);object-fit:cover;display:grid;place-items:center;color:var(--dof-steel);overflow:hidden;border:1px solid rgba(1,36,86,.08)}
 .thumb img,.thumb video{width:100%;height:100%;object-fit:cover}
-.play{color:var(--lime);display:grid;place-items:center}
-.pill{display:inline-flex;align-items:center;gap:6px;padding:8px 11px;background:rgba(184,255,44,.14);color:var(--lime);border-radius:999px;font-weight:1000}
-.pill.dark{background:#0b0c12;color:var(--muted)}
+.play{color:var(--blue);display:grid;place-items:center}
+.pill{display:inline-flex;align-items:center;gap:6px;padding:8px 11px;background:rgba(36,95,159,.10);color:var(--dof-navy);border-radius:999px;font-weight:1000}
+.pill.dark{background:var(--panel2);color:var(--muted)}
 .muscles{display:flex;flex-wrap:wrap;gap:8px}
-.bar{height:8px;background:#0b0c12;border-radius:999px;overflow:hidden}
-.bar i{display:block;height:100%;background:var(--lime);width:0}
+.bar{height:8px;background:#e2eaf2;border-radius:999px;overflow:hidden}
+.bar i{display:block;height:100%;background:linear-gradient(90deg,var(--dof-navy),var(--blue));width:0}
 .set-row{display:grid;grid-template-columns:26px 1fr 1fr 46px 30px;gap:6px;align-items:center}
-.field{width:100%;background:var(--panel2);border:1px solid var(--line);color:var(--text);border-radius:8px;padding:13px;text-align:center}
+.field{width:100%;background:#fff;border:1px solid var(--line);color:var(--text);border-radius:10px;padding:13px;text-align:center;box-shadow:inset 0 1px 0 rgba(1,36,86,.03)}
 .field.left{text-align:left}
 textarea.field{min-height:112px;text-align:left;resize:vertical}
-.check{height:48px;border-radius:8px;background:var(--panel2);color:var(--muted);border:1px solid var(--line);display:grid;place-items:center}
-.check.done{background:var(--lime);color:#08090d}
-.set-remove{width:30px;height:48px;border-radius:8px;background:transparent;color:var(--muted);border:1px solid var(--line);display:grid;place-items:center}
-.workout-bar{position:sticky;top:-20px;z-index:5;margin:-20px -20px 16px;padding:16px 20px 14px;background:rgba(17,19,26,.96);backdrop-filter:blur(14px);border-bottom:1px solid var(--line);border-radius:8px 8px 0 0}
-.workout-bar-title{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:12px}
-.workout-bar-title h1{font-size:20px}
-.workout-bar-top{display:flex;align-items:center;gap:12px}
-.mini-ring{position:relative;width:56px;height:56px;flex:0 0 auto}
-.mini-ring svg{width:100%;height:100%;transform:rotate(-90deg)}
-.mini-ring .ring-track{fill:none;stroke:var(--panel2);stroke-width:6}
-.mini-ring .ring-fg{fill:none;stroke:var(--lime);stroke-width:6;stroke-linecap:round;transition:stroke-dashoffset .3s linear}
-.mini-ring-center{position:absolute;inset:0;display:grid;place-items:center;font-size:11px;font-weight:1000}
-.workout-bar-info{flex:1;min-width:0}
-.workout-bar-info small{display:block;color:var(--muted);font-weight:800;letter-spacing:.08em;text-transform:uppercase;font-size:10px}
-.workout-bar-info strong{font-size:20px}
-.icon-btn{width:40px;height:40px;border-radius:8px;background:var(--panel2);border:1px solid var(--line);color:var(--text);display:grid;place-items:center;font-size:16px;flex:0 0 auto}
+.check{height:48px;border-radius:10px;background:var(--panel2);color:var(--muted);border:1px solid var(--line);display:grid;place-items:center}
+.check.done{background:var(--dof-navy);color:#fff}
+.set-remove{width:30px;height:48px;border-radius:10px;background:transparent;color:var(--muted);border:1px solid var(--line);display:grid;place-items:center}
+.workout-bar{position:sticky;top:-20px;z-index:5;margin:-20px -20px 14px;padding:14px 18px 12px;background:rgba(255,255,255,.96);backdrop-filter:blur(16px);border-bottom:1px solid var(--line);border-radius:8px 8px 0 0}
+.workout-bar-title{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-bottom:12px}
+.workout-bar-title h1{font-size:24px;line-height:1}
+.workout-bar-title small{display:block;color:var(--muted);font-weight:800;font-size:13px;margin-bottom:3px}
+.workout-status{display:grid;grid-template-columns:1fr 1fr auto;gap:8px;align-items:stretch}
+.timer-metric{background:var(--panel2);border:1px solid var(--line);border-radius:8px;padding:10px 12px;min-width:0}
+.timer-metric small{display:block;color:var(--muted);font-size:10px;font-weight:1000;letter-spacing:.11em;text-transform:uppercase;margin-bottom:4px}
+.timer-metric strong{display:block;color:var(--dof-navy);font-size:24px;line-height:1;font-variant-numeric:tabular-nums}
+.timer-metric.resting{background:#edf6fa;border-color:#cbdfe9}
+.rest-progress{height:5px;background:#d9e7ef;border-radius:999px;overflow:hidden;margin-top:8px}
+.rest-progress i{display:block;height:100%;width:0;background:linear-gradient(90deg,var(--blue),var(--lime));border-radius:999px;transition:width .25s linear}
+.workout-actions{display:flex;align-items:stretch;gap:8px}
+.workout-actions .icon-btn{height:100%;min-height:58px}
+.workout-cancel{height:100%;min-height:58px;padding:0 12px;color:var(--pink)}
+.workout-progress-row{display:flex;align-items:center;justify-content:space-between;gap:10px;margin:10px 0 4px}
+.progress-pill{display:inline-flex;align-items:baseline;gap:4px;background:#e7f0f7;color:var(--dof-navy);border-radius:999px;padding:8px 12px;font-weight:1000}
+.progress-pill strong{font-size:18px}
+.progress-pill small{color:var(--muted);font-weight:900}
+.modal-card .exercise{box-shadow:0 10px 26px rgba(1,36,86,.08);background:rgba(255,255,255,.92)}
+.modal-card .exercise h3{font-size:18px}
+.modal-card .field{box-shadow:none}
+.icon-btn{width:40px;height:40px;border-radius:10px;background:#fff;border:1px solid var(--line);color:var(--text);display:grid;place-items:center;font-size:16px;flex:0 0 auto;box-shadow:0 6px 14px rgba(1,36,86,.06)}
 .icon-btn.tiny{width:30px;height:30px;font-size:13px}
 .icon-btn.danger{color:var(--pink)}
 .rest-presets{display:flex;gap:6px;flex-wrap:wrap;margin-top:12px}
 .chip{background:var(--panel2);color:var(--muted);border:1px solid var(--line);border-radius:999px;padding:7px 12px;font-weight:900;font-size:12px}
-.chip.active{background:var(--lime);color:#07080b;border-color:var(--lime)}
+.chip.active{background:var(--dof-navy);color:#fff;border-color:var(--dof-navy)}
 .feed{padding:16px;margin:12px 0}
 .feed-title{display:flex;align-items:center;gap:10px}
-.dot{width:10px;height:10px;border-radius:50%;background:var(--green)}
+.dot{width:10px;height:10px;border-radius:50%;background:var(--blue)}
 .leader{display:grid;grid-template-columns:1fr auto;gap:8px;border-top:1px solid var(--line);padding-top:12px;margin-top:12px}
 .body-fig-wrap{position:relative;margin-top:14px;text-align:center}
 .body-fig-wrap svg{width:auto;height:auto;max-width:100%;max-height:56vh;display:inline-block}
-.body-flip-btn{position:absolute;left:12px;bottom:12px;width:44px;height:44px;border-radius:50%;background:var(--panel2);border:1px solid var(--line);display:grid;place-items:center;color:var(--text)}
+.mini-body-card{display:grid;grid-template-columns:112px 1fr;gap:16px;align-items:center;overflow:hidden}
+.mini-body-fig{height:170px;display:grid;place-items:center;background:linear-gradient(180deg,#f7fbfe,#edf4f9);border:1px solid var(--line);border-radius:8px}
+.mini-body-fig svg{height:152px;max-width:100%}
+.mini-body-card h2{margin-bottom:5px}
+.mini-body-chips{display:flex;flex-wrap:wrap;gap:7px;margin-top:12px}
+.body-flip-btn{position:absolute;left:12px;bottom:12px;width:44px;height:44px;border-radius:50%;background:#fff;border:1px solid var(--line);display:grid;place-items:center;color:var(--text);box-shadow:0 10px 22px rgba(1,36,86,.14)}
 .muscle-region{cursor:pointer;transition:opacity .15s}
 .muscle-region:hover,.muscle-region:active{opacity:.82}
 .muscle-legend{display:flex;align-items:center;justify-content:center;gap:14px;margin-top:12px;flex-wrap:wrap}
 .muscle-legend span{display:flex;align-items:center;gap:6px;font-size:11px;color:var(--muted);font-weight:800;text-transform:uppercase;letter-spacing:.06em}
 .muscle-legend i{width:10px;height:10px;border-radius:50%;display:inline-block}
-.auth{position:relative;min-height:100dvh;display:grid;place-items:center;padding:24px}
-.auth-box{width:min(460px,100%);background:linear-gradient(180deg,rgba(255,255,255,.045),rgba(255,255,255,.012)),var(--panel);border:1px solid var(--line);border-radius:12px;padding:24px;box-shadow:var(--shadow)}
-.auth-logo{font-size:54px;font-weight:1000;color:var(--lime)}
+.auth{position:relative;z-index:1;min-height:100dvh;display:grid;place-items:center;padding:24px}
+.auth-box{width:min(460px,100%);background:rgba(255,255,255,.90);border:1px solid rgba(1,36,86,.10);border-radius:8px;padding:24px;box-shadow:0 28px 70px rgba(1,36,86,.18)}
+.auth-logo{font-size:54px;font-weight:1000;color:var(--dof-navy)}
 .modal{position:fixed;inset:0;background:rgba(0,0,0,.72);z-index:40;display:none;align-items:flex-end;justify-content:center}
 .modal.show{display:flex}
 .modal-card{width:min(820px,100%);max-height:88dvh;overflow:auto;border-radius:8px 8px 0 0;padding:20px}
-.x{width:44px;height:44px;border-radius:8px;background:var(--panel2);color:var(--text);display:grid;place-items:center;flex:0 0 auto}
+.x{width:44px;height:44px;border-radius:12px;background:var(--panel2);color:var(--text);display:grid;place-items:center;flex:0 0 auto}
 .search{display:grid;grid-template-columns:1fr auto;gap:10px;margin:12px 0}
 .signup-names{display:grid;grid-template-columns:1fr 1fr;gap:10px}
 .hidden{display:none!important}
-.empty{padding:28px 18px;border:1px dashed var(--line);border-radius:8px;text-align:center;color:var(--muted);background:rgba(255,255,255,.018)}
+.empty{padding:28px 18px;border:1px dashed #bfd0df;border-radius:8px;text-align:center;color:var(--muted);background:rgba(255,255,255,.58)}
 @media (min-width:760px){
   .modal{align-items:center;padding:24px}
   .modal-card{border-radius:8px}
@@ -160,13 +182,24 @@ textarea.field{min-height:112px;text-align:left;resize:vertical}
   .brand-text small{font-size:10px}
   .focus .row{align-items:flex-start}
   .focus h2{font-size:25px}
-  .tab{font-size:11px}
-  .tab svg{width:24px;height:24px}
-  .tabs-inner{grid-template-columns:repeat(3,1fr)}
-  body{padding-bottom:148px}
+  .tab{font-size:9.5px;min-height:46px;padding:5px 0}
+  .tab svg{width:20px;height:20px}
+  body{padding-bottom:68px}
   .row{align-items:flex-start}
   .row>.btn,.row>.pill{flex:0 0 auto}
   .signup-names{grid-template-columns:1fr}
+  .workout-status{grid-template-columns:1fr 1fr}
+  .workout-actions{grid-column:1/-1}
+  .workout-actions .icon-btn,.workout-cancel{min-height:44px}
+  .workout-actions .icon-btn{flex:0 0 52px}
+  .workout-cancel{flex:1}
+  .modal-card{padding:16px}
+  .modal-card .exercise{padding:12px;margin:8px 0}
+  .modal-card .field{padding:10px 8px}
+  .modal-card .set-row{gap:5px}
+  .mini-body-card{grid-template-columns:92px 1fr;gap:12px}
+  .mini-body-fig{height:142px}
+  .mini-body-fig svg{height:128px}
 }
 </style>
 </head>
@@ -263,7 +296,6 @@ const BODY_REGIONS_BACK=[
   {name:'Triceps',shape:'rect',x:46,y:95,w:26,h:80,rx:13,mirror:true}
 ];
 const state={user:null,profile:null,view:'home',authMode:'login',exercises:[],templates:[],items:[],sessions:[],sets:[],externalActivities:[],active:null,activeItems:[],timer:null,elapsed:0,rest:0,restTotal:0,bodyFlip:'front'};
-const REST_RING_C=2*Math.PI*24;
 let builderState={selected:new Map(),group:'All'};
 
 const $=id=>document.getElementById(id);
@@ -404,7 +436,7 @@ function render(){
 
 function activeWorkoutBanner(){
   if(!state.active) return '';
-  return `<section class="card" style="border-color:#42591b;background:#14200f;cursor:pointer" onclick="openActiveWorkout()">
+  return `<section class="card" style="border-color:rgba(1,36,86,.20);background:linear-gradient(135deg,#ffffff,#e8f1f8);cursor:pointer" onclick="openActiveWorkout()">
     <div class="row">
       <div><h2>${esc(state.active.title)}</h2><p>Workout in progress · ${fmtSec(state.elapsed)}</p></div>
       <span class="pill">Resume ${icon('play',14)}</span>
@@ -425,7 +457,7 @@ function homeView(){
       <div class="focus">
         <div class="row">
           <div>
-            <div class="eyebrow" style="color:#4c620b">Your focus now</div>
+            <div class="eyebrow">Your focus now</div>
             <h2>${esc(todayTpl?.name||'Create your first routine')}</h2>
             <p>${weekCount} workouts completed this week. ${weekCount?'You are building rhythm.':'Today can be the start.'}</p>
           </div>
@@ -437,6 +469,7 @@ function homeView(){
       <div class="stat"><strong>${weekCount}</strong><small>this week</small></div>
       <div class="stat"><strong>${state.templates.filter(t=>t.user_id===state.user.id).length}</strong><small>your routines</small></div>
     </section>
+    ${miniBodyRecoveryCard()}
     ${muscleLoadCard('Muscle load')}
     ${todayTpl?workoutCard(todayTpl,true):empty('You do not have a routine yet. Create one from Train.')}
     <section class="card">
@@ -634,7 +667,7 @@ function openSessionDetail(sessionId){
       <div class="stat"><strong>${sets.filter(x=>x.done).length}</strong><small>sets logged</small></div>
     </section>
     ${s.report_difficulty||s.report_energy?`<section class="card"><div class="row"><span class="pill dark">${esc(s.report_difficulty||'normal')}</span><span class="pill dark">Energy ${s.report_energy||'-'}/5</span></div></section>`:''}
-    ${s.report_soreness?`<section class="card" style="border-color:#6b3040"><strong style="color:var(--pink)">Soreness</strong><p style="margin-top:6px">${esc(s.report_soreness_area||'Not specified')}</p></section>`:''}
+    ${s.report_soreness?`<section class="card" style="border-color:rgba(212,72,84,.30);background:#fff7f7"><strong style="color:var(--pink)">Soreness</strong><p style="margin-top:6px">${esc(s.report_soreness_area||'Not specified')}</p></section>`:''}
     ${s.report_note?`<section class="card"><div class="eyebrow">Notes</div><p style="margin-top:8px">${esc(s.report_note)}</p></section>`:''}
     <section class="card">
       <div class="eyebrow">Exercises</div>
@@ -710,16 +743,36 @@ function muscleLoadCard(title){
       <span class="pill">${restedCount} rested</span>
     </div>
     <div class="row" style="margin-top:14px;flex-wrap:wrap;gap:8px">
-      ${rows.slice(0,4).map(r=>`<span class="pill dark" style="background:${freshColor(r.score)};color:#07080b">${esc(r.name)} ${r.score}%</span>`).join('')}
+      ${rows.slice(0,4).map(r=>`<span class="pill dark" style="background:${freshColor(r.score)};color:var(--dof-deep)">${esc(r.name)} ${r.score}%</span>`).join('')}
     </div>
     <button class="btn" style="width:100%;margin-top:14px" onclick="setView('body')">View full body map</button>
+  </section>`;
+}
+
+function miniBodyRecoveryCard(){
+  const rows=getMyRecovery();
+  const scoreByName=new Map(rows.map(r=>[r.name,r.score]));
+  const needsWork=rows[0];
+  const restedCount=rows.filter(r=>r.rested).length;
+  return `<section class="card mini-body-card">
+    <button class="mini-body-fig" onclick="setView('body')" aria-label="Open body recovery map">
+      ${bodyFigureSVG('front',scoreByName,false)}
+    </button>
+    <div>
+      <div class="eyebrow">Body readiness</div>
+      <h2>${needsWork&&!needsWork.rested?`${esc(needsWork.name)} needs recovery`:'Body is ready'}</h2>
+      <p>${restedCount} muscles rested${needsWork&&!needsWork.rested?` · ready in ${formatHours(needsWork.hoursUntilFresh)}`:''}</p>
+      <div class="mini-body-chips">
+        ${rows.slice(0,3).map(r=>`<span class="pill dark" style="background:${freshColor(r.score)};color:var(--dof-deep)">${esc(r.name)} ${r.score}%</span>`).join('')}
+      </div>
+    </div>
   </section>`;
 }
 
 // ---- Body figure: single anatomical silhouette (front/back toggle), left-side shapes mirrored ----
 
 function bodyPrim(s,fill,extraAttrs){
-  const common=`${extraAttrs||''} fill="${fill}" stroke="#07080b" stroke-width="1.5"`;
+  const common=`${extraAttrs||''} fill="${fill}" stroke="#ffffff" stroke-width="1.5"`;
   return s.shape==='ellipse'
     ?`<ellipse cx="${s.cx}" cy="${s.cy}" rx="${s.rx}" ry="${s.ry}" ${common}/>`
     :`<rect x="${s.x}" y="${s.y}" width="${s.w}" height="${s.h}" rx="${s.rx}" ${common}/>`;
@@ -731,8 +784,8 @@ function mirrorShape(s){
 
 function bodySilhouetteMarkup(pieces){
   return pieces.map(s=>{
-    const base=bodyPrim(s,'#1d1e27');
-    return s.mirror?base+bodyPrim(mirrorShape(s),'#1d1e27'):base;
+    const base=bodyPrim(s,'#d8e3ec');
+    return s.mirror?base+bodyPrim(mirrorShape(s),'#d8e3ec'):base;
   }).join('');
 }
 
@@ -748,10 +801,10 @@ function onBodyFigureClick(evt){
   if(el) openMuscleDetail(el.getAttribute('data-muscle'));
 }
 
-function bodyFigureSVG(view,scoreByName){
+function bodyFigureSVG(view,scoreByName,interactive=true){
   const silhouette=view==='back'?BODY_SILHOUETTE_BACK:BODY_SILHOUETTE_FRONT;
   const regions=view==='back'?BODY_REGIONS_BACK:BODY_REGIONS_FRONT;
-  return `<svg viewBox="0 0 ${BODY_VIEWBOX_W} ${BODY_VIEWBOX_H}" xmlns="http://www.w3.org/2000/svg" onclick="onBodyFigureClick(event)">${bodySilhouetteMarkup(silhouette)}${regions.map(r=>bodyRegionMarkup(r,scoreByName.get(r.name)||0)).join('')}</svg>`;
+  return `<svg viewBox="0 0 ${BODY_VIEWBOX_W} ${BODY_VIEWBOX_H}" xmlns="http://www.w3.org/2000/svg" ${interactive?'onclick="onBodyFigureClick(event)"':''}>${bodySilhouetteMarkup(silhouette)}${regions.map(r=>bodyRegionMarkup(r,scoreByName.get(r.name)||0)).join('')}</svg>`;
 }
 
 function toggleBodyView(){
@@ -788,7 +841,7 @@ function bodyView(){
       <div class="row"><h2>Muscle status</h2><button class="btn small" onclick="openLogActivity()">+ Log activity</button></div>
       ${rows.map(r=>`<div class="row" style="margin-top:10px;cursor:pointer" onclick="openMuscleDetail('${r.name}')">
         <div><strong>${esc(r.name)}</strong><p>${r.rested?'Ready now':'Ready in '+formatHours(r.hoursUntilFresh)}</p></div>
-        <span class="pill dark" style="background:${freshColor(r.score)};color:#07080b">${r.score}%</span>
+        <span class="pill dark" style="background:${freshColor(r.score)};color:var(--dof-deep)">${r.score}%</span>
       </div>`).join('')}
     </section>
     <section class="card">
@@ -832,7 +885,7 @@ function openMuscleDetail(name){
   $('modalCard').innerHTML=`
     <div class="row"><h1>${esc(name)}</h1><button class="x" onclick="closeModal()">${icon('close',20)}</button></div>
     <section class="card" style="text-align:center">
-      <div style="width:96px;height:96px;border-radius:50%;margin:0 auto;background:${freshColor(row.score)};display:grid;place-items:center;font-weight:1000;font-size:22px;color:#07080b">${row.score}%</div>
+      <div style="width:96px;height:96px;border-radius:50%;margin:0 auto;background:${freshColor(row.score)};display:grid;place-items:center;font-weight:1000;font-size:22px;color:var(--dof-deep)">${row.score}%</div>
       <p style="margin-top:10px">${row.rested?'Ready now':'Ready in '+formatHours(row.hoursUntilFresh)}</p>
     </section>
     <section class="card">
@@ -956,19 +1009,18 @@ function pauseWorkoutTimer(){
   state.timer=null;
 }
 
-function restRingOffset(){
-  if(!state.restTotal) return REST_RING_C;
-  const frac=Math.max(0,Math.min(1,state.rest/state.restTotal));
-  return REST_RING_C*(1-frac);
+function restProgressPct(){
+  if(!state.restTotal) return 0;
+  return Math.max(0,Math.min(100,(state.rest/state.restTotal)*100));
 }
 
 function updateWorkoutClocks(){
   const stopwatch=$('activeStopwatch');
   const rest=$('activeRest');
-  const ring=$('restRingFg');
+  const progress=$('restProgress');
   if(stopwatch) stopwatch.textContent=fmtSec(state.elapsed);
   if(rest) rest.textContent=fmtSec(state.rest);
-  if(ring) ring.setAttribute('stroke-dashoffset',restRingOffset().toFixed(1));
+  if(progress) progress.style.width=`${restProgressPct()}%`;
 }
 
 function toggleWorkoutTimer(){
@@ -996,28 +1048,34 @@ function renderActiveWorkout(){
   $('modalCard').innerHTML=`
     <div class="workout-bar">
       <div class="workout-bar-title">
-        <div><small class="muted">Today workout</small><h1>${esc(state.active.title)}</h1></div>
-        <button class="x" onclick="closeModal()">${icon('close',20)}</button>
+        <div><small>Today workout</small><h1>${esc(state.active.title)}</h1></div>
+        <button class="x" onclick="closeModal()" aria-label="Hide workout">${icon('close',20)}</button>
       </div>
-      <div class="workout-bar-top">
-        <div class="mini-ring">
-          <svg viewBox="0 0 60 60">
-            <circle class="ring-track" cx="30" cy="30" r="24"></circle>
-            <circle id="restRingFg" class="ring-fg" cx="30" cy="30" r="24" stroke-dasharray="${REST_RING_C.toFixed(1)}" stroke-dashoffset="${restRingOffset().toFixed(1)}"></circle>
-          </svg>
-          <div class="mini-ring-center" id="activeRest">${fmtSec(state.rest)}</div>
+      <div class="workout-status">
+        <div class="timer-metric">
+          <small>Elapsed</small>
+          <strong id="activeStopwatch">${fmtSec(state.elapsed)}</strong>
         </div>
-        <div class="workout-bar-info"><small>Elapsed</small><strong id="activeStopwatch">${fmtSec(state.elapsed)}</strong></div>
-        <button class="icon-btn" onclick="toggleWorkoutTimer()" aria-label="${running?'Pause':'Resume'}">${running?icon('pause',16):icon('play',16)}</button>
-        <button class="icon-btn danger" onclick="cancelWorkout()" aria-label="Cancel workout">${icon('close',16)}</button>
+        <div class="timer-metric resting">
+          <small>Rest</small>
+          <strong id="activeRest">${fmtSec(state.rest)}</strong>
+          <div class="rest-progress"><i id="restProgress" style="width:${restProgressPct()}%"></i></div>
+        </div>
+        <div class="workout-actions">
+          <button class="icon-btn" onclick="toggleWorkoutTimer()" aria-label="${running?'Pause timer':'Resume timer'}">${running?icon('pause',16):icon('play',16)}</button>
+          <button class="btn workout-cancel" onclick="cancelWorkout()">${icon('close',15)} Cancel</button>
+        </div>
       </div>
       <div class="rest-presets">
         ${restPresets.map(s=>`<button type="button" class="chip ${state.restTotal===s?'active':''}" onclick="setRest(${s})">${s<60?s+'s':(s/60)+'m'}</button>`).join('')}
       </div>
     </div>
-    <p style="margin:14px 0"><span class="pill">${done}/${allSets.length}</span></p>
+    <div class="workout-progress-row">
+      <span class="progress-pill"><strong>${done}</strong><small>/ ${allSets.length} sets</small></span>
+      <button class="btn small primary" onclick="openReport()">Finish</button>
+    </div>
     ${state.activeItems.map(item=>activeExercise(item,allSets.filter(s=>s.exercise_id===item.exercise_id))).join('')}
-    <button class="btn primary" style="width:100%;margin-top:12px" onclick="openReport()">Send report</button>`;
+    <button class="btn primary" style="width:100%;margin-top:12px" onclick="openReport()">Finish workout</button>`;
 }
 
 function activeExercise(item,sets){
@@ -1084,27 +1142,30 @@ async function cancelWorkout(){
   if(!confirm('Cancel this workout? Your logged sets will be deleted.')) return;
   const sessionId=state.active.id;
   pauseWorkoutTimer();
-  const {error}=await sb.from('skandi_sessions').delete().eq('id',sessionId);
+  const {data,error}=await sb.from('skandi_sessions').delete().eq('id',sessionId).eq('user_id',state.user.id).select('id');
   if(error) return alert(error.message);
+  if(!data?.length) return alert('Could not cancel this workout. Refresh and try again.');
   state.active=null;
   state.activeItems=[];
+  state.sessions=state.sessions.filter(s=>s.id!==sessionId);
+  state.sets=state.sets.filter(s=>s.session_id!==sessionId);
   state.elapsed=0;
   state.rest=0;
   state.restTotal=0;
   closeModal();
-  await loadAll();
   render();
+  await loadAll();
 }
 
 function openReport(){
   $('modalCard').innerHTML=`
     <div class="row"><h1>Workout saved</h1><button class="x" onclick="closeModal()">${icon('close',20)}</button></div>
-    <section class="card" style="border-color:#42591b;background:#14200f"><h2>${esc(state.active.title)}</h2><p>${fmtSec(state.elapsed)} of work logged</p></section>
+    <section class="card" style="border-color:rgba(1,36,86,.20);background:linear-gradient(135deg,#ffffff,#e8f1f8)"><h2>${esc(state.active.title)}</h2><p>${fmtSec(state.elapsed)} of work logged</p></section>
     <label class="eyebrow">Difficulty</label>
     <select id="difficulty" class="field left"><option value="normal">Normal</option><option value="facil">Easy</option><option value="pesado">Heavy</option></select>
     <label class="eyebrow">Energy</label>
     <select id="energy" class="field left"><option value="3">3 / 5</option><option value="1">1 / 5</option><option value="2">2 / 5</option><option value="4">4 / 5</option><option value="5">5 / 5</option></select>
-    <label class="card row" style="border-color:#6b3040"><div><h3>I noticed soreness or pain</h3><p>Mark the area so we can track it week by week.</p></div><input id="sore" type="checkbox"></label>
+    <label class="card row" style="border-color:rgba(212,72,84,.30);background:#fff7f7"><div><h3>I noticed soreness or pain</h3><p>Mark the area so we can track it week by week.</p></div><input id="sore" type="checkbox"></label>
     <input id="soreArea" class="field left" placeholder="Area: shoulder, elbow, lower back...">
     <textarea id="note" class="field" placeholder="How did you feel, what was harder, what would you change..."></textarea>
     <button class="btn primary" style="width:100%" onclick="finishWorkout()">Save and share</button>`;
