@@ -119,27 +119,29 @@ textarea.field{min-height:112px;text-align:left;resize:vertical}
 .check{height:48px;border-radius:10px;background:var(--panel2);color:var(--muted);border:1px solid var(--line);display:grid;place-items:center}
 .check.done{background:var(--dof-navy);color:#fff}
 .set-remove{width:30px;height:48px;border-radius:10px;background:transparent;color:var(--muted);border:1px solid var(--line);display:grid;place-items:center}
-.workout-bar{position:sticky;top:-20px;z-index:5;margin:-20px -20px 0;padding:14px 18px 12px;background:linear-gradient(180deg,rgba(247,251,254,.98),rgba(247,251,254,.82));backdrop-filter:blur(18px);border-bottom:1px solid rgba(1,36,86,.08);border-radius:8px 8px 0 0;overflow:visible}
+.workout-bar{position:sticky;top:-20px;z-index:5;margin:-20px -20px 0;padding:14px 18px 12px;background:linear-gradient(180deg,rgba(247,251,254,.98),rgba(247,251,254,.78));backdrop-filter:blur(18px);border-bottom:0;border-radius:8px 8px 0 0;overflow:visible}
 .workout-bar-title{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-bottom:12px}
 .workout-bar-title h1{font-size:22px;line-height:1}
 .workout-bar-title small{display:block;color:var(--muted);font-weight:800;font-size:12px;margin-bottom:3px}
-.timer-console{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:10px;align-items:center;background:rgba(255,255,255,.88);border:1px solid rgba(1,36,86,.10);border-radius:14px;padding:10px;box-shadow:0 18px 38px rgba(1,36,86,.14);color:var(--text)}
+.timer-console{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:10px;align-items:center;background:linear-gradient(135deg,#051a3a,#062f68);border:1px solid rgba(255,255,255,.14);border-radius:14px;padding:10px;box-shadow:0 18px 38px rgba(1,36,86,.20);color:#fff}
 .timer-main{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:10px;align-items:center;min-width:0}
-.timer-label{display:flex;align-items:center;gap:7px;color:var(--muted);font-size:9px;font-weight:1000;letter-spacing:.14em;text-transform:uppercase}
-.timer-label:before{content:"";width:6px;height:6px;border-radius:50%;background:var(--dof-navy);box-shadow:0 0 0 4px rgba(1,36,86,.08)}
-.timer-main strong{display:block;margin-top:4px;color:var(--text);font-size:34px;line-height:.95;font-variant-numeric:tabular-nums;letter-spacing:0;white-space:nowrap}
-.timer-main em{display:block;margin-top:4px;color:var(--muted);font-style:normal;font-size:10px;font-weight:800;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.timer-toggle{width:46px;height:46px;border-radius:50%;background:linear-gradient(180deg,#082653,#031833);border:1px solid rgba(1,36,86,.18);color:#fff;display:grid;place-items:center;box-shadow:0 10px 20px rgba(1,36,86,.20),inset 0 1px 0 rgba(255,255,255,.20)}
+.timer-label{display:flex;align-items:center;gap:7px;color:rgba(255,255,255,.66);font-size:9px;font-weight:1000;letter-spacing:.14em;text-transform:uppercase}
+.timer-label:before{content:"";width:6px;height:6px;border-radius:50%;background:#fff;box-shadow:0 0 0 4px rgba(255,255,255,.12)}
+.timer-main strong{display:block;margin-top:4px;color:#fff;font-size:34px;line-height:.95;font-variant-numeric:tabular-nums;letter-spacing:0;white-space:nowrap}
+.timer-main em{display:block;margin-top:4px;color:rgba(255,255,255,.58);font-style:normal;font-size:10px;font-weight:800;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.timer-toggle{width:46px;height:46px;border-radius:50%;background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.24);color:#fff;display:grid;place-items:center;box-shadow:0 10px 20px rgba(0,0,0,.16),inset 0 1px 0 rgba(255,255,255,.20)}
 .timer-side{display:grid;grid-template-columns:auto auto;gap:8px;align-items:center}
-.timer-step{width:44px;height:44px;border-radius:50%;background:#fff;border:1px solid rgba(1,36,86,.12);color:var(--dof-navy);font-size:12px;font-weight:1000;box-shadow:0 8px 18px rgba(1,36,86,.08)}
-.timer-rest{min-width:74px;text-align:center;background:linear-gradient(180deg,#fff,#f7fbfe);border:1px solid rgba(1,36,86,.10);border-radius:999px;padding:7px 10px;box-shadow:inset 0 1px 0 rgba(255,255,255,.8)}
+.timer-step{width:44px;height:44px;border-radius:50%;background:rgba(255,255,255,.10);border:1px solid rgba(255,255,255,.20);color:#fff;font-size:12px;font-weight:1000;box-shadow:inset 0 1px 0 rgba(255,255,255,.14)}
+.timer-rest{min-width:74px;text-align:center;background:rgba(255,255,255,.10);border:1px solid rgba(255,255,255,.18);border-radius:999px;padding:7px 10px;box-shadow:inset 0 1px 0 rgba(255,255,255,.12)}
 .timer-rest span{display:block;color:#d8922f;font-size:8px;font-weight:1000;letter-spacing:.12em;text-transform:uppercase}
-.timer-rest strong{display:block;color:var(--text);font-size:18px;line-height:1.05;font-variant-numeric:tabular-nums;white-space:nowrap}
+.timer-rest strong{display:block;color:#fff;font-size:18px;line-height:1.05;font-variant-numeric:tabular-nums;white-space:nowrap}
 .timer-meta{grid-column:1/-1;display:grid;grid-template-columns:1fr auto;gap:10px;align-items:center}
-.rest-progress{height:5px;background:#dce8f1;border-radius:999px;overflow:hidden}
+.rest-progress{height:5px;background:rgba(255,255,255,.18);border-radius:999px;overflow:hidden}
 .rest-progress i{display:block;height:100%;width:0;background:linear-gradient(90deg,#ffb451,#2dd4bf);border-radius:999px;transition:width .25s linear}
-.timer-meta .unit-toggle{background:#eef4f8;border-color:rgba(1,36,86,.08)}
-.workout-content{margin:0 -20px -20px;padding:22px 20px 20px;background:linear-gradient(180deg,#f3f8fc,#f7fbfe 88px,#f7fbfe)}
+.timer-meta .unit-toggle{background:rgba(255,255,255,.10);border-color:rgba(255,255,255,.18)}
+.timer-meta .unit-toggle button{color:rgba(255,255,255,.76)}
+.timer-meta .unit-toggle button.active{background:#fff;color:var(--dof-navy)}
+.workout-content{margin:16px -20px -20px;padding:22px 20px 20px;background:linear-gradient(180deg,#f3f8fc,#f7fbfe 88px,#f7fbfe);border-top:1px solid rgba(1,36,86,.08)}
 .workout-section-head{display:flex;align-items:center;justify-content:space-between;gap:10px;margin:0 0 12px}
 .workout-section-head h2{font-size:20px;margin:0}
 .workout-progress-row{display:flex;align-items:center;justify-content:space-between;gap:10px;margin:0}
@@ -161,6 +163,14 @@ textarea.field{min-height:112px;text-align:left;resize:vertical}
 .rest-presets{display:flex;gap:6px;flex-wrap:wrap;margin-top:12px}
 .chip{background:var(--panel2);color:var(--muted);border:1px solid var(--line);border-radius:999px;padding:7px 12px;font-weight:900;font-size:12px}
 .chip.active{background:var(--dof-navy);color:#fff;border-color:var(--dof-navy)}
+.routine-card{cursor:pointer}
+.routine-card .routine-summary{align-items:center}
+.routine-card .routine-title{min-width:0}
+.routine-card .routine-title h2{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.routine-count{display:inline-flex;align-items:center;gap:8px;flex:0 0 auto}
+.routine-toggle{width:34px;height:34px;border-radius:999px;background:var(--panel2);border:1px solid var(--line);color:var(--muted);display:grid;place-items:center;transition:transform .16s ease,background .16s ease,color .16s ease}
+.routine-card.open .routine-toggle{transform:rotate(90deg);background:var(--dof-navy);color:#fff;border-color:var(--dof-navy)}
+.routine-details{display:grid;gap:14px;margin-top:14px;padding-top:14px;border-top:1px solid var(--line)}
 .feed{padding:16px;margin:12px 0}
 .feed-title{display:flex;align-items:center;gap:10px}
 .dot{width:10px;height:10px;border-radius:50%;background:var(--blue)}
@@ -229,7 +239,7 @@ textarea.field{min-height:112px;text-align:left;resize:vertical}
   .timer-rest strong{font-size:17px}
   .timer-meta{grid-template-columns:1fr auto;gap:8px}
   .modal-card{width:calc(100vw - 16px);max-width:calc(100vw - 16px);padding:16px}
-  .workout-content{margin:0 -16px -16px;padding:16px}
+  .workout-content{margin:14px -16px -16px;padding:16px}
   .workout-section-head{margin-bottom:10px}
   .workout-footer{grid-template-columns:1fr 1fr;margin:12px 0 0;padding:0}
   .modal-card .exercise{padding:12px;margin:8px 0}
@@ -342,7 +352,7 @@ const BODY_REGIONS_BACK=[
   {name:'Triceps',shape:'rect',x:46,y:95,w:26,h:80,rx:13,mirror:true}
 ];
 const ACTIVE_WORKOUT_MAX_HOURS=18;
-const state={user:null,profile:null,view:'home',authMode:'login',exercises:[],templates:[],items:[],sessions:[],sets:[],externalActivities:[],active:null,activeItems:[],timer:null,elapsed:0,rest:0,restTotal:0,bodyFlip:'front',weightUnit:localStorage.getItem('skandi_weight_unit')||'kg'};
+const state={user:null,profile:null,view:'home',authMode:'login',exercises:[],templates:[],items:[],sessions:[],sets:[],externalActivities:[],active:null,activeItems:[],timer:null,elapsed:0,rest:0,restTotal:0,bodyFlip:'front',weightUnit:localStorage.getItem('skandi_weight_unit')||'kg',expandedRoutines:new Set()};
 let builderState={selected:new Map(),group:'All'};
 
 const $=id=>document.getElementById(id);
@@ -600,25 +610,34 @@ function trainView(){
     ${community.length?community.map(t=>workoutCard(t)).join(''):empty('No routines shared by other crew yet.')}`;
 }
 
+function toggleRoutineCard(id){
+  if(state.expandedRoutines.has(id)) state.expandedRoutines.delete(id);
+  else state.expandedRoutines.add(id);
+  render();
+}
+
 function workoutCard(t){
   const its=state.items.filter(i=>i.template_id===t.id);
   const names=its.slice(0,4).map(i=>`<span class="pill dark">${esc(i.exercise?.name||'Exercise')}</span>`).join('');
   const mine=t.user_id===state.user.id;
   const creator=t.profile?.name||'Crew member';
-  return `<article class="workout card">
-    <div class="row">
-      <div>
+  const open=state.expandedRoutines.has(t.id);
+  return `<article class="workout card routine-card ${open?'open':''}" onclick="toggleRoutineCard('${t.id}')">
+    <div class="row routine-summary">
+      <div class="routine-title">
         <h2>${esc(t.name)}</h2>
         <p>${its.length} exercises ${t.weekday!=null?'· '+DOW[t.weekday]:''}${mine?'':' · by '+esc(creator)}</p>
-        ${t.forked_from_name?`<p class="muted" style="margin-top:4px">Adapted from ${esc(t.forked_from_name)}</p>`:''}
       </div>
-      <span class="pill">${its.length} ex.</span>
+      <span class="routine-count"><span class="pill">${its.length} ex.</span><span class="routine-toggle">${icon('chevronRight',18)}</span></span>
     </div>
-    <div class="muscles">${names}${its.length>4?`<span class="pill dark">+${its.length-4}</span>`:''}</div>
-    <div class="row" style="margin-top:16px">
-      <button class="btn primary" onclick="event.stopPropagation();startWorkout('${t.id}')">${icon('play',16)} Start</button>
-      ${mine?`<button class="btn" onclick="event.stopPropagation();openTemplateBuilder(null,'${t.id}')">Edit</button>`:`<button class="btn" onclick="event.stopPropagation();openAddToWeek('${t.id}')">+ Add to my week</button>`}
-    </div>
+    ${open?`<div class="routine-details">
+      ${t.forked_from_name?`<p class="muted">Adapted from ${esc(t.forked_from_name)}</p>`:''}
+      <div class="muscles">${names}${its.length>4?`<span class="pill dark">+${its.length-4}</span>`:''}</div>
+      <div class="row">
+        <button class="btn primary" onclick="event.stopPropagation();startWorkout('${t.id}')">${icon('play',16)} Start</button>
+        ${mine?`<button class="btn" onclick="event.stopPropagation();openTemplateBuilder(null,'${t.id}')">Edit</button>`:`<button class="btn" onclick="event.stopPropagation();openAddToWeek('${t.id}')">+ Add to my week</button>`}
+      </div>
+    </div>`:''}
   </article>`;
 }
 
