@@ -353,7 +353,7 @@ const BODY_REGIONS_BACK=[
   {name:'Triceps',shape:'rect',x:46,y:95,w:26,h:80,rx:13,mirror:true}
 ];
 const ACTIVE_WORKOUT_MAX_HOURS=18;
-const state={user:null,profile:null,view:'home',authMode:'login',exercises:[],templates:[],items:[],sessions:[],sets:[],externalActivities:[],active:null,activeItems:[],timer:null,elapsed:0,rest:0,restTotal:0,bodyFlip:'front',weightUnit:localStorage.getItem('skandi_weight_unit')||'kg',expandedRoutines:new Set(),swapTarget:null,swapQuery:'',addExOpen:false,addExQuery:''};
+const state={user:null,profile:null,view:'home',authMode:'login',exercises:[],templates:[],items:[],sessions:[],sets:[],externalActivities:[],active:null,activeItems:[],timer:null,elapsed:0,rest:0,restTotal:0,bodyFlip:'front',weightUnit:localStorage.getItem('skandi_weight_unit')||'kg',expandedRoutines:new Set(),swapTarget:null,swapQuery:'',addExOpen:false,addExQuery:'',pausedMs:0,pausedAt:null};
 let builderState={selected:new Map(),group:'All'};
 
 const $=id=>document.getElementById(id);
@@ -560,6 +560,8 @@ function hydrateActiveWorkout(){
   state.elapsed=Math.max(0,Math.floor((Date.now()-new Date(active.started_at).getTime())/1000));
   state.rest=0;
   state.restTotal=0;
+  state.pausedMs=0;
+  state.pausedAt=null;
   resumeWorkoutTimer();
 }
 
@@ -1196,6 +1198,8 @@ async function startWorkout(templateId){
     state.elapsed=0;
     state.rest=0;
     state.restTotal=0;
+    state.pausedMs=0;
+    state.pausedAt=null;
     resumeWorkoutTimer();
     openActiveWorkout();
     loadAll().catch(()=>{}); // best-effort background refresh of the rest of state; the workout itself no longer depends on it
@@ -1289,9 +1293,16 @@ function playRestBell(){
 
 function resumeWorkoutTimer(){
   clearInterval(state.timer);
+  if(state.pausedAt){ state.pausedMs+=Date.now()-state.pausedAt; state.pausedAt=null; }
   try{ getAudioCtx(); }catch(e){} // unlock audio now, inside this user-gesture call chain, so playRestBell() can fire later from the interval tick
+  // started_at (a real timestamp) minus accumulated pause time, not a per-tick counter: a
+  // throttled setInterval — screen locked during a long rest, tab backgrounded — used to
+  // silently undercount elapsed++ ticks, so the total shown at the end of the workout could
+  // be far lower than the real time spent. Recomputing from wall-clock time on every tick
+  // self-corrects even after the interval was stalled for minutes.
+  const startedAtMs=state.active?new Date(state.active.started_at).getTime():Date.now()-state.elapsed*1000;
   state.timer=setInterval(()=>{
-    state.elapsed++;
+    state.elapsed=Math.max(0,Math.floor((Date.now()-startedAtMs-state.pausedMs)/1000));
     if(state.rest>0){
       state.rest--;
       if(state.rest===0) playRestBell();
@@ -1303,6 +1314,7 @@ function resumeWorkoutTimer(){
 function pauseWorkoutTimer(){
   clearInterval(state.timer);
   state.timer=null;
+  if(!state.pausedAt) state.pausedAt=Date.now();
 }
 
 function restProgressPct(){
