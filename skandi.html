@@ -36,6 +36,7 @@ html,body{margin:0;background:var(--bg);color:var(--text);overflow-x:hidden}
 body{position:relative;min-height:100dvh;padding-bottom:76px}
 body:before{content:"";position:fixed;z-index:0;inset:0;pointer-events:none;background:radial-gradient(circle at 18% -8%,rgba(1,36,86,.18),transparent 34%),linear-gradient(180deg,#f8fbfe 0%,#eef4f8 48%,#e7eff5 100%);opacity:1}
 button,input,textarea,select{font:inherit}
+input[type="checkbox"]{width:22px;height:22px;accent-color:var(--dof-navy);cursor:pointer;flex:0 0 auto}
 button{border:0;cursor:pointer}
 button:focus-visible,input:focus-visible,textarea:focus-visible,select:focus-visible{outline:2px solid var(--blue);outline-offset:2px}
 .app{position:relative;z-index:1;max-width:820px;margin:0 auto;padding:18px 14px 104px;overflow:hidden}
@@ -352,11 +353,12 @@ const BODY_REGIONS_BACK=[
   {name:'Triceps',shape:'rect',x:46,y:95,w:26,h:80,rx:13,mirror:true}
 ];
 const ACTIVE_WORKOUT_MAX_HOURS=18;
-const state={user:null,profile:null,view:'home',authMode:'login',exercises:[],templates:[],items:[],sessions:[],sets:[],externalActivities:[],active:null,activeItems:[],timer:null,elapsed:0,rest:0,restTotal:0,bodyFlip:'front',weightUnit:localStorage.getItem('skandi_weight_unit')||'kg',expandedRoutines:new Set()};
+const state={user:null,profile:null,view:'home',authMode:'login',exercises:[],templates:[],items:[],sessions:[],sets:[],externalActivities:[],active:null,activeItems:[],timer:null,elapsed:0,rest:0,restTotal:0,bodyFlip:'front',weightUnit:localStorage.getItem('skandi_weight_unit')||'kg',expandedRoutines:new Set(),swapTarget:null,swapQuery:'',addExOpen:false,addExQuery:''};
 let builderState={selected:new Map(),group:'All'};
 
 const $=id=>document.getElementById(id);
 const esc=s=>(s??'').toString().replace(/[&<>"']/g,m=>({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[m]));
+const plural=(n,word,pluralWord=word+'s')=>n===1?word:pluralWord;
 const initials=name=>(name||'SF').split(/\s+/).slice(0,2).map(x=>x[0]).join('').toUpperCase();
 const ICON_PATHS={
   play:'<path d="M6 4l14 8-14 8V4z"/>',
@@ -369,6 +371,7 @@ const ICON_PATHS={
   swap:'<path d="M17 3l4 4-4 4"/><path d="M3 7h11"/><path d="M7 21l-4-4 4-4"/><path d="M21 17H10"/>',
   calendar:'<rect x="3" y="5" width="18" height="16" rx="3"/><path d="M16 3v4M8 3v4M3 10h18"/>',
   trash:'<path d="M4 7h16"/><path d="M10 11v6M14 11v6"/><path d="M6 7l1 13a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2l1-13"/><path d="M9 7V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v3"/>',
+  plus:'<path d="M12 5v14M5 12h14"/>',
   image:'<rect x="3" y="3" width="18" height="18" rx="3"/><circle cx="9" cy="9" r="1.75"/><path d="M21 15l-5.5-5.5L5 20"/>',
   ellipsis:'<circle cx="5" cy="12" r="1.6"/><circle cx="12" cy="12" r="1.6"/><circle cx="19" cy="12" r="1.6"/>'
 };
@@ -452,7 +455,9 @@ function setAuthMode(mode){
   if($('authMsg')) $('authMsg').textContent='';
 }
 
+let submittingAuth=false;
 async function submitAuth(){
+  if(submittingAuth) return; // guards a double-tap firing two concurrent sign-in/sign-up calls
   const email=$('email').value.trim();
   const password=$('password').value;
   const firstName=($('firstName')?.value||'').trim();
@@ -460,22 +465,32 @@ async function submitAuth(){
   const fullName=[firstName,lastName].filter(Boolean).join(' ');
   if(!email||!password) return $('authMsg').textContent='Email and password are required.';
   if(state.authMode==='signup'&&(!firstName||!lastName)) return $('authMsg').textContent='First name and last name are required.';
+  submittingAuth=true;
+  const btn=$('authBtn');
+  if(btn) btn.disabled=true;
   $('authMsg').textContent=state.authMode==='login'?'Signing in...':'Creating account...';
-  if(state.authMode==='login'){
-    const {data,error}=await sb.auth.signInWithPassword({email,password});
+  try{
+    if(state.authMode==='login'){
+      const {data,error}=await sb.auth.signInWithPassword({email,password});
+      if(error) return $('authMsg').textContent=error.message;
+      state.user=data.user;
+      await loadAll();
+      return showApp();
+    }
+    // app:'skandi' lets handle_new_user() (migration 055) tag this profile as a Skandi-only
+    // signup so it doesn't show up in HABIT's admin members list/search.
+    const {data,error}=await sb.auth.signUp({email,password,options:{data:{name:fullName,app:'skandi'},emailRedirectTo:location.href}});
     if(error) return $('authMsg').textContent=error.message;
-    state.user=data.user;
-    await loadAll();
-    return showApp();
+    if(data.session){
+      state.user=data.user;
+      await loadAll();
+      return showApp();
+    }
+    $('authMsg').textContent='Account created. Check your email if confirmation is required, then sign in.';
+  } finally {
+    submittingAuth=false;
+    if(btn) btn.disabled=false;
   }
-  const {data,error}=await sb.auth.signUp({email,password,options:{data:{name:fullName},emailRedirectTo:location.href}});
-  if(error) return $('authMsg').textContent=error.message;
-  if(data.session){
-    state.user=data.user;
-    await loadAll();
-    return showApp();
-  }
-  $('authMsg').textContent='Account created. Check your email if confirmation is required, then sign in.';
 }
 
 async function signOut(){
@@ -483,29 +498,49 @@ async function signOut(){
   location.reload();
 }
 
+function dedupeById(rows){
+  const byId=new Map();
+  rows.forEach(r=>{ if(r&&r.id) byId.set(r.id,r); });
+  return [...byId.values()];
+}
+
 async function loadAll(){
-  let [{data:profile},{data:exercises},{data:templates},{data:items},{data:sessions},{data:sets},{data:externalActivities}]=await Promise.all([
+  // Sessions/sets are split into "own" (unbounded — this is the data an active workout and a
+  // user's own stats/history depend on, and silently truncating it is a real bug: it can make
+  // exercises vanish mid-workout or PRs disappear once the crew collectively logs enough rows)
+  // vs. "crew" (other members' shared activity, capped since it only feeds the social feed).
+  let [{data:profile},{data:exercises},{data:templates},{data:items},
+       {data:ownSessions},{data:crewSessions},{data:ownSets},{data:crewSets},
+       {data:externalActivities}]=await Promise.all([
     sb.from('profiles').select('id,name,avatar_url').eq('id',state.user.id).maybeSingle(),
     sb.from('skandi_exercises').select('*').order('name'),
     sb.from('skandi_templates').select('*, profile:profiles(name,avatar_url)').order('weekday',{nullsFirst:false}).order('created_at',{ascending:false}),
     sb.from('skandi_template_items').select('*, exercise:skandi_exercises(*)').order('sort_order'),
-    sb.from('skandi_sessions').select('*, profile:profiles(name,avatar_url)').order('started_at',{ascending:false}).limit(60),
-    sb.from('skandi_sets').select('*, exercise:skandi_exercises(name,slug)').order('created_at',{ascending:false}).limit(600),
+    sb.from('skandi_sessions').select('*, profile:profiles(name,avatar_url)').eq('user_id',state.user.id).order('started_at',{ascending:false}),
+    sb.from('skandi_sessions').select('*, profile:profiles(name,avatar_url)').eq('visibility','crew').order('started_at',{ascending:false}).limit(60),
+    sb.from('skandi_sets').select('*, exercise:skandi_exercises(name,slug)').eq('user_id',state.user.id).order('created_at',{ascending:false}),
+    sb.from('skandi_sets').select('*, exercise:skandi_exercises(name,slug)').neq('user_id',state.user.id).order('created_at',{ascending:false}).limit(600),
     sb.from('skandi_external_activities').select('*').eq('user_id',state.user.id).order('performed_at',{ascending:false}).limit(200)
   ]);
   if(!profile){
     // Some signups end up with an auth user but no profiles row (trigger race condition).
     // Every Skandi write is FK'd to profiles(id), so self-heal it here before anything breaks.
-    await sb.rpc('ensure_own_profile',{p_name:state.user?.user_metadata?.name||state.user?.email?.split('@')[0]||''});
-    ({data:profile}=await sb.from('profiles').select('id,name,avatar_url').eq('id',state.user.id).maybeSingle());
+    const {error:ensureError}=await sb.rpc('ensure_own_profile',{p_name:state.user?.user_metadata?.name||state.user?.email?.split('@')[0]||''});
+    if(ensureError){
+      alert('Could not set up your profile: '+ensureError.message+'. Try signing out and back in.');
+    } else {
+      ({data:profile}=await sb.from('profiles').select('id,name,avatar_url').eq('id',state.user.id).maybeSingle());
+    }
   }
   state.profile=profile||{name:state.user.email};
   const ignored=ignoredSessionIds();
   state.exercises=exercises||[];
   state.templates=templates||[];
   state.items=items||[];
-  state.sessions=(sessions||[]).filter(s=>!(ignored.has(s.id)&&!s.completed_at));
-  state.sets=(sets||[]).filter(s=>!ignored.has(s.session_id));
+  const sessions=dedupeById([...(ownSessions||[]),...(crewSessions||[])]);
+  const sets=dedupeById([...(ownSets||[]),...(crewSets||[])]);
+  state.sessions=sessions.filter(s=>!(ignored.has(s.id)&&!s.completed_at));
+  state.sets=sets.filter(s=>!ignored.has(s.session_id));
   state.externalActivities=externalActivities||[];
   hydrateActiveWorkout();
 }
@@ -521,7 +556,7 @@ function hydrateActiveWorkout(){
   const active=state.sessions.find(s=>s.user_id===state.user.id&&!s.completed_at&&Date.now()-new Date(s.started_at).getTime()<=maxAgeMs);
   if(!active) return;
   state.active=active;
-  state.activeItems=state.items.filter(i=>i.template_id===active.template_id).sort((a,b)=>a.sort_order-b.sort_order);
+  state.activeItems=computeActiveItems(active.id);
   state.elapsed=Math.max(0,Math.floor((Date.now()-new Date(active.started_at).getTime())/1000));
   state.rest=0;
   state.restTotal=0;
@@ -551,8 +586,16 @@ function activeWorkoutBanner(){
 
 function homeView(){
   const mine=state.sessions.filter(s=>s.user_id===state.user.id&&s.completed_at);
-  const weekCount=mine.filter(s=>Date.now()-new Date(s.completed_at).getTime()<7*864e5).length;
-  const todayTpl=state.templates.find(t=>t.user_id===state.user.id&&t.weekday===todayDow())||state.templates.find(t=>t.user_id===state.user.id)||state.templates[0];
+  // Anchor to the actual Monday of this week (todayDow() is 0-indexed Mon..Sun) instead of a
+  // rolling "last 7 days" window, to match the "Monday to Sunday" label above.
+  const startOfWeek=new Date();
+  startOfWeek.setHours(0,0,0,0);
+  startOfWeek.setDate(startOfWeek.getDate()-todayDow());
+  const weekCount=mine.filter(s=>new Date(s.completed_at).getTime()>=startOfWeek.getTime()).length;
+  // Only ever fall back to one of THIS user's own routines — falling further back to
+  // state.templates[0] (any crew member's public routine) used to silently start someone
+  // else's workout for a user who hadn't created a routine yet, and skip onboarding.
+  const todayTpl=state.templates.find(t=>t.user_id===state.user.id&&t.weekday===todayDow())||state.templates.find(t=>t.user_id===state.user.id);
   const pct=Math.min(100,Math.round((weekCount/5)*100));
   const focusAction=todayTpl?`startWorkout('${todayTpl.id}')`:`openDayPicker(${todayDow()})`;
   return `
@@ -565,7 +608,7 @@ function homeView(){
           <div>
             <div class="eyebrow">Your focus now</div>
             <h2>${esc(todayTpl?.name||'Create your first routine')}</h2>
-            <p>${weekCount} workouts completed this week. ${weekCount?'You are building rhythm.':'Today can be the start.'}</p>
+            <p>${weekCount} ${plural(weekCount,'workout')} completed this week. ${weekCount?'You are building rhythm.':'Today can be the start.'}</p>
             <span class="focus-cta"><i>${todayTpl?icon('play',17):'+'}</i>${todayTpl?'Start today workout':'Set up today routine'}</span>
           </div>
           <div class="ring" style="--p:${pct}%"><span>${pct}%</span></div>
@@ -591,7 +634,7 @@ function trainView(){
     ${activeWorkoutBanner()}
     <div class="row"><h1>Train</h1><button class="btn primary" onclick="openDayPicker(todayDow())">+ Routine</button></div>
     <section class="card">
-      <div class="row"><h2>Your week</h2><span class="muted">${mine.length} routines</span></div>
+      <div class="row"><h2>Your week</h2><span class="muted">${mine.length} ${plural(mine.length,'routine')}</span></div>
       <div class="week">
         ${DOW.map((d,i)=>{
           const t=mine.find(x=>x.weekday===i);
@@ -626,7 +669,7 @@ function workoutCard(t){
     <div class="row routine-summary">
       <div class="routine-title">
         <h2>${esc(t.name)}</h2>
-        <p>${its.length} exercises ${t.weekday!=null?'· '+DOW[t.weekday]:''}${mine?'':' · by '+esc(creator)}</p>
+        <p>${its.length} ${plural(its.length,'exercise')} ${t.weekday!=null?'· '+DOW[t.weekday]:''}${mine?'':' · by '+esc(creator)}</p>
       </div>
       <span class="routine-count"><span class="pill">${its.length} ex.</span><span class="routine-toggle">${icon('chevronRight',18)}</span></span>
     </div>
@@ -727,7 +770,7 @@ function templateExerciseOption(e){
     <p class="muted" style="margin:10px 0 6px;font-size:12px;font-weight:800;letter-spacing:.1em;text-transform:uppercase">Rest between sets</p>
     <div class="rest-presets" style="justify-content:flex-start">
       ${[30,45,60,90,120,180].map(s=>`<button type="button" class="chip ${cfg.rest===s?'active':''}" onclick="event.preventDefault();updateBuilderConfig('${e.id}','rest',${s});renderTemplateExercisePicker()">${s<60?s+'s':(s/60)+'m'}</button>`).join('')}
-      <input class="field" type="number" min="0" step="5" inputmode="numeric" value="${cfg.rest}" placeholder="custom" style="width:80px;flex:0 0 auto" onclick="event.preventDefault()" onchange="updateBuilderConfig('${e.id}','rest',this.value);renderTemplateExercisePicker()">
+      <input class="field" type="number" min="0" max="900" step="5" inputmode="numeric" value="${cfg.rest}" placeholder="custom" style="width:80px;flex:0 0 auto" onclick="event.preventDefault()" onchange="updateBuilderConfig('${e.id}','rest',this.value);renderTemplateExercisePicker()">
     </div>`:''}
   </label>`;
 }
@@ -741,7 +784,6 @@ function exerciseCard(e,tracking){
       <div class="play">${icon('play',18)}</div>
     </div>
     <div class="muscles">${muscles.map(([m,p])=>`<span class="pill dark">${esc(m)} ${p}%</span>`).join('')}</div>
-    ${muscles.slice(0,3).map(([m,p])=>`<div><div class="row"><small>${esc(m)}</small><small>${p}%</small></div><div class="bar"><i style="width:${p}%"></i></div></div>`).join('')}
   </article>`;
 }
 
@@ -800,7 +842,7 @@ function openSessionDetail(sessionId){
 
 async function deleteSession(sessionId){
   if(!confirm('Delete this workout? This cannot be undone.')) return;
-  const {error}=await sb.from('skandi_sessions').delete().eq('id',sessionId);
+  const {error}=await sb.from('skandi_sessions').delete().eq('id',sessionId).eq('user_id',state.user.id);
   if(error) return alert(error.message);
   closeModal();
   await loadAll();
@@ -838,8 +880,10 @@ function formatHours(h){
 }
 
 // score 0 (still fatigued) -> muted grey, score 100 (rested & ready) -> bright accent.
+// Stops are the app's own --dof-steel/--amber/--green tokens (converted to rgb triples) so the
+// recovery heatmap reads as part of the navy/steel brand system instead of an unrelated palette.
 function freshColor(score){
-  const stops=[[42,44,56],[255,189,57],[184,255,44]];
+  const stops=[[120,139,161],[240,162,46],[29,154,108]];
   const t=Math.max(0,Math.min(100,score))/100;
   const seg=t<0.5?0:1;
   const local=t<0.5?t/0.5:(t-0.5)/0.5;
@@ -876,7 +920,7 @@ function miniBodyRecoveryCard(){
     <div>
       <div class="eyebrow">Body readiness</div>
       <h2>${needsWork&&!needsWork.rested?`${esc(needsWork.name)} needs recovery`:'Body is ready'}</h2>
-      <p>${restedCount} muscles rested${needsWork&&!needsWork.rested?` · ready in ${formatHours(needsWork.hoursUntilFresh)}`:''}</p>
+      <p>${restedCount} ${plural(restedCount,'muscle')} rested${needsWork&&!needsWork.rested?` · ready in ${formatHours(needsWork.hoursUntilFresh)}`:''}</p>
       <div class="mini-body-chips">
         ${rows.slice(0,3).map(r=>`<span class="pill dark" style="background:${freshColor(r.score)};color:var(--dof-deep)">${esc(r.name)} ${r.score}%</span>`).join('')}
       </div>
@@ -986,7 +1030,10 @@ function muscleDetailBreakdown(name){
   const activityRows=(state.externalActivities||[]).filter(a=>{
     const t=new Date(a.performed_at).getTime();
     const map=SkandiRecovery.ACTIVITY_MUSCLE_MAP[a.activity_type]||SkandiRecovery.ACTIVITY_MUSCLE_MAP.other;
-    return t>=since && !!map[name];
+    // Matches the recovery engine's own t > now exclusion (skandi-recovery.js) so a stray
+    // future-dated row (pre-existing bad data, clock skew) can't show here while contributing
+    // nothing to the freshness score displayed above it.
+    return t>=since && t<=Date.now() && !!map[name];
   }).map(a=>({label:activityTypeLabel(a.activity_type),pct:(SkandiRecovery.ACTIVITY_MUSCLE_MAP[a.activity_type]||SkandiRecovery.ACTIVITY_MUSCLE_MAP.other)[name],when:a.performed_at}));
   return {exerciseRows:[...byExercise.values()].sort((a,b)=>b.sets-a.sets),activityRows};
 }
@@ -1040,7 +1087,7 @@ function openLogActivity(){
     <label class="eyebrow">Intensity (effort, 1-10)</label>
     <input id="actIntensity" class="field left" type="number" min="1" max="10" inputmode="numeric" value="5">
     <label class="eyebrow">When</label>
-    <input id="actWhen" class="field left" type="datetime-local" value="${localDatetimeValue(new Date())}">
+    <input id="actWhen" class="field left" type="datetime-local" max="${localDatetimeValue(new Date())}" value="${localDatetimeValue(new Date())}">
     <textarea id="actNote" class="field" placeholder="Notes (optional)"></textarea>
     <button class="btn primary" style="width:100%" onclick="saveExternalActivity()">Save activity</button>`;
 }
@@ -1051,13 +1098,19 @@ async function saveExternalActivity(){
   if(!duration||duration<1) return alert('Enter a duration in minutes.');
   if(!intensity||intensity<1||intensity>10) return alert('Intensity must be between 1 and 10.');
   if(!$('actWhen').value) return alert('Choose when this activity happened.');
+  const performedAt=new Date($('actWhen').value);
+  // The datetime input's max="now" is only a soft browser hint (unreliable on mobile) — a
+  // future-dated activity would otherwise show up in "Recent activities" while contributing
+  // nothing to the freshness score above it (the recovery engine already excludes t > now),
+  // a visibly contradictory state. Reject it outright instead.
+  if(performedAt.getTime()>Date.now()+60000) return alert('This activity is in the future — check the date/time.');
   const payload={
     user_id:state.user.id,
     activity_type:$('actType').value,
     duration_min:duration,
     distance_km:$('actDistance').value?Number($('actDistance').value):null,
     intensity,
-    performed_at:new Date($('actWhen').value).toISOString(),
+    performed_at:performedAt.toISOString(),
     note:$('actNote').value.trim()||null
   };
   const {error}=await sb.from('skandi_external_activities').insert(payload);
@@ -1087,15 +1140,22 @@ function previousCompletedSetsForExercise(exerciseId){
     .filter(s=>s.user_id===state.user.id&&s.completed_at&&s.id!==state.active?.id)
     .sort((a,b)=>new Date(b.completed_at).getTime()-new Date(a.completed_at).getTime());
   for(const session of completed){
-    const rows=state.sets
-      .filter(s=>s.session_id===session.id&&s.exercise_id===exerciseId&&s.done)
-      .sort((a,b)=>a.set_idx-b.set_idx);
-    if(rows.length) return rows;
+    const rows=state.sets.filter(s=>s.session_id===session.id&&s.exercise_id===exerciseId);
+    if(!rows.length) continue;
+    const doneRows=rows.filter(s=>s.done).sort((a,b)=>a.set_idx-b.set_idx);
+    if(doneRows.length) return doneRows;
+    // Nobody tapped the check mark that session (easy to forget mid-workout), but the
+    // numbers were still logged — that's still worth preloading over leaving it blank.
+    const loggedRows=rows.filter(s=>s.weight_kg!=null||s.reps!=null).sort((a,b)=>a.set_idx-b.set_idx);
+    if(loggedRows.length) return loggedRows;
   }
   return [];
 }
 
+let startingWorkout=false;
 async function startWorkout(templateId){
+  if(startingWorkout) return; // guards a double-tap from creating two sessions before either
+                               // await resolves and state.active gets set
   if(state.active){
     if(state.active.template_id===templateId){ openActiveWorkout(); return; }
     return alert('Finish or cancel your current workout before starting another.');
@@ -1103,38 +1163,139 @@ async function startWorkout(templateId){
   const tpl=state.templates.find(t=>t.id===templateId);
   const its=state.items.filter(i=>i.template_id===templateId).sort((a,b)=>a.sort_order-b.sort_order);
   if(!tpl||!its.length) return;
-  const {data:session,error}=await sb.from('skandi_sessions').insert({user_id:state.user.id,template_id:tpl.id,title:tpl.name}).select().single();
-  if(error) return alert(error.message);
-  const rows=its.flatMap(item=>{
-    const previous=previousCompletedSetsForExercise(item.exercise_id);
-    return Array.from({length:item.target_sets},(_,idx)=>{
-      const prev=previous[idx]||previous[previous.length-1]||{};
-      return {
-        session_id:session.id,user_id:state.user.id,exercise_id:item.exercise_id,set_idx:idx+1,target_reps:item.target_reps,
-        weight_kg:prev.weight_kg??null,reps:prev.reps??null
-      };
+  startingWorkout=true;
+  try{
+    const {data:session,error}=await sb.from('skandi_sessions').insert({user_id:state.user.id,template_id:tpl.id,title:tpl.name}).select().single();
+    if(error) return alert(error.message);
+    const rows=its.flatMap(item=>{
+      const previous=previousCompletedSetsForExercise(item.exercise_id);
+      return Array.from({length:item.target_sets},(_,idx)=>{
+        const prev=previous[idx]||previous[previous.length-1]||{};
+        return {
+          session_id:session.id,user_id:state.user.id,exercise_id:item.exercise_id,set_idx:idx+1,target_reps:item.target_reps,
+          target_rest_sec:item.target_rest_sec,sort_order:item.sort_order,
+          weight_kg:prev.weight_kg??null,reps:prev.reps??null
+        };
+      });
     });
-  });
-  const {error:setsError}=await sb.from('skandi_sets').insert(rows);
-  if(setsError){
-    await sb.from('skandi_sessions').delete().eq('id',session.id);
-    return alert(setsError.message);
+    const {data:insertedSets,error:setsError}=await sb.from('skandi_sets').insert(rows).select();
+    if(setsError){
+      await sb.from('skandi_sessions').delete().eq('id',session.id);
+      return alert(setsError.message);
+    }
+    state.active=session;
+    state.sets=dedupeById([...state.sets,...(insertedSets||[])]);
+    // Built straight from the template items already in memory, not from a fresh
+    // loadAll()/computeActiveItems() round-trip. A flaky connection here used to leave
+    // state.active set with an empty exercise list forever, since hydrateActiveWorkout only
+    // (re)computes activeItems when state.active isn't already set.
+    state.activeItems=its.map(item=>({
+      exercise_id:item.exercise_id,exercise:item.exercise,target_sets:item.target_sets,
+      target_reps:item.target_reps,target_rest_sec:item.target_rest_sec,sort_order:item.sort_order
+    }));
+    state.elapsed=0;
+    state.rest=0;
+    state.restTotal=0;
+    resumeWorkoutTimer();
+    openActiveWorkout();
+    loadAll().catch(()=>{}); // best-effort background refresh of the rest of state; the workout itself no longer depends on it
+  } finally {
+    startingWorkout=false;
   }
-  state.active=session;
-  state.activeItems=its;
-  state.elapsed=0;
-  state.rest=0;
-  state.restTotal=0;
-  await loadAll();
-  resumeWorkoutTimer();
-  openActiveWorkout();
+}
+
+// An active workout's exercise list is derived from the session's own sets (each set
+// carries its own target_reps/target_rest_sec/sort_order), not from skandi_template_items.
+// That's what lets performSwap() below replace one exercise with another mid-workout
+// without touching the shared template, and have it survive a page reload.
+function computeActiveItems(sessionId){
+  const byExercise=new Map();
+  state.sets.filter(s=>s.session_id===sessionId).forEach(s=>{
+    if(!byExercise.has(s.exercise_id)) byExercise.set(s.exercise_id,[]);
+    byExercise.get(s.exercise_id).push(s);
+  });
+  return [...byExercise.entries()].map(([exercise_id,group])=>{
+    const withOrder=group.filter(s=>s.sort_order!=null);
+    // Sessions predating migration 051, or whose template was later deleted (FK sets
+    // template_id null), can have every set's sort_order null. Collapsing all of those to a
+    // shared "0" scrambled the exercise order to whatever state.sets happened to be sorted by.
+    // Push them after every exercise that DOES have a real sort_order instead, ordered among
+    // themselves by when they were first logged.
+    const sortOrder=withOrder.length
+      ?Math.min(...withOrder.map(s=>s.sort_order))
+      :1000+Math.min(...group.map(s=>new Date(s.created_at).getTime()));
+    return {
+      exercise_id,
+      exercise:state.exercises.find(e=>e.id===exercise_id),
+      target_sets:group.length,
+      target_reps:group[0]?.target_reps||'8-12',
+      target_rest_sec:group[0]?.target_rest_sec??90,
+      sort_order:sortOrder
+    };
+  }).filter(i=>i.exercise).sort((a,b)=>a.sort_order-b.sort_order);
+}
+
+let audioCtx=null;
+function getAudioCtx(){
+  if(!audioCtx) audioCtx=new (window.AudioContext||window.webkitAudioContext)();
+  if(audioCtx.state==='suspended') audioCtx.resume();
+  return audioCtx;
+}
+
+// Boxing-bell "ding-ding" for when the rest countdown hits zero. Synthesized with Web
+// Audio instead of a bundled file — this is a single-file no-build-step app, and a
+// synthesized bell still works offline once the PWA shell is cached.
+function strikeBell(ctx,startTime){
+  const master=ctx.createGain();
+  master.gain.value=0.5;
+  master.connect(ctx.destination);
+  // Inharmonic partials (not integer multiples of the fundamental) read as "metal bell"
+  // rather than a pure tone.
+  [660,990,1657,2211].forEach((freq,i)=>{
+    const osc=ctx.createOscillator();
+    osc.type='sine';
+    osc.frequency.value=freq;
+    const gain=ctx.createGain();
+    const peak=i===0?0.9:0.9/(i+1.6);
+    gain.gain.setValueAtTime(0,startTime);
+    gain.gain.linearRampToValueAtTime(peak,startTime+0.008);
+    gain.gain.exponentialRampToValueAtTime(0.0005,startTime+1.4-i*0.12);
+    osc.connect(gain).connect(master);
+    osc.start(startTime);
+    osc.stop(startTime+1.5);
+  });
+  const bufferSize=Math.floor(ctx.sampleRate*0.05);
+  const buffer=ctx.createBuffer(1,bufferSize,ctx.sampleRate);
+  const data=buffer.getChannelData(0);
+  for(let i=0;i<bufferSize;i++) data[i]=(Math.random()*2-1)*(1-i/bufferSize);
+  const noise=ctx.createBufferSource();
+  noise.buffer=buffer;
+  const noiseFilter=ctx.createBiquadFilter();
+  noiseFilter.type='highpass';
+  noiseFilter.frequency.value=1500;
+  const noiseGain=ctx.createGain();
+  noiseGain.gain.value=0.4;
+  noise.connect(noiseFilter).connect(noiseGain).connect(master);
+  noise.start(startTime);
+}
+function playRestBell(){
+  try{
+    const ctx=getAudioCtx();
+    const now=ctx.currentTime;
+    strikeBell(ctx,now);
+    strikeBell(ctx,now+0.22);
+  }catch(e){ /* Web Audio unsupported/blocked — the visual "Rest 0:00" is still there */ }
 }
 
 function resumeWorkoutTimer(){
   clearInterval(state.timer);
+  try{ getAudioCtx(); }catch(e){} // unlock audio now, inside this user-gesture call chain, so playRestBell() can fire later from the interval tick
   state.timer=setInterval(()=>{
     state.elapsed++;
-    if(state.rest>0) state.rest--;
+    if(state.rest>0){
+      state.rest--;
+      if(state.rest===0) playRestBell();
+    }
     updateWorkoutClocks();
   },1000);
 }
@@ -1235,6 +1396,8 @@ function renderActiveWorkout(){
         </div>
       </div>
       ${state.activeItems.map(item=>activeExercise(item,allSets.filter(s=>s.exercise_id===item.exercise_id))).join('')}
+      <button class="btn small ghost" style="width:100%;margin-top:4px" onclick="toggleAddExercise()">${icon('plus',16)} Add exercise (this session only)</button>
+      <div id="addExPanel">${addExercisePanelHtml()}</div>
       <div class="workout-footer">
         <button class="btn danger-action" onclick="cancelWorkout()">${icon('close',15)} Cancel</button>
         <button class="btn primary" onclick="confirmFinishWorkout()">${icon('check',17)} Finish workout</button>
@@ -1245,8 +1408,13 @@ function renderActiveWorkout(){
 
 function activeExercise(item,sets){
   const e=item.exercise;
+  const undone=sets.filter(s=>!s.done).length;
   return `<article class="exercise">
-    <div class="ex-head" onclick="openExercise('${e.id}')">${mediaThumb(e)}<div><h3>${esc(e.name)}</h3><p>${esc(e.english_name||'')} · ${item.target_sets} x ${esc(item.target_reps)} · rest ${item.target_rest_sec}s</p></div><span class="muted">${sets.filter(s=>s.done).length}/${sets.length}</span></div>
+    <div class="ex-head" onclick="openExercise('${e.id}')">${mediaThumb(e)}<div><h3>${esc(e.name)}</h3><p>${esc(e.english_name||'')} · ${item.target_sets} x ${esc(item.target_reps)} · rest ${item.target_rest_sec}s</p></div><span class="muted">${sets.filter(s=>s.done).length}/${sets.length}</span>
+      ${undone?`<button class="btn small ghost" onclick="event.stopPropagation();toggleSwap('${item.exercise_id}')" aria-label="Swap exercise" title="Swap exercise">${icon('swap',16)}</button>`:''}
+      <button class="icon-btn tiny danger" onclick="event.stopPropagation();removeExerciseFromSession('${item.exercise_id}')" aria-label="Remove exercise from this session" title="Remove from this session">${icon('trash',16)}</button>
+    </div>
+    <div id="swapPanel-${item.exercise_id}">${swapPanelHtml(item.exercise_id)}</div>
     <div class="stack">
       <div class="set-row"><span></span><small class="muted">${state.weightUnit.toUpperCase()}</small><small class="muted">REPS</small><span></span><span></span></div>
       ${sets.map(s=>`<div class="set-row">
@@ -1257,14 +1425,139 @@ function activeExercise(item,sets){
         <button class="set-remove" onclick="removeSet('${s.id}')" aria-label="Remove set">${icon('close',14)}</button>
       </div>`).join('')}
     </div>
-    <button class="btn small ghost" style="width:100%;margin-top:8px" onclick="addSet('${item.exercise_id}','${esc(item.target_reps)}')">+ Add set</button>
+    <button class="btn small ghost" style="width:100%;margin-top:8px" onclick="addSet('${item.exercise_id}')">+ Add set</button>
   </article>`;
+}
+
+// Swapping only ever touches this exercise's not-yet-done sets in the current session
+// (skandi_sets.exercise_id), never skandi_template_items — the weekly routine is
+// untouched, this session just plays out with a substitute for whatever's left.
+function toggleSwap(exerciseId){
+  state.swapTarget=state.swapTarget===exerciseId?null:exerciseId;
+  state.swapQuery='';
+  renderActiveWorkout();
+}
+
+function swapPanelHtml(exerciseId){
+  if(state.swapTarget!==exerciseId) return '';
+  return `<div class="stack" style="margin:8px 0;padding:10px;border:1px solid var(--border,#e5e5e5);border-radius:10px" onclick="event.stopPropagation()">
+    <input id="swapQuery-${exerciseId}" class="field left" placeholder="Replace with..." value="${esc(state.swapQuery)}" oninput="renderSwapList('${exerciseId}')" autofocus>
+    <div id="swapList-${exerciseId}" class="stack">${swapListHtml(exerciseId)}</div>
+  </div>`;
+}
+
+function swapListHtml(exerciseId){
+  const q=state.swapQuery.trim().toLowerCase();
+  const list=state.exercises.filter(e=>e.id!==exerciseId&&(!q||`${e.name} ${e.english_name||''}`.toLowerCase().includes(q))).slice(0,20);
+  if(!list.length) return `<p class="muted">No matches.</p>`;
+  return list.map(e=>`<button type="button" class="btn small ghost" style="width:100%;text-align:left" onclick="performSwap('${exerciseId}','${e.id}')">${esc(e.name)} <small class="muted">${esc(e.english_name||'')}</small></button>`).join('');
+}
+
+function renderSwapList(exerciseId){
+  state.swapQuery=$(`swapQuery-${exerciseId}`)?.value||'';
+  const list=$(`swapList-${exerciseId}`);
+  if(list) list.innerHTML=swapListHtml(exerciseId);
+}
+
+async function performSwap(oldExerciseId,newExerciseId){
+  if(!state.active||oldExerciseId===newExerciseId){ toggleSwap(oldExerciseId); return; }
+  const sessionId=state.active.id;
+  const moving=state.sets.filter(s=>s.session_id===sessionId&&s.exercise_id===oldExerciseId&&!s.done);
+  if(!moving.length){ toggleSwap(oldExerciseId); return; }
+  // set_idx is unique per (session_id, exercise_id): if newExerciseId already has sets in this
+  // session (e.g. two separate swaps landing on the same replacement), reassigning straight
+  // across would collide. Continue numbering after whatever's already there instead.
+  const existingForNew=state.sets.filter(s=>s.session_id===sessionId&&s.exercise_id===newExerciseId);
+  let nextIdx=(existingForNew.length?Math.max(...existingForNew.map(s=>s.set_idx)):0)+1;
+  const previous=previousCompletedSetsForExercise(newExerciseId);
+  let idx=0;
+  for(const s of moving){
+    const prev=previous[idx]||previous[previous.length-1]||{};
+    const patch={exercise_id:newExerciseId,set_idx:nextIdx,weight_kg:prev.weight_kg??null,reps:prev.reps??null,updated_at:new Date().toISOString()};
+    const {error}=await sb.from('skandi_sets').update(patch).eq('id',s.id);
+    if(error) return alert(error.message);
+    Object.assign(s,patch);
+    nextIdx++;
+    idx++;
+  }
+  state.activeItems=computeActiveItems(sessionId);
+  state.swapTarget=null;
+  state.swapQuery='';
+  renderActiveWorkout();
+}
+
+// Adding/removing an exercise here only ever touches this session's skandi_sets rows,
+// same as performSwap above — skandi_template_items (the weekly routine) is never touched.
+function toggleAddExercise(){
+  state.addExOpen=!state.addExOpen;
+  state.addExQuery='';
+  renderActiveWorkout();
+}
+
+function addExercisePanelHtml(){
+  if(!state.addExOpen) return '';
+  return `<div class="stack" style="margin:8px 0;padding:10px;border:1px solid var(--border,#e5e5e5);border-radius:10px">
+    <input id="addExQuery" class="field left" placeholder="Search exercise..." value="${esc(state.addExQuery)}" oninput="renderAddExerciseList()" autofocus>
+    <div id="addExList" class="stack">${addExerciseListHtml()}</div>
+  </div>`;
+}
+
+function addExerciseListHtml(){
+  const q=state.addExQuery.trim().toLowerCase();
+  const already=new Set(state.activeItems.map(i=>i.exercise_id));
+  const list=state.exercises.filter(e=>!already.has(e.id)&&(!q||`${e.name} ${e.english_name||''}`.toLowerCase().includes(q))).slice(0,20);
+  if(!list.length) return `<p class="muted">No matches.</p>`;
+  return list.map(e=>`<button type="button" class="btn small ghost" style="width:100%;text-align:left" onclick="addExerciseToSession('${e.id}')">${esc(e.name)} <small class="muted">${esc(e.english_name||'')}</small></button>`).join('');
+}
+
+function renderAddExerciseList(){
+  state.addExQuery=$('addExQuery')?.value||'';
+  const list=$('addExList');
+  if(list) list.innerHTML=addExerciseListHtml();
+}
+
+async function addExerciseToSession(exerciseId){
+  if(!state.active) return;
+  const sessionId=state.active.id;
+  const sortOrder=state.activeItems.length?Math.max(...state.activeItems.map(i=>i.sort_order))+1:1;
+  const previous=previousCompletedSetsForExercise(exerciseId);
+  const targetSets=previous.length||3;
+  const rows=Array.from({length:targetSets},(_,idx)=>{
+    const prev=previous[idx]||previous[previous.length-1]||{};
+    return {
+      session_id:sessionId,user_id:state.user.id,exercise_id:exerciseId,set_idx:idx+1,
+      target_reps:prev.target_reps||'8-12',target_rest_sec:prev.target_rest_sec??90,sort_order:sortOrder,
+      weight_kg:prev.weight_kg??null,reps:prev.reps??null
+    };
+  });
+  const {data,error}=await sb.from('skandi_sets').insert(rows).select();
+  if(error) return alert(error.message);
+  state.sets.push(...(data||[]));
+  state.activeItems=computeActiveItems(sessionId);
+  state.addExOpen=false;
+  state.addExQuery='';
+  renderActiveWorkout();
+}
+
+async function removeExerciseFromSession(exerciseId){
+  if(!state.active) return;
+  const sessionId=state.active.id;
+  const item=state.activeItems.find(i=>i.exercise_id===exerciseId);
+  if(!confirm(`Remove ${item?.exercise?.name||'this exercise'} from today's session? This won't change your saved routine.`)) return;
+  const {error}=await sb.from('skandi_sets').delete().eq('session_id',sessionId).eq('exercise_id',exerciseId);
+  if(error) return alert(error.message);
+  state.sets=state.sets.filter(s=>!(s.session_id===sessionId&&s.exercise_id===exerciseId));
+  state.activeItems=computeActiveItems(sessionId);
+  renderActiveWorkout();
 }
 
 async function updateSet(id,key,value){
   const patch={updated_at:new Date().toISOString()};
   const parsed=value===''?null:(key==='weight_kg'?displayToKg(value):Number(value));
   if(parsed!==null&&!Number.isFinite(parsed)) return alert('Enter a valid number.');
+  // Matches the DB check constraint on skandi_sets.weight_kg (migration 053) — catch it here
+  // instead of round-tripping to a raw Postgres error.
+  if(key==='weight_kg'&&parsed!==null&&(parsed<0||parsed>500)) return alert('Enter a weight between 0 and 500kg.');
   patch[key]=parsed===null?null:(key==='weight_kg'?Math.round(parsed*100)/100:Math.round(parsed));
   const {error}=await sb.from('skandi_sets').update(patch).eq('id',id);
   if(error) return alert(error.message);
@@ -1293,14 +1586,22 @@ async function toggleSet(id,rest){
   renderActiveWorkout();
 }
 
-async function addSet(exerciseId,targetReps){
+async function addSet(exerciseId){
   if(!state.active) return;
   const sessionId=state.active.id;
   const existing=state.sets.filter(s=>s.session_id===sessionId&&s.exercise_id===exerciseId);
   const nextIdx=(existing.length?Math.max(...existing.map(s=>s.set_idx)):0)+1;
   const seed=existing.find(s=>s.set_idx===1)||{};
+  // Look target_reps/rest/sort up server-side-derived state rather than taking it as a caller
+  // argument — target_reps is free text a user can set when building a routine, and passing it
+  // through an inline onclick('...') string argument is an XSS vector (HTML-escaping a value
+  // that lands inside a JS string literal in an attribute does not neutralize it).
+  const item=state.activeItems.find(i=>i.exercise_id===exerciseId);
   const {data,error}=await sb.from('skandi_sets').insert({
-    session_id:sessionId,user_id:state.user.id,exercise_id:exerciseId,set_idx:nextIdx,target_reps:targetReps,
+    session_id:sessionId,user_id:state.user.id,exercise_id:exerciseId,set_idx:nextIdx,
+    target_reps:seed.target_reps||item?.target_reps||'8-12',
+    target_rest_sec:seed.target_rest_sec??item?.target_rest_sec??null,
+    sort_order:seed.sort_order??item?.sort_order??null,
     weight_kg:seed.weight_kg??null,reps:seed.reps??null
   }).select().single();
   if(error) return alert(error.message);
@@ -1356,7 +1657,8 @@ function openReport(){
     <label class="card row" style="border-color:rgba(212,72,84,.30);background:#fff7f7"><div><h3>I noticed soreness or pain</h3><p>Mark the area so we can track it week by week.</p></div><input id="sore" type="checkbox"></label>
     <input id="soreArea" class="field left" placeholder="Area: shoulder, elbow, lower back...">
     <textarea id="note" class="field" placeholder="How did you feel, what was harder, what would you change..."></textarea>
-    <button class="btn primary" style="width:100%" onclick="finishWorkout()">Save and share</button>`;
+    <label class="card row" style="margin:0 0 14px"><div><h3>Share with crew</h3><p>Soreness notes and this report are only visible to you if unchecked.</p></div><input id="shareCrew" type="checkbox" checked></label>
+    <button class="btn primary" style="width:100%" onclick="finishWorkout()">Save workout</button>`;
 }
 
 async function finishWorkout(){
@@ -1368,7 +1670,7 @@ async function finishWorkout(){
     report_soreness:$('sore').checked,
     report_soreness_area:$('soreArea').value.trim()||null,
     report_note:$('note').value.trim()||null,
-    visibility:'crew'
+    visibility:$('shareCrew').checked?'crew':'private'
   };
   const {error}=await sb.from('skandi_sessions').update(patch).eq('id',state.active.id);
   if(error) return alert(error.message);
@@ -1392,8 +1694,8 @@ function openExercise(id){
       ${e.media_page_url?`<p style="margin-top:12px"><a class="accent" href="${esc(e.media_page_url)}" target="_blank" rel="noreferrer">Open Gymvisual reference</a></p>`:''}
     </div>
     <section class="card"><div class="eyebrow">Muscles involved</div>${muscles.map(([m,p])=>`<div style="margin-top:10px"><div class="row"><strong>${esc(m)}</strong><span>${p}%</span></div><div class="bar"><i style="width:${p}%"></i></div></div>`).join('')}</section>
-    <section class="card"><div class="eyebrow">How to do it</div><ol>${(e.instructions||[]).map(x=>`<li>${esc(x)}</li>`).join('')}</ol></section>
-    <section class="card"><div class="eyebrow">Coach tips</div><ul>${(e.coach_tips||[]).map(x=>`<li>${esc(x)}</li>`).join('')}</ul></section>`;
+    <section class="card"><div class="eyebrow">How to do it</div>${e.instructions?.length?`<ol>${e.instructions.map(x=>`<li>${esc(x)}</li>`).join('')}</ol>`:empty('No instructions added yet.')}</section>
+    <section class="card"><div class="eyebrow">Coach tips</div>${e.coach_tips?.length?`<ul>${e.coach_tips.map(x=>`<li>${esc(x)}</li>`).join('')}</ul>`:empty('No coach tips added yet.')}</section>`;
 }
 
 function openTemplateBuilder(day=null,id=null){
@@ -1406,6 +1708,7 @@ function openTemplateBuilder(day=null,id=null){
     <input id="tplName" class="field left" placeholder="Routine name" value="${esc(t.name)}">
     <select id="tplDay" class="field left">${DOW.map((d,i)=>`<option value="${i}" ${t.weekday===i?'selected':''}>${d}</option>`).join('')}</select>
     <textarea id="tplNotes" class="field" placeholder="Workout note">${esc(t.notes||'')}</textarea>
+    <label class="card row" style="margin:0 0 14px"><div><h3>Share with crew</h3><p>Other crew members can see and fork this routine.</p></div><input id="tplPublic" type="checkbox" ${t.is_public===false?'':'checked'}></label>
     <h2>Exercises</h2>
     <input id="tplExSearch" class="field left" placeholder="Search exercise..." oninput="renderTemplateExercisePicker()">
     <div id="tplExPicker"></div>
@@ -1445,34 +1748,51 @@ function updateBuilderConfig(id,key,value){
   const cfg=builderState.selected.get(id);
   if(!cfg) return;
   if(key==='reps') cfg.reps=value.trim()||'8-12';
-  else cfg[key]=Math.max(0,Number(value)||0)||(key==='sets'?1:0);
+  // Clamp client-side to the same bounds skandi_template_items enforces in the DB
+  // (target_sets 1-12, target_rest_sec 0-900) so a bad hand-typed value gets caught
+  // here instead of failing the save_template_items RPC after the fact.
+  else if(key==='sets') cfg.sets=Math.min(12,Math.max(1,Number(value)||1));
+  else cfg.rest=Math.min(900,Math.max(0,Number(value)||0));
 }
 
+let savingTemplate=false;
 async function saveTemplate(id){
+  if(savingTemplate) return; // guards against a double-tap racing two delete+insert cycles into the
+                              // same (template_id, exercise_id, sort_order) unique constraint
   const checked=[...builderState.selected.keys()];
   if(!$('tplName').value.trim()||!checked.length) return alert('Add a name and at least one exercise.');
-  const payload={user_id:state.user.id,name:$('tplName').value.trim(),weekday:Number($('tplDay').value),notes:$('tplNotes').value.trim()||null,is_public:true,updated_at:new Date().toISOString()};
-  let templateId=id;
-  if(id){
-    const {error}=await sb.from('skandi_templates').update(payload).eq('id',id);
-    if(error) return alert(error.message);
+  savingTemplate=true;
+  const btn=document.querySelector('#modalCard button.primary');
+  if(btn){btn.disabled=true;btn.textContent='Saving...';}
+  try{
+    const payload={user_id:state.user.id,name:$('tplName').value.trim(),weekday:Number($('tplDay').value),notes:$('tplNotes').value.trim()||null,is_public:$('tplPublic').checked,updated_at:new Date().toISOString()};
+    let templateId=id;
+    if(id){
+      const {error}=await sb.from('skandi_templates').update(payload).eq('id',id);
+      if(error) return alert(error.message);
+    }
+    else {
+      const {data,error}=await sb.from('skandi_templates').insert(payload).select().single();
+      if(error) return alert(error.message);
+      templateId=data.id;
+    }
+    // Delete-old + insert-new happen inside one Postgres function (save_template_items,
+    // migration 052) instead of two separate client requests, so a bad row can't leave the
+    // template with its old items deleted and nothing to replace them.
+    const items=checked.map((exercise_id,idx)=>{
+      const cfg=builderState.selected.get(exercise_id);
+      return {exercise_id,sort_order:idx,target_sets:cfg.sets,target_reps:cfg.reps,target_rest_sec:cfg.rest};
+    });
+    const {error:itemsError}=await sb.rpc('save_template_items',{p_template_id:templateId,p_items:items});
+    if(itemsError) return alert(itemsError.message);
+    closeModal();
+    await loadAll();
+    render();
+  } finally {
+    savingTemplate=false;
+    // btn may already be gone from the DOM if closeModal() ran (success path) — harmless no-op then.
+    if(btn){btn.disabled=false;btn.textContent='Save routine';}
   }
-  else {
-    const {data,error}=await sb.from('skandi_templates').insert(payload).select().single();
-    if(error) return alert(error.message);
-    templateId=data.id;
-  }
-  const {error:deleteError}=await sb.from('skandi_template_items').delete().eq('template_id',templateId);
-  if(deleteError) return alert(deleteError.message);
-  const rows=checked.map((exercise_id,idx)=>{
-    const cfg=builderState.selected.get(exercise_id);
-    return {template_id:templateId,exercise_id,sort_order:idx,target_sets:cfg.sets,target_reps:cfg.reps,target_rest_sec:cfg.rest};
-  });
-  const {error:itemsError}=await sb.from('skandi_template_items').insert(rows);
-  if(itemsError) return alert(itemsError.message);
-  closeModal();
-  await loadAll();
-  render();
 }
 
 function openAddToWeek(templateId){
@@ -1490,13 +1810,23 @@ function openAddToWeek(templateId){
     <button class="btn primary" style="width:100%;margin-top:14px" onclick="confirmAddToWeek('${templateId}')">Add to my week</button>`;
 }
 
+// Shared by every path that assigns/forks a routine onto a weekday (confirmAddToWeek,
+// assignOwnRoutineToDay, useCommunityRoutineForDay) — these do a non-atomic bump-then-write and,
+// without a guard, a double-tap can create two templates claiming the same day.
+let assigningTemplateDay=false;
 async function confirmAddToWeek(templateId){
-  const weekday=Number($('forkDay').value);
-  const {error}=await forkTemplateToDay(templateId,weekday);
-  if(error) return alert(error.message);
-  closeModal();
-  await loadAll();
-  setView('train');
+  if(assigningTemplateDay) return;
+  assigningTemplateDay=true;
+  try{
+    const weekday=Number($('forkDay').value);
+    const {error}=await forkTemplateToDay(templateId,weekday);
+    if(error) return alert(error.message);
+    closeModal();
+    await loadAll();
+    setView('train');
+  } finally {
+    assigningTemplateDay=false;
+  }
 }
 
 async function forkTemplateToDay(templateId,weekday){
@@ -1520,13 +1850,19 @@ async function forkTemplateToDay(templateId,weekday){
 }
 
 async function assignOwnRoutineToDay(templateId,weekday){
-  const bumped=state.templates.find(x=>x.user_id===state.user.id&&x.weekday===weekday&&x.id!==templateId);
-  if(bumped) await sb.from('skandi_templates').update({weekday:null,updated_at:new Date().toISOString()}).eq('id',bumped.id);
-  const {error}=await sb.from('skandi_templates').update({weekday,updated_at:new Date().toISOString()}).eq('id',templateId);
-  if(error) return alert(error.message);
-  closeModal();
-  await loadAll();
-  setView('train');
+  if(assigningTemplateDay) return;
+  assigningTemplateDay=true;
+  try{
+    const bumped=state.templates.find(x=>x.user_id===state.user.id&&x.weekday===weekday&&x.id!==templateId);
+    if(bumped) await sb.from('skandi_templates').update({weekday:null,updated_at:new Date().toISOString()}).eq('id',bumped.id);
+    const {error}=await sb.from('skandi_templates').update({weekday,updated_at:new Date().toISOString()}).eq('id',templateId);
+    if(error) return alert(error.message);
+    closeModal();
+    await loadAll();
+    setView('train');
+  } finally {
+    assigningTemplateDay=false;
+  }
 }
 
 async function removeRoutineFromDay(templateId){
@@ -1542,7 +1878,7 @@ function openDayPicker(day){
   const mine=state.templates.filter(t=>t.user_id===state.user.id);
   const community=state.templates.filter(t=>t.user_id!==state.user.id);
   const pickerRow=(t,isMine)=>`<div class="row card" style="margin:0 0 8px">
-    <div><strong>${esc(t.name)}</strong><p>${state.items.filter(i=>i.template_id===t.id).length} exercises${isMine?'':' · by '+esc(t.profile?.name||'Crew member')}</p></div>
+    <div><strong>${esc(t.name)}</strong><p>${state.items.filter(i=>i.template_id===t.id).length} ${plural(state.items.filter(i=>i.template_id===t.id).length,'exercise')}${isMine?'':' · by '+esc(t.profile?.name||'Crew member')}</p></div>
     <button class="btn small primary" onclick="${isMine?`assignOwnRoutineToDay('${t.id}',Number($('dayPickerDay').value))`:`useCommunityRoutineForDay('${t.id}')`}">Use</button>
   </div>`;
   $('modal').classList.add('show');
@@ -1557,12 +1893,18 @@ function openDayPicker(day){
 }
 
 async function useCommunityRoutineForDay(templateId){
-  const weekday=Number($('dayPickerDay').value);
-  const {error}=await forkTemplateToDay(templateId,weekday);
-  if(error) return alert(error.message);
-  closeModal();
-  await loadAll();
-  setView('train');
+  if(assigningTemplateDay) return;
+  assigningTemplateDay=true;
+  try{
+    const weekday=Number($('dayPickerDay').value);
+    const {error}=await forkTemplateToDay(templateId,weekday);
+    if(error) return alert(error.message);
+    closeModal();
+    await loadAll();
+    setView('train');
+  } finally {
+    assigningTemplateDay=false;
+  }
 }
 
 function createRoutineForPickedDay(){
@@ -1657,12 +1999,13 @@ async function saveExercise(){
   if(!Object.keys(muscles).length) return alert('Set at least one muscle above 0%.');
   const slug=name.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'');
   const equipment=$('exEquipment').value.split(',').map(x=>x.trim()).filter(Boolean);
+  if(state.exercises.some(e=>e.slug===slug)) return alert('An exercise with that name already exists in the catalog.');
   const {error}=await sb.from('skandi_exercises').insert({
     slug,name,english_name:$('exEnglish').value.trim()||null,category:$('exCategory').value,
     equipment,muscles,media_url:$('exMedia').value.trim()||null,media_page_url:$('exPage').value.trim()||null,
     instructions:[],coach_tips:[],created_by:state.user.id
   });
-  if(error) return alert(error.message);
+  if(error) return alert(error.code==='23505'?'An exercise with that name already exists in the catalog.':error.message);
   closeModal();
   await loadAll();
   render();
