@@ -1397,6 +1397,36 @@ body.admin-mode .adm-search,body.admin-mode .adm-date,body.admin-mode .admin-sel
 .admin-user-meta{display:flex;flex-wrap:wrap;gap:6px 10px;margin-top:5px;color:#8f96a3;font-size:11.5px;line-height:1.25}
 .admin-user-status{display:flex;align-items:center;gap:10px;justify-self:end}
 .admin-user-arrow{width:26px;height:26px;border-radius:999px;background:rgba(255,255,255,.055);display:flex;align-items:center;justify-content:center;color:#9aa1ad;font-size:18px}
+.board-create-trigger{width:100%;display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:12px;align-items:center;margin-bottom:12px;padding:13px 14px;border:1px solid rgba(37,99,235,.24);border-radius:16px;background:linear-gradient(180deg,rgba(37,99,235,.13),rgba(255,255,255,.035));color:var(--white);cursor:pointer;text-align:left;box-shadow:0 14px 34px rgba(0,0,0,.18)}
+.board-create-icon{width:36px;height:36px;border-radius:13px;background:rgba(37,99,235,.18);display:flex;align-items:center;justify-content:center;color:#9cc2ff;font-size:23px;font-weight:720;line-height:1}
+.board-create-title{font-size:14px;font-weight:780;color:var(--white);line-height:1.15}
+.board-create-sub{font-size:11.5px;color:#8f96a3;margin-top:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.board-create-chevron{width:28px;height:28px;border-radius:999px;background:rgba(255,255,255,.06);display:flex;align-items:center;justify-content:center;color:#b7c3d4;font-size:18px}
+.board-create-form{margin-bottom:12px;padding:13px;border:1px solid rgba(255,255,255,.09);border-radius:16px;background:linear-gradient(180deg,rgba(255,255,255,.06),rgba(255,255,255,.032));box-shadow:0 14px 34px rgba(0,0,0,.2)}
+.board-create-form .field{margin-bottom:9px}
+.board-color-input{width:100%;height:34px;background:rgba(255,255,255,.045);border:1px solid rgba(255,255,255,.1);border-radius:10px;cursor:pointer}
+.board-create-actions{display:grid;grid-template-columns:1fr auto;gap:8px;margin-top:2px}
+.board-create-actions .btn{min-height:42px;border-radius:12px;font-size:13px}
+.board-create-actions .btn-sm{min-height:42px;border-radius:12px;padding:0 14px}
+#boards-list{display:grid;gap:8px}
+#boards-list .board-card{margin-bottom:0;border-radius:16px;border-color:rgba(255,255,255,.075);background:rgba(255,255,255,.032);box-shadow:none}
+.routine-board-row{display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:12px;align-items:center;padding:12px 13px}
+.routine-board-dot{width:13px;height:13px;border-radius:50%;box-shadow:0 0 0 6px rgba(255,255,255,.035);flex-shrink:0}
+.routine-board-main{min-width:0}
+.routine-board-name{font-size:14px;font-weight:780;color:var(--white);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;line-height:1.15}
+.routine-board-meta{display:flex;gap:7px;align-items:center;margin-top:4px;font-size:11px;color:#8f96a3}
+.routine-board-action{min-height:34px;border-radius:12px;border:1px solid rgba(127,176,255,.34);background:rgba(37,99,235,.1);color:#9cc2ff;padding:0 12px;font-size:12px;font-weight:760;cursor:pointer}
+.routine-board-done{border-color:rgba(16,185,129,.34);background:rgba(16,185,129,.12);color:#7ee6ad}
+.routine-board-cancel{border-color:rgba(255,255,255,.1);background:rgba(255,255,255,.035);color:#a3aab7}
+.routine-board-editor{padding:0 12px 12px}
+.routine-board-panel{background:rgba(255,255,255,.035);border:1px solid rgba(255,255,255,.08);border-radius:14px;padding:12px;margin-bottom:10px}
+.routine-board-panel input{border-radius:10px}
+.routine-board-section-label{font-size:10px;color:#8f96a3;font-weight:850;letter-spacing:.09em;text-transform:uppercase;margin:2px 0 8px}
+.routine-board-color-grid{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:6px}
+.routine-board-swatch{width:28px;height:28px;border-radius:50%;cursor:pointer;box-sizing:border-box;box-shadow:inset 0 0 0 1px rgba(0,0,0,.18)}
+.routine-board-tools{display:grid;grid-template-columns:1fr 1fr;gap:7px;margin:4px 0 10px}
+.routine-board-tool{min-height:40px;border-radius:12px;font-size:12px;font-weight:780;cursor:pointer}
+.routine-board-delete{border-radius:12px;min-height:40px}
 body.admin-mode #s-admin .hdr{position:relative;z-index:4}
 body.admin-mode #s-admin .adm-nav{position:sticky;top:0;z-index:3;box-shadow:0 10px 24px rgba(0,0,0,.18)}
 body.admin-mode #s-admin .scroll-area{padding-bottom:calc(24px + env(safe-area-inset-bottom,0px))}
@@ -1412,9 +1442,14 @@ body.admin-mode #s-admin .admin-filter-strip .filter-chip{flex:0 0 auto;min-widt
 body.admin-mode #user-list{display:grid;gap:8px}
 body.admin-mode .admin-user-card{padding:12px}
 body.admin-mode .admin-user-meta span{max-width:100%;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+body.admin-mode #a-boards .admin-page-head{margin-bottom:11px}
+body.admin-mode #boards-list{gap:9px}
 @media(max-width:360px){
   body.admin-mode .admin-user-card{grid-template-columns:auto minmax(0,1fr);gap:10px}
   body.admin-mode .admin-user-status{grid-column:1/-1;justify-self:stretch;justify-content:space-between;padding-left:42px}
+  .routine-board-row{grid-template-columns:auto minmax(0,1fr);gap:10px}
+  .routine-board-action{grid-column:1/-1;justify-self:stretch}
+  .board-create-actions{grid-template-columns:1fr}
 }
 </style>
 </head>
@@ -1931,12 +1966,7 @@ body.admin-mode .admin-user-meta span{max-width:100%;white-space:nowrap;overflow
       <div class="admin-page-head">
         <div><div class="admin-page-kicker">Biblioteca</div><h2 class="admin-page-title">Rutinas</h2><div class="admin-page-sub">Pizarrones y ejercicios</div></div>
       </div>
-      <div class="admin-card">
-        <div class="admin-card-title">Nuevo pizarrón</div>
-        <div class="field"><label>Nombre</label><input type="text" id="board-name-in" placeholder="Ej: Fuerza Lunes"></div>
-        <div class="field"><label>Color</label><input type="color" id="board-color-in" value="#2563eb" style="width:100%;height:40px;background:var(--card2);border:1px solid var(--border);border-radius:4px;cursor:pointer"></div>
-        <button class="btn" onclick="addBoardSb()">Crear pizarron</button>
-      </div>
+      <div id="board-create-panel"></div>
       <div id="boards-list"></div>
     </div>
 
@@ -6065,7 +6095,9 @@ let editingBoards=new Set();
 let addingExBoards=new Set();
 let assigningBoards=new Set();
 let expandedBoardExercises=new Set();
+let newBoardFormOpen=false;
 function toggleBoardEx(bid){if(expandedBoards.has(bid))expandedBoards.delete(bid);else expandedBoards.add(bid);renderBoardsAdmin();}
+function toggleNewBoardForm(){newBoardFormOpen=!newBoardFormOpen;renderBoardCreatePanel();}
 let _boardOriginalNames={};
 function toggleBoardEdit(bid){
   if(editingBoards.has(bid)){
@@ -9167,7 +9199,31 @@ function filterBoardAssignees(input){
   if(empty)empty.style.display=visible?'none':'block';
 }
 
+function renderBoardCreatePanel(){
+  const panel=document.getElementById('board-create-panel');
+  if(!panel)return;
+  if(!newBoardFormOpen){
+    panel.innerHTML='<button type="button" class="board-create-trigger" onclick="toggleNewBoardForm()">'
+      +'<span class="board-create-icon">+</span>'
+      +'<span><span class="board-create-title">Nuevo pizarrón</span><span class="board-create-sub">Crear rutina y elegir color</span></span>'
+      +'<span class="board-create-chevron">›</span>'
+      +'</button>';
+    return;
+  }
+  panel.innerHTML='<div class="board-create-form">'
+    +'<div class="admin-card-title" style="margin-bottom:9px">Nuevo pizarrón</div>'
+    +'<div class="field"><label>Nombre</label><input type="text" id="board-name-in" placeholder="Ej: Fuerza Lunes" onkeydown="if(event.key===&quot;Enter&quot;)addBoardSb()"></div>'
+    +'<div class="field"><label>Color</label><input class="board-color-input" type="color" id="board-color-in" value="#2563eb"></div>'
+    +'<div class="board-create-actions">'
+    +'<button class="btn" onclick="addBoardSb()">Crear pizarrón</button>'
+    +'<button class="btn-sm" style="background:transparent;border:1px solid var(--border);color:var(--gray)" onclick="toggleNewBoardForm()">Cancelar</button>'
+    +'</div>'
+    +'</div>';
+  setTimeout(()=>document.getElementById('board-name-in')?.focus(),0);
+}
+
 async function renderBoardsAdmin(){
+  renderBoardCreatePanel();
   await loadBoardsSb();
   await loadExerciseCatalogSb();
   const{data:allU}=await sb.from('profiles').select('id,name').neq('role','admin').neq('source','skandi').order('name').limit(1000);
@@ -9268,54 +9324,48 @@ async function renderBoardsAdmin(){
 
     // ── Card ───────────────────────────────────────
     card.innerHTML=
-      '<div style="padding:14px">'
-
-      // Header: name + Editar button (no Guardar visible by default)
-      +'<div style="display:flex;align-items:center;gap:8px;margin-bottom:10px">'
-      +'<div style="width:13px;height:13px;border-radius:50%;background:'+board.color+';flex-shrink:0"></div>'
-      +'<span style="flex:1;font-size:15px;font-weight:700;color:var(--white);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+esc(board.name)+'</span>'
-      +'<span style="font-size:11px;color:var(--gray);margin-right:4px">'+board.exercises.length+' ejs</span>'
+      '<div class="routine-board-row">'
+      +'<div class="routine-board-dot" style="background:'+board.color+'"></div>'
+      +'<div class="routine-board-main"><div class="routine-board-name">'+esc(board.name)+'</div><div class="routine-board-meta"><span>'+board.exercises.length+' ejs</span><span>'+assignedUsers.length+' socios</span></div></div>'
       +(isEditing?
-      '<div style="display:flex;gap:6px">'
-      +'<button onclick="toggleBoardEdit(&quot;'+board.id+'&quot;)" style="background:rgba(16,185,129,.2);border:1px solid var(--green);border-radius:6px;padding:7px 14px;color:var(--green);font-size:12px;font-weight:700;cursor:pointer;white-space:nowrap">✓ Listo</button>'
-      +'<button onclick="cancelBoardEdit(&quot;'+board.id+'&quot;)" style="background:transparent;border:1px solid var(--border);border-radius:6px;padding:7px 12px;color:var(--gray);font-size:12px;font-weight:700;cursor:pointer;white-space:nowrap">✕</button>'
-      +'</div>'
-      :'<button onclick="toggleBoardEdit(&quot;'+board.id+'&quot;)" style="background:rgba(37,99,235,.12);border:1px solid var(--blue);border-radius:6px;padding:7px 14px;color:var(--bl);font-size:12px;font-weight:700;cursor:pointer;white-space:nowrap">✏️ Editar</button>')
+        '<div style="display:flex;gap:6px"><button class="routine-board-action routine-board-done" onclick="toggleBoardEdit(&quot;'+board.id+'&quot;)">Listo</button><button class="routine-board-action routine-board-cancel" onclick="cancelBoardEdit(&quot;'+board.id+'&quot;)">Cerrar</button></div>'
+        :'<button class="routine-board-action" onclick="toggleBoardEdit(&quot;'+board.id+'&quot;)">Editar</button>')
       +'</div>'
 
       // Expanded edit area
       +(isEditing?
+        '<div class="routine-board-editor">'
         // Name input + color swatches
-        '<div style="background:var(--card2);border:1px solid var(--border);border-radius:8px;padding:12px;margin-bottom:10px">'
-        +'<div style="font-size:11px;color:var(--gray);font-weight:700;letter-spacing:.06em;margin-bottom:6px">NOMBRE</div>'
-        +'<input id="bn-'+board.id+'" value="'+esc(board.name)+'" style="width:100%;background:var(--card);border:1px solid var(--border);border-radius:4px;padding:9px;font-size:14px;font-weight:700;color:var(--white);outline:none;margin-bottom:10px;box-sizing:border-box" onkeydown="if(event.key===&quot;Enter&quot;)updateBoardNameSb(&quot;'+board.id+'&quot;)">'
-        +'<div style="font-size:11px;color:var(--gray);font-weight:700;letter-spacing:.06em;margin-bottom:8px">COLOR</div>'
-        +'<div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:4px">'
-        +COLORS.map(c=>'<div onclick="updateBoardColorSb(&quot;'+board.id+'&quot;,&quot;'+c+'&quot;)" style="width:28px;height:28px;border-radius:50%;background:'+c+';cursor:pointer;box-sizing:border-box;border:2.5px solid '+(board.color===c?'rgba(255,255,255,.9)':'rgba(255,255,255,.12)')+'" title="'+c+'"></div>').join('')
+        +'<div class="routine-board-panel">'
+        +'<div class="routine-board-section-label">Nombre</div>'
+        +'<input id="bn-'+board.id+'" value="'+esc(board.name)+'" style="width:100%;background:var(--card);border:1px solid var(--border);padding:10px;font-size:14px;font-weight:700;color:var(--white);outline:none;margin-bottom:10px;box-sizing:border-box" onkeydown="if(event.key===&quot;Enter&quot;)updateBoardNameSb(&quot;'+board.id+'&quot;)">'
+        +'<div class="routine-board-section-label">Color</div>'
+        +'<div class="routine-board-color-grid">'
+        +COLORS.map(c=>'<div class="routine-board-swatch" onclick="updateBoardColorSb(&quot;'+board.id+'&quot;,&quot;'+c+'&quot;)" style="background:'+c+';border:2.5px solid '+(board.color===c?'rgba(255,255,255,.9)':'rgba(255,255,255,.12)')+'" title="'+c+'"></div>').join('')
         +'</div>'
-        +'<div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-top:8px">'
+        +'<div style="display:grid;grid-template-columns:1fr 1fr;gap:7px;margin-top:9px">'
         +'<button class="btn-sm bblue" data-bid="'+board.id+'" onclick="updateBoardNameSb(this.dataset.bid)">Guardar</button>'
         +'<button class="btn-sm" style="background:transparent;border:1px solid var(--border);color:var(--gray)" onclick="cancelBoardEdit(&quot;'+board.id+'&quot;)">Cancelar</button>'
         +'</div>'
         +'</div>'
 
         // Exercises
-        +'<div style="font-size:11px;color:var(--gray);font-weight:700;letter-spacing:.06em;margin-bottom:8px">EJERCICIOS</div>'
+        +'<div class="routine-board-section-label">Ejercicios</div>'
         +(exHtml||'<div style="font-size:12px;color:var(--gray);padding:4px 0 10px">Sin ejercicios aún.</div>')
 
         // Add exercise + assign buttons
-        +'<div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-top:4px;margin-bottom:10px">'
-        +'<button onclick="addingExBoards.has(&quot;'+board.id+'&quot;)?addingExBoards.delete(&quot;'+board.id+'&quot;):addingExBoards.add(&quot;'+board.id+'&quot;);renderBoardsAdmin()" style="background:rgba(37,99,235,.12);border:1px solid var(--blue);border-radius:6px;padding:9px;color:var(--bl);font-size:12px;font-weight:700;cursor:pointer">+ Agregar ejercicio</button>'
-        +'<button onclick="assigningBoards.has(&quot;'+board.id+'&quot;)?assigningBoards.delete(&quot;'+board.id+'&quot;):assigningBoards.add(&quot;'+board.id+'&quot;);renderBoardsAdmin()" style="background:rgba(16,185,129,.1);border:1px solid var(--green);border-radius:6px;padding:9px;color:var(--green);font-size:12px;font-weight:700;cursor:pointer">👥 Asignar ('+assignedUsers.length+')</button>'
+        +'<div class="routine-board-tools">'
+        +'<button class="routine-board-tool" onclick="addingExBoards.has(&quot;'+board.id+'&quot;)?addingExBoards.delete(&quot;'+board.id+'&quot;):addingExBoards.add(&quot;'+board.id+'&quot;);renderBoardsAdmin()" style="background:rgba(37,99,235,.12);border:1px solid var(--blue);color:var(--bl)">+ Ejercicio</button>'
+        +'<button class="routine-board-tool" onclick="assigningBoards.has(&quot;'+board.id+'&quot;)?assigningBoards.delete(&quot;'+board.id+'&quot;):assigningBoards.add(&quot;'+board.id+'&quot;);renderBoardsAdmin()" style="background:rgba(16,185,129,.1);border:1px solid var(--green);color:var(--green)">Asignar ('+assignedUsers.length+')</button>'
         +'</div>'
 
         +addExForm
         +assignPanel
 
         // Delete button just above the "Listo" area
-        +'<button class="btn-sm bred" style="width:100%;margin-top:4px" data-bid="'+board.id+'" onclick="deleteBoardSb(this.dataset.bid)">🗑 Eliminar pizarrón</button>'
-      :'')
-      +'</div>';
+        +'<button class="btn-sm bred routine-board-delete" style="width:100%;margin-top:4px" data-bid="'+board.id+'" onclick="deleteBoardSb(this.dataset.bid)">Eliminar pizarrón</button>'
+        +'</div>'
+      :'');
 
     el.appendChild(card);
   });
@@ -13072,6 +13122,7 @@ async function addBoardSb(){
     if(error)throw error;
     boards.push({...data,assignedTo:[]});
     document.getElementById('board-name-in').value='';
+    newBoardFormOpen=false;
     hideLoading();
     toast('Pizarron creado: '+name,'ok');
     renderBoardsAdmin();
