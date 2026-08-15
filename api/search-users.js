@@ -34,6 +34,33 @@ async function makeAccessCode() {
   throw new Error('No se pudo generar codigo de acceso');
 }
 
+async function assignDefaultMemberBoards(userId) {
+  if (!userId) return 0;
+  try {
+    const { data, error } = await supabase.rpc('assign_default_member_boards', { p_user_id: userId });
+    if (!error) return Number(data) || 0;
+    console.warn('assign_default_member_boards rpc skipped:', error.message || error);
+  } catch (error) {
+    console.warn('assign_default_member_boards rpc skipped:', error.message || error);
+  }
+
+  const { data: boards, error: boardsError } = await supabase
+    .from('boards')
+    .select('id,name,color')
+    .eq('color', '#2563eb')
+    .order('created_at', { ascending: true });
+  if (boardsError) throw boardsError;
+  if (!boards || !boards.length) return 0;
+
+  const rows = boards.map((board) => ({ board_id: board.id, user_id: userId }));
+  const { data: inserted, error: insertError } = await supabase
+    .from('board_assignments')
+    .upsert(rows, { onConflict: 'board_id,user_id', ignoreDuplicates: true })
+    .select('board_id');
+  if (insertError) throw insertError;
+  return inserted ? inserted.length : 0;
+}
+
 async function requireAdmin(token) {
   if (!token) {
     const err = new Error('Sesion requerida');
@@ -149,11 +176,13 @@ async function createUser(req, res, token) {
     profile = insertedProfile;
   }
 
+  const defaultBoardCount = isReception ? 0 : await assignDefaultMemberBoards(userId);
+
   await supabase.from('admin_notifs').insert({
     message: (isReception ? 'Cuenta recepcion creada: ' : 'Socio creado por admin: ') + name + ' · ' + email + ' · Admin: ' + (adminProfile.name || 'Admin'),
   });
 
-  return res.status(200).json({ ok: true, profile });
+  return res.status(200).json({ ok: true, profile, default_board_count: defaultBoardCount });
 }
 
 const MAZ_UTC_OFFSET_H = 7;

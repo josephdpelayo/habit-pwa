@@ -1224,6 +1224,9 @@ html,body{background:radial-gradient(circle at 50% -18%,rgba(80,112,164,.16),tra
 #s-admin .scroll-area{padding:14px;background:linear-gradient(180deg,#080808,#050505)}
 .adm-nav{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:6px;padding:9px;background:rgba(11,11,12,.96);border-bottom-color:var(--hairline);overflow:visible}
 .adm-tab,.fin-subtab{border-radius:999px;border:none;padding:9px 5px;text-transform:none;letter-spacing:0;background:transparent;color:var(--gray);min-height:36px;min-width:0;width:100%;line-height:1.1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.adm-tab{display:flex;align-items:center;justify-content:center;gap:5px}
+.adm-tab svg{width:15px;height:15px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;flex-shrink:0}
+.adm-tab span{min-width:0;overflow:hidden;text-overflow:ellipsis}
 .adm-tab.active,.fin-subtab.active{border:none;background:linear-gradient(180deg,rgba(255,255,255,.12),rgba(255,255,255,.07));color:var(--white);box-shadow:inset 0 0 0 1px rgba(255,255,255,.08)}
 .admin-top-actions{display:flex;align-items:center;gap:6px;flex-shrink:0;margin-left:auto}
 .admin-icon-action{position:relative;width:34px;height:34px;border-radius:12px;border:1px solid var(--hairline);background:rgba(255,255,255,.045);color:#8f96a3;display:flex;align-items:center;justify-content:center;cursor:pointer}
@@ -1308,6 +1311,111 @@ html,body,.app,input,select,button,textarea{font-family:var(--font-ui);font-opti
 .fasting-time,.tu-stat-n,.coach-hero-stat strong,.met-v,.pprice,.shop-price{font-family:var(--font-ui);font-weight:720;letter-spacing:-.015em}
 .coach-session-count,.coach-task-chip,.fasting-toggle,.fasting-entry button,.fasting-goal,.coach-feedback-choice,.main-member-pill{font-weight:650}
 .score-unit-pill,.tu-unit-pill,.routine-tab,.habit-mode-btn strong{font-weight:620}
+
+/* Coaching lighter pass + member assistance */
+#v-rutinas .scroll-area{padding-bottom:calc(88px + env(safe-area-inset-bottom,0px))}
+#v-coaching .scroll-area{background:#080808;padding-left:12px;padding-right:12px}
+#v-coaching .board-card{border-radius:14px;background:rgba(255,255,255,.026);border-color:rgba(255,255,255,.065);box-shadow:none;margin-bottom:10px}
+#v-coaching .board-hdr{padding:12px 13px;background:transparent;border-bottom-color:rgba(255,255,255,.055)}
+#v-coaching .board-body{padding:12px}
+#v-coaching .coach-context{border-color:rgba(255,255,255,.055);background:rgba(255,255,255,.026);border-radius:14px;padding:11px 12px;margin-bottom:9px}
+#v-coaching .coach-context-title{font-size:14px;font-weight:660}
+#v-coaching .coach-context-sub{font-size:11px;color:#8f97a3}
+#v-coaching .coach-primary-action{min-height:43px;margin-bottom:10px;box-shadow:none}
+#v-coaching .coach-session-card{border-radius:14px;background:rgba(255,255,255,.025);border-color:rgba(255,255,255,.06);padding:10px 11px;margin-bottom:7px}
+#v-coaching .coach-session-count{background:rgba(255,255,255,.055);color:#c7d2e1}
+#v-coaching .coach-day-strip{box-shadow:none;background:transparent;border-color:rgba(255,255,255,.06);padding:8px 6px;margin-bottom:10px}
+#v-coaching .coach-day-num{width:32px;height:32px;border-radius:11px;background:rgba(255,255,255,.035)}
+#v-coaching .coach-week-score{gap:6px;margin-bottom:10px}
+#v-coaching .coach-week-score .tu-stat{border-radius:12px;background:rgba(255,255,255,.026);border-color:rgba(255,255,255,.06);padding:9px 6px}
+#v-coaching .coach-day-summary{margin-bottom:10px}
+#v-coaching .coach-task-row{border-radius:12px;background:rgba(255,255,255,.028);border-color:rgba(255,255,255,.06);padding:10px 11px;margin-bottom:7px}
+#v-coaching .coach-task-chip{background:rgba(255,255,255,.035);border-color:rgba(255,255,255,.07);padding:8px 10px}
+#v-coaching .fasting-card{box-shadow:none;border-radius:14px;background:rgba(255,255,255,.026);border-color:rgba(255,255,255,.065)}
+#v-coaching .fasting-card:after{display:none}
+#v-coaching .coach-empty{border-radius:14px;background:rgba(255,255,255,.024);border-color:rgba(255,255,255,.055);padding:18px 14px}
+.support-fab{position:fixed;right:max(14px,calc((100vw - 430px)/2 + 14px));bottom:calc(88px + env(safe-area-inset-bottom,0px));z-index:9997;display:none;align-items:center;gap:8px;min-height:44px;border:none;border-radius:999px;background:#20d492;color:#03120d;padding:9px 13px 9px 10px;font-size:12px;font-weight:800;box-shadow:0 14px 34px rgba(0,0,0,.42);cursor:pointer}
+.support-fab.show{display:inline-flex}
+.support-fab svg{width:20px;height:20px;fill:currentColor;flex-shrink:0}
+.support-fab:active{transform:translateY(1px);filter:brightness(.94)}
+
+/* Admin workstation layout */
+@media(min-width:900px){
+body.admin-mode{background:#050506}
+body.admin-mode .app{max-width:none;width:100vw;height:100vh;height:100dvh;background:#050506}
+body.admin-mode #s-admin.screen.active{display:grid;grid-template-columns:278px minmax(0,1fr);grid-template-rows:auto 1fr;height:100%;background:
+  radial-gradient(circle at 78% -18%,rgba(37,99,235,.16),transparent 34%),
+  linear-gradient(180deg,#080809 0%,#050506 100%)}
+body.admin-mode #s-admin .hdr{grid-column:1;grid-row:1;min-height:0;align-self:stretch;display:flex;flex-direction:column;align-items:stretch;gap:14px;padding:26px 18px 16px;background:rgba(9,9,10,.92);border-right:1px solid rgba(255,255,255,.08);border-bottom:0;box-shadow:none}
+body.admin-mode #s-admin .logo-wrap{width:100%;margin:0;padding:10px 11px;border-radius:16px}
+body.admin-mode #s-admin .header-logo-img{width:34px;height:34px}
+body.admin-mode #s-admin .ltxt{font-size:21px}
+body.admin-mode #s-admin .lsub{font-size:9px;color:#9dbfff}
+body.admin-mode #s-admin .admin-top-actions{display:grid;grid-template-columns:repeat(5,1fr);gap:8px;margin:0}
+body.admin-mode #s-admin .admin-icon-action{width:100%;height:42px;border-radius:14px}
+body.admin-mode #s-admin .logout-btn{margin:0;width:100%;border:1px solid rgba(255,255,255,.08);background:rgba(255,255,255,.035);padding:11px 12px;text-align:center}
+body.admin-mode #s-admin .adm-nav{grid-column:1;grid-row:2;display:flex;flex-direction:column;align-self:stretch;gap:7px;padding:4px 18px 24px;background:rgba(9,9,10,.92);border-right:1px solid rgba(255,255,255,.08);border-bottom:0}
+body.admin-mode #s-admin .adm-tab{display:flex;align-items:center;justify-content:flex-start;width:100%;min-height:44px;border-radius:14px;padding:0 13px;font-size:13px;color:#9aa1ad}
+body.admin-mode #s-admin .adm-tab svg{width:18px;height:18px}
+body.admin-mode #s-admin .adm-tab.active{background:linear-gradient(180deg,rgba(37,99,235,.22),rgba(37,99,235,.12));color:#fff;box-shadow:inset 0 0 0 1px rgba(127,176,255,.2)}
+body.admin-mode #s-admin .scroll-area{grid-column:2;grid-row:1/3;min-width:0;padding:28px clamp(24px,3vw,44px);background:transparent}
+body.admin-mode #s-admin .adm-section{max-width:1240px;margin:0 auto}
+body.admin-mode #s-admin .adm-section.active{width:100%}
+body.admin-mode .admin-page-head{margin:0 0 20px;padding:0 0 16px;border-bottom:1px solid rgba(255,255,255,.07)}
+body.admin-mode .admin-page-title{font-size:34px;letter-spacing:-.025em}
+body.admin-mode .admin-page-sub{font-size:13px}
+body.admin-mode #a-dash.active{display:grid;grid-template-columns:minmax(0,1.38fr) minmax(320px,.72fr);gap:18px;align-items:start}
+body.admin-mode #a-dash .admin-page-head{grid-column:1/-1}
+body.admin-mode #a-dash .daily-quote-wrap{grid-column:1/-1}
+body.admin-mode #dash-kpis{grid-column:1/-1;display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:10px}
+body.admin-mode #a-dash .admin-copy-note{grid-column:1/-1}
+body.admin-mode #a-dash>.slbl:nth-of-type(1),body.admin-mode #a-dash>.admin-chart-card:nth-of-type(1){grid-column:1}
+body.admin-mode #a-dash>.slbl:nth-of-type(2),body.admin-mode #a-dash>.admin-chart-card:nth-of-type(2){grid-column:1}
+body.admin-mode #a-dash>.slbl:nth-of-type(3),body.admin-mode #a-dash>.admin-chart-card.compact,body.admin-mode #expiry-section{grid-column:2}
+body.admin-mode #a-dash>.slbl:nth-of-type(3){grid-row:5}
+body.admin-mode #a-dash>.admin-chart-card.compact{grid-row:6}
+body.admin-mode #expiry-section{grid-row:7 / span 3}
+body.admin-mode .metrics{grid-template-columns:repeat(6,minmax(0,1fr))}
+body.admin-mode .met{min-height:104px;display:flex;flex-direction:column;justify-content:space-between}
+body.admin-mode .met-v{font-size:clamp(22px,2vw,32px);line-height:1.05}
+body.admin-mode .admin-chart-card{height:250px}
+body.admin-mode .admin-chart-card.compact{height:210px}
+body.admin-mode #a-users #user-list-area,body.admin-mode #a-coaching .admin-card,body.admin-mode #a-boards{max-width:980px}
+body.admin-mode #a-users .admin-toolbar{grid-template-columns:minmax(320px,1fr);margin-bottom:12px}
+body.admin-mode #a-users .admin-filter-strip{grid-template-columns:repeat(6,minmax(0,1fr));gap:8px}
+body.admin-mode #user-list{display:grid;gap:8px}
+body.admin-mode #a-slots,body.admin-mode #a-payments,body.admin-mode #a-reports,body.admin-mode #a-shop,body.admin-mode #a-comunidad,body.admin-mode #a-notifs,body.admin-mode #a-gaia{max-width:1100px}
+body.admin-mode .admin-card,body.admin-mode .new-board-form,body.admin-mode .admin-slot,body.admin-mode .expiry-card{box-shadow:0 18px 42px rgba(0,0,0,.22)}
+body.admin-mode .brow,body.admin-mode .adm-notif,body.admin-mode .expiry-card{padding:13px 14px;border-radius:15px}
+body.admin-mode .adm-search,body.admin-mode .adm-date,body.admin-mode .admin-select{min-height:46px}
+}
+.admin-user-card{display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:13px;align-items:center;width:100%;padding:13px 14px;border:1px solid rgba(255,255,255,.075);border-radius:16px;background:rgba(255,255,255,.034);cursor:pointer;transition:border-color .16s,background .16s,transform .16s}
+.admin-user-card:active{transform:scale(.995)}
+.admin-user-card:hover{border-color:rgba(127,176,255,.28);background:rgba(255,255,255,.05)}
+.admin-user-main{min-width:0}
+.admin-user-name{font-size:14px;font-weight:760;color:var(--white);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.admin-user-meta{display:flex;flex-wrap:wrap;gap:6px 10px;margin-top:5px;color:#8f96a3;font-size:11.5px;line-height:1.25}
+.admin-user-status{display:flex;align-items:center;gap:10px;justify-self:end}
+.admin-user-arrow{width:26px;height:26px;border-radius:999px;background:rgba(255,255,255,.055);display:flex;align-items:center;justify-content:center;color:#9aa1ad;font-size:18px}
+body.admin-mode #s-admin .hdr{position:relative;z-index:4}
+body.admin-mode #s-admin .adm-nav{position:sticky;top:0;z-index:3;box-shadow:0 10px 24px rgba(0,0,0,.18)}
+body.admin-mode #s-admin .scroll-area{padding-bottom:calc(24px + env(safe-area-inset-bottom,0px))}
+body.admin-mode #s-admin .admin-page-head{margin-top:2px}
+body.admin-mode #s-admin .admin-page-title{font-size:24px}
+body.admin-mode #s-admin .admin-card{border-radius:18px}
+body.admin-mode #s-admin .metrics{grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}
+body.admin-mode #s-admin .met{min-height:90px;border-radius:16px}
+body.admin-mode #s-admin .met-l{font-size:9.5px}
+body.admin-mode #s-admin .met-v{font-size:22px;line-height:1.08}
+body.admin-mode #s-admin .admin-filter-strip{gap:7px;overflow-x:auto;display:flex;padding-bottom:8px}
+body.admin-mode #s-admin .admin-filter-strip .filter-chip{flex:0 0 auto;min-width:86px}
+body.admin-mode #user-list{display:grid;gap:8px}
+body.admin-mode .admin-user-card{padding:12px}
+body.admin-mode .admin-user-meta span{max-width:100%;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+@media(max-width:360px){
+  body.admin-mode .admin-user-card{grid-template-columns:auto minmax(0,1fr);gap:10px}
+  body.admin-mode .admin-user-status{grid-column:1/-1;justify-self:stretch;justify-content:space-between;padding-left:42px}
+}
 </style>
 </head>
 <body>
@@ -1600,6 +1708,10 @@ html,body,.app,input,select,button,textarea{font-family:var(--font-ui);font-opti
     <span id="rest-timer-label">Descanso</span>
     <span class="rest-timer-hint">Toca para saltar</span>
   </div>
+  <button id="support-fab" class="support-fab" onclick="openSupportWhatsapp()" aria-label="Asistencia por WhatsApp">
+    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12.04 2C6.58 2 2.13 6.45 2.13 11.91c0 1.75.46 3.45 1.32 4.95L2 22l5.28-1.38a9.9 9.9 0 0 0 4.76 1.21h.01c5.46 0 9.9-4.45 9.9-9.91 0-2.65-1.03-5.14-2.9-7.01A9.82 9.82 0 0 0 12.04 2m0 1.67c2.2 0 4.27.86 5.82 2.42a8.19 8.19 0 0 1 2.41 5.82c0 4.54-3.7 8.24-8.24 8.24a8.2 8.2 0 0 1-4.19-1.15l-.3-.18-3.12.82.84-3.04-.2-.31a8.18 8.18 0 0 1-1.26-4.38c0-4.54 3.7-8.24 8.24-8.24M8.53 6.87c-.16 0-.43.06-.66.31-.22.25-.86.85-.86 2.06 0 1.22.88 2.4 1 2.56.13.17 1.75 2.79 4.31 3.8 2.13.85 2.57.68 3.03.64.47-.04 1.5-.61 1.72-1.2.21-.59.21-1.09.15-1.2-.06-.1-.23-.17-.48-.29-.25-.13-1.5-.74-1.73-.82-.23-.09-.4-.13-.57.12-.17.26-.65.83-.8 1-.15.17-.29.19-.55.06-.25-.13-1.06-.39-2.02-1.25-.75-.66-1.25-1.49-1.4-1.74-.14-.25-.02-.39.11-.51.11-.11.25-.29.37-.44.13-.14.17-.25.25-.41.08-.17.04-.31-.02-.44-.06-.13-.57-1.4-.79-1.91-.2-.5-.41-.43-.57-.43z"/></svg>
+    <span>Asistencia</span>
+  </button>
 
   <!-- BOTTOM NAV -->
   <div class="bnav">
@@ -1696,10 +1808,10 @@ html,body,.app,input,select,button,textarea{font-family:var(--font-ui);font-opti
     <button class="logout-btn" onclick="doLogout()">Salir</button>
   </div>
   <div class="adm-nav">
-    <button class="adm-tab" data-admin-tab="slots" onclick="admTab('slots')">Agenda</button>
-    <button class="adm-tab" data-admin-tab="boards" onclick="admTab('boards')">Rutinas</button>
-    <button class="adm-tab" data-admin-tab="users" onclick="admTab('users')">Socios</button>
-    <button class="adm-tab" data-admin-tab="coaching" onclick="admTab('coaching')">Coaching</button>
+    <button class="adm-tab" data-admin-tab="slots" onclick="admTab('slots')"><svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg><span>Agenda</span></button>
+    <button class="adm-tab" data-admin-tab="boards" onclick="admTab('boards')"><svg viewBox="0 0 24 24"><path d="M6 4h4v16H6zM14 4h4v16h-4zM4 9h2M10 9h4M18 9h2M4 15h2M10 15h4M18 15h2"/></svg><span>Rutinas</span></button>
+    <button class="adm-tab" data-admin-tab="users" onclick="admTab('users')"><svg viewBox="0 0 24 24"><circle cx="9" cy="7" r="4"/><path d="M2 21v-2a7 7 0 0114 0v2"/><path d="M17 11l2 2 4-4"/></svg><span>Socios</span></button>
+    <button class="adm-tab" data-admin-tab="coaching" onclick="admTab('coaching')"><svg viewBox="0 0 24 24"><path d="M4 19V5"/><path d="M4 19h16"/><path d="M8 15l3-3 3 2 5-7"/></svg><span>Coaching</span></button>
   </div>
   <div class="scroll-area" style="padding-top:.75rem">
 
@@ -2580,7 +2692,7 @@ async function loadUserData(){
 
 function showMainSb(){
   stopReception();
-  document.body.classList.remove('reception-mode');
+  document.body.classList.remove('reception-mode','admin-mode');
   document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
   const main=document.getElementById('s-main');
   if(main)main.classList.add('active');
@@ -3757,7 +3869,7 @@ async function doRegister(){
 }
 async function ensureProfile(reg){
   const{data:existing}=await sb.from('profiles').select('id').eq('id',sbUser.id).maybeSingle();
-  if(existing)return;
+  if(existing){await assignDefaultMemberBoardsSb(sbUser.id);return;}
   let code;
   for(let attempts=0;attempts<20;attempts++){
     code=String(Math.floor(1000+Math.random()*9000));
@@ -3766,6 +3878,18 @@ async function ensureProfile(reg){
   }
   const{error}=await sb.from('profiles').insert({id:sbUser.id,name:reg.name,phone:reg.phone||null,role:'user',access_code:code});
   if(error)throw error;
+  await assignDefaultMemberBoardsSb(sbUser.id);
+}
+async function assignDefaultMemberBoardsSb(userId){
+  if(!userId)return 0;
+  try{
+    const{data,error}=await sb.rpc('assign_default_member_boards',{p_user_id:userId});
+    if(error)throw error;
+    return Number(data)||0;
+  }catch(e){
+    console.warn('assignDefaultMemberBoardsSb:',e.message||e);
+    return 0;
+  }
 }
 async function completeRegister(reg){
   showLoading('Creando cuenta...');
@@ -3811,7 +3935,7 @@ async function doLogout(){
   chatMessages=[];chatSendContext=null;
   Object.values(_tuPrCharts).forEach(c=>{try{c.destroy();}catch(_){}});_tuPrCharts={};_tuScoreRows=null;
   await sb.auth.signOut().catch(()=>{});
-  document.body.classList.remove('reception-mode');
+  document.body.classList.remove('reception-mode','admin-mode');
   document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
   document.getElementById('s-auth').classList.add('active');
 }
@@ -3820,6 +3944,7 @@ function showMain(){showMainSb();}
 function showAdmin(){
   stopReception();
   document.body.classList.remove('reception-mode');
+  document.body.classList.add('admin-mode');
   document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
   const adm=document.getElementById('s-admin');
   if(adm)adm.classList.add('active');
@@ -3873,6 +3998,7 @@ function showReception(){
   if(accessDataInt){clearInterval(accessDataInt);accessDataInt=null;}
   stopUserNotifRealtime();
   stopChatRealtime();
+  document.body.classList.remove('admin-mode');
   document.body.classList.add('reception-mode');
   document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
   const rec=document.getElementById('s-reception');
@@ -4067,6 +4193,28 @@ function updateTopActions(v){
     btn.classList.toggle('primary',btn.dataset.topView===v);
   });
 }
+function supportWhatsappUrl(){
+  let context='mi rutina';
+  if(document.getElementById('v-coaching')?.classList.contains('active')){
+    context=coachHubActiveTab==='programa'?'mi calendario de coaching':(coachHubActiveTab==='hoy'?'mi entrenamiento de hoy':'coaching');
+  }else if(document.getElementById('v-rutinas')?.classList.contains('active')){
+    const visibleTitle=document.querySelector('#v-rutinas .board-title')?.textContent?.trim();
+    if(visibleTitle)context='mi rutina "'+visibleTitle+'"';
+  }else if(selectedRoutineBoardId&&Array.isArray(boards)){
+    const b=boards.find(x=>x.id===selectedRoutineBoardId);
+    if(b&&b.name)context='mi rutina "'+b.name+'"';
+  }
+  return 'https://wa.me/526623562816?text='+encodeURIComponent('Hola HABIT, necesito asistencia con '+context+'.');
+}
+function openSupportWhatsapp(){
+  window.open(supportWhatsappUrl(),'_blank','noopener');
+}
+function updateSupportFab(v){
+  const fab=document.getElementById('support-fab');
+  if(!fab)return;
+  const show=!!sbUser&&v==='rutinas';
+  fab.classList.toggle('show',show);
+}
 function sv(v){
   if(v==='rutinas'&&canAccessCoaching()){v='coaching';coachHubActiveTab='programa';}
   if(MEMBER_LOCKED_VIEWS.includes(v)&&!canUseMemberViews()){
@@ -4089,6 +4237,7 @@ function sv(v){
   updateShopCartBadge();
   updateCoachingNavBadge();
   updateTopActions(v);
+  updateSupportFab(v);
   ALL_VIEWS.forEach(n=>{const el=document.getElementById('v-'+n);if(el)el.classList.toggle('active',n===v);});
   if(v==='inicio'){renderMembershipStatus();loadAccessData().catch(console.error);renderDailyQuote();renderInicioCoachingWidgets();renderGuestGroup().catch(console.error);renderActiveBookings().catch(console.error);renderUserNotifsSb().catch(console.error);}
   if(v==='book'){const _ds=dk(curDate);loadSlotOccupancyFromSb(_ds).then(()=>renderBook().catch(console.error));}
@@ -4134,6 +4283,7 @@ function coachHubTab(t,btn){
   if(t==='programa')renderCoachProgramaSb();
   if(t==='mensajes')renderMensajesSb();
   if(t==='tu')renderCoachTuSb();
+  updateSupportFab('coaching');
 }
 function renderCoachHub(){coachHubTab(coachHubActiveTab,null);}
 function toggleCoachTodayBoard(id){
@@ -5112,7 +5262,7 @@ function canAccessCoaching(){
 }
 function showShopAccessGate(isLoggedIn){
   stopReception();
-  document.body.classList.remove('reception-mode');
+  document.body.classList.remove('reception-mode','admin-mode');
   document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
   const el=document.getElementById('s-public-shop');
   if(el)el.classList.add('active');
@@ -5124,7 +5274,7 @@ function showShopAccessGate(isLoggedIn){
 }
 function showPublicShop(){
   stopReception();
-  document.body.classList.remove('reception-mode');
+  document.body.classList.remove('reception-mode','admin-mode');
   document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
   const el=document.getElementById('s-public-shop');
   if(el)el.classList.add('active');
@@ -5133,6 +5283,7 @@ function showPublicShop(){
 }
 function showAuthFromShop(){
   history.replaceState({},'',location.pathname);
+  document.body.classList.remove('reception-mode','admin-mode');
   document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
   const authEl=document.getElementById('s-auth');
   if(authEl)authEl.classList.add('active');
@@ -6700,11 +6851,7 @@ async function renderRutinas(){
     const tabs=myBoards.map(b=>'<button class="routine-tab '+(b.id===selected.id?'active':'')+'" onclick="selectRoutineBoard(&quot;'+esc(b.id)+'&quot;)">'+esc(b.name)+'</button>').join('');
     const exercises=selected.exercises||[];
     const exHtml=renderExerciseListHtml(exercises,selected.id,selected.id);
-    const waHelpLink='https://wa.me/526623562816?text='+encodeURIComponent('Hola HABIT 👋 Tengo una duda sobre mi rutina "'+selected.name+'"');
     el.innerHTML='<div class="routine-tabs">'+tabs+'</div>'
-      +'<a href="'+waHelpLink+'" target="_blank" rel="noopener" style="display:flex;align-items:center;justify-content:center;gap:8px;background:#25d366;color:#04170d;font-weight:800;font-size:13px;padding:11px;border-radius:8px;text-decoration:none;margin-bottom:12px">'
-      +'<svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M12.04 2C6.58 2 2.13 6.45 2.13 11.91c0 1.75.46 3.45 1.32 4.95L2 22l5.28-1.38a9.9 9.9 0 0 0 4.76 1.21h.01c5.46 0 9.9-4.45 9.9-9.91 0-2.65-1.03-5.14-2.9-7.01A9.82 9.82 0 0 0 12.04 2m0 1.67c2.2 0 4.27.86 5.82 2.42a8.19 8.19 0 0 1 2.41 5.82c0 4.54-3.7 8.24-8.24 8.24a8.2 8.2 0 0 1-4.19-1.15l-.3-.18-3.12.82.84-3.04-.2-.31a8.18 8.18 0 0 1-1.26-4.38c0-4.54 3.7-8.24 8.24-8.24M8.53 6.87c-.16 0-.43.06-.66.31-.22.25-.86.85-.86 2.06 0 1.22.88 2.4 1 2.56.13.17 1.75 2.79 4.31 3.8 2.13.85 2.57.68 3.03.64.47-.04 1.5-.61 1.72-1.2.21-.59.21-1.09.15-1.2-.06-.1-.23-.17-.48-.29-.25-.13-1.5-.74-1.73-.82-.23-.09-.4-.13-.57.12-.17.26-.65.83-.8 1-.15.17-.29.19-.55.06-.25-.13-1.06-.39-2.02-1.25-.75-.66-1.25-1.49-1.4-1.74-.14-.25-.02-.39.11-.51.11-.11.25-.29.37-.44.13-.14.17-.25.25-.41.08-.17.04-.31-.02-.44-.06-.13-.57-1.4-.79-1.91-.2-.5-.41-.43-.57-.43z"/></svg>'
-      +'¿Dudas con tu rutina? Escríbenos por WhatsApp</a>'
       +'<div class="board-card"><div class="board-hdr"><div style="display:flex;align-items:center;gap:8px;min-width:0"><div style="width:10px;height:10px;border-radius:50%;background:'+esc(selected.color||'#2563eb')+'"></div><span class="board-title">'+esc(selected.name)+'</span></div><span class="badge bg-blue">'+exercises.length+' ejercicios</span></div><div class="board-body">'+exHtml+'</div></div>';
   }catch(e){
     el.innerHTML='<div class="empty">Error cargando rutinas: '+e.message+'</div>';
@@ -8703,7 +8850,7 @@ async function _loadAdminBookProfiles(){
   if(_adminBookProfilesLoading)return null;
   _adminBookProfilesLoading=true;
   try{
-    const{data}=await sb.from('profiles').select('id,name,phone,credits,plan_id,plan_expiry').neq('role','admin').neq('role','reception').order('name').limit(1000);
+    const{data}=await sb.from('profiles').select('id,name,phone,credits,plan_id,plan_expiry').neq('role','admin').neq('role','reception').neq('source','skandi').order('name').limit(1000);
     _adminBookProfiles=data||[];
   }finally{_adminBookProfilesLoading=false;}
   return _adminBookProfiles;
@@ -9023,7 +9170,7 @@ function filterBoardAssignees(input){
 async function renderBoardsAdmin(){
   await loadBoardsSb();
   await loadExerciseCatalogSb();
-  const{data:allU}=await sb.from('profiles').select('id,name').neq('role','admin').order('name').limit(1000);
+  const{data:allU}=await sb.from('profiles').select('id,name').neq('role','admin').neq('source','skandi').order('name').limit(1000);
   const users=allU||[];
   const el=document.getElementById('boards-list');
   if(!el)return;
@@ -9412,7 +9559,7 @@ async function renderDashboard(){
     const monthStart=today.slice(0,7);
     const cutoff14=addDaysDS(today,-14);
     const[{data:allU},{data:pays},{data:bks},{data:logs},{data:recentBks}]=await Promise.all([
-      sb.from('profiles').select('id,credits,plan_expiry,plan_id,plan_is_courtesy,role,name,phone').neq('role','admin'),
+      sb.from('profiles').select('id,credits,plan_expiry,plan_id,plan_is_courtesy,role,name,phone').neq('role','admin').neq('source','skandi'),
       sb.from('payments').select('amount,created_at,plan_name,user_id,payment_method,net_amount').order('created_at',{ascending:false}).limit(2000),
       sb.from('bookings').select('ds,status').eq('status','active'),
       sb.from('access_log').select('id'),
@@ -9719,7 +9866,7 @@ async function generateReport(){
       });
     } else if(type==='socios-activos'){
       const[{data:allU,error},{data:payRows,error:payErr}]=await Promise.all([
-        sb.from('profiles').select('*').neq('role','admin'),
+        sb.from('profiles').select('*').neq('role','admin').neq('source','skandi'),
         sb.from('payments').select('user_id,amount,payment_method,net_amount')
       ]);
       if(error)throw error;
@@ -9733,7 +9880,7 @@ async function generateReport(){
         html+='<div class="brow"><div class="brow-info"><div class="brow-name">'+esc(u.name)+'</div><div class="brow-meta">'+profilePlanLbl(u)+(u.plan_expiry?' · vence '+fmtDateMaz(u.plan_expiry):'')+'</div></div>'+(d!==null&&d<=5?'<span class="badge bg-amber">'+d+'d</span>':'')+'</div>';
       });
     } else if(type==='socios-vencidos'){
-      const{data:allU,error}=await sb.from('profiles').select('*').neq('role','admin');
+      const{data:allU,error}=await sb.from('profiles').select('*').neq('role','admin').neq('source','skandi');
       if(error)throw error;
       const exp=(allU||[]).filter(u=>{const d=daysUntil(u.plan_expiry);return d!==null&&d<=5;}).sort((a,b2)=>daysUntil(a.plan_expiry)-daysUntil(b2.plan_expiry));
       html+='<p class="slbl" style="margin-bottom:10px">Socios por vencer o vencidos · '+exp.length+' total</p>';
@@ -9754,7 +9901,7 @@ async function generateReport(){
       });
     } else if(type==='retencion'){
       const[{data:allU,error:errU},{data:allPays,error:errP}]=await Promise.all([
-        sb.from('profiles').select('*').neq('role','admin'),
+        sb.from('profiles').select('*').neq('role','admin').neq('source','skandi'),
         sb.from('payments').select('user_id,amount,payment_method,net_amount')
       ]);
       if(errU)throw errU;
@@ -9896,7 +10043,7 @@ async function renderUsersSb(){
   if(!list)return;
   list.innerHTML='<div class="empty">Cargando...</div>';
   try{
-    const{data:allU,error}=await sb.from('profiles').select('*').order('created_at');
+    const{data:allU,error}=await sb.from('profiles').select('*').neq('source','skandi').order('created_at');
     if(error)throw error;
     // Para "Activos": un socio solo cuenta si tiene al menos un pago real en su
     // historial (no cortesía) — esto también cubre cortesías viejas dadas antes
@@ -9947,20 +10094,23 @@ async function renderUsersSb(){
       const statusCls=isPrueba?'bg-amber':expired||noCredits?'bg-red':(lowCredits||expiring)?'bg-amber':active?'bg-green':'bg-gray';
       const statusTxt=isPrueba?'🎁 Cortesía':expired?'Vencida':noCredits?'Sin visitas':isUnlimited&&active?'Mensual':lowCredits?'Pocas visitas':expiring?'Por vencer':active?'Activo':'Sin plan';
       const div=document.createElement('div');
-      div.className='user-row';
-      div.style.cssText='flex-direction:column;align-items:flex-start;gap:0;padding:0;overflow:hidden;cursor:pointer';
+      div.className='admin-user-card';
+      div.onclick=()=>adminOpenUserProfile(u.id);
       div.innerHTML=
-        '<div style="display:flex;align-items:center;gap:10px;width:100%;padding:12px 4px" onclick="adminOpenUserProfile(&quot;'+u.id+'&quot;)">'
-        +avatarHtml(u.name,u.avatar_url,'post-av')
-        +'<div style="flex:1;min-width:0">'
-        +'<div class="brow-name">'+u.name+'</div>'
-        +'<div class="brow-meta">'+(u.phone||'Sin telefono')+'</div>'
-        +'<div class="brow-meta">'+planName+(u.credits>=999?' · Ilimitado':(plan&&plan.credits>=999)?' · Ilimitado':u.credits?' · '+u.credits+' visitas':' · Sin visitas')+(u.plan_expiry?' · vence '+fmtDateMaz(u.plan_expiry):'')+'</div>'
+        avatarHtml(u.name,u.avatar_url,'post-av')
+        +'<div class="admin-user-main">'
+        +'<div class="admin-user-name">'+esc(u.name||'Socio')+'</div>'
+        +'<div class="admin-user-meta">'
+        +'<span>'+esc(u.phone||'Sin telefono')+'</span>'
+        +'<span>'+esc(planName)+'</span>'
+        +'<span>'+(isUnlimited?'Ilimitado':((u.credits||0)+' visita'+((u.credits||0)===1?'':'s')))+'</span>'
+        +(u.plan_expiry?'<span>Vence '+esc(fmtDateMaz(u.plan_expiry))+'</span>':'')
+        +(u.coaching_beta?'<span>Coaching</span>':'')
         +'</div>'
-        +'<div style="display:flex;flex-direction:column;align-items:flex-end;gap:4px">'
+        +'</div>'
+        +'<div class="admin-user-status">'
         +'<span class="badge '+statusCls+'">'+statusTxt+'</span>'
-        +'<span style="font-size:16px;color:var(--gray);line-height:1">›</span>'
-        +'</div>'
+        +'<span class="admin-user-arrow">›</span>'
         +'</div>';
       list.appendChild(div);
     });
@@ -9994,7 +10144,7 @@ async function adminOpenCourtesyView(){
   view.style.display='block';
   view.innerHTML='<div class="empty">Cargando...</div>';
   try{
-    const{data:allU,error}=await sb.from('profiles').select('*').neq('role','admin').neq('role','reception');
+    const{data:allU,error}=await sb.from('profiles').select('*').neq('role','admin').neq('role','reception').neq('source','skandi');
     if(error)throw error;
     const socios=(allU||[]).filter(u=>u.plan_id==='prueba'||!!u.plan_is_courtesy);
     let grantMap={};
@@ -10282,7 +10432,7 @@ async function renderGaiaTab(){
   if(q.length<2){list.innerHTML='<div class="empty" style="color:var(--gray);font-size:13px">Escribe para buscar un socio.</div>';return;}
   list.innerHTML='<div class="empty">Buscando...</div>';
   try{
-    const{data,error}=await sb.from('profiles').select('id,name,phone,email,credits,plan_expiry').neq('role','admin').neq('role','reception').or('name.ilike.%'+q+'%,phone.ilike.%'+q+'%,email.ilike.%'+q+'%').order('name').limit(20);
+    const{data,error}=await sb.from('profiles').select('id,name,phone,email,credits,plan_expiry').neq('role','admin').neq('role','reception').neq('source','skandi').or('name.ilike.%'+q+'%,phone.ilike.%'+q+'%,email.ilike.%'+q+'%').order('name').limit(20);
     if(error)throw error;
     if(!data||!data.length){list.innerHTML='<div class="empty">Sin resultados.</div>';return;}
     list.innerHTML=data.map(u=>
@@ -12471,7 +12621,8 @@ async function adminCreateUserSb(){
     if(!res.ok)throw new Error(payload.error||'No se pudo crear el socio');
     hideLoading();
     ['nu-name','nu-email','nu-phone','nu-pass'].forEach(id=>document.getElementById(id).value='');
-    toast('Socio creado: '+name+(payload.profile?.access_code?' · '+payload.profile.access_code+'#':''),'ok');
+    const defaultBoards=Number(payload.default_board_count)||0;
+    toast('Socio creado: '+name+(payload.profile?.access_code?' · '+payload.profile.access_code+'#':'')+(defaultBoards?' · '+defaultBoards+' rutinas base':''),'ok');
     const f=document.getElementById('new-socio-form');if(f)f.style.display='none';
     renderUsersSb();
     if(document.getElementById('a-notifs')?.classList.contains('active'))renderAdminNotifsSb();
