@@ -364,6 +364,21 @@ input,select,button,textarea{font-family:'Inter',sans-serif}
 .member-routine-row.active .member-routine-pill{border-color:rgba(127,176,255,.3);background:rgba(37,99,235,.14);color:#9cc2ff}
 .member-routine-detail{border:1px solid rgba(255,255,255,.075);border-radius:18px;background:rgba(255,255,255,.03);overflow:hidden}
 .member-routine-detail.inline{margin-bottom:4px}
+.member-routine-screen{display:grid;gap:12px}
+.member-routine-hero{border:1px solid rgba(255,255,255,.075);border-radius:20px;background:linear-gradient(180deg,rgba(255,255,255,.055),rgba(255,255,255,.028));padding:15px;display:grid;gap:12px}
+.member-routine-hero-top{display:flex;align-items:flex-start;justify-content:space-between;gap:12px}
+.member-routine-kicker{font-size:10px;font-weight:850;letter-spacing:.1em;text-transform:uppercase;color:#8f97a5;margin-bottom:6px}
+.member-routine-hero-title{display:flex;align-items:center;gap:10px;min-width:0}
+.member-routine-hero-title strong{display:block;font-size:24px;font-weight:860;line-height:1.05;color:var(--white);letter-spacing:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.member-routine-change{border:1px solid rgba(127,176,255,.25);background:rgba(37,99,235,.12);color:#9cc2ff;border-radius:999px;padding:10px 12px;font-size:12px;font-weight:820;cursor:pointer;white-space:nowrap}
+.member-routine-hero-meta{display:flex;flex-wrap:wrap;gap:7px}
+.member-routine-hero-meta span{border:1px solid rgba(255,255,255,.08);background:rgba(255,255,255,.04);border-radius:999px;padding:7px 10px;color:#aeb7c6;font-size:11px;font-weight:760}
+.member-routine-picker{position:fixed;inset:0;z-index:9998;display:flex;align-items:flex-end;justify-content:center;background:rgba(0,0,0,.62);backdrop-filter:blur(10px);padding:0 10px calc(env(safe-area-inset-bottom,0px) + 10px)}
+.member-routine-picker-sheet{width:100%;max-width:430px;border:1px solid rgba(255,255,255,.09);border-radius:22px;background:#0b0b0d;box-shadow:0 -20px 60px rgba(0,0,0,.55);padding:12px;max-height:min(72vh,620px);overflow:auto}
+.member-routine-picker-head{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:4px 2px 12px}
+.member-routine-picker-head strong{font-size:15px;font-weight:820;color:var(--white)}
+.member-routine-picker-head button{border:1px solid rgba(255,255,255,.09);background:rgba(255,255,255,.045);color:#dbe4f0;border-radius:999px;width:34px;height:34px;font-size:18px;cursor:pointer}
+.member-routine-picker-list{display:grid;gap:8px}
 .member-routine-head{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:14px 14px 12px;border-bottom:1px solid rgba(255,255,255,.06);background:rgba(255,255,255,.026)}
 .member-routine-title{display:flex;align-items:center;gap:9px;min-width:0}
 .member-routine-title strong{display:block;font-size:18px;font-weight:840;color:var(--white);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
@@ -6276,10 +6291,14 @@ function cancelBoardEdit(bid){
   renderBoardsAdmin();
 }
 function toggleNewSocioForm(){const f=document.getElementById('new-socio-form');if(!f)return;const open=f.style.display!=='none';f.style.display=open?'none':'block';}
+let routinePickerOpen=false;
 function selectRoutineBoard(bid){
   selectedRoutineBoardId=bid;
+  routinePickerOpen=false;
   renderRutinas();
 }
+function openRoutinePicker(){routinePickerOpen=true;renderRutinas();}
+function closeRoutinePicker(){routinePickerOpen=false;renderRutinas();}
 let scoreWeightUnit=localStorage.getItem('habit_weight_unit')||'kg';
 function openLogScore(ctx){
   logScoreCtx=ctx; // {boardId,exIdx,exName,exId}
@@ -7026,24 +7045,36 @@ async function renderRutinas(){
       return;
     }
     if(!selectedRoutineBoardId||!myBoards.some(b=>b.id===selectedRoutineBoardId))selectedRoutineBoardId=myBoards[0].id;
+    const selected=myBoards.find(b=>b.id===selectedRoutineBoardId)||myBoards[0];
     const routineRows=myBoards.map(b=>{
       const count=(b.exercises||[]).length;
       const isActive=b.id===selectedRoutineBoardId;
-      const exercises=b.exercises||[];
-      const exHtml=isActive?renderExerciseListHtml(exercises,b.id,b.id):'';
-      return '<div class="member-routine-item">'
-        +'<button class="member-routine-row '+(isActive?'active':'')+'" onclick="selectRoutineBoard(&quot;'+esc(b.id)+'&quot;)">'
+      return '<button class="member-routine-row '+(isActive?'active':'')+'" onclick="selectRoutineBoard(&quot;'+esc(b.id)+'&quot;)">'
         +'<span class="member-routine-dot" style="background:'+esc(b.color||'#2563eb')+'"></span>'
         +'<span class="member-routine-main"><span class="member-routine-name">'+esc(b.name)+'</span><span class="member-routine-sub">'+count+' ejercicio'+(count===1?'':'s')+'</span></span>'
-        +'<span class="member-routine-pill">'+(isActive?'Abierta':'Ver')+'</span>'
-        +'</button>'
-        +(isActive?'<div class="member-routine-detail inline">'
-          +'<div class="member-routine-head"><div class="member-routine-title"><span class="member-routine-dot" style="background:'+esc(b.color||'#2563eb')+'"></span><strong>'+esc(b.name)+'</strong></div><span class="badge bg-blue">'+exercises.length+' ejercicios</span></div>'
-          +'<div class="member-routine-body">'+(exercises.length?exHtml:'<div class="member-routine-empty">Esta rutina aún no tiene ejercicios.</div>')+'</div>'
-          +'</div>':'')
-        +'</div>';
+        +'<span class="member-routine-pill">'+(isActive?'Actual':'Elegir')+'</span>'
+        +'</button>';
     }).join('');
-    el.innerHTML='<div class="member-routine-list">'+routineRows+'</div>';
+    const exercises=selected.exercises||[];
+    const exHtml=renderExerciseListHtml(exercises,selected.id,selected.id);
+    el.innerHTML='<div class="member-routine-screen">'
+      +'<div class="member-routine-hero">'
+      +'<div class="member-routine-hero-top">'
+      +'<div style="min-width:0"><div class="member-routine-kicker">Rutina actual</div><div class="member-routine-hero-title"><span class="member-routine-dot" style="background:'+esc(selected.color||'#2563eb')+'"></span><strong>'+esc(selected.name)+'</strong></div></div>'
+      +'<button class="member-routine-change" onclick="openRoutinePicker()">Cambiar</button>'
+      +'</div>'
+      +'<div class="member-routine-hero-meta"><span>'+exercises.length+' ejercicio'+(exercises.length===1?'':'s')+'</span><span>'+myBoards.length+' rutina'+(myBoards.length===1?'':'s')+' asignada'+(myBoards.length===1?'':'s')+'</span></div>'
+      +'</div>'
+      +'<div class="member-routine-detail">'
+      +'<div class="member-routine-head"><div class="member-routine-title"><span class="member-routine-dot" style="background:'+esc(selected.color||'#2563eb')+'"></span><strong>'+esc(selected.name)+'</strong></div><span class="badge bg-blue">'+exercises.length+' ejercicios</span></div>'
+      +'<div class="member-routine-body">'+(exercises.length?exHtml:'<div class="member-routine-empty">Esta rutina aún no tiene ejercicios.</div>')+'</div>'
+      +'</div>'
+      +(routinePickerOpen?'<div class="member-routine-picker" onclick="if(event.target===this)closeRoutinePicker()">'
+        +'<div class="member-routine-picker-sheet">'
+        +'<div class="member-routine-picker-head"><strong>Cambiar rutina</strong><button onclick="closeRoutinePicker()">×</button></div>'
+        +'<div class="member-routine-picker-list">'+routineRows+'</div>'
+        +'</div></div>':'')
+      +'</div>';
   }catch(e){
     el.innerHTML='<div class="empty">Error cargando rutinas: '+e.message+'</div>';
     console.error('renderRutinas:',e);
