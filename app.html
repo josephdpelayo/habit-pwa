@@ -1427,6 +1427,81 @@ body.admin-mode .adm-search,body.admin-mode .adm-date,body.admin-mode .admin-sel
 .routine-board-tools{display:grid;grid-template-columns:1fr 1fr;gap:7px;margin:4px 0 10px}
 .routine-board-tool{min-height:40px;border-radius:12px;font-size:12px;font-weight:780;cursor:pointer}
 .routine-board-delete{border-radius:12px;min-height:40px}
+.admin-date-rail{margin-bottom:12px}
+.admin-date-rail .adm-date{min-height:44px;border-radius:14px;background:rgba(255,255,255,.055);border-color:rgba(255,255,255,.09);box-shadow:inset 0 0 0 1px rgba(255,255,255,.018)}
+.admin-segmented{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px;margin-bottom:13px;padding:5px;border:1px solid rgba(255,255,255,.08);border-radius:16px;background:rgba(255,255,255,.035)}
+.admin-segmented .fin-subtab{min-height:38px;padding:0 8px}
+.admin-form-card,.admin-ally-card{box-shadow:none}
+.admin-search-hero{margin-bottom:11px}
+body.admin-mode #s-admin .scroll-area{padding-top:10px!important}
+body.admin-mode #s-admin .adm-section{padding-bottom:10px}
+body.admin-mode #s-admin .admin-page-head{align-items:flex-start;margin:0 0 12px;padding-bottom:0;border-bottom:0}
+body.admin-mode #s-admin .admin-page-kicker{font-size:9.5px;margin-bottom:4px;color:#798395}
+body.admin-mode #s-admin .admin-page-title{font-size:23px;line-height:1.05}
+body.admin-mode #s-admin .admin-page-sub{font-size:11.5px;margin-top:4px;color:#8d95a3}
+body.admin-mode #s-admin .admin-status-pill{padding:6px 9px;font-size:10.5px}
+body.admin-mode #s-admin .admin-card,
+body.admin-mode #s-admin .perfil-section,
+body.admin-mode #s-admin .post-card,
+body.admin-mode #s-admin .stripe-box{border-radius:16px;border-color:rgba(255,255,255,.075);background:rgba(255,255,255,.033);box-shadow:none;padding:13px;margin-bottom:10px}
+body.admin-mode #s-admin .admin-card-title{font-size:12.5px;margin-bottom:9px}
+body.admin-mode #s-admin .slbl{font-size:10.5px;color:#8f97a5;letter-spacing:.08em;text-transform:uppercase}
+body.admin-mode #s-admin .empty{border-radius:16px;border:1px dashed rgba(255,255,255,.09);background:rgba(255,255,255,.025);padding:16px 13px;color:#8f97a5}
+body.admin-mode #s-admin .divider{border-top-color:rgba(255,255,255,.065);margin:11px 0}
+body.admin-mode #s-admin .brow,
+body.admin-mode #s-admin .adm-notif,
+body.admin-mode #s-admin .mensajes-inbox-row{border:1px solid rgba(255,255,255,.072);border-radius:15px;background:rgba(255,255,255,.033);padding:12px;margin-bottom:8px;box-shadow:none}
+body.admin-mode #s-admin .brow:active,
+body.admin-mode #s-admin .mensajes-inbox-row:active{background:rgba(255,255,255,.055);transform:scale(.995)}
+body.admin-mode #s-admin .brow-name{font-size:13.5px;font-weight:760;letter-spacing:0}
+body.admin-mode #s-admin .brow-meta{font-size:11.3px;color:#8f97a5;line-height:1.35}
+body.admin-mode #s-admin .badge,
+body.admin-mode #s-admin .order-status,
+body.admin-mode #s-admin .perk{border-radius:999px;padding:5px 8px;font-size:10.5px;font-weight:780}
+body.admin-mode #s-admin .btn,
+body.admin-mode #s-admin .btn-sm,
+body.admin-mode #s-admin .btn-ghost{border-radius:12px}
+body.admin-mode #s-admin .btn-sm{min-height:34px}
+body.admin-mode #s-admin input,
+body.admin-mode #s-admin select,
+body.admin-mode #s-admin textarea,
+body.admin-mode #s-admin .adm-search,
+body.admin-mode #s-admin .adm-date,
+body.admin-mode #s-admin .admin-select{border-radius:13px;border-color:rgba(255,255,255,.09);background:rgba(255,255,255,.045);font-size:13px}
+body.admin-mode #s-admin .field label{font-size:10px;color:#8f97a5;letter-spacing:.07em;text-transform:uppercase}
+body.admin-mode #s-admin .metrics{gap:8px}
+body.admin-mode #s-admin .met{min-height:78px;border-radius:16px;border-color:rgba(255,255,255,.075);background:linear-gradient(180deg,rgba(255,255,255,.052),rgba(255,255,255,.028));padding:12px;box-shadow:none}
+body.admin-mode #s-admin .met-l{font-size:9.5px;line-height:1.2;color:#8f97a5}
+body.admin-mode #s-admin .met-v{font-size:21px;line-height:1.05}
+body.admin-mode #s-admin .admin-chart-card{border-radius:16px;border-color:rgba(255,255,255,.075);background:rgba(255,255,255,.028);box-shadow:none;height:188px;padding:12px}
+body.admin-mode #s-admin .admin-chart-card.compact{min-height:155px;height:auto}
+body.admin-mode #a-dash .daily-quote-wrap{margin-bottom:10px}
+body.admin-mode #a-dash .admin-copy-note{margin-bottom:11px;font-size:11.5px;color:#8f97a5}
+body.admin-mode #a-slots .metrics{margin-bottom:12px!important}
+body.admin-mode #a-slots .adm-slot-row{display:grid;grid-template-columns:54px minmax(0,1fr) auto;gap:10px;align-items:start}
+body.admin-mode #a-slots .slot-time{font-size:12px;font-weight:850;color:#d4d9e2;padding-top:3px}
+body.admin-mode #a-slots .adm-slot-head{gap:5px;flex-wrap:wrap}
+body.admin-mode #a-slots .adm-slot-actions{display:flex;flex-direction:column;gap:6px}
+body.admin-mode #a-slots .adm-block-panel{grid-column:1/-1;border-radius:14px;background:rgba(255,255,255,.038)}
+body.admin-mode #a-users #new-socio-form{padding:13px}
+body.admin-mode #a-coaching .admin-card,
+body.admin-mode #a-mensajes .admin-card{padding:12px}
+body.admin-mode #a-payments .fin-panel{display:none}
+body.admin-mode #a-payments .fin-panel.active{display:block}
+body.admin-mode #a-payments #payment-list,
+body.admin-mode #a-payments #gastos-list,
+body.admin-mode #a-payments #cuentas-list{display:grid;gap:8px}
+body.admin-mode #a-payments #payment-list>.brow{margin-bottom:0}
+body.admin-mode #a-shop #admin-shop-list{display:grid;gap:9px}
+body.admin-mode #a-shop .cart-total{border-radius:13px;background:rgba(255,255,255,.045);padding:10px 12px;margin-top:10px}
+body.admin-mode #a-comunidad #adm-feed-content{display:grid;gap:10px}
+body.admin-mode #a-comunidad .post-card{margin-bottom:0}
+body.admin-mode #a-comunidad .post-reactions{gap:6px;overflow-x:auto}
+body.admin-mode #a-notifs #adm-notif-content{display:grid;gap:8px}
+body.admin-mode #a-notifs .adm-notif{margin-bottom:0}
+body.admin-mode #a-gaia .admin-ally-card{display:block}
+body.admin-mode #a-gaia #gaia-user-list{display:grid;gap:8px}
+body.admin-mode #a-reports .admin-form-card .btn{min-height:44px}
 body.admin-mode #s-admin .hdr{position:relative;z-index:4}
 body.admin-mode #s-admin .adm-nav{position:sticky;top:0;z-index:3;box-shadow:0 10px 24px rgba(0,0,0,.18)}
 body.admin-mode #s-admin .scroll-area{padding-bottom:calc(24px + env(safe-area-inset-bottom,0px))}
@@ -1882,7 +1957,7 @@ body.admin-mode #boards-list{gap:9px}
       <div class="admin-page-head">
         <div><div class="admin-page-kicker">Operación</div><h2 class="admin-page-title">Agenda</h2><div class="admin-page-sub">Reservas, cupos y bloqueos</div></div>
       </div>
-      <div class="admin-card"><input type="date" class="adm-date" id="adm-date" onchange="renderAdmSlots()"></div>
+      <div class="admin-date-rail"><input type="date" class="adm-date" id="adm-date" onchange="renderAdmSlots()"></div>
       <div id="adm-slot-content"></div>
     </div>
 
@@ -1991,7 +2066,7 @@ body.admin-mode #boards-list{gap:9px}
       <div class="admin-page-head">
         <div><div class="admin-page-kicker">Caja</div><h2 class="admin-page-title">Finanzas</h2><div class="admin-page-sub">Ingresos, gastos y cuentas</div></div>
       </div>
-      <div class="admin-card flush" style="display:flex;gap:4px;margin-bottom:14px;padding:6px">
+      <div class="admin-segmented">
         <button class="fin-subtab active" onclick="finSubTab('resumen',this)">Resumen</button>
         <button class="fin-subtab" onclick="finSubTab('gastos',this)">Gastos</button>
         <button class="fin-subtab" onclick="finSubTab('cuentas',this)">Cuentas</button>
@@ -2022,7 +2097,7 @@ body.admin-mode #boards-list{gap:9px}
       <div class="admin-page-head">
         <div><div class="admin-page-kicker">Análisis</div><h2 class="admin-page-title">Reportes</h2><div class="admin-page-sub">Exportables operativos</div></div>
       </div>
-      <div class="admin-card">
+      <div class="admin-card admin-form-card">
         <div class="admin-card-title">Generar reporte</div>
         <div class="field"><label>Tipo de reporte</label>
           <select id="rpt-type">
@@ -2054,7 +2129,7 @@ body.admin-mode #boards-list{gap:9px}
       <div class="admin-page-head">
         <div><div class="admin-page-kicker">Alianza</div><h2 class="admin-page-title">GAIA</h2><div class="admin-page-sub">Paquetes y beneficios cruzados</div></div>
       </div>
-      <div class="admin-card">
+      <div class="admin-card admin-ally-card">
         <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px">
           <img src="icons/logo-original.png" style="height:28px;border-radius:4px" alt="">
           <span style="font-size:13px;color:var(--gray)">+</span>
@@ -2062,7 +2137,7 @@ body.admin-mode #boards-list{gap:9px}
         </div>
         <p style="font-size:12px;color:var(--gray);margin:0">Registra un paquete de alianza. Se suman las visitas HABIT al socio y se registra el ingreso a caja.</p>
       </div>
-      <input class="adm-search" id="gaia-search" placeholder="Buscar socio por nombre o telefono..." oninput="renderGaiaTab()">
+      <input class="adm-search admin-search-hero" id="gaia-search" placeholder="Buscar socio por nombre o telefono..." oninput="renderGaiaTab()">
       <div id="gaia-user-list"><div class="empty" style="color:var(--gray);font-size:13px">Escribe para buscar un socio.</div></div>
     </div>
 
