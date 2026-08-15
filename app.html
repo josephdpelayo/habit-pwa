@@ -352,6 +352,21 @@ input,select,button,textarea{font-family:'Inter',sans-serif}
 .routine-tabs{display:flex;gap:8px;overflow-x:auto;padding-bottom:10px;margin-bottom:12px;-webkit-overflow-scrolling:touch}
 .routine-tab{flex:0 0 auto;border:1px solid var(--border);background:var(--card);color:var(--gray);border-radius:4px;padding:10px 12px;font-size:12px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;cursor:pointer;max-width:180px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .routine-tab.active{border-color:var(--blue);background:rgba(37,99,235,.12);color:var(--bl)}
+.member-routine-list{display:grid;gap:8px;margin-bottom:12px}
+.member-routine-row{width:100%;display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:11px;align-items:center;border:1px solid rgba(255,255,255,.075);background:rgba(255,255,255,.032);border-radius:16px;padding:12px;color:var(--white);text-align:left;cursor:pointer}
+.member-routine-row.active{border-color:rgba(127,176,255,.45);background:linear-gradient(180deg,rgba(37,99,235,.16),rgba(255,255,255,.04))}
+.member-routine-dot{width:11px;height:11px;border-radius:50%;box-shadow:0 0 0 6px rgba(255,255,255,.035)}
+.member-routine-main{min-width:0}
+.member-routine-name{font-size:14px;font-weight:820;color:var(--white);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;line-height:1.15}
+.member-routine-sub{font-size:11px;color:#8f97a5;margin-top:4px}
+.member-routine-pill{border:1px solid rgba(255,255,255,.09);background:rgba(255,255,255,.045);color:#aeb7c6;border-radius:999px;padding:6px 9px;font-size:10.5px;font-weight:820;white-space:nowrap}
+.member-routine-row.active .member-routine-pill{border-color:rgba(127,176,255,.3);background:rgba(37,99,235,.14);color:#9cc2ff}
+.member-routine-detail{border:1px solid rgba(255,255,255,.075);border-radius:18px;background:rgba(255,255,255,.03);overflow:hidden}
+.member-routine-head{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:14px 14px 12px;border-bottom:1px solid rgba(255,255,255,.06);background:rgba(255,255,255,.026)}
+.member-routine-title{display:flex;align-items:center;gap:9px;min-width:0}
+.member-routine-title strong{display:block;font-size:18px;font-weight:840;color:var(--white);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.member-routine-body{display:grid;gap:8px;padding:10px}
+.member-routine-empty{border:1px dashed rgba(255,255,255,.09);border-radius:16px;background:rgba(255,255,255,.025);padding:16px;color:#8f97a5;font-size:12px;text-align:center}
 .exercise-detail{background:var(--card);border:1px solid var(--border);border-radius:6px;margin-bottom:10px;overflow:hidden;cursor:pointer}
 .exercise-detail:active{background:var(--card2)}
 .exercise-detail.static{cursor:default}
@@ -1314,6 +1329,14 @@ html,body,.app,input,select,button,textarea{font-family:var(--font-ui);font-opti
 
 /* Coaching lighter pass + member assistance */
 #v-rutinas .scroll-area{padding-bottom:calc(88px + env(safe-area-inset-bottom,0px))}
+#v-rutinas .exercise-detail{border-radius:16px;border-color:rgba(255,255,255,.075);background:rgba(255,255,255,.032);margin-bottom:0}
+#v-rutinas .exercise-detail:active{background:rgba(255,255,255,.055)}
+#v-rutinas .exercise-detail-head{padding:13px 12px}
+#v-rutinas .ex-num{width:30px;height:30px;min-width:30px;border-radius:12px;background:rgba(37,99,235,.13);display:flex;align-items:center;justify-content:center;color:#8bb7ff;font-size:13px;font-weight:850;padding-top:0}
+#v-rutinas .ex-name{font-size:14px;font-weight:760;line-height:1.25;letter-spacing:0}
+#v-rutinas .ex-detail{font-size:11.5px;color:#8f97a5;line-height:1.4;margin-top:5px}
+#v-rutinas .ex-note{border-left:2px solid rgba(245,158,11,.45);padding-left:8px;margin-top:7px;color:#c6a55c;font-style:normal}
+#v-rutinas .badge{border-radius:999px;padding:7px 10px;font-size:11px}
 #v-coaching .scroll-area{background:#080808;padding-left:12px;padding-right:12px}
 #v-coaching .board-card{border-radius:14px;background:rgba(255,255,255,.026);border-color:rgba(255,255,255,.065);box-shadow:none;margin-bottom:10px}
 #v-coaching .board-hdr{padding:12px 13px;background:transparent;border-bottom-color:rgba(255,255,255,.055)}
@@ -7002,11 +7025,22 @@ async function renderRutinas(){
     }
     if(!selectedRoutineBoardId||!myBoards.some(b=>b.id===selectedRoutineBoardId))selectedRoutineBoardId=myBoards[0].id;
     const selected=myBoards.find(b=>b.id===selectedRoutineBoardId)||myBoards[0];
-    const tabs=myBoards.map(b=>'<button class="routine-tab '+(b.id===selected.id?'active':'')+'" onclick="selectRoutineBoard(&quot;'+esc(b.id)+'&quot;)">'+esc(b.name)+'</button>').join('');
+    const routineRows=myBoards.map(b=>{
+      const count=(b.exercises||[]).length;
+      const isActive=b.id===selected.id;
+      return '<button class="member-routine-row '+(isActive?'active':'')+'" onclick="selectRoutineBoard(&quot;'+esc(b.id)+'&quot;)">'
+        +'<span class="member-routine-dot" style="background:'+esc(b.color||'#2563eb')+'"></span>'
+        +'<span class="member-routine-main"><span class="member-routine-name">'+esc(b.name)+'</span><span class="member-routine-sub">'+count+' ejercicio'+(count===1?'':'s')+'</span></span>'
+        +'<span class="member-routine-pill">'+(isActive?'Abierta':'Ver')+'</span>'
+        +'</button>';
+    }).join('');
     const exercises=selected.exercises||[];
     const exHtml=renderExerciseListHtml(exercises,selected.id,selected.id);
-    el.innerHTML='<div class="routine-tabs">'+tabs+'</div>'
-      +'<div class="board-card"><div class="board-hdr"><div style="display:flex;align-items:center;gap:8px;min-width:0"><div style="width:10px;height:10px;border-radius:50%;background:'+esc(selected.color||'#2563eb')+'"></div><span class="board-title">'+esc(selected.name)+'</span></div><span class="badge bg-blue">'+exercises.length+' ejercicios</span></div><div class="board-body">'+exHtml+'</div></div>';
+    el.innerHTML='<div class="member-routine-list">'+routineRows+'</div>'
+      +'<div class="member-routine-detail">'
+      +'<div class="member-routine-head"><div class="member-routine-title"><span class="member-routine-dot" style="background:'+esc(selected.color||'#2563eb')+'"></span><strong>'+esc(selected.name)+'</strong></div><span class="badge bg-blue">'+exercises.length+' ejercicios</span></div>'
+      +'<div class="member-routine-body">'+(exercises.length?exHtml:'<div class="member-routine-empty">Esta rutina aún no tiene ejercicios.</div>')+'</div>'
+      +'</div>';
   }catch(e){
     el.innerHTML='<div class="empty">Error cargando rutinas: '+e.message+'</div>';
     console.error('renderRutinas:',e);
