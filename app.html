@@ -1427,6 +1427,28 @@ body.admin-mode .adm-search,body.admin-mode .adm-date,body.admin-mode .admin-sel
 .routine-board-tools{display:grid;grid-template-columns:1fr 1fr;gap:7px;margin:4px 0 10px}
 .routine-board-tool{min-height:40px;border-radius:12px;font-size:12px;font-weight:780;cursor:pointer}
 .routine-board-delete{border-radius:12px;min-height:40px}
+.routine-deep-panel{background:rgba(255,255,255,.035);border:1px solid rgba(255,255,255,.08);border-radius:15px;padding:12px;margin-bottom:10px}
+.routine-deep-title{font-size:12px;font-weight:820;color:var(--white);line-height:1.2;margin-bottom:9px}
+.routine-deep-actions{display:grid;grid-template-columns:1fr auto;gap:8px;margin-top:8px}
+.admin-profile-shell{display:grid;gap:10px}
+.admin-profile-head{display:grid;grid-template-columns:auto auto minmax(0,1fr) auto;gap:11px;align-items:center}
+.admin-profile-back{width:36px;height:36px;border-radius:13px;border:1px solid rgba(255,255,255,.09);background:rgba(255,255,255,.045);color:#dbe4f0;font-size:18px;font-weight:760;cursor:pointer}
+.admin-profile-avatar{width:48px;height:48px;border-radius:17px;background:linear-gradient(180deg,rgba(37,99,235,.28),rgba(37,99,235,.12));display:flex;align-items:center;justify-content:center;color:#fff;font-size:15px;font-weight:860;box-shadow:inset 0 0 0 1px rgba(255,255,255,.08)}
+.admin-profile-title{min-width:0}
+.admin-profile-title strong{display:block;font-size:18px;font-weight:820;color:var(--white);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;line-height:1.1}
+.admin-profile-title span{display:block;margin-top:4px;font-size:11.5px;color:#8f97a5;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.admin-profile-status{justify-self:end}
+.admin-profile-card{border:1px solid rgba(255,255,255,.075);border-radius:17px;background:rgba(255,255,255,.033);padding:13px}
+.admin-profile-stats{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+.admin-profile-stat{border:1px solid rgba(255,255,255,.07);border-radius:14px;background:rgba(255,255,255,.035);padding:11px}
+.admin-profile-stat span{display:block;font-size:9.5px;font-weight:850;letter-spacing:.08em;text-transform:uppercase;color:#8f97a5}
+.admin-profile-stat strong{display:block;margin-top:5px;font-size:15px;font-weight:820;color:var(--white);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.admin-profile-actions{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+.admin-profile-actions .btn-sm{min-height:42px;font-size:12px}
+.admin-profile-section{display:grid;gap:8px}
+.admin-profile-section-head{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-top:2px}
+.admin-profile-section-title{font-size:10.5px;font-weight:880;letter-spacing:.09em;text-transform:uppercase;color:#8f97a5}
+.admin-profile-list{display:grid;gap:8px}
 .admin-date-rail{margin-bottom:12px}
 .admin-date-rail .adm-date{min-height:44px;border-radius:14px;background:rgba(255,255,255,.055);border-color:rgba(255,255,255,.09);box-shadow:inset 0 0 0 1px rgba(255,255,255,.018)}
 .admin-segmented{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px;margin-bottom:13px;padding:5px;border:1px solid rgba(255,255,255,.08);border-radius:16px;background:rgba(255,255,255,.035)}
@@ -1519,6 +1541,31 @@ body.admin-mode .admin-user-card{padding:12px}
 body.admin-mode .admin-user-meta span{max-width:100%;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 body.admin-mode #a-boards .admin-page-head{margin-bottom:11px}
 body.admin-mode #boards-list{gap:9px}
+body.admin-mode #a-boards .board-ex-detail input,
+body.admin-mode #a-boards .board-ex-detail select,
+body.admin-mode #a-boards .board-ex-detail textarea,
+body.admin-mode #a-boards .routine-deep-panel input,
+body.admin-mode #a-boards .routine-deep-panel select,
+body.admin-mode #a-boards .routine-deep-panel textarea{border-radius:12px!important;border-color:rgba(255,255,255,.09)!important;background:rgba(255,255,255,.045)!important;padding:11px!important}
+body.admin-mode #a-boards .board-ex-compact{border-radius:15px;background:rgba(255,255,255,.032)}
+body.admin-mode #a-boards .board-ex-detail{padding:0 11px 12px}
+body.admin-mode #a-boards .assign-row{border-bottom-color:rgba(255,255,255,.06)!important}
+body.admin-mode #user-profile-view .brow{margin-bottom:0}
+body.admin-mode #edit-user-modal>div,
+body.admin-mode #membership-grant-modal>div,
+body.admin-mode #courtesy-modal>div{border-radius:20px 20px 0 0!important;border-color:rgba(255,255,255,.09)!important;background:#0b0b0d!important}
+body.admin-mode #edit-user-modal input,
+body.admin-mode #edit-user-modal select,
+body.admin-mode #edit-user-modal textarea,
+body.admin-mode #membership-grant-modal input,
+body.admin-mode #membership-grant-modal select,
+body.admin-mode #membership-grant-modal textarea,
+body.admin-mode #courtesy-modal input,
+body.admin-mode #courtesy-modal select,
+body.admin-mode #courtesy-modal textarea{border-radius:13px!important;border-color:rgba(255,255,255,.09)!important;background:rgba(255,255,255,.045)!important}
+body.admin-mode #edit-user-modal label,
+body.admin-mode #membership-grant-modal label,
+body.admin-mode #courtesy-modal label{border-radius:14px!important;border-color:rgba(255,255,255,.08)!important;background:rgba(255,255,255,.035)!important}
 @media(max-width:360px){
   body.admin-mode .admin-user-card{grid-template-columns:auto minmax(0,1fr);gap:10px}
   body.admin-mode .admin-user-status{grid-column:1/-1;justify-self:stretch;justify-content:space-between;padding-left:42px}
@@ -8911,7 +8958,7 @@ async function renderAdmSlots(){
         +'<div class="adm-slot-actions"><button class="btn-sm bblue" data-idx="'+idx+'" onclick="toggleBlockPanel(parseInt(this.dataset.idx))">Bloq.</button>'
         +(row.blocked?'<button class="btn-sm bred" data-ds="'+ds+'" data-idx="'+idx+'" onclick="unblockSlotSb(this.dataset.ds,parseInt(this.dataset.idx))">Abrir</button>':'')+'</div>'
         +'<div id="blk-panel-'+idx+'" class="adm-block-panel" style="flex-direction:column;gap:8px;padding:10px;width:100%;box-sizing:border-box">'
-        +'<div style="display:grid;grid-template-columns:1fr 1fr;gap:6px"><button class="btn-sm bblue" onclick="setSlotPanelMode('+idx+',\'book\')">📅 Reservar</button><button class="btn-sm" style="border:1px solid var(--border);color:var(--gray);background:var(--card2)" onclick="setSlotPanelMode('+idx+',\'block\')">🚫 Bloquear</button></div>'
+        +'<div style="display:grid;grid-template-columns:1fr 1fr;gap:6px"><button class="btn-sm bblue" onclick="setSlotPanelMode('+idx+',\'book\')">Reservar</button><button class="btn-sm" style="border:1px solid var(--border);color:var(--gray);background:var(--card2)" onclick="setSlotPanelMode('+idx+',\'block\')">Bloquear</button></div>'
         +'<div id="blk-book-'+idx+'" style="display:none;flex-direction:column;gap:6px">'
         +'<input id="blk-user-search-'+idx+'" type="text" placeholder="Buscar socio..." oninput="adminSearchForBooking('+idx+',this.value)" style="background:var(--card);border:1px solid var(--border);border-radius:4px;padding:8px;font-size:13px;color:var(--white);outline:none;width:100%;box-sizing:border-box">'
         +'<div id="blk-user-results-'+idx+'" style="max-height:140px;overflow-y:auto;border-radius:4px"></div>'
@@ -9331,7 +9378,7 @@ async function renderBoardsAdmin(){
         +(isOpen?'<div class="board-ex-detail">'
           +(meta?'<div style="font-size:12px;color:var(--gray);margin-bottom:6px">'+esc(meta)+'</div>':'')
           +(ex.note||ex.notes||ex.description?'<div style="font-size:11px;color:var(--gray);opacity:.8;font-style:italic;margin-bottom:6px">'+esc(ex.note||ex.notes||ex.description)+'</div>':'')
-          +(vids.length?'<div style="font-size:11px;color:var(--bl)">▶ '+vids.length+' video'+(vids.length>1?'s':'')+'</div>':'')
+          +(vids.length?'<div style="font-size:11px;color:var(--bl)">Videos: '+vids.length+'</div>':'')
           +'</div>':'')+'</div>';
       }
       return '<div class="board-ex-compact">'+summary+(isOpen?'<div class="board-ex-detail">'
@@ -9355,8 +9402,8 @@ async function renderBoardsAdmin(){
 
     // ── Add exercise form ──────────────────────────
     const addExForm=isAddingEx?
-      '<div style="background:var(--card2);border:1px solid var(--blue);border-radius:8px;padding:14px;margin-bottom:10px">'
-      +'<div style="font-size:11px;font-weight:700;color:var(--bl);margin-bottom:10px;letter-spacing:.06em">NUEVO EJERCICIO</div>'
+      '<div class="routine-deep-panel">'
+      +'<div class="routine-deep-title">Nuevo ejercicio</div>'
       +'<input type="text" list="catalog-'+board.id+'" placeholder="Buscar o crear ejercicio *" id="exn-'+board.id+'" oninput="applyExerciseCatalogPick(&quot;'+board.id+'&quot;,this.value)" style="width:100%;background:var(--card);border:1px solid var(--border);border-radius:4px;padding:9px;font-size:13px;color:var(--white);outline:none;margin-bottom:6px;box-sizing:border-box">'
       +exerciseCatalogOptionsHtml('catalog-'+board.id)
       +exerciseTypeSelectHtml('extype-'+board.id,'')
@@ -9371,7 +9418,7 @@ async function renderBoardsAdmin(){
       +'<input type="text" placeholder="Nombre video 1" id="ext-'+board.id+'" style="width:100%;background:var(--card);border:1px solid var(--border);border-radius:4px;padding:8px;font-size:12px;color:var(--white);outline:none;margin-bottom:4px;box-sizing:border-box">'
       +'<input type="url" placeholder="Video 2 URL (opcional)" id="exv2-'+board.id+'" style="width:100%;background:var(--card);border:1px solid var(--border);border-radius:4px;padding:8px;font-size:12px;color:var(--white);outline:none;margin-bottom:4px;box-sizing:border-box">'
       +'<input type="text" placeholder="Nombre video 2" id="ext2-'+board.id+'" style="width:100%;background:var(--card);border:1px solid var(--border);border-radius:4px;padding:8px;font-size:12px;color:var(--white);outline:none;margin-bottom:8px;box-sizing:border-box">'
-      +'<div style="display:flex;gap:6px">'
+      +'<div class="routine-deep-actions">'
       +'<button class="btn-sm bblue" style="flex:1" data-bid="'+board.id+'" onclick="addExerciseSb(this.dataset.bid)">Agregar</button>'
       +'<button class="btn-sm" style="background:transparent;border:1px solid var(--border);color:var(--gray)" onclick="addingExBoards.delete(&quot;'+board.id+'&quot;);renderBoardsAdmin()">Cancelar</button>'
       +'</div></div>'
@@ -9379,8 +9426,8 @@ async function renderBoardsAdmin(){
 
     // ── Assign panel ───────────────────────────────
     const assignPanel=isAssigning?
-      '<div style="background:var(--card2);border:1px solid var(--green);border-radius:8px;padding:14px;margin-bottom:10px">'
-      +'<div style="font-size:11px;font-weight:700;color:var(--green);margin-bottom:10px;letter-spacing:.06em">ASIGNAR SOCIOS · '+assignedUsers.length+' asignado'+(assignedUsers.length===1?'':'s')+'</div>'
+      '<div class="routine-deep-panel" style="border-color:rgba(16,185,129,.22)">'
+      +'<div class="routine-deep-title" style="color:var(--green)">Asignar socios · '+assignedUsers.length+' asignado'+(assignedUsers.length===1?'':'s')+'</div>'
       +'<input class="adm-search board-assign-search" placeholder="Buscar socio..." oninput="filterBoardAssignees(this)" style="margin-bottom:8px" data-board-assign="'+esc(board.id)+'">'
       +'<div class="assign-box" data-board-assign="'+esc(board.id)+'">'
       +'<div class="assign-list">'
@@ -10217,7 +10264,7 @@ async function renderUsersSb(){
       const expiring=days!==null&&days<=5&&days>=0;
       const isPrueba=u.plan_id==='prueba'||!!u.plan_is_courtesy;
       const statusCls=isPrueba?'bg-amber':expired||noCredits?'bg-red':(lowCredits||expiring)?'bg-amber':active?'bg-green':'bg-gray';
-      const statusTxt=isPrueba?'🎁 Cortesía':expired?'Vencida':noCredits?'Sin visitas':isUnlimited&&active?'Mensual':lowCredits?'Pocas visitas':expiring?'Por vencer':active?'Activo':'Sin plan';
+      const statusTxt=isPrueba?'Cortesía':expired?'Vencida':noCredits?'Sin visitas':isUnlimited&&active?'Mensual':lowCredits?'Pocas visitas':expiring?'Por vencer':active?'Activo':'Sin plan';
       const div=document.createElement('div');
       div.className='admin-user-card';
       div.onclick=()=>adminOpenUserProfile(u.id);
@@ -10294,8 +10341,8 @@ async function adminOpenCourtesyView(){
 
     const header=document.createElement('div');
     header.style.cssText='display:flex;align-items:center;gap:10px;margin-bottom:1rem';
-    header.innerHTML='<button onclick="adminCloseCourtesyView()" style="background:var(--card2);border:1px solid var(--border);border-radius:6px;padding:8px 14px;color:var(--white);font-size:13px;cursor:pointer;white-space:nowrap">← Volver</button>'
-      +'<span style="font-size:16px;font-weight:800;flex:1">🎁 Cortesías activas ('+socios.length+')</span>';
+    header.innerHTML='<button onclick="adminCloseCourtesyView()" class="admin-profile-back">‹</button>'
+      +'<span style="font-size:16px;font-weight:800;flex:1">Cortesías activas ('+socios.length+')</span>';
     view.appendChild(header);
 
     const note=document.createElement('div');
@@ -10369,45 +10416,46 @@ async function adminOpenUserProfile(uid){
     const isPrueba=u.plan_id==='prueba'||!!u.plan_is_courtesy;
     const isUnlimited=u.credits>=999||(plan&&plan.credits>=999);
     const statusCls=isPrueba?'bg-amber':expired?'bg-red':active?'bg-green':'bg-gray';
-    const statusTxt=isPrueba?'🎁 Cortesía':expired?'Vencida':isUnlimited&&active?'Mensual':active?'Activo':'Sin plan';
+    const statusTxt=isPrueba?'Cortesía':expired?'Vencida':isUnlimited&&active?'Mensual':active?'Activo':'Sin plan';
     const planName=plan?plan.name:(isPrueba?'Visita de prueba':(u.credits||0)>0?'Visitas manuales':'Sin plan');
     const today=mazToday();
     const pastBks=(bks||[]).filter(b=>b.ds<today);
     const upBks=(bks||[]).filter(b=>b.ds>=today);
-    const bkRowHtml=arr=>arr.map(b=>'<div class="brow"><div class="brow-info"><div class="brow-name" style="font-size:13px">'+fmtDS(b.ds)+'</div><div class="brow-meta">'+(b.time_str||fmtTimeRange(b.start_idx,b.slots_used||3))+(b.is_group?' · Grupal':'')+'</div></div></div>').join('');
-    const payRowHtml=(pays||[]).map(p=>'<div class="brow"><div class="brow-info"><div class="brow-name" style="font-size:13px">'+esc(p.plan_name||p.plan_id||'Pago')+'</div><div class="brow-meta">'+fmtDateTimeMaz(p.created_at)+' · '+esc(p.last4||'----')+'</div></div><div style="font-weight:700;font-size:14px">'+MXN(p.amount)+'</div></div>').join('');
+    const bkRowHtml=arr=>'<div class="admin-profile-list">'+arr.map(b=>'<div class="brow"><div class="brow-info"><div class="brow-name">'+fmtDS(b.ds)+'</div><div class="brow-meta">'+(b.time_str||fmtTimeRange(b.start_idx,b.slots_used||3))+(b.is_group?' · Grupal':' · Individual')+'</div></div></div>').join('')+'</div>';
+    const payRowHtml=(pays||[]).length?'<div class="admin-profile-list">'+(pays||[]).map(p=>'<div class="brow"><div class="brow-info"><div class="brow-name">'+esc(p.plan_name||p.plan_id||'Pago')+'</div><div class="brow-meta">'+fmtDateTimeMaz(p.created_at)+' · '+esc(p.last4||'----')+'</div></div><div style="font-weight:760;font-size:14px">'+MXN(p.amount)+'</div></div>').join('')+'</div>':'';
     profileView.innerHTML=
-      '<div style="display:flex;align-items:center;gap:10px;margin-bottom:1rem">'
-      +'<button onclick="adminCloseUserProfile()" style="background:var(--card2);border:1px solid var(--border);border-radius:6px;padding:8px 14px;color:var(--white);font-size:13px;cursor:pointer;white-space:nowrap">← Volver</button>'
-      +'<span style="font-size:16px;font-weight:800;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+esc(u.name||'')+'</span>'
-      +'<span class="badge '+statusCls+'">'+statusTxt+'</span>'
+      '<div class="admin-profile-shell">'
+      +'<div class="admin-profile-head">'
+      +'<button class="admin-profile-back" onclick="adminCloseUserProfile()">‹</button>'
+      +'<div class="admin-profile-avatar">'+inits(u.name||'?')+'</div>'
+      +'<div class="admin-profile-title"><strong>'+esc(u.name||'Socio')+'</strong><span>'+esc(u.phone||u.email||'Sin contacto')+'</span></div>'
+      +'<span class="badge '+statusCls+' admin-profile-status">'+statusTxt+'</span>'
       +'</div>'
-      +'<div style="background:var(--card);border:1px solid var(--border);border-radius:6px;padding:1rem;margin-bottom:12px">'
-      +'<div style="font-size:12px;color:var(--gray);line-height:2">'
-      +(u.email?'<div>'+esc(u.email)+'</div>':'')
-      +(u.phone?'<div>'+esc(u.phone)+'</div>':'')
-      +'<div>Código: <strong style="color:var(--bl)">'+(u.access_code||'—')+'#</strong></div>'
-      +'<div>Plan: <strong style="color:var(--white)">'+esc(planName)+'</strong></div>'
-      +'<div>Visitas: <strong style="color:var(--white)">'+(isUnlimited?'Ilimitadas':(u.credits||0))+'</strong></div>'
-      +(u.plan_expiry?'<div>Vence: <strong style="color:var(--white)">'+fmtDateMaz(u.plan_expiry)+'</strong></div>':'')
-      +'<div>Reservas: <strong style="color:var(--white)">'+(bks||[]).length+' total · '+upBks.length+' próximas · '+pastBks.length+' pasadas</strong></div>'
+      +'<div class="admin-profile-card">'
+      +'<div class="admin-profile-stats">'
+      +'<div class="admin-profile-stat"><span>Plan</span><strong>'+esc(planName)+'</strong></div>'
+      +'<div class="admin-profile-stat"><span>Visitas</span><strong>'+(isUnlimited?'Ilimitadas':(u.credits||0))+'</strong></div>'
+      +'<div class="admin-profile-stat"><span>Código</span><strong style="color:var(--bl)">'+(u.access_code||'—')+'#</strong></div>'
+      +'<div class="admin-profile-stat"><span>Vence</span><strong>'+(u.plan_expiry?fmtDateMaz(u.plan_expiry):'Sin fecha')+'</strong></div>'
       +'</div>'
+      +(u.email||u.phone?'<div class="brow-meta" style="margin-top:10px">'+[u.email?esc(u.email):'',u.phone?esc(u.phone):''].filter(Boolean).join(' · ')+'</div>':'')
       +'</div>'
-      +'<div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:12px">'
-      +'<button class="btn-sm bblue" onclick="adminOpenMembershipModal(\''+uid+'\',\''+esc(u.name||'')+'\')">Activar membresía</button>'
+      +'<div class="admin-profile-actions">'
+      +'<button class="btn-sm bblue" onclick="adminOpenMembershipModal(\''+uid+'\',\''+esc(u.name||'')+'\')">Membresía</button>'
       +'<button class="btn-sm bgreen" onclick="openCourtesyModal(\''+uid+'\',\''+esc(u.name||'')+'\')">Cortesía</button>'
-      +'<button class="btn-sm bblue" onclick="adminEditUserSb(\''+uid+'\',\''+esc(u.name||'')+'\')">Editar datos</button>'
-      +'<button class="btn-sm bgreen" onclick="adminAddCreditsSb(\''+uid+'\')">+Visita extra</button>'
+      +'<button class="btn-sm bblue" onclick="adminEditUserSb(\''+uid+'\',\''+esc(u.name||'')+'\')">Editar</button>'
+      +'<button class="btn-sm bgreen" onclick="adminAddCreditsSb(\''+uid+'\')">Visita extra</button>'
       +(u.coaching_beta
-        ?'<button class="btn-sm" style="grid-column:1/-1;background:rgba(16,185,129,.12);border-color:var(--green);color:var(--green)" onclick="adminOpenCoachingCockpit(\''+uid+'\',\''+esc(u.name||'')+'\')">🏋️ Ver Coaching →</button>'
-        :'<button class="btn-sm" style="grid-column:1/-1;background:rgba(37,99,235,.12);border-color:var(--blue);color:var(--bl)" onclick="adminToggleCoachingBetaSb(\''+uid+'\',true,\''+esc(u.name||'')+'\')">🏋️ Activar Coaching</button>')
+        ?'<button class="btn-sm" style="grid-column:1/-1;background:rgba(16,185,129,.12);border-color:var(--green);color:var(--green)" onclick="adminOpenCoachingCockpit(\''+uid+'\',\''+esc(u.name||'')+'\')">Ver Coaching</button>'
+        :'<button class="btn-sm" style="grid-column:1/-1;background:rgba(37,99,235,.12);border-color:var(--blue);color:var(--bl)" onclick="adminToggleCoachingBetaSb(\''+uid+'\',true,\''+esc(u.name||'')+'\')">Activar Coaching</button>')
       +'<button class="btn-sm bred" style="grid-column:1/-1" onclick="adminDeleteUserSb(\''+uid+'\',\''+esc(u.name||'')+'\')">Eliminar socio</button>'
       +'</div>'
-      +(upBks.length?'<p class="slbl" style="margin-bottom:8px">Próximas reservas ('+upBks.length+')</p>'+bkRowHtml(upBks):'')
-      +(pastBks.length?'<p class="slbl" style="margin:12px 0 8px">Historial reservas ('+pastBks.length+')</p>'+bkRowHtml(pastBks):'<div class="empty" style="font-size:12px;margin:12px 0">Sin reservas pasadas.</div>')
-      +((pays&&pays.length)?'<p class="slbl" style="margin:12px 0 8px">Pagos ('+pays.length+')</p>'+payRowHtml:'<div class="empty" style="font-size:12px;margin:12px 0">Sin pagos registrados.</div>');
+      +'<div class="admin-profile-section"><div class="admin-profile-section-head"><div class="admin-profile-section-title">Próximas reservas</div><span class="badge bg-blue">'+upBks.length+'</span></div>'+(upBks.length?bkRowHtml(upBks):'<div class="empty">Sin próximas reservas.</div>')+'</div>'
+      +'<div class="admin-profile-section"><div class="admin-profile-section-head"><div class="admin-profile-section-title">Historial reservas</div><span class="badge bg-gray">'+pastBks.length+'</span></div>'+(pastBks.length?bkRowHtml(pastBks):'<div class="empty">Sin reservas pasadas.</div>')+'</div>'
+      +'<div class="admin-profile-section"><div class="admin-profile-section-head"><div class="admin-profile-section-title">Pagos</div><span class="badge bg-green">'+(pays||[]).length+'</span></div>'+((pays&&pays.length)?payRowHtml:'<div class="empty">Sin pagos registrados.</div>')+'</div>'
+      +'</div>';
   }catch(e){
-    profileView.innerHTML='<button onclick="adminCloseUserProfile()" style="background:var(--card2);border:1px solid var(--border);border-radius:6px;padding:8px 14px;color:var(--white);font-size:13px;cursor:pointer;margin-bottom:1rem">← Volver</button><div class="empty" style="color:var(--red)">Error: '+esc(e.message)+'</div>';
+    profileView.innerHTML='<button class="admin-profile-back" onclick="adminCloseUserProfile()">‹</button><div class="empty" style="color:var(--red);margin-top:10px">Error: '+esc(e.message)+'</div>';
   }
 }
 
@@ -10770,7 +10818,7 @@ async function adminEditUserSb(uid,uname){
       +'<div class="field" id="eu-logo-section" style="'+(prof.is_instructor?'':'display:none')+'">'
       +'<label>Logo del instructor (PNG transparente 1000×1000px)</label>'
       +'<div style="display:flex;align-items:center;gap:10px;margin-top:6px">'
-      +(prof.avatar_url?'<img src="'+prof.avatar_url+'" style="width:56px;height:56px;border-radius:4px;object-fit:contain;background:var(--card2);border:1px solid var(--border)" id="eu-logo-preview">':'<div id="eu-logo-preview" style="width:56px;height:56px;border-radius:4px;background:var(--card2);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:22px">🖼</div>')
+      +(prof.avatar_url?'<img src="'+prof.avatar_url+'" style="width:56px;height:56px;border-radius:12px;object-fit:contain;background:var(--card2);border:1px solid var(--border)" id="eu-logo-preview">':'<div id="eu-logo-preview" style="width:56px;height:56px;border-radius:12px;background:var(--card2);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:800;color:var(--gray);letter-spacing:.08em">PNG</div>')
       +'<div style="flex:1">'
       +'<input type="file" id="eu-logo-file" accept="image/png" onchange="previewInstructorLogo(this)" style="display:none">'
       +'<button class="btn-sm bblue" onclick="document.getElementById(&quot;eu-logo-file&quot;).click()" style="margin-bottom:4px">Subir PNG</button>'
@@ -12457,7 +12505,7 @@ function renderCoachingDetail(){
 
   const todayRow=coachAdminSchedule.find(r=>r.ds===today&&r.status==='in_progress')||coachAdminPrimaryScheduleForDs(today,coachDaysBetweenDS(coachAdminWeekStart,today));
   const liveBanner=(todayRow&&todayRow.status==='in_progress')
-    ?'<div class="coach-alert" style="background:rgba(37,99,235,.12);border-left-color:var(--blue);margin-bottom:12px">🔴 Entreno en curso ahora: <b>'+esc(todayRow.board_name)+'</b></div>'
+    ?'<div class="coach-alert" style="background:rgba(37,99,235,.12);border-left-color:var(--blue);margin-bottom:12px">Entreno en curso ahora: <b>'+esc(todayRow.board_name)+'</b></div>'
     :'';
 
   const tasksHtml=coachAdminTasks.length?coachAdminTasks.map(t=>
@@ -12532,12 +12580,12 @@ function renderCoachingDetail(){
     +'<div class="admin-plan-section-title" id="coach-task-form-label">'+(editingCoachTaskId?'Editar hábito':'Hábitos asignados')+'</div>'
     +'<div class="field"><label>Hábito</label><input type="text" id="coach-task-title-in" placeholder="Ej: Tomar agua"></div>'
     +(editingCoachTaskId?'':'<div class="habit-presets">'
-      +'<button type="button" class="btn-sm" onclick="fillRecurringTaskPreset(&quot;💧 Tomar agua&quot;)">💧 Tomar agua</button>'
-      +'<button type="button" class="btn-sm" onclick="fillRecurringTaskPreset(&quot;💧 Tomar 2L de agua&quot;)">💧 2L de agua</button>'
-      +'<button type="button" class="btn-sm" onclick="fillRecurringTaskPreset(&quot;🚭 No fumar&quot;)">🚭 No fumar</button>'
-      +'<button type="button" class="btn-sm" onclick="fillRecurringTaskPreset(&quot;☀️ Luz solar 20 min&quot;)">☀️ Luz solar</button>'
-      +'<button type="button" class="btn-sm" onclick="fillRecurringTaskPreset(&quot;🍽️ Ayuno intermitente&quot;)">🍽️ Ayuno</button>'
-      +'<button type="button" class="btn-sm" onclick="fillRecurringTaskPreset(&quot;🧘 Meditar 10 min&quot;)">🧘 Meditar</button>'
+      +'<button type="button" class="btn-sm" onclick="fillRecurringTaskPreset(&quot;Tomar agua&quot;)">Tomar agua</button>'
+      +'<button type="button" class="btn-sm" onclick="fillRecurringTaskPreset(&quot;Tomar 2L de agua&quot;)">2L de agua</button>'
+      +'<button type="button" class="btn-sm" onclick="fillRecurringTaskPreset(&quot;No fumar&quot;)">No fumar</button>'
+      +'<button type="button" class="btn-sm" onclick="fillRecurringTaskPreset(&quot;Luz solar 20 min&quot;)">Luz solar</button>'
+      +'<button type="button" class="btn-sm" onclick="fillRecurringTaskPreset(&quot;Ayuno intermitente&quot;)">Ayuno</button>'
+      +'<button type="button" class="btn-sm" onclick="fillRecurringTaskPreset(&quot;Meditar 10 min&quot;)">Meditar</button>'
       +'</div>')
     +'<input type="checkbox" id="coach-task-recurring-in" '+(editingCoachTaskId?'':'checked')+' style="display:none" onchange="toggleCoachTaskDueVisibility()">'
     +'<div class="habit-schedule-picker">'
