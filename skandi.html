@@ -789,8 +789,15 @@ function exerciseCard(e,tracking){
   </article>`;
 }
 
+function isVideoUrl(url){
+  return /\.(mp4|mov|webm|m4v)(\?|#|$)/i.test(url||'');
+}
+
 function mediaThumb(e){
-  if(e.media_url) return `<div class="thumb"><img src="${esc(e.media_url)}" alt="${esc(e.name)}" loading="lazy" onerror="this.parentElement.innerHTML=THUMB_FALLBACK"></div>`;
+  if(e.media_url){
+    if(isVideoUrl(e.media_url)) return `<div class="thumb"><video src="${esc(e.media_url)}" muted playsinline preload="metadata" onerror="this.parentElement.innerHTML=THUMB_FALLBACK"></video></div>`;
+    return `<div class="thumb"><img src="${esc(e.media_url)}" alt="${esc(e.name)}" loading="lazy" onerror="this.parentElement.innerHTML=THUMB_FALLBACK"></div>`;
+  }
   return `<div class="thumb">${THUMB_FALLBACK}</div>`;
 }
 
@@ -1702,12 +1709,57 @@ function openExercise(id){
   $('modalCard').innerHTML=`
     <div class="row"><h1>${esc(e.name)}</h1><button class="x" onclick="closeModal()">${icon('close',20)}</button></div>
     <div class="card">
-      ${e.media_url?`<img src="${esc(e.media_url)}" alt="${esc(e.name)}" style="width:100%;border-radius:20px;max-height:520px;object-fit:cover">`:empty('Paste a Gymvisual GIF or another source in the library to see technique here.')}
+      ${e.media_url?(isVideoUrl(e.media_url)?`<video src="${esc(e.media_url)}" controls playsinline style="width:100%;border-radius:20px;max-height:520px;object-fit:cover"></video>`:`<img src="${esc(e.media_url)}" alt="${esc(e.name)}" style="width:100%;border-radius:20px;max-height:520px;object-fit:cover">`):empty('Paste a Gymvisual GIF or another source in the library to see technique here.')}
       ${e.media_page_url?`<p style="margin-top:12px"><a class="accent" href="${esc(e.media_page_url)}" target="_blank" rel="noreferrer">Open Gymvisual reference</a></p>`:''}
+      <button class="btn" style="width:100%;margin-top:12px" onclick="openExerciseMediaEdit('${e.id}')">${icon('edit',16)} Edit technique media</button>
     </div>
     <section class="card"><div class="eyebrow">Muscles involved</div>${muscles.map(([m,p])=>`<div style="margin-top:10px"><div class="row"><strong>${esc(m)}</strong><span>${p}%</span></div><div class="bar"><i style="width:${p}%"></i></div></div>`).join('')}</section>
     <section class="card"><div class="eyebrow">How to do it</div>${e.instructions?.length?`<ol>${e.instructions.map(x=>`<li>${esc(x)}</li>`).join('')}</ol>`:empty('No instructions added yet.')}</section>
     <section class="card"><div class="eyebrow">Coach tips</div>${e.coach_tips?.length?`<ul>${e.coach_tips.map(x=>`<li>${esc(x)}</li>`).join('')}</ul>`:empty('No coach tips added yet.')}</section>`;
+}
+
+let exerciseMediaFile=null;
+function openExerciseMediaEdit(id){
+  const e=state.exercises.find(x=>x.id===id);
+  if(!e) return;
+  exerciseMediaFile=null;
+  $('modalCard').innerHTML=`
+    <div class="row"><h1>Edit media</h1><button class="x" onclick="openExercise('${e.id}')">${icon('close',20)}</button></div>
+    <p class="muted">${esc(e.name)}</p>
+    <label class="eyebrow" style="margin-top:14px">Upload from your gallery</label>
+    <input id="exMediaFile" type="file" accept="video/*,image/gif" class="field left" onchange="exerciseMediaFile=this.files[0]||null; $('exMediaFilePreview').textContent=exerciseMediaFile?exerciseMediaFile.name:''">
+    <p id="exMediaFilePreview" class="muted" style="margin-top:6px"></p>
+    <label class="eyebrow" style="margin-top:14px">Or paste a direct GIF/video URL</label>
+    <input id="exMediaUrl" class="field left" placeholder="Direct GIF/video URL" value="${esc(e.media_url||'')}">
+    <label class="eyebrow" style="margin-top:14px">Reference page URL</label>
+    <input id="exMediaPageUrl" class="field left" placeholder="Optional" value="${esc(e.media_page_url||'')}">
+    <button class="btn primary" style="width:100%;margin-top:14px" id="exMediaSaveBtn" onclick="saveExerciseMedia('${e.id}')">Save media</button>`;
+}
+
+async function saveExerciseMedia(id){
+  const btn=$('exMediaSaveBtn');
+  if(btn){btn.disabled=true;btn.textContent='Saving...';}
+  try{
+    let mediaUrl=$('exMediaUrl').value.trim();
+    if(exerciseMediaFile){
+      const file=exerciseMediaFile;
+      const ext=(file.name.split('.').pop()||'mp4').toLowerCase();
+      const path=`${id}/${Date.now()}.${ext}`;
+      const{error:upErr}=await sb.storage.from('skandi-exercise-media').upload(path,file,{contentType:file.type||'video/mp4',upsert:false});
+      if(upErr) return alert('Upload error: '+upErr.message);
+      const{data:urlData}=sb.storage.from('skandi-exercise-media').getPublicUrl(path);
+      mediaUrl=urlData.publicUrl;
+    }
+    const{error}=await sb.rpc('skandi_update_exercise_media',{
+      p_exercise_id:id,p_media_url:mediaUrl,p_media_page_url:$('exMediaPageUrl').value.trim()
+    });
+    if(error) return alert(error.message);
+    exerciseMediaFile=null;
+    await loadAll();
+    openExercise(id);
+  } finally {
+    if(btn){btn.disabled=false;btn.textContent='Save media';}
+  }
 }
 
 function openTemplateBuilder(day=null,id=null){
