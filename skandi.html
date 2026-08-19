@@ -215,7 +215,7 @@ textarea.field{min-height:112px;text-align:left;resize:vertical}
 .auth-logo{font-size:54px;font-weight:1000;color:var(--dof-navy)}
 .modal{position:fixed;inset:0;background:rgba(0,0,0,.72);z-index:40;display:none;align-items:flex-end;justify-content:center;overflow:hidden}
 .modal.show{display:flex}
-.modal-card{width:min(820px,calc(100vw - 16px));max-width:calc(100vw - 16px);max-height:88dvh;overflow:auto;overflow-x:hidden;border-radius:8px 8px 0 0;padding:20px;margin:0 auto}
+.modal-card{width:min(820px,calc(100vw - 16px));max-width:calc(100vw - 16px);max-height:88dvh;overflow:auto;overflow-x:hidden;overscroll-behavior:contain;border-radius:8px 8px 0 0;padding:20px;margin:0 auto}
 .x{width:44px;height:44px;border-radius:12px;background:var(--panel2);color:var(--text);display:grid;place-items:center;flex:0 0 auto}
 .search{display:grid;grid-template-columns:1fr auto;gap:10px;margin:12px 0}
 .signup-names{display:grid;grid-template-columns:1fr 1fr;gap:10px}
@@ -2535,6 +2535,31 @@ async function saveExercise(){
 function closeModal(){
   $('modal').classList.remove('show');
 }
+
+// iOS Safari lets a touch-scroll "leak" from the modal card's own overflow:auto content
+// through to the page underneath once the inner scroll hits its end — plain overflow:hidden
+// on body doesn't stop that on iOS, only actually freezing the body's scroll position does.
+// A MutationObserver (rather than editing every one of the ~10 call sites that do
+// `$('modal').classList.add('show')`, plus closeModal) keeps this correct no matter how or
+// where a modal gets shown.
+let lockedScrollY=0;
+function lockBodyScroll(){
+  lockedScrollY=window.scrollY;
+  document.body.style.position='fixed';
+  document.body.style.top=`-${lockedScrollY}px`;
+  document.body.style.width='100%';
+}
+function unlockBodyScroll(){
+  document.body.style.position='';
+  document.body.style.top='';
+  document.body.style.width='';
+  window.scrollTo(0,lockedScrollY);
+}
+new MutationObserver(()=>{
+  const open=$('modal').classList.contains('show');
+  if(open&&document.body.style.position!=='fixed') lockBodyScroll();
+  else if(!open&&document.body.style.position==='fixed') unlockBodyScroll();
+}).observe($('modal'),{attributes:true,attributeFilter:['class']});
 
 function empty(msg){ return `<div class="empty">${esc(msg)}</div>`; }
 
