@@ -122,27 +122,38 @@ textarea.field{min-height:112px;text-align:left;resize:vertical}
 .check.done{background:var(--dof-navy);color:#fff}
 .set-remove{width:30px;height:48px;border-radius:10px;background:transparent;color:var(--muted);border:1px solid var(--line);display:grid;place-items:center}
 .workout-bar{position:sticky;top:-20px;z-index:5;margin:-20px -20px 0;padding:14px 18px 12px;background:linear-gradient(180deg,rgba(247,251,254,.98),rgba(247,251,254,.78));backdrop-filter:blur(18px);border-bottom:0;border-radius:8px 8px 0 0;overflow:visible}
-.workout-bar-title{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-bottom:12px}
+.workout-bar-title{display:flex;align-items:flex-start;justify-content:space-between;gap:12px}
 .workout-bar-title h1{font-size:22px;line-height:1}
 .workout-bar-title small{display:block;color:var(--muted);font-weight:800;font-size:12px;margin-bottom:3px}
-.timer-console{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:10px;align-items:center;background:linear-gradient(135deg,#051a3a,#062f68);border:1px solid rgba(255,255,255,.14);border-radius:14px;padding:10px;box-shadow:0 18px 38px rgba(1,36,86,.20);color:#fff}
-.timer-main{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:10px;align-items:center;min-width:0}
+/* Floating timer: a small tap-to-expand pill instead of a full-width hero console, so the
+   clock doesn't compete with the exercise list for attention while training. Fixed-positioned
+   (escapes .modal-card's overflow:auto clipping since no ancestor sets a transform/filter). */
+.float-timer{position:fixed;top:calc(env(safe-area-inset-top,0px) + 14px);right:14px;z-index:50;display:flex;flex-direction:column;align-items:flex-end;gap:8px;max-width:calc(100vw - 28px)}
+.float-timer-chip{display:flex;align-items:center;gap:8px;background:linear-gradient(135deg,#051a3a,#062f68);border:1px solid rgba(255,255,255,.16);border-radius:999px;padding:9px 12px;box-shadow:0 14px 30px rgba(1,36,86,.30);color:#fff}
+.float-timer-dot{width:7px;height:7px;border-radius:50%;background:#2dd4bf;flex:0 0 auto}
+.float-timer-dot.paused{background:rgba(255,255,255,.4)}
+.float-timer-chip strong{font-size:15px;font-variant-numeric:tabular-nums;white-space:nowrap}
+.float-timer-restbadge{display:flex;align-items:center;gap:4px;background:rgba(255,255,255,.10);border:1px solid rgba(255,255,255,.18);color:rgba(255,255,255,.6);border-radius:999px;padding:3px 8px;font-size:11px;font-weight:1000;font-variant-numeric:tabular-nums;white-space:nowrap;transition:background .16s ease,color .16s ease,border-color .16s ease}
+.float-timer-restbadge.resting{background:rgba(255,180,81,.20);border-color:rgba(255,180,81,.40);color:#ffb451}
+.float-timer-chevron{color:rgba(255,255,255,.6);display:flex;transition:transform .16s ease}
+.float-timer.open .float-timer-chevron{transform:rotate(90deg)}
+.float-timer-panel{width:min(220px,calc(100vw - 28px));background:linear-gradient(135deg,#051a3a,#062f68);border:1px solid rgba(255,255,255,.16);border-radius:16px;padding:14px;box-shadow:0 18px 38px rgba(1,36,86,.30);color:#fff}
+.float-timer-panel .row-head{display:flex;align-items:flex-start;justify-content:space-between;gap:10px}
 .timer-label{display:flex;align-items:center;gap:7px;color:rgba(255,255,255,.66);font-size:9px;font-weight:1000;letter-spacing:.14em;text-transform:uppercase}
 .timer-label:before{content:"";width:6px;height:6px;border-radius:50%;background:#fff;box-shadow:0 0 0 4px rgba(255,255,255,.12)}
-.timer-main strong{display:block;margin-top:4px;color:#fff;font-size:34px;line-height:.95;font-variant-numeric:tabular-nums;letter-spacing:0;white-space:nowrap}
-.timer-main em{display:block;margin-top:4px;color:rgba(255,255,255,.58);font-style:normal;font-size:10px;font-weight:800;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.timer-toggle{width:46px;height:46px;border-radius:50%;background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.24);color:#fff;display:grid;place-items:center;box-shadow:0 10px 20px rgba(0,0,0,.16),inset 0 1px 0 rgba(255,255,255,.20)}
-.timer-side{display:grid;grid-template-columns:auto auto;gap:8px;align-items:center}
-.timer-step{width:44px;height:44px;border-radius:50%;background:rgba(255,255,255,.10);border:1px solid rgba(255,255,255,.20);color:#fff;font-size:12px;font-weight:1000;box-shadow:inset 0 1px 0 rgba(255,255,255,.14)}
-.timer-rest{min-width:74px;text-align:center;background:rgba(255,255,255,.10);border:1px solid rgba(255,255,255,.18);border-radius:999px;padding:7px 10px;box-shadow:inset 0 1px 0 rgba(255,255,255,.12)}
+.float-timer-panel .elapsed-big{display:block;margin-top:4px;color:#fff;font-size:28px;line-height:1;font-variant-numeric:tabular-nums}
+.float-timer-panel .elapsed-hint{display:block;margin-top:3px;color:rgba(255,255,255,.58);font-style:normal;font-size:10px;font-weight:800}
+.timer-toggle{width:40px;height:40px;border-radius:50%;background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.24);color:#fff;display:grid;place-items:center;box-shadow:0 10px 20px rgba(0,0,0,.16),inset 0 1px 0 rgba(255,255,255,.20);flex:0 0 auto}
+.float-timer-panel .rest-row{display:grid;grid-template-columns:auto 1fr auto;gap:8px;align-items:center;margin-top:14px}
+.timer-step{width:38px;height:38px;border-radius:50%;background:rgba(255,255,255,.10);border:1px solid rgba(255,255,255,.20);color:#fff;font-size:11px;font-weight:1000;box-shadow:inset 0 1px 0 rgba(255,255,255,.14)}
+.timer-rest{text-align:center;background:rgba(255,255,255,.10);border:1px solid rgba(255,255,255,.18);border-radius:999px;padding:6px 8px;box-shadow:inset 0 1px 0 rgba(255,255,255,.12)}
 .timer-rest span{display:block;color:#d8922f;font-size:8px;font-weight:1000;letter-spacing:.12em;text-transform:uppercase}
-.timer-rest strong{display:block;color:#fff;font-size:18px;line-height:1.05;font-variant-numeric:tabular-nums;white-space:nowrap}
-.timer-meta{grid-column:1/-1;display:grid;grid-template-columns:1fr auto;gap:10px;align-items:center}
-.rest-progress{height:5px;background:rgba(255,255,255,.18);border-radius:999px;overflow:hidden}
+.timer-rest strong{display:block;color:#fff;font-size:17px;line-height:1.05;font-variant-numeric:tabular-nums;white-space:nowrap}
+.rest-progress{margin-top:10px;height:5px;background:rgba(255,255,255,.18);border-radius:999px;overflow:hidden}
 .rest-progress i{display:block;height:100%;width:0;background:linear-gradient(90deg,#ffb451,#2dd4bf);border-radius:999px;transition:width .25s linear}
-.timer-meta .unit-toggle{background:rgba(255,255,255,.10);border-color:rgba(255,255,255,.18)}
-.timer-meta .unit-toggle button{color:rgba(255,255,255,.76)}
-.timer-meta .unit-toggle button.active{background:#fff;color:var(--dof-navy)}
+.float-timer-panel .unit-toggle{margin-top:12px;background:rgba(255,255,255,.10);border-color:rgba(255,255,255,.18)}
+.float-timer-panel .unit-toggle button{color:rgba(255,255,255,.76)}
+.float-timer-panel .unit-toggle button.active{background:#fff;color:var(--dof-navy)}
 .workout-content{margin:16px -20px -20px;padding:22px 20px 20px;background:linear-gradient(180deg,#f3f8fc,#f7fbfe 88px,#f7fbfe);border-top:1px solid rgba(1,36,86,.08)}
 .workout-section-head{display:flex;align-items:center;justify-content:space-between;gap:10px;margin:0 0 12px}
 .workout-section-head h2{font-size:20px;margin:0}
@@ -156,6 +167,9 @@ textarea.field{min-height:112px;text-align:left;resize:vertical}
 .workout-footer{display:grid;grid-template-columns:minmax(0,.82fr) minmax(0,1.18fr);gap:10px;margin:14px 0 0;padding:4px 0 0}
 .workout-footer .btn{min-height:52px;box-shadow:none}
 .workout-footer .danger-action{color:var(--pink);border-color:rgba(212,72,84,.32);background:#fff}
+/* Sticks "Save routine" to the bottom of the modal-card's own scroll area (mirrors the
+   sticky-top .workout-bar trick) so it stays reachable without scrolling past ~100 exercises. */
+.tpl-save-bar{position:sticky;bottom:-20px;z-index:5;margin:14px -20px -20px;padding:12px 20px calc(12px + 20px);background:linear-gradient(0deg,rgba(247,251,254,.98),rgba(247,251,254,.85) 70%,rgba(247,251,254,0));backdrop-filter:blur(18px)}
 .modal-card .exercise{box-shadow:0 10px 26px rgba(1,36,86,.08);background:rgba(255,255,255,.92)}
 .modal-card .exercise h3{font-size:18px}
 .modal-card .field{box-shadow:none}
@@ -229,19 +243,12 @@ textarea.field{min-height:112px;text-align:left;resize:vertical}
   .row>.btn,.row>.pill{flex:0 0 auto}
   .signup-names{grid-template-columns:1fr}
   .workout-bar{margin:-16px -16px 0;padding:12px 12px 10px}
-  .workout-bar-title{margin-bottom:10px}
   .workout-bar-title h1{font-size:21px}
-  .timer-console{grid-template-columns:1fr;gap:8px;padding:9px}
-  .timer-main{grid-template-columns:minmax(0,1fr) 44px;gap:8px}
-  .timer-main strong{font-size:32px}
-  .timer-main em{font-size:10px}
-  .timer-toggle{width:44px;height:44px}
-  .timer-side{grid-template-columns:44px minmax(68px,1fr) 44px;gap:7px}
-  .timer-step{width:44px;height:40px;border-radius:999px;font-size:11px}
-  .timer-rest{min-width:0;padding:6px 8px}
-  .timer-rest strong{font-size:17px}
-  .timer-meta{grid-template-columns:1fr auto;gap:8px}
+  .float-timer{top:calc(env(safe-area-inset-top,0px) + 10px);right:10px}
+  .float-timer-chip{padding:8px 10px}
+  .float-timer-panel{padding:12px}
   .modal-card{width:calc(100vw - 16px);max-width:calc(100vw - 16px);padding:16px}
+  .tpl-save-bar{margin:14px -16px -16px;padding:10px 16px calc(10px + 16px)}
   .workout-content{margin:14px -16px -16px;padding:16px}
   .workout-section-head{margin-bottom:10px}
   .workout-footer{grid-template-columns:1fr 1fr;margin:12px 0 0;padding:0}
@@ -355,12 +362,19 @@ const BODY_REGIONS_BACK=[
   {name:'Triceps',shape:'rect',x:46,y:95,w:26,h:80,rx:13,mirror:true}
 ];
 const ACTIVE_WORKOUT_MAX_HOURS=18;
-const state={user:null,profile:null,view:'home',authMode:'login',exercises:[],templates:[],items:[],sessions:[],sets:[],externalActivities:[],progressionState:[],active:null,activeItems:[],timer:null,elapsed:0,rest:0,restTotal:0,bodyFlip:'front',weightUnit:localStorage.getItem('skandi_weight_unit')||'kg',weightUnitOverrides:(()=>{try{return JSON.parse(localStorage.getItem('skandi_weight_unit_overrides')||'{}');}catch(e){return {};}})(),expandedRoutines:new Set(),swapTarget:null,swapQuery:'',addExOpen:false,addExQuery:'',pausedMs:0,pausedAt:null};
+const state={user:null,profile:null,view:'home',authMode:'login',exercises:[],templates:[],items:[],sessions:[],sets:[],externalActivities:[],progressionState:[],active:null,activeItems:[],timer:null,elapsed:0,rest:0,restTotal:0,bodyFlip:'front',weightUnit:localStorage.getItem('skandi_weight_unit')||'kg',weightUnitOverrides:(()=>{try{return JSON.parse(localStorage.getItem('skandi_weight_unit_overrides')||'{}');}catch(e){return {};}})(),expandedRoutines:new Set(),swapTarget:null,swapQuery:'',addExOpen:false,addExQuery:'',pausedMs:0,pausedAt:null,floatTimerOpen:false};
 let builderState={selected:new Map(),group:'All'};
 
 const $=id=>document.getElementById(id);
 const esc=s=>(s??'').toString().replace(/[&<>"']/g,m=>({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[m]));
 const plural=(n,word,pluralWord=word+'s')=>n===1?word:pluralWord;
+// Most calisthenics catalog rows have english_name identical to name (both already English) —
+// showing it as a subtitle everywhere just repeats the title. Only surface it when it adds
+// information.
+const exerciseSubtitle=e=>{
+  const en=(e?.english_name||'').trim();
+  return en&&en.toLowerCase()!==(e?.name||'').trim().toLowerCase()?en:'';
+};
 const initials=name=>(name||'SF').split(/\s+/).slice(0,2).map(x=>x[0]).join('').toUpperCase();
 const ICON_PATHS={
   play:'<path d="M6 4l14 8-14 8V4z"/>',
@@ -717,8 +731,8 @@ function crewView(){
   return `
     <div class="row"><h1>Crew</h1><button class="btn" onclick="loadAll().then(render)">Refresh</button></div>
     <section class="card">
-      <h2>Recent lifts</h2>
-      ${leaders.map(x=>`<div class="leader"><div><strong>${esc(x.exercise)}</strong><p>${esc(x.name)} · ${x.reps||0} reps</p></div><strong class="accent">${x.weight||0} kg</strong></div>`).join('')||empty('Log weights to build the leaderboard.')}
+      <h2>Recent PRs</h2>
+      ${leaders.map(x=>leaderRowHtml(x)).join('')||empty('Log a lift, hold, or set to build the leaderboard.')}
     </section>
     <h2>Workout feed</h2>
     ${state.sessions.filter(s=>s.completed_at&&s.visibility==='crew').map(feedItem).join('')||empty('No shared workouts yet.')}`;
@@ -737,9 +751,12 @@ function progressView(){
       ${sore.map(w=>`<p style="margin-top:8px"><strong>${esc(w.area)}</strong> — reported ${w.count} of your last sessions. Consider resting that area or regressing.</p>`).join('')}
       ${stalls.map(w=>`<div class="row click-card" style="margin-top:8px" onclick="openExercise('${w.exercise.id}')"><p><strong>${esc(w.exercise.name)}</strong> flat for 3 sessions (${w.marks.map(m=>w.exercise.log_mode==='seconds'?fmtSec(m):m+' reps').join(' → ')}). Maybe deload or hold longer.</p>${icon('chevronRight',18)}</div>`).join('')}
     </section>`:''}
-    <section class="grid">
-      <div class="stat"><strong>${mine.length}</strong><small>saved workouts</small></div>
-      <div class="stat"><strong>${Math.round(mine.reduce((a,s)=>a+(s.duration_sec||0),0)/60)}</strong><small>minutes</small></div>
+    <section class="card">
+      <div class="eyebrow">All time</div>
+      <div class="grid" style="margin-top:10px">
+        <div class="stat"><strong>${mine.length}</strong><small>saved workouts</small></div>
+        <div class="stat"><strong>${Math.round(mine.reduce((a,s)=>a+(s.duration_sec||0),0)/60)}</strong><small>minutes trained</small></div>
+      </div>
     </section>
     ${muscleLoadCard('Muscle recovery')}
     <section class="card">
@@ -747,8 +764,8 @@ function progressView(){
       ${(state.externalActivities||[]).slice(0,4).map(externalActivityRow).join('')||empty('Log a run, ride, or swim to factor it into recovery.')}
     </section>
     <section class="card">
-      <h2>Your best lifts</h2>
-      ${prs.map(x=>`<div class="leader"><div><strong>${esc(x.exercise)}</strong><p>${x.reps||0} reps</p></div><strong class="accent">${x.weight||0} kg</strong></div>`).join('')||empty('No weights logged yet.')}
+      <h2>Your bests</h2>
+      ${prs.map(x=>leaderRowHtml(x,false)).join('')||empty('No lifts, holds, or sets logged yet.')}
     </section>
     <section class="card">
       <h2>Workout history</h2>
@@ -816,7 +833,7 @@ function exerciseCard(e,tracking){
   return `<article class="exercise">
     <div class="ex-head" onclick="openExercise('${e.id}')">
       ${mediaThumb(e)}
-      <div><h3>${esc(e.name)}</h3><p>${esc(e.english_name||e.category||'')}</p></div>
+      <div><h3>${esc(e.name)}</h3><p>${esc(exerciseSubtitle(e)||e.category||'')}</p></div>
       <div class="play">${icon('play',18)}</div>
     </div>
     <div class="muscles">${muscles.map(([m,p])=>`<span class="pill dark">${esc(m)} ${p}%</span>`).join('')}</div>
@@ -895,14 +912,34 @@ async function deleteSession(sessionId){
 function leaderboard(){
   const profiles=new Map(state.sessions.map(s=>[s.user_id,s.profile?.name||'Crew member']));
   const best=new Map();
-  state.sets.filter(s=>s.done&&Number(s.weight_kg)>0).forEach(s=>{
+  state.sets.filter(s=>s.done).forEach(s=>{
+    // s.exercise (the join used to load sets) only carries name/slug — look the full row up in
+    // state.exercises for log_mode/log_weight instead.
+    const ex=state.exercises.find(e=>e.id===s.exercise_id);
+    if(!ex) return;
+    // Rank by hold time for timed holds, by load for anything still tracking weight, and by
+    // reps for pure-bodyweight rep work — the old weight-only filter meant front lever, back
+    // lever, planche, handstand and every other bodyweight/hold exercise could never post a PR
+    // and silently never appeared on the leaderboard at all.
+    const mode=ex.log_mode==='seconds'?'seconds':(ex.log_weight!==false?'weight':'reps');
+    const mark=mode==='seconds'?Number(s.seconds):(mode==='weight'?Number(s.weight_kg):Number(s.reps));
+    if(!(mark>0)) return;
     const key=`${s.user_id}:${s.exercise_id}`;
     const current=best.get(key);
-    if(!current||Number(s.weight_kg)>current.weight) best.set(key,{
-      user_id:s.user_id,name:profiles.get(s.user_id)||'Crew member',exercise:s.exercise?.name||'Exercise',weight:Number(s.weight_kg),reps:s.reps
+    if(!current||mark>current.mark) best.set(key,{
+      user_id:s.user_id,name:profiles.get(s.user_id)||'Crew member',exercise:ex.name,mode,mark,reps:Number(s.reps)||0
     });
   });
-  return [...best.values()].sort((a,b)=>b.weight-a.weight);
+  return [...best.values()].sort((a,b)=>b.mark-a.mark);
+}
+// Shared by Crew's "Recent PRs" and Progress's "Your bests" — the value/subtitle shown depends
+// on how this exercise is tracked (weight, timed hold, or bodyweight reps). showName is off for
+// "Your bests" since every row there is already the current user's.
+function leaderRowHtml(x,showName=true){
+  const value=x.mode==='seconds'?fmtSec(x.mark):x.mode==='weight'?`${x.mark} kg`:`${x.mark} reps`;
+  const detail=x.mode==='seconds'?'hold':x.mode==='weight'?`${x.reps||0} reps`:'best set';
+  const subtitle=showName?`${esc(x.name)} · ${detail}`:detail;
+  return `<div class="leader"><div><strong>${esc(x.exercise)}</strong><p>${subtitle}</p></div><strong class="accent">${value}</strong></div>`;
 }
 
 // ---- Progression + injury automation (rule-based, no LLM: reads existing session/set data) ----
@@ -1370,14 +1407,11 @@ async function startWorkout(templateId){
     }
     state.active=session;
     state.sets=dedupeById([...state.sets,...(insertedSets||[])]);
-    // Built straight from the template items already in memory, not from a fresh
-    // loadAll()/computeActiveItems() round-trip. A flaky connection here used to leave
-    // state.active set with an empty exercise list forever, since hydrateActiveWorkout only
-    // (re)computes activeItems when state.active isn't already set.
-    state.activeItems=its.map(item=>({
-      exercise_id:item.exercise_id,exercise:item.exercise,target_sets:item.target_sets,
-      target_reps:item.target_reps,target_rest_sec:item.target_rest_sec,sort_order:item.sort_order
-    }));
+    // Derived from state.sets (computeActiveItems is a pure local computation, no network
+    // round-trip) rather than waiting on a fresh loadAll(). A flaky connection here used to
+    // leave state.active set with an empty exercise list forever, since hydrateActiveWorkout
+    // only (re)computes activeItems when state.active isn't already set.
+    state.activeItems=computeActiveItems(session.id);
     state.elapsed=0;
     state.rest=0;
     state.restTotal=0;
@@ -1396,12 +1430,23 @@ async function startWorkout(templateId){
 // That's what lets performSwap() below replace one exercise with another mid-workout
 // without touching the shared template, and have it survive a page reload.
 function computeActiveItems(sessionId){
-  const byExercise=new Map();
+  const bySlot=new Map();
   state.sets.filter(s=>s.session_id===sessionId).forEach(s=>{
-    if(!byExercise.has(s.exercise_id)) byExercise.set(s.exercise_id,[]);
-    byExercise.get(s.exercise_id).push(s);
+    // A set keeps its original sort_order when it's moved to a different exercise mid-workout
+    // (progression step, manual swap — see moveActiveSetsToExercise, which only ever touches
+    // not-yet-done sets). Grouping by sort_order instead of exercise_id keeps that as ONE card
+    // — otherwise the already-completed sets get stranded on an orphaned card under the old
+    // exercise_id while the remaining sets render as a second, unrelated-looking exercise.
+    const key=s.sort_order!=null?`so:${s.sort_order}`:`ex:${s.exercise_id}`;
+    if(!bySlot.has(key)) bySlot.set(key,[]);
+    bySlot.get(key).push(s);
   });
-  return [...byExercise.entries()].map(([exercise_id,group])=>{
+  return [...bySlot.values()].map(group=>{
+    // Whichever exercise still has undone sets is the one actually being trained right now.
+    // Completed sets from before a swap/step stay attributed to whatever they were actually
+    // performed on — history isn't rewritten, only the card display is merged.
+    const current=group.find(s=>!s.done)||group[0];
+    const exercise_id=current.exercise_id;
     const withOrder=group.filter(s=>s.sort_order!=null);
     // Sessions predating migration 051, or whose template was later deleted (FK sets
     // template_id null), can have every set's sort_order null. Collapsing all of those to a
@@ -1411,13 +1456,20 @@ function computeActiveItems(sessionId){
     const sortOrder=withOrder.length
       ?Math.min(...withOrder.map(s=>s.sort_order))
       :1000+Math.min(...group.map(s=>new Date(s.created_at).getTime()));
+    // Completed sets (from whichever exercise they were logged against) surface first, then
+    // whatever's left to do — each half kept in its own set_idx order. A set's displayed row
+    // number comes from its position here, not its raw set_idx, since a moved set's set_idx
+    // restarts from 1 under its new exercise_id and would otherwise collide with a leftover
+    // set_idx 1 still sitting on the old exercise_id.
+    const sets=group.slice().sort((a,b)=>a.done===b.done?a.set_idx-b.set_idx:(a.done?-1:1));
     return {
       exercise_id,
       exercise:state.exercises.find(e=>e.id===exercise_id),
       target_sets:group.length,
-      target_reps:group[0]?.target_reps||'8-12',
-      target_rest_sec:group[0]?.target_rest_sec??90,
-      sort_order:sortOrder
+      target_reps:current.target_reps||'8-12',
+      target_rest_sec:current.target_rest_sec??90,
+      sort_order:sortOrder,
+      sets
     };
   }).filter(i=>i.exercise).sort((a,b)=>a.sort_order-b.sort_order);
 }
@@ -1510,10 +1562,24 @@ function updateWorkoutClocks(){
   const stopwatchHint=$('activeStopwatchHint');
   const rest=$('activeRest');
   const progress=$('restProgress');
+  const floatStopwatch=$('floatStopwatch');
+  const floatRestBadge=$('floatRestBadge');
   if(stopwatch) stopwatch.textContent=fmtWorkoutTime(state.elapsed);
   if(stopwatchHint) stopwatchHint.textContent=workoutTimeHint(state.elapsed);
   if(rest) rest.textContent=fmtSec(state.rest);
   if(progress) progress.style.width=`${restProgressPct()}%`;
+  if(floatStopwatch) floatStopwatch.textContent=fmtWorkoutTime(state.elapsed);
+  if(floatRestBadge){
+    floatRestBadge.textContent=fmtSec(state.rest);
+    floatRestBadge.classList.toggle('resting',state.rest>0);
+  }
+}
+
+// Collapsed pill vs. expanded controls for the floating workout timer (see .float-timer CSS) —
+// kept open/closed across re-renders via state so adjusting rest doesn't snap it shut.
+function toggleFloatTimer(){
+  state.floatTimerOpen=!state.floatTimerOpen;
+  renderActiveWorkout();
 }
 
 function toggleWorkoutTimer(){
@@ -1552,21 +1618,24 @@ function renderActiveWorkout(){
   const done=allSets.filter(s=>s.done).length;
   const running=!!state.timer;
   $('modalCard').innerHTML=`
-    <div class="workout-bar">
-      <div class="workout-bar-title">
-        <div><small>Today workout</small><h1>${esc(state.active.title)}</h1></div>
-        <button class="x" onclick="closeModal()" aria-label="Minimize workout" title="Minimize workout">${icon('minimize',22)}</button>
-      </div>
-      <div class="timer-console">
-        <div class="timer-main">
+    <div class="float-timer ${state.floatTimerOpen?'open':''}">
+      <button type="button" class="float-timer-chip" onclick="toggleFloatTimer()" aria-label="${state.floatTimerOpen?'Collapse timer':'Expand timer'}" aria-expanded="${state.floatTimerOpen}" title="${state.floatTimerOpen?'Collapse timer':'Expand timer'}">
+        <span class="float-timer-dot ${running?'':'paused'}"></span>
+        <strong id="floatStopwatch">${fmtWorkoutTime(state.elapsed)}</strong>
+        <span class="float-timer-restbadge ${state.rest>0?'resting':''}" id="floatRestBadge">${fmtSec(state.rest)}</span>
+        <span class="float-timer-chevron">${icon('chevronRight',14)}</span>
+      </button>
+      ${state.floatTimerOpen?`
+      <div class="float-timer-panel">
+        <div class="row-head">
           <div>
             <span class="timer-label">Elapsed</span>
-            <strong id="activeStopwatch">${fmtWorkoutTime(state.elapsed)}</strong>
-            <em id="activeStopwatchHint">${workoutTimeHint(state.elapsed)}</em>
+            <strong class="elapsed-big" id="activeStopwatch">${fmtWorkoutTime(state.elapsed)}</strong>
+            <em class="elapsed-hint" id="activeStopwatchHint">${workoutTimeHint(state.elapsed)}</em>
           </div>
-          <button class="timer-toggle" onclick="toggleWorkoutTimer()" aria-label="${running?'Pause timer':'Resume timer'}" title="${running?'Pause timer':'Resume timer'}">${running?icon('pause',22):icon('play',22)}</button>
+          <button class="timer-toggle" onclick="toggleWorkoutTimer()" aria-label="${running?'Pause timer':'Resume timer'}" title="${running?'Pause timer':'Resume timer'}">${running?icon('pause',18):icon('play',18)}</button>
         </div>
-        <div class="timer-side">
+        <div class="rest-row">
           <button class="timer-step" onclick="adjustRest(-30)" aria-label="Remove 30 seconds from rest">-30s</button>
           <div class="timer-rest">
             <span>Rest</span>
@@ -1574,13 +1643,17 @@ function renderActiveWorkout(){
           </div>
           <button class="timer-step" onclick="adjustRest(30)" aria-label="Add 30 seconds to rest">+30s</button>
         </div>
-        <div class="timer-meta">
-          <div class="rest-progress" aria-label="Rest progress"><i id="restProgress" style="width:${restProgressPct()}%"></i></div>
-          <div class="unit-toggle" aria-label="Weight unit">
-            <button class="${state.weightUnit==='kg'?'active':''}" onclick="setWeightUnit('kg')">KG</button>
-            <button class="${state.weightUnit==='lb'?'active':''}" onclick="setWeightUnit('lb')">LB</button>
-          </div>
+        <div class="rest-progress" aria-label="Rest progress"><i id="restProgress" style="width:${restProgressPct()}%"></i></div>
+        <div class="unit-toggle" aria-label="Default weight unit">
+          <button class="${state.weightUnit==='kg'?'active':''}" onclick="setWeightUnit('kg')">KG</button>
+          <button class="${state.weightUnit==='lb'?'active':''}" onclick="setWeightUnit('lb')">LB</button>
         </div>
+      </div>`:''}
+    </div>
+    <div class="workout-bar">
+      <div class="workout-bar-title">
+        <div><small>Today workout</small><h1>${esc(state.active.title)}</h1></div>
+        <button class="x" onclick="closeModal()" aria-label="Minimize workout" title="Minimize workout">${icon('minimize',22)}</button>
       </div>
     </div>
     <div class="workout-content">
@@ -1590,7 +1663,7 @@ function renderActiveWorkout(){
           <span class="progress-pill"><strong>${done}</strong><small>/ ${allSets.length} sets</small></span>
         </div>
       </div>
-      ${state.activeItems.map(item=>activeExercise(item,allSets.filter(s=>s.exercise_id===item.exercise_id))).join('')}
+      ${state.activeItems.map(item=>activeExercise(item,item.sets)).join('')}
       <button class="btn small ghost" style="width:100%;margin-top:4px" onclick="toggleAddExercise()">${icon('plus',16)} Add exercise (this session only)</button>
       <div id="addExPanel">${addExercisePanelHtml()}</div>
       <div class="workout-footer">
@@ -1626,7 +1699,7 @@ function activeExercise(item,sets){
   const unit=exerciseWeightUnit(item.exercise_id);
   const rowClass=showWeight?'set-row':'set-row no-weight';
   return `<article class="exercise">
-    <div class="ex-head" onclick="openExercise('${e.id}')">${mediaThumb(e)}<div><h3>${esc(e.name)}</h3><p>${esc(e.english_name||'')} · ${item.target_sets} x ${esc(item.target_reps)} · rest ${item.target_rest_sec}s</p>${progressionStepperHtml(e,item.exercise_id)}</div><span class="muted">${sets.filter(s=>s.done).length}/${sets.length}</span>
+    <div class="ex-head" onclick="openExercise('${e.id}',true)">${mediaThumb(e)}<div><h3>${esc(e.name)}</h3><p>${[esc(exerciseSubtitle(e)),`${item.target_sets} x ${esc(item.target_reps)}`,`rest ${item.target_rest_sec}s`].filter(Boolean).join(' · ')}</p>${progressionStepperHtml(e,item.exercise_id)}</div><span class="muted">${sets.filter(s=>s.done).length}/${sets.length}</span>
       ${undone?`<button class="btn small ghost" onclick="event.stopPropagation();toggleSwap('${item.exercise_id}')" aria-label="Swap exercise" title="Swap exercise">${icon('swap',16)}</button>`:''}
       <button class="icon-btn tiny danger" onclick="event.stopPropagation();removeExerciseFromSession('${item.exercise_id}')" aria-label="Remove exercise from this session" title="Remove from this session">${icon('trash',16)}</button>
     </div>
@@ -1637,15 +1710,28 @@ function activeExercise(item,sets){
         ${showWeight?`<button type="button" class="pill dark" style="cursor:pointer;justify-self:start" onclick="event.stopPropagation();setExerciseWeightUnit('${item.exercise_id}','${unit==='kg'?'lb':'kg'}')" aria-label="Switch this exercise to ${unit==='kg'?'pounds':'kilograms'}" title="Switch this exercise to ${unit==='kg'?'lb':'kg'}">${unit.toUpperCase()}</button>`:''}
         <small class="muted">${seconds?'SEC':'REPS'}</small><span></span><span></span>
       </div>
-      ${sets.map(s=>`<div class="${rowClass}">
-        <strong>${s.set_idx}</strong>
-        ${showWeight?`<input class="field" inputmode="decimal" value="${fmtWeightInput(s.weight_kg,unit)}" placeholder="${unit}" onchange="updateSet('${s.id}','weight_kg',this.value)">`:''}
-        ${seconds
+      ${sets.map((s,i)=>{
+        // A row's own exercise can differ from the card's current one (item.exercise) right
+        // after a mid-exercise swap/progression-step — completed sets stay attributed to
+        // whatever they were actually logged against (see computeActiveItems), so each row
+        // reads its own log_mode/log_weight/unit instead of inheriting the header's. Row
+        // number is this set's position in the card, not its raw set_idx: a moved set's
+        // set_idx restarts at 1 under its new exercise_id and would otherwise collide with a
+        // leftover set_idx 1 still sitting on the old exercise_id.
+        const rowEx=s.exercise_id===item.exercise_id?e:(state.exercises.find(x=>x.id===s.exercise_id)||e);
+        const rowSeconds=rowEx.log_mode==='seconds';
+        const rowShowWeight=rowEx.log_weight!==false;
+        const rowUnit=exerciseWeightUnit(s.exercise_id);
+        const rc=rowShowWeight?'set-row':'set-row no-weight';
+        return `<div class="${rc}">
+        <strong>${i+1}</strong>
+        ${rowShowWeight?`<input class="field" inputmode="decimal" value="${fmtWeightInput(s.weight_kg,rowUnit)}" placeholder="${rowUnit}" onchange="updateSet('${s.id}','weight_kg',this.value)">`:''}
+        ${rowSeconds
           ?`<input class="field" inputmode="numeric" value="${s.seconds??''}" placeholder="${esc(s.target_reps||'sec')}" onchange="updateSet('${s.id}','seconds',this.value)">`
           :`<input class="field" inputmode="numeric" value="${s.reps??''}" placeholder="${esc(s.target_reps||'reps')}" onchange="updateSet('${s.id}','reps',this.value)">`}
         <button class="check ${s.done?'done':''}" onclick="toggleSet('${s.id}',${item.target_rest_sec})">${icon('check',18)}</button>
         <button class="set-remove" onclick="removeSet('${s.id}')" aria-label="Remove set">${icon('close',14)}</button>
-      </div>`).join('')}
+      </div>`;}).join('')}
     </div>
     <button class="btn small ghost" style="width:100%;margin-top:8px" onclick="addSet('${item.exercise_id}')">+ Add set</button>
   </article>`;
@@ -1684,7 +1770,7 @@ function swapListHtml(exerciseId){
   }
   list=list.slice(0,20);
   if(!list.length) return `<p class="muted">No matches.</p>`;
-  return list.map(e=>`<button type="button" class="btn small ghost" style="width:100%;text-align:left" onclick="performSwap('${exerciseId}','${e.id}')">${esc(e.name)} <small class="muted">${esc(e.english_name||'')}</small></button>`).join('');
+  return list.map(e=>`<button type="button" class="btn small ghost" style="width:100%;text-align:left" onclick="performSwap('${exerciseId}','${e.id}')">${esc(e.name)}${exerciseSubtitle(e)?` <small class="muted">${esc(exerciseSubtitle(e))}</small>`:''}</button>`).join('');
 }
 
 function renderSwapList(exerciseId){
@@ -1760,7 +1846,7 @@ function addExerciseListHtml(){
   const already=new Set(state.activeItems.map(i=>i.exercise_id));
   const list=state.exercises.filter(e=>!already.has(e.id)&&(!q||`${e.name} ${e.english_name||''}`.toLowerCase().includes(q))).slice(0,20);
   if(!list.length) return `<p class="muted">No matches.</p>`;
-  return list.map(e=>`<button type="button" class="btn small ghost" style="width:100%;text-align:left" onclick="addExerciseToSession('${e.id}')">${esc(e.name)} <small class="muted">${esc(e.english_name||'')}</small></button>`).join('');
+  return list.map(e=>`<button type="button" class="btn small ghost" style="width:100%;text-align:left" onclick="addExerciseToSession('${e.id}')">${esc(e.name)}${exerciseSubtitle(e)?` <small class="muted">${esc(exerciseSubtitle(e))}</small>`:''}</button>`).join('');
 }
 
 function renderAddExerciseList(){
@@ -1796,10 +1882,15 @@ async function removeExerciseFromSession(exerciseId){
   if(!state.active) return;
   const sessionId=state.active.id;
   const item=state.activeItems.find(i=>i.exercise_id===exerciseId);
-  if(!confirm(`Remove ${item?.exercise?.name||'this exercise'} from today's session? This won't change your saved routine.`)) return;
-  const {error}=await sb.from('skandi_sets').delete().eq('session_id',sessionId).eq('exercise_id',exerciseId);
+  if(!item) return;
+  if(!confirm(`Remove ${item.exercise?.name||'this exercise'} from today's session? This won't change your saved routine.`)) return;
+  // Delete by id, not by exercise_id: after a mid-exercise swap/progression-step this card can
+  // hold sets logged against more than one exercise_id (see computeActiveItems) — filtering by
+  // the current exercise_id alone would leave the older exercise's completed sets behind.
+  const ids=item.sets.map(s=>s.id);
+  const {error}=await sb.from('skandi_sets').delete().in('id',ids);
   if(error) return alert(error.message);
-  state.sets=state.sets.filter(s=>!(s.session_id===sessionId&&s.exercise_id===exerciseId));
+  state.sets=state.sets.filter(s=>!ids.includes(s.id));
   state.activeItems=computeActiveItems(sessionId);
   renderActiveWorkout();
 }
@@ -1994,17 +2085,22 @@ function progressionHistoryHtml(exercise){
     </div>`).join('')}</section>`;
 }
 
-function openExercise(id){
+// fromWorkout marks that this detail view was opened from inside the active-workout modal
+// (see activeExercise's ex-head onclick) — its close button then returns to the workout
+// instead of dropping the user all the way out to the "Resume" banner on Home.
+function openExercise(id,fromWorkout=false){
   const e=state.exercises.find(x=>x.id===id);
   if(!e) return;
   const muscles=Object.entries(e.muscles||{}).sort((a,b)=>b[1]-a[1]);
+  const backToWorkout=fromWorkout&&!!state.active;
+  const closeAction=backToWorkout?'openActiveWorkout()':'closeModal()';
   $('modal').classList.add('show');
   $('modalCard').innerHTML=`
-    <div class="row"><h1>${esc(e.name)}</h1><button class="x" onclick="closeModal()">${icon('close',20)}</button></div>
+    <div class="row"><h1>${esc(e.name)}</h1><button class="x" onclick="${closeAction}" aria-label="${backToWorkout?'Back to workout':'Close'}" title="${backToWorkout?'Back to workout':'Close'}">${icon(backToWorkout?'minimize':'close',20)}</button></div>
     <div class="card">
       ${e.media_url?(isVideoUrl(e.media_url)?`<video src="${esc(e.media_url)}" controls playsinline style="width:100%;border-radius:20px;max-height:520px;object-fit:cover"></video>`:`<img src="${esc(e.media_url)}" alt="${esc(e.name)}" style="width:100%;border-radius:20px;max-height:520px;object-fit:cover">`):empty('Paste a Gymvisual GIF or another source in the library to see technique here.')}
       ${e.media_page_url?`<p style="margin-top:12px"><a class="accent" href="${esc(e.media_page_url)}" target="_blank" rel="noreferrer">Open Gymvisual reference</a></p>`:''}
-      <button class="btn" style="width:100%;margin-top:12px" onclick="openExerciseMediaEdit('${e.id}')">${icon('edit',16)} Edit technique media</button>
+      <button class="btn" style="width:100%;margin-top:12px" onclick="openExerciseMediaEdit('${e.id}',${backToWorkout})">${icon('edit',16)} Edit technique media</button>
     </div>
     ${progressionHistoryHtml(e)}
     <section class="card"><div class="eyebrow">Muscles involved</div>${muscles.map(([m,p])=>`<div style="margin-top:10px"><div class="row"><strong>${esc(m)}</strong><span>${p}%</span></div><div class="bar"><i style="width:${p}%"></i></div></div>`).join('')}</section>
@@ -2013,12 +2109,12 @@ function openExercise(id){
 }
 
 let exerciseMediaFile=null;
-function openExerciseMediaEdit(id){
+function openExerciseMediaEdit(id,fromWorkout=false){
   const e=state.exercises.find(x=>x.id===id);
   if(!e) return;
   exerciseMediaFile=null;
   $('modalCard').innerHTML=`
-    <div class="row"><h1>Edit media</h1><button class="x" onclick="openExercise('${e.id}')">${icon('close',20)}</button></div>
+    <div class="row"><h1>Edit media</h1><button class="x" onclick="openExercise('${e.id}',${fromWorkout})">${icon('close',20)}</button></div>
     <p class="muted">${esc(e.name)}</p>
     <label class="eyebrow" style="margin-top:14px">Upload from your gallery</label>
     <input id="exMediaFile" type="file" accept="video/*,image/gif" class="field left" onchange="exerciseMediaFile=this.files[0]||null; $('exMediaFilePreview').textContent=exerciseMediaFile?exerciseMediaFile.name:''">
@@ -2027,10 +2123,10 @@ function openExerciseMediaEdit(id){
     <input id="exMediaUrl" class="field left" placeholder="Direct GIF/video URL" value="${esc(e.media_url||'')}">
     <label class="eyebrow" style="margin-top:14px">Reference page URL</label>
     <input id="exMediaPageUrl" class="field left" placeholder="Optional" value="${esc(e.media_page_url||'')}">
-    <button class="btn primary" style="width:100%;margin-top:14px" id="exMediaSaveBtn" onclick="saveExerciseMedia('${e.id}')">Save media</button>`;
+    <button class="btn primary" style="width:100%;margin-top:14px" id="exMediaSaveBtn" onclick="saveExerciseMedia('${e.id}',${fromWorkout})">Save media</button>`;
 }
 
-async function saveExerciseMedia(id){
+async function saveExerciseMedia(id,fromWorkout=false){
   const btn=$('exMediaSaveBtn');
   if(btn){btn.disabled=true;btn.textContent='Saving...';}
   try{
@@ -2050,7 +2146,7 @@ async function saveExerciseMedia(id){
     if(error) return alert(error.message);
     exerciseMediaFile=null;
     await loadAll();
-    openExercise(id);
+    openExercise(id,fromWorkout);
   } finally {
     if(btn){btn.disabled=false;btn.textContent='Save media';}
   }
@@ -2070,24 +2166,29 @@ function openTemplateBuilder(day=null,id=null){
     <h2>Exercises</h2>
     <input id="tplExSearch" class="field left" placeholder="Search exercise..." oninput="renderTemplateExercisePicker()">
     <div id="tplExPicker"></div>
-    <button class="btn primary" style="width:100%;margin-top:14px" onclick="saveTemplate('${id||''}')">Save routine</button>`;
+    <div class="tpl-save-bar"><button class="btn primary" style="width:100%" onclick="saveTemplate('${id||''}')">Save routine</button></div>`;
   renderTemplateExercisePicker();
 }
 
 function renderTemplateExercisePicker(){
   const q=($('tplExSearch')?.value||'').trim().toLowerCase();
+  // "Selected" is a virtual group (not a muscle filter) so you can jump straight to reviewing/
+  // reordering what you've already picked instead of re-scrolling the full ~100-exercise list
+  // to find them again.
   const list=state.exercises.filter(e=>{
+    if(builderState.group==='Selected') return builderState.selected.has(e.id);
     if(builderState.group!=='All'&&muscleGroupOf(e)!==builderState.group) return false;
     if(q&&!`${e.name} ${e.english_name||''}`.toLowerCase().includes(q)) return false;
     return true;
   });
-  const filters=['All',...MUSCLE_GROUP_ORDER].map(g=>
-    `<button type="button" class="btn small ${builderState.group===g?'primary':''}" style="margin:0 6px 8px 0" onclick="setBuilderGroup('${esc(g)}')">${esc(g)}</button>`
-  ).join('');
+  const filters=['All',`Selected (${builderState.selected.size})`,...MUSCLE_GROUP_ORDER].map(g=>{
+    const key=g.startsWith('Selected')?'Selected':g;
+    return `<button type="button" class="btn small ${builderState.group===key?'primary':''}" style="margin:0 6px 8px 0" onclick="setBuilderGroup('${key}')">${esc(g)}</button>`;
+  }).join('');
   const groups=groupExercisesByMuscle(list).map(([group,items])=>`
     <div class="eyebrow" style="margin-top:14px">${esc(group)} · ${items.length}</div>
     ${items.map(e=>templateExerciseOption(e)).join('')}
-  `).join('')||empty('No exercises match your search.');
+  `).join('')||empty(builderState.group==='Selected'?'No exercises selected yet.':'No exercises match your search.');
   $('tplExPicker').innerHTML=`<div style="margin-top:10px">${filters}</div><div class="stack">${groups}</div>`;
 }
 
