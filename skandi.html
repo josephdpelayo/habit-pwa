@@ -114,6 +114,7 @@ p{color:var(--muted);line-height:1.45;margin:0}
 .bar{height:8px;background:#e2eaf2;border-radius:999px;overflow:hidden}
 .bar i{display:block;height:100%;background:linear-gradient(90deg,var(--dof-navy),var(--blue));width:0}
 .set-row{display:grid;grid-template-columns:26px 1fr 1fr 46px 30px;gap:6px;align-items:center}
+.set-row.no-weight{grid-template-columns:26px 1fr 46px 30px}
 .field{width:100%;background:#fff;border:1px solid var(--line);color:var(--text);border-radius:10px;padding:13px;text-align:center;box-shadow:inset 0 1px 0 rgba(1,36,86,.03)}
 .field.left{text-align:left}
 textarea.field{min-height:112px;text-align:left;resize:vertical}
@@ -215,6 +216,7 @@ textarea.field{min-height:112px;text-align:left;resize:vertical}
   .ex-head{grid-template-columns:58px 1fr auto}
   .thumb{width:58px;height:58px}
   .set-row{grid-template-columns:24px 1fr 1fr 42px 26px}
+  .set-row.no-weight{grid-template-columns:24px 1fr 42px 26px}
   .app{padding-left:13px;padding-right:13px}
   .brand{font-size:22px}
   .brand-text small{font-size:10px}
@@ -353,7 +355,7 @@ const BODY_REGIONS_BACK=[
   {name:'Triceps',shape:'rect',x:46,y:95,w:26,h:80,rx:13,mirror:true}
 ];
 const ACTIVE_WORKOUT_MAX_HOURS=18;
-const state={user:null,profile:null,view:'home',authMode:'login',exercises:[],templates:[],items:[],sessions:[],sets:[],externalActivities:[],active:null,activeItems:[],timer:null,elapsed:0,rest:0,restTotal:0,bodyFlip:'front',weightUnit:localStorage.getItem('skandi_weight_unit')||'kg',expandedRoutines:new Set(),swapTarget:null,swapQuery:'',addExOpen:false,addExQuery:'',pausedMs:0,pausedAt:null};
+const state={user:null,profile:null,view:'home',authMode:'login',exercises:[],templates:[],items:[],sessions:[],sets:[],externalActivities:[],progressionState:[],active:null,activeItems:[],timer:null,elapsed:0,rest:0,restTotal:0,bodyFlip:'front',weightUnit:localStorage.getItem('skandi_weight_unit')||'kg',weightUnitOverrides:(()=>{try{return JSON.parse(localStorage.getItem('skandi_weight_unit_overrides')||'{}');}catch(e){return {};}})(),expandedRoutines:new Set(),swapTarget:null,swapQuery:'',addExOpen:false,addExQuery:'',pausedMs:0,pausedAt:null};
 let builderState={selected:new Map(),group:'All'};
 
 const $=id=>document.getElementById(id);
@@ -378,16 +380,28 @@ const ICON_PATHS={
 const icon=(name,size=20)=>`<svg viewBox="0 0 24 24" width="${size}" height="${size}" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex:0 0 auto">${ICON_PATHS[name]||''}</svg>`;
 const THUMB_FALLBACK=icon('image',26);
 const fmtSec=s=>`${String(Math.floor((s||0)/60)).padStart(2,'0')}:${String((s||0)%60).padStart(2,'0')}`;
-const kgToDisplay=kg=>state.weightUnit==='lb'?Number(kg)*2.2046226218:Number(kg);
-const displayToKg=value=>state.weightUnit==='lb'?Number(value)/2.2046226218:Number(value);
-function fmtWeightInput(kg){
+const kgToDisplay=(kg,unit=state.weightUnit)=>unit==='lb'?Number(kg)*2.2046226218:Number(kg);
+const displayToKg=(value,unit=state.weightUnit)=>unit==='lb'?Number(value)/2.2046226218:Number(value);
+function fmtWeightInput(kg,unit=state.weightUnit){
   if(kg==null||kg==='') return '';
-  const n=kgToDisplay(kg);
+  const n=kgToDisplay(kg,unit);
   return Number.isInteger(n)?String(n):String(Math.round(n*10)/10);
 }
 function setWeightUnit(unit){
   state.weightUnit=unit==='lb'?'lb':'kg';
   localStorage.setItem('skandi_weight_unit',state.weightUnit);
+  renderActiveWorkout();
+}
+// Per-exercise weight unit override: some exercises are just labeled in lb (imported
+// dumbbells) while the rest of the session is kg, so the unit needs to travel with the
+// exercise rather than being one global switch. Falls back to the global weightUnit when an
+// exercise has no override of its own.
+function exerciseWeightUnit(exerciseId){
+  return state.weightUnitOverrides[exerciseId]||state.weightUnit;
+}
+function setExerciseWeightUnit(exerciseId,unit){
+  state.weightUnitOverrides[exerciseId]=unit==='lb'?'lb':'kg';
+  localStorage.setItem('skandi_weight_unit_overrides',JSON.stringify(state.weightUnitOverrides));
   renderActiveWorkout();
 }
 function fmtWorkoutTime(sec){
@@ -511,7 +525,7 @@ async function loadAll(){
   // vs. "crew" (other members' shared activity, capped since it only feeds the social feed).
   let [{data:profile},{data:exercises},{data:templates},{data:items},
        {data:ownSessions},{data:crewSessions},{data:ownSets},{data:crewSets},
-       {data:externalActivities}]=await Promise.all([
+       {data:externalActivities},{data:progressionState}]=await Promise.all([
     sb.from('profiles').select('id,name,avatar_url').eq('id',state.user.id).maybeSingle(),
     sb.from('skandi_exercises').select('*').order('name'),
     sb.from('skandi_templates').select('*, profile:profiles(name,avatar_url)').order('weekday',{nullsFirst:false}).order('created_at',{ascending:false}),
@@ -520,7 +534,8 @@ async function loadAll(){
     sb.from('skandi_sessions').select('*, profile:profiles(name,avatar_url)').eq('visibility','crew').order('started_at',{ascending:false}).limit(60),
     sb.from('skandi_sets').select('*, exercise:skandi_exercises(name,slug)').eq('user_id',state.user.id).order('created_at',{ascending:false}),
     sb.from('skandi_sets').select('*, exercise:skandi_exercises(name,slug)').neq('user_id',state.user.id).order('created_at',{ascending:false}).limit(600),
-    sb.from('skandi_external_activities').select('*').eq('user_id',state.user.id).order('performed_at',{ascending:false}).limit(200)
+    sb.from('skandi_external_activities').select('*').eq('user_id',state.user.id).order('performed_at',{ascending:false}).limit(200),
+    sb.from('skandi_progression_state').select('*').eq('user_id',state.user.id)
   ]);
   if(!profile){
     // Some signups end up with an auth user but no profiles row (trigger race condition).
@@ -542,6 +557,7 @@ async function loadAll(){
   state.sessions=sessions.filter(s=>!(ignored.has(s.id)&&!s.completed_at));
   state.sets=sets.filter(s=>!ignored.has(s.session_id));
   state.externalActivities=externalActivities||[];
+  state.progressionState=progressionState||[];
   hydrateActiveWorkout();
 }
 
@@ -598,7 +614,16 @@ function homeView(){
   // state.templates[0] (any crew member's public routine) used to silently start someone
   // else's workout for a user who hadn't created a routine yet, and skip onboarding.
   const todayTpl=state.templates.find(t=>t.user_id===state.user.id&&t.weekday===todayDow())||state.templates.find(t=>t.user_id===state.user.id);
-  const pct=Math.min(100,Math.round((weekCount/5)*100));
+  // Denominator is the user's actual scheduled days this week, not a fixed guess — someone
+  // running a 3-day split shouldn't be stuck under 60% forever, and someone on 6 days
+  // shouldn't hit 100% after 5.
+  const weekTotal=state.templates.filter(t=>t.user_id===state.user.id&&t.weekday!=null).length||5;
+  const pct=Math.min(100,Math.round((weekCount/weekTotal)*100));
+  const remaining=weekTotal-weekCount;
+  const encouragement=weekCount===0?'Today can be the start.'
+    :remaining<=0?'All done for the week. Strong work.'
+    :remaining===1?'One more to go. You got this.'
+    :'You are building rhythm.';
   const focusAction=todayTpl?`startWorkout('${todayTpl.id}')`:`openDayPicker(${todayDow()})`;
   return `
     ${activeWorkoutBanner()}
@@ -610,13 +635,14 @@ function homeView(){
           <div>
             <div class="eyebrow">Your focus now</div>
             <h2>${esc(todayTpl?.name||'Create your first routine')}</h2>
-            <p>${weekCount} ${plural(weekCount,'workout')} completed this week. ${weekCount?'You are building rhythm.':'Today can be the start.'}</p>
+            <p>${weekCount} of ${weekTotal} ${plural(weekTotal,'workout')} done this week. ${esc(encouragement)}</p>
             <span class="focus-cta"><i>${todayTpl?icon('play',17):'+'}</i>${todayTpl?'Start today workout':'Set up today routine'}</span>
           </div>
           <div class="ring" style="--p:${pct}%"><span>${pct}%</span></div>
         </div>
       </button>
     </section>
+    ${attentionBannerHtml()}
     <section class="grid">
       <div class="stat click-card" onclick="setView('progress')"><strong>${weekCount}</strong><small>this week</small></div>
       <div class="stat click-card" onclick="setView('train')"><strong>${state.templates.filter(t=>t.user_id===state.user.id).length}</strong><small>your routines</small></div>
@@ -701,8 +727,16 @@ function crewView(){
 function progressView(){
   const mine=state.sessions.filter(s=>s.user_id===state.user.id&&s.completed_at);
   const prs=leaderboard().filter(x=>x.user_id===state.user.id).slice(0,8);
+  const stalls=progressionStallWarnings();
+  const sore=repeatedSorenessWarnings();
   return `
     <h1>Progress</h1>
+    ${weeklyRecapCard()}
+    ${(stalls.length||sore.length)?`<section class="card" style="border-color:rgba(212,72,84,.30);background:#fff7f7">
+      <div class="eyebrow" style="color:var(--pink)">Needs attention</div>
+      ${sore.map(w=>`<p style="margin-top:8px"><strong>${esc(w.area)}</strong> — reported ${w.count} of your last sessions. Consider resting that area or regressing.</p>`).join('')}
+      ${stalls.map(w=>`<div class="row click-card" style="margin-top:8px" onclick="openExercise('${w.exercise.id}')"><p><strong>${esc(w.exercise.name)}</strong> flat for 3 sessions (${w.marks.map(m=>w.exercise.log_mode==='seconds'?fmtSec(m):m+' reps').join(' → ')}). Maybe deload or hold longer.</p>${icon('chevronRight',18)}</div>`).join('')}
+    </section>`:''}
     <section class="grid">
       <div class="stat"><strong>${mine.length}</strong><small>saved workouts</small></div>
       <div class="stat"><strong>${Math.round(mine.reduce((a,s)=>a+(s.duration_sec||0),0)/60)}</strong><small>minutes</small></div>
@@ -869,6 +903,105 @@ function leaderboard(){
     });
   });
   return [...best.values()].sort((a,b)=>b.weight-a.weight);
+}
+
+// ---- Progression + injury automation (rule-based, no LLM: reads existing session/set data) ----
+
+// Flags any progression line (front lever, planche, ...) where the user's CURRENT variant
+// hasn't improved its best mark across the last 3 sessions it was trained — i.e. the same or
+// a worse number 3 sessions running. That's a sign to deload, hold longer per rep, or just
+// stay patient, and it's exactly the trend the per-exercise sparkline shows but nobody checks
+// on their own every session.
+function progressionStallWarnings(){
+  const groups=[...new Set(state.exercises.filter(e=>e.progression_group).map(e=>e.progression_group))];
+  const warnings=[];
+  for(const group of groups){
+    const currentId=state.progressionState.find(p=>p.progression_group===group)?.exercise_id;
+    const exercise=currentId&&state.exercises.find(e=>e.id===currentId);
+    if(!exercise) continue;
+    const sessions=state.sessions.filter(s=>s.user_id===state.user.id&&s.completed_at&&s.id!==state.active?.id)
+      .sort((a,b)=>new Date(b.completed_at).getTime()-new Date(a.completed_at).getTime());
+    const marks=[];
+    for(const session of sessions){
+      const sets=state.sets.filter(s=>s.session_id===session.id&&s.exercise_id===exercise.id&&(s.seconds!=null||s.reps!=null));
+      if(!sets.length) continue;
+      marks.push(exercise.log_mode==='seconds'?Math.max(...sets.map(s=>s.seconds||0)):Math.max(...sets.map(s=>s.reps||0)));
+      if(marks.length>=3) break;
+    }
+    if(marks.length<3) continue;
+    // marks is newest-first: [latest, ..., oldest]. No net gain across the window = stalled.
+    if(marks[0]<=marks[marks.length-1]) warnings.push({group,exercise,marks:marks.slice().reverse()});
+  }
+  return warnings;
+}
+
+// Free-text soreness_area means this is normalized-string matching, not true zone taxonomy —
+// still catches the common case (someone typing "elbow" or "shoulder" the same way each time)
+// without needing a full body-zone picker in the report form.
+function repeatedSorenessWarnings(){
+  const sessions=state.sessions.filter(s=>s.user_id===state.user.id&&s.completed_at&&s.report_soreness&&s.report_soreness_area)
+    .sort((a,b)=>new Date(b.completed_at).getTime()-new Date(a.completed_at).getTime())
+    .slice(0,8);
+  const byArea=new Map();
+  sessions.forEach(s=>{
+    const key=s.report_soreness_area.trim().toLowerCase();
+    if(!byArea.has(key)) byArea.set(key,[]);
+    byArea.get(key).push(s);
+  });
+  return [...byArea.entries()].filter(([,list])=>list.length>=2)
+    .map(([area,list])=>({area,count:list.length,latest:list[0].completed_at}))
+    .sort((a,b)=>b.count-a.count);
+}
+
+function weeklyRecap(){
+  const startOfWeek=new Date();
+  startOfWeek.setHours(0,0,0,0);
+  startOfWeek.setDate(startOfWeek.getDate()-todayDow());
+  const lastWeekStart=new Date(startOfWeek);
+  lastWeekStart.setDate(lastWeekStart.getDate()-7);
+  const own=s=>s.user_id===state.user.id&&s.completed_at;
+  const thisWeek=state.sessions.filter(s=>own(s)&&new Date(s.completed_at).getTime()>=startOfWeek.getTime());
+  const lastWeek=state.sessions.filter(s=>own(s)&&new Date(s.completed_at).getTime()>=lastWeekStart.getTime()&&new Date(s.completed_at).getTime()<startOfWeek.getTime());
+  const avgEnergy=list=>{
+    const vals=list.map(s=>s.report_energy).filter(v=>v!=null);
+    return vals.length?Math.round((vals.reduce((a,b)=>a+b,0)/vals.length)*10)/10:null;
+  };
+  return {
+    count:thisWeek.length,
+    lastCount:lastWeek.length,
+    minutes:Math.round(thisWeek.reduce((a,s)=>a+(s.duration_sec||0),0)/60),
+    soreCount:thisWeek.filter(s=>s.report_soreness).length,
+    avgEnergy:avgEnergy(thisWeek),
+    lastAvgEnergy:avgEnergy(lastWeek),
+    progressions:state.progressionState.map(p=>state.exercises.find(e=>e.id===p.exercise_id)).filter(Boolean)
+  };
+}
+
+// Compact "needs attention" banner for Home — full detail (marks, history) lives in Progress.
+function attentionBannerHtml(){
+  const stalls=progressionStallWarnings();
+  const sore=repeatedSorenessWarnings();
+  if(!stalls.length&&!sore.length) return '';
+  return `<section class="card click-card" style="border-color:rgba(212,72,84,.30);background:#fff7f7" onclick="setView('progress')">
+    <div class="eyebrow" style="color:var(--pink)">Needs attention</div>
+    ${sore.map(w=>`<p style="margin-top:8px"><strong>${esc(w.area)}</strong> — reported ${w.count} of your last sessions. Consider resting that area or regressing.</p>`).join('')}
+    ${stalls.map(w=>`<p style="margin-top:8px"><strong>${esc(w.exercise.name)}</strong> — flat for 3 sessions (${w.marks.map(m=>w.exercise.log_mode==='seconds'?fmtSec(m):m+' reps').join(' → ')}). Maybe deload or hold longer.</p>`).join('')}
+  </section>`;
+}
+
+function weeklyRecapCard(){
+  const r=weeklyRecap();
+  const energyTrend=r.avgEnergy==null||r.lastAvgEnergy==null?null:r.avgEnergy-r.lastAvgEnergy;
+  return `<section class="card">
+    <div class="eyebrow">This week</div>
+    <div class="grid" style="margin-top:10px">
+      <div class="stat"><strong>${r.count}</strong><small>workouts${r.lastCount?` (${r.lastCount} last week)`:''}</small></div>
+      <div class="stat"><strong>${r.minutes}</strong><small>minutes trained</small></div>
+    </div>
+    ${r.avgEnergy!=null?`<p style="margin-top:10px">Average energy ${r.avgEnergy}/5${energyTrend!=null?(energyTrend>0?` (up from ${r.lastAvgEnergy})`:energyTrend<0?` (down from ${r.lastAvgEnergy})`:''):''}.</p>`:''}
+    ${r.soreCount?`<p style="margin-top:6px;color:var(--pink)">Soreness reported in ${r.soreCount} ${plural(r.soreCount,'session')} this week.</p>`:''}
+    ${r.progressions.length?`<div class="muscles" style="margin-top:10px">${r.progressions.map(e=>`<span class="pill dark">${esc(e.name)}</span>`).join('')}</div>`:''}
+  </section>`;
 }
 
 // ---- Recovery engine wiring (math itself lives in skandi-recovery.js) ----
@@ -1144,18 +1277,55 @@ async function deleteExternalActivity(id){
   render();
 }
 
+// Progressions (front lever, back lever, planche, handstand): skandi_exercises rows chained
+// by progression_group/progression_rank, and skandi_progression_state remembers which rank a
+// user is currently training in each group so a fixed routine slot ("Front Lever Hold")
+// always resolves to whatever variant they're actually working right now.
+function progressionSiblings(group){
+  return state.exercises.filter(e=>e.progression_group===group).sort((a,b)=>a.progression_rank-b.progression_rank);
+}
+
+// Resolves a template/session exercise into the user's current working variant for its
+// progression group. Exercises with no progression_group (or with no saved state yet)
+// resolve to themselves.
+function currentProgressionExercise(exercise){
+  if(!exercise?.progression_group) return exercise;
+  const saved=state.progressionState.find(p=>p.progression_group===exercise.progression_group);
+  if(!saved) return exercise;
+  return state.exercises.find(e=>e.id===saved.exercise_id)||exercise;
+}
+
+async function saveProgressionState(group,exerciseId){
+  const {error}=await sb.from('skandi_progression_state').upsert(
+    {user_id:state.user.id,progression_group:group,exercise_id:exerciseId,updated_at:new Date().toISOString()},
+    {onConflict:'user_id,progression_group'}
+  );
+  if(error) return; // best-effort — the session-local swap already happened either way
+  const existing=state.progressionState.find(p=>p.progression_group===group);
+  if(existing) existing.exercise_id=exerciseId;
+  else state.progressionState.push({user_id:state.user.id,progression_group:group,exercise_id:exerciseId});
+}
+
 function previousCompletedSetsForExercise(exerciseId){
+  // A progression exercise (front lever, planche, ...) matches sets logged against ANY
+  // sibling in the same skill line, not just this exact variant — so hold-time history
+  // carries forward across a level-up instead of resetting to blank every time the user
+  // advances to a harder variant.
+  const exercise=state.exercises.find(e=>e.id===exerciseId);
+  const matchIds=exercise?.progression_group
+    ?new Set(progressionSiblings(exercise.progression_group).map(e=>e.id))
+    :new Set([exerciseId]);
   const completed=state.sessions
     .filter(s=>s.user_id===state.user.id&&s.completed_at&&s.id!==state.active?.id)
     .sort((a,b)=>new Date(b.completed_at).getTime()-new Date(a.completed_at).getTime());
   for(const session of completed){
-    const rows=state.sets.filter(s=>s.session_id===session.id&&s.exercise_id===exerciseId);
+    const rows=state.sets.filter(s=>s.session_id===session.id&&matchIds.has(s.exercise_id));
     if(!rows.length) continue;
     const doneRows=rows.filter(s=>s.done).sort((a,b)=>a.set_idx-b.set_idx);
     if(doneRows.length) return doneRows;
     // Nobody tapped the check mark that session (easy to forget mid-workout), but the
     // numbers were still logged — that's still worth preloading over leaving it blank.
-    const loggedRows=rows.filter(s=>s.weight_kg!=null||s.reps!=null).sort((a,b)=>a.set_idx-b.set_idx);
+    const loggedRows=rows.filter(s=>s.weight_kg!=null||s.reps!=null||s.seconds!=null).sort((a,b)=>a.set_idx-b.set_idx);
     if(loggedRows.length) return loggedRows;
   }
   return [];
@@ -1170,7 +1340,13 @@ async function startWorkout(templateId){
     return alert('Finish or cancel your current workout before starting another.');
   }
   const tpl=state.templates.find(t=>t.id===templateId);
-  const its=state.items.filter(i=>i.template_id===templateId).sort((a,b)=>a.sort_order-b.sort_order);
+  // Resolve each template slot through the user's saved progression state: the routine can
+  // say "Front Lever Tuck" forever while the actual exercise trained here keeps advancing.
+  const its=state.items.filter(i=>i.template_id===templateId).sort((a,b)=>a.sort_order-b.sort_order)
+    .map(item=>{
+      const resolved=currentProgressionExercise(item.exercise);
+      return resolved.id===item.exercise_id?item:{...item,exercise:resolved,exercise_id:resolved.id};
+    });
   if(!tpl||!its.length) return;
   startingWorkout=true;
   try{
@@ -1183,7 +1359,7 @@ async function startWorkout(templateId){
         return {
           session_id:session.id,user_id:state.user.id,exercise_id:item.exercise_id,set_idx:idx+1,target_reps:item.target_reps,
           target_rest_sec:item.target_rest_sec,sort_order:item.sort_order,
-          weight_kg:prev.weight_kg??null,reps:prev.reps??null
+          weight_kg:prev.weight_kg??null,reps:prev.reps??null,seconds:prev.seconds??null
         };
       });
     });
@@ -1425,21 +1601,48 @@ function renderActiveWorkout(){
     `;
 }
 
+// Progression exercises (front lever, back lever, planche, handstand) get a quick
+// easier/harder stepper instead of having to open the full swap search every session.
+// Stepping persists the new variant via saveProgressionState so next week's workout
+// starts on it automatically (see startWorkout's currentProgressionExercise resolve).
+function progressionStepperHtml(e,exerciseId){
+  if(!e?.progression_group) return '';
+  const siblings=progressionSiblings(e.progression_group);
+  const idx=siblings.findIndex(x=>x.id===e.id);
+  if(idx<0) return '';
+  const prev=siblings[idx-1],next=siblings[idx+1];
+  const prevBtn=prev?`<button class="btn small ghost" onclick="event.stopPropagation();stepProgression('${exerciseId}','${prev.id}')" aria-label="Easier progression" title="Easier: ${esc(prev.name)}">◀</button>`
+    :`<button class="btn small ghost" disabled aria-label="Easiest progression">◀</button>`;
+  const nextBtn=next?`<button class="btn small ghost" onclick="event.stopPropagation();stepProgression('${exerciseId}','${next.id}')" aria-label="Harder progression" title="Harder: ${esc(next.name)}">▶</button>`
+    :`<button class="btn small ghost" disabled aria-label="Hardest progression">▶</button>`;
+  return `<div class="row" style="margin-top:6px" onclick="event.stopPropagation()">${prevBtn}<small class="muted">Progression ${idx+1}/${siblings.length}</small>${nextBtn}</div>`;
+}
+
 function activeExercise(item,sets){
   const e=item.exercise;
   const undone=sets.filter(s=>!s.done).length;
+  const seconds=e.log_mode==='seconds';
+  const showWeight=e.log_weight!==false; // pure plyometric/balance drills (migration 061) skip the weight field entirely
+  const unit=exerciseWeightUnit(item.exercise_id);
+  const rowClass=showWeight?'set-row':'set-row no-weight';
   return `<article class="exercise">
-    <div class="ex-head" onclick="openExercise('${e.id}')">${mediaThumb(e)}<div><h3>${esc(e.name)}</h3><p>${esc(e.english_name||'')} · ${item.target_sets} x ${esc(item.target_reps)} · rest ${item.target_rest_sec}s</p></div><span class="muted">${sets.filter(s=>s.done).length}/${sets.length}</span>
+    <div class="ex-head" onclick="openExercise('${e.id}')">${mediaThumb(e)}<div><h3>${esc(e.name)}</h3><p>${esc(e.english_name||'')} · ${item.target_sets} x ${esc(item.target_reps)} · rest ${item.target_rest_sec}s</p>${progressionStepperHtml(e,item.exercise_id)}</div><span class="muted">${sets.filter(s=>s.done).length}/${sets.length}</span>
       ${undone?`<button class="btn small ghost" onclick="event.stopPropagation();toggleSwap('${item.exercise_id}')" aria-label="Swap exercise" title="Swap exercise">${icon('swap',16)}</button>`:''}
       <button class="icon-btn tiny danger" onclick="event.stopPropagation();removeExerciseFromSession('${item.exercise_id}')" aria-label="Remove exercise from this session" title="Remove from this session">${icon('trash',16)}</button>
     </div>
     <div id="swapPanel-${item.exercise_id}">${swapPanelHtml(item.exercise_id)}</div>
     <div class="stack">
-      <div class="set-row"><span></span><small class="muted">${state.weightUnit.toUpperCase()}</small><small class="muted">REPS</small><span></span><span></span></div>
-      ${sets.map(s=>`<div class="set-row">
+      <div class="${rowClass}">
+        <span></span>
+        ${showWeight?`<button type="button" class="pill dark" style="cursor:pointer;justify-self:start" onclick="event.stopPropagation();setExerciseWeightUnit('${item.exercise_id}','${unit==='kg'?'lb':'kg'}')" aria-label="Switch this exercise to ${unit==='kg'?'pounds':'kilograms'}" title="Switch this exercise to ${unit==='kg'?'lb':'kg'}">${unit.toUpperCase()}</button>`:''}
+        <small class="muted">${seconds?'SEC':'REPS'}</small><span></span><span></span>
+      </div>
+      ${sets.map(s=>`<div class="${rowClass}">
         <strong>${s.set_idx}</strong>
-        <input class="field" inputmode="decimal" value="${fmtWeightInput(s.weight_kg)}" placeholder="${state.weightUnit}" onchange="updateSet('${s.id}','weight_kg',this.value)">
-        <input class="field" inputmode="numeric" value="${s.reps??''}" placeholder="${esc(s.target_reps||'reps')}" onchange="updateSet('${s.id}','reps',this.value)">
+        ${showWeight?`<input class="field" inputmode="decimal" value="${fmtWeightInput(s.weight_kg,unit)}" placeholder="${unit}" onchange="updateSet('${s.id}','weight_kg',this.value)">`:''}
+        ${seconds
+          ?`<input class="field" inputmode="numeric" value="${s.seconds??''}" placeholder="${esc(s.target_reps||'sec')}" onchange="updateSet('${s.id}','seconds',this.value)">`
+          :`<input class="field" inputmode="numeric" value="${s.reps??''}" placeholder="${esc(s.target_reps||'reps')}" onchange="updateSet('${s.id}','reps',this.value)">`}
         <button class="check ${s.done?'done':''}" onclick="toggleSet('${s.id}',${item.target_rest_sec})">${icon('check',18)}</button>
         <button class="set-remove" onclick="removeSet('${s.id}')" aria-label="Remove set">${icon('close',14)}</button>
       </div>`).join('')}
@@ -1467,7 +1670,19 @@ function swapPanelHtml(exerciseId){
 
 function swapListHtml(exerciseId){
   const q=state.swapQuery.trim().toLowerCase();
-  const list=state.exercises.filter(e=>e.id!==exerciseId&&(!q||`${e.name} ${e.english_name||''}`.toLowerCase().includes(q))).slice(0,20);
+  let list=state.exercises.filter(e=>e.id!==exerciseId&&(!q||`${e.name} ${e.english_name||''}`.toLowerCase().includes(q)));
+  // With no search typed yet, surface same-family progressions first (e.g. swapping out of
+  // Front Lever Tuck leads with the other front lever variants) instead of a flat A-Z list.
+  const group=!q&&state.exercises.find(e=>e.id===exerciseId)?.progression_group;
+  if(group){
+    list=list.slice().sort((a,b)=>{
+      const aIn=a.progression_group===group,bIn=b.progression_group===group;
+      if(aIn&&bIn) return a.progression_rank-b.progression_rank;
+      if(aIn!==bIn) return aIn?-1:1;
+      return a.name.localeCompare(b.name);
+    });
+  }
+  list=list.slice(0,20);
   if(!list.length) return `<p class="muted">No matches.</p>`;
   return list.map(e=>`<button type="button" class="btn small ghost" style="width:100%;text-align:left" onclick="performSwap('${exerciseId}','${e.id}')">${esc(e.name)} <small class="muted">${esc(e.english_name||'')}</small></button>`).join('');
 }
@@ -1478,11 +1693,17 @@ function renderSwapList(exerciseId){
   if(list) list.innerHTML=swapListHtml(exerciseId);
 }
 
-async function performSwap(oldExerciseId,newExerciseId){
-  if(!state.active||oldExerciseId===newExerciseId){ toggleSwap(oldExerciseId); return; }
+// Shared by the full swap search and the quick progression stepper (◀ ▶): moves this
+// session's not-yet-done sets from one exercise to another, preloading from that exercise's
+// own history. If the new exercise belongs to a progression line, this also remembers it as
+// the user's current variant for that line (saveProgressionState) so future sessions default
+// to it — that's what lets leveling up from Front Lever Tuck to Advanced Tuck stick without
+// ever touching the shared routine. Returns true if sets were actually moved.
+async function moveActiveSetsToExercise(oldExerciseId,newExerciseId){
+  if(!state.active||oldExerciseId===newExerciseId) return false;
   const sessionId=state.active.id;
   const moving=state.sets.filter(s=>s.session_id===sessionId&&s.exercise_id===oldExerciseId&&!s.done);
-  if(!moving.length){ toggleSwap(oldExerciseId); return; }
+  if(!moving.length) return false;
   // set_idx is unique per (session_id, exercise_id): if newExerciseId already has sets in this
   // session (e.g. two separate swaps landing on the same replacement), reassigning straight
   // across would collide. Continue numbering after whatever's already there instead.
@@ -1492,16 +1713,29 @@ async function performSwap(oldExerciseId,newExerciseId){
   let idx=0;
   for(const s of moving){
     const prev=previous[idx]||previous[previous.length-1]||{};
-    const patch={exercise_id:newExerciseId,set_idx:nextIdx,weight_kg:prev.weight_kg??null,reps:prev.reps??null,updated_at:new Date().toISOString()};
+    const patch={exercise_id:newExerciseId,set_idx:nextIdx,weight_kg:prev.weight_kg??null,reps:prev.reps??null,seconds:prev.seconds??null,updated_at:new Date().toISOString()};
     const {error}=await sb.from('skandi_sets').update(patch).eq('id',s.id);
-    if(error) return alert(error.message);
+    if(error){ alert(error.message); return false; }
     Object.assign(s,patch);
     nextIdx++;
     idx++;
   }
   state.activeItems=computeActiveItems(sessionId);
-  state.swapTarget=null;
-  state.swapQuery='';
+  const newExercise=state.exercises.find(e=>e.id===newExerciseId);
+  if(newExercise?.progression_group) await saveProgressionState(newExercise.progression_group,newExerciseId);
+  return true;
+}
+
+async function performSwap(oldExerciseId,newExerciseId){
+  if(!state.active||oldExerciseId===newExerciseId){ toggleSwap(oldExerciseId); return; }
+  const moved=await moveActiveSetsToExercise(oldExerciseId,newExerciseId);
+  if(moved){ state.swapTarget=null; state.swapQuery=''; }
+  renderActiveWorkout();
+}
+
+async function stepProgression(oldExerciseId,newExerciseId){
+  if(!newExerciseId) return;
+  await moveActiveSetsToExercise(oldExerciseId,newExerciseId);
   renderActiveWorkout();
 }
 
@@ -1546,7 +1780,7 @@ async function addExerciseToSession(exerciseId){
     return {
       session_id:sessionId,user_id:state.user.id,exercise_id:exerciseId,set_idx:idx+1,
       target_reps:prev.target_reps||'8-12',target_rest_sec:prev.target_rest_sec??90,sort_order:sortOrder,
-      weight_kg:prev.weight_kg??null,reps:prev.reps??null
+      weight_kg:prev.weight_kg??null,reps:prev.reps??null,seconds:prev.seconds??null
     };
   });
   const {data,error}=await sb.from('skandi_sets').insert(rows).select();
@@ -1572,17 +1806,19 @@ async function removeExerciseFromSession(exerciseId){
 
 async function updateSet(id,key,value){
   const patch={updated_at:new Date().toISOString()};
-  const parsed=value===''?null:(key==='weight_kg'?displayToKg(value):Number(value));
+  const existing=state.sets.find(x=>x.id===id);
+  const parsed=value===''?null:(key==='weight_kg'?displayToKg(value,exerciseWeightUnit(existing?.exercise_id)):Number(value));
   if(parsed!==null&&!Number.isFinite(parsed)) return alert('Enter a valid number.');
-  // Matches the DB check constraint on skandi_sets.weight_kg (migration 053) — catch it here
+  // Matches the DB check constraints on skandi_sets (migrations 040/053) — catch it here
   // instead of round-tripping to a raw Postgres error.
   if(key==='weight_kg'&&parsed!==null&&(parsed<0||parsed>500)) return alert('Enter a weight between 0 and 500kg.');
+  if(key==='seconds'&&parsed!==null&&(parsed<0||parsed>7200)) return alert('Enter a hold time between 0 and 7200 seconds.');
   patch[key]=parsed===null?null:(key==='weight_kg'?Math.round(parsed*100)/100:Math.round(parsed));
   const {error}=await sb.from('skandi_sets').update(patch).eq('id',id);
   if(error) return alert(error.message);
   const s=state.sets.find(x=>x.id===id);
   if(s) Object.assign(s,patch);
-  if(s&&s.set_idx===1&&patch[key]!=null&&(key==='weight_kg'||key==='reps')){
+  if(s&&s.set_idx===1&&patch[key]!=null&&(key==='weight_kg'||key==='reps'||key==='seconds')){
     const targets=state.sets.filter(x=>x.session_id===s.session_id&&x.exercise_id===s.exercise_id&&x.id!==s.id&&!x.done&&(x[key]==null||x[key]===''));
     if(targets.length){
       const ids=targets.map(x=>x.id);
@@ -1621,7 +1857,7 @@ async function addSet(exerciseId){
     target_reps:seed.target_reps||item?.target_reps||'8-12',
     target_rest_sec:seed.target_rest_sec??item?.target_rest_sec??null,
     sort_order:seed.sort_order??item?.sort_order??null,
-    weight_kg:seed.weight_kg??null,reps:seed.reps??null
+    weight_kg:seed.weight_kg??null,reps:seed.reps??null,seconds:seed.seconds??null
   }).select().single();
   if(error) return alert(error.message);
   state.sets.push(data);
@@ -1701,6 +1937,63 @@ async function finishWorkout(){
   setView('crew');
 }
 
+// For a progression exercise (front lever, back lever, planche, handstand), pulls the user's
+// own completed sessions and shows, per session, which variant of the line they trained and
+// their best mark that day (hold seconds or reps, plus load if any) — the trend a fixed
+// routine slot can't show on its own since the exercise trained keeps changing underneath it.
+// Tiny inline trend line (the "evolución últimos N registros" pattern) for a progression
+// line's best mark per session, oldest to newest left-to-right.
+function sparklineSvg(values){
+  if(values.length<2) return '';
+  const w=240,h=36,pad=4;
+  const min=Math.min(...values),max=Math.max(...values);
+  const span=max-min||1;
+  const pts=values.map((v,i)=>{
+    const x=pad+(i/(values.length-1))*(w-pad*2);
+    const y=h-pad-((v-min)/span)*(h-pad*2);
+    return `${x.toFixed(1)},${y.toFixed(1)}`;
+  });
+  const [lastX,lastY]=pts[pts.length-1].split(',');
+  return `<svg viewBox="0 0 ${w} ${h}" width="100%" height="${h}" preserveAspectRatio="none" style="display:block;margin-top:6px">
+    <polyline points="${pts.join(' ')}" fill="none" stroke="var(--blue)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+    <circle cx="${lastX}" cy="${lastY}" r="3" fill="var(--blue)"/>
+  </svg>`;
+}
+
+function progressionHistoryHtml(exercise){
+  if(!exercise?.progression_group) return '';
+  const ids=new Set(progressionSiblings(exercise.progression_group).map(e=>e.id));
+  const sessions=state.sessions.filter(s=>s.user_id===state.user.id&&s.completed_at)
+    .sort((a,b)=>new Date(b.completed_at).getTime()-new Date(a.completed_at).getTime());
+  const rows=[];
+  for(const session of sessions){
+    const byExercise=new Map();
+    state.sets.filter(s=>s.session_id===session.id&&ids.has(s.exercise_id)&&(s.seconds!=null||s.reps!=null))
+      .forEach(s=>{ if(!byExercise.has(s.exercise_id)) byExercise.set(s.exercise_id,[]); byExercise.get(s.exercise_id).push(s); });
+    for(const [exId,exSets] of byExercise){
+      const ex=state.exercises.find(x=>x.id===exId);
+      if(!ex) continue;
+      const best=ex.log_mode==='seconds'
+        ?Math.max(...exSets.map(s=>s.seconds||0))
+        :Math.max(...exSets.map(s=>s.reps||0));
+      const weight=exSets.find(s=>s.weight_kg)?.weight_kg;
+      rows.push({date:session.completed_at,name:ex.name,best,mode:ex.log_mode,weight});
+    }
+    if(rows.length>=12) break;
+  }
+  if(!rows.length) return '';
+  const shown=rows.slice(0,12);
+  // rows is newest-first (for the list below); the trend line reads left-to-right oldest-first.
+  const trend=sparklineSvg(shown.slice().reverse().map(r=>r.best));
+  return `<section class="card"><div class="eyebrow">Progression history</div>
+    ${trend?`<div>${trend}<p class="muted" style="margin-top:2px">evolución últimas ${shown.length} sesiones</p></div>`:''}
+    ${shown.map(r=>`
+    <div class="row" style="margin-top:8px">
+      <div><strong>${esc(r.name)}</strong><p class="muted">${new Date(r.date).toLocaleDateString()}</p></div>
+      <span>${r.mode==='seconds'?fmtSec(r.best):r.best+' reps'}${r.weight?` · +${fmtWeightInput(r.weight)}${state.weightUnit}`:''}</span>
+    </div>`).join('')}</section>`;
+}
+
 function openExercise(id){
   const e=state.exercises.find(x=>x.id===id);
   if(!e) return;
@@ -1713,6 +2006,7 @@ function openExercise(id){
       ${e.media_page_url?`<p style="margin-top:12px"><a class="accent" href="${esc(e.media_page_url)}" target="_blank" rel="noreferrer">Open Gymvisual reference</a></p>`:''}
       <button class="btn" style="width:100%;margin-top:12px" onclick="openExerciseMediaEdit('${e.id}')">${icon('edit',16)} Edit technique media</button>
     </div>
+    ${progressionHistoryHtml(e)}
     <section class="card"><div class="eyebrow">Muscles involved</div>${muscles.map(([m,p])=>`<div style="margin-top:10px"><div class="row"><strong>${esc(m)}</strong><span>${p}%</span></div><div class="bar"><i style="width:${p}%"></i></div></div>`).join('')}</section>
     <section class="card"><div class="eyebrow">How to do it</div>${e.instructions?.length?`<ol>${e.instructions.map(x=>`<li>${esc(x)}</li>`).join('')}</ol>`:empty('No instructions added yet.')}</section>
     <section class="card"><div class="eyebrow">Coach tips</div>${e.coach_tips?.length?`<ul>${e.coach_tips.map(x=>`<li>${esc(x)}</li>`).join('')}</ul>`:empty('No coach tips added yet.')}</section>`;
