@@ -1679,7 +1679,14 @@ function renderActiveWorkout(){
   const allSets=state.sets.filter(s=>s.session_id===state.active.id);
   const done=allSets.filter(s=>s.done).length;
   const running=!!state.timer;
-  $('modalCard').innerHTML=`
+  const card=$('modalCard');
+  // Checking off a set, editing weight/reps/time, adding/removing a set — all of these
+  // re-render this whole card via one big innerHTML replace, which silently resets its
+  // scrollTop to 0. Scrolled halfway down a long exercise list and tap a checkmark, and the
+  // page appears to violently "jump" back to the top. Snapshot/restore scrollTop around the
+  // replace so the member's place in the list survives every one of those re-renders.
+  const scrollTop=card.scrollTop;
+  card.innerHTML=`
     <div class="float-timer ${state.floatTimerOpen?'open':''}">
       <button type="button" class="float-timer-chip" onclick="toggleFloatTimer()" aria-label="${state.floatTimerOpen?'Collapse timer':'Expand timer'}" aria-expanded="${state.floatTimerOpen}" title="${state.floatTimerOpen?'Collapse timer':'Expand timer'}">
         <span class="float-timer-dot ${running?'':'paused'}"></span>
@@ -1734,6 +1741,7 @@ function renderActiveWorkout(){
       </div>
     </div>
     `;
+  card.scrollTop=scrollTop;
 }
 
 // Progression exercises (front lever, back lever, planche, handstand) get a quick
