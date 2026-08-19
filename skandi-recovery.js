@@ -56,10 +56,29 @@ function setStimulusUnits(set){
   return (load * repsEquivalent) / SET_WORK_REFERENCE;
 }
 
-// One external activity -> stimulus units. Calibrated so 30 min @ RPE 5 == 1.0 SU (~one hard set).
+// Absolute-bpm bands used as a heart rate zone proxy (no personalized max HR on file —
+// manual entry only, no device integration) mapped onto the same 1-10 scale as effort-based
+// RPE, so a run logged with heart rate feeds the exact same stimulus formula. Distance/pace
+// aren't given a separate term: for a fixed duration a harder pace already shows up as a
+// higher heart rate, and where duration itself differs that's already in the duration term —
+// adding pace on top would double-count the same effort.
+function heartRateIntensity(bpm){
+  bpm = Number(bpm) || 0;
+  if (!bpm) return null;
+  if (bpm < 110) return 3;
+  if (bpm < 130) return 5;
+  if (bpm < 150) return 6.5;
+  if (bpm < 170) return 8;
+  return 9.5;
+}
+
+// One external activity -> stimulus units. Calibrated so 30 min @ RPE 5 == 1.0 SU (~one hard
+// set). Heart rate, when logged, replaces the manual RPE as the intensity driver — it's the
+// more objective signal of actual cardiovascular effort. Falls back to RPE when no heart rate
+// was entered, so older/unlogged activities are unaffected.
 function activityStimulusUnits(activity){
   const duration = Number(activity.duration_min) || 0;
-  const intensity = Number(activity.intensity) || 5;
+  const intensity = heartRateIntensity(activity.avg_heart_rate) ?? (Number(activity.intensity) || 5);
   return (duration * intensity) / 150;
 }
 
@@ -150,7 +169,7 @@ function computeMuscleRecovery({ sets, sessions, exercises, activities, userId, 
 const SkandiRecovery = {
   MUSCLE_RECOVERY_HOURS, RECOVERY_MUSCLES, ACTIVITY_MUSCLE_MAP,
   RECOVERY_LOOKBACK_DAYS, FRESH_THRESHOLD,
-  tauHoursForMuscle, setStimulusUnits, activityStimulusUnits,
+  tauHoursForMuscle, setStimulusUnits, activityStimulusUnits, heartRateIntensity,
   buildStimulusEvents, muscleFatigueAt, freshnessScore, hoursUntilFresh,
   computeMuscleRecovery
 };

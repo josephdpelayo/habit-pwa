@@ -362,7 +362,7 @@ const BODY_REGIONS_BACK=[
   {name:'Triceps',shape:'rect',x:46,y:95,w:26,h:80,rx:13,mirror:true}
 ];
 const ACTIVE_WORKOUT_MAX_HOURS=18;
-const state={user:null,profile:null,view:'home',authMode:'login',exercises:[],templates:[],items:[],sessions:[],sets:[],externalActivities:[],progressionState:[],active:null,activeItems:[],timer:null,elapsed:0,rest:0,restTotal:0,bodyFlip:'front',weightUnit:localStorage.getItem('skandi_weight_unit')||'kg',weightUnitOverrides:(()=>{try{return JSON.parse(localStorage.getItem('skandi_weight_unit_overrides')||'{}');}catch(e){return {};}})(),expandedRoutines:new Set(),swapTarget:null,swapQuery:'',addExOpen:false,addExQuery:'',pausedMs:0,pausedAt:null,floatTimerOpen:false};
+const state={user:null,profile:null,view:'home',authMode:'login',exercises:[],templates:[],items:[],sessions:[],sets:[],externalActivities:[],activityTemplates:[],progressionState:[],active:null,activeItems:[],timer:null,elapsed:0,rest:0,restTotal:0,bodyFlip:'front',weightUnit:localStorage.getItem('skandi_weight_unit')||'kg',weightUnitOverrides:(()=>{try{return JSON.parse(localStorage.getItem('skandi_weight_unit_overrides')||'{}');}catch(e){return {};}})(),expandedRoutines:new Set(),swapTarget:null,swapQuery:'',addExOpen:false,addExQuery:'',pausedMs:0,pausedAt:null,floatTimerOpen:false};
 let builderState={selected:new Map(),group:'All'};
 
 const $=id=>document.getElementById(id);
@@ -436,6 +436,17 @@ function workoutTimeHint(sec){
   return 'minutes : seconds';
 }
 const todayDow=()=>{const d=new Date().getDay();return d===0?6:d-1};
+const isToday=d=>{const t=new Date(); return d.getFullYear()===t.getFullYear()&&d.getMonth()===t.getMonth()&&d.getDate()===t.getDate();};
+function fmtPace(sec){
+  if(sec==null) return null;
+  return `${Math.floor(sec/60)}:${String(Math.round(sec%60)).padStart(2,'0')}`;
+}
+// Accepts "m:ss" or "mm:ss" (pace as minutes:seconds per km) — the format runners already
+// think in, rather than asking for raw seconds.
+function parsePaceToSec(str){
+  const m=str.trim().match(/^(\d{1,2}):([0-5]\d)$/);
+  return m?Number(m[1])*60+Number(m[2]):null;
+}
 const displayName=()=>state.profile?.name||state.user?.user_metadata?.name||state.user?.email?.split('@')[0]||'crew';
 const firstName=()=>displayName().split(/\s+/)[0];
 const ignoredSessionKey=()=>state.user?`skandi_ignored_sessions_${state.user.id}`:'skandi_ignored_sessions';
@@ -539,7 +550,7 @@ async function loadAll(){
   // vs. "crew" (other members' shared activity, capped since it only feeds the social feed).
   let [{data:profile},{data:exercises},{data:templates},{data:items},
        {data:ownSessions},{data:crewSessions},{data:ownSets},{data:crewSets},
-       {data:externalActivities},{data:progressionState}]=await Promise.all([
+       {data:externalActivities},{data:activityTemplates},{data:progressionState}]=await Promise.all([
     sb.from('profiles').select('id,name,avatar_url').eq('id',state.user.id).maybeSingle(),
     sb.from('skandi_exercises').select('*').order('name'),
     sb.from('skandi_templates').select('*, profile:profiles(name,avatar_url)').order('weekday',{nullsFirst:false}).order('created_at',{ascending:false}),
@@ -549,6 +560,7 @@ async function loadAll(){
     sb.from('skandi_sets').select('*, exercise:skandi_exercises(name,slug)').eq('user_id',state.user.id).order('created_at',{ascending:false}),
     sb.from('skandi_sets').select('*, exercise:skandi_exercises(name,slug)').neq('user_id',state.user.id).order('created_at',{ascending:false}).limit(600),
     sb.from('skandi_external_activities').select('*').eq('user_id',state.user.id).order('performed_at',{ascending:false}).limit(200),
+    sb.from('skandi_activity_templates').select('*').eq('user_id',state.user.id).order('weekday',{nullsFirst:false}),
     sb.from('skandi_progression_state').select('*').eq('user_id',state.user.id)
   ]);
   if(!profile){
@@ -571,6 +583,7 @@ async function loadAll(){
   state.sessions=sessions.filter(s=>!(ignored.has(s.id)&&!s.completed_at));
   state.sets=sets.filter(s=>!ignored.has(s.session_id));
   state.externalActivities=externalActivities||[];
+  state.activityTemplates=activityTemplates||[];
   state.progressionState=progressionState||[];
   hydrateActiveWorkout();
 }
@@ -616,6 +629,24 @@ function activeWorkoutBanner(){
   </section>`;
 }
 
+function enduranceTodayCard(){
+  const plan=state.activityTemplates.find(t=>t.user_id===state.user.id&&t.weekday===todayDow());
+  if(!plan) return '';
+  const loggedToday=state.externalActivities.some(a=>a.template_id===plan.id&&isToday(new Date(a.performed_at)));
+  const goal=[
+    plan.target_distance_km?`${plan.target_distance_km} km`:null,
+    plan.target_duration_min?`${plan.target_duration_min} min`:null,
+    plan.target_pace_sec_per_km?`${fmtPace(plan.target_pace_sec_per_km)}/km`:null,
+    plan.target_zone?`Zone ${plan.target_zone}`:null
+  ].filter(Boolean).join(' · ')||'No target set';
+  return `<section class="card click-card" onclick="openLogActivity('${plan.id}')">
+    <div class="row">
+      <div><div class="eyebrow">Endurance today</div><h2>${esc(activityTypeLabel(plan.activity_type))}</h2><p>${esc(goal)}</p></div>
+      <span class="pill ${loggedToday?'dark':''}">${loggedToday?'Logged '+icon('check',14):'Log it '+icon('play',14)}</span>
+    </div>
+  </section>`;
+}
+
 function homeView(){
   const mine=state.sessions.filter(s=>s.user_id===state.user.id&&s.completed_at);
   // Anchor to the actual Monday of this week (todayDow() is 0-indexed Mon..Sun) instead of a
@@ -656,6 +687,7 @@ function homeView(){
         </div>
       </button>
     </section>
+    ${enduranceTodayCard()}
     ${attentionBannerHtml()}
     <section class="grid">
       <div class="stat click-card" onclick="setView('progress')"><strong>${weekCount}</strong><small>this week</small></div>
@@ -672,6 +704,7 @@ function homeView(){
 function trainView(){
   const mine=state.templates.filter(t=>t.user_id===state.user.id);
   const community=state.templates.filter(t=>t.user_id!==state.user.id);
+  const myPlans=state.activityTemplates.filter(t=>t.user_id===state.user.id);
   return `
     ${activeWorkoutBanner()}
     <div class="row"><h1>Train</h1><button class="btn primary" onclick="openDayPicker(todayDow())">+ Routine</button></div>
@@ -685,6 +718,21 @@ function trainView(){
             <span>${d}</span>
             <span style="cursor:pointer" onclick="openWorkoutOverview('${t.id}')">${esc(t.name)}</span>
             <button class="icon-btn tiny" onclick="openDayManage('${t.id}',${i})" aria-label="Manage ${d}">${icon('ellipsis',16)}</button>
+          </div>`;
+        }).join('')}
+      </div>
+    </section>
+    <section class="card">
+      <div class="row"><h2>Endurance</h2><span class="muted">${myPlans.length} ${plural(myPlans.length,'plan')}</span></div>
+      <div class="week">
+        ${DOW.map((d,i)=>{
+          const p=myPlans.find(x=>x.weekday===i);
+          if(!p) return `<button class="day ${i===todayDow()?'today':''}" onclick="openActivityTemplateBuilder(${i})"><span>${d}</span><span>Add plan</span><span>${icon('chevronRight',18)}</span></button>`;
+          const summary=[activityTypeLabel(p.activity_type),p.target_distance_km?`${p.target_distance_km}km`:null].filter(Boolean).join(' · ');
+          return `<div class="day ${i===todayDow()?'today':''}" style="grid-template-columns:64px 1fr auto">
+            <span>${d}</span>
+            <span style="cursor:pointer" onclick="openActivityTemplateBuilder(${i},'${p.id}')">${esc(summary)}</span>
+            <button class="icon-btn tiny" onclick="openActivityTemplateBuilder(${i},'${p.id}')" aria-label="Manage ${d} plan">${icon('ellipsis',16)}</button>
           </div>`;
         }).join('')}
       </div>
@@ -1253,16 +1301,33 @@ function localDatetimeValue(d){
   return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
 }
 
-function openLogActivity(){
+function activityGoalLine(t){
+  return [
+    t.target_distance_km?`${t.target_distance_km} km`:null,
+    t.target_duration_min?`${t.target_duration_min} min`:null,
+    t.target_pace_sec_per_km?`${fmtPace(t.target_pace_sec_per_km)}/km`:null,
+    t.target_zone?`Zone ${t.target_zone}`:null
+  ].filter(Boolean).join(' · ');
+}
+
+// templateId, when passed (from the "Endurance today" card or the plan list), pre-fills the
+// form with that plan's targets and tags the logged row with template_id so "did I do today's
+// run" can be answered later — the member still just types in what actually happened.
+function openLogActivity(templateId){
+  const t=templateId?state.activityTemplates.find(x=>x.id===templateId):null;
   $('modal').classList.add('show');
   $('modalCard').innerHTML=`
     <div class="row"><h1>Log activity</h1><button class="x" onclick="closeModal()">${icon('close',20)}</button></div>
+    ${t?`<p class="muted">Goal: ${esc(activityGoalLine(t)||'—')}</p>`:''}
+    <input type="hidden" id="actTemplateId" value="${t?t.id:''}">
     <label class="eyebrow">Activity type</label>
-    <select id="actType" class="field left">${Object.entries(ACTIVITY_LABELS).map(([v,l])=>`<option value="${v}">${l}</option>`).join('')}</select>
+    <select id="actType" class="field left">${Object.entries(ACTIVITY_LABELS).map(([v,l])=>`<option value="${v}" ${(t?.activity_type||'running')===v?'selected':''}>${l}</option>`).join('')}</select>
     <label class="eyebrow">Duration (minutes)</label>
-    <input id="actDuration" class="field left" type="number" min="1" max="600" inputmode="numeric" placeholder="e.g. 40">
+    <input id="actDuration" class="field left" type="number" min="1" max="600" inputmode="numeric" placeholder="e.g. 40" value="${t?.target_duration_min??''}">
     <label class="eyebrow">Distance (km, optional)</label>
-    <input id="actDistance" class="field left" type="number" min="0" step="0.1" inputmode="decimal" placeholder="e.g. 6.5">
+    <input id="actDistance" class="field left" type="number" min="0" step="0.1" inputmode="decimal" placeholder="e.g. 6.5" value="${t?.target_distance_km??''}">
+    <label class="eyebrow">Avg heart rate (bpm, optional)</label>
+    <input id="actHeartRate" class="field left" type="number" min="30" max="230" inputmode="numeric" placeholder="e.g. 148">
     <label class="eyebrow">Intensity (effort, 1-10)</label>
     <input id="actIntensity" class="field left" type="number" min="1" max="10" inputmode="numeric" value="5">
     <label class="eyebrow">When</label>
@@ -1283,11 +1348,16 @@ async function saveExternalActivity(){
   // nothing to the freshness score above it (the recovery engine already excludes t > now),
   // a visibly contradictory state. Reject it outright instead.
   if(performedAt.getTime()>Date.now()+60000) return alert('This activity is in the future — check the date/time.');
+  const heartRateStr=$('actHeartRate').value;
+  const heartRate=heartRateStr?Number(heartRateStr):null;
+  if(heartRate!==null&&(heartRate<30||heartRate>230)) return alert('Enter a heart rate between 30 and 230 bpm.');
   const payload={
     user_id:state.user.id,
     activity_type:$('actType').value,
     duration_min:duration,
     distance_km:$('actDistance').value?Number($('actDistance').value):null,
+    avg_heart_rate:heartRate,
+    template_id:$('actTemplateId').value||null,
     intensity,
     performed_at:performedAt.toISOString(),
     note:$('actNote').value.trim()||null
@@ -1300,8 +1370,18 @@ async function saveExternalActivity(){
 }
 
 function externalActivityRow(a){
+  // Pace is derived from distance/duration rather than stored separately — the two can't
+  // disagree, and it's the only extra number worth showing on a run that a target didn't set.
+  const pace=a.distance_km?Math.round((a.duration_min*60)/a.distance_km):null;
+  const parts=[
+    `${a.duration_min} min`,`intensity ${a.intensity}/10`,
+    a.distance_km?`${a.distance_km} km`:null,
+    pace?`${fmtPace(pace)}/km`:null,
+    a.avg_heart_rate?`${a.avg_heart_rate} bpm`:null,
+    new Date(a.performed_at).toLocaleDateString()
+  ].filter(Boolean).join(' · ');
   return `<div class="row" style="margin-top:10px">
-    <div><strong>${esc(activityTypeLabel(a.activity_type))}</strong><p>${a.duration_min} min · intensity ${a.intensity}/10${a.distance_km?' · '+a.distance_km+' km':''} · ${new Date(a.performed_at).toLocaleDateString()}</p></div>
+    <div><strong>${esc(activityTypeLabel(a.activity_type))}</strong><p>${esc(parts)}</p></div>
     <button class="icon-btn tiny danger" onclick="deleteExternalActivity('${a.id}')" aria-label="Delete">${icon('trash',16)}</button>
   </div>`;
 }
@@ -1310,6 +1390,68 @@ async function deleteExternalActivity(id){
   if(!confirm('Delete this activity?')) return;
   const {error}=await sb.from('skandi_external_activities').delete().eq('id',id);
   if(error) return alert(error.message);
+  await loadAll();
+  render();
+}
+
+// ---- Recurring endurance plans ("every Wednesday run 5km at Zone 2") ----
+
+function openActivityTemplateBuilder(day=null,id=null){
+  const t=state.activityTemplates.find(x=>x.id===id)||{activity_type:'running',weekday:day??todayDow(),target_distance_km:null,target_duration_min:null,target_pace_sec_per_km:null,target_zone:null,notes:''};
+  $('modal').classList.add('show');
+  $('modalCard').innerHTML=`
+    <div class="row"><h1>${id?'Edit':'New'} endurance plan</h1><button class="x" onclick="closeModal()">${icon('close',20)}</button></div>
+    <label class="eyebrow">Activity type</label>
+    <select id="tplActType" class="field left">${Object.entries(ACTIVITY_LABELS).map(([v,l])=>`<option value="${v}" ${t.activity_type===v?'selected':''}>${l}</option>`).join('')}</select>
+    <label class="eyebrow">Day</label>
+    <select id="tplActDay" class="field left">${DOW.map((d,i)=>`<option value="${i}" ${t.weekday===i?'selected':''}>${d}</option>`).join('')}</select>
+    <label class="eyebrow">Target distance (km, optional)</label>
+    <input id="tplActDistance" class="field left" type="number" min="0" step="0.1" inputmode="decimal" placeholder="e.g. 5" value="${t.target_distance_km??''}">
+    <label class="eyebrow">Target duration (minutes, optional)</label>
+    <input id="tplActDuration" class="field left" type="number" min="1" max="600" inputmode="numeric" placeholder="e.g. 40" value="${t.target_duration_min??''}">
+    <label class="eyebrow">Target pace (min:sec per km, optional)</label>
+    <input id="tplActPace" class="field left" placeholder="e.g. 5:40" value="${t.target_pace_sec_per_km?fmtPace(t.target_pace_sec_per_km):''}">
+    <label class="eyebrow">Target heart rate zone (optional)</label>
+    <select id="tplActZone" class="field left">
+      <option value="">No zone</option>
+      ${[1,2,3,4,5].map(z=>`<option value="${z}" ${t.target_zone===z?'selected':''}>Zone ${z}</option>`).join('')}
+    </select>
+    <textarea id="tplActNotes" class="field" placeholder="Notes (optional)">${esc(t.notes||'')}</textarea>
+    <div class="row" style="margin-top:14px">
+      ${id?`<button class="btn danger" onclick="deleteActivityTemplate('${id}')">Delete</button>`:'<span></span>'}
+      <button class="btn primary" onclick="saveActivityTemplate('${id||''}')">Save plan</button>
+    </div>`;
+}
+
+async function saveActivityTemplate(id){
+  const paceStr=$('tplActPace').value.trim();
+  const pace=paceStr?parsePaceToSec(paceStr):null;
+  if(paceStr&&pace===null) return alert('Enter pace as minutes:seconds per km, e.g. 5:40.');
+  const zoneVal=$('tplActZone').value;
+  const payload={
+    user_id:state.user.id,
+    activity_type:$('tplActType').value,
+    weekday:Number($('tplActDay').value),
+    target_distance_km:$('tplActDistance').value?Number($('tplActDistance').value):null,
+    target_duration_min:$('tplActDuration').value?Number($('tplActDuration').value):null,
+    target_pace_sec_per_km:pace,
+    target_zone:zoneVal?Number(zoneVal):null,
+    notes:$('tplActNotes').value.trim()||null
+  };
+  const {error}=id
+    ?await sb.from('skandi_activity_templates').update(payload).eq('id',id)
+    :await sb.from('skandi_activity_templates').insert(payload);
+  if(error) return alert(error.message);
+  closeModal();
+  await loadAll();
+  render();
+}
+
+async function deleteActivityTemplate(id){
+  if(!confirm('Remove this recurring plan?')) return;
+  const {error}=await sb.from('skandi_activity_templates').delete().eq('id',id);
+  if(error) return alert(error.message);
+  closeModal();
   await loadAll();
   render();
 }
