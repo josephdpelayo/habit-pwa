@@ -1993,6 +1993,14 @@ async function updateSet(id,key,value){
 async function toggleSet(id,rest){
   const s=state.sets.find(x=>x.id===id);
   if(!s) return;
+  // Checking off a set is what actually starts the rest countdown whose end the bell needs to
+  // mark — and it's a real synchronous tap, unlike the resumeWorkoutTimer() call in
+  // startWorkout() (several `await`s removed from the original tap by the time it runs) or in
+  // hydrateActiveWorkout() (no tap at all, page just loaded on an already-running workout).
+  // Both of those can leave the AudioContext stuck 'suspended' — silently, since
+  // playRestBell() swallows the error — so the bell never plays for the whole session. Priming
+  // it here, synchronously and before any `await`, catches it on the gesture that matters.
+  try{ getAudioCtx(); }catch(e){}
   const done=!s.done;
   const {error}=await sb.from('skandi_sets').update({done,updated_at:new Date().toISOString()}).eq('id',id);
   if(error) return alert(error.message);
