@@ -1377,12 +1377,36 @@ async function startWorkout(templateId){
     return alert('Finish or cancel your current workout before starting another.');
   }
   const tpl=state.templates.find(t=>t.id===templateId);
-  // Resolve each template slot through the user's saved progression state: the routine can
-  // say "Front Lever Tuck" forever while the actual exercise trained here keeps advancing.
-  const its=state.items.filter(i=>i.template_id===templateId).sort((a,b)=>a.sort_order-b.sort_order)
+  const templateItems=state.items.filter(i=>i.template_id===templateId);
+  // A routine can deliberately include more than one rung of the same progression ladder in one
+  // day (e.g. Wall Handstand as a fixed technique slot before Freestanding Handstand as the main
+  // set that actually progresses — see migration 060's Wednesday routine). Only the
+  // highest-rank authored slot per progression_group tracks the user's saved progression state;
+  // lower authored rungs stay exactly what they are regardless of how far the user has
+  // progressed. A collision guard on top of that (authored ids + ids already assigned this
+  // pass) covers any resolved variant that happens to match another slot's exercise, including
+  // when it's not itself one of this routine's authored exercises. Both matter: resolving every
+  // same-group slot (or resolving past a target another slot already owns) would collapse two
+  // distinct exercises into the same exercise_id and violate the (session_id, exercise_id,
+  // set_idx) uniqueness on skandi_sets at insert time.
+  const highestRankByGroup=new Map();
+  templateItems.forEach(i=>{
+    const g=i.exercise?.progression_group;
+    if(!g) return;
+    const rank=i.exercise.progression_rank??0;
+    if(!highestRankByGroup.has(g)||rank>highestRankByGroup.get(g)) highestRankByGroup.set(g,rank);
+  });
+  const authoredIds=new Set(templateItems.map(i=>i.exercise_id));
+  const usedIds=new Set();
+  const its=templateItems.slice().sort((a,b)=>a.sort_order-b.sort_order)
     .map(item=>{
-      const resolved=currentProgressionExercise(item.exercise);
-      return resolved.id===item.exercise_id?item:{...item,exercise:resolved,exercise_id:resolved.id};
+      const g=item.exercise?.progression_group;
+      const isHighestRankSlot=!g||item.exercise.progression_rank===highestRankByGroup.get(g);
+      const resolved=isHighestRankSlot?currentProgressionExercise(item.exercise):item.exercise;
+      const collides=resolved.id!==item.exercise_id&&(authoredIds.has(resolved.id)||usedIds.has(resolved.id));
+      const finalExercise=collides?item.exercise:resolved;
+      usedIds.add(finalExercise.id);
+      return finalExercise.id===item.exercise_id?item:{...item,exercise:finalExercise,exercise_id:finalExercise.id};
     });
   if(!tpl||!its.length) return;
   startingWorkout=true;
