@@ -2011,10 +2011,24 @@ function playRestBell(){
   }catch(e){ /* Web Audio unsupported/blocked — the visual "Rest 0:00" is still there */ }
 }
 
+// iOS Safari's autoplay unlock is stricter than ctx.state === 'running': resume() on a
+// context that was first created outside a real gesture can flip the state flag to
+// 'running' while the hardware output stays silent. The reliable unlock is to actually
+// start an audio node — even an inaudible one — synchronously inside the gesture handler.
+function unlockAudioCtx(){
+  try{
+    const ctx=getAudioCtx();
+    const buffer=ctx.createBuffer(1,1,22050);
+    const src=ctx.createBufferSource();
+    src.buffer=buffer;
+    src.connect(ctx.destination);
+    src.start(0);
+  }catch(e){}
+}
+
 function resumeWorkoutTimer(){
   clearInterval(state.timer);
   if(state.pausedAt){ state.pausedMs+=Date.now()-state.pausedAt; state.pausedAt=null; }
-  try{ getAudioCtx(); }catch(e){} // unlock audio now, inside this user-gesture call chain, so playRestBell() can fire later from the interval tick
   // started_at (a real timestamp) minus accumulated pause time, not a per-tick counter: a
   // throttled setInterval — screen locked during a long rest, tab backgrounded — used to
   // silently undercount elapsed++ ticks, so the total shown at the end of the workout could
@@ -2448,10 +2462,12 @@ async function toggleSet(id,rest){
   // mark — and it's a real synchronous tap, unlike the resumeWorkoutTimer() call in
   // startWorkout() (several `await`s removed from the original tap by the time it runs) or in
   // hydrateActiveWorkout() (no tap at all, page just loaded on an already-running workout).
-  // Both of those can leave the AudioContext stuck 'suspended' — silently, since
-  // playRestBell() swallows the error — so the bell never plays for the whole session. Priming
-  // it here, synchronously and before any `await`, catches it on the gesture that matters.
-  try{ getAudioCtx(); }catch(e){}
+  // On iOS Safari a plain resume() isn't enough if the context's first resume attempt ever
+  // happened outside a gesture (both call sites above do exactly that) — the state flag can
+  // read 'running' while the speaker stays silent for the whole session. unlockAudioCtx()
+  // starts a real (inaudible) node here, synchronously and before any `await`, on the one
+  // call site that's guaranteed to be a genuine tap.
+  unlockAudioCtx();
   const done=!s.done;
   const {error}=await sb.from('skandi_sets').update({done,updated_at:new Date().toISOString()}).eq('id',id);
   if(error) return alert(error.message);
