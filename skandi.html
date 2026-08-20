@@ -1918,11 +1918,10 @@ async function startWorkout(templateId){
         return {
           session_id:session.id,user_id:state.user.id,exercise_id:item.exercise_id,set_idx:idx+1,target_reps:item.target_reps,
           target_rest_sec:item.target_rest_sec,target_rir:item.target_rir??null,sort_order:item.sort_order,
-          // rir starts from the routine's own target, not last session's actual — RIR is an
-          // instruction ("aim for this"), not a performance number to replicate like
-          // weight/reps/seconds. Falls back to what was actually logged last time only for
-          // exercises with no target_rir set (e.g. an older routine before this field existed).
-          weight_kg:deloadAdjustedWeight(prev.weight_kg??null),reps:prev.reps??null,seconds:prev.seconds??null,rir:item.target_rir??prev.rir??null
+          // rir starts from what was actually logged last time, same as weight/reps/seconds —
+          // the routine's target_rir only kicks in the very first time this exercise (or its
+          // progression line) has ever been trained, when there's no prior rir to carry.
+          weight_kg:deloadAdjustedWeight(prev.weight_kg??null),reps:prev.reps??null,seconds:prev.seconds??null,rir:prev.rir??item.target_rir??null
         };
       });
     });
@@ -2372,7 +2371,7 @@ async function moveActiveSetsToExercise(oldExerciseId,newExerciseId){
   let idx=0;
   for(const s of moving){
     const prev=previous[idx]||previous[previous.length-1]||{};
-    const patch={exercise_id:newExerciseId,set_idx:nextIdx,target_rir:prev.target_rir??null,weight_kg:deloadAdjustedWeight(prev.weight_kg??null),reps:prev.reps??null,seconds:prev.seconds??null,rir:prev.target_rir??prev.rir??null,updated_at:new Date().toISOString()};
+    const patch={exercise_id:newExerciseId,set_idx:nextIdx,target_rir:prev.target_rir??null,weight_kg:deloadAdjustedWeight(prev.weight_kg??null),reps:prev.reps??null,seconds:prev.seconds??null,rir:prev.rir??prev.target_rir??null,updated_at:new Date().toISOString()};
     const {error}=await sb.from('skandi_sets').update(patch).eq('id',s.id);
     if(error){ alert(error.message); return false; }
     Object.assign(s,patch);
@@ -2439,7 +2438,7 @@ async function addExerciseToSession(exerciseId){
     return {
       session_id:sessionId,user_id:state.user.id,exercise_id:exerciseId,set_idx:idx+1,
       target_reps:prev.target_reps||'8-12',target_rest_sec:prev.target_rest_sec??90,target_rir:prev.target_rir??null,sort_order:sortOrder,
-      weight_kg:deloadAdjustedWeight(prev.weight_kg??null),reps:prev.reps??null,seconds:prev.seconds??null,rir:prev.target_rir??prev.rir??null
+      weight_kg:deloadAdjustedWeight(prev.weight_kg??null),reps:prev.reps??null,seconds:prev.seconds??null,rir:prev.rir??prev.target_rir??null
     };
   });
   const {data,error}=await sb.from('skandi_sets').insert(rows).select();
@@ -2546,7 +2545,7 @@ async function addSet(exerciseId){
     target_rest_sec:seed.target_rest_sec??item?.target_rest_sec??null,
     target_rir:seed.target_rir??item?.target_rir??null,
     sort_order:seed.sort_order??item?.sort_order??null,
-    weight_kg:seed.weight_kg??null,reps:seed.reps??null,seconds:seed.seconds??null,rir:seed.target_rir??item?.target_rir??null
+    weight_kg:seed.weight_kg??null,reps:seed.reps??null,seconds:seed.seconds??null,rir:seed.rir??item?.target_rir??null
   }).select().single();
   if(error) return alert(error.message);
   state.sets.push(data);
