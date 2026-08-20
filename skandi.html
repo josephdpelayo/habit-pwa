@@ -121,6 +121,7 @@ p{color:var(--muted);line-height:1.45;margin:0}
 .clean-toggle{height:100%;border-radius:10px;background:var(--panel2);color:var(--muted);border:1px solid var(--line);font-weight:1000;font-size:13px}
 .clean-toggle.clean{background:#e4f7ee;color:#1f9d5c;border-color:#bfe9d3}
 .clean-toggle.broken{background:#fdeceb;color:var(--pink);border-color:#f6c9c5}
+.progression-ready{display:block;width:100%;text-align:left;margin-top:6px;padding:7px 10px;background:#e4f7ee;color:#1f9d5c;border:1px solid #bfe9d3;border-radius:8px;font-weight:700;font-size:12px}
 .field{width:100%;background:#fff;border:1px solid var(--line);color:var(--text);border-radius:10px;padding:13px;text-align:center;box-shadow:inset 0 1px 0 rgba(1,36,86,.03)}
 .field-narrow{padding:13px 3px}
 .field.left{text-align:left}
@@ -1791,6 +1792,41 @@ function previousCompletedSetsForExercise(exerciseId){
   return [];
 }
 
+// Progression readiness: has the user hit this exact variant's progression_target CLEAN
+// in each of the last two sessions where they trained it? Unlike previousCompletedSetsFor-
+// Exercise, siblings aren't pooled here — readiness is about mastering the CURRENT rank,
+// not the skill line's history overall. Sessions where this variant wasn't trained are
+// skipped rather than breaking the streak; a session where it WAS trained but missed the
+// target does break it, so this needs two CONSECUTIVE qualifying sessions, not just two ever.
+function exerciseBestMark(exerciseId,sessionId){
+  const ex=state.exercises.find(e=>e.id===exerciseId);
+  if(!ex) return null;
+  const seconds=ex.log_mode==='seconds';
+  const sets=state.sets.filter(s=>s.session_id===sessionId&&s.exercise_id===exerciseId&&s.done);
+  // Only clean holds count toward a hold's standard — a broken-form hold that happened to
+  // last long enough shouldn't push someone into a harder variant.
+  const usable=seconds?sets.filter(s=>s.hold_clean===true):sets;
+  if(!usable.length) return null;
+  return Math.max(...usable.map(s=>seconds?(s.seconds||0):(s.reps||0)));
+}
+
+function progressionReadiness(exercise){
+  if(!exercise?.progression_group||!exercise.progression_target) return false;
+  const siblings=progressionSiblings(exercise.progression_group);
+  if(siblings.findIndex(x=>x.id===exercise.id)===siblings.length-1) return false; // already the hardest rank
+  const completed=state.sessions
+    .filter(s=>s.user_id===state.user.id&&s.completed_at&&s.id!==state.active?.id)
+    .sort((a,b)=>new Date(b.completed_at).getTime()-new Date(a.completed_at).getTime());
+  let qualifying=0;
+  for(const session of completed){
+    const mark=exerciseBestMark(exercise.id,session.id);
+    if(mark==null) continue;
+    if(mark<exercise.progression_target) return false;
+    if(++qualifying>=2) return true;
+  }
+  return false;
+}
+
 let startingWorkout=false;
 // Shown before a fresh workout is actually created, so the member sees what the routine
 // involves and taps a deliberate "Start training" rather than jumping straight into a live
@@ -2200,6 +2236,16 @@ function progressionStepperHtml(e,exerciseId){
   return `<div class="row" style="margin-top:6px" onclick="event.stopPropagation()">${prevBtn}<small class="muted">Progression ${idx+1}/${siblings.length}</small>${nextBtn}</div>`;
 }
 
+// Surfaced once progressionReadiness() confirms two consecutive clean sessions at target —
+// tapping it is exactly the same step the ▶ button above already performs.
+function progressionReadinessHtml(e,exerciseId){
+  if(!progressionReadiness(e)) return '';
+  const siblings=progressionSiblings(e.progression_group);
+  const next=siblings[siblings.findIndex(x=>x.id===e.id)+1];
+  if(!next) return '';
+  return `<button type="button" class="progression-ready" onclick="event.stopPropagation();stepProgression('${exerciseId}','${next.id}')">Ready for ${esc(next.name)} — tap to level up</button>`;
+}
+
 function activeExercise(item,sets){
   const e=item.exercise;
   const undone=sets.filter(s=>!s.done).length;
@@ -2211,7 +2257,7 @@ function activeExercise(item,sets){
   // seconds-based skill holds (front lever, handstand, planche — judged on position, not load).
   const rowClass=showWeight?'set-row':'set-row no-weight';
   return `<article class="exercise">
-    <div class="ex-head" onclick="openExercise('${e.id}',true)">${mediaThumb(e)}<div><h3>${esc(e.name)} <span class="ex-info-hint">${icon('chevronRight',13)}</span></h3><p>${[esc(exerciseSubtitle(e)),`${item.target_sets} x ${esc(item.target_reps)}`,`rest ${item.target_rest_sec}s`].filter(Boolean).join(' · ')}</p>${progressionStepperHtml(e,item.exercise_id)}</div>
+    <div class="ex-head" onclick="openExercise('${e.id}',true)">${mediaThumb(e)}<div><h3>${esc(e.name)} <span class="ex-info-hint">${icon('chevronRight',13)}</span></h3><p>${[esc(exerciseSubtitle(e)),`${item.target_sets} x ${esc(item.target_reps)}`,`rest ${item.target_rest_sec}s`].filter(Boolean).join(' · ')}</p>${progressionStepperHtml(e,item.exercise_id)}${progressionReadinessHtml(e,item.exercise_id)}</div>
       <div class="ex-actions">
         <span class="muted">${sets.filter(s=>s.done).length}/${sets.length}${seconds&&sets.some(s=>s.done)?` · Clean ${sets.filter(s=>s.done&&s.hold_clean===true).length}/${sets.filter(s=>s.done).length}`:''}</span>
         <div class="ex-actions-row">
