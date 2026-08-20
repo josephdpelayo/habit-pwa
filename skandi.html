@@ -996,6 +996,7 @@ function templateExerciseOption(e){
     ${checked?`<div class="row" style="margin-top:10px;gap:8px">
       <input class="field" type="number" min="1" max="12" inputmode="numeric" value="${cfg.sets}" placeholder="sets" onclick="event.preventDefault()" onchange="updateBuilderConfig('${e.id}','sets',this.value)">
       <input class="field" type="text" value="${esc(cfg.reps)}" placeholder="reps" onclick="event.preventDefault()" onchange="updateBuilderConfig('${e.id}','reps',this.value)">
+      ${e.log_mode!=='seconds'?`<input class="field" type="number" min="0" max="10" inputmode="numeric" value="${cfg.rir??''}" placeholder="RIR" title="Target RIR (reps in reserve)" onclick="event.preventDefault()" onchange="updateBuilderConfig('${e.id}','rir',this.value)">`:''}
     </div>
     <p class="muted" style="margin:10px 0 6px;font-size:12px;font-weight:800;letter-spacing:.1em;text-transform:uppercase">Rest between sets</p>
     <div class="rest-presets" style="justify-content:flex-start">
@@ -1916,8 +1917,12 @@ async function startWorkout(templateId){
         const prev=previous[idx]||previous[previous.length-1]||{};
         return {
           session_id:session.id,user_id:state.user.id,exercise_id:item.exercise_id,set_idx:idx+1,target_reps:item.target_reps,
-          target_rest_sec:item.target_rest_sec,sort_order:item.sort_order,
-          weight_kg:deloadAdjustedWeight(prev.weight_kg??null),reps:prev.reps??null,seconds:prev.seconds??null,rir:prev.rir??null
+          target_rest_sec:item.target_rest_sec,target_rir:item.target_rir??null,sort_order:item.sort_order,
+          // rir starts from the routine's own target, not last session's actual — RIR is an
+          // instruction ("aim for this"), not a performance number to replicate like
+          // weight/reps/seconds. Falls back to what was actually logged last time only for
+          // exercises with no target_rir set (e.g. an older routine before this field existed).
+          weight_kg:deloadAdjustedWeight(prev.weight_kg??null),reps:prev.reps??null,seconds:prev.seconds??null,rir:item.target_rir??prev.rir??null
         };
       });
     });
@@ -1989,6 +1994,7 @@ function computeActiveItems(sessionId){
       target_sets:group.length,
       target_reps:current.target_reps||'8-12',
       target_rest_sec:current.target_rest_sec??90,
+      target_rir:current.target_rir??null,
       sort_order:sortOrder,
       sets
     };
@@ -2366,7 +2372,7 @@ async function moveActiveSetsToExercise(oldExerciseId,newExerciseId){
   let idx=0;
   for(const s of moving){
     const prev=previous[idx]||previous[previous.length-1]||{};
-    const patch={exercise_id:newExerciseId,set_idx:nextIdx,weight_kg:deloadAdjustedWeight(prev.weight_kg??null),reps:prev.reps??null,seconds:prev.seconds??null,rir:prev.rir??null,updated_at:new Date().toISOString()};
+    const patch={exercise_id:newExerciseId,set_idx:nextIdx,target_rir:prev.target_rir??null,weight_kg:deloadAdjustedWeight(prev.weight_kg??null),reps:prev.reps??null,seconds:prev.seconds??null,rir:prev.target_rir??prev.rir??null,updated_at:new Date().toISOString()};
     const {error}=await sb.from('skandi_sets').update(patch).eq('id',s.id);
     if(error){ alert(error.message); return false; }
     Object.assign(s,patch);
@@ -2432,8 +2438,8 @@ async function addExerciseToSession(exerciseId){
     const prev=previous[idx]||previous[previous.length-1]||{};
     return {
       session_id:sessionId,user_id:state.user.id,exercise_id:exerciseId,set_idx:idx+1,
-      target_reps:prev.target_reps||'8-12',target_rest_sec:prev.target_rest_sec??90,sort_order:sortOrder,
-      weight_kg:deloadAdjustedWeight(prev.weight_kg??null),reps:prev.reps??null,seconds:prev.seconds??null,rir:prev.rir??null
+      target_reps:prev.target_reps||'8-12',target_rest_sec:prev.target_rest_sec??90,target_rir:prev.target_rir??null,sort_order:sortOrder,
+      weight_kg:deloadAdjustedWeight(prev.weight_kg??null),reps:prev.reps??null,seconds:prev.seconds??null,rir:prev.target_rir??prev.rir??null
     };
   });
   const {data,error}=await sb.from('skandi_sets').insert(rows).select();
@@ -2538,8 +2544,9 @@ async function addSet(exerciseId){
     session_id:sessionId,user_id:state.user.id,exercise_id:exerciseId,set_idx:nextIdx,
     target_reps:seed.target_reps||item?.target_reps||'8-12',
     target_rest_sec:seed.target_rest_sec??item?.target_rest_sec??null,
+    target_rir:seed.target_rir??item?.target_rir??null,
     sort_order:seed.sort_order??item?.sort_order??null,
-    weight_kg:seed.weight_kg??null,reps:seed.reps??null,seconds:seed.seconds??null,rir:seed.rir??null
+    weight_kg:seed.weight_kg??null,reps:seed.reps??null,seconds:seed.seconds??null,rir:seed.target_rir??item?.target_rir??null
   }).select().single();
   if(error) return alert(error.message);
   state.sets.push(data);
@@ -2754,7 +2761,7 @@ async function saveExerciseMedia(id,fromWorkout=false){
 function openTemplateBuilder(day=null,id=null){
   const t=state.templates.find(x=>x.id===id)||{name:'',weekday:day??todayDow(),notes:''};
   const items=state.items.filter(i=>i.template_id===id);
-  builderState={selected:new Map(items.map(i=>[i.exercise_id,{sets:i.target_sets||3,reps:i.target_reps||'8-12',rest:i.target_rest_sec??90}])),group:'All'};
+  builderState={selected:new Map(items.map(i=>[i.exercise_id,{sets:i.target_sets||3,reps:i.target_reps||'8-12',rest:i.target_rest_sec??90,rir:i.target_rir??2}])),group:'All'};
   $('modal').classList.add('show');
   $('modalCard').innerHTML=`
     <div class="row"><h1>${id?'Edit':'New'} routine</h1><button class="x" onclick="closeModal()">${icon('close',20)}</button></div>
@@ -2797,7 +2804,10 @@ function setBuilderGroup(group){
 }
 
 function toggleBuilderExercise(id,checked){
-  if(checked) builderState.selected.set(id,{sets:3,reps:'8-12',rest:90});
+  // rir defaults to 2 (the middle of the plan's "RIR 1-2 per compound" rule) rather than
+  // null — the whole point is a coach-set target already sitting there when the member opens
+  // the exercise, not a blank field they have to fill in themselves every time.
+  if(checked) builderState.selected.set(id,{sets:3,reps:'8-12',rest:90,rir:2});
   else builderState.selected.delete(id);
   renderTemplateExercisePicker();
 }
@@ -2807,10 +2817,12 @@ function updateBuilderConfig(id,key,value){
   if(!cfg) return;
   if(key==='reps') cfg.reps=value.trim()||'8-12';
   // Clamp client-side to the same bounds skandi_template_items enforces in the DB
-  // (target_sets 1-12, target_rest_sec 0-900) so a bad hand-typed value gets caught
-  // here instead of failing the save_template_items RPC after the fact.
+  // (target_sets 1-12, target_rest_sec 0-900, target_rir 0-10) so a bad hand-typed value
+  // gets caught here instead of failing the save_template_items RPC after the fact.
   else if(key==='sets') cfg.sets=Math.min(12,Math.max(1,Number(value)||1));
-  else cfg.rest=Math.min(900,Math.max(0,Number(value)||0));
+  else if(key==='rest') cfg.rest=Math.min(900,Math.max(0,Number(value)||0));
+  // Empty input clears the target (no RIR guidance for this slot) rather than snapping to 0.
+  else if(key==='rir') cfg.rir=value===''?null:Math.min(10,Math.max(0,Number(value)||0));
 }
 
 let savingTemplate=false;
@@ -2839,7 +2851,7 @@ async function saveTemplate(id){
     // template with its old items deleted and nothing to replace them.
     const items=checked.map((exercise_id,idx)=>{
       const cfg=builderState.selected.get(exercise_id);
-      return {exercise_id,sort_order:idx,target_sets:cfg.sets,target_reps:cfg.reps,target_rest_sec:cfg.rest};
+      return {exercise_id,sort_order:idx,target_sets:cfg.sets,target_reps:cfg.reps,target_rest_sec:cfg.rest,target_rir:cfg.rir??null};
     });
     const {error:itemsError}=await sb.rpc('save_template_items',{p_template_id:templateId,p_items:items});
     if(itemsError) return alert(itemsError.message);
@@ -2899,7 +2911,7 @@ async function forkTemplateToDay(templateId,weekday){
   const payload={user_id:state.user.id,name:t.name,notes:t.notes,weekday,is_public:true,forked_from:t.id,forked_from_name:t.profile?.name||'Crew member',updated_at:new Date().toISOString()};
   const {data,error}=await sb.from('skandi_templates').insert(payload).select().single();
   if(error) return {error};
-  const rows=sourceItems.map((i,idx)=>({template_id:data.id,exercise_id:i.exercise_id,sort_order:idx,target_sets:i.target_sets,target_reps:i.target_reps,target_rest_sec:i.target_rest_sec,note:i.note}));
+  const rows=sourceItems.map((i,idx)=>({template_id:data.id,exercise_id:i.exercise_id,sort_order:idx,target_sets:i.target_sets,target_reps:i.target_reps,target_rest_sec:i.target_rest_sec,target_rir:i.target_rir,note:i.note}));
   if(rows.length){
     const {error:itemsError}=await sb.from('skandi_template_items').insert(rows);
     if(itemsError) return {error:itemsError};
