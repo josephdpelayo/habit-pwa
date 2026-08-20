@@ -113,10 +113,11 @@ p{color:var(--muted);line-height:1.45;margin:0}
 .muscles{display:flex;flex-wrap:wrap;gap:8px}
 .bar{height:8px;background:#e2eaf2;border-radius:999px;overflow:hidden}
 .bar i{display:block;height:100%;background:linear-gradient(90deg,var(--dof-navy),var(--blue));width:0}
-.set-row{display:grid;grid-template-columns:26px 1fr 1fr 46px 30px;gap:6px;align-items:center}
-.set-row.no-weight{grid-template-columns:26px 1fr 46px 30px}
-.set-row.rir{grid-template-columns:26px 1fr 1fr 34px 46px 30px}
-.set-row.no-weight.rir{grid-template-columns:26px 1fr 34px 46px 30px}
+.set-row{display:grid;grid-template-columns:26px 1fr 1fr 34px 46px 30px;gap:6px;align-items:center}
+.set-row.no-weight{grid-template-columns:26px 1fr 34px 46px 30px}
+.clean-toggle{height:100%;border-radius:10px;background:var(--panel2);color:var(--muted);border:1px solid var(--line);font-weight:1000;font-size:13px}
+.clean-toggle.clean{background:#e4f7ee;color:#1f9d5c;border-color:#bfe9d3}
+.clean-toggle.broken{background:#fdeceb;color:var(--pink);border-color:#f6c9c5}
 .field{width:100%;background:#fff;border:1px solid var(--line);color:var(--text);border-radius:10px;padding:13px;text-align:center;box-shadow:inset 0 1px 0 rgba(1,36,86,.03)}
 .field.left{text-align:left}
 textarea.field{min-height:112px;text-align:left;resize:vertical}
@@ -231,10 +232,8 @@ textarea.field{min-height:112px;text-align:left;resize:vertical}
   .grid{grid-template-columns:1fr 1fr}
   .ex-head{grid-template-columns:58px 1fr auto}
   .thumb{width:58px;height:58px}
-  .set-row{grid-template-columns:24px 1fr 1fr 42px 26px}
-  .set-row.no-weight{grid-template-columns:24px 1fr 42px 26px}
-  .set-row.rir{grid-template-columns:24px 1fr 1fr 30px 42px 26px}
-  .set-row.no-weight.rir{grid-template-columns:24px 1fr 30px 42px 26px}
+  .set-row{grid-template-columns:24px 1fr 1fr 30px 42px 26px}
+  .set-row.no-weight{grid-template-columns:24px 1fr 30px 42px 26px}
   .app{padding-left:13px;padding-right:13px}
   .brand{font-size:22px}
   .brand-text small{font-size:10px}
@@ -932,7 +931,10 @@ function openSessionDetail(sessionId){
   const sets=state.sets.filter(x=>x.session_id===sessionId).sort((a,b)=>a.set_idx-b.set_idx);
   const byExercise=new Map();
   sets.forEach(x=>{
-    if(!byExercise.has(x.exercise_id)) byExercise.set(x.exercise_id,{name:x.exercise?.name||'Exercise',sets:[]});
+    // x.exercise (the join used to load sets) only carries name/slug — look the full row up
+    // in state.exercises for log_mode, same as leaderboard(), so seconds-based holds render
+    // their clean/broken tag here instead of a meaningless "weight × reps".
+    if(!byExercise.has(x.exercise_id)) byExercise.set(x.exercise_id,{name:x.exercise?.name||'Exercise',seconds:state.exercises.find(e=>e.id===x.exercise_id)?.log_mode==='seconds',sets:[]});
     byExercise.get(x.exercise_id).sets.push(x);
   });
   const mine=s.user_id===state.user.id;
@@ -956,7 +958,7 @@ function openSessionDetail(sessionId){
         <div style="margin-top:12px">
           <strong>${esc(ex.name)}</strong>
           <div class="stack" style="margin-top:6px">
-            ${ex.sets.map(x=>`<div class="row"><small class="muted">Set ${x.set_idx}</small><small>${x.done?`${x.weight_kg??'-'} kg × ${x.reps??'-'}${x.rir!=null?` · RIR ${x.rir}`:''}`:'not logged'}</small></div>`).join('')}
+            ${ex.sets.map(x=>`<div class="row"><small class="muted">Set ${x.set_idx}</small><small>${x.done?(ex.seconds?`${fmtSec(x.seconds)}${x.hold_clean===true?' · clean':x.hold_clean===false?' · broken':''}`:`${x.weight_kg??'-'} kg × ${x.reps??'-'}${x.rir!=null?` · RIR ${x.rir}`:''}`):'not logged'}</small></div>`).join('')}
           </div>
         </div>
       `).join('')||empty('No sets logged.')}
@@ -986,6 +988,10 @@ function leaderboard(){
     // lever, planche, handstand and every other bodyweight/hold exercise could never post a PR
     // and silently never appeared on the leaderboard at all.
     const mode=ex.log_mode==='seconds'?'seconds':(ex.log_weight!==false?'weight':'reps');
+    // A hold explicitly tagged broken doesn't get to set the PR, even if it ran long —
+    // "mejor hold limpio" per the training plan. Untagged (hold_clean null) holds still count,
+    // so this doesn't silently erase every PR set before the clean/broken toggle existed.
+    if(mode==='seconds'&&s.hold_clean===false) return;
     const mark=mode==='seconds'?Number(s.seconds):(mode==='weight'?Number(s.weight_kg):Number(s.reps));
     if(!(mark>0)) return;
     const key=`${s.user_id}:${s.exercise_id}`;
@@ -1925,12 +1931,12 @@ function activeExercise(item,sets){
   const seconds=e.log_mode==='seconds';
   const showWeight=e.log_weight!==false; // pure plyometric/balance drills (migration 061) skip the weight field entirely
   const unit=exerciseWeightUnit(item.exercise_id);
-  // RIR only makes sense for rep-based work (the plan's progression rules are RIR 1-2 on
-  // compounds) — a seconds-based skill hold (front lever, handstand, planche) is judged on
-  // clean position/time instead, so it gets no RIR column at all.
-  const rowClass=(showWeight?'set-row':'set-row no-weight')+(seconds?'':' rir');
+  // Every set row gets one extra column beyond weight/reps-or-seconds: RIR for rep-based work
+  // (the plan's progression rules are RIR 1-2 on compounds) or a clean/broken toggle for
+  // seconds-based skill holds (front lever, handstand, planche — judged on position, not load).
+  const rowClass=showWeight?'set-row':'set-row no-weight';
   return `<article class="exercise">
-    <div class="ex-head" onclick="openExercise('${e.id}',true)">${mediaThumb(e)}<div><h3>${esc(e.name)}</h3><p>${[esc(exerciseSubtitle(e)),`${item.target_sets} x ${esc(item.target_reps)}`,`rest ${item.target_rest_sec}s`].filter(Boolean).join(' · ')}</p>${progressionStepperHtml(e,item.exercise_id)}</div><span class="muted">${sets.filter(s=>s.done).length}/${sets.length}</span>
+    <div class="ex-head" onclick="openExercise('${e.id}',true)">${mediaThumb(e)}<div><h3>${esc(e.name)}</h3><p>${[esc(exerciseSubtitle(e)),`${item.target_sets} x ${esc(item.target_reps)}`,`rest ${item.target_rest_sec}s`].filter(Boolean).join(' · ')}</p>${progressionStepperHtml(e,item.exercise_id)}</div><span class="muted">${sets.filter(s=>s.done).length}/${sets.length}${seconds&&sets.some(s=>s.done)?` · Clean ${sets.filter(s=>s.done&&s.hold_clean===true).length}/${sets.filter(s=>s.done).length}`:''}</span>
       ${undone?`<button class="btn small ghost" onclick="event.stopPropagation();toggleSwap('${item.exercise_id}')" aria-label="Swap exercise" title="Swap exercise">${icon('swap',16)}</button>`:''}
       <button class="icon-btn tiny danger" onclick="event.stopPropagation();removeExerciseFromSession('${item.exercise_id}')" aria-label="Remove exercise from this session" title="Remove from this session">${icon('trash',16)}</button>
     </div>
@@ -1939,7 +1945,7 @@ function activeExercise(item,sets){
       <div class="${rowClass}">
         <span></span>
         ${showWeight?`<button type="button" class="pill dark" style="cursor:pointer;justify-self:start" onclick="event.stopPropagation();setExerciseWeightUnit('${item.exercise_id}','${unit==='kg'?'lb':'kg'}')" aria-label="Switch this exercise to ${unit==='kg'?'pounds':'kilograms'}" title="Switch this exercise to ${unit==='kg'?'lb':'kg'}">${unit.toUpperCase()}</button>`:''}
-        <small class="muted">${seconds?'SEC':'REPS'}</small>${seconds?'':'<small class="muted">RIR</small>'}<span></span><span></span>
+        <small class="muted">${seconds?'SEC':'REPS'}</small><small class="muted">${seconds?'CLEAN':'RIR'}</small><span></span><span></span>
       </div>
       ${sets.map((s,i)=>{
         // A row's own exercise can differ from the card's current one (item.exercise) right
@@ -1953,14 +1959,17 @@ function activeExercise(item,sets){
         const rowSeconds=rowEx.log_mode==='seconds';
         const rowShowWeight=rowEx.log_weight!==false;
         const rowUnit=exerciseWeightUnit(s.exercise_id);
-        const rc=(rowShowWeight?'set-row':'set-row no-weight')+(rowSeconds?'':' rir');
+        const rc=rowShowWeight?'set-row':'set-row no-weight';
+        const cleanLabel=s.hold_clean===true?'Clean':s.hold_clean===false?'Broken form':'Not marked — tap to set';
         return `<div class="${rc}">
         <strong>${i+1}</strong>
         ${rowShowWeight?`<input class="field" inputmode="decimal" value="${fmtWeightInput(s.weight_kg,rowUnit)}" placeholder="${rowUnit}" onchange="updateSet('${s.id}','weight_kg',this.value)">`:''}
         ${rowSeconds
           ?`<input class="field" inputmode="numeric" value="${s.seconds??''}" placeholder="${esc(s.target_reps||'sec')}" onchange="updateSet('${s.id}','seconds',this.value)">`
           :`<input class="field" inputmode="numeric" value="${s.reps??''}" placeholder="${esc(s.target_reps||'reps')}" onchange="updateSet('${s.id}','reps',this.value)">`}
-        ${rowSeconds?'':`<input class="field" inputmode="numeric" value="${s.rir??''}" placeholder="RIR" onchange="updateSet('${s.id}','rir',this.value)">`}
+        ${rowSeconds
+          ?`<button type="button" class="clean-toggle ${s.hold_clean===true?'clean':s.hold_clean===false?'broken':''}" onclick="event.stopPropagation();toggleHoldClean('${s.id}')" aria-label="Hold quality: ${cleanLabel}" title="${cleanLabel}">${s.hold_clean===true?'✓':s.hold_clean===false?'✕':'–'}</button>`
+          :`<input class="field" inputmode="numeric" value="${s.rir??''}" placeholder="RIR" onchange="updateSet('${s.id}','rir',this.value)">`}
         <button class="check ${s.done?'done':''}" onclick="toggleSet('${s.id}',${item.target_rest_sec})">${icon('check',18)}</button>
         <button class="set-remove" onclick="removeSet('${s.id}')" aria-label="Remove set">${icon('close',14)}</button>
       </div>`;}).join('')}
@@ -2151,6 +2160,19 @@ async function updateSet(id,key,value){
       renderActiveWorkout();
     }
   }
+}
+
+// Cycles a hold's quality tag: unset -> clean -> broken -> unset. Three states because
+// "unset" (never tapped) has to stay distinguishable from "explicitly broken" — collapsing
+// them into a plain checkbox would make every untagged historical hold look intentionally bad.
+async function toggleHoldClean(id){
+  const s=state.sets.find(x=>x.id===id);
+  if(!s) return;
+  const next=s.hold_clean===true?false:s.hold_clean===false?null:true;
+  const {error}=await sb.from('skandi_sets').update({hold_clean:next,updated_at:new Date().toISOString()}).eq('id',id);
+  if(error) return alert(error.message);
+  s.hold_clean=next;
+  renderActiveWorkout();
 }
 
 async function toggleSet(id,rest){
