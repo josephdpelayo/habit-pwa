@@ -580,8 +580,20 @@ async function loadAll(){
   state.items=items||[];
   const sessions=dedupeById([...(ownSessions||[]),...(crewSessions||[])]);
   const sets=dedupeById([...(ownSets||[]),...(crewSets||[])]);
-  state.sessions=sessions.filter(s=>!(ignored.has(s.id)&&!s.completed_at));
-  state.sets=sets.filter(s=>!ignored.has(s.session_id));
+  if(state.active){
+    // A background loadAll() (e.g. the one fired right after startWorkout) can resolve after
+    // the member has already checked off sets locally — its server snapshot is racing those
+    // in-flight updates, so overwriting wholesale can silently revert sets just marked done,
+    // surfacing on the next render as unchecked. Each edit during a live workout is already
+    // persisted individually (toggleSet/updateSet/addSet/removeSet), so keep the active
+    // session's own data from local state and only merge in everything outside it.
+    const localActiveSets=state.sets.filter(s=>s.session_id===state.active.id);
+    state.sessions=dedupeById([state.active,...sessions.filter(s=>s.id!==state.active.id)]).filter(s=>!(ignored.has(s.id)&&!s.completed_at));
+    state.sets=dedupeById([...localActiveSets,...sets.filter(s=>s.session_id!==state.active.id)]).filter(s=>!ignored.has(s.session_id));
+  }else{
+    state.sessions=sessions.filter(s=>!(ignored.has(s.id)&&!s.completed_at));
+    state.sets=sets.filter(s=>!ignored.has(s.session_id));
+  }
   state.externalActivities=externalActivities||[];
   state.activityTemplates=activityTemplates||[];
   state.progressionState=progressionState||[];
