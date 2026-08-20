@@ -105,6 +105,8 @@ p{color:var(--muted);line-height:1.45;margin:0}
 .day span:nth-child(2){color:inherit;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .exercise{padding:14px;display:grid;gap:10px;margin:10px 0}
 .ex-head{display:grid;grid-template-columns:72px 1fr auto;gap:12px;align-items:center}
+.ex-actions{display:flex;flex-direction:column;align-items:flex-end;gap:8px}
+.ex-actions-row{display:flex;gap:6px}
 .thumb{width:72px;height:72px;border-radius:12px;background:linear-gradient(180deg,#eef4f8,#dfe9f1);object-fit:cover;display:grid;place-items:center;color:var(--dof-steel);overflow:hidden;border:1px solid rgba(1,36,86,.08)}
 .thumb img,.thumb video{width:100%;height:100%;object-fit:cover}
 .play{color:var(--blue);display:grid;place-items:center}
@@ -119,6 +121,7 @@ p{color:var(--muted);line-height:1.45;margin:0}
 .clean-toggle.clean{background:#e4f7ee;color:#1f9d5c;border-color:#bfe9d3}
 .clean-toggle.broken{background:#fdeceb;color:var(--pink);border-color:#f6c9c5}
 .field{width:100%;background:#fff;border:1px solid var(--line);color:var(--text);border-radius:10px;padding:13px;text-align:center;box-shadow:inset 0 1px 0 rgba(1,36,86,.03)}
+.field-narrow{padding:13px 3px}
 .field.left{text-align:left}
 textarea.field{min-height:112px;text-align:left;resize:vertical}
 .check{height:48px;border-radius:10px;background:var(--panel2);color:var(--muted);border:1px solid var(--line);display:grid;place-items:center}
@@ -2042,16 +2045,21 @@ function activeExercise(item,sets){
   // seconds-based skill holds (front lever, handstand, planche — judged on position, not load).
   const rowClass=showWeight?'set-row':'set-row no-weight';
   return `<article class="exercise">
-    <div class="ex-head" onclick="openExercise('${e.id}',true)">${mediaThumb(e)}<div><h3>${esc(e.name)}</h3><p>${[esc(exerciseSubtitle(e)),`${item.target_sets} x ${esc(item.target_reps)}`,`rest ${item.target_rest_sec}s`].filter(Boolean).join(' · ')}</p>${progressionStepperHtml(e,item.exercise_id)}</div><span class="muted">${sets.filter(s=>s.done).length}/${sets.length}${seconds&&sets.some(s=>s.done)?` · Clean ${sets.filter(s=>s.done&&s.hold_clean===true).length}/${sets.filter(s=>s.done).length}`:''}</span>
-      ${undone?`<button class="btn small ghost" onclick="event.stopPropagation();toggleSwap('${item.exercise_id}')" aria-label="Swap exercise" title="Swap exercise">${icon('swap',16)}</button>`:''}
-      <button class="icon-btn tiny danger" onclick="event.stopPropagation();removeExerciseFromSession('${item.exercise_id}')" aria-label="Remove exercise from this session" title="Remove from this session">${icon('trash',16)}</button>
+    <div class="ex-head" onclick="openExercise('${e.id}',true)">${mediaThumb(e)}<div><h3>${esc(e.name)}</h3><p>${[esc(exerciseSubtitle(e)),`${item.target_sets} x ${esc(item.target_reps)}`,`rest ${item.target_rest_sec}s`].filter(Boolean).join(' · ')}</p>${progressionStepperHtml(e,item.exercise_id)}</div>
+      <div class="ex-actions">
+        <span class="muted">${sets.filter(s=>s.done).length}/${sets.length}${seconds&&sets.some(s=>s.done)?` · Clean ${sets.filter(s=>s.done&&s.hold_clean===true).length}/${sets.filter(s=>s.done).length}`:''}</span>
+        <div class="ex-actions-row">
+          ${undone?`<button class="icon-btn tiny" onclick="event.stopPropagation();toggleSwap('${item.exercise_id}')" aria-label="Swap exercise" title="Swap exercise">${icon('swap',14)}</button>`:''}
+          <button class="icon-btn tiny danger" onclick="event.stopPropagation();removeExerciseFromSession('${item.exercise_id}')" aria-label="Remove exercise from this session" title="Remove from this session">${icon('trash',14)}</button>
+        </div>
+      </div>
     </div>
     <div id="swapPanel-${item.exercise_id}">${swapPanelHtml(item.exercise_id)}</div>
     <div class="stack">
       <div class="${rowClass}">
         <span></span>
         ${showWeight?`<button type="button" class="pill dark" style="cursor:pointer;justify-self:start" onclick="event.stopPropagation();setExerciseWeightUnit('${item.exercise_id}','${unit==='kg'?'lb':'kg'}')" aria-label="Switch this exercise to ${unit==='kg'?'pounds':'kilograms'}" title="Switch this exercise to ${unit==='kg'?'lb':'kg'}">${unit.toUpperCase()}</button>`:''}
-        <small class="muted">${seconds?'SEC':'REPS'}</small><small class="muted">${seconds?'CLEAN':'RIR'}</small><span></span><span></span>
+        <small class="muted">${seconds?'SEC':'REPS'}</small><small class="muted" style="font-size:10px">${seconds?'CLN':'RIR'}</small><span></span><span></span>
       </div>
       ${sets.map((s,i)=>{
         // A row's own exercise can differ from the card's current one (item.exercise) right
@@ -2075,7 +2083,7 @@ function activeExercise(item,sets){
           :`<input class="field" inputmode="numeric" value="${s.reps??''}" placeholder="${esc(s.target_reps||'reps')}" onchange="updateSet('${s.id}','reps',this.value)">`}
         ${rowSeconds
           ?`<button type="button" class="clean-toggle ${s.hold_clean===true?'clean':s.hold_clean===false?'broken':''}" onclick="event.stopPropagation();toggleHoldClean('${s.id}')" aria-label="Hold quality: ${cleanLabel}" title="${cleanLabel}">${s.hold_clean===true?'✓':s.hold_clean===false?'✕':'–'}</button>`
-          :`<input class="field" inputmode="numeric" value="${s.rir??''}" placeholder="RIR" onchange="updateSet('${s.id}','rir',this.value)">`}
+          :`<input class="field field-narrow" inputmode="numeric" value="${s.rir??''}" onchange="updateSet('${s.id}','rir',this.value)">`}
         <button class="check ${s.done?'done':''}" onclick="toggleSet('${s.id}',${item.target_rest_sec})">${icon('check',18)}</button>
         <button class="set-remove" onclick="removeSet('${s.id}')" aria-label="Remove set">${icon('close',14)}</button>
       </div>`;}).join('')}
