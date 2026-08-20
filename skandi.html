@@ -107,6 +107,7 @@ p{color:var(--muted);line-height:1.45;margin:0}
 .ex-head{display:grid;grid-template-columns:72px 1fr auto;gap:12px;align-items:center}
 .ex-actions{display:flex;flex-direction:column;align-items:flex-end;gap:8px}
 .ex-actions-row{display:flex;gap:6px}
+.ex-info-hint{display:inline-flex;vertical-align:middle;color:var(--dof-steel);opacity:.55}
 .thumb{width:72px;height:72px;border-radius:12px;background:linear-gradient(180deg,#eef4f8,#dfe9f1);object-fit:cover;display:grid;place-items:center;color:var(--dof-steel);overflow:hidden;border:1px solid rgba(1,36,86,.08)}
 .thumb img,.thumb video{width:100%;height:100%;object-fit:cover}
 .play{color:var(--blue);display:grid;place-items:center}
@@ -126,7 +127,8 @@ p{color:var(--muted);line-height:1.45;margin:0}
 textarea.field{min-height:112px;text-align:left;resize:vertical}
 .check{height:48px;border-radius:10px;background:var(--panel2);color:var(--muted);border:1px solid var(--line);display:grid;place-items:center}
 .check.done{background:var(--dof-navy);color:#fff}
-.set-remove{width:30px;height:48px;border-radius:10px;background:transparent;color:var(--muted);border:1px solid var(--line);display:grid;place-items:center}
+.set-remove{width:30px;height:48px;background:transparent;border:none;color:#c7ccd3;display:grid;place-items:center}
+.add-set-link{justify-self:start;background:transparent;border:none;box-shadow:none;color:var(--muted);font-weight:800;font-size:13px;padding:8px 2px;margin-top:2px}
 .workout-bar{position:sticky;top:-20px;z-index:5;margin:-20px -20px 0;padding:14px 18px 12px;background:linear-gradient(180deg,rgba(247,251,254,.98),rgba(247,251,254,.78));backdrop-filter:blur(18px);border-bottom:0;border-radius:8px 8px 0 0;overflow:visible}
 .workout-bar-title{display:flex;align-items:flex-start;justify-content:space-between;gap:12px}
 .workout-bar-title h1{font-size:22px;line-height:1}
@@ -2045,7 +2047,7 @@ function activeExercise(item,sets){
   // seconds-based skill holds (front lever, handstand, planche — judged on position, not load).
   const rowClass=showWeight?'set-row':'set-row no-weight';
   return `<article class="exercise">
-    <div class="ex-head" onclick="openExercise('${e.id}',true)">${mediaThumb(e)}<div><h3>${esc(e.name)}</h3><p>${[esc(exerciseSubtitle(e)),`${item.target_sets} x ${esc(item.target_reps)}`,`rest ${item.target_rest_sec}s`].filter(Boolean).join(' · ')}</p>${progressionStepperHtml(e,item.exercise_id)}</div>
+    <div class="ex-head" onclick="openExercise('${e.id}',true)">${mediaThumb(e)}<div><h3>${esc(e.name)} <span class="ex-info-hint">${icon('chevronRight',13)}</span></h3><p>${[esc(exerciseSubtitle(e)),`${item.target_sets} x ${esc(item.target_reps)}`,`rest ${item.target_rest_sec}s`].filter(Boolean).join(' · ')}</p>${progressionStepperHtml(e,item.exercise_id)}</div>
       <div class="ex-actions">
         <span class="muted">${sets.filter(s=>s.done).length}/${sets.length}${seconds&&sets.some(s=>s.done)?` · Clean ${sets.filter(s=>s.done&&s.hold_clean===true).length}/${sets.filter(s=>s.done).length}`:''}</span>
         <div class="ex-actions-row">
@@ -2085,10 +2087,10 @@ function activeExercise(item,sets){
           ?`<button type="button" class="clean-toggle ${s.hold_clean===true?'clean':s.hold_clean===false?'broken':''}" onclick="event.stopPropagation();toggleHoldClean('${s.id}')" aria-label="Hold quality: ${cleanLabel}" title="${cleanLabel}">${s.hold_clean===true?'✓':s.hold_clean===false?'✕':'–'}</button>`
           :`<input class="field field-narrow" inputmode="numeric" value="${s.rir??''}" onchange="updateSet('${s.id}','rir',this.value)">`}
         <button class="check ${s.done?'done':''}" onclick="toggleSet('${s.id}',${item.target_rest_sec})">${icon('check',18)}</button>
-        <button class="set-remove" onclick="removeSet('${s.id}')" aria-label="Remove set">${icon('close',14)}</button>
+        <button class="set-remove" onclick="removeSet('${s.id}')" aria-label="Remove set">${icon('close',11)}</button>
       </div>`;}).join('')}
     </div>
-    <button class="btn small ghost" style="width:100%;margin-top:8px" onclick="addSet('${item.exercise_id}')">+ Add set</button>
+    <button class="add-set-link" onclick="addSet('${item.exercise_id}')">+ Add set</button>
   </article>`;
 }
 
