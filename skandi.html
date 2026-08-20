@@ -370,7 +370,7 @@ const BODY_REGIONS_BACK=[
   {name:'Triceps',shape:'rect',x:46,y:95,w:26,h:80,rx:13,mirror:true}
 ];
 const ACTIVE_WORKOUT_MAX_HOURS=18;
-const state={user:null,profile:null,view:'home',authMode:'login',exercises:[],templates:[],items:[],sessions:[],sets:[],externalActivities:[],activityTemplates:[],progressionState:[],trainingBlocks:[],active:null,activeItems:[],timer:null,elapsed:0,rest:0,restTotal:0,bodyFlip:'front',weightUnit:localStorage.getItem('skandi_weight_unit')||'kg',weightUnitOverrides:(()=>{try{return JSON.parse(localStorage.getItem('skandi_weight_unit_overrides')||'{}');}catch(e){return {};}})(),expandedRoutines:new Set(),swapTarget:null,swapQuery:'',addExOpen:false,addExQuery:'',pausedMs:0,pausedAt:null,floatTimerOpen:false};
+const state={user:null,profile:null,view:'home',authMode:'login',exercises:[],templates:[],items:[],sessions:[],sets:[],externalActivities:[],activityTemplates:[],progressionState:[],trainingBlocks:[],bodyweightLogs:[],active:null,activeItems:[],timer:null,elapsed:0,rest:0,restTotal:0,bodyFlip:'front',weightUnit:localStorage.getItem('skandi_weight_unit')||'kg',weightUnitOverrides:(()=>{try{return JSON.parse(localStorage.getItem('skandi_weight_unit_overrides')||'{}');}catch(e){return {};}})(),expandedRoutines:new Set(),swapTarget:null,swapQuery:'',addExOpen:false,addExQuery:'',pausedMs:0,pausedAt:null,floatTimerOpen:false};
 let builderState={selected:new Map(),group:'All'};
 
 const $=id=>document.getElementById(id);
@@ -558,7 +558,7 @@ async function loadAll(){
   // vs. "crew" (other members' shared activity, capped since it only feeds the social feed).
   let [{data:profile},{data:exercises},{data:templates},{data:items},
        {data:ownSessions},{data:crewSessions},{data:ownSets},{data:crewSets},
-       {data:externalActivities},{data:activityTemplates},{data:progressionState},{data:trainingBlocks}]=await Promise.all([
+       {data:externalActivities},{data:activityTemplates},{data:progressionState},{data:trainingBlocks},{data:bodyweightLogs}]=await Promise.all([
     sb.from('profiles').select('id,name,avatar_url').eq('id',state.user.id).maybeSingle(),
     sb.from('skandi_exercises').select('*').order('name'),
     sb.from('skandi_templates').select('*, profile:profiles(name,avatar_url)').order('weekday',{nullsFirst:false}).order('created_at',{ascending:false}),
@@ -570,7 +570,8 @@ async function loadAll(){
     sb.from('skandi_external_activities').select('*').eq('user_id',state.user.id).order('performed_at',{ascending:false}).limit(200),
     sb.from('skandi_activity_templates').select('*').eq('user_id',state.user.id).order('weekday',{nullsFirst:false}),
     sb.from('skandi_progression_state').select('*').eq('user_id',state.user.id),
-    sb.from('skandi_training_blocks').select('*').eq('user_id',state.user.id).order('start_date',{ascending:false})
+    sb.from('skandi_training_blocks').select('*').eq('user_id',state.user.id).order('start_date',{ascending:false}),
+    sb.from('skandi_bodyweight_logs').select('*').eq('user_id',state.user.id).order('logged_at',{ascending:false})
   ]);
   if(!profile){
     // Some signups end up with an auth user but no profiles row (trigger race condition).
@@ -607,6 +608,7 @@ async function loadAll(){
   state.activityTemplates=activityTemplates||[];
   state.progressionState=progressionState||[];
   state.trainingBlocks=trainingBlocks||[];
+  state.bodyweightLogs=bodyweightLogs||[];
   hydrateActiveWorkout();
 }
 
@@ -930,6 +932,8 @@ function progressView(){
         <div class="stat"><strong>${Math.round(mine.reduce((a,s)=>a+(s.duration_sec||0),0)/60)}</strong><small>minutes trained</small></div>
       </div>
     </section>
+    ${crossTrainingCardHtml()}
+    ${bodyweightCardHtml()}
     ${muscleLoadCard('Muscle recovery')}
     <section class="card">
       <div class="row"><h2>External activities</h2><button class="btn small" onclick="openLogActivity()">+ Log activity</button></div>
@@ -1217,6 +1221,92 @@ function weeklyRecapCard(){
     ${r.avgEnergy!=null?`<p style="margin-top:10px">Average energy ${r.avgEnergy}/5${energyTrend!=null?(energyTrend>0?` (up from ${r.lastAvgEnergy})`:energyTrend<0?` (down from ${r.lastAvgEnergy})`:''):''}.</p>`:''}
     ${r.soreCount?`<p style="margin-top:6px;color:var(--pink)">Soreness reported in ${r.soreCount} ${plural(r.soreCount,'session')} this week.</p>`:''}
     ${r.progressions.length?`<div class="muscles" style="margin-top:10px">${r.progressions.map(e=>`<span class="pill dark">${esc(e.name)}</span>`).join('')}</div>`:''}
+  </section>`;
+}
+
+// ---- Cross-training analysis: strength/skill vs running/bike/swim, per week ----
+// The training plan's whole "de donde vienes / a donde vas" structure assumes endurance and
+// strength work interact — this surfaces that interaction from data instead of leaving it to
+// memory. Monday-start weeks, matching todayDow()'s convention elsewhere.
+
+function weekStart(date){
+  const d=new Date(date);
+  d.setHours(0,0,0,0);
+  const dow=d.getDay()===0?6:d.getDay()-1;
+  d.setDate(d.getDate()-dow);
+  return d;
+}
+
+function crossTrainingWeeks(numWeeks=6){
+  const mySessions=state.sessions.filter(s=>s.user_id===state.user.id&&s.completed_at);
+  const myActivities=state.externalActivities||[];
+  const weeks=new Map();
+  const ensure=key=>{
+    if(!weeks.has(key)) weeks.set(key,{week:key,strengthSessions:0,setsDone:0,rirSamples:[],cleanDone:0,cleanTotal:0,enduranceMin:0,enduranceSessions:0,feltWorse:0});
+    return weeks.get(key);
+  };
+  mySessions.forEach(s=>{
+    const w=ensure(weekStart(s.completed_at).toISOString().slice(0,10));
+    w.strengthSessions++;
+    if(s.report_felt_worse) w.feltWorse++;
+    state.sets.filter(x=>x.session_id===s.id&&x.done).forEach(x=>{
+      w.setsDone++;
+      if(x.rir!=null) w.rirSamples.push(x.rir);
+      if(x.hold_clean!=null){ w.cleanTotal++; if(x.hold_clean) w.cleanDone++; }
+    });
+  });
+  myActivities.forEach(a=>{
+    const w=ensure(weekStart(a.performed_at).toISOString().slice(0,10));
+    w.enduranceMin+=a.duration_min;
+    w.enduranceSessions++;
+  });
+  return [...weeks.values()].sort((a,b)=>b.week.localeCompare(a.week)).slice(0,numWeeks).map(w=>({
+    ...w,
+    avgRir:w.rirSamples.length?Math.round((w.rirSamples.reduce((a,b)=>a+b,0)/w.rirSamples.length)*10)/10:null,
+    cleanPct:w.cleanTotal?Math.round((w.cleanDone/w.cleanTotal)*100):null
+  }));
+}
+
+// How often a "felt worse than usual" report follows a hard (RPE >= 7) endurance session in
+// the prior 36h — a rough, transparent version of the interference the plan's day-ordering
+// (Z2 the day after piernas, calidad separated 6-8h from Front Lever) is designed to avoid.
+function feltWorseAfterEndurance(){
+  const flagged=state.sessions.filter(s=>s.user_id===state.user.id&&s.completed_at&&s.report_felt_worse);
+  if(!flagged.length) return null;
+  const activities=state.externalActivities||[];
+  const linked=flagged.filter(s=>{
+    const t=new Date(s.completed_at).getTime();
+    return activities.some(a=>{
+      const hoursBefore=(t-new Date(a.performed_at).getTime())/3600000;
+      return hoursBefore>0&&hoursBefore<=36&&a.intensity>=7;
+    });
+  }).length;
+  return {total:flagged.length,linked};
+}
+
+function crossTrainingCardHtml(){
+  const weeks=crossTrainingWeeks(6);
+  if(!weeks.some(w=>w.strengthSessions||w.enduranceSessions)) return '';
+  const worse=feltWorseAfterEndurance();
+  return `<section class="card">
+    <h2>Fuerza/skill vs resistencia</h2>
+    <div style="margin-top:10px;overflow-x:auto">
+      <table style="width:100%;border-collapse:collapse;font-size:13px;white-space:nowrap">
+        <thead><tr style="text-align:left;color:var(--muted)">
+          <th style="padding:6px 8px 6px 0">Semana</th><th style="padding:6px 8px">Fuerza</th><th style="padding:6px 8px">RIR prom.</th><th style="padding:6px 8px">Clean %</th><th style="padding:6px 0">Resistencia</th>
+        </tr></thead>
+        <tbody>
+          ${weeks.map(w=>`<tr style="border-top:1px solid var(--line)">
+            <td style="padding:6px 8px 6px 0">${new Date(w.week+'T00:00:00').toLocaleDateString(undefined,{month:'short',day:'numeric'})}</td>
+            <td style="padding:6px 8px">${w.strengthSessions} · ${w.setsDone} sets</td>
+            <td style="padding:6px 8px">${w.avgRir??'—'}</td>
+            <td style="padding:6px 8px">${w.cleanPct!=null?w.cleanPct+'%':'—'}</td>
+            <td style="padding:6px 0">${w.enduranceMin} min${w.enduranceSessions?` (${w.enduranceSessions})`:''}</td>
+          </tr>`).join('')}
+        </tbody>
+      </table>
+    </div>
+    ${worse&&worse.total?`<p style="margin-top:10px">${worse.linked} de ${worse.total} veces que reportaste rendir peor de lo normal, hubo una sesión de resistencia intensa (RPE≥7) en las 36h previas.</p>`:''}
   </section>`;
 }
 
@@ -1520,6 +1610,66 @@ function externalActivityRow(a){
 async function deleteExternalActivity(id){
   if(!confirm('Delete this activity?')) return;
   const {error}=await sb.from('skandi_external_activities').delete().eq('id',id);
+  if(error) return alert(error.message);
+  await loadAll();
+  render();
+}
+
+// ---- Bodyweight (not tied to a session — logged whenever, at most once per day) ----
+
+function bodyweightCardHtml(){
+  const logs=state.bodyweightLogs;
+  const unit=state.weightUnit;
+  const latest=logs[0];
+  const prev=logs[1];
+  const delta=latest&&prev?kgToDisplay(latest.weight_kg,unit)-kgToDisplay(prev.weight_kg,unit):null;
+  return `<section class="card">
+    <div class="row"><h2>Bodyweight</h2><button class="btn small" onclick="openLogBodyweight()">+ Log weight</button></div>
+    ${latest?`<div class="row" style="margin-top:10px">
+      <div class="stat"><strong>${fmtWeightInput(latest.weight_kg,unit)}</strong><small>${unit} · ${new Date(latest.logged_at+'T00:00:00').toLocaleDateString()}</small></div>
+      ${delta!=null?`<div class="stat"><strong>${delta>0?'+':''}${Math.round(delta*10)/10}</strong><small>${unit} vs last log</small></div>`:''}
+    </div>`:empty('Log your weight to track it alongside strength and skill numbers.')}
+    ${logs.slice(0,5).map(l=>`<div class="row" style="margin-top:10px">
+      <div><strong>${fmtWeightInput(l.weight_kg,unit)} ${unit}</strong><p>${new Date(l.logged_at+'T00:00:00').toLocaleDateString()}${l.note?' · '+esc(l.note):''}</p></div>
+      <button class="icon-btn tiny danger" onclick="deleteBodyweightLog('${l.id}')" aria-label="Delete">${icon('trash',16)}</button>
+    </div>`).join('')}
+  </section>`;
+}
+
+function openLogBodyweight(){
+  const today=new Date().toISOString().slice(0,10);
+  const existing=state.bodyweightLogs.find(l=>l.logged_at===today);
+  $('modal').classList.add('show');
+  $('modalCard').innerHTML=`
+    <div class="row"><h1>Log bodyweight</h1><button class="x" onclick="closeModal()">${icon('close',20)}</button></div>
+    <label class="eyebrow">Weight (${state.weightUnit})</label>
+    <input id="bwWeight" class="field left" type="number" min="1" step="0.1" inputmode="decimal" placeholder="e.g. ${state.weightUnit==='lb'?'165':'75'}" value="${existing?fmtWeightInput(existing.weight_kg,state.weightUnit):''}">
+    <label class="eyebrow">Date</label>
+    <input id="bwDate" class="field left" type="date" max="${today}" value="${existing?.logged_at||today}">
+    <textarea id="bwNote" class="field" placeholder="Notes (optional)">${esc(existing?.note||'')}</textarea>
+    ${existing?`<p class="muted" style="margin-top:6px">Ya tienes un registro hoy — guardar lo reemplaza.</p>`:''}
+    <button class="btn primary" style="width:100%;margin-top:10px" onclick="saveBodyweight()">Save</button>`;
+}
+
+async function saveBodyweight(){
+  const raw=$('bwWeight').value;
+  const logDate=$('bwDate').value;
+  if(!raw||!Number.isFinite(Number(raw))||Number(raw)<=0) return alert('Enter a valid weight.');
+  if(!logDate) return alert('Choose a date.');
+  const weightKg=displayToKg(raw,state.weightUnit);
+  if(weightKg<20||weightKg>300) return alert('Enter a weight between 20 and 300kg (or the lb equivalent).');
+  const {error}=await sb.from('skandi_bodyweight_logs').upsert({
+    user_id:state.user.id,logged_at:logDate,weight_kg:Math.round(weightKg*100)/100,note:$('bwNote').value.trim()||null
+  },{onConflict:'user_id,logged_at'});
+  if(error) return alert(error.message);
+  closeModal();
+  await loadAll();
+  render();
+}
+
+async function deleteBodyweightLog(id){
+  if(!confirm('Delete this bodyweight entry?')) return;
+  const {error}=await sb.from('skandi_bodyweight_logs').delete().eq('id',id);
   if(error) return alert(error.message);
   await loadAll();
   render();
