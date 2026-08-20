@@ -365,7 +365,7 @@ const BODY_REGIONS_BACK=[
   {name:'Triceps',shape:'rect',x:46,y:95,w:26,h:80,rx:13,mirror:true}
 ];
 const ACTIVE_WORKOUT_MAX_HOURS=18;
-const state={user:null,profile:null,view:'home',authMode:'login',exercises:[],templates:[],items:[],sessions:[],sets:[],externalActivities:[],activityTemplates:[],progressionState:[],active:null,activeItems:[],timer:null,elapsed:0,rest:0,restTotal:0,bodyFlip:'front',weightUnit:localStorage.getItem('skandi_weight_unit')||'kg',weightUnitOverrides:(()=>{try{return JSON.parse(localStorage.getItem('skandi_weight_unit_overrides')||'{}');}catch(e){return {};}})(),expandedRoutines:new Set(),swapTarget:null,swapQuery:'',addExOpen:false,addExQuery:'',pausedMs:0,pausedAt:null,floatTimerOpen:false};
+const state={user:null,profile:null,view:'home',authMode:'login',exercises:[],templates:[],items:[],sessions:[],sets:[],externalActivities:[],activityTemplates:[],progressionState:[],trainingBlocks:[],active:null,activeItems:[],timer:null,elapsed:0,rest:0,restTotal:0,bodyFlip:'front',weightUnit:localStorage.getItem('skandi_weight_unit')||'kg',weightUnitOverrides:(()=>{try{return JSON.parse(localStorage.getItem('skandi_weight_unit_overrides')||'{}');}catch(e){return {};}})(),expandedRoutines:new Set(),swapTarget:null,swapQuery:'',addExOpen:false,addExQuery:'',pausedMs:0,pausedAt:null,floatTimerOpen:false};
 let builderState={selected:new Map(),group:'All'};
 
 const $=id=>document.getElementById(id);
@@ -553,7 +553,7 @@ async function loadAll(){
   // vs. "crew" (other members' shared activity, capped since it only feeds the social feed).
   let [{data:profile},{data:exercises},{data:templates},{data:items},
        {data:ownSessions},{data:crewSessions},{data:ownSets},{data:crewSets},
-       {data:externalActivities},{data:activityTemplates},{data:progressionState}]=await Promise.all([
+       {data:externalActivities},{data:activityTemplates},{data:progressionState},{data:trainingBlocks}]=await Promise.all([
     sb.from('profiles').select('id,name,avatar_url').eq('id',state.user.id).maybeSingle(),
     sb.from('skandi_exercises').select('*').order('name'),
     sb.from('skandi_templates').select('*, profile:profiles(name,avatar_url)').order('weekday',{nullsFirst:false}).order('created_at',{ascending:false}),
@@ -564,7 +564,8 @@ async function loadAll(){
     sb.from('skandi_sets').select('*, exercise:skandi_exercises(name,slug)').neq('user_id',state.user.id).order('created_at',{ascending:false}).limit(600),
     sb.from('skandi_external_activities').select('*').eq('user_id',state.user.id).order('performed_at',{ascending:false}).limit(200),
     sb.from('skandi_activity_templates').select('*').eq('user_id',state.user.id).order('weekday',{nullsFirst:false}),
-    sb.from('skandi_progression_state').select('*').eq('user_id',state.user.id)
+    sb.from('skandi_progression_state').select('*').eq('user_id',state.user.id),
+    sb.from('skandi_training_blocks').select('*').eq('user_id',state.user.id).order('start_date',{ascending:false})
   ]);
   if(!profile){
     // Some signups end up with an auth user but no profiles row (trigger race condition).
@@ -600,6 +601,7 @@ async function loadAll(){
   state.externalActivities=externalActivities||[];
   state.activityTemplates=activityTemplates||[];
   state.progressionState=progressionState||[];
+  state.trainingBlocks=trainingBlocks||[];
   hydrateActiveWorkout();
 }
 
@@ -621,6 +623,37 @@ function hydrateActiveWorkout(){
   state.pausedMs=0;
   state.pausedAt=null;
   resumeWorkoutTimer();
+}
+
+// ---- Training blocks (N build weeks + 1 deload week, per Plan_Hibrido_Final_v3) ----
+// A block is never auto-continued by calendar: it just sits at whatever week the date lands
+// on, and once it runs past its last week the UI asks the member to review and explicitly
+// start the next one (build_weeks can change block to block, e.g. 4+1 vs 5+1).
+
+function currentTrainingBlock(){
+  if(!state.trainingBlocks.length) return null;
+  return state.trainingBlocks.reduce((a,b)=>new Date(b.start_date)>new Date(a.start_date)?b:a);
+}
+
+function trainingBlockWeekInfo(block){
+  block=block||currentTrainingBlock();
+  if(!block) return null;
+  const start=new Date(block.start_date+'T00:00:00');
+  const totalWeeks=block.build_weeks+1;
+  const days=Math.floor((Date.now()-start.getTime())/86400000);
+  if(days<0) return {block,week:0,totalWeeks,deload:false,ended:false,notStarted:true};
+  const week=Math.floor(days/7)+1;
+  return {block,week:Math.min(week,totalWeeks+1),totalWeeks,deload:week===totalWeeks,ended:week>totalWeeks,notStarted:false};
+}
+
+// Deload-week load suggestion: ~30% lighter than last time, rounded to a plate-friendly
+// 0.5kg step. Only ever touches the PRELOADED value shown when a set is created — every
+// field stays a normal editable input, so this is a starting point, not an enforced cap.
+function deloadAdjustedWeight(weightKg){
+  if(weightKg==null) return weightKg;
+  const info=trainingBlockWeekInfo();
+  if(!info?.deload) return weightKg;
+  return Math.round(weightKg*0.7*2)/2;
 }
 
 function setView(view){
@@ -660,6 +693,58 @@ function enduranceTodayCard(){
       <span class="pill ${loggedToday?'dark':''}">${loggedToday?'Logged '+icon('check',14):'Log it '+icon('play',14)}</span>
     </div>
   </section>`;
+}
+
+function trainingBlockCardHtml(){
+  const info=trainingBlockWeekInfo();
+  if(!info) return `<section class="card click-card" onclick="openTrainingBlockForm()">
+    <div class="eyebrow">Programa</div>
+    <p style="margin-top:6px">No tienes un bloque de entrenamiento configurado. Toca para definir cuántas semanas de carga antes de tu semana de descarga.</p>
+  </section>`;
+  if(info.ended) return `<section class="card click-card" style="border-color:rgba(212,72,84,.30);background:#fff7f7" onclick="openTrainingBlockForm()">
+    <div class="eyebrow" style="color:var(--pink)">Bloque terminado</div>
+    <p style="margin-top:6px">Revisa si Front Lever/Handstand/Planche mejoraron y si las cargas subieron sin perder técnica, y arranca el siguiente bloque.</p>
+  </section>`;
+  const deload=info.deload;
+  return `<section class="card click-card" style="${deload?'border-color:rgba(240,160,60,.35);background:#fff8ef':''}" onclick="openTrainingBlockForm()">
+    <div class="row">
+      <div>
+        <div class="eyebrow" style="${deload?'color:#c8790a':''}">${deload?'Semana de descarga':'Semana de carga'}</div>
+        <h2 style="margin-top:4px">Semana ${info.week} de ${info.totalWeeks}</h2>
+      </div>
+      <span class="pill dark">${info.block.build_weeks}+1</span>
+    </div>
+    ${deload?`<p style="margin-top:8px">Reduce 30-40% el volumen, conserva RIR 2-3, quita el bloque intenso de carrera y baja los contactos de pliometría. Los pesos de sets nuevos ya salen ~30% más ligeros — ajústalos si hace falta.</p>`:''}
+  </section>`;
+}
+
+function openTrainingBlockForm(){
+  const info=trainingBlockWeekInfo();
+  $('modal').classList.add('show');
+  $('modalCard').innerHTML=`
+    <div class="row"><h1>${info&&!info.ended?'Bloque actual':'Nuevo bloque'}</h1><button class="x" onclick="closeModal()">${icon('close',20)}</button></div>
+    ${info&&!info.ended?`<p class="muted" style="margin-bottom:14px">Ya tienes un bloque activo: semana ${info.week} de ${info.totalWeeks} (${info.block.build_weeks}+1 semanas). Guardar aquí abajo empieza uno nuevo desde la fecha que elijas.</p>`:''}
+    <label class="eyebrow">Semanas de carga antes de la descarga</label>
+    <select id="blockWeeks" class="field left">
+      <option value="3">3</option><option value="4" selected>4</option><option value="5">5</option><option value="6">6</option>
+    </select>
+    <label class="eyebrow">Fecha de inicio</label>
+    <input id="blockStart" type="date" class="field left" value="${new Date().toISOString().slice(0,10)}">
+    <textarea id="blockNote" class="field" placeholder="Nota (opcional): qué mejoró en el bloque anterior, qué ajustar..."></textarea>
+    <button class="btn primary" style="width:100%;margin-top:10px" onclick="saveTrainingBlock()">Guardar bloque</button>`;
+}
+
+async function saveTrainingBlock(){
+  const buildWeeks=Number($('blockWeeks').value);
+  const startDate=$('blockStart').value;
+  if(!startDate) return alert('Elige una fecha de inicio.');
+  const {error}=await sb.from('skandi_training_blocks').insert({
+    user_id:state.user.id,start_date:startDate,build_weeks:buildWeeks,note:$('blockNote').value.trim()||null
+  });
+  if(error) return alert(error.message);
+  closeModal();
+  await loadAll();
+  render();
 }
 
 function homeView(){
@@ -702,6 +787,7 @@ function homeView(){
         </div>
       </button>
     </section>
+    ${trainingBlockCardHtml()}
     ${enduranceTodayCard()}
     ${attentionBannerHtml()}
     <section class="grid">
@@ -1622,7 +1708,7 @@ async function startWorkout(templateId){
         return {
           session_id:session.id,user_id:state.user.id,exercise_id:item.exercise_id,set_idx:idx+1,target_reps:item.target_reps,
           target_rest_sec:item.target_rest_sec,sort_order:item.sort_order,
-          weight_kg:prev.weight_kg??null,reps:prev.reps??null,seconds:prev.seconds??null,rir:prev.rir??null
+          weight_kg:deloadAdjustedWeight(prev.weight_kg??null),reps:prev.reps??null,seconds:prev.seconds??null,rir:prev.rir??null
         };
       });
     });
@@ -1843,6 +1929,8 @@ function renderActiveWorkout(){
   const allSets=state.sets.filter(s=>s.session_id===state.active.id);
   const done=allSets.filter(s=>s.done).length;
   const running=!!state.timer;
+  const blockInfo=trainingBlockWeekInfo();
+  const blockLabel=blockInfo&&!blockInfo.ended?`Today workout · Semana ${blockInfo.week}/${blockInfo.totalWeeks}${blockInfo.deload?' · Descarga':''}`:'Today workout';
   const card=$('modalCard');
   // Checking off a set, editing weight/reps/time, adding/removing a set — all of these
   // re-render this whole card via one big innerHTML replace, which silently resets its
@@ -1885,7 +1973,7 @@ function renderActiveWorkout(){
     </div>
     <div class="workout-bar">
       <div class="workout-bar-title">
-        <div><small>Today workout</small><h1>${esc(state.active.title)}</h1></div>
+        <div><small>${esc(blockLabel)}</small><h1>${esc(state.active.title)}</h1></div>
         <button class="x" onclick="closeModal()" aria-label="Minimize workout" title="Minimize workout">${icon('minimize',22)}</button>
       </div>
     </div>
@@ -2040,7 +2128,7 @@ async function moveActiveSetsToExercise(oldExerciseId,newExerciseId){
   let idx=0;
   for(const s of moving){
     const prev=previous[idx]||previous[previous.length-1]||{};
-    const patch={exercise_id:newExerciseId,set_idx:nextIdx,weight_kg:prev.weight_kg??null,reps:prev.reps??null,seconds:prev.seconds??null,rir:prev.rir??null,updated_at:new Date().toISOString()};
+    const patch={exercise_id:newExerciseId,set_idx:nextIdx,weight_kg:deloadAdjustedWeight(prev.weight_kg??null),reps:prev.reps??null,seconds:prev.seconds??null,rir:prev.rir??null,updated_at:new Date().toISOString()};
     const {error}=await sb.from('skandi_sets').update(patch).eq('id',s.id);
     if(error){ alert(error.message); return false; }
     Object.assign(s,patch);
@@ -2107,7 +2195,7 @@ async function addExerciseToSession(exerciseId){
     return {
       session_id:sessionId,user_id:state.user.id,exercise_id:exerciseId,set_idx:idx+1,
       target_reps:prev.target_reps||'8-12',target_rest_sec:prev.target_rest_sec??90,sort_order:sortOrder,
-      weight_kg:prev.weight_kg??null,reps:prev.reps??null,seconds:prev.seconds??null,rir:prev.rir??null
+      weight_kg:deloadAdjustedWeight(prev.weight_kg??null),reps:prev.reps??null,seconds:prev.seconds??null,rir:prev.rir??null
     };
   });
   const {data,error}=await sb.from('skandi_sets').insert(rows).select();
