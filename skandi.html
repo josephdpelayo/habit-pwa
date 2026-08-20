@@ -718,29 +718,47 @@ function trainingBlockCardHtml(){
   </section>`;
 }
 
-function openTrainingBlockForm(){
-  const info=trainingBlockWeekInfo();
+// With no args, edits the current block in place if one exists (so a date typo or a build
+// length you want to change mid-block is never stuck) — pass {forceNew:true} (from the "start
+// a new block" button below) to skip that and get a blank form that inserts a fresh row
+// instead, which is what actually ends the current block (see currentTrainingBlock's
+// "latest start_date wins" rule).
+function openTrainingBlockForm(opts){
+  opts=opts||{};
+  const block=opts.forceNew?null:currentTrainingBlock();
+  const isEdit=!!block;
   $('modal').classList.add('show');
   $('modalCard').innerHTML=`
-    <div class="row"><h1>${info&&!info.ended?'Bloque actual':'Nuevo bloque'}</h1><button class="x" onclick="closeModal()">${icon('close',20)}</button></div>
-    ${info&&!info.ended?`<p class="muted" style="margin-bottom:14px">Ya tienes un bloque activo: semana ${info.week} de ${info.totalWeeks} (${info.block.build_weeks}+1 semanas). Guardar aquí abajo empieza uno nuevo desde la fecha que elijas.</p>`:''}
+    <div class="row"><h1>${isEdit?'Editar bloque':'Nuevo bloque'}</h1><button class="x" onclick="closeModal()">${icon('close',20)}</button></div>
     <label class="eyebrow">Semanas de carga antes de la descarga</label>
     <select id="blockWeeks" class="field left">
-      <option value="3">3</option><option value="4" selected>4</option><option value="5">5</option><option value="6">6</option>
+      ${[3,4,5,6].map(n=>`<option value="${n}" ${(block?.build_weeks??4)===n?'selected':''}>${n}</option>`).join('')}
     </select>
     <label class="eyebrow">Fecha de inicio</label>
-    <input id="blockStart" type="date" class="field left" value="${new Date().toISOString().slice(0,10)}">
-    <textarea id="blockNote" class="field" placeholder="Nota (opcional): qué mejoró en el bloque anterior, qué ajustar..."></textarea>
-    <button class="btn primary" style="width:100%;margin-top:10px" onclick="saveTrainingBlock()">Guardar bloque</button>`;
+    <input id="blockStart" type="date" class="field left" value="${block?.start_date||new Date().toISOString().slice(0,10)}">
+    <textarea id="blockNote" class="field" placeholder="Nota (opcional): qué mejoró en el bloque anterior, qué ajustar...">${esc(block?.note||'')}</textarea>
+    <button class="btn primary" style="width:100%;margin-top:10px" onclick="saveTrainingBlock(${block?`'${block.id}'`:'null'})">${isEdit?'Guardar cambios':'Guardar bloque'}</button>
+    ${isEdit?`<button class="btn" style="width:100%;margin-top:10px" onclick="openTrainingBlockForm({forceNew:true})">+ Empezar bloque nuevo</button>
+    <button class="btn danger" style="width:100%;margin-top:10px" onclick="deleteTrainingBlock('${block.id}')">${icon('trash',16)} Eliminar este bloque</button>`:''}`;
 }
 
-async function saveTrainingBlock(){
+async function saveTrainingBlock(blockId){
   const buildWeeks=Number($('blockWeeks').value);
   const startDate=$('blockStart').value;
   if(!startDate) return alert('Elige una fecha de inicio.');
-  const {error}=await sb.from('skandi_training_blocks').insert({
-    user_id:state.user.id,start_date:startDate,build_weeks:buildWeeks,note:$('blockNote').value.trim()||null
-  });
+  const note=$('blockNote').value.trim()||null;
+  const {error}=blockId
+    ?await sb.from('skandi_training_blocks').update({start_date:startDate,build_weeks:buildWeeks,note}).eq('id',blockId)
+    :await sb.from('skandi_training_blocks').insert({user_id:state.user.id,start_date:startDate,build_weeks:buildWeeks,note});
+  if(error) return alert(error.message);
+  closeModal();
+  await loadAll();
+  render();
+}
+
+async function deleteTrainingBlock(blockId){
+  if(!confirm('¿Eliminar este bloque? Tus entrenamientos y sets no se tocan, solo se borra el conteo de semana/descarga.')) return;
+  const {error}=await sb.from('skandi_training_blocks').delete().eq('id',blockId);
   if(error) return alert(error.message);
   closeModal();
   await loadAll();
