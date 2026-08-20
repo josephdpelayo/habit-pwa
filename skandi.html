@@ -115,6 +115,8 @@ p{color:var(--muted);line-height:1.45;margin:0}
 .bar i{display:block;height:100%;background:linear-gradient(90deg,var(--dof-navy),var(--blue));width:0}
 .set-row{display:grid;grid-template-columns:26px 1fr 1fr 46px 30px;gap:6px;align-items:center}
 .set-row.no-weight{grid-template-columns:26px 1fr 46px 30px}
+.set-row.rir{grid-template-columns:26px 1fr 1fr 34px 46px 30px}
+.set-row.no-weight.rir{grid-template-columns:26px 1fr 34px 46px 30px}
 .field{width:100%;background:#fff;border:1px solid var(--line);color:var(--text);border-radius:10px;padding:13px;text-align:center;box-shadow:inset 0 1px 0 rgba(1,36,86,.03)}
 .field.left{text-align:left}
 textarea.field{min-height:112px;text-align:left;resize:vertical}
@@ -231,6 +233,8 @@ textarea.field{min-height:112px;text-align:left;resize:vertical}
   .thumb{width:58px;height:58px}
   .set-row{grid-template-columns:24px 1fr 1fr 42px 26px}
   .set-row.no-weight{grid-template-columns:24px 1fr 42px 26px}
+  .set-row.rir{grid-template-columns:24px 1fr 1fr 30px 42px 26px}
+  .set-row.no-weight.rir{grid-template-columns:24px 1fr 30px 42px 26px}
   .app{padding-left:13px;padding-right:13px}
   .brand{font-size:22px}
   .brand-text small{font-size:10px}
@@ -943,7 +947,7 @@ function openSessionDetail(sessionId){
       <div class="stat"><strong>${Math.round((s.duration_sec||0)/60)}</strong><small>minutes</small></div>
       <div class="stat"><strong>${sets.filter(x=>x.done).length}</strong><small>sets logged</small></div>
     </section>
-    ${s.report_difficulty||s.report_energy?`<section class="card"><div class="row"><span class="pill dark">${esc(s.report_difficulty||'normal')}</span><span class="pill dark">Energy ${s.report_energy||'-'}/5</span></div></section>`:''}
+    ${s.report_difficulty||s.report_energy?`<section class="card"><div class="row"><span class="pill dark">${esc(s.report_difficulty||'normal')}</span><span class="pill dark">Energy ${s.report_energy||'-'}/5</span>${s.report_sleep_hours!=null?`<span class="pill dark">Sleep ${s.report_sleep_hours}h</span>`:''}${s.report_felt_worse?`<span class="pill dark" style="color:var(--pink)">Rindió peor</span>`:''}</div></section>`:''}
     ${s.report_soreness?`<section class="card" style="border-color:rgba(212,72,84,.30);background:#fff7f7"><strong style="color:var(--pink)">Soreness</strong><p style="margin-top:6px">${esc(s.report_soreness_area||'Not specified')}</p></section>`:''}
     ${s.report_note?`<section class="card"><div class="eyebrow">Notes</div><p style="margin-top:8px">${esc(s.report_note)}</p></section>`:''}
     <section class="card">
@@ -952,7 +956,7 @@ function openSessionDetail(sessionId){
         <div style="margin-top:12px">
           <strong>${esc(ex.name)}</strong>
           <div class="stack" style="margin-top:6px">
-            ${ex.sets.map(x=>`<div class="row"><small class="muted">Set ${x.set_idx}</small><small>${x.done?`${x.weight_kg??'-'} kg × ${x.reps??'-'}`:'not logged'}</small></div>`).join('')}
+            ${ex.sets.map(x=>`<div class="row"><small class="muted">Set ${x.set_idx}</small><small>${x.done?`${x.weight_kg??'-'} kg × ${x.reps??'-'}${x.rir!=null?` · RIR ${x.rir}`:''}`:'not logged'}</small></div>`).join('')}
           </div>
         </div>
       `).join('')||empty('No sets logged.')}
@@ -1612,7 +1616,7 @@ async function startWorkout(templateId){
         return {
           session_id:session.id,user_id:state.user.id,exercise_id:item.exercise_id,set_idx:idx+1,target_reps:item.target_reps,
           target_rest_sec:item.target_rest_sec,sort_order:item.sort_order,
-          weight_kg:prev.weight_kg??null,reps:prev.reps??null,seconds:prev.seconds??null
+          weight_kg:prev.weight_kg??null,reps:prev.reps??null,seconds:prev.seconds??null,rir:prev.rir??null
         };
       });
     });
@@ -1921,7 +1925,10 @@ function activeExercise(item,sets){
   const seconds=e.log_mode==='seconds';
   const showWeight=e.log_weight!==false; // pure plyometric/balance drills (migration 061) skip the weight field entirely
   const unit=exerciseWeightUnit(item.exercise_id);
-  const rowClass=showWeight?'set-row':'set-row no-weight';
+  // RIR only makes sense for rep-based work (the plan's progression rules are RIR 1-2 on
+  // compounds) — a seconds-based skill hold (front lever, handstand, planche) is judged on
+  // clean position/time instead, so it gets no RIR column at all.
+  const rowClass=(showWeight?'set-row':'set-row no-weight')+(seconds?'':' rir');
   return `<article class="exercise">
     <div class="ex-head" onclick="openExercise('${e.id}',true)">${mediaThumb(e)}<div><h3>${esc(e.name)}</h3><p>${[esc(exerciseSubtitle(e)),`${item.target_sets} x ${esc(item.target_reps)}`,`rest ${item.target_rest_sec}s`].filter(Boolean).join(' · ')}</p>${progressionStepperHtml(e,item.exercise_id)}</div><span class="muted">${sets.filter(s=>s.done).length}/${sets.length}</span>
       ${undone?`<button class="btn small ghost" onclick="event.stopPropagation();toggleSwap('${item.exercise_id}')" aria-label="Swap exercise" title="Swap exercise">${icon('swap',16)}</button>`:''}
@@ -1932,7 +1939,7 @@ function activeExercise(item,sets){
       <div class="${rowClass}">
         <span></span>
         ${showWeight?`<button type="button" class="pill dark" style="cursor:pointer;justify-self:start" onclick="event.stopPropagation();setExerciseWeightUnit('${item.exercise_id}','${unit==='kg'?'lb':'kg'}')" aria-label="Switch this exercise to ${unit==='kg'?'pounds':'kilograms'}" title="Switch this exercise to ${unit==='kg'?'lb':'kg'}">${unit.toUpperCase()}</button>`:''}
-        <small class="muted">${seconds?'SEC':'REPS'}</small><span></span><span></span>
+        <small class="muted">${seconds?'SEC':'REPS'}</small>${seconds?'':'<small class="muted">RIR</small>'}<span></span><span></span>
       </div>
       ${sets.map((s,i)=>{
         // A row's own exercise can differ from the card's current one (item.exercise) right
@@ -1946,13 +1953,14 @@ function activeExercise(item,sets){
         const rowSeconds=rowEx.log_mode==='seconds';
         const rowShowWeight=rowEx.log_weight!==false;
         const rowUnit=exerciseWeightUnit(s.exercise_id);
-        const rc=rowShowWeight?'set-row':'set-row no-weight';
+        const rc=(rowShowWeight?'set-row':'set-row no-weight')+(rowSeconds?'':' rir');
         return `<div class="${rc}">
         <strong>${i+1}</strong>
         ${rowShowWeight?`<input class="field" inputmode="decimal" value="${fmtWeightInput(s.weight_kg,rowUnit)}" placeholder="${rowUnit}" onchange="updateSet('${s.id}','weight_kg',this.value)">`:''}
         ${rowSeconds
           ?`<input class="field" inputmode="numeric" value="${s.seconds??''}" placeholder="${esc(s.target_reps||'sec')}" onchange="updateSet('${s.id}','seconds',this.value)">`
           :`<input class="field" inputmode="numeric" value="${s.reps??''}" placeholder="${esc(s.target_reps||'reps')}" onchange="updateSet('${s.id}','reps',this.value)">`}
+        ${rowSeconds?'':`<input class="field" inputmode="numeric" value="${s.rir??''}" placeholder="RIR" onchange="updateSet('${s.id}','rir',this.value)">`}
         <button class="check ${s.done?'done':''}" onclick="toggleSet('${s.id}',${item.target_rest_sec})">${icon('check',18)}</button>
         <button class="set-remove" onclick="removeSet('${s.id}')" aria-label="Remove set">${icon('close',14)}</button>
       </div>`;}).join('')}
@@ -2023,7 +2031,7 @@ async function moveActiveSetsToExercise(oldExerciseId,newExerciseId){
   let idx=0;
   for(const s of moving){
     const prev=previous[idx]||previous[previous.length-1]||{};
-    const patch={exercise_id:newExerciseId,set_idx:nextIdx,weight_kg:prev.weight_kg??null,reps:prev.reps??null,seconds:prev.seconds??null,updated_at:new Date().toISOString()};
+    const patch={exercise_id:newExerciseId,set_idx:nextIdx,weight_kg:prev.weight_kg??null,reps:prev.reps??null,seconds:prev.seconds??null,rir:prev.rir??null,updated_at:new Date().toISOString()};
     const {error}=await sb.from('skandi_sets').update(patch).eq('id',s.id);
     if(error){ alert(error.message); return false; }
     Object.assign(s,patch);
@@ -2090,7 +2098,7 @@ async function addExerciseToSession(exerciseId){
     return {
       session_id:sessionId,user_id:state.user.id,exercise_id:exerciseId,set_idx:idx+1,
       target_reps:prev.target_reps||'8-12',target_rest_sec:prev.target_rest_sec??90,sort_order:sortOrder,
-      weight_kg:prev.weight_kg??null,reps:prev.reps??null,seconds:prev.seconds??null
+      weight_kg:prev.weight_kg??null,reps:prev.reps??null,seconds:prev.seconds??null,rir:prev.rir??null
     };
   });
   const {data,error}=await sb.from('skandi_sets').insert(rows).select();
@@ -2124,16 +2132,17 @@ async function updateSet(id,key,value){
   const existing=state.sets.find(x=>x.id===id);
   const parsed=value===''?null:(key==='weight_kg'?displayToKg(value,exerciseWeightUnit(existing?.exercise_id)):Number(value));
   if(parsed!==null&&!Number.isFinite(parsed)) return alert('Enter a valid number.');
-  // Matches the DB check constraints on skandi_sets (migrations 040/053) — catch it here
+  // Matches the DB check constraints on skandi_sets (migrations 040/053/064) — catch it here
   // instead of round-tripping to a raw Postgres error.
   if(key==='weight_kg'&&parsed!==null&&(parsed<0||parsed>500)) return alert('Enter a weight between 0 and 500kg.');
   if(key==='seconds'&&parsed!==null&&(parsed<0||parsed>7200)) return alert('Enter a hold time between 0 and 7200 seconds.');
+  if(key==='rir'&&parsed!==null&&(parsed<0||parsed>10)) return alert('Enter RIR between 0 and 10.');
   patch[key]=parsed===null?null:(key==='weight_kg'?Math.round(parsed*100)/100:Math.round(parsed));
   const {error}=await sb.from('skandi_sets').update(patch).eq('id',id);
   if(error) return alert(error.message);
   const s=state.sets.find(x=>x.id===id);
   if(s) Object.assign(s,patch);
-  if(s&&s.set_idx===1&&patch[key]!=null&&(key==='weight_kg'||key==='reps'||key==='seconds')){
+  if(s&&s.set_idx===1&&patch[key]!=null&&(key==='weight_kg'||key==='reps'||key==='seconds'||key==='rir')){
     const targets=state.sets.filter(x=>x.session_id===s.session_id&&x.exercise_id===s.exercise_id&&x.id!==s.id&&!x.done&&(x[key]==null||x[key]===''));
     if(targets.length){
       const ids=targets.map(x=>x.id);
@@ -2180,7 +2189,7 @@ async function addSet(exerciseId){
     target_reps:seed.target_reps||item?.target_reps||'8-12',
     target_rest_sec:seed.target_rest_sec??item?.target_rest_sec??null,
     sort_order:seed.sort_order??item?.sort_order??null,
-    weight_kg:seed.weight_kg??null,reps:seed.reps??null,seconds:seed.seconds??null
+    weight_kg:seed.weight_kg??null,reps:seed.reps??null,seconds:seed.seconds??null,rir:seed.rir??null
   }).select().single();
   if(error) return alert(error.message);
   state.sets.push(data);
@@ -2232,6 +2241,9 @@ function openReport(){
     <select id="difficulty" class="field left"><option value="normal">Normal</option><option value="facil">Easy</option><option value="pesado">Heavy</option></select>
     <label class="eyebrow">Energy</label>
     <select id="energy" class="field left"><option value="3">3 / 5</option><option value="1">1 / 5</option><option value="2">2 / 5</option><option value="4">4 / 5</option><option value="5">5 / 5</option></select>
+    <label class="eyebrow">Sleep last night (hours)</label>
+    <input id="sleepHours" class="field left" inputmode="decimal" placeholder="e.g. 7.5">
+    <label class="card row"><div><h3>Rendí peor de lo normal hoy</h3><p>Marca si sientes que el entrenamiento anterior te dejó cansado o bajo de rendimiento.</p></div><input id="feltWorse" type="checkbox"></label>
     <label class="card row" style="border-color:rgba(212,72,84,.30);background:#fff7f7"><div><h3>I noticed soreness or pain</h3><p>Mark the area so we can track it week by week.</p></div><input id="sore" type="checkbox"></label>
     <input id="soreArea" class="field left" placeholder="Area: shoulder, elbow, lower back...">
     <textarea id="note" class="field" placeholder="How did you feel, what was harder, what would you change..."></textarea>
@@ -2240,11 +2252,16 @@ function openReport(){
 }
 
 async function finishWorkout(){
+  const sleepRaw=$('sleepHours').value.trim();
+  const sleepHours=sleepRaw===''?null:Number(sleepRaw);
+  if(sleepHours!==null&&(!Number.isFinite(sleepHours)||sleepHours<0||sleepHours>24)) return alert('Enter sleep hours between 0 and 24.');
   const patch={
     completed_at:new Date().toISOString(),
     duration_sec:state.elapsed,
     report_difficulty:$('difficulty').value,
     report_energy:Number($('energy').value),
+    report_sleep_hours:sleepHours===null?null:Math.round(sleepHours*10)/10,
+    report_felt_worse:$('feltWorse').checked,
     report_soreness:$('sore').checked,
     report_soreness_area:$('soreArea').value.trim()||null,
     report_note:$('note').value.trim()||null,
