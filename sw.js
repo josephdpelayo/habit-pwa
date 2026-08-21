@@ -1,12 +1,17 @@
 // HABIT Training Hub — Service Worker
 // Push notifications + app shell caching
 
-const CACHE_VERSION = '20260821-03'; // keep in sync with APP_VERSION in app.html
+const CACHE_VERSION = '20260821-04'; // keep in sync with APP_VERSION in app.html
 const CACHE = `habit-${CACHE_VERSION}`;
+
+// Librerías compartidas con Skandi Fit: la app no arranca sin ellas, así que
+// entran al shell cacheado igual que app.html. Van con ?v= para que la versión
+// nueva invalide la vieja.
+const SHELL = ['/app.html', `/skandi-recovery.js?v=${CACHE_VERSION}`, `/body-figure.js?v=${CACHE_VERSION}`];
 
 self.addEventListener('install', e => {
   e.waitUntil(
-    caches.open(CACHE).then(cache => cache.add('/app.html'))
+    caches.open(CACHE).then(cache => cache.addAll(SHELL))
   );
   self.skipWaiting();
 });
@@ -26,8 +31,11 @@ self.addEventListener('fetch', e => {
   // Only handle same-origin requests; skip API calls
   if (url.origin !== self.location.origin || url.pathname.startsWith('/api/')) return;
 
-  // Icons: cache-first (served with versioned URLs so stale entries auto-expire on update)
-  if (url.pathname.startsWith('/icons/')) {
+  // Icons y librerías del shell: cache-first (van con URL versionada, así que
+  // una entrada vieja caduca sola al subir la versión)
+  if (url.pathname.startsWith('/icons/')
+      || url.pathname === '/skandi-recovery.js'
+      || url.pathname === '/body-figure.js') {
     e.respondWith(
       caches.match(request).then(cached => {
         if (cached) return cached;

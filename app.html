@@ -6,16 +6,18 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="HABIT">
 <meta name="application-name" content="HABIT">
-<link rel="manifest" href="/manifest.json?v=20260821-03">
-<link rel="apple-touch-icon" sizes="120x120" href="/icons/icon-120.png?v=20260821-03">
-<link rel="apple-touch-icon" sizes="152x152" href="/icons/icon-152.png?v=20260821-03">
-<link rel="apple-touch-icon" sizes="167x167" href="/icons/icon-167.png?v=20260821-03">
-<link rel="apple-touch-icon" sizes="180x180" href="/icons/icon-180.png?v=20260821-03">
-<link rel="icon" type="image/png" sizes="32x32" href="/icons/icon-32.png?v=20260821-03">
+<link rel="manifest" href="/manifest.json?v=20260821-04">
+<link rel="apple-touch-icon" sizes="120x120" href="/icons/icon-120.png?v=20260821-04">
+<link rel="apple-touch-icon" sizes="152x152" href="/icons/icon-152.png?v=20260821-04">
+<link rel="apple-touch-icon" sizes="167x167" href="/icons/icon-167.png?v=20260821-04">
+<link rel="apple-touch-icon" sizes="180x180" href="/icons/icon-180.png?v=20260821-04">
+<link rel="icon" type="image/png" sizes="32x32" href="/icons/icon-32.png?v=20260821-04">
 <title>HABIT</title>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Share+Tech+Mono&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="/skandi-recovery.js?v=20260821-04"></script>
+<script src="/body-figure.js?v=20260821-04"></script>
 <style>
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
 :root{
@@ -1738,9 +1740,52 @@ body.admin-mode #courtesy-modal label{border-radius:14px!important;border-color:
 .exercise-media-frame{width:100%;border-radius:12px;overflow:hidden;background:#000;display:block}
 .exercise-media-frame img,.exercise-media-frame video{width:100%;display:block;max-height:60vh;object-fit:contain}
 
+/* ── Cuerpo y fatiga ───────────────────────────────────────────────────── */
+.body-card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius-md,12px);padding:14px;margin-top:14px}
+.body-card-head{display:flex;align-items:flex-start;justify-content:space-between;gap:10px;margin-bottom:10px}
+.body-card-sub{font-size:12.5px;color:var(--gl);margin-top:4px;line-height:1.4}
+.body-card-pill{flex:0 0 auto;font-size:11px;font-weight:800;color:var(--gl);background:var(--surface,rgba(255,255,255,.045));
+  border:1px solid var(--border);border-radius:999px;padding:5px 10px;white-space:nowrap}
+.body-fig-wrap{position:relative;max-width:230px;margin:0 auto}
+.body-fig-wrap svg{width:100%;height:auto;display:block}
+.body-fig-wrap .muscle-region{cursor:pointer}
+.body-flip-btn{position:absolute;right:0;top:0;border:1px solid var(--border);background:var(--surface-2,rgba(255,255,255,.07));
+  color:var(--gl);border-radius:999px;padding:6px 12px;font-size:11px;font-weight:700;cursor:pointer}
+.body-legend{display:flex;justify-content:center;gap:16px;margin-top:8px;font-size:11px;color:var(--gray)}
+.body-legend i{display:inline-block;width:9px;height:9px;border-radius:50%;margin-right:5px;vertical-align:middle}
+.body-muscle-list{margin-top:14px;display:flex;flex-direction:column;gap:2px}
+.body-muscle-row{display:grid;grid-template-columns:96px 1fr 42px;align-items:center;gap:10px;width:100%;
+  background:transparent;border:none;border-radius:8px;padding:7px 6px;cursor:pointer;text-align:left;color:var(--white)}
+.body-muscle-row:active{background:var(--surface,rgba(255,255,255,.045))}
+.body-muscle-name{font-size:12.5px;font-weight:650;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.body-muscle-bar{height:6px;border-radius:99px;background:var(--surface-2,rgba(255,255,255,.07));overflow:hidden}
+.body-muscle-bar i{display:block;height:100%;border-radius:99px}
+.body-muscle-pct{font-size:11.5px;font-weight:800;color:var(--gl);text-align:right;font-variant-numeric:tabular-nums}
+.body-progress-btn{margin-top:14px}
+.muscle-detail-score{width:92px;height:92px;border-radius:50%;margin:4px auto 0;display:grid;place-items:center;
+  font-size:22px;font-weight:900;color:#07131f}
+.muscle-detail-eta{text-align:center;font-size:12.5px;color:var(--gl);margin:10px 0 14px;line-height:1.45}
+.muscle-detail-row{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:9px 0;border-bottom:1px solid var(--border)}
+.muscle-detail-row:last-child{border-bottom:none}
+.muscle-detail-row strong{display:block;font-size:13px;font-weight:700}
+.muscle-detail-row span span,.muscle-detail-row div span{display:block;font-size:11px;color:var(--gray);margin-top:2px}
+
+/* ── Progreso ──────────────────────────────────────────────────────────── */
+.vol-list{display:flex;flex-direction:column;gap:8px}
+.vol-row{display:grid;grid-template-columns:92px 1fr auto;align-items:center;gap:10px}
+.vol-name{font-size:12.5px;font-weight:650;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.vol-bar{height:8px;border-radius:99px;background:var(--surface-2,rgba(255,255,255,.07));overflow:hidden}
+.vol-bar i{display:block;height:100%;border-radius:99px;background:linear-gradient(90deg,var(--bdim),var(--bl))}
+.vol-val{font-size:11.5px;font-weight:800;color:var(--gl);text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
+.vol-val small{display:block;font-size:10px;font-weight:600;color:var(--gray)}
+.progreso-chart{height:180px;margin:6px 0 14px}
+#v-progreso .tu-stats-row{grid-template-columns:repeat(3,1fr)}
+
 @media(max-width:360px){
   .week-day{grid-template-columns:44px minmax(0,1fr) auto;gap:8px}
   .ws-timer-panel{width:200px}
+  .body-muscle-row{grid-template-columns:80px 1fr 38px;gap:8px}
+  .vol-row{grid-template-columns:76px 1fr auto;gap:8px}
 }
 </style>
 </head>
@@ -2012,6 +2057,11 @@ body.admin-mode #courtesy-modal label{border-radius:14px!important;border-color:
     </div>
   </div>
 
+  <!-- PROGRESO -->
+  <div id="v-progreso" class="view">
+    <div class="scroll-area"><div id="progreso-content"></div></div>
+  </div>
+
   <!-- HISTORIAL -->
   <div id="v-historial" class="view">
     <div class="scroll-area">
@@ -2060,7 +2110,7 @@ body.admin-mode #courtesy-modal label{border-radius:14px!important;border-color:
       <button class="bnb" onclick="sv('book')">
         <svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>Reservar</button>
       <button id="rutinas-nav-btn" class="bnb" onclick="sv('rutinas')">
-        <svg viewBox="0 0 24 24"><path d="M6 4h4v16H6zM14 4h4v16h-4zM4 9h2M10 9h4M18 9h2M4 15h2M10 15h4M18 15h2"/></svg>Rutinas</button>
+        <svg viewBox="0 0 24 24"><path d="M6 4h4v16H6zM14 4h4v16h-4zM4 9h2M10 9h4M18 9h2M4 15h2M10 15h4M18 15h2"/></svg>Entrenar</button>
       <button id="coaching-nav-btn" class="bnb" onclick="sv('coaching')" style="display:none">
         <span id="coaching-nav-badge" class="bnb-badge coach-pending" data-coaching-pending-count></span>
         <svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M3 10h18M8 2v4M16 2v4M8 15l2 2 4-4"/></svg>Coaching</button>
@@ -2572,6 +2622,17 @@ body.admin-mode #courtesy-modal label{border-radius:14px!important;border-color:
   <div class="ws-timer" id="ws-timer"></div>
 </div>
 
+<!-- DETALLE DE UN MÚSCULO -->
+<div id="muscle-detail-modal" class="terms-modal" style="display:none">
+  <div class="terms-box" style="max-height:85vh">
+    <div class="terms-hdr">
+      <h2 id="muscle-detail-title">Músculo</h2>
+      <button class="video-modal-close" onclick="closeMuscleDetail()">Cerrar</button>
+    </div>
+    <div class="terms-body" id="muscle-detail-body" style="padding:12px"></div>
+  </div>
+</div>
+
 <!-- ASIGNAR RUTINA A UN DÍA DE LA SEMANA -->
 <div id="day-picker-modal" class="terms-modal" style="display:none">
   <div class="terms-box">
@@ -2730,8 +2791,20 @@ body.admin-mode #courtesy-modal label{border-radius:14px!important;border-color:
 // ── CONFIG & SUPABASE ───────────────────────────────────────
 const SUPABASE_URL='https://pmpjteuqjusbiduevbwq.supabase.co';
 const SUPABASE_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBtcGp0ZXVxanVzYmlkdWV2YndxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc2OTI1NjUsImV4cCI6MjA5MzI2ODU2NX0.XbMzZoo2yqtrD8znLnyo_1zDfrdJAvAPj1lqGOyXnLw';
-const APP_VERSION='20260821-03';
-const MUSCLE_GROUPS=['Pecho','Espalda','Piernas','Glúteos','Hombros','Bíceps','Tríceps','Antebrazo','Core','Cardio','Full Body'];
+const APP_VERSION='20260821-04';
+// La pierna va separada en cuádriceps, femorales y pantorrillas: la figura
+// corporal pinta esas tres regiones por separado y el motor de recuperación les
+// da ventanas de descanso distintas. 'Piernas' sigue reconociéndose al leer
+// rutinas viejas (ver LEGACY_MUSCLE_SPLIT) pero ya no se ofrece al etiquetar.
+const MUSCLE_GROUPS=['Pecho','Espalda','Hombros','Bíceps','Tríceps','Antebrazo','Core','Glúteos','Cuádriceps','Femorales','Pantorrillas','Cardio','Full Body'];
+// Nombres del motor de recuperación (skandi-recovery.js) y de la figura.
+const MUSCLE_ES_TO_EN={'Pecho':'Chest','Espalda':'Back','Hombros':'Shoulders','Bíceps':'Biceps',
+  'Tríceps':'Triceps','Antebrazo':'Forearms','Core':'Core','Glúteos':'Glutes',
+  'Cuádriceps':'Quads','Femorales':'Hamstrings','Pantorrillas':'Calves'};
+const MUSCLE_EN_TO_ES=Object.fromEntries(Object.entries(MUSCLE_ES_TO_EN).map(([es,en])=>[en,es]));
+// Rutinas etiquetadas antes de separar la pierna. El reparto es una suposición
+// explícita para no perder esos ejercicios del mapa de fatiga.
+const LEGACY_MUSCLE_SPLIT={'Piernas':{Quads:50,Hamstrings:30,Calves:20},'Full Body':{Chest:15,Back:20,Quads:20,Glutes:15,Shoulders:15,Core:15}};
 const EXERCISE_TYPES=['Fuerza','Calistenia','Isométrico','Cardio','Movilidad','Potencia','Técnica','Accesorio'];
 const EXERCISE_CATALOG_FALLBACK=[
   {name:'Bench press barra',slug:'bench-press-barra',category:'Fuerza',primary_muscle:'Pecho',secondary_muscles:['Tríceps','Hombros'],equipment:['Barra'],movement_pattern:'Empuje horizontal',default_tracking:'reps',difficulty:'basico',aliases:['press banca']},
@@ -2833,6 +2906,7 @@ function normalizeExerciseCatalogRow(row){
     difficulty:row.difficulty||'basico',
     instructions:row.instructions||'',
     video_url:row.video_url||row.video||'',
+    muscle_split:(row.muscle_split&&typeof row.muscle_split==='object')?row.muscle_split:{},
     aliases:Array.isArray(row.aliases)?row.aliases:[]
   };
 }
@@ -4610,7 +4684,7 @@ async function loadReceptionSessions(){
 }
 
 // ── NAVIGATION ──
-const ALL_VIEWS=['inicio','book','planes','rutinas','coaching','comunidad','shop','historial','perfil'];
+const ALL_VIEWS=['inicio','book','planes','rutinas','coaching','comunidad','shop','historial','perfil','progreso'];
 const MEMBER_LOCKED_VIEWS=['book','rutinas','comunidad'];
 function canUseMemberViews(){
   if(!curUser)return false;
@@ -4673,6 +4747,7 @@ function sv(v){
   if(v==='book'){const _ds=dk(curDate);loadSlotOccupancyFromSb(_ds).then(()=>renderBook().catch(console.error));}
   if(v==='planes')renderPlans();
   if(v==='rutinas'){renderRutinas().catch(console.error);}
+  if(v==='progreso'){renderProgreso().catch(console.error);}
   if(v==='coaching'){renderCoachHub();}
   if(v==='comunidad'){renderFeedSb().catch(console.error);}
   if(v==='shop'){renderShop('shop-content',false);loadShopProducts().then(()=>renderShop('shop-content',false)).catch(()=>{});handleShopReturn();}
@@ -7357,7 +7432,10 @@ async function renderRutHub(){
   if(panel&&!myRoutinesLoadedAt)panel.innerHTML='<div class="empty">Cargando…</div>';
   try{
     await loadMyRoutinesSb(false);
-    if(rutActiveTab==='hoy')await loadCoachWeekDataSb(false);
+    if(rutActiveTab==='hoy'){
+      await loadCoachWeekDataSb(false);
+      await loadMyRecoverySb(false);
+    }
     if(rutActiveTab==='semana')await loadWeekPlanSb(false);
   }catch(e){
     if(panel)panel.innerHTML='<div class="empty">Error cargando: '+esc(e.message||e)+'</div>';
@@ -7443,6 +7521,453 @@ function routineExercises(b){return (b&&Array.isArray(b.exercises)?b.exercises:[
 function programDaysOf(id){return myProgramDays.filter(d=>d.program_id===id).sort((a,b)=>a.dow-b.dow);}
 function activeProgram(){return myPrograms.find(p=>p.is_active)||null;}
 
+// ══════════════════════════════════════════════════════════════════════════
+// CUERPO Y FATIGA MUSCULAR
+// ══════════════════════════════════════════════════════════════════════════
+// La matemática vive en skandi-recovery.js y la figura en body-figure.js, los
+// dos compartidos con Skandi Fit. Aquí solo está el adaptador: traducir el
+// modelo de HABIT (coaching_session_sets + boards.exercises) al que espera el
+// motor, que piensa en series con peso/reps y ejercicios con reparto muscular.
+let myRecovery=[];              // filas del motor, menos fresco primero
+let recoveryLoadedAt=0;
+let bodyFlip='front';
+const RECOVERY_TTL_MS=60000;
+
+// Reparto muscular de un ejercicio de rutina, en nombres del motor y sumando
+// ~100. Se busca primero en el catálogo (que sí tiene porcentajes desde la
+// migración 072) y solo si no está se arma con principal + secundarios.
+function exerciseMuscleSplit(ex){
+  if(!ex)return null;
+  const cat=exerciseCatalogRows();
+  const byId=ex.catalogId&&cat.find(c=>c.id===ex.catalogId);
+  const byKey=!byId&&ex.exerciseKey&&cat.find(c=>c.slug===ex.exerciseKey);
+  const byName=!byId&&!byKey&&findExerciseCatalogMatch(ex.name);
+  const row=byId||byKey||byName;
+  if(row&&row.muscle_split&&Object.keys(row.muscle_split).length)return row.muscle_split;
+
+  const primaryEs=ex.muscleGroup||ex.primary_muscle||(row&&row.primary_muscle)||'';
+  const secondaryEs=(Array.isArray(ex.secondaryMuscleGroups)&&ex.secondaryMuscleGroups.length)
+    ?ex.secondaryMuscleGroups
+    :((row&&row.secondary_muscles)||[]);
+  const split={};
+  const add=(en,pct)=>{if(en)split[en]=(split[en]||0)+pct;};
+  const expand=(es,pct)=>{
+    // 'Piernas' y 'Full Body' vienen de rutinas etiquetadas antes de separar la
+    // pierna: se reparten en vez de descartarse.
+    const legacy=LEGACY_MUSCLE_SPLIT[es];
+    if(legacy){Object.entries(legacy).forEach(([en,w])=>add(en,pct*w/100));return;}
+    add(MUSCLE_ES_TO_EN[es],pct);
+  };
+  if(primaryEs)expand(primaryEs,60);
+  const others=secondaryEs.filter(m=>m&&m!==primaryEs);
+  // Sin porcentajes en la fuente: principal 60, secundarios reparten 40. Es una
+  // suposición explícita, no un dato medido.
+  if(others.length)others.forEach(m=>expand(m,40/others.length));
+  else if(primaryEs)expand(primaryEs,40);
+  return Object.keys(split).length?split:null;
+}
+
+// Series completadas de los últimos días, con el músculo de cada ejercicio
+// resuelto, en el shape que pide computeMuscleRecovery.
+async function loadMyRecoverySb(force){
+  if(!sbUser||typeof SkandiRecovery==='undefined')return myRecovery;
+  if(!force&&recoveryLoadedAt&&Date.now()-recoveryLoadedAt<RECOVERY_TTL_MS)return myRecovery;
+  try{
+    await loadExerciseCatalogSb();
+    const days=SkandiRecovery.RECOVERY_LOOKBACK_DAYS;
+    const since=addDaysDS(mazToday(),-days);
+    const{data:sched,error:schedErr}=await sb.from('coaching_schedule')
+      .select('id,board_id,ds,started_at,completed_at,status,session_exercises')
+      .eq('user_id',sbUser.id).gte('ds',since);
+    if(schedErr)throw schedErr;
+    const rows=sched||[];
+    if(!rows.length){myRecovery=emptyRecovery();recoveryLoadedAt=Date.now();return myRecovery;}
+
+    const{data:sets,error:setsErr}=await sb.from('coaching_session_sets')
+      .select('id,schedule_id,ex_key,weight,actual_reps,done,created_at,updated_at')
+      .in('schedule_id',rows.map(r=>r.id)).eq('done',true);
+    if(setsErr)throw setsErr;
+
+    const boardIds=[...new Set(rows.map(r=>r.board_id).filter(Boolean))];
+    if(boardIds.length){
+      const{data:brds}=await sb.from('boards').select('id,name,color,exercises').in('id',boardIds);
+      (brds||[]).forEach(b=>{if(!coachBoardsById[b.id])coachBoardsById[b.id]=b;});
+    }
+
+    // ex_key -> reparto muscular, recorriendo la lista efectiva de cada sesión
+    // (incluye lo que se cambió o agregó en vivo).
+    const splitByKey={};
+    rows.forEach(row=>{
+      sessionExerciseList(row,{}).forEach((ex,i)=>{
+        const key=exerciseKeyForSession(row.board_id,ex,i);
+        if(!splitByKey[key]){
+          const split=exerciseMuscleSplit(ex);
+          if(split)splitByKey[key]={id:key,name:ex.name||'',muscles:split};
+        }
+      });
+    });
+
+    // El motor fecha cada estímulo por session.completed_at; una sesión en curso
+    // todavía no lo tiene, así que se usa cuándo se registró la serie.
+    const sessions=rows.map(r=>({id:r.id,completed_at:r.completed_at||r.updated_at||null}));
+    const engineSets=(sets||[]).filter(s=>splitByKey[s.ex_key]).map(s=>({
+      done:true,user_id:sbUser.id,session_id:s.schedule_id,exercise_id:s.ex_key,
+      weight_kg:s.weight,reps:s.actual_reps,seconds:null,
+      created_at:s.updated_at||s.created_at
+    }));
+    myRecovery=SkandiRecovery.computeMuscleRecovery({
+      sets:engineSets,
+      sessions,
+      exercises:Object.values(splitByKey),
+      activities:[],
+      userId:sbUser.id
+    });
+    recoveryLoadedAt=Date.now();
+  }catch(e){
+    console.error('loadMyRecoverySb:',e);
+    myRecovery=emptyRecovery();
+  }
+  return myRecovery;
+}
+
+function emptyRecovery(){
+  if(typeof SkandiRecovery==='undefined')return[];
+  return SkandiRecovery.RECOVERY_MUSCLES.map(name=>({name,fatigue:0,score:100,hoursUntilFresh:0,rested:true}));
+}
+function muscleLabelEs(en){return MUSCLE_EN_TO_ES[en]||en;}
+function formatHoursEs(h){
+  if(!h||h<=0)return 'ya';
+  if(h<1)return Math.round(h*60)+' min';
+  if(h<24)return Math.round(h)+' h';
+  const d=Math.round(h/24);
+  return d+' día'+(d===1?'':'s');
+}
+function toggleBodyFlip(){
+  bodyFlip=bodyFlip==='back'?'front':'back';
+  renderRutHoy();
+}
+function onHabitBodyClick(evt){
+  const el=evt.target.closest('[data-muscle]');
+  if(el)openMuscleDetail(el.getAttribute('data-muscle'));
+}
+
+function bodyCardHtml(){
+  if(typeof BodyFigure==='undefined')return '';
+  const scoreByName=new Map(myRecovery.map(r=>[r.name,r.score]));
+  const rested=myRecovery.filter(r=>r.rested).length;
+  const worst=myRecovery[0];
+  return '<section class="body-card">'
+    +'<div class="body-card-head">'
+    +'<div><div class="ws-bar-k">Tu cuerpo</div>'
+    +'<div class="body-card-sub">'+(worst&&!worst.rested
+        ? esc(muscleLabelEs(worst.name))+' es lo más cargado · listo en '+esc(formatHoursEs(worst.hoursUntilFresh))
+        : 'Todo descansado y listo para entrenar')+'</div></div>'
+    +'<span class="body-card-pill">'+rested+'/'+myRecovery.length+' listos</span>'
+    +'</div>'
+    +'<div class="body-fig-wrap">'
+    +BodyFigure.svg(bodyFlip,scoreByName,'onHabitBodyClick(event)')
+    +'<button class="body-flip-btn" onclick="toggleBodyFlip()" aria-label="Girar figura">'
+    +(bodyFlip==='front'?'Espalda':'Frente')+'</button>'
+    +'</div>'
+    +'<div class="body-legend">'
+    +'<span><i style="background:'+BodyFigure.freshColor(0)+'"></i>Recuperando</span>'
+    +'<span><i style="background:'+BodyFigure.freshColor(100)+'"></i>Listo</span>'
+    +'</div>'
+    +'<div class="body-muscle-list">'
+    +myRecovery.map(r=>'<button class="body-muscle-row" onclick="openMuscleDetail(&quot;'+esc(r.name)+'&quot;)">'
+      +'<span class="body-muscle-name">'+esc(muscleLabelEs(r.name))+'</span>'
+      +'<span class="body-muscle-bar"><i style="width:'+r.score+'%;background:'+BodyFigure.freshColor(r.score)+'"></i></span>'
+      +'<span class="body-muscle-pct">'+r.score+'%</span></button>').join('')
+    +'</div>'
+    +'<button class="btn body-progress-btn" onclick="sv(&quot;progreso&quot;)">Ver mi progreso</button>'
+    +'</section>';
+}
+
+// Detalle de un músculo: qué ejercicios lo cargaron en la ventana de
+// recuperación y con cuáles se entrena mejor.
+async function openMuscleDetail(en){
+  const row=myRecovery.find(r=>r.name===en)||{name:en,score:100,hoursUntilFresh:0,rested:true};
+  const label=muscleLabelEs(en);
+  document.getElementById('muscle-detail-title').textContent=label;
+  const body=document.getElementById('muscle-detail-body');
+  body.innerHTML='<div class="empty">Cargando…</div>';
+  document.getElementById('muscle-detail-modal').style.display='flex';
+  let worked=[];
+  try{
+    const since=addDaysDS(mazToday(),-SkandiRecovery.RECOVERY_LOOKBACK_DAYS);
+    const{data:sched}=await sb.from('coaching_schedule')
+      .select('id,board_id,ds,completed_at,session_exercises')
+      .eq('user_id',sbUser.id).gte('ds',since);
+    const rows=sched||[];
+    const{data:sets}=rows.length
+      ?await sb.from('coaching_session_sets').select('ex_key,weight,actual_reps')
+         .in('schedule_id',rows.map(r=>r.id)).eq('done',true)
+      :{data:[]};
+    const nameByKey={},pctByKey={};
+    rows.forEach(r=>sessionExerciseList(r,{}).forEach((ex,i)=>{
+      const k=exerciseKeyForSession(r.board_id,ex,i);
+      if(nameByKey[k])return;
+      const split=exerciseMuscleSplit(ex);
+      if(split&&split[en]){nameByKey[k]=ex.name||'Ejercicio';pctByKey[k]=Math.round(split[en]);}
+    }));
+    const agg={};
+    (sets||[]).forEach(s=>{
+      if(!nameByKey[s.ex_key])return;
+      const a=agg[s.ex_key]||(agg[s.ex_key]={name:nameByKey[s.ex_key],pct:pctByKey[s.ex_key],sets:0});
+      a.sets++;
+    });
+    worked=Object.values(agg).sort((a,b)=>b.sets-a.sets);
+  }catch(e){console.error('openMuscleDetail:',e);}
+
+  const best=exerciseCatalogRows()
+    .filter(c=>c.muscle_split&&c.muscle_split[en])
+    .sort((a,b)=>(b.muscle_split[en]||0)-(a.muscle_split[en]||0)).slice(0,6);
+
+  body.innerHTML='<div class="muscle-detail-score" style="background:'+BodyFigure.freshColor(row.score)+'">'+row.score+'%</div>'
+    +'<p class="muscle-detail-eta">'+(row.rested?'Listo para entrenar':'Listo en '+esc(formatHoursEs(row.hoursUntilFresh)))+'</p>'
+    +'<p class="slbl">Lo que lo cargó estos días</p>'
+    +(worked.length
+      ?worked.map(w=>'<div class="muscle-detail-row"><div><strong>'+esc(w.name)+'</strong>'
+        +'<span>'+w.sets+' serie'+(w.sets===1?'':'s')+'</span></div>'
+        +'<span class="badge bg-blue">'+w.pct+'% del ejercicio</span></div>').join('')
+      :'<div class="empty">Sin series registradas en '+esc(String(SkandiRecovery.RECOVERY_LOOKBACK_DAYS))+' días.</div>')
+    +'<div class="divider"></div><p class="slbl">Mejores ejercicios para '+esc(label)+'</p>'
+    +(best.length
+      ?best.map(c=>'<div class="muscle-detail-row"><div><strong>'+esc(c.name)+'</strong>'
+        +'<span>'+esc([c.category,(c.equipment||[]).join('/')].filter(Boolean).join(' · '))+'</span></div>'
+        +'<span class="badge bg-blue">'+Math.round(c.muscle_split[en])+'%</span></div>').join('')
+      :'<div class="empty">Sin ejercicios en el catálogo para este músculo.</div>');
+}
+function closeMuscleDetail(){document.getElementById('muscle-detail-modal').style.display='none';}
+
+// ══════════════════════════════════════════════════════════════════════════
+// PROGRESO
+// ══════════════════════════════════════════════════════════════════════════
+// Todo sale de lo que ya se registra entrenando: coaching_schedule (sesiones
+// completadas) y coaching_session_sets (series con peso y reps). Las tarjetas
+// de PR reusan renderPrCardsInto, el mismo componente de Coaching → Tú.
+let _progresoData=null;
+let _progresoQuery='';
+let _progresoCharts={};
+const PROGRESO_LOOKBACK_DAYS=84;   // 12 semanas
+
+async function loadProgresoSb(force){
+  if(!sbUser)return null;
+  if(!force&&_progresoData&&Date.now()-_progresoData.at<60000)return _progresoData;
+  await loadExerciseCatalogSb();
+  const since=addDaysDS(mazToday(),-PROGRESO_LOOKBACK_DAYS);
+  const{data:sched,error}=await sb.from('coaching_schedule')
+    .select('id,board_id,board_name,ds,started_at,completed_at,duration_sec,status,session_exercises')
+    .eq('user_id',sbUser.id).gte('ds',since).order('ds');
+  if(error)throw error;
+  const rows=sched||[];
+  const done=rows.filter(r=>r.status==='done');
+  let sets=[];
+  if(rows.length){
+    const{data}=await sb.from('coaching_session_sets')
+      .select('schedule_id,ex_key,weight,actual_reps,rir,done,updated_at')
+      .in('schedule_id',rows.map(r=>r.id)).eq('done',true);
+    sets=data||[];
+  }
+  const boardIds=[...new Set(rows.map(r=>r.board_id).filter(Boolean))];
+  if(boardIds.length){
+    const{data:brds}=await sb.from('boards').select('id,name,color,exercises').in('id',boardIds);
+    (brds||[]).forEach(b=>{if(!coachBoardsById[b.id])coachBoardsById[b.id]=b;});
+  }
+  // ex_key -> nombre + reparto muscular, desde la lista efectiva de cada sesión
+  const meta={};
+  rows.forEach(r=>sessionExerciseList(r,{}).forEach((ex,i)=>{
+    const k=exerciseKeyForSession(r.board_id,ex,i);
+    if(!meta[k])meta[k]={name:ex.name||'Ejercicio',split:exerciseMuscleSplit(ex)||{}};
+  }));
+  _progresoData={at:Date.now(),rows,done,sets,meta};
+  return _progresoData;
+}
+
+// Racha = semanas consecutivas hacia atrás con al menos un entreno completado.
+function progresoStreak(done){
+  const weeks=new Set(done.map(r=>mazWeekStart(r.ds)));
+  let streak=0, w=mazWeekStart(mazToday());
+  while(weeks.has(w)){streak++;w=addDaysDS(w,-7);}
+  return streak;
+}
+
+function progresoStatsHtml(d){
+  const totalMin=Math.round(d.done.reduce((n,r)=>n+(r.duration_sec||0),0)/60);
+  const thisWeek=mazWeekStart(mazToday());
+  const weekCount=d.done.filter(r=>mazWeekStart(r.ds)===thisWeek).length;
+  return '<div class="tu-stats-row">'
+    +'<div class="tu-stat"><div class="tu-stat-n">'+d.done.length+'</div><div class="tu-stat-l">Entrenos (12 sem)</div></div>'
+    +'<div class="tu-stat"><div class="tu-stat-n">'+weekCount+'</div><div class="tu-stat-l">Esta semana</div></div>'
+    +'<div class="tu-stat"><div class="tu-stat-n">'+progresoStreak(d.done)+'</div><div class="tu-stat-l">Semanas seguidas</div></div>'
+    +'<div class="tu-stat"><div class="tu-stat-n">'+d.sets.length+'</div><div class="tu-stat-l">Series</div></div>'
+    +'<div class="tu-stat"><div class="tu-stat-n">'+totalMin+'</div><div class="tu-stat-l">Minutos</div></div>'
+    +'<div class="tu-stat"><div class="tu-stat-n">'+Math.round(progresoTotalVolume(d)/1000)+'k</div><div class="tu-stat-l">kg movidos</div></div>'
+    +'</div>';
+}
+function setVolumeKg(s){
+  const w=Number(s.weight)||0, r=parseInt(s.actual_reps,10)||0;
+  return w>0&&r>0?w*r:0;
+}
+function progresoTotalVolume(d){return d.sets.reduce((n,s)=>n+setVolumeKg(s),0);}
+
+// Volumen por músculo: cada serie reparte sus kilos entre los músculos del
+// ejercicio según el mismo porcentaje que usa el mapa de fatiga.
+function progresoVolumeByMuscle(d,weeks){
+  const since=addDaysDS(mazToday(),-weeks*7);
+  const byId={};
+  d.rows.forEach(r=>{byId[r.id]=r;});
+  const vol={};
+  d.sets.forEach(s=>{
+    const row=byId[s.schedule_id];
+    if(!row||row.ds<since)return;
+    const m=d.meta[s.ex_key];
+    if(!m)return;
+    const kg=setVolumeKg(s);
+    Object.entries(m.split).forEach(([en,pct])=>{
+      // Sin peso registrado (calistenia, isométricos) la serie igual cuenta como
+      // trabajo hecho, así que se acumula aparte en `sets`.
+      vol[en]=vol[en]||{kg:0,sets:0};
+      vol[en].kg+=kg*(Number(pct)||0)/100;
+      vol[en].sets+=(Number(pct)||0)/100;
+    });
+  });
+  // Se ordena y se mide por series, no por kilos: una dominada o una plancha no
+  // registran peso, y ordenar por kg las mandaba al fondo aunque fueran el
+  // trabajo real de la semana. Los kilos van como dato al lado.
+  return Object.entries(vol).map(([en,v])=>({en,label:muscleLabelEs(en),kg:Math.round(v.kg),sets:Math.round(v.sets*10)/10}))
+    .filter(v=>v.sets>0).sort((a,b)=>b.sets-a.sets||b.kg-a.kg);
+}
+
+function progresoVolumeHtml(d){
+  const rows=progresoVolumeByMuscle(d,4);
+  if(!rows.length)return '<div class="empty">Aún no hay series registradas.</div>';
+  const max=Math.max(...rows.map(r=>r.sets),1);
+  return '<div class="vol-list">'+rows.map(r=>'<div class="vol-row">'
+    +'<span class="vol-name">'+esc(r.label)+'</span>'
+    +'<span class="vol-bar"><i style="width:'+Math.max(4,Math.round(r.sets/max*100))+'%"></i></span>'
+    +'<span class="vol-val">'+(Math.round(r.sets*10)/10)+' ser.'
+      +'<small>'+(r.kg?r.kg.toLocaleString('es-MX')+' kg':'sin peso')+'</small></span>'
+    +'</div>').join('')+'</div>';
+}
+
+// Buscador: un ejercicio, toda su progresión de peso y reps.
+function progresoExerciseListHtml(d){
+  const q=_progresoQuery.trim().toLowerCase();
+  const byId={};
+  d.rows.forEach(r=>{byId[r.id]=r;});
+  const agg={};
+  d.sets.forEach(s=>{
+    const m=d.meta[s.ex_key];
+    if(!m)return;
+    const a=agg[s.ex_key]||(agg[s.ex_key]={key:s.ex_key,name:m.name,sets:0,best:0,lastDs:''});
+    a.sets++;
+    const w=Number(s.weight)||0;
+    if(w>a.best)a.best=w;
+    const ds=(byId[s.schedule_id]||{}).ds||'';
+    if(ds>a.lastDs)a.lastDs=ds;
+  });
+  const list=Object.values(agg)
+    .filter(a=>!q||a.name.toLowerCase().includes(q))
+    .sort((a,b)=>b.lastDs.localeCompare(a.lastDs)||b.sets-a.sets).slice(0,40);
+  if(!list.length)return '<div class="empty">'+(q?'Sin coincidencias.':'Todavía no registras series.')+'</div>';
+  return list.map(a=>'<button class="ws-pick-item" onclick="openProgresoExercise(&quot;'+esc(a.key)+'&quot;)">'
+    +esc(a.name)
+    +'<small>'+a.sets+' serie'+(a.sets===1?'':'s')+(a.best?' · tope '+fmtWeightValue(kgToUnit(a.best,scoreWeightUnit),scoreWeightUnit,false):'')
+    +(a.lastDs?' · '+esc(fmtDS(a.lastDs)):'')+'</small></button>').join('');
+}
+function renderProgresoExerciseList(){
+  _progresoQuery=document.getElementById('progreso-q')?.value||'';
+  const el=document.getElementById('progreso-ex-list');
+  if(el)el.innerHTML=progresoExerciseListHtml(_progresoData);
+}
+
+function openProgresoExercise(exKey){
+  const d=_progresoData;
+  if(!d)return;
+  const m=d.meta[exKey]||{name:'Ejercicio',split:{}};
+  const byId={};
+  d.rows.forEach(r=>{byId[r.id]=r;});
+  // Una marca por día: el mejor peso de la sesión, que es lo que interesa ver
+  // subir; la nube de todas las series solo hace ruido en la gráfica.
+  const byDay={};
+  d.sets.filter(s=>s.ex_key===exKey).forEach(s=>{
+    const ds=(byId[s.schedule_id]||{}).ds;
+    if(!ds)return;
+    const w=Number(s.weight)||0, r=parseInt(s.actual_reps,10)||0;
+    const cur=byDay[ds]||(byDay[ds]={ds,weight:0,reps:0,sets:0});
+    cur.sets++;
+    if(w>cur.weight){cur.weight=w;cur.reps=r;}
+  });
+  const points=Object.values(byDay).sort((a,b)=>a.ds.localeCompare(b.ds));
+  document.getElementById('muscle-detail-title').textContent=m.name;
+  const body=document.getElementById('muscle-detail-body');
+  const musc=Object.entries(m.split).sort((a,b)=>b[1]-a[1])
+    .map(([en,p])=>esc(muscleLabelEs(en))+' '+Math.round(p)+'%').join(' · ');
+  const best=points.reduce((mx,p)=>Math.max(mx,p.weight),0);
+  body.innerHTML=(musc?'<p class="muscle-detail-eta">'+musc+'</p>':'')
+    +'<div class="tu-stats-row"><div class="tu-stat"><div class="tu-stat-n">'
+      +(best?esc(fmtWeightValue(kgToUnit(best,scoreWeightUnit),scoreWeightUnit,true)):'—')
+      +'</div><div class="tu-stat-l">Mejor peso</div></div>'
+    +'<div class="tu-stat"><div class="tu-stat-n">'+points.length+'</div><div class="tu-stat-l">Días entrenado</div></div></div>'
+    +(points.length>1?'<div class="progreso-chart"><canvas id="progreso-ex-chart"></canvas></div>':'')
+    +'<p class="slbl">Historial</p>'
+    +points.slice().reverse().map(p=>'<div class="muscle-detail-row"><div><strong>'+esc(fmtDS(p.ds))+'</strong>'
+      +'<span>'+p.sets+' serie'+(p.sets===1?'':'s')+'</span></div>'
+      +'<span class="badge bg-blue">'+(p.weight?esc(fmtWeightValue(kgToUnit(p.weight,scoreWeightUnit),scoreWeightUnit,false)):'sin peso')
+      +(p.reps?' × '+p.reps:'')+'</span></div>').join('');
+  document.getElementById('muscle-detail-modal').style.display='flex';
+  if(points.length>1)drawProgresoChart(points);
+}
+
+function drawProgresoChart(points){
+  const cv=document.getElementById('progreso-ex-chart');
+  if(!cv||typeof Chart==='undefined')return;
+  if(_progresoCharts.ex){try{_progresoCharts.ex.destroy();}catch(_){}}
+  _progresoCharts.ex=new Chart(cv.getContext('2d'),{
+    type:'line',
+    data:{labels:points.map(p=>fmtDS(p.ds)),
+      datasets:[{data:points.map(p=>Math.round(kgToUnit(p.weight,scoreWeightUnit)*10)/10),
+        borderColor:'#7fb0ff',backgroundColor:'rgba(37,99,235,.18)',fill:true,tension:.3,
+        pointRadius:3,pointBackgroundColor:'#7fb0ff'}]},
+    options:{responsive:true,maintainAspectRatio:false,
+      plugins:{legend:{display:false}},
+      scales:{x:{ticks:{color:'#8f96a3',font:{size:10}},grid:{display:false}},
+              y:{ticks:{color:'#8f96a3',font:{size:10}},grid:{color:'rgba(255,255,255,.06)'}}}}
+  });
+}
+
+async function renderProgreso(){
+  const el=document.getElementById('progreso-content');
+  if(!el)return;
+  if(!sbUser){el.innerHTML='<div class="empty">Inicia sesión para ver tu progreso.</div>';return;}
+  el.innerHTML='<div class="empty">Cargando progreso…</div>';
+  let d;
+  try{d=await loadProgresoSb(false);}
+  catch(e){el.innerHTML='<div class="empty">Error cargando progreso: '+esc(e.message||e)+'</div>';return;}
+  if(!d){el.innerHTML='<div class="empty">Sin datos.</div>';return;}
+
+  el.innerHTML='<div style="display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:12px">'
+      +'<p class="slbl" style="margin:0">Últimas 12 semanas</p>'
+      +'<button class="btn-sm" onclick="sv(&quot;rutinas&quot;)">Volver a Entrenar</button></div>'
+    +progresoStatsHtml(d)
+    +'<div class="divider"></div><p class="slbl">Volumen por músculo · 4 semanas</p>'
+    +progresoVolumeHtml(d)
+    +'<div class="divider"></div><p class="slbl">Tus ejercicios</p>'
+    +'<input id="progreso-q" class="set-reps-in" style="width:100%;text-align:left;padding:11px 12px;margin-bottom:10px" '
+      +'placeholder="Buscar un ejercicio…" value="'+esc(_progresoQuery)+'" oninput="renderProgresoExerciseList()">'
+    +'<div class="ws-swap-list" id="progreso-ex-list" style="max-height:none">'+progresoExerciseListHtml(d)+'</div>'
+    +'<div class="divider"></div><p class="slbl">Tus PRs</p>'
+    +'<div id="progreso-prs"></div>';
+
+  // Las tarjetas de PR son las mismas de Coaching → Tú, alimentadas por user_scores.
+  try{
+    const{data:scores}=await sb.from('user_scores').select('*').eq('user_id',sbUser.id).order('logged_at',{ascending:false});
+    const box=document.getElementById('progreso-prs');
+    if(box)renderPrCardsInto(box,_progresoCharts,scores||[],scoreWeightUnit,'prog');
+  }catch(e){console.error('renderProgreso PRs:',e);}
+}
+
 // ── HOY ───────────────────────────────────────────────────────────────────
 function renderRutHoy(){
   const el=document.getElementById('rut-hoy-content');
@@ -7487,6 +8012,7 @@ function renderRutHoy(){
   });
 
   html+='<button class="btn-sm coach-add-workout" onclick="openAddWorkoutModal()">Entrenar otra rutina</button>';
+  html+=bodyCardHtml();
   el.innerHTML=html;
 }
 
