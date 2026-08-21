@@ -6,18 +6,18 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="HABIT">
 <meta name="application-name" content="HABIT">
-<link rel="manifest" href="/manifest.json?v=20260821-07">
-<link rel="apple-touch-icon" sizes="120x120" href="/icons/icon-120.png?v=20260821-07">
-<link rel="apple-touch-icon" sizes="152x152" href="/icons/icon-152.png?v=20260821-07">
-<link rel="apple-touch-icon" sizes="167x167" href="/icons/icon-167.png?v=20260821-07">
-<link rel="apple-touch-icon" sizes="180x180" href="/icons/icon-180.png?v=20260821-07">
-<link rel="icon" type="image/png" sizes="32x32" href="/icons/icon-32.png?v=20260821-07">
+<link rel="manifest" href="/manifest.json?v=20260821-08">
+<link rel="apple-touch-icon" sizes="120x120" href="/icons/icon-120.png?v=20260821-08">
+<link rel="apple-touch-icon" sizes="152x152" href="/icons/icon-152.png?v=20260821-08">
+<link rel="apple-touch-icon" sizes="167x167" href="/icons/icon-167.png?v=20260821-08">
+<link rel="apple-touch-icon" sizes="180x180" href="/icons/icon-180.png?v=20260821-08">
+<link rel="icon" type="image/png" sizes="32x32" href="/icons/icon-32.png?v=20260821-08">
 <title>HABIT</title>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Share+Tech+Mono&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="/skandi-recovery.js?v=20260821-07"></script>
-<script src="/body-figure.js?v=20260821-07"></script>
+<script src="/skandi-recovery.js?v=20260821-08"></script>
+<script src="/body-figure.js?v=20260821-08"></script>
 <style>
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
 :root{
@@ -1866,14 +1866,7 @@ body.admin-mode #courtesy-modal label{border-radius:14px!important;border-color:
   color:var(--gl);border-radius:999px;padding:6px 12px;font-size:11px;font-weight:700;cursor:pointer}
 .body-legend{display:flex;justify-content:center;gap:16px;margin-top:8px;font-size:11px;color:var(--gray)}
 .body-legend i{display:inline-block;width:9px;height:9px;border-radius:50%;margin-right:5px;vertical-align:middle}
-.body-muscle-list{margin-top:14px;display:flex;flex-direction:column;gap:2px}
-.body-muscle-row{display:grid;grid-template-columns:96px 1fr 42px;align-items:center;gap:10px;width:100%;
-  background:transparent;border:none;border-radius:8px;padding:7px 6px;cursor:pointer;text-align:left;color:var(--white)}
-.body-muscle-row:active{background:var(--surface,rgba(255,255,255,.045))}
-.body-muscle-name{font-size:12.5px;font-weight:650;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.body-muscle-bar{height:6px;border-radius:99px;background:var(--surface-2,rgba(255,255,255,.07));overflow:hidden}
-.body-muscle-bar i{display:block;height:100%;border-radius:99px}
-.body-muscle-pct{font-size:11.5px;font-weight:800;color:var(--gl);text-align:right;font-variant-numeric:tabular-nums}
+.body-figure-hint{text-align:center;margin-top:10px;font-size:11.5px;color:var(--gray)}
 .body-progress-btn{margin-top:14px}
 .muscle-detail-score{width:92px;height:92px;border-radius:50%;margin:4px auto 0;display:grid;place-items:center;
   font-size:22px;font-weight:900;color:#07131f}
@@ -1900,7 +1893,6 @@ body.admin-mode #courtesy-modal label{border-radius:14px!important;border-color:
   body.workout-sheet-open .support-fab{width:46px;height:46px;min-height:46px;padding:0;justify-content:center}
   body.workout-sheet-open .support-fab span{display:none}
   body.workout-sheet-open .support-fab svg{width:22px;height:22px}
-  .body-muscle-row{grid-template-columns:80px 1fr 38px;gap:8px}
   .vol-row{grid-template-columns:76px 1fr auto;gap:8px}
 }
 </style>
@@ -2908,7 +2900,7 @@ body.admin-mode #courtesy-modal label{border-radius:14px!important;border-color:
 // ── CONFIG & SUPABASE ───────────────────────────────────────
 const SUPABASE_URL='https://pmpjteuqjusbiduevbwq.supabase.co';
 const SUPABASE_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBtcGp0ZXVxanVzYmlkdWV2YndxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc2OTI1NjUsImV4cCI6MjA5MzI2ODU2NX0.XbMzZoo2yqtrD8znLnyo_1zDfrdJAvAPj1lqGOyXnLw';
-const APP_VERSION='20260821-07';
+const APP_VERSION='20260821-08';
 // La pierna va separada en cuádriceps, femorales y pantorrillas: la figura
 // corporal pinta esas tres regiones por separado y el motor de recuperación les
 // da ventanas de descanso distintas. 'Piernas' sigue reconociéndose al leer
@@ -7759,12 +7751,7 @@ function bodyCardHtml(){
     +'<span><i style="background:'+BodyFigure.freshColor(0)+'"></i>Recuperando</span>'
     +'<span><i style="background:'+BodyFigure.freshColor(100)+'"></i>Listo</span>'
     +'</div>'
-    +'<div class="body-muscle-list">'
-    +myRecovery.map(r=>'<button class="body-muscle-row" onclick="openMuscleDetail(&quot;'+esc(r.name)+'&quot;)">'
-      +'<span class="body-muscle-name">'+esc(muscleLabelEs(r.name))+'</span>'
-      +'<span class="body-muscle-bar"><i style="width:'+r.score+'%;background:'+BodyFigure.freshColor(r.score)+'"></i></span>'
-      +'<span class="body-muscle-pct">'+r.score+'%</span></button>').join('')
-    +'</div>'
+    +'<div class="body-figure-hint">Toca un músculo para ver su recuperación</div>'
     +'<button class="btn body-progress-btn" onclick="sv(&quot;progreso&quot;)">Ver mi progreso</button>'
     +'</section>';
 }
