@@ -232,6 +232,21 @@ textarea.field{min-height:112px;text-align:left;resize:vertical}
 .seg{display:grid;grid-auto-flow:column;grid-auto-columns:1fr;gap:4px;background:var(--panel2);border:1px solid var(--line);border-radius:12px;padding:4px}
 .seg button{background:transparent;color:var(--muted);border-radius:9px;padding:11px 8px;font-weight:1000;font-size:14px}
 .seg button.active{background:var(--dof-navy);color:#fff;box-shadow:0 8px 18px rgba(1,36,86,.18)}
+.seg.sub button{font-size:13px;padding:10px 4px}
+.crew-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:9px;margin-top:12px}
+.member{display:flex;align-items:center;gap:10px;width:100%;text-align:left;padding:10px;background:var(--panel2);border:1px solid var(--line);border-radius:10px;cursor:pointer}
+.member:hover{background:var(--panel3)}
+.member-avatar{width:36px;height:36px;border-radius:50%;background:var(--dof-navy);color:#fff;display:grid;place-items:center;font-weight:900;font-size:13px;flex:0 0 auto;overflow:hidden}
+.member-avatar img{width:100%;height:100%;object-fit:cover}
+.member-name{min-width:0;display:grid;gap:2px}
+.member-name strong{font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.member-name small{color:var(--muted);font-weight:800;font-size:11px}
+.chart{width:100%;height:auto;display:block;margin-top:10px;overflow:visible}
+.chart-legend{display:flex;justify-content:space-between;gap:10px;margin-top:6px;color:var(--muted);font-size:11px;font-weight:800}
+.filters{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:8px;margin:12px 0}
+.pgm-day{display:grid;grid-template-columns:52px 1fr;gap:10px;align-items:center;padding:9px 11px;background:var(--panel2);border:1px solid var(--line);border-radius:8px;font-weight:800;font-size:13px}
+.pgm-day>span:first-child{color:var(--muted);font-size:11px;letter-spacing:.08em}
+.pgm-day.rest>span:nth-child(2){color:var(--muted);font-weight:700}
 .hidden{display:none!important}
 .empty{padding:28px 18px;border:1px dashed #bfd0df;border-radius:8px;text-align:center;color:var(--muted);background:rgba(255,255,255,.58)}
 @media (min-width:760px){
@@ -431,6 +446,51 @@ en:{
   'progress.activitiesEmpty':'Log a run, ride, or swim to factor it into recovery.',
   'progress.yourBests':'Your bests','progress.bestsEmpty':'No lifts, holds, or sets logged yet.',
   'progress.history':'Workout history','progress.historyEmpty':'Complete a workout to see it here.',
+
+  'progress.tabSummary':'Summary','progress.tabExercises':'Exercises','progress.tabHistory':'History','progress.tabLoad':'Load',
+  'progress.seeExercises':'By exercise','progress.searchExercise':'Search a trained exercise',
+  'progress.exercisesEmpty':'Log a few workouts and every exercise you train gets its own chart here.',
+  'progress.lastTrained':'last {date}',
+  'progress.allMonths':'All months','progress.allRoutines':'All routines',
+  'progress.resultsN':'{n} workouts · {min} min',
+  'progress.noResults':'No workouts match those filters.',
+  'progress.longSession':'That duration looks off — edit it to fix the minutes.',
+  'progress.loadIntro':'Everything that adds fatigue: endurance work, muscle load, bodyweight.',
+  'chart.best':'Best mark','chart.volume':'Volume','chart.noData':'Train this exercise twice to see a trend.',
+  'chart.perSession':'Session by session','chart.openExercise':'Exercise details','chart.volumeUnit':'{v} {unit} total',
+
+  'sedit.title':'Edit workout','sedit.name':'Workout name','sedit.date':'Date','sedit.duration':'Duration (minutes)',
+  'sedit.durationHint':'Forgot to hit finish? Fix the minutes here — the start time follows the duration.',
+  'sedit.save':'Save changes','sedit.errName':'Give the workout a name.',
+  'sedit.errDuration':'Enter a duration between 1 and 600 minutes.','sedit.errDate':'Pick a valid date.',
+  'session.edit':'Edit workout',
+  'report.duration':'Duration (minutes)','report.durationHint':'Timer says {time}. Correct it if you forgot to finish the workout.',
+
+  'pgm.eyebrow':'Program','pgm.title':'Programs',
+  'pgm.hint':'Workout → routine → program. A program holds a whole week; loading one fills every day at once.',
+  'pgm.none':'No program yet','pgm.noneBody':'Save the week you just planned as a program, then switch between full plans in one tap.',
+  'pgm.noneActive':'No program loaded','pgm.pickOne':'{n} saved — pick one to fill your week.',
+  'pgm.saveWeek':'Save this week as a program','pgm.change':'Switch','pgm.active':'Loaded','pgm.use':'Load',
+  'pgm.summary':'{routines} routines · {plans} endurance · {days} days',
+  'pgm.dirty':'Your week no longer matches this program.','pgm.saveChanges':'Update program with this week',
+  'pgm.newTitle':'New program','pgm.editTitle':'Rename program',
+  'pgm.newBody':'This saves your week exactly as it stands right now:',
+  'pgm.namePh':'Program name (e.g. 5-day strength)','pgm.notesPh':'Notes (optional)',
+  'pgm.save':'Save program','pgm.rename':'Rename','pgm.manage':'Program options',
+  'pgm.activate':'Load this program into my week','pgm.delete':'Delete program',
+  'pgm.confirmDelete':'Delete this program? Your routines stay where they are.',
+  'pgm.confirmApply':'Load "{name}"? Your week gets rewritten with this program\'s days.',
+  'pgm.errName':'Give the program a name.',
+  'pgm.errEmptyWeek':'Your week is empty — schedule at least one routine or endurance plan first.',
+  'pgm.rest':'Rest','pgm.empty':'No programs saved yet.','pgm.missingRoutine':'Deleted routine',
+
+  'crew.onboard':'On board','crew.you':'You','crew.seeAllPrs':'See all','crew.allPrs':'Crew records',
+  'crew.loadMore':'Show more','crew.lastTrained':'last {date}','crew.neverTrained':'no workouts yet',
+  'crew.profileShared':'shared workouts','crew.profileMinutes':'minutes','crew.profileBests':'Best marks',
+  'crew.profileRoutines':'Routines','crew.profileRecent':'Recent workouts',
+  'crew.noRoutines':'No shared routines.','crew.noSessions':'Nothing shared yet.',
+  'crew.privateNote':'Only workouts shared with the crew are listed here.',
+
 
   'recap.thisWeek':'This week','recap.lastWeek':'({n} last week)',
   'recap.avgEnergy':'Average energy {v}/5','recap.energyUp':' (up from {v})','recap.energyDown':' (down from {v})',
@@ -694,6 +754,51 @@ es:{
   'progress.activitiesEmpty':'Registra una carrera, bici o natación para incluirla en la recuperación.',
   'progress.yourBests':'Tus mejores marcas','progress.bestsEmpty':'Aún no hay levantamientos, holds ni series registradas.',
   'progress.history':'Historial de entrenamientos','progress.historyEmpty':'Completa un entrenamiento para verlo aquí.',
+
+  'progress.tabSummary':'Resumen','progress.tabExercises':'Ejercicios','progress.tabHistory':'Historial','progress.tabLoad':'Carga',
+  'progress.seeExercises':'Por ejercicio','progress.searchExercise':'Busca un ejercicio que hayas entrenado',
+  'progress.exercisesEmpty':'Registra algunos entrenamientos y cada ejercicio tendrá aquí su propia gráfica.',
+  'progress.lastTrained':'última {date}',
+  'progress.allMonths':'Todos los meses','progress.allRoutines':'Todas las rutinas',
+  'progress.resultsN':'{n} entrenamientos · {min} min',
+  'progress.noResults':'Ningún entrenamiento coincide con esos filtros.',
+  'progress.longSession':'Esa duración se ve rara — edítala para corregir los minutos.',
+  'progress.loadIntro':'Todo lo que suma fatiga: trabajo de resistencia, carga muscular y peso corporal.',
+  'chart.best':'Mejor marca','chart.volume':'Volumen','chart.noData':'Entrena este ejercicio dos veces para ver la tendencia.',
+  'chart.perSession':'Sesión por sesión','chart.openExercise':'Ficha del ejercicio','chart.volumeUnit':'{v} {unit} en total',
+
+  'sedit.title':'Editar entrenamiento','sedit.name':'Nombre del entrenamiento','sedit.date':'Fecha','sedit.duration':'Duración (minutos)',
+  'sedit.durationHint':'¿Se te olvidó terminarlo? Corrige los minutos aquí — la hora de inicio se ajusta sola.',
+  'sedit.save':'Guardar cambios','sedit.errName':'Ponle nombre al entrenamiento.',
+  'sedit.errDuration':'Escribe una duración entre 1 y 600 minutos.','sedit.errDate':'Elige una fecha válida.',
+  'session.edit':'Editar entrenamiento',
+  'report.duration':'Duración (minutos)','report.durationHint':'El cronómetro marca {time}. Corrígelo si se te olvidó terminar el entrenamiento.',
+
+  'pgm.eyebrow':'Programa','pgm.title':'Programas',
+  'pgm.hint':'Entrenamiento → rutina → programa. Un programa guarda la semana completa; al cargarlo se llenan todos los días de golpe.',
+  'pgm.none':'Aún no tienes programas','pgm.noneBody':'Guarda la semana que acabas de planear como programa y cambia de plan completo con un solo toque.',
+  'pgm.noneActive':'Sin programa cargado','pgm.pickOne':'{n} guardados — elige uno para llenar tu semana.',
+  'pgm.saveWeek':'Guardar esta semana como programa','pgm.change':'Cambiar','pgm.active':'Cargado','pgm.use':'Cargar',
+  'pgm.summary':'{routines} rutinas · {plans} de resistencia · {days} días',
+  'pgm.dirty':'Tu semana ya no coincide con este programa.','pgm.saveChanges':'Actualizar el programa con esta semana',
+  'pgm.newTitle':'Nuevo programa','pgm.editTitle':'Renombrar programa',
+  'pgm.newBody':'Esto guarda tu semana tal como está ahora mismo:',
+  'pgm.namePh':'Nombre del programa (ej. Fuerza 5 días)','pgm.notesPh':'Notas (opcional)',
+  'pgm.save':'Guardar programa','pgm.rename':'Renombrar','pgm.manage':'Opciones del programa',
+  'pgm.activate':'Cargar este programa en mi semana','pgm.delete':'Eliminar programa',
+  'pgm.confirmDelete':'¿Eliminar este programa? Tus rutinas se quedan donde están.',
+  'pgm.confirmApply':'¿Cargar «{name}»? Tu semana se reescribe con los días de este programa.',
+  'pgm.errName':'Ponle nombre al programa.',
+  'pgm.errEmptyWeek':'Tu semana está vacía — agenda al menos una rutina o un plan de resistencia primero.',
+  'pgm.rest':'Descanso','pgm.empty':'Aún no hay programas guardados.','pgm.missingRoutine':'Rutina eliminada',
+
+  'crew.onboard':'A bordo','crew.you':'Tú','crew.seeAllPrs':'Ver todos','crew.allPrs':'Récords de la tripulación',
+  'crew.loadMore':'Ver más','crew.lastTrained':'último {date}','crew.neverTrained':'aún sin entrenamientos',
+  'crew.profileShared':'entrenamientos compartidos','crew.profileMinutes':'minutos','crew.profileBests':'Mejores marcas',
+  'crew.profileRoutines':'Rutinas','crew.profileRecent':'Entrenamientos recientes',
+  'crew.noRoutines':'Sin rutinas compartidas.','crew.noSessions':'Aún no ha compartido nada.',
+  'crew.privateNote':'Aquí solo se listan los entrenamientos compartidos con la tripulación.',
+
 
   'recap.thisWeek':'Esta semana','recap.lastWeek':'({n} la semana pasada)',
   'recap.avgEnergy':'Energía promedio {v}/5','recap.energyUp':' (subió desde {v})','recap.energyDown':' (bajó desde {v})',
@@ -993,7 +1098,7 @@ const BODY_REGIONS_BACK=[
   {name:'Calves',mirror:true,...P('M99 404 C94 411 91 421 91 433 C91 444 93 453 96 460 C104 465 111 463 113 456 C114 445 114 432 115 421 C115 413 116 407 116 402 C110 406 104 406 99 404 Z')}
 ];
 const ACTIVE_WORKOUT_MAX_HOURS=18;
-const state={user:null,profile:null,view:'home',authMode:'login',exercises:[],templates:[],items:[],sessions:[],sets:[],externalActivities:[],activityTemplates:[],progressionState:[],trainingBlocks:[],bodyweightLogs:[],active:null,activeItems:[],timer:null,elapsed:0,rest:0,restTotal:0,bodyFlip:'front',weightUnit:localStorage.getItem('skandi_weight_unit')||'kg',weightUnitOverrides:(()=>{try{return JSON.parse(localStorage.getItem('skandi_weight_unit_overrides')||'{}');}catch(e){return {};}})(),expandedRoutines:new Set(),swapTarget:null,swapQuery:'',addExOpen:false,addExQuery:'',pausedMs:0,pausedAt:null,floatTimerOpen:false};
+const state={user:null,profile:null,view:'home',authMode:'login',exercises:[],templates:[],items:[],sessions:[],sets:[],externalActivities:[],activityTemplates:[],progressionState:[],trainingBlocks:[],bodyweightLogs:[],programs:[],programDays:[],active:null,activeItems:[],timer:null,elapsed:0,rest:0,restTotal:0,bodyFlip:'front',weightUnit:localStorage.getItem('skandi_weight_unit')||'kg',weightUnitOverrides:(()=>{try{return JSON.parse(localStorage.getItem('skandi_weight_unit_overrides')||'{}');}catch(e){return {};}})(),expandedRoutines:new Set(),progressTab:'summary',progressQuery:'',progressMetric:'best',historyFilter:{month:'all',title:'all'},crewFeedLimit:6,swapTarget:null,swapQuery:'',addExOpen:false,addExQuery:'',pausedMs:0,pausedAt:null,floatTimerOpen:false};
 let builderState={selected:new Map(),group:'All'};
 
 const $=id=>document.getElementById(id);
@@ -1181,7 +1286,8 @@ async function loadAll(){
   // vs. "crew" (other members' shared activity, capped since it only feeds the social feed).
   let [{data:profile},{data:exercises},{data:templates},{data:items},
        {data:ownSessions},{data:crewSessions},{data:ownSets},{data:crewSets},
-       {data:externalActivities},{data:activityTemplates},{data:progressionState},{data:trainingBlocks},{data:bodyweightLogs}]=await Promise.all([
+       {data:externalActivities},{data:activityTemplates},{data:progressionState},{data:trainingBlocks},{data:bodyweightLogs},
+       {data:programs},{data:programDays}]=await Promise.all([
     sb.from('profiles').select('id,name,avatar_url').eq('id',state.user.id).maybeSingle(),
     sb.from('skandi_exercises').select('*').order('name'),
     sb.from('skandi_templates').select('*, profile:profiles(name,avatar_url)').order('weekday',{nullsFirst:false}).order('created_at',{ascending:false}),
@@ -1194,7 +1300,11 @@ async function loadAll(){
     sb.from('skandi_activity_templates').select('*').eq('user_id',state.user.id).order('weekday',{nullsFirst:false}),
     sb.from('skandi_progression_state').select('*').eq('user_id',state.user.id),
     sb.from('skandi_training_blocks').select('*').eq('user_id',state.user.id).order('start_date',{ascending:false}),
-    sb.from('skandi_bodyweight_logs').select('*').eq('user_id',state.user.id).order('logged_at',{ascending:false})
+    sb.from('skandi_bodyweight_logs').select('*').eq('user_id',state.user.id).order('logged_at',{ascending:false}),
+    sb.from('skandi_programs').select('*').eq('user_id',state.user.id).order('created_at',{ascending:false}),
+    // No user_id filter: skandi_program_days has no user_id column of its own, its RLS policy
+    // resolves ownership through the parent program (migration 069).
+    sb.from('skandi_program_days').select('*')
   ]);
   if(!profile){
     // Some signups end up with an auth user but no profiles row (trigger race condition).
@@ -1232,6 +1342,10 @@ async function loadAll(){
   state.progressionState=progressionState||[];
   state.trainingBlocks=trainingBlocks||[];
   state.bodyweightLogs=bodyweightLogs||[];
+  // Both default to [] rather than throwing when migration 069 hasn't been run yet — the rest
+  // of the app (and the week itself) works fine without programs.
+  state.programs=programs||[];
+  state.programDays=programDays||[];
   hydrateActiveWorkout();
 }
 
@@ -1451,6 +1565,227 @@ function homeView(){
     </section>`;
 }
 
+// ---- Programs: the layer above routines (workout -> routine -> program) ------------------
+// skandi_templates.weekday / skandi_activity_templates.weekday stay the single source of truth
+// for "my week". A program is only a saved snapshot of that week -- which routine and which
+// endurance plan sit on each day -- and loading one re-stamps those weekday columns. That way
+// every existing week/day code path keeps working untouched, and switching between a 5-day
+// strength plan and, say, a running block never has to touch a session or a set.
+
+const myTemplates=()=>state.templates.filter(x=>x.user_id===state.user.id);
+const activeProgram=()=>state.programs.find(p=>p.is_active)||null;
+const programDaysOf=id=>state.programDays.filter(d=>d.program_id===id).sort((a,b)=>a.weekday-b.weekday);
+
+function currentWeekSnapshot(){
+  const rows=[];
+  for(let i=0;i<7;i++){
+    const tpl=myTemplates().find(x=>x.weekday===i);
+    const act=state.activityTemplates.find(x=>x.weekday===i);
+    if(tpl||act) rows.push({weekday:i,template_id:tpl?.id||null,activity_template_id:act?.id||null});
+  }
+  return rows;
+}
+
+// "Dirty" = the member rearranged their week after loading a program, so the saved program no
+// longer describes what they actually train. Surfaced as an explicit "update program" button
+// rather than auto-saving: moving one routine for one week shouldn't silently rewrite the plan.
+function weekMatchesProgram(program){
+  if(!program) return true;
+  const key=r=>`${r.weekday}:${r.template_id||'-'}:${r.activity_template_id||'-'}`;
+  const week=currentWeekSnapshot().map(key).sort();
+  const saved=programDaysOf(program.id).filter(d=>d.template_id||d.activity_template_id).map(key).sort();
+  return week.length===saved.length&&week.every((v,i)=>v===saved[i]);
+}
+
+function programSummary(program){
+  const days=programDaysOf(program.id);
+  return t('pgm.summary',{
+    routines:days.filter(d=>d.template_id).length,
+    plans:days.filter(d=>d.activity_template_id).length,
+    days:days.filter(d=>d.template_id||d.activity_template_id).length
+  });
+}
+
+// One row per weekday, used by both the program preview (saved days) and the "save this week"
+// form (live days) -- same shape either way, so the member sees exactly what they're saving.
+function programDayRowsHtml(days){
+  return DOW.map((label,i)=>{
+    const day=days.find(x=>x.weekday===i);
+    const tpl=day?.template_id?state.templates.find(x=>x.id===day.template_id):null;
+    const act=day?.activity_template_id?state.activityTemplates.find(x=>x.id===day.activity_template_id):null;
+    const parts=[day?.template_id?(tpl?.name||t('pgm.missingRoutine')):null,act?activityTypeLabel(act.activity_type):null].filter(Boolean);
+    const rest=!parts.length;
+    return `<div class="pgm-day ${rest?'rest':''}"><span>${label}</span><span>${esc(rest?t('pgm.rest'):parts.join(' + '))}</span></div>`;
+  }).join('');
+}
+
+function programCardHtml(){
+  if(!state.programs.length){
+    return `<section class="card">
+      <div class="eyebrow">${esc(t('pgm.eyebrow'))}</div>
+      <h2 style="margin-top:6px">${esc(t('pgm.none'))}</h2>
+      <p class="muted" style="margin-top:6px">${esc(t('pgm.noneBody'))}</p>
+      <button class="btn primary" style="width:100%;margin-top:12px" onclick="openProgramForm()">${icon('plus',16)} ${esc(t('pgm.saveWeek'))}</button>
+    </section>`;
+  }
+  const active=activeProgram();
+  const dirty=active&&!weekMatchesProgram(active);
+  return `<section class="card">
+    <div class="row">
+      <div style="min-width:0">
+        <div class="eyebrow">${esc(t('pgm.eyebrow'))}</div>
+        <h2 style="margin-top:4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${esc(active?active.name:t('pgm.noneActive'))}</h2>
+        <p class="muted">${esc(active?programSummary(active):t('pgm.pickOne',{n:state.programs.length}))}</p>
+      </div>
+      <button class="btn small" onclick="openProgramPicker()">${icon('swap',16)} ${esc(t('pgm.change'))}</button>
+    </div>
+    ${dirty?`<div class="row" style="margin-top:12px;gap:8px;flex-wrap:wrap">
+      <p class="muted" style="flex:1 1 150px;min-width:0">${esc(t('pgm.dirty'))}</p>
+      <button class="btn small" onclick="updateProgramFromWeek('${active.id}')">${esc(t('pgm.saveChanges'))}</button>
+    </div>`:''}
+  </section>`;
+}
+
+function openProgramPicker(){
+  $('modal').classList.add('show');
+  $('modalCard').innerHTML=`
+    <div class="row"><h1>${esc(t('pgm.title'))}</h1><button class="x" onclick="closeModal()" aria-label="${esc(t('common.close'))}">${icon('close',20)}</button></div>
+    <p class="muted">${esc(t('pgm.hint'))}</p>
+    <div class="stack" style="margin-top:14px">
+      ${state.programs.map(p=>`<div class="row card" style="margin:0">
+        <div style="min-width:0"><strong>${esc(p.name)}</strong><p class="muted">${esc(programSummary(p))}</p></div>
+        <div style="display:flex;align-items:center;gap:6px;flex:0 0 auto">
+          ${p.is_active?`<span class="pill">${esc(t('pgm.active'))}</span>`:`<button class="btn small primary" onclick="applyProgram('${p.id}')">${esc(t('pgm.use'))}</button>`}
+          <button class="icon-btn tiny" onclick="openProgramManage('${p.id}')" aria-label="${esc(t('pgm.manage'))}">${icon('ellipsis',16)}</button>
+        </div>
+      </div>`).join('')||empty(t('pgm.empty'))}
+    </div>
+    <button class="btn" style="width:100%;margin-top:14px" onclick="openProgramForm()">${icon('plus',16)} ${esc(t('pgm.saveWeek'))}</button>`;
+}
+
+function openProgramManage(id){
+  const p=state.programs.find(x=>x.id===id);
+  if(!p) return;
+  $('modalCard').innerHTML=`
+    <div class="row"><h1>${esc(p.name)}</h1><button class="x" onclick="openProgramPicker()" aria-label="${esc(t('common.close'))}">${icon('close',20)}</button></div>
+    ${p.notes?`<p class="muted">${esc(p.notes)}</p>`:''}
+    <div class="stack" style="margin-top:12px;gap:8px">${programDayRowsHtml(programDaysOf(id))}</div>
+    <div class="stack" style="margin-top:14px">
+      ${p.is_active?'':`<button class="btn primary" style="width:100%" onclick="applyProgram('${p.id}')">${icon('calendar',16)} ${esc(t('pgm.activate'))}</button>`}
+      <button class="btn" style="width:100%" onclick="openProgramForm('${p.id}')">${icon('edit',16)} ${esc(t('pgm.rename'))}</button>
+      <button class="btn" style="width:100%" onclick="updateProgramFromWeek('${p.id}')">${icon('swap',16)} ${esc(t('pgm.saveChanges'))}</button>
+      <button class="btn danger" style="width:100%" onclick="deleteProgram('${p.id}')">${icon('trash',16)} ${esc(t('pgm.delete'))}</button>
+    </div>`;
+}
+
+function openProgramForm(id=null){
+  const p=state.programs.find(x=>x.id===id)||{name:'',notes:''};
+  $('modal').classList.add('show');
+  $('modalCard').innerHTML=`
+    <div class="row"><h1>${esc(id?t('pgm.editTitle'):t('pgm.newTitle'))}</h1><button class="x" onclick="closeModal()" aria-label="${esc(t('common.close'))}">${icon('close',20)}</button></div>
+    <input id="pgmName" class="field left" style="margin-top:12px" placeholder="${esc(t('pgm.namePh'))}" value="${esc(p.name)}">
+    <textarea id="pgmNotes" class="field" placeholder="${esc(t('pgm.notesPh'))}">${esc(p.notes||'')}</textarea>
+    ${id?'':`<p class="form-note" style="margin-top:10px">${esc(t('pgm.newBody'))}</p>
+    <div class="stack" style="gap:8px">${programDayRowsHtml(currentWeekSnapshot())}</div>`}
+    <button class="btn primary" style="width:100%;margin-top:14px" onclick="saveProgram('${id||''}')">${esc(t('pgm.save'))}</button>`;
+}
+
+let savingProgram=false;
+async function saveProgram(id){
+  if(savingProgram) return;
+  const name=$('pgmName').value.trim();
+  if(!name) return alert(t('pgm.errName'));
+  const notes=$('pgmNotes').value.trim()||null;
+  const snapshot=id?null:currentWeekSnapshot();
+  if(snapshot&&!snapshot.length) return alert(t('pgm.errEmptyWeek'));
+  savingProgram=true;
+  try{
+    if(id){
+      const {error}=await sb.from('skandi_programs').update({name,notes,updated_at:new Date().toISOString()}).eq('id',id);
+      if(error) return alert(error.message);
+    } else {
+      // A brand-new program describes the week that is live right now, so it becomes the active
+      // one. Deactivate first: the partial unique index allows only one active row per member.
+      await sb.from('skandi_programs').update({is_active:false}).eq('user_id',state.user.id).eq('is_active',true);
+      const {data,error}=await sb.from('skandi_programs').insert({user_id:state.user.id,name,notes,is_active:true}).select().single();
+      if(error) return alert(error.message);
+      const {error:daysError}=await sb.from('skandi_program_days').insert(snapshot.map(r=>({program_id:data.id,...r})));
+      if(daysError) return alert(daysError.message);
+    }
+    closeModal();
+    await loadAll();
+    render();
+  } finally {
+    savingProgram=false;
+  }
+}
+
+async function updateProgramFromWeek(id){
+  if(savingProgram) return;
+  const snapshot=currentWeekSnapshot();
+  if(!snapshot.length) return alert(t('pgm.errEmptyWeek'));
+  savingProgram=true;
+  try{
+    const {error:delError}=await sb.from('skandi_program_days').delete().eq('program_id',id);
+    if(delError) return alert(delError.message);
+    const {error}=await sb.from('skandi_program_days').insert(snapshot.map(r=>({program_id:id,...r})));
+    if(error) return alert(error.message);
+    await sb.from('skandi_programs').update({updated_at:new Date().toISOString()}).eq('id',id);
+    closeModal();
+    await loadAll();
+    render();
+  } finally {
+    savingProgram=false;
+  }
+}
+
+let applyingProgram=false;
+async function applyProgram(id){
+  if(applyingProgram) return;
+  const program=state.programs.find(p=>p.id===id);
+  if(!program) return;
+  if(!confirm(t('pgm.confirmApply',{name:program.name}))) return;
+  applyingProgram=true;
+  try{
+    const days=programDaysOf(id);
+    const tplDay=new Map(days.filter(d=>d.template_id).map(d=>[d.template_id,d.weekday]));
+    const actDay=new Map(days.filter(d=>d.activity_template_id).map(d=>[d.activity_template_id,d.weekday]));
+    const stamp=new Date().toISOString();
+    // Every routine of mine gets rewritten, not just the ones this program names: a day the
+    // program leaves empty has to actually empty out, otherwise the previous program's routine
+    // would linger on it and the week would be a mix of two plans.
+    for(const tpl of myTemplates()){
+      const target=tplDay.has(tpl.id)?tplDay.get(tpl.id):null;
+      if(tpl.weekday===target) continue;
+      const {error}=await sb.from('skandi_templates').update({weekday:target,updated_at:stamp}).eq('id',tpl.id);
+      if(error) return alert(error.message);
+    }
+    for(const plan of state.activityTemplates){
+      const target=actDay.has(plan.id)?actDay.get(plan.id):null;
+      if(plan.weekday===target) continue;
+      const {error}=await sb.from('skandi_activity_templates').update({weekday:target}).eq('id',plan.id);
+      if(error) return alert(error.message);
+    }
+    await sb.from('skandi_programs').update({is_active:false}).eq('user_id',state.user.id).eq('is_active',true);
+    const {error:activateError}=await sb.from('skandi_programs').update({is_active:true,updated_at:stamp}).eq('id',id);
+    if(activateError) return alert(activateError.message);
+    closeModal();
+    await loadAll();
+    setView('train');
+  } finally {
+    applyingProgram=false;
+  }
+}
+
+async function deleteProgram(id){
+  if(!confirm(t('pgm.confirmDelete'))) return;
+  const {error}=await sb.from('skandi_programs').delete().eq('id',id).eq('user_id',state.user.id);
+  if(error) return alert(error.message);
+  closeModal();
+  await loadAll();
+  render();
+}
+
 function trainView(){
   const mine=state.templates.filter(x=>x.user_id===state.user.id);
   const community=state.templates.filter(x=>x.user_id!==state.user.id);
@@ -1458,6 +1793,7 @@ function trainView(){
   return `
     ${activeWorkoutBanner()}
     <div class="row"><h1>${esc(t('train.title'))}</h1><button class="btn primary" onclick="openDayPicker(todayDow())">${esc(t('train.addRoutine'))}</button></div>
+    ${programCardHtml()}
     <section class="card">
       <div class="row"><h2>${esc(t('train.yourWeek'))}</h2><span class="muted">${mine.length} ${esc(tp(mine.length,'common.routines'))}</span></div>
       <div class="week">
@@ -1524,31 +1860,153 @@ function workoutCard(tpl){
   </article>`;
 }
 
+// ---- Crew ---------------------------------------------------------------------------------
+// Deliberately three blocks and no more: who is on board, the top of the board, and the feed.
+// Everything else about a person (their bests, their routines, their history) lives one tap
+// deeper in their profile instead of being dumped onto this screen.
+
+function crewMembers(){
+  const members=new Map();
+  const upsert=(userId,profile)=>{
+    if(!members.has(userId)) members.set(userId,{user_id:userId,name:profile?.name||t('common.crewMember'),avatar:profile?.avatar_url||null,workouts:0,minutes:0,lastAt:null});
+    const member=members.get(userId);
+    if(profile?.name) member.name=profile.name;
+    if(profile?.avatar_url) member.avatar=profile.avatar_url;
+    return member;
+  };
+  upsert(state.user.id,state.profile);
+  // My own private sessions count for me (it's my data either way); for everyone else only
+  // what they chose to share is visible at all.
+  state.sessions.filter(s=>s.completed_at&&(s.visibility==='crew'||s.user_id===state.user.id)).forEach(s=>{
+    const member=upsert(s.user_id,s.profile);
+    member.workouts++;
+    member.minutes+=Math.round((s.duration_sec||0)/60);
+    if(!member.lastAt||new Date(s.completed_at)>new Date(member.lastAt)) member.lastAt=s.completed_at;
+  });
+  return [...members.values()].sort((a,b)=>(b.lastAt?new Date(b.lastAt).getTime():0)-(a.lastAt?new Date(a.lastAt).getTime():0));
+}
+
+function memberChipHtml(member){
+  const me=member.user_id===state.user.id;
+  return `<button class="member" onclick="openCrewProfile('${member.user_id}')">
+    <span class="member-avatar">${member.avatar?`<img src="${esc(member.avatar)}" alt="">`:esc(initials(member.name))}</span>
+    <span class="member-name">
+      <strong>${esc(me?t('crew.you'):member.name)}</strong>
+      <small>${member.workouts} ${esc(tp(member.workouts,'common.workouts'))}</small>
+    </span>
+  </button>`;
+}
+
 function crewView(){
+  const members=crewMembers();
+  const feed=state.sessions.filter(s=>s.completed_at&&s.visibility==='crew');
+  const limit=state.crewFeedLimit||6;
   const leaders=leaderboard();
   return `
-    <div class="row"><h1>${esc(t('crew.title'))}</h1><button class="btn" onclick="loadAll().then(render)">${esc(t('crew.refresh'))}</button></div>
+    <div class="row"><h1>${esc(t('crew.title'))}</h1><button class="btn small" onclick="loadAll().then(render)">${esc(t('crew.refresh'))}</button></div>
     <section class="card">
-      <h2>${esc(t('crew.recentPrs'))}</h2>
-      ${leaders.map(x=>leaderRowHtml(x)).join('')||empty(t('crew.prsEmpty'))}
+      <div class="eyebrow">${esc(t('crew.onboard'))}</div>
+      <div class="crew-grid">${members.map(memberChipHtml).join('')}</div>
+    </section>
+    <section class="card">
+      <div class="row">
+        <div class="eyebrow">${esc(t('crew.recentPrs'))}</div>
+        ${leaders.length>3?`<button class="btn small" onclick="openCrewRecords()">${esc(t('crew.seeAllPrs'))}</button>`:''}
+      </div>
+      ${leaders.slice(0,3).map(x=>leaderRowHtml(x)).join('')||empty(t('crew.prsEmpty'))}
     </section>
     <h2>${esc(t('crew.feed'))}</h2>
-    ${state.sessions.filter(s=>s.completed_at&&s.visibility==='crew').map(feedItem).join('')||empty(t('crew.feedEmpty'))}`;
+    ${feed.slice(0,limit).map(feedItem).join('')||empty(t('crew.feedEmpty'))}
+    ${feed.length>limit?`<button class="btn" style="width:100%;margin-top:4px" onclick="state.crewFeedLimit=${limit+10};render()">${esc(t('crew.loadMore'))}</button>`:''}`;
+}
+
+function openCrewRecords(){
+  $('modal').classList.add('show');
+  $('modalCard').innerHTML=`
+    <div class="row"><h1>${esc(t('crew.allPrs'))}</h1><button class="x" onclick="closeModal()" aria-label="${esc(t('common.close'))}">${icon('close',20)}</button></div>
+    <section class="card">${leaderboard().map(x=>leaderRowHtml(x)).join('')||empty(t('crew.prsEmpty'))}</section>`;
+}
+
+function openCrewProfile(userId){
+  const member=crewMembers().find(x=>x.user_id===userId);
+  if(!member) return;
+  const me=userId===state.user.id;
+  const bests=leaderboard().filter(x=>x.user_id===userId).slice(0,6);
+  const routines=state.templates.filter(x=>x.user_id===userId&&(me||x.is_public!==false));
+  const sessions=state.sessions.filter(s=>s.user_id===userId&&s.completed_at&&(me||s.visibility==='crew')).slice(0,5);
+  $('modal').classList.add('show');
+  $('modalCard').innerHTML=`
+    <div class="row">
+      <div style="display:flex;align-items:center;gap:12px;min-width:0">
+        <span class="member-avatar" style="width:46px;height:46px;font-size:16px">${member.avatar?`<img src="${esc(member.avatar)}" alt="">`:esc(initials(member.name))}</span>
+        <div style="min-width:0"><h1 style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${esc(member.name)}</h1>
+        <p class="muted">${esc(member.lastAt?t('crew.lastTrained',{date:new Date(member.lastAt).toLocaleDateString(LANG,{day:'numeric',month:'short'})}):t('crew.neverTrained'))}</p></div>
+      </div>
+      <button class="x" onclick="closeModal()" aria-label="${esc(t('common.close'))}">${icon('close',20)}</button>
+    </div>
+    <section class="grid" style="margin-top:14px">
+      <div class="stat"><strong>${member.workouts}</strong><small>${esc(t('crew.profileShared'))}</small></div>
+      <div class="stat"><strong>${member.minutes}</strong><small>${esc(t('crew.profileMinutes'))}</small></div>
+    </section>
+    <section class="card">
+      <div class="eyebrow">${esc(t('crew.profileBests'))}</div>
+      ${bests.map(x=>leaderRowHtml(x,false)).join('')||empty(t('crew.prsEmpty'))}
+    </section>
+    <section class="card">
+      <div class="eyebrow">${esc(t('crew.profileRoutines'))}</div>
+      ${routines.map(tpl=>{
+        const count=state.items.filter(i=>i.template_id===tpl.id).length;
+        return `<div class="row" style="margin-top:12px">
+          <div style="min-width:0"><strong>${esc(tpl.name)}</strong><p class="muted">${count} ${esc(tp(count,'common.exercises'))}</p></div>
+          <button class="btn small" onclick="${me?`openWorkoutOverview('${tpl.id}')`:`openAddToWeek('${tpl.id}')`}">${esc(me?t('card.start'):t('card.addToWeek'))}</button>
+        </div>`;
+      }).join('')||empty(t('crew.noRoutines'))}
+    </section>
+    <section class="card">
+      <div class="eyebrow">${esc(t('crew.profileRecent'))}</div>
+      ${sessions.map(feedItem).join('')||empty(t('crew.noSessions'))}
+      ${me?'':`<p class="form-note" style="margin:10px 0 0">${esc(t('crew.privateNote'))}</p>`}
+    </section>`;
+}
+
+// ---- Progress -----------------------------------------------------------------------------
+// Four short tabs instead of one long scroll of unrelated cards: Summary (am I on track this
+// week), Exercises (is this lift actually going up), History (what did I do, and fix it if the
+// log is wrong), Load (everything that adds fatigue). Tab state lives in state.progressTab so
+// switching tabs is a plain render(), not a separate screen.
+
+const myCompletedSessions=()=>state.sessions.filter(s=>s.user_id===state.user.id&&s.completed_at)
+  .sort((a,b)=>new Date(b.completed_at)-new Date(a.completed_at));
+
+function setProgressTab(tab){
+  state.progressTab=tab;
+  render();
 }
 
 function progressView(){
-  const mine=state.sessions.filter(s=>s.user_id===state.user.id&&s.completed_at);
-  const prs=leaderboard().filter(x=>x.user_id===state.user.id).slice(0,8);
+  const tab=state.progressTab||'summary';
+  const tabs=[['summary','progress.tabSummary'],['exercises','progress.tabExercises'],['history','progress.tabHistory'],['load','progress.tabLoad']];
+  const body=tab==='exercises'?progressExercisesTab():tab==='history'?progressHistoryTab():tab==='load'?progressLoadTab():progressSummaryTab();
+  return `
+    <h1>${esc(t('progress.title'))}</h1>
+    <div class="seg sub" style="margin:12px 0 16px">
+      ${tabs.map(([key,label])=>`<button class="${tab===key?'active':''}" onclick="setProgressTab('${key}')">${esc(t(label))}</button>`).join('')}
+    </div>
+    ${body}`;
+}
+
+function progressSummaryTab(){
+  const mine=myCompletedSessions();
+  const prs=leaderboard().filter(x=>x.user_id===state.user.id).slice(0,5);
   const stalls=progressionStallWarnings();
   const sore=repeatedSorenessWarnings();
   return `
-    <h1>${esc(t('progress.title'))}</h1>
-    ${weeklyRecapCard()}
     ${(stalls.length||sore.length)?`<section class="card" style="border-color:rgba(212,72,84,.30);background:#fff7f7">
       <div class="eyebrow" style="color:var(--pink)">${esc(t('progress.needsAttention'))}</div>
       ${sore.map(w=>`<p style="margin-top:8px">${t('progress.soreWarn',{area:esc(w.area),n:w.count})}</p>`).join('')}
       ${stalls.map(w=>`<div class="row click-card" style="margin-top:8px" onclick="openExercise('${w.exercise.id}')"><p>${t('progress.stallWarn',{name:esc(w.exercise.name),marks:esc(w.marks.map(m=>w.exercise.log_mode==='seconds'?fmtSec(m):m+' '+t('common.reps')).join(' → '))})}</p>${icon('chevronRight',18)}</div>`).join('')}
     </section>`:''}
+    ${weeklyRecapCard()}
     <section class="card">
       <div class="eyebrow">${esc(t('progress.allTime'))}</div>
       <div class="grid" style="margin-top:10px">
@@ -1556,21 +2014,226 @@ function progressView(){
         <div class="stat"><strong>${Math.round(mine.reduce((a,s)=>a+(s.duration_sec||0),0)/60)}</strong><small>${esc(t('progress.minutesTrained'))}</small></div>
       </div>
     </section>
+    <section class="card">
+      <div class="row"><h2>${esc(t('progress.yourBests'))}</h2><button class="btn small" onclick="setProgressTab('exercises')">${esc(t('progress.seeExercises'))}</button></div>
+      ${prs.map(x=>leaderRowHtml(x,false)).join('')||empty(t('progress.bestsEmpty'))}
+    </section>`;
+}
+
+function progressLoadTab(){
+  return `
+    <p class="muted" style="margin-bottom:4px">${esc(t('progress.loadIntro'))}</p>
     ${crossTrainingCardHtml()}
-    ${bodyweightCardHtml()}
     ${muscleLoadCard(t('recovery.title'))}
+    ${bodyweightCardHtml()}
     <section class="card">
       <div class="row"><h2>${esc(t('progress.externalActivities'))}</h2><button class="btn small" onclick="openLogActivity()">${esc(t('progress.logActivity'))}</button></div>
-      ${(state.externalActivities||[]).slice(0,4).map(externalActivityRow).join('')||empty(t('progress.activitiesEmpty'))}
-    </section>
-    <section class="card">
-      <h2>${esc(t('progress.yourBests'))}</h2>
-      ${prs.map(x=>leaderRowHtml(x,false)).join('')||empty(t('progress.bestsEmpty'))}
-    </section>
-    <section class="card">
-      <h2>${esc(t('progress.history'))}</h2>
-      ${mine.slice(0,20).map(feedItem).join('')||empty(t('progress.historyEmpty'))}
+      ${(state.externalActivities||[]).slice(0,6).map(externalActivityRow).join('')||empty(t('progress.activitiesEmpty'))}
     </section>`;
+}
+
+// ---- Progress > Exercises: one chart per exercise you actually train ----------------------
+
+// How this exercise is scored, matching leaderboard()'s rule: hold time for timed holds, load
+// for anything tracking weight, reps for pure bodyweight work.
+function exerciseTrackingMode(ex){
+  return ex.log_mode==='seconds'?'seconds':(ex.log_weight!==false?'weight':'reps');
+}
+
+function formatMark(mode,value){
+  if(mode==='seconds') return fmtSec(value);
+  if(mode==='weight') return `${fmtWeightInput(value)} ${state.weightUnit}`;
+  return `${value} ${t('common.reps')}`;
+}
+
+// Best mark + total volume per completed session for one exercise, oldest first so the chart
+// reads left to right. Only done sets count -- an unchecked set is a plan, not a result.
+function exerciseProgressSeries(exerciseId){
+  const ex=state.exercises.find(e=>e.id===exerciseId);
+  if(!ex) return [];
+  const mode=exerciseTrackingMode(ex);
+  const out=[];
+  for(const session of myCompletedSessions()){
+    const sets=state.sets.filter(x=>x.session_id===session.id&&x.exercise_id===exerciseId&&x.done);
+    if(!sets.length) continue;
+    const best=mode==='seconds'?Math.max(...sets.map(x=>Number(x.seconds)||0))
+      :mode==='weight'?Math.max(...sets.map(x=>Number(x.weight_kg)||0))
+      :Math.max(...sets.map(x=>Number(x.reps)||0));
+    out.push({
+      sessionId:session.id,title:session.title,date:session.completed_at,mode,best,
+      volume:sets.reduce((a,x)=>a+(Number(x.weight_kg)||0)*(Number(x.reps)||0),0),
+      sets:sets.length
+    });
+  }
+  return out.sort((a,b)=>new Date(a.date)-new Date(b.date));
+}
+
+function trainedExercises(){
+  const byExercise=new Map();
+  state.sets.filter(x=>x.user_id===state.user.id&&x.done).forEach(x=>{
+    const session=state.sessions.find(s=>s.id===x.session_id);
+    if(!session?.completed_at) return;
+    const current=byExercise.get(x.exercise_id);
+    if(!current||new Date(session.completed_at)>new Date(current.lastAt)) byExercise.set(x.exercise_id,{exercise_id:x.exercise_id,lastAt:session.completed_at});
+  });
+  return [...byExercise.values()]
+    .map(row=>({...row,exercise:state.exercises.find(e=>e.id===row.exercise_id)}))
+    .filter(row=>row.exercise)
+    .sort((a,b)=>new Date(b.lastAt)-new Date(a.lastAt));
+}
+
+function progressExercisesTab(){
+  return `
+    <div class="search"><input id="pgQ" class="field left" placeholder="${esc(t('progress.searchExercise'))}" value="${esc(state.progressQuery||'')}" oninput="state.progressQuery=this.value;renderProgressExerciseList()"></div>
+    <div id="pgExList">${progressExerciseListHtml()}</div>`;
+}
+
+// Replaces only the list (like renderLibraryList) -- a full render() on every keystroke would
+// blow away the search input's focus mid-word.
+function renderProgressExerciseList(){
+  const host=$('pgExList');
+  if(host) host.innerHTML=progressExerciseListHtml();
+}
+
+function progressExerciseListHtml(){
+  const q=(state.progressQuery||'').trim().toLowerCase();
+  const rows=trainedExercises().filter(r=>!q||`${r.exercise.name} ${r.exercise.english_name||''}`.toLowerCase().includes(q));
+  return rows.map(progressExerciseRowHtml).join('')||empty(q?t('common.noMatches'):t('progress.exercisesEmpty'));
+}
+
+function progressExerciseRowHtml(row){
+  const series=exerciseProgressSeries(row.exercise.id);
+  if(!series.length) return '';
+  const mode=series[0].mode;
+  const best=Math.max(...series.map(p=>p.best));
+  return `<article class="card click-card" onclick="openExerciseProgress('${row.exercise.id}')">
+    <div class="row">
+      <div style="min-width:0">
+        <strong>${esc(row.exercise.name)}</strong>
+        <p class="muted">${series.length} ${esc(tp(series.length,'common.sessions'))} · ${esc(t('progress.lastTrained',{date:new Date(row.lastAt).toLocaleDateString(LANG,{day:'numeric',month:'short'})}))}</p>
+      </div>
+      <strong class="accent" style="flex:0 0 auto">${esc(formatMark(mode,best))}</strong>
+    </div>
+    ${sparklineSvg(series.slice(-10).map(p=>p.best))}
+  </article>`;
+}
+
+// Full-width line chart: the readable sibling of sparklineSvg. Value labels live in HTML under
+// the chart (see chartLegendHtml) rather than as SVG text, so they stay crisp at any width.
+function progressChartSvg(values){
+  if(values.length<2) return '';
+  const w=320,h=150,padX=8,padT=14,padB=12;
+  const min=Math.min(...values),max=Math.max(...values);
+  const span=(max-min)||Math.abs(max)||1;
+  const x=i=>padX+(i/(values.length-1))*(w-padX*2);
+  const y=v=>padT+(1-(v-min)/span)*(h-padT-padB);
+  const line=values.map((v,i)=>`${x(i).toFixed(1)},${y(v).toFixed(1)}`).join(' ');
+  return `<svg class="chart" viewBox="0 0 ${w} ${h}" role="img">
+    <defs><linearGradient id="chartFill" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#245f9f" stop-opacity=".26"/>
+      <stop offset="100%" stop-color="#245f9f" stop-opacity="0"/>
+    </linearGradient></defs>
+    <line x1="${padX}" y1="${h-padB}" x2="${w-padX}" y2="${h-padB}" stroke="#d7e1ea" stroke-width="1"/>
+    <polygon points="${padX},${h-padB} ${line} ${w-padX},${h-padB}" fill="url(#chartFill)"/>
+    <polyline points="${line}" fill="none" stroke="#245f9f" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+    ${values.map((v,i)=>`<circle cx="${x(i).toFixed(1)}" cy="${y(v).toFixed(1)}" r="${i===values.length-1?4:2.4}" fill="${i===values.length-1?'#012456':'#245f9f'}"/>`).join('')}
+  </svg>`;
+}
+
+function openExerciseProgress(exerciseId){
+  const ex=state.exercises.find(e=>e.id===exerciseId);
+  if(!ex) return;
+  const series=exerciseProgressSeries(exerciseId);
+  const mode=exerciseTrackingMode(ex);
+  // Volume (load x reps) only means something where load is tracked; for holds and bodyweight
+  // reps the toggle is hidden rather than charting a column of zeros.
+  const canVolume=mode==='weight'&&series.some(p=>p.volume>0);
+  const metric=canVolume&&state.progressMetric==='volume'?'volume':'best';
+  const values=series.map(p=>metric==='volume'?p.volume:p.best);
+  const label=v=>metric==='volume'?`${fmtWeightInput(v)} ${state.weightUnit}`:formatMark(mode,v);
+  $('modal').classList.add('show');
+  $('modalCard').innerHTML=`
+    <div class="row"><h1>${esc(ex.name)}</h1><button class="x" onclick="closeModal()" aria-label="${esc(t('common.close'))}">${icon('close',20)}</button></div>
+    ${canVolume?`<div class="seg sub" style="margin-top:12px">
+      <button class="${metric==='best'?'active':''}" onclick="state.progressMetric='best';openExerciseProgress('${exerciseId}')">${esc(t('chart.best'))}</button>
+      <button class="${metric==='volume'?'active':''}" onclick="state.progressMetric='volume';openExerciseProgress('${exerciseId}')">${esc(t('chart.volume'))}</button>
+    </div>`:''}
+    <section class="card">
+      ${values.length>1?`${progressChartSvg(values)}
+      <div class="chart-legend">
+        <span>${esc(new Date(series[0].date).toLocaleDateString(LANG,{day:'numeric',month:'short'}))}</span>
+        <span>${esc(label(Math.min(...values)))} → ${esc(label(Math.max(...values)))}</span>
+        <span>${esc(new Date(series[series.length-1].date).toLocaleDateString(LANG,{day:'numeric',month:'short'}))}</span>
+      </div>`:empty(t('chart.noData'))}
+    </section>
+    <section class="card">
+      <div class="eyebrow">${esc(t('chart.perSession'))}</div>
+      ${series.slice().reverse().map(p=>`<div class="row click-card" style="margin-top:10px" onclick="openSessionDetail('${p.sessionId}')">
+        <div style="min-width:0"><strong>${esc(formatMark(p.mode,p.best))}</strong><p class="muted">${esc(new Date(p.date).toLocaleDateString(LANG,{weekday:'short',day:'numeric',month:'short'}))} · ${p.sets} ${esc(tp(p.sets,'common.setsLogged'))}</p></div>
+        ${p.volume>0?`<span class="pill dark">${esc(t('chart.volumeUnit',{v:fmtWeightInput(p.volume),unit:state.weightUnit}))}</span>`:''}
+      </div>`).join('')||empty(t('chart.noData'))}
+    </section>
+    <button class="btn" style="width:100%" onclick="openExercise('${exerciseId}')">${icon('chevronRight',16)} ${esc(t('chart.openExercise'))}</button>`;
+}
+
+// ---- Progress > History: filter it, and fix a workout whose log came out wrong -------------
+
+function setHistoryFilter(key,value){
+  state.historyFilter={...state.historyFilter,[key]:value};
+  render();
+}
+
+// Local month, not UTC: a workout finished at 8pm on the last day of the month is UTC-next-day
+// in Mazatlan (UTC-7), and toISOString() would file it under the wrong month in the filter.
+const monthKey=iso=>{const d=new Date(iso);return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`;};
+const monthLabel=key=>{
+  const d=new Date(`${key}-01T12:00:00`);
+  const label=d.toLocaleDateString(LANG,{month:'long',year:'numeric'});
+  return label.charAt(0).toUpperCase()+label.slice(1);
+};
+
+function progressHistoryTab(){
+  const sessions=myCompletedSessions();
+  const filter=state.historyFilter||{month:'all',title:'all'};
+  const months=[...new Set(sessions.map(s=>monthKey(s.completed_at)))];
+  const titles=[...new Set(sessions.map(s=>s.title))].sort((a,b)=>a.localeCompare(b));
+  const filtered=sessions.filter(s=>
+    (filter.month==='all'||monthKey(s.completed_at)===filter.month)&&
+    (filter.title==='all'||s.title===filter.title));
+  const minutes=Math.round(filtered.reduce((a,s)=>a+(s.duration_sec||0),0)/60);
+  return `
+    <div class="filters">
+      <select class="field left" onchange="setHistoryFilter('month',this.value)">
+        <option value="all">${esc(t('progress.allMonths'))}</option>
+        ${months.map(m=>`<option value="${m}" ${filter.month===m?'selected':''}>${esc(monthLabel(m))}</option>`).join('')}
+      </select>
+      <select class="field left" onchange="setHistoryFilter('title',this.value)">
+        <option value="all">${esc(t('progress.allRoutines'))}</option>
+        ${titles.map(x=>`<option value="${esc(x)}" ${filter.title===x?'selected':''}>${esc(x)}</option>`).join('')}
+      </select>
+    </div>
+    <p class="muted">${esc(t('progress.resultsN',{n:filtered.length,min:minutes}))}</p>
+    ${filtered.map(historyRowHtml).join('')||empty(sessions.length?t('progress.noResults'):t('progress.historyEmpty'))}`;
+}
+
+// A session left running overnight lands here as a 12-hour workout that quietly wrecks every
+// minutes total, so the row calls it out and points straight at the edit form.
+const SUSPICIOUS_DURATION_SEC=4*3600;
+
+function historyRowHtml(s){
+  const doneSets=state.sets.filter(x=>x.session_id===s.id&&x.done).length;
+  const odd=(s.duration_sec||0)>SUSPICIOUS_DURATION_SEC;
+  return `<article class="feed">
+    <div class="row">
+      <div style="min-width:0;cursor:pointer" onclick="openSessionDetail('${s.id}')">
+        <p class="muted">${esc(new Date(s.completed_at).toLocaleDateString(LANG,{weekday:'short',day:'numeric',month:'short'}))}</p>
+        <h3>${esc(s.title)}</h3>
+        <p class="muted">${esc(t('feed.seriesMin',{sets:doneSets,min:Math.round((s.duration_sec||0)/60)}))}</p>
+      </div>
+      <button class="icon-btn tiny" onclick="openSessionEdit('${s.id}')" aria-label="${esc(t('session.edit'))}">${icon('edit',15)}</button>
+    </div>
+    ${odd?`<p style="color:var(--pink);margin-top:8px">${esc(t('progress.longSession'))}</p>`:''}
+  </article>`;
 }
 
 function libraryView(){
@@ -1701,7 +2364,84 @@ function openSessionDetail(sessionId){
         </div>
       `).join('')||empty(t('session.noSets'))}
     </section>
-    ${mine?`<button class="btn danger" style="width:100%;margin-top:14px" onclick="deleteSession('${s.id}')">${icon('trash',16)} ${esc(t('session.delete'))}</button>`:''}`;
+    ${mine?`<div class="stack" style="margin-top:14px">
+      <button class="btn" style="width:100%" onclick="openSessionEdit('${s.id}')">${icon('edit',16)} ${esc(t('session.edit'))}</button>
+      <button class="btn danger" style="width:100%" onclick="deleteSession('${s.id}')">${icon('trash',16)} ${esc(t('session.delete'))}</button>
+    </div>`:''}`;
+}
+
+// A finished workout is still editable: the timer only knows when you tapped finish, so a
+// session you forgot to close reads as 12 hours until someone corrects it. Duration is the
+// point of this form -- everything else (name, date, how it felt, the note) is here because
+// it's the same UPDATE and it's exactly what you'd want to fix at the same time.
+function openSessionEdit(sessionId){
+  const s=state.sessions.find(x=>x.id===sessionId);
+  if(!s||s.user_id!==state.user.id) return;
+  const when=new Date(s.completed_at||s.started_at);
+  const dateValue=`${when.getFullYear()}-${String(when.getMonth()+1).padStart(2,'0')}-${String(when.getDate()).padStart(2,'0')}`;
+  const minutes=Math.max(1,Math.round((s.duration_sec||0)/60));
+  $('modal').classList.add('show');
+  $('modalCard').innerHTML=`
+    <div class="row"><h1>${esc(t('sedit.title'))}</h1><button class="x" onclick="openSessionDetail('${s.id}')" aria-label="${esc(t('common.close'))}">${icon('close',20)}</button></div>
+    <label class="eyebrow">${esc(t('sedit.name'))}</label>
+    <input id="seTitle" class="field left" value="${esc(s.title)}">
+    <label class="eyebrow" style="display:block;margin-top:14px">${esc(t('sedit.date'))}</label>
+    <input id="seDate" class="field left" type="date" value="${dateValue}">
+    <label class="eyebrow" style="display:block;margin-top:14px">${esc(t('sedit.duration'))}</label>
+    <input id="seDuration" class="field left" inputmode="numeric" value="${minutes}">
+    <p class="form-note" style="margin-top:8px">${esc(t('sedit.durationHint'))}</p>
+    <label class="eyebrow" style="display:block;margin-top:6px">${esc(t('report.difficulty'))}</label>
+    <select id="seDifficulty" class="field left">${['normal','facil','pesado'].map(v=>`<option value="${v}" ${(s.report_difficulty||'normal')===v?'selected':''}>${esc(difficultyLabel(v))}</option>`).join('')}</select>
+    <label class="eyebrow" style="display:block;margin-top:14px">${esc(t('report.energy'))}</label>
+    <select id="seEnergy" class="field left">${[1,2,3,4,5].map(v=>`<option value="${v}" ${Number(s.report_energy||3)===v?'selected':''}>${v} / 5</option>`).join('')}</select>
+    <label class="card row" style="margin-top:14px;border-color:rgba(212,72,84,.30);background:#fff7f7"><div><h3>${esc(t('report.soreTitle'))}</h3><p>${esc(t('report.soreBody'))}</p></div><input id="seSore" type="checkbox" ${s.report_soreness?'checked':''}></label>
+    <input id="seSoreArea" class="field left" placeholder="${esc(t('report.sorePh'))}" value="${esc(s.report_soreness_area||'')}">
+    <textarea id="seNote" class="field" placeholder="${esc(t('report.notePh'))}">${esc(s.report_note||'')}</textarea>
+    <label class="card row" style="margin:0 0 14px"><div><h3>${esc(t('report.shareTitle'))}</h3><p>${esc(t('report.shareBody'))}</p></div><input id="seShare" type="checkbox" ${s.visibility==='crew'?'checked':''}></label>
+    <button class="btn primary" style="width:100%" onclick="saveSessionEdit('${s.id}')">${esc(t('sedit.save'))}</button>`;
+}
+
+let savingSessionEdit=false;
+async function saveSessionEdit(sessionId){
+  if(savingSessionEdit) return;
+  const s=state.sessions.find(x=>x.id===sessionId);
+  if(!s) return;
+  const title=$('seTitle').value.trim();
+  if(!title) return alert(t('sedit.errName'));
+  const minutes=Number($('seDuration').value);
+  if(!Number.isFinite(minutes)||minutes<1||minutes>600) return alert(t('sedit.errDuration'));
+  const [year,month,day]=($('seDate').value||'').split('-').map(Number);
+  if(!year||!month||!day) return alert(t('sedit.errDate'));
+  const durationSec=Math.round(minutes*60);
+  // Keep the clock time the workout was finished at and move only the calendar date, then let
+  // started_at follow the corrected duration -- the pair has to stay consistent, since the
+  // active-workout recovery and every "minutes trained" total read from it.
+  const completedAt=new Date(s.completed_at||s.started_at);
+  completedAt.setFullYear(year,month-1,day);
+  savingSessionEdit=true;
+  const btn=document.querySelector('#modalCard button.primary');
+  if(btn){btn.disabled=true;btn.textContent=t('common.saving');}
+  try{
+    const {error}=await sb.from('skandi_sessions').update({
+      title,
+      completed_at:completedAt.toISOString(),
+      started_at:new Date(completedAt.getTime()-durationSec*1000).toISOString(),
+      duration_sec:durationSec,
+      report_difficulty:$('seDifficulty').value,
+      report_energy:Number($('seEnergy').value),
+      report_soreness:$('seSore').checked,
+      report_soreness_area:$('seSoreArea').value.trim()||null,
+      report_note:$('seNote').value.trim()||null,
+      visibility:$('seShare').checked?'crew':'private'
+    }).eq('id',sessionId).eq('user_id',state.user.id);
+    if(error) return alert(error.message);
+    closeModal();
+    await loadAll();
+    render();
+  } finally {
+    savingSessionEdit=false;
+    if(btn){btn.disabled=false;btn.textContent=t('sedit.save');}
+  }
 }
 
 async function deleteSession(sessionId){
@@ -3225,7 +3965,10 @@ async function cancelWorkout(){
 function openReport(){
   $('modalCard').innerHTML=`
     <div class="row"><h1>${esc(t('report.title'))}</h1><button class="x" onclick="closeModal()" aria-label="${esc(t('common.close'))}">${icon('close',20)}</button></div>
-    <section class="card" style="border-color:rgba(1,36,86,.20);background:linear-gradient(135deg,#ffffff,#e8f1f8)"><h2>${esc(state.active.title)}</h2><p>${esc(t('report.logged',{time:fmtSec(state.elapsed)}))}</p></section>
+    <section class="card" style="border-color:rgba(1,36,86,.20);background:linear-gradient(135deg,#ffffff,#e8f1f8)"><h2>${esc(state.active.title)}</h2><p>${esc(t('report.logged',{time:fmtWorkoutTime(state.elapsed)}))}</p></section>
+    <label class="eyebrow">${esc(t('report.duration'))}</label>
+    <input id="repDuration" class="field left" inputmode="numeric" value="${Math.max(1,Math.round(state.elapsed/60))}">
+    <p class="form-note" style="margin-top:8px">${esc(t('report.durationHint',{time:fmtWorkoutTime(state.elapsed)}))}</p>
     <label class="eyebrow">${esc(t('report.difficulty'))}</label>
     <select id="difficulty" class="field left"><option value="normal">${esc(t('report.diffNormal'))}</option><option value="facil">${esc(t('report.diffEasy'))}</option><option value="pesado">${esc(t('report.diffHeavy'))}</option></select>
     <label class="eyebrow">${esc(t('report.energy'))}</label>
@@ -3244,9 +3987,16 @@ async function finishWorkout(){
   const sleepRaw=$('sleepHours').value.trim();
   const sleepHours=sleepRaw===''?null:Number(sleepRaw);
   if(sleepHours!==null&&(!Number.isFinite(sleepHours)||sleepHours<0||sleepHours>24)) return alert(t('report.errSleep'));
+  const minutes=Number($('repDuration').value);
+  if(!Number.isFinite(minutes)||minutes<1||minutes>600) return alert(t('sedit.errDuration'));
+  const durationSec=Math.round(minutes*60);
+  // A workout nobody remembered to finish gets closed out hours later, so "now" is the wrong
+  // completion time: once the duration is corrected, the session ended when it ended
+  // (started_at + duration). Capped at now so a padded duration can't land in the future.
+  const completedAt=new Date(Math.min(Date.now(),new Date(state.active.started_at).getTime()+durationSec*1000));
   const patch={
-    completed_at:new Date().toISOString(),
-    duration_sec:state.elapsed,
+    completed_at:completedAt.toISOString(),
+    duration_sec:durationSec,
     report_difficulty:$('difficulty').value,
     report_energy:Number($('energy').value),
     report_sleep_hours:sleepHours===null?null:Math.round(sleepHours*10)/10,
