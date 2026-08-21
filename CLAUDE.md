@@ -54,7 +54,16 @@ Core tables:
 - `payments` — payment records (Stripe and manual)
 - `door_commands` — queue of door open requests with Shelly execution status
 - `access_log` — history of door access events
-- `boards` / `board_assignments` / `scores` — workout boards feature
+- `boards` / `board_assignments` / `scores` — workout boards feature. A board with `owner_id` null
+  is a gym/coach board; with `owner_id` set it's a member-built routine (migration 070), and the
+  `SELECT` policy is `owner_id is null or owner_id = auth.uid()`
+- `coaching_week_templates` / `coaching_programs` / `coaching_program_days` — the member's weekly
+  plan (`dow` 0 = Monday) and named programs that overwrite it. Activating a program rewrites
+  every `coaching_week_templates` row, then re-materializes the week via the
+  `ensure_coaching_week_from_template` RPC
+- `coaching_schedule.session_exercises` — JSONB overlay of exercises swapped in or added during a
+  live session. `boards.exercises` is never mutated by a workout; `sessionExerciseList()` in
+  `app.html` merges the two and is the single source of the effective exercise list
 - `posts` / `post_reactions` / `post_comments` — community feed
 - `booking_guest_passes` — group session guest passes (from `group-guest-passes.sql`)
 - `admin_notifs` — in-app notifications for admin
