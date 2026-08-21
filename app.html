@@ -6,18 +6,18 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="HABIT">
 <meta name="application-name" content="HABIT">
-<link rel="manifest" href="/manifest.json?v=20260821-05">
-<link rel="apple-touch-icon" sizes="120x120" href="/icons/icon-120.png?v=20260821-05">
-<link rel="apple-touch-icon" sizes="152x152" href="/icons/icon-152.png?v=20260821-05">
-<link rel="apple-touch-icon" sizes="167x167" href="/icons/icon-167.png?v=20260821-05">
-<link rel="apple-touch-icon" sizes="180x180" href="/icons/icon-180.png?v=20260821-05">
-<link rel="icon" type="image/png" sizes="32x32" href="/icons/icon-32.png?v=20260821-05">
+<link rel="manifest" href="/manifest.json?v=20260821-07">
+<link rel="apple-touch-icon" sizes="120x120" href="/icons/icon-120.png?v=20260821-07">
+<link rel="apple-touch-icon" sizes="152x152" href="/icons/icon-152.png?v=20260821-07">
+<link rel="apple-touch-icon" sizes="167x167" href="/icons/icon-167.png?v=20260821-07">
+<link rel="apple-touch-icon" sizes="180x180" href="/icons/icon-180.png?v=20260821-07">
+<link rel="icon" type="image/png" sizes="32x32" href="/icons/icon-32.png?v=20260821-07">
 <title>HABIT</title>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Share+Tech+Mono&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="/skandi-recovery.js?v=20260821-05"></script>
-<script src="/body-figure.js?v=20260821-05"></script>
+<script src="/skandi-recovery.js?v=20260821-07"></script>
+<script src="/body-figure.js?v=20260821-07"></script>
 <style>
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
 :root{
@@ -59,6 +59,9 @@ input,select,button,textarea{font-family:'Inter',sans-serif}
 .bnb-badge{position:absolute;top:7px;right:18px;min-width:18px;height:18px;border-radius:99px;background:var(--green);color:#03120d;font-size:10px;font-weight:900;display:none;align-items:center;justify-content:center;padding:0 5px;border:1px solid rgba(0,0,0,.3)}
 .bnb-badge.coach-pending{background:#ef4444;color:#fff;box-shadow:0 0 0 2px rgba(0,0,0,.55)}
 .bnb-badge.show{display:flex}
+/* Coaching agrega una quinta sección; todas caben sin desplazar Entrenar. */
+.member-has-coaching .bnb{min-width:66px;padding-left:4px;padding-right:4px}
+.member-has-coaching .bnb-badge{right:8px}
 .top-actions{display:flex;align-items:center;gap:6px;margin-left:auto}
 .top-action{width:34px;height:34px;border-radius:4px;border:1px solid var(--border);background:var(--card);color:var(--gray);display:flex;align-items:center;justify-content:center;cursor:pointer;position:relative}
 .top-action.primary{border-color:var(--blue);background:rgba(37,99,235,.12);color:var(--bl)}
@@ -565,6 +568,19 @@ input,select,button,textarea{font-family:'Inter',sans-serif}
 .admin-plan-grid{display:grid;gap:12px}
 .admin-plan-section{border:1px solid rgba(255,255,255,.08);border-radius:16px;background:rgba(255,255,255,.03);padding:12px}
 .admin-plan-section-title{font-size:11px;font-weight:900;color:#a3a9b5;letter-spacing:.11em;text-transform:uppercase;margin-bottom:10px}
+.coach-plan-day{display:grid;grid-template-columns:74px minmax(0,1fr);gap:10px;align-items:center;padding:9px 0;border-bottom:1px solid rgba(255,255,255,.06)}
+.coach-plan-day:last-of-type{border-bottom:0}
+.coach-plan-day-label{font-size:12px;font-weight:720;color:#a3a9b5}
+.coach-plan-day-label strong{display:block;color:#d5dae2;font-size:12.5px}
+.coach-plan-day-source{display:block;font-size:9.5px;font-weight:700;color:var(--purple);margin-top:3px}
+.coach-plan-day select{width:100%;min-width:0;border-radius:11px!important;padding:10px!important;background:rgba(0,0,0,.2)!important}
+.coach-plan-day.from-member select{border-color:rgba(167,139,250,.4)!important;background:rgba(139,92,246,.06)!important}
+.coach-task-admin-row{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:9px;align-items:center;padding:10px 0;border-bottom:1px solid rgba(255,255,255,.06)}
+.coach-task-admin-row:last-child{border-bottom:0}
+.coach-task-admin-main{min-width:0;font-size:13px;color:var(--white)}
+.coach-task-admin-main.done{color:var(--gray);text-decoration:line-through}
+.coach-task-admin-main small{display:block;margin-top:3px;color:var(--gray);font-size:9.5px;font-weight:760;text-transform:uppercase;letter-spacing:.07em}
+.coach-task-admin-actions{display:flex;gap:5px}
 .admin-plan-toggle{width:100%;border:none;background:transparent;color:var(--white);padding:0;display:grid;grid-template-columns:1fr auto;gap:10px;align-items:center;text-align:left;cursor:pointer}
 .admin-plan-toggle-title{font-size:13px;font-weight:850;color:var(--white)}
 .admin-plan-toggle-sub{font-size:11px;color:#9aa1ad;line-height:1.35;margin-top:3px}
@@ -1350,10 +1366,13 @@ html,body,.app,input,select,button,textarea{font-family:var(--font-ui);font-opti
 #v-coaching .fasting-card{box-shadow:none;border-radius:14px;background:rgba(255,255,255,.026);border-color:rgba(255,255,255,.065)}
 #v-coaching .fasting-card:after{display:none}
 #v-coaching .coach-empty{border-radius:14px;background:rgba(255,255,255,.024);border-color:rgba(255,255,255,.055);padding:18px 14px}
-.support-fab{position:fixed;right:max(14px,calc((100vw - 430px)/2 + 14px));bottom:calc(88px + env(safe-area-inset-bottom,0px));z-index:9997;display:none;align-items:center;gap:8px;min-height:44px;border:none;border-radius:999px;background:#20d492;color:#03120d;padding:9px 13px 9px 10px;font-size:12px;font-weight:800;box-shadow:0 14px 34px rgba(0,0,0,.42);cursor:pointer}
+.support-fab{position:fixed;right:max(14px,calc((100vw - 430px)/2 + 14px));bottom:calc(88px + env(safe-area-inset-bottom,0px));z-index:9997;display:none;align-items:center;gap:8px;min-height:44px;border:none;border-radius:999px;background:#20d492;color:#03120d;padding:9px 13px 9px 10px;font-size:12px;font-weight:800;box-shadow:0 14px 34px rgba(0,0,0,.42);cursor:pointer;transition:left .2s ease,right .2s ease,bottom .2s ease,transform .16s ease}
 .support-fab.show{display:inline-flex}
 .support-fab svg{width:20px;height:20px;fill:currentColor;flex-shrink:0}
 .support-fab:active{transform:translateY(1px);filter:brightness(.94)}
+/* Durante el entreno, el cronómetro es dueño de la esquina derecha. La
+   asistencia se acomoda a la izquierda para que ambos controles sigan a mano. */
+body.workout-sheet-open .support-fab{left:max(14px,calc((100vw - 430px)/2 + 14px));right:auto;bottom:calc(16px + env(safe-area-inset-bottom,0px))}
 
 /* Admin workstation layout */
 @media(min-width:900px){
@@ -1446,6 +1465,43 @@ body.admin-mode .adm-search,body.admin-mode .adm-date,body.admin-mode .admin-sel
 .routine-deep-panel{background:rgba(255,255,255,.035);border:1px solid rgba(255,255,255,.08);border-radius:15px;padding:12px;margin-bottom:10px}
 .routine-deep-title{font-size:12px;font-weight:820;color:var(--white);line-height:1.2;margin-bottom:9px}
 .routine-deep-actions{display:grid;grid-template-columns:1fr auto;gap:8px;margin-top:8px}
+.admin-page-actions{display:flex;align-items:center;gap:8px;margin-left:auto}
+.admin-page-action{min-height:38px;border:1px solid rgba(255,255,255,.1);border-radius:12px;background:rgba(255,255,255,.045);color:#cbd5e1;padding:0 13px;font-size:11.5px;font-weight:760;cursor:pointer;white-space:nowrap}
+.admin-page-action.primary{border-color:rgba(96,165,250,.32);background:rgba(37,99,235,.13);color:#bfdbfe}
+.coach-directory-head{display:flex;align-items:flex-end;justify-content:space-between;gap:12px;margin-bottom:12px}
+.coach-directory-head .admin-card-title{margin:0!important}
+.coach-directory-count{font-size:11px;color:#8f97a5;font-variant-numeric:tabular-nums;white-space:nowrap}
+.coach-directory-tools{display:grid;gap:9px;margin-bottom:12px}
+.coach-command-head{margin-bottom:11px}
+.coach-command-title{font-size:15px;font-weight:780;color:var(--white)}
+.coach-command-sub{font-size:11.5px;color:#8f97a5;line-height:1.4;margin-top:3px}
+.coach-command-section{margin-top:12px}
+.coach-command-section-label{font-size:9.5px;font-weight:820;letter-spacing:.1em;text-transform:uppercase;color:#788292;margin-bottom:8px}
+.coach-automation-disclosure{border-top:1px solid rgba(255,255,255,.065);margin-top:12px;padding-top:10px}
+.coach-automation-disclosure summary{display:flex;align-items:center;justify-content:space-between;gap:10px;list-style:none;cursor:pointer;color:#a8b0bd;font-size:11.5px;font-weight:720}
+.coach-automation-disclosure summary::-webkit-details-marker{display:none}
+.coach-automation-disclosure summary:after{content:'+';width:24px;height:24px;border-radius:999px;background:rgba(255,255,255,.055);display:flex;align-items:center;justify-content:center;color:#8993a2;font-size:15px}
+.coach-automation-disclosure[open] summary:after{content:'–'}
+.coach-automation-disclosure .coach-automation-list{margin-top:9px}
+.board-library-toolbar{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:10px;align-items:center;margin-bottom:12px}
+.board-library-toolbar .board-create-trigger{width:auto;margin:0;min-height:46px;padding:8px 12px;grid-template-columns:auto minmax(0,1fr) auto}
+.board-library-toolbar .board-create-sub{display:none}
+.board-library-toolbar .board-create-form{grid-column:1/-1;margin:0}
+.board-library-search{position:relative}
+.board-library-search .adm-search{margin:0;width:100%;padding-left:38px}
+.board-library-search-icon{position:absolute;left:13px;top:50%;transform:translateY(-50%);color:#747e8c;font-size:15px;pointer-events:none}
+.board-library-summary{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin-bottom:12px}
+.board-library-stat{border:1px solid rgba(255,255,255,.075);border-radius:14px;background:rgba(255,255,255,.03);padding:11px 12px}
+.board-library-stat strong{display:block;color:var(--white);font-size:19px;font-weight:760;line-height:1;font-variant-numeric:tabular-nums}
+.board-library-stat span{display:block;color:#828b99;font-size:9.5px;font-weight:760;letter-spacing:.07em;text-transform:uppercase;margin-top:5px}
+.board-library-empty{display:none;grid-column:1/-1}
+.routine-editor-grid{display:grid;gap:12px}
+.routine-editor-main,.routine-editor-side{min-width:0}
+.routine-editor-side{display:grid;align-content:start;gap:10px}
+.routine-board-danger{border-top:1px solid rgba(255,255,255,.065);padding-top:10px}
+.routine-board-danger summary{list-style:none;cursor:pointer;color:#8d929c;font-size:10.5px;text-align:center;padding:7px}
+.routine-board-danger summary::-webkit-details-marker{display:none}
+.routine-board-danger .routine-board-delete{margin-top:6px!important}
 .admin-profile-shell{display:grid;gap:10px}
 .admin-profile-head{display:grid;grid-template-columns:auto auto minmax(0,1fr) auto;gap:11px;align-items:center}
 .admin-profile-back{width:36px;height:36px;border-radius:13px;border:1px solid rgba(255,255,255,.09);background:rgba(255,255,255,.045);color:#dbe4f0;font-size:18px;font-weight:760;cursor:pointer}
@@ -1588,6 +1644,33 @@ body.admin-mode #courtesy-modal label{border-radius:14px!important;border-color:
   .routine-board-row{grid-template-columns:auto minmax(0,1fr);gap:10px}
   .routine-board-action{grid-column:1/-1;justify-self:stretch}
   .board-create-actions{grid-template-columns:1fr}
+}
+
+@media(min-width:900px){
+  body.admin-mode #a-coaching.active{max-width:1220px!important;display:grid;grid-template-columns:minmax(0,1.55fr) minmax(300px,.72fr);gap:16px;align-items:start}
+  body.admin-mode #a-coaching .admin-page-head{grid-column:1/-1}
+  body.admin-mode #a-coaching>.admin-card{grid-column:1;grid-row:2;max-width:none;margin:0}
+  body.admin-mode #a-coaching>#coaching-command-center{grid-column:2;grid-row:2;position:sticky;top:10px}
+  body.admin-mode #a-coaching .coach-admin-kpis{grid-template-columns:repeat(2,minmax(0,1fr))}
+  body.admin-mode #a-coaching-detail{max-width:1180px!important}
+  body.admin-mode #a-coaching-detail .coach-cockpit-head{position:sticky;top:-10px;z-index:8;padding:10px 0 12px;background:linear-gradient(180deg,#080809 82%,rgba(8,8,9,0));backdrop-filter:blur(16px)}
+  body.admin-mode #a-coaching-detail .admin-plan-grid{grid-template-columns:minmax(0,1.25fr) minmax(320px,.75fr);align-items:start}
+  body.admin-mode #a-coaching-detail #coach-plan-week{grid-column:1;grid-row:1/span 2;position:sticky;top:112px}
+  body.admin-mode #a-coaching-detail #coach-plan-routines{grid-column:2;grid-row:1}
+  body.admin-mode #a-coaching-detail #coach-plan-habits{grid-column:2;grid-row:2}
+  body.admin-mode #a-boards{max-width:1180px!important}
+  body.admin-mode #boards-list{grid-template-columns:repeat(2,minmax(0,1fr));align-items:start}
+  body.admin-mode #boards-list .board-card.is-editing{grid-column:1/-1}
+  body.admin-mode #boards-list .board-card:not(.is-editing):hover{border-color:rgba(96,165,250,.22);background:rgba(255,255,255,.045)}
+  body.admin-mode .routine-editor-grid{grid-template-columns:minmax(0,1.45fr) minmax(290px,.55fr);gap:14px}
+  body.admin-mode .routine-editor-side{position:sticky;top:10px}
+}
+
+@media(max-width:899px){
+  .admin-page-head{gap:10px}
+  .admin-page-actions{align-self:flex-start}
+  .admin-page-action{padding:0 10px}
+  .board-library-toolbar{grid-template-columns:1fr}
 }
 
 /* ══════════════════════════════════════════════════════════════════════
@@ -1814,6 +1897,9 @@ body.admin-mode #courtesy-modal label{border-radius:14px!important;border-color:
 @media(max-width:360px){
   .week-day{grid-template-columns:44px minmax(0,1fr) auto;gap:8px}
   .ws-timer-panel{width:200px}
+  body.workout-sheet-open .support-fab{width:46px;height:46px;min-height:46px;padding:0;justify-content:center}
+  body.workout-sheet-open .support-fab span{display:none}
+  body.workout-sheet-open .support-fab svg{width:22px;height:22px}
   .body-muscle-row{grid-template-columns:80px 1fr 38px;gap:8px}
   .vol-row{grid-template-columns:76px 1fr auto;gap:8px}
 }
@@ -2316,16 +2402,19 @@ body.admin-mode #courtesy-modal label{border-radius:14px!important;border-color:
     <div id="a-coaching" class="adm-section">
       <div class="admin-page-head">
         <div><div class="admin-page-kicker">Entrenamiento</div><h2 class="admin-page-title">Coaching</h2><div class="admin-page-sub">Clientes activos y programación</div></div>
+        <div class="admin-page-actions"><button class="admin-page-action" onclick="admTab('boards')">Abrir rutinas</button></div>
       </div>
       <div id="coaching-command-center"></div>
-      <div class="admin-card">
-        <div class="admin-card-title">Socios activos</div>
-        <input class="adm-search" id="coaching-search" placeholder="Buscar socio..." oninput="renderCoachingListRows(this.value)">
-        <div class="coach-admin-filters">
-          <button class="coach-admin-filter active" data-coach-filter="todos" onclick="setCoachingListFilter(this)">Todos</button>
-          <button class="coach-admin-filter" data-coach-filter="atencion" onclick="setCoachingListFilter(this)">Atención</button>
-          <button class="coach-admin-filter" data-coach-filter="activos" onclick="setCoachingListFilter(this)">Activos</button>
-          <button class="coach-admin-filter" data-coach-filter="sin-plan" onclick="setCoachingListFilter(this)">Sin plan</button>
+      <div class="admin-card coach-client-directory">
+        <div class="coach-directory-head"><div><div class="admin-card-title">Clientes</div><div class="coach-card-sub">Seguimiento diario y acceso a cada plan.</div></div><span class="coach-directory-count" id="coaching-list-count"></span></div>
+        <div class="coach-directory-tools">
+          <input class="adm-search" id="coaching-search" placeholder="Buscar cliente por nombre..." aria-label="Buscar cliente de coaching" oninput="renderCoachingListRows(this.value)">
+          <div class="coach-admin-filters" style="margin:0">
+            <button class="coach-admin-filter active" data-coach-filter="todos" onclick="setCoachingListFilter(this)">Todos</button>
+            <button class="coach-admin-filter" data-coach-filter="atencion" onclick="setCoachingListFilter(this)">Atención</button>
+            <button class="coach-admin-filter" data-coach-filter="activos" onclick="setCoachingListFilter(this)">Activos</button>
+            <button class="coach-admin-filter" data-coach-filter="sin-plan" onclick="setCoachingListFilter(this)">Sin plan</button>
+          </div>
         </div>
         <div id="coaching-list"></div>
       </div>
@@ -2341,9 +2430,15 @@ body.admin-mode #courtesy-modal label{border-radius:14px!important;border-color:
     <div id="a-boards" class="adm-section">
       <div class="admin-page-head">
         <div><div class="admin-page-kicker">Biblioteca</div><h2 class="admin-page-title">Rutinas</h2><div class="admin-page-sub">Pizarrones y ejercicios</div></div>
+        <div class="admin-page-actions"><button class="admin-page-action" onclick="admTab('coaching')">Ver clientes</button><button class="admin-page-action primary" onclick="if(!newBoardFormOpen)toggleNewBoardForm()">Nueva rutina</button></div>
       </div>
-      <div id="board-create-panel"></div>
+      <div class="board-library-toolbar">
+        <div class="board-library-search"><span class="board-library-search-icon">⌕</span><input class="adm-search" id="board-admin-search" placeholder="Buscar rutina..." aria-label="Buscar rutina" oninput="filterBoardsAdmin(this.value)"></div>
+        <div id="board-create-panel"></div>
+      </div>
+      <div id="board-library-summary" class="board-library-summary"></div>
       <div id="boards-list"></div>
+      <div id="board-search-empty" class="empty board-library-empty">No hay rutinas con ese nombre.</div>
     </div>
 
 
@@ -2813,7 +2908,7 @@ body.admin-mode #courtesy-modal label{border-radius:14px!important;border-color:
 // ── CONFIG & SUPABASE ───────────────────────────────────────
 const SUPABASE_URL='https://pmpjteuqjusbiduevbwq.supabase.co';
 const SUPABASE_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBtcGp0ZXVxanVzYmlkdWV2YndxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc2OTI1NjUsImV4cCI6MjA5MzI2ODU2NX0.XbMzZoo2yqtrD8znLnyo_1zDfrdJAvAPj1lqGOyXnLw';
-const APP_VERSION='20260821-05';
+const APP_VERSION='20260821-07';
 // La pierna va separada en cuádriceps, femorales y pantorrillas: la figura
 // corporal pinta esas tres regiones por separado y el motor de recuperación les
 // da ventanas de descanso distintas. 'Piernas' sigue reconociéndose al leer
@@ -3163,9 +3258,12 @@ async function loadUserData(){
   const shopBtn=document.getElementById('shop-nav-btn');
   if(shopBtn)shopBtn.style.display='none';
   const rutBtn=document.getElementById('rutinas-nav-btn');
-  if(rutBtn)rutBtn.style.display=prof.coaching_beta?'none':'';
+  // Entrenar pertenece a todos los socios. Coaching suma seguimiento, pero no
+  // reemplaza la biblioteca, la semana ni el progreso de entrenamiento.
+  if(rutBtn)rutBtn.style.display='';
   const coachBtn=document.getElementById('coaching-nav-btn');
   if(coachBtn)coachBtn.style.display=prof.coaching_beta?'':'none';
+  document.body.classList.toggle('member-has-coaching',!!prof.coaching_beta);
   if(prof.coaching_beta){startChatRealtime();}else{stopChatRealtime();updateCoachingNavBadge();}
   if(prof.coaching_beta)loadActiveCoachingSessionSb().catch(console.error);
   if(prof.coaching_beta)loadCoachWeekDataSb(true).then(updateCoachingNavBadge).catch(console.error);
@@ -4464,7 +4562,7 @@ async function doLogout(){
   _tuScoreRows=null;_progresoData=null;_progresoQuery='';
   myRecovery=[];recoveryLoadedAt=0;bodyFlip='front';
   await sb.auth.signOut().catch(()=>{});
-  document.body.classList.remove('reception-mode','admin-mode');
+  document.body.classList.remove('reception-mode','admin-mode','member-has-coaching');
   document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
   document.getElementById('s-auth').classList.add('active');
 }
@@ -10172,6 +10270,7 @@ function openWorkoutSheet(){
   wsUnlockAudio();
   hideActiveSessionBar();
   document.getElementById('workout-sheet').classList.add('open');
+  document.body.classList.add('workout-sheet-open');
   document.body.style.overflow='hidden';
   loadExerciseCatalogSb().catch(()=>{});
   wsLoadLastScores().catch(()=>{});
@@ -10200,6 +10299,7 @@ async function wsRepairMissingSetsSb(){
 function minimizeWorkoutSheet(){
   wsOpen=false;
   document.getElementById('workout-sheet').classList.remove('open');
+  document.body.classList.remove('workout-sheet-open');
   document.body.style.overflow='';
   if(activeCoachingSession)showActiveSessionBar();
   wsUpdateClocks();
@@ -10208,6 +10308,7 @@ function closeWorkoutSheet(){
   wsOpen=false;
   const el=document.getElementById('workout-sheet');
   if(el)el.classList.remove('open');
+  document.body.classList.remove('workout-sheet-open');
   document.body.style.overflow='';
   wsStopTicker();
   wsPausedMs=0;wsPausedAt=0;wsRestEndAt=0;wsRestFrozen=0;wsRestTotal=0;wsLastRest=0;
@@ -11515,17 +11616,17 @@ function renderBoardCreatePanel(){
   if(!newBoardFormOpen){
     panel.innerHTML='<button type="button" class="board-create-trigger" onclick="toggleNewBoardForm()">'
       +'<span class="board-create-icon">+</span>'
-      +'<span><span class="board-create-title">Nuevo pizarrón</span><span class="board-create-sub">Crear rutina y elegir color</span></span>'
+      +'<span><span class="board-create-title">Nueva rutina</span><span class="board-create-sub">Crear rutina y elegir color</span></span>'
       +'<span class="board-create-chevron">›</span>'
       +'</button>';
     return;
   }
   panel.innerHTML='<div class="board-create-form">'
-    +'<div class="admin-card-title" style="margin-bottom:9px">Nuevo pizarrón</div>'
+    +'<div class="admin-card-title" style="margin-bottom:9px">Nueva rutina</div>'
     +'<div class="field"><label>Nombre</label><input type="text" id="board-name-in" placeholder="Ej: Fuerza Lunes" onkeydown="if(event.key===&quot;Enter&quot;)addBoardSb()"></div>'
     +'<div class="field"><label>Color</label><input class="board-color-input" type="color" id="board-color-in" value="#2563eb"></div>'
     +'<div class="board-create-actions">'
-    +'<button class="btn" onclick="addBoardSb()">Crear pizarrón</button>'
+    +'<button class="btn" onclick="addBoardSb()">Crear rutina</button>'
     +'<button class="btn-sm" style="background:transparent;border:1px solid var(--border);color:var(--gray)" onclick="toggleNewBoardForm()">Cancelar</button>'
     +'</div>'
     +'</div>';
@@ -11542,9 +11643,18 @@ async function renderBoardsAdmin(){
   if(!el)return;
   el.innerHTML='';
   if(!boards.length){el.innerHTML='<div class="empty">Sin pizarrones. Crea el primero.</div>';return;}
+  const summary=document.getElementById('board-library-summary');
+  if(summary){
+    const exerciseTotal=boards.reduce((n,b)=>n+(Array.isArray(b.exercises)?b.exercises.length:0),0);
+    const assignmentTotal=boards.reduce((n,b)=>n+(Array.isArray(b.assignedTo)?b.assignedTo.length:0),0);
+    summary.innerHTML='<div class="board-library-stat"><strong>'+boards.length+'</strong><span>Rutinas</span></div>'
+      +'<div class="board-library-stat"><strong>'+exerciseTotal+'</strong><span>Ejercicios</span></div>'
+      +'<div class="board-library-stat"><strong>'+assignmentTotal+'</strong><span>Asignaciones</span></div>';
+  }
   boards.forEach(board=>{
-    const card=document.createElement('div');card.className='board-card';
     const isEditing=editingBoards.has(board.id);
+    const card=document.createElement('div');card.className='board-card'+(isEditing?' is-editing':'');
+    card.dataset.boardName=(board.name||'').toLowerCase();
     const isAddingEx=addingExBoards.has(board.id);
     const isAssigning=assigningBoards.has(board.id);
     const assignedUsers=users.filter(u=>board.assignedTo.includes(u.id));
@@ -11646,9 +11756,19 @@ async function renderBoardsAdmin(){
 
       // Expanded edit area
       +(isEditing?
-        '<div class="routine-board-editor">'
-        // Name input + color swatches
+        '<div class="routine-board-editor"><div class="routine-editor-grid">'
+        +'<div class="routine-editor-main">'
+        +'<div class="routine-board-section-label">Ejercicios · '+board.exercises.length+'</div>'
+        +(exHtml||'<div class="member-routine-empty">Esta rutina todavía no tiene ejercicios.</div>')
+        +'<div class="routine-board-tools">'
+        +'<button class="routine-board-tool" onclick="addingExBoards.has(&quot;'+board.id+'&quot;)?addingExBoards.delete(&quot;'+board.id+'&quot;):addingExBoards.add(&quot;'+board.id+'&quot;);renderBoardsAdmin()" style="background:rgba(37,99,235,.12);border:1px solid var(--blue);color:var(--bl)">+ Agregar ejercicio</button>'
+        +'<button class="routine-board-tool" onclick="assigningBoards.has(&quot;'+board.id+'&quot;)?assigningBoards.delete(&quot;'+board.id+'&quot;):assigningBoards.add(&quot;'+board.id+'&quot;);renderBoardsAdmin()" style="background:rgba(16,185,129,.1);border:1px solid var(--green);color:var(--green)">Asignar socios ('+assignedUsers.length+')</button>'
+        +'</div>'
+        +addExForm
+        +'</div>'
+        +'<aside class="routine-editor-side">'
         +'<div class="routine-board-panel">'
+        +'<div class="routine-board-section-label">Información de la rutina</div>'
         +'<div class="routine-board-section-label">Nombre</div>'
         +'<input id="bn-'+board.id+'" value="'+esc(board.name)+'" style="width:100%;background:var(--card);border:1px solid var(--border);padding:10px;font-size:14px;font-weight:700;color:var(--white);outline:none;margin-bottom:10px;box-sizing:border-box" onkeydown="if(event.key===&quot;Enter&quot;)updateBoardNameSb(&quot;'+board.id+'&quot;)">'
         +'<div class="routine-board-section-label">Color</div>'
@@ -11660,27 +11780,27 @@ async function renderBoardsAdmin(){
         +'<button class="btn-sm" style="background:transparent;border:1px solid var(--border);color:var(--gray)" onclick="cancelBoardEdit(&quot;'+board.id+'&quot;)">Cancelar</button>'
         +'</div>'
         +'</div>'
-
-        // Exercises
-        +'<div class="routine-board-section-label">Ejercicios</div>'
-        +(exHtml||'<div style="font-size:12px;color:var(--gray);padding:4px 0 10px">Sin ejercicios aún.</div>')
-
-        // Add exercise + assign buttons
-        +'<div class="routine-board-tools">'
-        +'<button class="routine-board-tool" onclick="addingExBoards.has(&quot;'+board.id+'&quot;)?addingExBoards.delete(&quot;'+board.id+'&quot;):addingExBoards.add(&quot;'+board.id+'&quot;);renderBoardsAdmin()" style="background:rgba(37,99,235,.12);border:1px solid var(--blue);color:var(--bl)">+ Ejercicio</button>'
-        +'<button class="routine-board-tool" onclick="assigningBoards.has(&quot;'+board.id+'&quot;)?assigningBoards.delete(&quot;'+board.id+'&quot;):assigningBoards.add(&quot;'+board.id+'&quot;);renderBoardsAdmin()" style="background:rgba(16,185,129,.1);border:1px solid var(--green);color:var(--green)">Asignar ('+assignedUsers.length+')</button>'
-        +'</div>'
-
-        +addExForm
         +assignPanel
-
-        // Delete button just above the "Listo" area
-        +'<button class="btn-sm bred routine-board-delete" style="width:100%;margin-top:4px" data-bid="'+board.id+'" onclick="deleteBoardSb(this.dataset.bid)">Eliminar pizarrón</button>'
-        +'</div>'
+        +'<details class="routine-board-danger"><summary>Opciones avanzadas</summary><button class="btn-sm bred routine-board-delete" style="width:100%" data-bid="'+board.id+'" onclick="deleteBoardSb(this.dataset.bid)">Eliminar rutina</button></details>'
+        +'</aside></div></div>'
       :'');
 
     el.appendChild(card);
   });
+  filterBoardsAdmin(document.getElementById('board-admin-search')?.value||'');
+}
+
+function filterBoardsAdmin(value){
+  const q=String(value||'').trim().toLowerCase();
+  const cards=[...document.querySelectorAll('#boards-list .board-card')];
+  let visible=0;
+  cards.forEach(card=>{
+    const show=!q||(card.dataset.boardName||'').includes(q)||card.classList.contains('is-editing');
+    card.style.display=show?'block':'none';
+    if(show)visible++;
+  });
+  const empty=document.getElementById('board-search-empty');
+  if(empty)empty.style.display=cards.length&&!visible?'block':'none';
 }
 
 
@@ -14121,21 +14241,21 @@ function renderCoachingCommandCenter(){
       +'</div>').join('')+'</div>'
     :'<div class="empty" style="margin-bottom:12px">Sin clientes que requieran atención inmediata.</div>';
   const automations=[
-    {title:'Seguimiento inteligente',sub:'Alertas por entrenos, hábitos, feedback y chats.',on:true},
-    {title:'Resumen semanal',sub:'Se calcula al abrir la ficha del cliente.',on:true},
-    {title:'Hábitos recurrentes',sub:'Check-list diario con historial por fecha.',on:rows.some(u=>u.hasRecurringTasks)},
-    {title:'Lectura automática de chats',sub:'Pendiente de conectar IA para detectar temas.',on:false}
+    {title:'Alertas de seguimiento',sub:'Entrenos, hábitos, feedback y chats.',on:true},
+    {title:'Resumen semanal',sub:'Se actualiza al abrir cada cliente.',on:true},
+    {title:'Hábitos recurrentes',sub:'Check-list diario con historial.',on:rows.some(u=>u.hasRecurringTasks)}
   ];
-  el.innerHTML='<div class="coach-admin-kpis">'
+  el.innerHTML='<div class="coach-command-head"><div class="coach-command-title">Vista de hoy</div><div class="coach-command-sub">Lo que necesita una decisión del coach.</div></div>'
+    +'<div class="coach-admin-kpis">'
     +'<div class="coach-admin-kpi"><strong class="good">'+active+'</strong><span>Activos recientes</span></div>'
     +'<div class="coach-admin-kpi"><strong class="hot">'+attention+'</strong><span>Requieren atención</span></div>'
     +'<div class="coach-admin-kpi"><strong>'+noPlan+'</strong><span>Sin plan hoy</span></div>'
     +'<div class="coach-admin-kpi"><strong>'+unread+'</strong><span>Chats sin leer</span></div>'
     +'</div>'
-    +'<div class="coach-window-card"><div class="coach-card-head"><div><div class="coach-card-k">Requiere atención</div><div class="coach-card-sub">Prioridad diaria de seguimiento.</div></div><div class="admin-report-pill '+(attention?'warn':'good')+'">'+attention+'</div></div>'+attentionHtml+'</div>'
-    +'<div class="coach-window-card" style="margin-bottom:12px"><div class="coach-card-head"><div><div class="coach-card-k">Automatizaciones</div><div class="coach-card-sub">Estado de procesos de coaching.</div></div></div><div class="coach-automation-list">'
+    +'<div class="coach-window-card"><div class="coach-card-head"><div><div class="coach-card-k">Prioridad</div><div class="coach-card-sub">Clientes que requieren seguimiento.</div></div><div class="admin-report-pill '+(attention?'warn':'good')+'">'+attention+'</div></div>'+attentionHtml
+    +'<details class="coach-automation-disclosure"><summary>Estado del sistema</summary><div class="coach-automation-list">'
     +automations.map(a=>'<div class="coach-automation-row"><div class="coach-automation-light '+(a.on?'on':'')+'"></div><div><div class="coach-automation-title">'+esc(a.title)+'</div><div class="coach-automation-sub">'+esc(a.sub)+'</div></div><div class="admin-report-pill '+(a.on?'good':'warn')+'">'+(a.on?'Activo':'Pendiente')+'</div></div>').join('')
-    +'</div></div>';
+    +'</div></details></div>';
 }
 function renderCoachingListRows(filter){
   const el=document.getElementById('coaching-list');
@@ -14150,6 +14270,8 @@ function renderCoachingListRows(filter){
     if(coachingListFilter==='sin-plan')return !!u.noPlanToday;
     return true;
   });
+  const countEl=document.getElementById('coaching-list-count');
+  if(countEl)countEl.textContent=list.length+' de '+((_coachingListAll||[]).length)+' clientes';
   el.innerHTML=list.length?list.map((u,idx)=>
     '<div class="coach-client-row" onclick="adminOpenCoachingCockpit(&quot;'+esc(u.id)+'&quot;,&quot;'+esc(u.name||'')+'&quot;)">'
     +'<div class="coach-client-avatar" style="background:'+coachListAvatarColor(idx)+'">'+inits(u.name||'?')+'</div>'
@@ -14694,11 +14816,11 @@ function renderCoachingDetail(){
     // coach necesita verlo antes de guardar: al guardar se reescribe la semana
     // completa y ese día se perdería sin que nadie se entere.
     const setByMember=!!(tpl&&tpl.created_by&&tpl.created_by===selectedCoachClientId);
-    dayRows+='<div style="display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--border)">'
-      +'<div style="width:64px;font-size:12px;font-weight:700;color:var(--gray)">'+DN_MON[i]+' '+parseDS(ds).d
-        +(setByMember?'<span style="display:block;font-size:9.5px;font-weight:700;color:var(--purple);margin-top:2px">lo puso el socio</span>':'')
+    dayRows+='<div class="coach-plan-day'+(setByMember?' from-member':'')+'">'
+      +'<div class="coach-plan-day-label"><strong>'+DN_MON[i]+' '+parseDS(ds).d+'</strong>'
+        +(setByMember?'<span class="coach-plan-day-source">Elegido por el socio</span>':'')
       +'</div>'
-      +'<select data-coach-day="'+ds+'" data-coach-dow="'+i+'" style="flex:1;background:var(--card2);border:1px solid '+(setByMember?'rgba(167,139,250,.45)':'var(--border)')+';border-radius:4px;padding:9px;font-size:13px;color:var(--white)">'+opts+'</select>'
+      +'<select data-coach-day="'+ds+'" data-coach-dow="'+i+'" aria-label="Rutina para '+DN_MON[i]+'">'+opts+'</select>'
       +'</div>';
     let dayCls='coach-day';
     if(ds===today)dayCls+=' today';
@@ -14721,10 +14843,10 @@ function renderCoachingDetail(){
     :'';
 
   const tasksHtml=coachAdminTasks.length?coachAdminTasks.map(t=>
-    '<div style="display:flex;align-items:center;gap:8px;padding:10px 0;border-bottom:1px solid var(--border)">'
-    +'<span style="flex:1;font-size:13px;'+(t.is_done?'color:var(--gray);text-decoration:line-through':'color:var(--white)')+'">'+esc(t.title)+'<small style="display:block;margin-top:3px;color:var(--gray);font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.08em">'+(t.is_recurring?'Diario':t.due_date?fmtDS(t.due_date):'Sin fecha')+'</small></span>'
-    +'<button class="btn-sm" style="padding:4px 8px" data-tid="'+esc(t.id)+'" data-ttitle="'+esc(t.title)+'" data-tdue="'+esc(t.due_date||'')+'" data-trecurring="'+(t.is_recurring?'1':'')+'" onclick="startEditCoachingTaskSb(this)">Editar</button>'
-    +'<button class="btn-sm bred" style="padding:4px 8px" onclick="deleteCoachingTaskSb(&quot;'+t.id+'&quot;)">Eliminar</button>'
+    '<div class="coach-task-admin-row">'
+    +'<div class="coach-task-admin-main'+(t.is_done?' done':'')+'">'+esc(t.title)+'<small>'+(t.is_recurring?'Diario':t.due_date?fmtDS(t.due_date):'Sin fecha')+'</small></div>'
+    +'<div class="coach-task-admin-actions"><button class="btn-sm" style="padding:4px 8px" data-tid="'+esc(t.id)+'" data-ttitle="'+esc(t.title)+'" data-tdue="'+esc(t.due_date||'')+'" data-trecurring="'+(t.is_recurring?'1':'')+'" onclick="startEditCoachingTaskSb(this)">Editar</button>'
+    +'<button class="btn-sm bred" style="padding:4px 8px" onclick="deleteCoachingTaskSb(&quot;'+t.id+'&quot;)">Eliminar</button></div>'
     +'</div>'
   ).join(''):'<div class="empty">Sin hábitos.</div>';
 
