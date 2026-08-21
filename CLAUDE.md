@@ -56,7 +56,9 @@ Core tables:
 - `access_log` — history of door access events
 - `boards` / `board_assignments` / `scores` — workout boards feature. A board with `owner_id` null
   is a gym/coach board; with `owner_id` set it's a member-built routine (migration 070), and the
-  `SELECT` policy is `owner_id is null or owner_id = auth.uid()`
+  `SELECT` policy is `owner_id is null or owner_id = auth.uid()`. Member routines always carry
+  `MEMBER_ROUTINE_COLOR`; the color is what tells a member's routine apart from the coach's, so
+  it is not theirs to pick and `routineColor()` resolves it at render time
 - `coaching_week_templates` / `coaching_programs` / `coaching_program_days` — the member's weekly
   plan (`dow` 0 = Monday) and named programs that overwrite it. Activating a program rewrites
   every `coaching_week_templates` row, then re-materializes the week via the
@@ -64,6 +66,10 @@ Core tables:
 - `coaching_schedule.session_exercises` — JSONB overlay of exercises swapped in or added during a
   live session. `boards.exercises` is never mutated by a workout; `sessionExerciseList()` in
   `app.html` merges the two and is the single source of the effective exercise list
+- `exercise_catalog` — the only place a member can pick an exercise from. Migration 071 imported
+  Skandi Fit's `skandi_exercises` into it (names translated to Spanish, English name kept as an
+  alias); its `video_url` values are GIFs and MP4s, not embeds, so `mediaKind()` in `app.html`
+  decides between `<img>`, `<video>` and an iframe
 - `posts` / `post_reactions` / `post_comments` — community feed
 - `booking_guest_passes` — group session guest passes (from `group-guest-passes.sql`)
 - `admin_notifs` — in-app notifications for admin

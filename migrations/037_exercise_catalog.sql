@@ -1,4 +1,11 @@
 -- Biblioteca maestra de ejercicios para construir rutinas con metadata consistente.
+--
+-- Los array[] vacíos de secondary_muscles iban sin tipo y Postgres no puede inferirlo
+-- dentro de un VALUES (42P18: cannot determine type of empty array), así que esta
+-- migración nunca llegó a aplicarse y la app venía usando EXERCISE_CATALOG_FALLBACK
+-- de app.html. Van casteados a text[]. Se corrige aquí en vez de en una migración
+-- nueva porque esta nunca corrió en ninguna base: no hay estado desplegado que
+-- quede inconsistente.
 
 create extension if not exists "uuid-ossp";
 
@@ -59,8 +66,8 @@ values
   ('Press militar barra','press-militar-barra','Fuerza','Hombros',array['Tríceps','Core'],array['Barra'],'Empuje vertical','reps','basico',array['overhead press barra']),
   ('Press militar mancuernas','press-militar-mancuernas','Fuerza','Hombros',array['Tríceps','Core'],array['Mancuernas'],'Empuje vertical','reps','basico',array['shoulder press mancuernas']),
   ('Press Arnold','press-arnold','Fuerza','Hombros',array['Tríceps'],array['Mancuernas'],'Empuje vertical','reps','intermedio',array['arnold press']),
-  ('Elevaciones laterales mancuernas','elevaciones-laterales-mancuernas','Fuerza','Hombros',array[],array['Mancuernas'],'Abducción','reps','basico',array['laterales mancuernas']),
-  ('Elevaciones laterales polea','elevaciones-laterales-polea','Fuerza','Hombros',array[],array['Polea'],'Abducción','reps','basico',array['laterales polea']),
+  ('Elevaciones laterales mancuernas','elevaciones-laterales-mancuernas','Fuerza','Hombros',array[]::text[],array['Mancuernas'],'Abducción','reps','basico',array['laterales mancuernas']),
+  ('Elevaciones laterales polea','elevaciones-laterales-polea','Fuerza','Hombros',array[]::text[],array['Polea'],'Abducción','reps','basico',array['laterales polea']),
   ('Elevaciones frontales','elevaciones-frontales','Fuerza','Hombros',array['Pecho'],array['Mancuernas'],'Flexión hombro','reps','basico',array['front raises']),
   ('Face pull','face-pull','Fuerza','Hombros',array['Espalda'],array['Polea'],'Jalón','reps','basico',array['jalon rostro']),
   ('Pájaros mancuernas','pajaros-mancuernas','Fuerza','Hombros',array['Espalda'],array['Mancuernas'],'Abducción posterior','reps','basico',array['reverse fly']),
@@ -77,30 +84,30 @@ values
   ('Sentadilla barra','sentadilla-barra','Fuerza','Piernas',array['Core','Espalda'],array['Barra'],'Sentadilla','reps','basico',array['back squat']),
   ('Sentadilla frontal','sentadilla-frontal','Fuerza','Piernas',array['Core','Espalda'],array['Barra'],'Sentadilla','reps','intermedio',array['front squat']),
   ('Prensa de pierna','prensa-de-pierna','Fuerza','Piernas',array['Glúteos'],array['Máquina'],'Sentadilla','reps','basico',array['leg press']),
-  ('Extensión de cuádriceps','extension-de-cuadriceps','Fuerza','Piernas',array[],array['Máquina'],'Extensión rodilla','reps','basico',array['leg extension']),
+  ('Extensión de cuádriceps','extension-de-cuadriceps','Fuerza','Piernas',array[]::text[],array['Máquina'],'Extensión rodilla','reps','basico',array['leg extension']),
   ('Curl femoral acostado','curl-femoral-acostado','Fuerza','Piernas',array['Glúteos'],array['Máquina'],'Flexión rodilla','reps','basico',array['leg curl acostado']),
   ('Curl femoral sentado','curl-femoral-sentado','Fuerza','Piernas',array['Glúteos'],array['Máquina'],'Flexión rodilla','reps','basico',array['seated leg curl']),
   ('Hip thrust','hip-thrust','Fuerza','Piernas',array['Core'],array['Barra','Banco'],'Extensión cadera','reps','basico',array['empuje de cadera']),
   ('Peso muerto rumano','peso-muerto-rumano','Fuerza','Piernas',array['Espalda','Core'],array['Barra','Mancuernas'],'Bisagra','reps','basico',array['romanian deadlift']),
   ('Zancadas caminando','zancadas-caminando','Fuerza','Piernas',array['Glúteos','Core'],array['Mancuernas','Peso corporal'],'Desplante','reps','basico',array['walking lunges']),
   ('Bulgarian split squat','bulgarian-split-squat','Fuerza','Piernas',array['Glúteos','Core'],array['Mancuernas','Banco'],'Desplante','reps','intermedio',array['sentadilla bulgara']),
-  ('Elevación de pantorrilla parado','elevacion-de-pantorrilla-parado','Fuerza','Piernas',array[],array['Máquina','Mancuernas'],'Pantorrilla','reps','basico',array['standing calf raise']),
+  ('Elevación de pantorrilla parado','elevacion-de-pantorrilla-parado','Fuerza','Piernas',array[]::text[],array['Máquina','Mancuernas'],'Pantorrilla','reps','basico',array['standing calf raise']),
   ('Curl bíceps barra','curl-biceps-barra','Fuerza','Bíceps',array['Antebrazo'],array['Barra'],'Flexión codo','reps','basico',array['barbell curl']),
   ('Curl bíceps mancuernas','curl-biceps-mancuernas','Fuerza','Bíceps',array['Antebrazo'],array['Mancuernas'],'Flexión codo','reps','basico',array['dumbbell curl']),
   ('Curl martillo','curl-martillo','Fuerza','Bíceps',array['Antebrazo'],array['Mancuernas'],'Flexión codo','reps','basico',array['hammer curl']),
   ('Curl predicador','curl-predicador','Fuerza','Bíceps',array['Antebrazo'],array['Máquina','Barra Z'],'Flexión codo','reps','basico',array['preacher curl']),
   ('Curl polea baja','curl-polea-baja','Fuerza','Bíceps',array['Antebrazo'],array['Polea'],'Flexión codo','reps','basico',array['cable curl']),
-  ('Extensión tríceps cuerda','extension-triceps-cuerda','Fuerza','Tríceps',array[],array['Polea'],'Extensión codo','reps','basico',array['pushdown cuerda']),
-  ('Pushdown barra','pushdown-barra','Fuerza','Tríceps',array[],array['Polea','Barra'],'Extensión codo','reps','basico',array['triceps pushdown']),
+  ('Extensión tríceps cuerda','extension-triceps-cuerda','Fuerza','Tríceps',array[]::text[],array['Polea'],'Extensión codo','reps','basico',array['pushdown cuerda']),
+  ('Pushdown barra','pushdown-barra','Fuerza','Tríceps',array[]::text[],array['Polea','Barra'],'Extensión codo','reps','basico',array['triceps pushdown']),
   ('Extensión tríceps overhead','extension-triceps-overhead','Fuerza','Tríceps',array['Hombros'],array['Mancuernas','Polea'],'Extensión codo','reps','basico',array['overhead triceps extension']),
-  ('Rompecráneos','rompecraneos','Fuerza','Tríceps',array[],array['Barra Z','Mancuernas'],'Extensión codo','reps','intermedio',array['skull crusher']),
+  ('Rompecráneos','rompecraneos','Fuerza','Tríceps',array[]::text[],array['Barra Z','Mancuernas'],'Extensión codo','reps','intermedio',array['skull crusher']),
   ('Press cerrado','press-cerrado','Fuerza','Tríceps',array['Pecho','Hombros'],array['Barra'],'Empuje horizontal','reps','intermedio',array['close grip bench press']),
-  ('Crunch abdominal','crunch-abdominal','Fuerza','Core',array[],array['Peso corporal'],'Flexión tronco','reps','basico',array['crunch']),
+  ('Crunch abdominal','crunch-abdominal','Fuerza','Core',array[]::text[],array['Peso corporal'],'Flexión tronco','reps','basico',array['crunch']),
   ('Elevación de piernas','elevacion-de-piernas','Calistenia','Core',array['Piernas'],array['Peso corporal'],'Flexión cadera','reps','basico',array['leg raises']),
   ('Plank','plank','Isométrico','Core',array['Hombros'],array['Peso corporal'],'Anti-extensión','time','basico',array['plancha']),
   ('Side plank','side-plank','Isométrico','Core',array['Hombros','Glúteos'],array['Peso corporal'],'Anti-rotación','time','basico',array['plancha lateral']),
   ('Hollow hold','hollow-hold','Isométrico','Core',array['Piernas'],array['Peso corporal'],'Anti-extensión','time','intermedio',array['hollow body hold']),
-  ('Russian twist','russian-twist','Fuerza','Core',array[],array['Peso corporal','Disco','Mancuernas'],'Rotación','reps','basico',array['giros rusos']),
+  ('Russian twist','russian-twist','Fuerza','Core',array[]::text[],array['Peso corporal','Disco','Mancuernas'],'Rotación','reps','basico',array['giros rusos']),
   ('Mountain climbers','mountain-climbers','Cardio','Core',array['Hombros','Piernas'],array['Peso corporal'],'Cardio core','time','basico',array['escaladores']),
   ('Burpees','burpees','Cardio','Full Body',array['Pecho','Piernas','Core'],array['Peso corporal'],'Acondicionamiento','reps','intermedio',array['burpee']),
   ('Jumping jacks','jumping-jacks','Cardio','Cardio',array['Piernas','Hombros'],array['Peso corporal'],'Acondicionamiento','time','basico',array['saltos tijera']),

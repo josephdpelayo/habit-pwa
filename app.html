@@ -6,12 +6,12 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="HABIT">
 <meta name="application-name" content="HABIT">
-<link rel="manifest" href="/manifest.json?v=20260821-01">
-<link rel="apple-touch-icon" sizes="120x120" href="/icons/icon-120.png?v=20260821-01">
-<link rel="apple-touch-icon" sizes="152x152" href="/icons/icon-152.png?v=20260821-01">
-<link rel="apple-touch-icon" sizes="167x167" href="/icons/icon-167.png?v=20260821-01">
-<link rel="apple-touch-icon" sizes="180x180" href="/icons/icon-180.png?v=20260821-01">
-<link rel="icon" type="image/png" sizes="32x32" href="/icons/icon-32.png?v=20260821-01">
+<link rel="manifest" href="/manifest.json?v=20260821-02">
+<link rel="apple-touch-icon" sizes="120x120" href="/icons/icon-120.png?v=20260821-02">
+<link rel="apple-touch-icon" sizes="152x152" href="/icons/icon-152.png?v=20260821-02">
+<link rel="apple-touch-icon" sizes="167x167" href="/icons/icon-167.png?v=20260821-02">
+<link rel="apple-touch-icon" sizes="180x180" href="/icons/icon-180.png?v=20260821-02">
+<link rel="icon" type="image/png" sizes="32x32" href="/icons/icon-32.png?v=20260821-02">
 <title>HABIT</title>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Share+Tech+Mono&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
@@ -1605,8 +1605,11 @@ body.admin-mode #courtesy-modal label{border-radius:14px!important;border-color:
 .week-day.today{border-color:rgba(127,176,255,.45);background:rgba(37,99,235,.10)}
 .week-day-dow{font-size:10.5px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--gray)}
 .week-day.today .week-day-dow{color:var(--bl)}
+/* El punto de color se usa suelto en la nota del builder y en el selector de
+   día, no solo dentro de la rejilla, así que necesita tamaño propio. */
+.week-dot{width:9px;height:9px;border-radius:50%;flex:0 0 auto;display:inline-block}
 .week-day-name{min-width:0;font-size:14px;font-weight:700;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;display:flex;align-items:center;gap:8px}
-.week-day-name .week-dot{width:8px;height:8px;border-radius:50%;flex:0 0 auto}
+.week-day-name .week-dot{width:8px;height:8px}
 .week-day-empty{font-size:13px;color:var(--gray);font-weight:500}
 .week-day-go{font-size:18px;color:var(--gray);line-height:1}
 .week-day-edit{border:1px solid var(--border);background:var(--surface,rgba(255,255,255,.045));color:var(--gl);border-radius:9px;
@@ -1623,7 +1626,7 @@ body.admin-mode #courtesy-modal label{border-radius:14px!important;border-color:
 /* Tarjeta de rutina expandible */
 .routine-card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius-md,12px);margin-bottom:10px;overflow:hidden}
 .routine-card-head{display:flex;align-items:center;gap:10px;padding:14px;cursor:pointer}
-.routine-card-head .week-dot{width:9px;height:9px;border-radius:50%;flex:0 0 auto}
+.routine-card-head .week-dot{width:9px;height:9px}
 .routine-card-title{flex:1;min-width:0}
 .routine-card-title strong{display:block;font-size:14.5px;font-weight:750;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .routine-card-title span{display:block;font-size:11.5px;color:var(--gray);margin-top:3px}
@@ -1722,6 +1725,19 @@ body.admin-mode #courtesy-modal label{border-radius:14px!important;border-color:
 .ws-rest-mid strong{display:block;font-size:18px;font-weight:800;font-variant-numeric:tabular-nums}
 .ws-rest-bar{height:4px;border-radius:99px;background:var(--surface-2,rgba(255,255,255,.07));margin-top:10px;overflow:hidden}
 .ws-rest-bar i{display:block;height:100%;background:var(--bl);border-radius:99px;transition:width .95s linear}
+/* Builder del socio */
+.rb-color-note{display:flex;align-items:center;gap:8px;font-size:11.5px;color:var(--gray);line-height:1.45;
+  background:var(--surface,rgba(255,255,255,.045));border:1px solid var(--border);border-radius:10px;
+  padding:10px 12px;margin:-4px 0 14px}
+.rb-ex-pick{flex:1;min-width:0;text-align:left;background:var(--card2);border:1px solid var(--border);
+  border-radius:8px;padding:8px 10px;color:var(--white);cursor:pointer}
+.rb-ex-pick span{display:block;font-size:13px;font-weight:650;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.rb-ex-pick small{display:block;font-size:10.5px;color:var(--gray);margin-top:2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+
+/* Media de técnica que no es un embed: los GIF y MP4 del catálogo de Skandi */
+.exercise-media-frame{width:100%;border-radius:12px;overflow:hidden;background:#000;display:block}
+.exercise-media-frame img,.exercise-media-frame video{width:100%;display:block;max-height:60vh;object-fit:contain}
+
 @media(max-width:360px){
   .week-day{grid-template-columns:44px minmax(0,1fr) auto;gap:8px}
   .ws-timer-panel{width:200px}
@@ -2714,7 +2730,7 @@ body.admin-mode #courtesy-modal label{border-radius:14px!important;border-color:
 // ── CONFIG & SUPABASE ───────────────────────────────────────
 const SUPABASE_URL='https://pmpjteuqjusbiduevbwq.supabase.co';
 const SUPABASE_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBtcGp0ZXVxanVzYmlkdWV2YndxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc2OTI1NjUsImV4cCI6MjA5MzI2ODU2NX0.XbMzZoo2yqtrD8znLnyo_1zDfrdJAvAPj1lqGOyXnLw';
-const APP_VERSION='20260821-01';
+const APP_VERSION='20260821-02';
 const MUSCLE_GROUPS=['Pecho','Espalda','Piernas','Glúteos','Hombros','Bíceps','Tríceps','Antebrazo','Core','Cardio','Full Body'];
 const EXERCISE_TYPES=['Fuerza','Calistenia','Isométrico','Cardio','Movilidad','Potencia','Técnica','Accesorio'];
 const EXERCISE_CATALOG_FALLBACK=[
@@ -3377,10 +3393,28 @@ function getEmbedUrl(url){
   if(s.includes('vimeo.com')){const m=s.match(/vimeo\.com\/(\d+)/);if(m)return'https://player.vimeo.com/video/'+m[1];}
   return s;
 }
+// El catálogo importado de Skandi trae GIFs y MP4 subidos al storage, no
+// enlaces de YouTube o Drive. Meterlos en un <iframe> los muestra de milagro
+// (el navegador abre el archivo como documento) pero sin controles y sin
+// escalar bien, así que se detectan por extensión y se pintan como <img> o
+// <video>, que es lo que son.
+function mediaKind(url){
+  const s=String(url||'').split('?')[0].split('#')[0].toLowerCase();
+  if(/\.(gif|png|jpe?g|webp|avif)$/.test(s))return 'image';
+  if(/\.(mp4|webm|mov|m4v)$/.test(s))return 'video';
+  return 'embed';
+}
+function directMediaHtml(url){
+  const kind=mediaKind(url);
+  if(kind==='image')return '<div class="exercise-media-frame"><img src="'+esc(url)+'" alt="Demostración del ejercicio" loading="lazy"></div>';
+  if(kind==='video')return '<div class="exercise-media-frame"><video src="'+esc(url)+'" controls playsinline muted loop preload="metadata"></video></div>';
+  return '';
+}
 function getVideoHtml(url){
   const s=String(url||'').trim();
   const embed=getEmbedUrl(s);
   if(!embed)return'';
+  if(mediaKind(s)!=='embed')return directMediaHtml(s);
   const isDrive=!!getDriveId(s);
   return '<div class="video-shell"><div class="video-frame"><iframe class="video-embed" src="'+esc(embed)+'" allow="autoplay; encrypted-media; picture-in-picture; fullscreen" allowfullscreen referrerpolicy="no-referrer-when-downgrade"></iframe></div></div>'
     +'<div class="video-actions"><button class="video-open-btn" data-embed="'+esc(embed)+'" onclick="openVideoModal(this.dataset.embed)">Ver grande</button></div>'
@@ -3389,6 +3423,15 @@ function getVideoHtml(url){
 function getExerciseFocusVideoHtml(url){
   const embed=getEmbedUrl(url);
   if(!embed)return'';
+  // Un GIF pesa poco y se entiende de un vistazo, así que se muestra en la
+  // ficha directo en vez de esconderlo tras un "ábrelo en grande".
+  if(mediaKind(url)!=='embed'){
+    return directMediaHtml(url)
+      +'<div class="exercise-focus-video-foot">'
+      +'<button class="ex-focus-min-btn" onclick="toggleExFocusVideo()">Minimizar</button>'
+      +'<button class="video-open-btn" data-embed="'+esc(String(url).trim())+'" onclick="openVideoModal(this.dataset.embed)">Ver grande</button>'
+      +'</div>';
+  }
   return '<div class="exercise-video-preview"><div class="exercise-video-preview-icon"><span class="play-tri"></span></div>'
     +'<div><div class="exercise-video-preview-title">Video de técnica</div><div class="exercise-video-preview-sub">Ábrelo en grande para verlo sin saturar el registro.</div></div></div>'
     +'<div class="exercise-focus-video-foot">'
@@ -3425,7 +3468,11 @@ function openVideoModal(embed){
   modal.id='video-modal';
   modal.className='video-modal';
   modal.innerHTML='<div class="video-modal-head"><span>Video</span><button class="video-modal-close" onclick="closeVideoModal()">Cerrar</button></div>'
-    +'<div class="video-modal-frame"><iframe class="video-embed" src="'+esc(embed)+'" allow="autoplay; encrypted-media; picture-in-picture; fullscreen" allowfullscreen referrerpolicy="no-referrer-when-downgrade"></iframe></div>';
+    +'<div class="video-modal-frame">'
+    +(mediaKind(embed)!=='embed'
+      ?directMediaHtml(embed)
+      :'<iframe class="video-embed" src="'+esc(embed)+'" allow="autoplay; encrypted-media; picture-in-picture; fullscreen" allowfullscreen referrerpolicy="no-referrer-when-downgrade"></iframe>')
+    +'</div>';
   document.body.appendChild(modal);
 }
 function closeVideoModal(){
@@ -7379,8 +7426,14 @@ async function loadWeekPlanSb(force){
   weekPlanLoadedAt=Date.now();
 }
 
+// En HABIT el color identifica al pizarrón del gym. Todo lo que crea el socio
+// lleva este color y solo este, para que de un vistazo se distinga lo suyo de
+// lo que le puso el coach. Se resuelve al pintar, no solo al guardar, para que
+// las rutinas creadas antes de esta regla también se vean uniformes.
+const MEMBER_ROUTINE_COLOR='#a78bfa';
 function routineById(id){return myRoutines.find(b=>b.id===id)||coachBoardsById[id]||null;}
 function isMyRoutine(b){return !!(b&&sbUser&&b.owner_id===sbUser.id);}
+function routineColor(b){return isMyRoutine(b)?MEMBER_ROUTINE_COLOR:((b&&b.color)||'#2563eb');}
 function routineExercises(b){return (b&&Array.isArray(b.exercises)?b.exercises:[]);}
 function programDaysOf(id){return myProgramDays.filter(d=>d.program_id===id).sort((a,b)=>a.dow-b.dow);}
 function activeProgram(){return myPrograms.find(p=>p.is_active)||null;}
@@ -7456,9 +7509,13 @@ function renderRutSemana(){
         +'<span class="week-day-empty">Poner rutina</span>'
         +'<span class="week-day-go">›</span></button>';
     }else{
+      // board_color es una copia que se guardó al asignar el día; si la rutina
+      // está cargada mandan sus datos actuales, y si no, la copia.
+      const b=routineById(tpl.board_id);
+      const dot=b?routineColor(b):(tpl.board_color||'#2563eb');
       html+='<div class="'+cls+'">'
         +'<span class="week-day-dow">'+DOW_SHORT[d]+'</span>'
-        +'<span class="week-day-name" onclick="openDayPicker('+d+')"><span class="week-dot" style="background:'+esc(tpl.board_color||'#2563eb')+'"></span>'+esc(tpl.board_name)+'</span>'
+        +'<span class="week-day-name" onclick="openDayPicker('+d+')"><span class="week-dot" style="background:'+esc(dot)+'"></span>'+esc(b?b.name:tpl.board_name)+'</span>'
         +'<button class="week-day-edit" onclick="clearWeekDay('+d+')" title="Quitar del día" aria-label="Quitar rutina del día">✕</button>'
         +'</div>';
     }
@@ -7481,7 +7538,7 @@ function openDayPicker(dow){
     html='<div class="empty">Todavía no tienes rutinas. Crea una en “Mis rutinas”.</div>';
   }else{
     html=myRoutines.map(b=>'<button class="ex-menu-item" onclick="setWeekDay('+dow+',&quot;'+esc(b.id)+'&quot;)">'
-      +'<span class="week-dot" style="background:'+esc(b.color||'#2563eb')+'"></span>'
+      +'<span class="week-dot" style="background:'+esc(routineColor(b))+'"></span>'
       +'<span style="flex:1;min-width:0">'+esc(b.name)+'<span style="display:block;font-size:11px;color:var(--gray)">'
       +routineExercises(b).length+' ejercicios · '+(isMyRoutine(b)?'Tuya':'Del gym')+'</span></span>'
       +(tpl&&tpl.board_id===b.id?'<span style="color:var(--green)">✓</span>':'')
@@ -7502,7 +7559,7 @@ async function setWeekDay(dow,boardId){
   if(!b)return;
   try{
     const{error}=await sb.from('coaching_week_templates').upsert({
-      user_id:sbUser.id,dow,board_id:b.id,board_name:b.name,board_color:b.color||'#2563eb',
+      user_id:sbUser.id,dow,board_id:b.id,board_name:b.name,board_color:routineColor(b),
       created_by:sbUser.id,updated_at:new Date().toISOString()
     },{onConflict:'user_id,dow'});
     if(error)throw error;
@@ -7724,7 +7781,7 @@ function routineCardHtml(b){
   const dayIdx=weekTemplate.filter(t=>t.board_id===b.id).map(t=>DOW_SHORT[t.dow]);
   return '<article class="routine-card'+(open?' open':'')+'">'
     +'<div class="routine-card-head" onclick="toggleRoutineCard(&quot;'+esc(b.id)+'&quot;)">'
-    +'<span class="week-dot" style="background:'+esc(b.color||'#2563eb')+'"></span>'
+    +'<span class="week-dot" style="background:'+esc(routineColor(b))+'"></span>'
     +'<div class="routine-card-title"><strong>'+esc(b.name)+'</strong>'
     +'<span>'+exercises.length+' ejercicio'+(exercises.length===1?'':'s')
     +(dayIdx.length?' · '+dayIdx.join(' '):'')
@@ -7737,7 +7794,7 @@ function routineCardHtml(b){
         +(exercises.length>6?'<span class="routine-ex-pill">+'+(exercises.length-6)+'</span>':'')
         +'</div>':'<div class="empty" style="margin:0 0 12px">Esta rutina aún no tiene ejercicios.</div>')
       +'<div class="routine-card-actions">'
-      +(exercises.length?'<button class="btn" onclick="startWorkoutFromBoardSb(&quot;'+esc(b.id)+'&quot;,&quot;'+esc(b.name)+'&quot;,&quot;'+esc(b.color||'#2563eb')+'&quot;)">Entrenar</button>':'')
+      +(exercises.length?'<button class="btn" onclick="startWorkoutFromBoardSb(&quot;'+esc(b.id)+'&quot;,&quot;'+esc(b.name)+'&quot;,&quot;'+esc(routineColor(b))+'&quot;)">Entrenar</button>':'')
       +(mine
         ?'<button class="btn-sm" onclick="openRoutineBuilder(&quot;'+esc(b.id)+'&quot;)">Editar</button>'
          +'<button class="btn-sm bred" onclick="deleteRoutineSb(&quot;'+esc(b.id)+'&quot;)">Eliminar</button>'
@@ -7787,7 +7844,7 @@ async function forkRoutineSb(boardId){
   showLoading('Duplicando rutina...');
   try{
     const{data,error}=await sb.from('boards').insert({
-      name:src.name+' (mi versión)',color:src.color||'#2563eb',
+      name:src.name+' (mi versión)',color:MEMBER_ROUTINE_COLOR,
       exercises:routineExercises(src),owner_id:sbUser.id,
       forked_from:src.id,forked_from_name:src.name
     }).select().single();
@@ -7823,8 +7880,18 @@ async function deleteRoutineSb(boardId){
 // ── BUILDER DE RUTINA ─────────────────────────────────────────────────────
 // Guarda exactamente el mismo shape JSONB que usan los pizarrones del coach,
 // así que la ficha de técnica, los videos y el motor de series no cambian.
+//
+// Dos reglas propias del socio:
+//  · Un solo color para todo lo que crea él (MEMBER_ROUTINE_COLOR). El color en
+//    HABIT identifica al pizarrón del gym; si el socio pudiera elegirlo, sus
+//    rutinas se confundirían con las del coach de un vistazo.
+//  · El ejercicio se elige del catálogo, no se escribe. Escribir a mano dejaba
+//    ejercicios sin músculo, sin instrucciones y sin video, y esos son
+//    justamente los datos de los que vive la ficha de técnica.
 let _rbBoardId=null;
 let _rbDraft=null;
+let _rbPickerFor=null;   // índice del ejercicio que se está eligiendo, o 'new'
+let _rbPickerQuery='';
 
 async function openRoutineBuilder(boardId){
   await loadExerciseCatalogSb();
@@ -7832,16 +7899,16 @@ async function openRoutineBuilder(boardId){
   _rbBoardId=boardId||null;
   _rbDraft={
     name:b?b.name:'',
-    color:b?(b.color||'#2563eb'):'#2563eb',
     exercises:b?JSON.parse(JSON.stringify(routineExercises(b))):[]
   };
+  _rbPickerFor=null;_rbPickerQuery='';
   document.getElementById('routine-builder-title').textContent=boardId?'Editar rutina':'Nueva rutina';
   renderRoutineBuilder();
   document.getElementById('routine-builder-modal').style.display='flex';
 }
 function closeRoutineBuilder(){
   document.getElementById('routine-builder-modal').style.display='none';
-  _rbBoardId=null;_rbDraft=null;
+  _rbBoardId=null;_rbDraft=null;_rbPickerFor=null;
 }
 
 // El draft se lee del DOM antes de cada re-render para no perder lo que el
@@ -7850,11 +7917,8 @@ function rbSyncFromDom(){
   if(!_rbDraft)return;
   const nameEl=document.getElementById('rb-name');
   if(nameEl)_rbDraft.name=nameEl.value;
-  const colorEl=document.getElementById('rb-color');
-  if(colorEl)_rbDraft.color=colorEl.value;
   _rbDraft.exercises.forEach((ex,i)=>{
     const g=id=>document.getElementById(id+'-'+i);
-    if(g('rb-ex-name'))ex.name=g('rb-ex-name').value;
     if(g('rb-ex-sets'))ex.sets=g('rb-ex-sets').value;
     if(g('rb-ex-reps'))ex.reps=g('rb-ex-reps').value;
     if(g('rb-ex-rest'))ex.rest=g('rb-ex-rest').value;
@@ -7866,26 +7930,28 @@ function rbSyncFromDom(){
 function renderRoutineBuilder(){
   const body=document.getElementById('routine-builder-body');
   if(!body||!_rbDraft)return;
-  const cat=exerciseCatalogRows();
   let html='<div class="field"><label>Nombre de la rutina</label>'
     +'<input type="text" id="rb-name" placeholder="Ej. Empuje pesado" value="'+esc(_rbDraft.name)+'"></div>'
-    +'<div class="field"><label>Color</label>'
-    +'<select id="rb-color">'+[['#2563eb','Azul'],['#20d492','Verde'],['#f5b84b','Ámbar'],['#ff6464','Rojo'],['#a78bfa','Morado']]
-      .map(([v,l])=>'<option value="'+v+'" '+(_rbDraft.color===v?'selected':'')+'>'+l+'</option>').join('')
-    +'</select></div>'
+    +'<div class="rb-color-note"><span class="week-dot" style="background:'+MEMBER_ROUTINE_COLOR+'"></span>'
+    +'Tus rutinas llevan este color para distinguirlas de las del gym.</div>'
     +'<p class="slbl">Ejercicios</p>';
 
-  if(!_rbDraft.exercises.length){
+  if(!_rbDraft.exercises.length&&_rbPickerFor!=='new'){
     html+='<div class="empty">Sin ejercicios todavía.</div>';
-  }else{
-    html+=_rbDraft.exercises.map((ex,i)=>'<div class="exercise-detail static" style="padding:12px;cursor:default">'
+  }
+
+  html+=_rbDraft.exercises.map((ex,i)=>{
+    const meta=[ex.muscleGroup,ex.exerciseType].filter(Boolean).join(' · ');
+    return '<div class="exercise-detail static" style="padding:12px;cursor:default">'
       +'<div style="display:flex;align-items:center;gap:8px;margin-bottom:8px">'
       +'<div class="ex-num">'+(i+1)+'</div>'
-      +'<input type="text" id="rb-ex-name-'+i+'" list="rb-catalog" placeholder="Nombre del ejercicio" value="'+esc(ex.name||'')+'" '
-      +'onchange="rbApplyCatalog('+i+',this.value)" '
-      +'style="flex:1;min-width:0;background:var(--card2);border:1px solid var(--border);border-radius:8px;padding:9px 10px;color:var(--white);font-size:13px">'
+      +'<button type="button" class="rb-ex-pick" onclick="rbOpenPicker('+i+')">'
+      +'<span>'+esc(ex.name||'Elegir ejercicio')+'</span>'
+      +(meta?'<small>'+esc(meta)+'</small>':'<small>toca para elegir del catálogo</small>')
+      +'</button>'
       +'<button class="ws-ex-tool danger" onclick="rbRemoveEx('+i+')">Quitar</button>'
       +'</div>'
+      +(_rbPickerFor===i?rbPickerHtml():'')
       +'<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:6px">'
       +rbFieldHtml('rb-ex-sets-'+i,'Series',ex.sets||'','3')
       +rbFieldHtml('rb-ex-reps-'+i,'Reps/tiempo',ex.reps||'','8-10')
@@ -7896,13 +7962,15 @@ function renderRoutineBuilder(){
       +'<option value="">Normal</option>'
       +['A','B','C','D'].map(g=>'<option value="'+g+'" '+(String(ex.supersetGroup||'').toUpperCase()===g?'selected':'')+'>Superserie '+g+'</option>').join('')
       +'</select></div>'
-      +'</div>').join('');
-  }
+      +'</div>';
+  }).join('');
 
-  html+='<datalist id="rb-catalog">'+cat.slice(0,500).map(e=>'<option value="'+esc(e.name)+'">'+esc([e.primary_muscle,e.category].filter(Boolean).join(' · '))+'</option>').join('')+'</datalist>'
-    +'<button class="ws-add-ex" style="margin-top:6px" onclick="rbAddEx()">+ Agregar ejercicio</button>'
+  html+=(_rbPickerFor==='new'?'<div class="exercise-detail static" style="padding:12px;cursor:default">'+rbPickerHtml()+'</div>':'')
+    +'<button class="ws-add-ex" style="margin-top:6px" onclick="rbOpenPicker(&quot;new&quot;)">+ Agregar ejercicio</button>'
     +'<button class="btn" style="margin-top:14px" onclick="saveRoutineSb()">Guardar rutina</button>';
   body.innerHTML=html;
+  const q=document.getElementById('rb-pick-q');
+  if(q)q.focus();
 }
 
 function rbFieldHtml(id,label,value,ph){
@@ -7911,34 +7979,58 @@ function rbFieldHtml(id,label,value,ph){
     +'style="width:100%;background:var(--card2);border:1px solid var(--border);border-radius:8px;padding:8px;color:var(--white);font-size:12.5px;text-align:center"></div>';
 }
 
-function rbAddEx(){
+// ── Selector de ejercicio (solo catálogo) ─────────────────────────────────
+function rbOpenPicker(target){
   rbSyncFromDom();
-  _rbDraft.exercises.push({name:'',sets:'3',reps:'8-10',rest:'90s',targetRir:'2'});
+  _rbPickerFor=(_rbPickerFor===target)?null:target;
+  _rbPickerQuery='';
+  renderRoutineBuilder();
+}
+function rbPickerHtml(){
+  return '<div class="ws-swap-panel" style="padding:0 0 10px">'
+    +'<input id="rb-pick-q" class="set-reps-in" style="width:100%;text-align:left;padding:10px 12px" '
+    +'placeholder="Buscar ejercicio…" value="'+esc(_rbPickerQuery)+'" oninput="rbRenderPickerList()">'
+    +'<div class="ws-swap-list" id="rb-pick-list">'+rbPickerListHtml()+'</div></div>';
+}
+function rbPickerListHtml(){
+  const list=wsCatalogList(_rbPickerQuery);
+  if(!list.length)return '<div class="empty" style="margin:0">Sin coincidencias.</div>';
+  return list.map(e=>wsPickItemHtml(e,'rbPickExercise(&quot;'+esc(e.slug||e.name)+'&quot;)')).join('');
+}
+function rbRenderPickerList(){
+  _rbPickerQuery=document.getElementById('rb-pick-q')?.value||'';
+  const el=document.getElementById('rb-pick-list');
+  if(el)el.innerHTML=rbPickerListHtml();
+}
+// Al elegir del catálogo se copian músculo, tipo, instrucciones y video — es lo
+// que hace que una rutina del socio salga con video de demostración sin que él
+// tenga que pegar ningún enlace.
+function rbPickExercise(slug){
+  rbSyncFromDom();
+  const row=wsCatalogRowBySlug(slug);
+  if(!row)return;
+  const target=_rbPickerFor;
+  const base=(target==='new'||!_rbDraft.exercises[target])
+    ?{sets:'3',reps:'8-10',rest:'90s',targetRir:'2'}
+    :_rbDraft.exercises[target];
+  const ex={...base,
+    name:row.name,
+    catalogId:row.id||'',
+    exerciseType:row.category||'',
+    muscleGroup:row.primary_muscle||'',
+    secondaryMuscleGroups:row.secondary_muscles||[],
+    instructions:row.instructions||''};
+  if(row.video_url)ex.video_url=row.video_url; else delete ex.video_url;
+  if(row.default_tracking==='time'&&!/[:sm]/.test(String(ex.reps||'')))ex.reps='0:30';
+  if(target==='new')_rbDraft.exercises.push(ex);
+  else _rbDraft.exercises[target]=ex;
+  _rbPickerFor=null;_rbPickerQuery='';
   renderRoutineBuilder();
 }
 function rbRemoveEx(i){
   rbSyncFromDom();
   _rbDraft.exercises.splice(i,1);
-  renderRoutineBuilder();
-}
-// Al escribir un nombre que existe en el catálogo se copian músculo, tipo,
-// instrucciones y video — es lo que hace que una rutina del socio salga con
-// video de demostración sin que él tenga que pegar ningún enlace.
-function rbApplyCatalog(i,value){
-  rbSyncFromDom();
-  const match=findExerciseCatalogMatch(value);
-  const ex=_rbDraft.exercises[i];
-  if(!ex)return;
-  if(match){
-    ex.name=match.name;
-    ex.catalogId=match.id||'';
-    ex.exerciseType=match.category||'';
-    ex.muscleGroup=match.primary_muscle||'';
-    ex.secondaryMuscleGroups=match.secondary_muscles||[];
-    ex.instructions=match.instructions||'';
-    if(match.video_url)ex.video_url=match.video_url;
-    if(match.default_tracking==='time'&&!/[:sm]/.test(String(ex.reps||'')))ex.reps='0:30';
-  }
+  if(_rbPickerFor===i)_rbPickerFor=null;
   renderRoutineBuilder();
 }
 
@@ -7948,6 +8040,7 @@ async function saveRoutineSb(){
   rbSyncFromDom();
   const name=String(_rbDraft.name||'').trim();
   if(!name){toast('Ponle nombre a la rutina','warn');return;}
+  // Un renglón sin ejercicio elegido todavía simplemente no se guarda.
   const exercises=_rbDraft.exercises
     .filter(ex=>String(ex.name||'').trim())
     .map(ex=>{
@@ -7969,7 +8062,7 @@ async function saveRoutineSb(){
   _savingRoutine=true;
   showLoading('Guardando rutina...');
   try{
-    const patch={name,color:_rbDraft.color||'#2563eb',exercises,updated_at:new Date().toISOString()};
+    const patch={name,color:MEMBER_ROUTINE_COLOR,exercises,updated_at:new Date().toISOString()};
     if(_rbBoardId){
       const{error}=await sb.from('boards').update(patch).eq('id',_rbBoardId).eq('owner_id',sbUser.id);
       if(error)throw error;
