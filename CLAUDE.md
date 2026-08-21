@@ -59,6 +59,16 @@ Core tables:
   `SELECT` policy is `owner_id is null or owner_id = auth.uid()`. Member routines always carry
   `MEMBER_ROUTINE_COLOR`; the color is what tells a member's routine apart from the coach's, so
   it is not theirs to pick and `routineColor()` resolves it at render time
+**Entrenar vs Coaching.** The `rutinas` view (labelled "Entrenar") owns everything about
+training and is open to every member: today's session, the weekly grid, the member's routines,
+the muscle-fatigue body and the Progreso screen. The `coaching` view is only for David's clients
+(`profiles.coaching_beta`) and owns only what the coach relationship adds: chat, habits, fasting,
+adherence and the post-workout feedback he reads. Nothing is rendered in both — Coaching links
+into Entrenar instead. `coaching_week_templates.created_by` says who set each weekday, which is
+what lets Entrenar mark a day as "de tu coach" and the coach's panel mark one as set by the
+member; both sides rewrite the whole week on save, so that marking is the only thing preventing
+a silent overwrite.
+
 - `coaching_week_templates` / `coaching_programs` / `coaching_program_days` — the member's weekly
   plan (`dow` 0 = Monday) and named programs that overwrite it. Activating a program rewrites
   every `coaching_week_templates` row, then re-materializes the week via the

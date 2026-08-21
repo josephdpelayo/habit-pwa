@@ -6,18 +6,18 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="HABIT">
 <meta name="application-name" content="HABIT">
-<link rel="manifest" href="/manifest.json?v=20260821-04">
-<link rel="apple-touch-icon" sizes="120x120" href="/icons/icon-120.png?v=20260821-04">
-<link rel="apple-touch-icon" sizes="152x152" href="/icons/icon-152.png?v=20260821-04">
-<link rel="apple-touch-icon" sizes="167x167" href="/icons/icon-167.png?v=20260821-04">
-<link rel="apple-touch-icon" sizes="180x180" href="/icons/icon-180.png?v=20260821-04">
-<link rel="icon" type="image/png" sizes="32x32" href="/icons/icon-32.png?v=20260821-04">
+<link rel="manifest" href="/manifest.json?v=20260821-05">
+<link rel="apple-touch-icon" sizes="120x120" href="/icons/icon-120.png?v=20260821-05">
+<link rel="apple-touch-icon" sizes="152x152" href="/icons/icon-152.png?v=20260821-05">
+<link rel="apple-touch-icon" sizes="167x167" href="/icons/icon-167.png?v=20260821-05">
+<link rel="apple-touch-icon" sizes="180x180" href="/icons/icon-180.png?v=20260821-05">
+<link rel="icon" type="image/png" sizes="32x32" href="/icons/icon-32.png?v=20260821-05">
 <title>HABIT</title>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Share+Tech+Mono&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="/skandi-recovery.js?v=20260821-04"></script>
-<script src="/body-figure.js?v=20260821-04"></script>
+<script src="/skandi-recovery.js?v=20260821-05"></script>
+<script src="/body-figure.js?v=20260821-05"></script>
 <style>
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
 :root{
@@ -1605,6 +1605,8 @@ body.admin-mode #courtesy-modal label{border-radius:14px!important;border-color:
 .week-day{display:grid;grid-template-columns:52px minmax(0,1fr) auto;align-items:center;gap:10px;width:100%;text-align:left;
   background:var(--card);border:1px solid var(--border);border-radius:var(--radius-md,12px);padding:12px 12px;color:var(--white);cursor:pointer}
 .week-day.today{border-color:rgba(127,176,255,.45);background:rgba(37,99,235,.10)}
+.week-day.from-coach{border-left:3px solid var(--purple)}
+.from-coach-tag{display:block;font-size:10px;font-weight:600;color:var(--purple);letter-spacing:.02em;margin-top:2px}
 .week-day-dow{font-size:10.5px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--gray)}
 .week-day.today .week-day-dow{color:var(--bl)}
 /* El punto de color se usa suelto en la nota del builder y en el selector de
@@ -1656,46 +1658,61 @@ body.admin-mode #courtesy-modal label{border-radius:14px!important;border-color:
   width:36px;height:36px;font-size:17px;cursor:pointer;flex:0 0 auto;line-height:1}
 /* El colchón de abajo deja que el timer flotante nunca tape el último botón */
 .ws-content{flex:1;min-height:0;overflow-y:auto;-webkit-overflow-scrolling:touch;
-  padding:14px 14px calc(env(safe-area-inset-bottom,0px) + 96px)}
+  padding:10px 16px calc(env(safe-area-inset-bottom,0px) + 96px)}
 .ws-content::-webkit-scrollbar{width:3px}
 .ws-content::-webkit-scrollbar-thumb{background:var(--border);border-radius:99px}
-.ws-progress{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:12px}
-.ws-progress-k{font-size:11px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--gray)}
-.ws-progress-pill{font-size:12px;font-weight:800;color:var(--white);background:var(--surface-2,rgba(255,255,255,.07));
-  border:1px solid var(--border);border-radius:999px;padding:6px 12px}
+.ws-progress{padding:10px 0 16px;margin-bottom:2px}
+.ws-progress-copy{display:flex;align-items:baseline;justify-content:space-between;gap:10px;margin-bottom:9px}
+.ws-progress-k{font-size:12px;font-weight:650;color:var(--gray)}
+.ws-progress-k strong{color:var(--white);font-size:14px;font-weight:750}
+.ws-progress-pill{font-size:11.5px;font-weight:650;color:var(--gray);white-space:nowrap}
+.ws-progress-track{height:3px;border-radius:99px;background:rgba(255,255,255,.08);overflow:hidden}
+.ws-progress-track i{display:block;height:100%;border-radius:inherit;background:var(--green);transition:width .2s ease}
 .ws-foot{display:flex;gap:10px;margin-top:18px}
 .ws-foot .btn{flex:2}
 .ws-foot .btn-cancel{flex:1;background:rgba(239,68,68,.12);border:1px solid rgba(239,68,68,.3);color:#ef4444;
   border-radius:13px;min-height:50px;font-size:13px;font-weight:800;cursor:pointer}
 
 /* Tarjeta de ejercicio dentro de la hoja */
-.ws-ex{background:var(--card);border:1px solid var(--border);border-radius:var(--radius-md,12px);margin-bottom:12px;overflow:hidden}
-.ws-ex.done{opacity:.62}
-.ws-ex-head{display:flex;align-items:flex-start;gap:10px;padding:12px;cursor:pointer}
-.ws-ex-num{width:26px;height:26px;border-radius:9px;background:var(--surface-2,rgba(255,255,255,.07));color:var(--gl);
+.ws-ex{position:relative;background:transparent;border:0;border-bottom:1px solid rgba(255,255,255,.075);border-radius:0;padding:5px 0 15px;margin-bottom:10px}
+.ws-ex.done{opacity:.48}
+.ws-ex.in-progress{opacity:1}
+.ws-ex-head{display:flex;align-items:flex-start;gap:10px;padding:10px 0 8px;cursor:pointer}
+.ws-ex-num{width:24px;height:24px;border-radius:8px;background:rgba(255,255,255,.055);color:var(--gray);
   display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:800;flex:0 0 auto}
+.ws-ex.in-progress .ws-ex-num{background:rgba(32,212,146,.13);color:var(--green)}
 .ws-ex-info{flex:1;min-width:0}
-.ws-ex-name{font-size:14.5px;font-weight:750;display:flex;align-items:center;gap:6px;flex-wrap:wrap}
-.ws-ex-name .ws-ex-chev{font-size:12px;color:var(--gray);font-weight:400}
-.ws-ex-meta{font-size:11.5px;color:var(--gray);margin-top:3px}
+.ws-ex-name{font-size:15px;font-weight:700;line-height:1.25;display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+.ws-ex-name .ws-ex-chev{font-size:17px;color:#646873;font-weight:400;line-height:1}
+.ws-ex-meta{font-size:11px;color:#777d88;margin-top:3px}
 .ws-ex-last{font-size:11px;color:var(--bl);margin-top:4px}
-.ws-ex-video{flex:0 0 auto;border:1px solid rgba(127,176,255,.35);background:rgba(37,99,235,.14);color:var(--bl);
-  border-radius:9px;width:30px;height:30px;font-size:11px;cursor:pointer;line-height:1}
-.ws-ex-badge{flex:0 0 auto;font-size:11px;font-weight:800;color:var(--gray);background:var(--surface,rgba(255,255,255,.045));
-  border:1px solid var(--border);border-radius:999px;padding:4px 9px}
-.ws-ex-badge.done{color:var(--green);border-color:rgba(32,212,146,.32);background:rgba(32,212,146,.10)}
-.ws-ex-tools{display:flex;gap:6px;padding:0 12px 10px;justify-content:flex-end}
+.ws-ex-video{flex:0 0 auto;border:0;background:transparent;color:#8aa4cc;border-radius:8px;width:26px;height:26px;font-size:10px;cursor:pointer;line-height:1}
+.ws-ex-badge{flex:0 0 auto;font-size:10.5px;font-weight:700;color:#777d88;padding:5px 0;min-width:28px;text-align:right}
+.ws-ex-badge.done{color:var(--green)}
+.ws-ex-more{position:relative;margin:-2px 0 5px auto;width:max-content}
+.ws-ex-more summary{list-style:none;color:#777d88;font-size:15px;letter-spacing:2px;cursor:pointer;padding:2px 0 5px 14px}
+.ws-ex-more summary::-webkit-details-marker{display:none}
+.ws-ex-tools{display:flex;gap:6px;padding:3px 0 7px;justify-content:flex-end}
 .ws-ex-tool{border:1px solid var(--border);background:var(--surface,rgba(255,255,255,.045));color:var(--gray);
-  border-radius:8px;padding:5px 10px;font-size:10.5px;font-weight:700;cursor:pointer}
+  border-radius:999px;padding:6px 11px;font-size:10.5px;font-weight:650;cursor:pointer}
 .ws-ex-tool.danger{color:#ef4444;border-color:rgba(239,68,68,.28)}
 .ws-swap-panel{padding:0 12px 12px}
 .ws-swap-list{display:flex;flex-direction:column;gap:6px;max-height:240px;overflow-y:auto;margin-top:8px}
 .ws-pick-item{width:100%;text-align:left;border:1px solid var(--border);background:var(--card2);color:var(--white);
   border-radius:10px;padding:10px 12px;font-size:13px;cursor:pointer}
 .ws-pick-item small{display:block;color:var(--gray);font-size:11px;margin-top:2px}
-.ws-add-ex{width:100%;border:1px dashed var(--border);background:transparent;color:var(--gl);border-radius:12px;
-  padding:13px;font-size:12.5px;font-weight:700;cursor:pointer}
+.ws-add-ex{width:100%;border:0;background:transparent;color:#8aa4cc;border-radius:10px;
+  padding:12px;font-size:12px;font-weight:650;cursor:pointer}
 
+/* Series compactas: son el dato principal, sin otra tarjeta anidada */
+.workout-sheet .set-tracker{padding:4px 0 0;background:transparent;border:0}
+.workout-sheet .set-tracker-hdr{color:#626873;padding:0 1px 5px}
+.workout-sheet .set-row{margin-bottom:5px}
+.workout-sheet .set-reps-in{background:rgba(255,255,255,.04);border-color:rgba(255,255,255,.075);border-radius:9px;padding:8px 5px;text-align:center}
+.workout-sheet .set-check{border-radius:10px;background:rgba(255,255,255,.035);border-color:rgba(255,255,255,.12)}
+.workout-sheet .set-tracker-actions{margin-top:7px}
+.workout-sheet .set-tracker-actions .btn-sm{border-color:transparent;background:transparent;color:#7f8a99;padding:7px 8px}
+.workout-sheet .set-tracker-actions .btn-sm:last-child{flex:0 0 auto}
 /* Columna de RIR en el set-tracker */
 .set-tracker.has-rir .set-tracker-hdr,.set-tracker.has-rir .set-row{grid-template-columns:24px 1fr 1fr 46px 40px 22px}
 .set-rir-in{text-align:center}
@@ -1739,6 +1756,19 @@ body.admin-mode #courtesy-modal label{border-radius:14px!important;border-color:
 /* Media de técnica que no es un embed: los GIF y MP4 del catálogo de Skandi */
 .exercise-media-frame{width:100%;border-radius:12px;overflow:hidden;background:#000;display:block}
 .exercise-media-frame img,.exercise-media-frame video{width:100%;display:block;max-height:60vh;object-fit:contain}
+
+/* Coaching: el entreno del día es una línea que lleva a Entrenar, no una tarjeta */
+.coach-workout-line{display:flex;align-items:center;gap:10px;width:100%;text-align:left;cursor:pointer;
+  background:var(--card);border:1px solid var(--border);border-radius:var(--radius-md,12px);
+  padding:13px 14px;margin-bottom:8px;color:var(--white)}
+.coach-workout-line:active{background:var(--card2)}
+.coach-workout-line.done{opacity:.65}
+.coach-workout-line-info{flex:1;min-width:0}
+.coach-workout-line-info strong{display:block;font-size:14px;font-weight:750;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.coach-workout-line-info small{display:block;font-size:11.5px;color:var(--gray);margin-top:2px}
+.coach-workout-line-go{flex:0 0 auto;font-size:12px;font-weight:800;color:var(--bl)}
+.coach-plan-links{display:flex;gap:8px;margin-top:14px}
+.coach-plan-links .btn-sm{flex:1;text-align:center}
 
 /* ── Cuerpo y fatiga ───────────────────────────────────────────────────── */
 .body-card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius-md,12px);padding:14px;margin-top:14px}
@@ -1988,12 +2018,10 @@ body.admin-mode #courtesy-modal label{border-radius:14px!important;border-color:
       <button class="coach-hub-tab active" data-tab="hoy" onclick="coachHubTab('hoy',this)">
         <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>Hoy</button>
       <button class="coach-hub-tab" data-tab="programa" onclick="coachHubTab('programa',this)">
-        <svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M3 10h18M8 2v4M16 2v4M8 15l2 2 4-4"/></svg>Calendario</button>
+        <svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M3 10h18M8 2v4M16 2v4M8 15l2 2 4-4"/></svg>Plan</button>
       <button class="coach-hub-tab" data-tab="mensajes" onclick="coachHubTab('mensajes',this)">
         <span id="coach-hub-mensajes-badge" class="bnb-badge" data-mensajes-nav-count></span>
         <svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>Mensajes</button>
-      <button class="coach-hub-tab" data-tab="tu" onclick="coachHubTab('tu',this)">
-        <svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21v-1a8 8 0 0116 0v1"/></svg>Tú</button>
     </div>
 
     <div id="v-coach-hoy" class="view active">
@@ -2021,12 +2049,6 @@ body.admin-mode #courtesy-modal label{border-radius:14px!important;border-color:
       </div>
     </div>
 
-    <div id="v-coach-tu" class="view">
-      <div class="scroll-area">
-        <p class="slbl">Tus ejercicios</p>
-        <div id="coach-tu-panel"></div>
-      </div>
-    </div>
   </div>
 
   <!-- SCORES -->
@@ -2791,7 +2813,7 @@ body.admin-mode #courtesy-modal label{border-radius:14px!important;border-color:
 // ── CONFIG & SUPABASE ───────────────────────────────────────
 const SUPABASE_URL='https://pmpjteuqjusbiduevbwq.supabase.co';
 const SUPABASE_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBtcGp0ZXVxanVzYmlkdWV2YndxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc2OTI1NjUsImV4cCI6MjA5MzI2ODU2NX0.XbMzZoo2yqtrD8znLnyo_1zDfrdJAvAPj1lqGOyXnLw';
-const APP_VERSION='20260821-04';
+const APP_VERSION='20260821-05';
 // La pierna va separada en cuádriceps, femorales y pantorrillas: la figura
 // corporal pinta esas tres regiones por separado y el motor de recuperación les
 // da ventanas de descanso distintas. 'Piernas' sigue reconociéndose al leer
@@ -4438,7 +4460,9 @@ async function doLogout(){
   expandedRoutineCards=new Set();rutActiveTab='hoy';closeWorkoutSheet();
   selectedRoutineBoardId=null;logScoreCtx=null;
   chatMessages=[];chatSendContext=null;
-  Object.values(_tuPrCharts).forEach(c=>{try{c.destroy();}catch(_){}});_tuPrCharts={};_tuScoreRows=null;
+  Object.values(_progresoCharts).forEach(c=>{try{c.destroy();}catch(_){}});_progresoCharts={};
+  _tuScoreRows=null;_progresoData=null;_progresoQuery='';
+  myRecovery=[];recoveryLoadedAt=0;bodyFlip='front';
   await sb.auth.signOut().catch(()=>{});
   document.body.classList.remove('reception-mode','admin-mode');
   document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
@@ -4774,28 +4798,22 @@ function admTab(t){
   if(t==='gaia')renderGaiaTab();
 }
 
-let coachHubActiveTab='hoy', coachTodayExpandedBoards=new Set(), selectedCoachProgramDs=null, workoutFeedbackScheduleId=null, workoutFeedbackEnergy='normal', workoutFeedbackDifficulty='normal', workoutFeedbackSoreness=false, workoutFeedbackSorenessArea='', workoutFeedbackSorenessLevel=0, workoutFeedbackSorenessTrend='igual', workoutFeedbackShare=true, workoutFeedbackSets={};
+let coachHubActiveTab='hoy', selectedCoachProgramDs=null, workoutFeedbackScheduleId=null, workoutFeedbackEnergy='normal', workoutFeedbackDifficulty='normal', workoutFeedbackSoreness=false, workoutFeedbackSorenessArea='', workoutFeedbackSorenessLevel=0, workoutFeedbackSorenessTrend='igual', workoutFeedbackShare=true, workoutFeedbackSets={};
 function coachHubTab(t,btn){
   coachHubActiveTab=t;
   document.querySelectorAll('.coach-hub-tab').forEach(b=>b.classList.remove('active'));
   if(btn)btn.classList.add('active');
   else{const b=document.querySelector('.coach-hub-tab[data-tab="'+t+'"]');if(b)b.classList.add('active');}
-  ['hoy','programa','mensajes','tu'].forEach(x=>{
+  ['hoy','programa','mensajes'].forEach(x=>{
     const el=document.getElementById('v-coach-'+x);
     if(el)el.classList.toggle('active',x===t);
   });
   if(t==='hoy')renderHoySb();
   if(t==='programa')renderCoachProgramaSb();
   if(t==='mensajes')renderMensajesSb();
-  if(t==='tu')renderCoachTuSb();
   updateSupportFab('coaching');
 }
 function renderCoachHub(){coachHubTab(coachHubActiveTab,null);}
-function toggleCoachTodayBoard(id){
-  if(coachTodayExpandedBoards.has(id))coachTodayExpandedBoards.delete(id);
-  else coachTodayExpandedBoards.add(id);
-  renderCoachHoyPanel();
-}
 function goToActiveSession(){
   openWorkoutSheet();
 }
@@ -6429,49 +6447,13 @@ function renderPrCardsInto(containerEl,chartsRegistry,scoreRows,unit,canvasPrefi
     }
   });
 }
-let _tuPrCharts={};
-let _tuScoreRows=null;
+let _tuScoreRows=null;   // filas de user_scores que comparten Progreso y el toggle kg/lb
 function updateScoreUnitToggleUI(){
   document.querySelectorAll('.tu-unit-pill').forEach(b=>b.classList.toggle('active',b.dataset.unit===scoreWeightUnit));
 }
-async function renderCoachTuSb(){
-  const el=document.getElementById('coach-tu-panel');
-  if(!el||!sbUser)return;
-  el.innerHTML='<div class="empty">Cargando...</div>';
-  try{
-    const[schRes,scRes,fastRes]=await Promise.allSettled([
-      sb.from('coaching_schedule').select('ds,duration_sec').eq('user_id',sbUser.id).eq('status','done'),
-      sb.from('user_scores').select('*').eq('user_id',sbUser.id).order('logged_at',{ascending:true}).limit(300),
-      sb.from('coaching_fasting_logs').select('duration_min,target_hours,fast_start_ds').eq('user_id',sbUser.id).order('fast_start_at',{ascending:false}).limit(30)
-    ]);
-    const doneRows=schRes.status==='fulfilled'?(schRes.value.data||[]):[];
-    _tuScoreRows=scRes.status==='fulfilled'?(scRes.value.data||[]):[];
-    const fastRows=(fastRes.status==='fulfilled'&&!fastRes.value.error)?(fastRes.value.data||[]):loadLocalFastingHistory();
-    const totalMin=Math.round(doneRows.reduce((s,r)=>s+(r.duration_sec||0),0)/60);
-    const avgFast=fastRows.length?Math.round(fastRows.reduce((s,r)=>s+(r.duration_min||0),0)/fastRows.length):0;
-    const bestFast=fastRows.reduce((m,r)=>Math.max(m,r.duration_min||0),0);
-    const doneDates=new Set(doneRows.map(r=>r.ds));
-    let streak=0,cursor=mazToday();
-    if(!doneDates.has(cursor))cursor=addDaysDS(cursor,-1);
-    while(doneDates.has(cursor)){streak++;cursor=addDaysDS(cursor,-1);}
-    el.innerHTML='<div class="tu-stats-row">'
-      +'<div class="tu-stat"><div class="tu-stat-n">'+totalMin+'</div><div class="tu-stat-l">Min de entreno</div></div>'
-      +'<div class="tu-stat"><div class="tu-stat-n">'+streak+'</div><div class="tu-stat-l">Días de racha</div></div>'
-      +'<div class="tu-stat"><div class="tu-stat-n">'+Math.floor(avgFast/60)+'h</div><div class="tu-stat-l">Ayuno prom</div></div>'
-      +'<div class="tu-stat"><div class="tu-stat-n">'+Math.floor(bestFast/60)+'h</div><div class="tu-stat-l">Mejor ayuno</div></div>'
-      +'</div>'
-      +'<div class="score-unit-toggle">'
-      +'<button class="tu-unit-pill" data-unit="kg" onclick="setLogScoreUnit(&quot;kg&quot;)">KG</button>'
-      +'<button class="tu-unit-pill" data-unit="lb" onclick="setLogScoreUnit(&quot;lb&quot;)">LB</button>'
-      +'</div><div id="coach-tu-scores"><div class="empty">Cargando...</div></div>';
-    updateScoreUnitToggleUI();
-    renderPrCardsInto(document.getElementById('coach-tu-scores'),_tuPrCharts,_tuScoreRows,scoreWeightUnit,'tu');
-  }catch(e){
-    el.innerHTML='<div class="empty">Error: '+e.message+'</div>';
-    console.error('renderCoachTuSb:',e);
-  }
-}
-
+// La pestaña Tú se fue: sus PRs y su racha viven en Progreso, con volumen por
+// músculo y buscador de ejercicio encima. Coaching se queda con lo que solo
+// pasa ahí — ayuno, hábitos, adherencia y el feedback que lee el coach.
 // ── HISTORIAL ────────────────────────────────────────────────
 const _prCharts={};
 let _historialRange='90'; // '30' | '90' | '365' | 'all'
@@ -6935,7 +6917,8 @@ function setLogScoreUnit(u){
   localStorage.setItem('habit_weight_unit',u);
   setLogScoreUnitUI(u);
   updateScoreUnitToggleUI();
-  if(_tuScoreRows)renderPrCardsInto(document.getElementById('coach-tu-scores'),_tuPrCharts,_tuScoreRows,scoreWeightUnit,'tu');
+  const progBox=document.getElementById('progreso-prs');
+  if(progBox&&_tuScoreRows)renderPrCardsInto(progBox,_progresoCharts,_tuScoreRows,scoreWeightUnit,'prog');
 }
 async function submitScore(){
   if(!logScoreCtx)return;
@@ -7519,6 +7502,11 @@ function isMyRoutine(b){return !!(b&&sbUser&&b.owner_id===sbUser.id);}
 function routineColor(b){return isMyRoutine(b)?MEMBER_ROUTINE_COLOR:((b&&b.color)||'#2563eb');}
 function routineExercises(b){return (b&&Array.isArray(b.exercises)?b.exercises:[]);}
 function programDaysOf(id){return myProgramDays.filter(d=>d.program_id===id).sort((a,b)=>a.dow-b.dow);}
+// created_by distingue quién puso cada día de la semana: si no fue el socio,
+// fue su coach desde el panel de admin. El socio puede moverlo igual —esa es la
+// regla— pero verlo marcado antes de tocarlo evita deshacer el plan sin querer.
+function isCoachSet(row){return !!(row&&row.created_by&&sbUser&&row.created_by!==sbUser.id);}
+function coachSetDays(){return (weekTemplate||[]).filter(isCoachSet);}
 function activeProgram(){return myPrograms.find(p=>p.is_active)||null;}
 
 // ══════════════════════════════════════════════════════════════════════════
@@ -7963,8 +7951,9 @@ async function renderProgreso(){
   // Las tarjetas de PR son las mismas de Coaching → Tú, alimentadas por user_scores.
   try{
     const{data:scores}=await sb.from('user_scores').select('*').eq('user_id',sbUser.id).order('logged_at',{ascending:false});
+    _tuScoreRows=scores||[];   // lo reusa setLogScoreUnit al cambiar kg/lb
     const box=document.getElementById('progreso-prs');
-    if(box)renderPrCardsInto(box,_progresoCharts,scores||[],scoreWeightUnit,'prog');
+    if(box)renderPrCardsInto(box,_progresoCharts,_tuScoreRows,scoreWeightUnit,'prog');
   }catch(e){console.error('renderProgreso PRs:',e);}
 }
 
@@ -8002,10 +7991,13 @@ function renderRutHoy(){
         +'</div></div>';
       return;
     }
+    // generated_from_base = la materializó la plantilla semanal; junto con
+    // created_by dice si el día viene del coach y no del propio socio.
+    const fromCoach=isCoachSet(row)||(row.generated_from_base&&row.created_by&&sbUser&&row.created_by!==sbUser.id);
     html+='<div class="coach-session-card">'
       +'<div class="coach-session-top"><div class="coach-session-dot" style="background:'+esc(row.board_color||'#2563eb')+'"></div>'
       +'<div style="min-width:0"><div class="coach-session-title">'+esc(row.board_name)+'</div>'
-      +'<div class="coach-session-meta">Rutina lista · '+exercises.length+' ejercicios</div></div></div>'
+      +'<div class="coach-session-meta">'+(fromCoach?'Programado por tu coach':'Rutina lista')+' · '+exercises.length+' ejercicios</div></div></div>'
       +'<div class="coach-session-actions">'
       +'<button class="btn" onclick="startCoachingSessionSb(&quot;'+row.id+'&quot;)">Iniciar</button>'
       +'</div></div>';
@@ -8044,9 +8036,11 @@ function renderRutSemana(){
       // está cargada mandan sus datos actuales, y si no, la copia.
       const b=routineById(tpl.board_id);
       const dot=b?routineColor(b):(tpl.board_color||'#2563eb');
-      html+='<div class="'+cls+'">'
+      html+='<div class="'+cls+(isCoachSet(tpl)?' from-coach':'')+'">'
         +'<span class="week-day-dow">'+DOW_SHORT[d]+'</span>'
-        +'<span class="week-day-name" onclick="openDayPicker('+d+')"><span class="week-dot" style="background:'+esc(dot)+'"></span>'+esc(b?b.name:tpl.board_name)+'</span>'
+        +'<span class="week-day-name" onclick="openDayPicker('+d+')"><span class="week-dot" style="background:'+esc(dot)+'"></span>'
+          +esc(b?b.name:tpl.board_name)
+          +(isCoachSet(tpl)?'<small class="from-coach-tag">de tu coach</small>':'')+'</span>'
         +'<button class="week-day-edit" onclick="clearWeekDay('+d+')" title="Quitar del día" aria-label="Quitar rutina del día">✕</button>'
         +'</div>';
     }
@@ -8054,7 +8048,9 @@ function renderRutSemana(){
   html+='</div>';
   html+='<button class="btn-sm" style="width:100%;margin-top:12px" onclick="openProgramForm()">Guardar esta semana como programa</button>';
   html+='<div style="font-size:11.5px;color:var(--gray);margin-top:10px;line-height:1.5">'
-    +'La semana se aplica sola cada lunes. Mover o saltarte un día suelto no cambia el programa.</div>';
+    +'La semana se aplica sola cada lunes. Mover o saltarte un día suelto no cambia el programa.'
+    +(coachSetDays().length?' Los días marcados los puso tu coach; puedes cambiarlos y él lo verá.':'')
+    +'</div>';
   el.innerHTML=html;
 }
 
@@ -8257,7 +8253,12 @@ async function applyProgramSb(id){
   if(_applyingProgram)return;
   const p=myPrograms.find(x=>x.id===id);
   if(!p)return;
-  if(!confirm('¿Cambiar tu semana a "'+p.name+'"?'))return;
+  const coachDays=coachSetDays();
+  const aviso=coachDays.length
+    ? '¿Cambiar tu semana a "'+p.name+'"?\n\nOjo: tu coach había puesto '+coachDays.length+' día'+(coachDays.length===1?'':'s')
+      +' ('+coachDays.map(d=>DOW_SHORT[d.dow]).join(', ')+') y este programa los reemplaza.'
+    : '¿Cambiar tu semana a "'+p.name+'"?';
+  if(!confirm(aviso))return;
   _applyingProgram=true;
   showLoading('Aplicando programa...');
   try{
@@ -9128,11 +9129,11 @@ function coachTodayContext(todayRows,relevantTasks,doneTasks,missedRows){
   if(missedRows.length)sub.push('pendiente de revisar ayer');
   return{title,sub:sub.join(' · ')};
 }
-function coachPrimaryActionHtml(todayRows){
+// El entreno ya tiene su propia línea justo debajo con la misma acción, así que
+// este botón se queda solo con el ayuno: es lo único de aquí que no vive en
+// Entrenar. Dos botones para lo mismo era la definición de sobrecargar.
+function coachPrimaryActionHtml(){
   const log=loadFastingLog();
-  if(activeCoachingSession)return '<button class="btn coach-primary-action" onclick="openWorkoutSheet()">Continuar entreno</button>';
-  const nextWorkout=todayRows.find(r=>r.status==='scheduled');
-  if(nextWorkout)return '<button class="btn coach-primary-action" onclick="startCoachingSessionSb(&quot;'+nextWorkout.id+'&quot;)">Iniciar '+esc(nextWorkout.board_name)+'</button>';
   if(log.lastMealAt&&!log.firstMealAt){
     const target=getFastingTargetHours()*60;
     const done=fastingDurationMin(log.lastMealAt,new Date().toISOString())>=target;
@@ -9140,11 +9141,6 @@ function coachPrimaryActionHtml(todayRows){
   }
   if(!log.lastMealAt||log.firstMealAt)return '<button class="btn coach-primary-action" onclick="fastingExpanded=true;renderCoachHoyPanel()">Registrar última comida</button>';
   return '';
-}
-function coachPrimaryWorkoutId(todayRows){
-  if(activeCoachingSession)return activeCoachingSession.id;
-  const nextWorkout=todayRows.find(r=>r.status==='scheduled');
-  return nextWorkout?nextWorkout.id:null;
 }
 function renderCoachHoyPanel(){
   const el=document.getElementById('coach-hoy-panel');
@@ -9159,13 +9155,12 @@ function renderCoachHoyPanel(){
   const doneTasks=relevantTasks.filter(isTaskDoneToday).length;
   const doneWorkouts=todayRows.filter(r=>r.status==='done').length;
   const ctx=coachTodayContext(todayRows,relevantTasks,doneTasks,missedRows);
-  const primaryWorkoutId=coachPrimaryWorkoutId(todayRows);
   let html='';
   html+='<div class="coach-context"><div class="coach-context-main"><div class="coach-context-k">Coaching de hoy</div><div class="coach-context-title">'+esc(ctx.title)+'</div><div class="coach-context-sub">'+esc(ctx.sub)+'</div></div><div class="badge bg-blue">'+doneWorkouts+'/'+todayRows.length+' · '+doneTasks+'/'+relevantTasks.length+'</div></div>';
-  html+=coachPrimaryActionHtml(todayRows);
+  html+=coachPrimaryActionHtml();
   if(missedRows.length){
     const label=missedRows.length===1?('el entreno de '+fmtDS(missedRows[0].ds)):(missedRows.length+' entrenos esta semana');
-    html+='<div class="coach-alert"><span>Quedó pendiente '+esc(label)+'. Puedes moverlo o marcar descanso en Calendario.</span><button class="coach-alert-close" onclick="this.parentElement.remove()">×</button></div>';
+    html+='<div class="coach-alert"><span>Quedó pendiente '+esc(label)+'. Puedes moverlo o marcar descanso en Plan.</span><button class="coach-alert-close" onclick="this.parentElement.remove()">×</button></div>';
   }
   if(activeCoachingSession&&activeCoachingSession.ds!==today){
     html+='<div class="coach-alert"><span>⏱ Tienes un entreno sin terminar de '+esc(fmtDS(activeCoachingSession.ds))+' ('+esc(activeCoachingSession.board_name)+')</span></div>'
@@ -9174,46 +9169,29 @@ function renderCoachHoyPanel(){
       +'<button class="btn-sm" style="flex:1;background:rgba(239,68,68,.12);border-color:rgba(239,68,68,.3);color:#ef4444" onclick="cancelCoachingSessionSb()">Cancelar</button>'
       +'</div></div>';
   }
+  // El entreno del día vive en Entrenar, con su hoja, su cuerpo y su progreso.
+  // Aquí va una sola línea que dispara la misma acción, en vez de repintar la
+  // tarjeta completa: Coaching es la relación con el coach, no un segundo lugar
+  // para entrenar.
   if(!todayRows.length){
-    html+='<div class="coach-empty">Día libre.<br>Puedes registrar ayuno o hacer una rutina asignada.</div>';
+    html+='<div class="coach-empty">Día libre.<br>Puedes registrar tu ayuno, o entrenar lo que quieras desde Entrenar.</div>';
   }else{
-    todayRows.forEach(todayRow=>{
-      if(todayRow.status==='done'){
-        html+='<div class="board-card"><div class="board-hdr"><div style="display:flex;align-items:center;gap:8px;min-width:0"><div style="width:10px;height:10px;border-radius:50%;background:'+esc(todayRow.board_color||'#2563eb')+'"></div><span class="board-title">'+esc(todayRow.board_name)+'</span></div><span class="badge bg-green">Completado ✓</span></div>'
-          +'<div class="board-body" style="padding-top:0"><button class="btn-sm" style="width:100%" onclick="openEditCompletedWorkoutSb(&quot;'+todayRow.id+'&quot;)">Editar registro</button></div>'
-          +'</div>';
-      }else{
-        const isActive=todayRow.status==='in_progress';
-        const exercises=isActive?sessionExerciseList(todayRow):((coachBoardsById[todayRow.board_id]||{}).exercises||[]);
-        const exHtml=renderExerciseListHtml(exercises,'coach_'+todayRow.id,todayRow.board_id,isActive?{scheduleId:todayRow.id,sets:coachSessionSets}:null);
-        const isExpanded=coachTodayExpandedBoards.has(todayRow.id);
-        const totalSets=Object.values(coachSessionSets).reduce((sum,list)=>sum+(Array.isArray(list)?list.length:0),0);
-        const doneSets=Object.values(coachSessionSets).reduce((sum,list)=>sum+(Array.isArray(list)?list.filter(s=>s.done).length:0),0);
-        const progressLabel=isActive&&totalSets?(doneSets+'/'+totalSets+' series'):(exercises.length+' ejercicios');
-        const isPrimary=todayRow.id===primaryWorkoutId;
-        const detailBtn='<button class="btn-sm '+(isPrimary?'coach-detail-mini':'')+'" onclick="toggleCoachTodayBoard(&quot;'+todayRow.id+'&quot;)">'+(isExpanded?'Ocultar':'Detalle')+'</button>';
-        html+='<div class="coach-session-card">'
-          +(isPrimary
-            // Entreno principal: ya tiene su propio botón grande de Iniciar/Continuar
-            // arriba, así que aquí todo cabe en un solo renglón compacto.
-            ?'<div class="coach-session-row">'
-              +'<div class="coach-session-dot" style="background:'+esc(todayRow.board_color||'#2563eb')+'"></div>'
-              +'<div class="coach-session-info"><div class="coach-session-title">'+esc(todayRow.board_name)+'</div><div class="coach-session-meta">'+(isActive?'En curso':'Rutina lista')+' · '+esc(progressLabel)+'</div></div>'
-              +'<div class="coach-session-count">'+exercises.length+' ej.</div>'
-              +detailBtn
-              +'</div>'
-            :'<div class="coach-session-top"><div class="coach-session-dot" style="background:'+esc(todayRow.board_color||'#2563eb')+'"></div>'
-              +'<div style="min-width:0"><div class="coach-session-title">'+esc(todayRow.board_name)+'</div><div class="coach-session-meta">'+(isActive?'En curso':'Rutina lista')+' · '+esc(progressLabel)+'</div></div>'
-              +'<div class="coach-session-count">'+exercises.length+' ej.</div></div>'
-              +'<div class="coach-session-actions">'
-              +'<button class="btn" onclick="'+(isActive?'openWorkoutSheet()':'startCoachingSessionSb(&quot;'+todayRow.id+'&quot;)')+'">'+(isActive?'Volver':'Iniciar')+'</button>'
-              +detailBtn
-              +'</div>')
-          +(isExpanded?'<div class="coach-session-details">'+exHtml+'</div>':'')+'</div>';
-      }
-    });
+    html+=todayRows.map(row=>{
+      const isActive=row.status==='in_progress';
+      const isDone=row.status==='done';
+      const action=isDone?'openEditCompletedWorkoutSb(&quot;'+row.id+'&quot;)'
+        :isActive?'openWorkoutSheet()'
+        :'startCoachingSessionSb(&quot;'+row.id+'&quot;)';
+      const label=isDone?'Editar':isActive?'Continuar':'Iniciar';
+      const meta=isDone?('Completado'+(row.duration_sec?' · '+Math.round(row.duration_sec/60)+' min':''))
+        :isActive?'En curso':'Programado';
+      return '<button type="button" class="coach-workout-line'+(isDone?' done':'')+'" onclick="'+action+'">'
+        +'<span class="coach-session-dot" style="background:'+esc(row.board_color||'#2563eb')+'"></span>'
+        +'<span class="coach-workout-line-info"><strong>'+esc(row.board_name)+'</strong><small>'+esc(meta)+'</small></span>'
+        +'<span class="coach-workout-line-go">'+label+' ›</span></button>';
+    }).join('');
   }
-  html+='<button class="btn-sm coach-add-workout" onclick="openAddWorkoutModal()">Agregar otro entreno</button>';
+  html+='<button class="btn-sm coach-add-workout" onclick="sv(&quot;rutinas&quot;)">Ir a Entrenar</button>';
   html+=renderFastingCardHtml();
   html+='<div class="board-card"><div class="board-hdr"><span class="board-title">Hábitos</span></div><div class="board-body">'
     +(relevantTasks.length?'<div class="coach-task-chips">'+relevantTasks.map(t=>{
@@ -9612,7 +9590,25 @@ function renderCoachSemanaPanel(){
       return '<div class="coach-task-row '+(done?'done':'')+'"><div class="coach-task-check">'+(done?'✓':'')+'</div><div class="coach-task-title">'+esc(t.title)+'</div><div class="coach-task-due">'+esc(label)+'</div></div>';
     }).join(''):'<div class="empty">Sin hábitos para este día.</div>')
     +'</div></div>';
-  el.innerHTML=renderCoachWeekScoreHtml()+strip+summary+tasksHtml;
+  // Las estadísticas de ayuno estaban en la pestaña Tú, que se fue. Son de
+  // coaching (David las prescribe y les da seguimiento), así que se quedan aquí
+  // en vez de irse a Progreso.
+  const fastRows=coachFastingLogs||[];
+  const avgFast=fastRows.length?Math.round(fastRows.reduce((n,r)=>n+(r.duration_min||0),0)/fastRows.length):0;
+  const bestFast=fastRows.reduce((m,r)=>Math.max(m,r.duration_min||0),0);
+  const fastStats=fastRows.length
+    ?'<div class="tu-stats-row" style="margin-top:14px">'
+      +'<div class="tu-stat"><div class="tu-stat-n">'+Math.floor(avgFast/60)+'h</div><div class="tu-stat-l">Ayuno promedio</div></div>'
+      +'<div class="tu-stat"><div class="tu-stat-n">'+Math.floor(bestFast/60)+'h</div><div class="tu-stat-l">Mejor ayuno</div></div>'
+      +'</div>'
+    :'';
+  // Los números de fuerza y el cuerpo viven en Progreso y en Entrenar; desde
+  // aquí solo se sale hacia allá.
+  const links='<div class="coach-plan-links">'
+    +'<button class="btn-sm" onclick="sv(&quot;progreso&quot;)">Ver mi progreso</button>'
+    +'<button class="btn-sm" onclick="sv(&quot;rutinas&quot;)">Editar mi semana</button>'
+    +'</div>';
+  el.innerHTML=renderCoachWeekScoreHtml()+strip+summary+tasksHtml+fastStats+links;
 }
 // loadCoachWeekDataSb vacía coachBoardsById y solo repone los boards que están
 // en el calendario, así que la rutina puede no estar en el mapa justo cuando se
@@ -10251,9 +10247,12 @@ function renderWorkoutSheet(){
   const exercises=sessionExerciseList();
   const allSets=Object.values(coachSessionSets).flat();
   const done=allSets.filter(s=>s.done).length;
+  const progressPct=allSets.length?Math.round(done/allSets.length*100):0;
 
-  let html='<div class="ws-progress"><span class="ws-progress-k">Ejercicios</span>'
-    +'<span class="ws-progress-pill">'+done+' / '+allSets.length+' series</span></div>';
+  let html='<div class="ws-progress"><div class="ws-progress-copy">'
+    +'<span class="ws-progress-k"><strong>'+exercises.length+'</strong> ejercicios</span>'
+    +'<span class="ws-progress-pill">'+done+' de '+allSets.length+' series</span></div>'
+    +'<div class="ws-progress-track"><i style="width:'+progressPct+'%"></i></div></div>';
   html+=exercises.map((ex,i)=>wsExerciseHtml(ex,i)).join('')
     ||'<div class="empty">Esta rutina no tiene ejercicios. Agrega uno abajo.</div>';
   html+='<button class="ws-add-ex" onclick="wsToggleAdd()">+ Agregar ejercicio</button>';
@@ -10295,12 +10294,12 @@ function wsExerciseHtml(ex,i){
     commonMistakes:ex.common_mistakes||ex.commonMistakes||ex.mistakes||ex.errors||'',
     coachTips:ex.coach_tips||ex.coachTips||ex.tips||''};
 
-  let html='<article class="ws-ex'+(allDone?' done':'')+'">'
+  let html='<article class="ws-ex'+(allDone?' done':(doneCount?' in-progress':''))+'">'
     +'<div class="ws-ex-head" onclick="openExerciseFocus(this)" data-ex="'+esc(JSON.stringify(exData))+'">'
     +'<div class="ws-ex-num">'+(i+1)+'</div>'
     +'<div class="ws-ex-info">'
     +'<div class="ws-ex-name">'+(groupLabel?'<span class="ex-superset-mini">'+esc(groupLabel)+'</span>':'')
-    +esc(ex.name||'Ejercicio')+'<span class="ws-ex-chev">ver técnica ›</span></div>'
+    +esc(ex.name||'Ejercicio')+'<span class="ws-ex-chev">›</span></div>'
     +'<div class="ws-ex-meta">'+esc(exerciseDetailParts(ex).join(' · ')||'Sin detalle')+'</div>'
     +(ex._swappedFrom?'<div class="ws-ex-meta" style="color:var(--amber)">Sustituto de esta sesión</div>':'')
     +(ex._replaced?'<div class="ws-ex-meta" style="color:var(--gray)">Cambiado a media sesión</div>':'')
@@ -10312,10 +10311,10 @@ function wsExerciseHtml(ex,i){
     +'</div>';
 
   if(!ex._replaced){
-    html+='<div class="ws-ex-tools">'
+    html+='<details class="ws-ex-more"><summary aria-label="Opciones del ejercicio">•••</summary><div class="ws-ex-tools">'
       +'<button class="ws-ex-tool" onclick="wsToggleSwap(&quot;'+esc(exKey)+'&quot;)">Cambiar</button>'
       +'<button class="ws-ex-tool danger" onclick="wsRemoveExercise(&quot;'+esc(exKey)+'&quot;)">Quitar</button>'
-      +'</div>'
+      +'</div></details>'
       +wsSwapPanelHtml(exKey);
   }
   html+=renderSetTrackerHtml({scheduleId:activeCoachingSession.id,sets:coachSessionSets,focusSetIdx},exKey,ex)
@@ -14691,9 +14690,15 @@ function renderCoachingDetail(){
     const opts='<option value="">— Descanso —</option>'
       +(assignedBoards.length?'<optgroup label="Asignados a este socio">'+assignedBoards.map(boardOpt).join('')+'</optgroup>':'')
       +(otherBoards.length?'<optgroup label="Resto del catálogo">'+otherBoards.map(boardOpt).join('')+'</optgroup>':'');
+    // created_by dice quién puso ese día. Si fue el socio desde Entrenar, el
+    // coach necesita verlo antes de guardar: al guardar se reescribe la semana
+    // completa y ese día se perdería sin que nadie se entere.
+    const setByMember=!!(tpl&&tpl.created_by&&tpl.created_by===selectedCoachClientId);
     dayRows+='<div style="display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--border)">'
-      +'<div style="width:64px;font-size:12px;font-weight:700;color:var(--gray)">'+DN_MON[i]+' '+parseDS(ds).d+'</div>'
-      +'<select data-coach-day="'+ds+'" data-coach-dow="'+i+'" style="flex:1;background:var(--card2);border:1px solid var(--border);border-radius:4px;padding:9px;font-size:13px;color:var(--white)">'+opts+'</select>'
+      +'<div style="width:64px;font-size:12px;font-weight:700;color:var(--gray)">'+DN_MON[i]+' '+parseDS(ds).d
+        +(setByMember?'<span style="display:block;font-size:9.5px;font-weight:700;color:var(--purple);margin-top:2px">lo puso el socio</span>':'')
+      +'</div>'
+      +'<select data-coach-day="'+ds+'" data-coach-dow="'+i+'" style="flex:1;background:var(--card2);border:1px solid '+(setByMember?'rgba(167,139,250,.45)':'var(--border)')+';border-radius:4px;padding:9px;font-size:13px;color:var(--white)">'+opts+'</select>'
       +'</div>';
     let dayCls='coach-day';
     if(ds===today)dayCls+=' today';
