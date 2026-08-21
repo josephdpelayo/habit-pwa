@@ -6,12 +6,12 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="HABIT">
 <meta name="application-name" content="HABIT">
-<link rel="manifest" href="/manifest.json?v=20260821-02">
-<link rel="apple-touch-icon" sizes="120x120" href="/icons/icon-120.png?v=20260821-02">
-<link rel="apple-touch-icon" sizes="152x152" href="/icons/icon-152.png?v=20260821-02">
-<link rel="apple-touch-icon" sizes="167x167" href="/icons/icon-167.png?v=20260821-02">
-<link rel="apple-touch-icon" sizes="180x180" href="/icons/icon-180.png?v=20260821-02">
-<link rel="icon" type="image/png" sizes="32x32" href="/icons/icon-32.png?v=20260821-02">
+<link rel="manifest" href="/manifest.json?v=20260821-03">
+<link rel="apple-touch-icon" sizes="120x120" href="/icons/icon-120.png?v=20260821-03">
+<link rel="apple-touch-icon" sizes="152x152" href="/icons/icon-152.png?v=20260821-03">
+<link rel="apple-touch-icon" sizes="167x167" href="/icons/icon-167.png?v=20260821-03">
+<link rel="apple-touch-icon" sizes="180x180" href="/icons/icon-180.png?v=20260821-03">
+<link rel="icon" type="image/png" sizes="32x32" href="/icons/icon-32.png?v=20260821-03">
 <title>HABIT</title>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Share+Tech+Mono&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
@@ -2730,7 +2730,7 @@ body.admin-mode #courtesy-modal label{border-radius:14px!important;border-color:
 // ── CONFIG & SUPABASE ───────────────────────────────────────
 const SUPABASE_URL='https://pmpjteuqjusbiduevbwq.supabase.co';
 const SUPABASE_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBtcGp0ZXVxanVzYmlkdWV2YndxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc2OTI1NjUsImV4cCI6MjA5MzI2ODU2NX0.XbMzZoo2yqtrD8znLnyo_1zDfrdJAvAPj1lqGOyXnLw';
-const APP_VERSION='20260821-02';
+const APP_VERSION='20260821-03';
 const MUSCLE_GROUPS=['Pecho','Espalda','Piernas','Glúteos','Hombros','Bíceps','Tríceps','Antebrazo','Core','Cardio','Full Body'];
 const EXERCISE_TYPES=['Fuerza','Calistenia','Isométrico','Cardio','Movilidad','Potencia','Técnica','Accesorio'];
 const EXERCISE_CATALOG_FALLBACK=[
@@ -7374,7 +7374,12 @@ async function renderRutHub(){
 // traerse todo el catálogo de pizarrones.
 async function loadMyRoutinesSb(force){
   if(!sbUser)return myRoutines;
-  if(!force&&myRoutinesLoadedAt&&Date.now()-myRoutinesLoadedAt<30000)return myRoutines;
+  if(!force&&myRoutinesLoadedAt&&Date.now()-myRoutinesLoadedAt<30000){
+    // Servir de caché no puede dejar coachBoardsById incompleto: quien lo vació
+    // fue loadCoachWeekDataSb, y estas rutinas ya están en memoria.
+    myRoutines.forEach(b=>{if(!coachBoardsById[b.id])coachBoardsById[b.id]=b;});
+    return myRoutines;
+  }
   const{data:assignments}=await sb.from('board_assignments').select('board_id').eq('user_id',sbUser.id);
   const boardIds=(assignments||[]).map(a=>a.board_id).filter(Boolean);
   const[gymRes,mineRes]=await Promise.all([
@@ -8167,6 +8172,9 @@ async function loadCoachWeekDataSb(force){
       const{data:brds}=await sb.from('boards').select('id,exercises').in('id',boardIds);
       (brds||[]).forEach(b=>{coachBoardsById[b.id]=b;});
     }
+    // El mapa se acaba de vaciar y repoblar solo con lo del calendario; las
+    // rutinas del socio que ya están en memoria vuelven a entrar.
+    myRoutines.forEach(b=>{if(!coachBoardsById[b.id])coachBoardsById[b.id]=b;});
     coachDataLoadedAt=Date.now();
     coachDataLoadError=null;
     updateCoachingNavBadge();
@@ -9080,9 +9088,29 @@ function renderCoachSemanaPanel(){
     +'</div></div>';
   el.innerHTML=renderCoachWeekScoreHtml()+strip+summary+tasksHtml;
 }
+// loadCoachWeekDataSb vacía coachBoardsById y solo repone los boards que están
+// en el calendario, así que la rutina puede no estar en el mapa justo cuando se
+// va a sembrar. Sin esto, sessionExerciseList devuelve [] y el entreno arranca
+// sin una sola serie mientras la hoja, ya con el board cargado, sí muestra los
+// ejercicios: ese es el "Sin series / 0-0".
+async function ensureBoardLoadedSb(boardId){
+  if(!boardId)return null;
+  const cached=coachBoardsById[boardId];
+  if(cached&&Array.isArray(cached.exercises))return cached;
+  try{
+    const{data,error}=await sb.from('boards').select('id,name,color,exercises').eq('id',boardId).single();
+    if(error)throw error;
+    if(data)coachBoardsById[boardId]=data;
+    return data||null;
+  }catch(e){console.error('ensureBoardLoadedSb:',e);return null;}
+}
 async function seedSessionSetsSb(scheduleRow){
+  await ensureBoardLoadedSb(scheduleRow.board_id);
   const exercises=sessionExerciseList(scheduleRow);
-  if(!exercises.length)return;
+  if(!exercises.length){
+    toast('Esta rutina no tiene ejercicios configurados','warn');
+    return;
+  }
   const exKeys=exercises.map((ex,i)=>exerciseKeyForSession(scheduleRow.board_id,ex,i));
   const lastScores={};
   try{
@@ -9101,10 +9129,28 @@ async function seedSessionSetsSb(scheduleRow){
     for(let s=0;s<n;s++)rows.push({schedule_id:scheduleRow.id,user_id:sbUser.id,ex_key:exKey,set_idx:s,reps_target:ex.reps||null,weight:prev.weight!=null?prev.weight:null,actual_reps:prev.reps||null,target_rir:targetRir,done:false});
   });
   if(!rows.length)return;
+  // Si esto falla, el socio abre el entreno y cada ejercicio dice "Sin series"
+  // sin ninguna explicación — el console.error mudo que había antes es
+  // exactamente lo que escondía el problema. Ahora se avisa.
   try{
     const{error}=await sb.from('coaching_session_sets').upsert(rows,{onConflict:'schedule_id,ex_key,set_idx',ignoreDuplicates:true});
     if(error)throw error;
-  }catch(e){console.error('seedSessionSetsSb:',e);}
+  }catch(e){
+    console.error('seedSessionSetsSb:',e);
+    const msg=String(e.message||e);
+    // target_rir es la columna más nueva (migración 070). Una PWA cachea el
+    // shell, así que un cliente puede correr por delante de la base; antes de
+    // dejarlo con un entreno inservible se reintenta sin ese campo.
+    if(e.code==='PGRST204'||/target_rir/i.test(msg)){
+      const{error:retryErr}=await sb.from('coaching_session_sets')
+        .upsert(rows.map(({target_rir,...r})=>r),{onConflict:'schedule_id,ex_key,set_idx',ignoreDuplicates:true});
+      if(!retryErr){
+        toast('Entreno listo, pero sin RIR: falta correr la migración 070','warn');
+        return;
+      }
+    }
+    toast('No se pudieron crear las series: '+msg,'err');
+  }
 }
 async function loadSessionSetsSb(scheduleId){
   try{
@@ -9609,6 +9655,25 @@ function openWorkoutSheet(){
   wsLoadLastScores().catch(()=>{});
   renderWorkoutSheet();
   wsStartTicker();
+  wsRepairMissingSetsSb().catch(console.error);
+}
+
+// Una sesión que arrancó con la rutina fuera del mapa de boards quedaba sin una
+// sola serie e inservible: había que cancelarla y volver a empezar. Al abrir la
+// hoja se detecta y se siembra. Solo repara cuando NINGÚN ejercicio tiene
+// series — esa es la firma de la sesión rota; que a uno solo le falten es
+// decisión del socio (borró sus series) y no hay que resucitarlas.
+async function wsRepairMissingSetsSb(){
+  if(!activeCoachingSession)return;
+  await ensureBoardLoadedSb(activeCoachingSession.board_id);
+  const exercises=sessionExerciseList();
+  if(!exercises.length)return;
+  const total=exercises.reduce((n,ex,i)=>
+    n+((coachSessionSets[exerciseKeyForSession(activeCoachingSession.board_id,ex,i)]||[]).length),0);
+  if(total>0)return;
+  await seedSessionSetsSb(activeCoachingSession);
+  await loadSessionSetsSb(activeCoachingSession.id);
+  if(wsOpen)renderWorkoutSheet();
 }
 function minimizeWorkoutSheet(){
   wsOpen=false;
@@ -10986,6 +11051,7 @@ async function renderBoardsAdmin(){
       +'<div class="exercise-field-label">Series</div><input class="exercise-form-control small" type="number" min="1" step="1" inputmode="numeric" placeholder="Solo números" id="exedit-sets-'+board.id+'-'+i+'" value="'+esc(ex.sets||'')+'">'
       +'<div class="exercise-field-label">Objetivo</div><div class="exercise-target-row"><select class="exercise-form-control small" id="exedit-rt-'+board.id+'-'+i+'" onchange="syncExerciseTargetInput(&quot;'+board.id+'-'+i+'&quot;)"><option value="reps" '+(inferTargetType(ex)==='reps'?'selected':'')+'>Reps</option><option value="time" '+(inferTargetType(ex)==='time'?'selected':'')+'>Tiempo</option></select><input class="exercise-form-control small" type="text" inputmode="numeric" data-target-type="'+inferTargetType(ex)+'" oninput="cleanExerciseInput(this)" placeholder="'+(inferTargetType(ex)==='time'?'0:30 o 30s':'Repeticiones')+'" id="exedit-reps-'+board.id+'-'+i+'" value="'+esc(ex.reps||'')+'"></div>'
       +'<div class="exercise-field-label">Descanso entre series</div><input class="exercise-form-control small" type="text" inputmode="numeric" oninput="this.value=this.value.replace(/[^\\d:ms\\s]/gi,\'\')" placeholder="Solo segundos o mm:ss. Ej: 90 o 1:30" id="exedit-rest-'+board.id+'-'+i+'" value="'+esc(ex.rest||'')+'">'
+      +'<div class="exercise-field-label">RIR objetivo</div><input class="exercise-form-control small" type="number" min="0" max="10" step="1" inputmode="numeric" placeholder="Reps en reserva (0-10). Vacío = sin objetivo" id="exedit-rir-'+board.id+'-'+i+'" value="'+esc(parseTargetRir(ex)??'')+'">'
       +supersetSelectHtml('exedit-group-'+board.id+'-'+i,exerciseGroupRaw(ex),board)
       +musclePrimarySelectHtml('exedit-mg-'+board.id+'-'+i,ex.muscleGroup||'')
       +muscleSecondaryPickerHtml('exedit-secondary-'+board.id+'-'+i,ex.secondaryMuscleGroups||[])
@@ -11008,6 +11074,7 @@ async function renderBoardsAdmin(){
       +'<div class="exercise-field-label">Series</div><input class="exercise-form-control small" type="number" min="1" step="1" inputmode="numeric" placeholder="Solo números" id="exs-'+board.id+'">'
       +'<div class="exercise-field-label">Objetivo</div><div class="exercise-target-row"><select class="exercise-form-control small" id="exrt-'+board.id+'" onchange="syncExerciseTargetInput(&quot;'+board.id+'&quot;)"><option value="reps">Reps</option><option value="time">Tiempo</option></select><input class="exercise-form-control small" type="text" inputmode="numeric" data-target-type="reps" oninput="cleanExerciseInput(this)" placeholder="Repeticiones" id="exr-'+board.id+'"></div>'
       +'<div class="exercise-field-label">Descanso entre series</div><input class="exercise-form-control small" type="text" inputmode="numeric" oninput="this.value=this.value.replace(/[^\\d:ms\\s]/gi,\'\')" placeholder="Solo segundos o mm:ss. Ej: 90 o 1:30" id="exrest-'+board.id+'">'
+      +'<div class="exercise-field-label">RIR objetivo</div><input class="exercise-form-control small" type="number" min="0" max="10" step="1" inputmode="numeric" placeholder="Reps en reserva (0-10). Vacío = sin objetivo" id="exrir-'+board.id+'">'
       +supersetSelectHtml('exgroup-'+board.id,'',board)
       +musclePrimarySelectHtml('exmg-'+board.id,'')
       +muscleSecondaryPickerHtml('exsecondary-'+board.id,[])
@@ -11143,6 +11210,17 @@ async function updateBoardNameSb(bid){
   }
 }
 
+// RIR objetivo de la rutina: se guarda como targetRir en boards.exercises y es
+// lo que siembra coaching_session_sets.target_rir la primera vez que se corre
+// el entreno. Vacío significa "sin objetivo", no cero.
+function readTargetRirInput(id){
+  const el=document.getElementById(id);
+  const raw=(el?.value||'').trim();
+  if(!raw)return null;
+  const n=parseInt(raw,10);
+  if(isNaN(n)||n<0||n>10)throw new Error('El RIR objetivo va de 0 a 10.');
+  return n;
+}
 async function addExerciseSb(bid){
   const nameInput=document.getElementById('exn-'+bid);
   const name=nameInput.value.trim();
@@ -11156,6 +11234,8 @@ async function addExerciseSb(bid){
   let rest=document.getElementById('exrest-'+bid).value.trim();
   let restNext='';
   const supersetGroup=(document.getElementById('exgroup-'+bid)?.value||'').trim().toUpperCase();
+  let targetRir=null;
+  try{targetRir=readTargetRirInput('exrir-'+bid);}catch(e){toast(e.message,'err');return;}
   const muscleGroup=(document.getElementById('exmg-'+bid)?.value||'').trim();
   const secondaryMuscleGroups=getSelectedSecondaryMuscles('exsecondary-'+bid,muscleGroup);
   const note=document.getElementById('exd-'+bid).value.trim();
@@ -11181,7 +11261,7 @@ async function addExerciseSb(bid){
   if(video)videos.push({url:video,title:videoTitle});
   if(video2)videos.push({url:video2,title:videoTitle2});
   const canonicalName=name.trim();
-  const exToSave={id:crypto.randomUUID(),catalogId,name:canonicalName,canonicalName,exerciseKey:(catalogMatch&&catalogMatch.slug)||exerciseSlug(canonicalName),exerciseType,sets,reps,repsType,rest,restNext,supersetGroup,block:supersetGroup,isSuperset:!!supersetGroup,muscleGroup,secondaryMuscleGroups,muscles:{primary:muscleGroup||null,secondary:secondaryMuscleGroups},equipment:catalogMatch?.equipment||[],movementPattern:catalogMatch?.movement_pattern||'',difficulty:catalogMatch?.difficulty||'basico',note,description:note,video:video||'',videoTitle:videoTitle||'',videos};
+  const exToSave={id:crypto.randomUUID(),catalogId,name:canonicalName,canonicalName,exerciseKey:(catalogMatch&&catalogMatch.slug)||exerciseSlug(canonicalName),exerciseType,sets,reps,repsType,rest,restNext,targetRir,supersetGroup,block:supersetGroup,isSuperset:!!supersetGroup,muscleGroup,secondaryMuscleGroups,muscles:{primary:muscleGroup||null,secondary:secondaryMuscleGroups},equipment:catalogMatch?.equipment||[],movementPattern:catalogMatch?.movement_pattern||'',difficulty:catalogMatch?.difficulty||'basico',note,description:note,video:video||'',videoTitle:videoTitle||'',videos};
   if(!exToSave.catalogId){
     const savedCatalogId=await saveExerciseCatalogFromBoardExercise(exToSave);
     if(savedCatalogId)exToSave.catalogId=savedCatalogId;
@@ -11193,6 +11273,7 @@ async function addExerciseSb(bid){
   document.getElementById('exs-'+bid).value='';
   document.getElementById('exr-'+bid).value='';
   document.getElementById('exrest-'+bid).value='';
+  const exrir=document.getElementById('exrir-'+bid);if(exrir)exrir.value='';
   const exgroup=document.getElementById('exgroup-'+bid);if(exgroup)exgroup.value='';
   const extype=document.getElementById('extype-'+bid);if(extype)extype.value='';
   const exmg=document.getElementById('exmg-'+bid);if(exmg)exmg.value='';
@@ -11217,6 +11298,8 @@ async function updateExerciseSb(bid,idx){
   let rest=(document.getElementById('exedit-rest-'+bid+'-'+idx)?.value||'').trim();
   let restNext='';
   const supersetGroup=(document.getElementById('exedit-group-'+bid+'-'+idx)?.value||'').trim().toUpperCase();
+  let targetRir=null;
+  try{targetRir=readTargetRirInput('exedit-rir-'+bid+'-'+idx);}catch(e){toast(e.message,'err');return;}
   const muscleGroup=(document.getElementById('exedit-mg-'+bid+'-'+idx)?.value||'').trim();
   const secondaryMuscleGroups=getSelectedSecondaryMuscles('exedit-secondary-'+bid+'-'+idx,muscleGroup);
   const desc=(document.getElementById('exedit-desc-'+bid+'-'+idx)?.value||'').trim();
@@ -11242,7 +11325,7 @@ async function updateExerciseSb(bid,idx){
   if(video2)videos.push({url:video2,title:videoTitle2});
   const canonicalName=name.trim();
   const catalogMatch=findExerciseCatalogMatch(canonicalName);
-  b.exercises[idx]={...b.exercises[idx],catalogId:b.exercises[idx].catalogId||catalogMatch?.id||'',name:canonicalName,canonicalName,exerciseKey:b.exercises[idx].exerciseKey||catalogMatch?.slug||exerciseSlug(canonicalName),exerciseType,sets,reps,repsType,rest,restNext,supersetGroup,block:supersetGroup,isSuperset:!!supersetGroup,muscleGroup,secondaryMuscleGroups,muscles:{primary:muscleGroup||null,secondary:secondaryMuscleGroups},equipment:b.exercises[idx].equipment||catalogMatch?.equipment||[],movementPattern:b.exercises[idx].movementPattern||catalogMatch?.movement_pattern||'',difficulty:b.exercises[idx].difficulty||catalogMatch?.difficulty||'basico',note:desc,description:desc,video,videoTitle,videos};
+  b.exercises[idx]={...b.exercises[idx],catalogId:b.exercises[idx].catalogId||catalogMatch?.id||'',name:canonicalName,canonicalName,exerciseKey:b.exercises[idx].exerciseKey||catalogMatch?.slug||exerciseSlug(canonicalName),exerciseType,sets,reps,repsType,rest,restNext,targetRir,supersetGroup,block:supersetGroup,isSuperset:!!supersetGroup,muscleGroup,secondaryMuscleGroups,muscles:{primary:muscleGroup||null,secondary:secondaryMuscleGroups},equipment:b.exercises[idx].equipment||catalogMatch?.equipment||[],movementPattern:b.exercises[idx].movementPattern||catalogMatch?.movement_pattern||'',difficulty:b.exercises[idx].difficulty||catalogMatch?.difficulty||'basico',note:desc,description:desc,video,videoTitle,videos};
   try{
     const savedCatalogId=await saveExerciseCatalogFromBoardExercise(b.exercises[idx]);
     if(savedCatalogId)b.exercises[idx].catalogId=savedCatalogId;
