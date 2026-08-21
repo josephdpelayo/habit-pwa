@@ -228,6 +228,10 @@ textarea.field{min-height:112px;text-align:left;resize:vertical}
 .x{width:44px;height:44px;border-radius:12px;background:var(--panel2);color:var(--text);display:grid;place-items:center;flex:0 0 auto}
 .search{display:grid;grid-template-columns:1fr auto;gap:10px;margin:12px 0}
 .signup-names{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.auth-lang{background:transparent;color:var(--muted);font-weight:900;font-size:13px;padding:6px;text-decoration:underline;text-underline-offset:3px}
+.seg{display:grid;grid-auto-flow:column;grid-auto-columns:1fr;gap:4px;background:var(--panel2);border:1px solid var(--line);border-radius:12px;padding:4px}
+.seg button{background:transparent;color:var(--muted);border-radius:9px;padding:11px 8px;font-weight:1000;font-size:14px}
+.seg button.active{background:var(--dof-navy);color:#fff;box-shadow:0 8px 18px rgba(1,36,86,.18)}
 .hidden{display:none!important}
 .empty{padding:28px 18px;border:1px dashed #bfd0df;border-radius:8px;text-align:center;color:var(--muted);background:rgba(255,255,255,.58)}
 @media (min-width:760px){
@@ -281,20 +285,21 @@ textarea.field{min-height:112px;text-align:left;resize:vertical}
     <div class="auth-ship"><img src="/assets/skandi/skandi-nomad-cutout.png" alt="Skandi Nomad"></div>
     <div>
       <div class="eyebrow">Skandi Fit</div>
-      <h1>Train with the crew</h1>
+      <h1 data-i18n="auth.title">Train with the crew</h1>
     </div>
-    <p>A lightweight DOF crew training app for the Skandi Nomad. Sign in or create an account to build routines, log lifts, and follow the boat's progress.</p>
+    <p data-i18n="auth.blurb">A lightweight DOF crew training app for the Skandi Nomad. Sign in or create an account to build routines, log lifts, and follow the boat's progress.</p>
     <div class="auth-tabs">
-      <button id="loginTab" class="auth-tab active" onclick="setAuthMode('login')">Sign in</button>
-      <button id="signupTab" class="auth-tab" onclick="setAuthMode('signup')">Create account</button>
+      <button id="loginTab" class="auth-tab active" onclick="setAuthMode('login')" data-i18n="auth.signin">Sign in</button>
+      <button id="signupTab" class="auth-tab" onclick="setAuthMode('signup')" data-i18n="auth.createAccount">Create account</button>
     </div>
     <div id="signupNames" class="signup-names hidden">
-      <input id="firstName" class="field left" type="text" placeholder="First name">
-      <input id="lastName" class="field left" type="text" placeholder="Last name">
+      <input id="firstName" class="field left" type="text" placeholder="First name" data-i18n-ph="auth.firstName">
+      <input id="lastName" class="field left" type="text" placeholder="Last name" data-i18n-ph="auth.lastName">
     </div>
     <input id="email" class="field left" type="email" placeholder="you@email.com">
-    <input id="password" class="field left" type="password" placeholder="Password">
-    <button id="authBtn" class="btn primary" onclick="submitAuth()">Sign in</button>
+    <input id="password" class="field left" type="password" placeholder="Password" data-i18n-ph="auth.password">
+    <button id="authBtn" class="btn primary" onclick="submitAuth()" data-i18n="auth.signin">Sign in</button>
+    <button type="button" class="auth-lang" onclick="toggleLang()" data-i18n="auth.langSwitch">Español</button>
     <p id="authMsg"></p>
   </div>
 </div>
@@ -305,19 +310,19 @@ textarea.field{min-height:112px;text-align:left;resize:vertical}
       <div class="ship-mark"><img src="/assets/skandi/skandi-nomad-cutout.png" alt="Skandi Nomad"></div>
       <div class="brand-text"><span>Skandi Fit</span><small>Skandi Nomad · DOF</small></div>
     </div>
-    <button class="avatar" onclick="signOut()" title="Sign out" id="avatar">SF</button>
+    <button class="avatar" onclick="openSettings()" title="Settings" data-i18n-title="settings.title" data-i18n-aria="settings.title" aria-label="Settings" id="avatar">SF</button>
   </header>
   <section id="screen"></section>
 </main>
 
 <nav class="tabs hidden" id="tabs">
   <div class="tabs-inner">
-    <button class="tab active" data-view="home" onclick="setView('home')"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg>Home</button>
-    <button class="tab" data-view="train" onclick="setView('train')"><svg viewBox="0 0 24 24"><path d="M4 14h2m12 0h2M7 10v8m10-8v8M9 12h6"/></svg>Train</button>
-    <button class="tab" data-view="crew" onclick="setView('crew')"><svg viewBox="0 0 24 24"><path d="M16 11a4 4 0 1 0-8 0"/><path d="M4 21a8 8 0 0 1 16 0"/></svg>Crew</button>
-    <button class="tab" data-view="progress" onclick="setView('progress')"><svg viewBox="0 0 24 24"><path d="M4 19V5"/><path d="M4 19h16"/><path d="m7 15 3-3 3 2 5-7"/></svg>Progress</button>
-    <button class="tab" data-view="body" onclick="setView('body')"><svg viewBox="0 0 24 24"><circle cx="12" cy="6" r="3"/><path d="M6 21v-2a6 6 0 0 1 12 0v2"/></svg>Body</button>
-    <button class="tab" data-view="library" onclick="setView('library')"><svg viewBox="0 0 24 24"><path d="M4 5h16M4 12h16M4 19h16"/></svg>Library</button>
+    <button class="tab active" data-view="home" onclick="setView('home')"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg><span data-i18n="tab.home">Home</span></button>
+    <button class="tab" data-view="train" onclick="setView('train')"><svg viewBox="0 0 24 24"><path d="M4 14h2m12 0h2M7 10v8m10-8v8M9 12h6"/></svg><span data-i18n="tab.train">Train</span></button>
+    <button class="tab" data-view="crew" onclick="setView('crew')"><svg viewBox="0 0 24 24"><path d="M16 11a4 4 0 1 0-8 0"/><path d="M4 21a8 8 0 0 1 16 0"/></svg><span data-i18n="tab.crew">Crew</span></button>
+    <button class="tab" data-view="progress" onclick="setView('progress')"><svg viewBox="0 0 24 24"><path d="M4 19V5"/><path d="M4 19h16"/><path d="m7 15 3-3 3 2 5-7"/></svg><span data-i18n="tab.progress">Progress</span></button>
+    <button class="tab" data-view="body" onclick="setView('body')"><svg viewBox="0 0 24 24"><circle cx="12" cy="6" r="3"/><path d="M6 21v-2a6 6 0 0 1 12 0v2"/></svg><span data-i18n="tab.body">Body</span></button>
+    <button class="tab" data-view="library" onclick="setView('library')"><svg viewBox="0 0 24 24"><path d="M4 5h16M4 12h16M4 19h16"/></svg><span data-i18n="tab.library">Library</span></button>
   </div>
 </nav>
 
@@ -327,7 +332,608 @@ textarea.field{min-height:112px;text-align:left;resize:vertical}
 const SUPABASE_URL='https://pmpjteuqjusbiduevbwq.supabase.co';
 const SUPABASE_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBtcGp0ZXVxanVzYmlkdWV2YndxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc2OTI1NjUsImV4cCI6MjA5MzI2ODU2NX0.XbMzZoo2yqtrD8znLnyo_1zDfrdJAvAPj1lqGOyXnLw';
 const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-const DOW=['MON','TUE','WED','THU','FRI','SAT','SUN'];
+
+// ---- i18n ------------------------------------------------------------------
+// Every user-facing string in the app goes through t(). Keys are flat and dot-namespaced by
+// screen; `{name}`-style placeholders are interpolated from the vars object. Counted strings
+// live as `<key>_one` / `<key>_other` and are read through tp(n,key).
+//
+// IMPORTANT: only LABELS are translated. Everything that is a stored value (activity_type,
+// exercise category, muscle key, report_difficulty, DB muscle names in exercises.muscles) keeps
+// its English key in the database and is translated at display time via the *Label() helpers
+// below — so switching language never rewrites data or breaks a lookup.
+const LANG_STORAGE_KEY='skandi_lang';
+const I18N={
+en:{
+  'auth.title':'Train with the crew',
+  'auth.blurb':"A lightweight DOF crew training app for the Skandi Nomad. Sign in or create an account to build routines, log lifts, and follow the boat's progress.",
+  'auth.signin':'Sign in','auth.createAccount':'Create account',
+  'auth.firstName':'First name','auth.lastName':'Last name','auth.password':'Password',
+  'auth.langSwitch':'Español',
+  'auth.errRequired':'Email and password are required.',
+  'auth.errNames':'First name and last name are required.',
+  'auth.signingIn':'Signing in...','auth.creatingAccount':'Creating account...',
+  'auth.created':'Account created. Check your email if confirmation is required, then sign in.',
+  'auth.profileError':'Could not set up your profile: {msg}. Try signing out and back in.',
+
+  'tab.home':'Home','tab.train':'Train','tab.crew':'Crew','tab.progress':'Progress','tab.body':'Body','tab.library':'Library',
+
+  'settings.title':'Settings','settings.language':'Language','settings.units':'Default weight unit',
+  'settings.account':'Account','settings.signedInAs':'Signed in as','settings.signOut':'Sign out',
+  'settings.langNote':'Changing the language translates the whole app. Your routines, exercises and history are not affected.',
+  'settings.close':'Close',
+
+  'common.close':'Close','common.save':'Save','common.delete':'Delete','common.edit':'Edit','common.cancel':'Cancel',
+  'common.saving':'Saving...','common.optional':'Optional','common.notesOptional':'Notes (optional)',
+  'common.crewMember':'Crew member','common.exercise':'Exercise','common.noMatches':'No matches.',
+  'common.searchExercise':'Search exercise...','common.day':'Day','common.date':'Date',
+  'common.reps':'reps','common.sets':'sets','common.min':'min','common.byName':'by {name}',
+  'common.exercises_one':'exercise','common.exercises_other':'exercises',
+  'common.routines_one':'routine','common.routines_other':'routines',
+  'common.workouts_one':'workout','common.workouts_other':'workouts',
+  'common.plans_one':'plan','common.plans_other':'plans',
+  'common.sessions_one':'session','common.sessions_other':'sessions',
+  'common.muscles_one':'muscle','common.muscles_other':'muscles',
+  'common.setsLogged_one':'set logged','common.setsLogged_other':'sets logged',
+
+  'banner.inProgress':'Workout in progress · {time}','banner.resume':'Resume',
+
+  'endurance.today':'Endurance today','endurance.noTarget':'No target set',
+  'endurance.logged':'Logged','endurance.logIt':'Log it','endurance.zone':'Zone {z}',
+
+  'block.eyebrow':'Program',
+  'block.none':'You have no training block set up. Tap to define how many build weeks come before your deload week.',
+  'block.ended':'Block finished',
+  'block.endedBody':'Check whether Front Lever/Handstand/Planche improved and whether loads went up without losing technique, then start the next block.',
+  'block.deloadWeek':'Deload week','block.buildWeek':'Build week','block.weekOf':'Week {week} of {total}',
+  'block.deloadBody':'Cut volume 30-40%, keep RIR 2-3, drop the hard running block and lower plyometric contacts. New sets already preload ~30% lighter — adjust if needed.',
+  'block.editTitle':'Edit block','block.newTitle':'New block',
+  'block.buildWeeksLabel':'Build weeks before the deload',
+  'block.startDate':'Start date',
+  'block.notePh':'Note (optional): what improved last block, what to adjust...',
+  'block.saveChanges':'Save changes','block.save':'Save block',
+  'block.startNew':'+ Start a new block','block.delete':'Delete this block',
+  'block.pickDate':'Choose a start date.',
+  'block.confirmDelete':'Delete this block? Your workouts and sets are untouched, only the week/deload count is removed.',
+
+  'home.weekRange':'Monday to Sunday','home.hey':'Hey, {name}',
+  'home.firstRoutine':'Create your first routine','home.focusNow':'Your focus now',
+  'home.startAria':'Start {name}',
+  'home.weekProgress':'{done} of {total} {unit} done this week. {note}',
+  'home.encStart':'Today can be the start.','home.encDone':'All done for the week. Strong work.',
+  'home.encOne':'One more to go. You got this.','home.encRhythm':'You are building rhythm.',
+  'home.startToday':'Start today workout','home.setupToday':'Set up today routine',
+  'home.thisWeek':'this week','home.yourRoutines':'your routines',
+  'home.noRoutine':'You do not have a routine yet. Create one from Train.',
+  'home.latest':'Latest from the boat','home.viewCrew':'View crew',
+  'home.feedEmpty':'When someone finishes a workout, it will show up here.',
+
+  'train.title':'Train','train.addRoutine':'+ Routine','train.yourWeek':'Your week',
+  'train.addRoutineDay':'Add routine','train.manageDay':'Manage {day}',
+  'train.endurance':'Endurance','train.addPlan':'Add plan','train.managePlanDay':'Manage {day} plan',
+  'train.myRoutines':'My routines','train.newRoutine':'+ New routine',
+  'train.noRoutines':'You have not created a routine yet.',
+  'train.communityRoutines':'Community routines',
+  'train.noCommunity':'No routines shared by other crew yet.',
+
+  'card.exCount':'{n} ex.','card.adaptedFrom':'Adapted from {name}',
+  'card.start':'Start','card.addToWeek':'+ Add to my week',
+
+  'crew.title':'Crew','crew.refresh':'Refresh','crew.recentPrs':'Recent PRs',
+  'crew.prsEmpty':'Log a lift, hold, or set to build the leaderboard.',
+  'crew.feed':'Workout feed','crew.feedEmpty':'No shared workouts yet.',
+
+  'progress.title':'Progress','progress.needsAttention':'Needs attention',
+  'progress.soreWarn':'<strong>{area}</strong> — reported in {n} of your last sessions. Consider resting that area or regressing.',
+  'progress.stallWarn':'<strong>{name}</strong> flat for 3 sessions ({marks}). Maybe deload or hold longer.',
+  'progress.allTime':'All time','progress.savedWorkouts':'saved workouts','progress.minutesTrained':'minutes trained',
+  'progress.externalActivities':'External activities','progress.logActivity':'+ Log activity',
+  'progress.activitiesEmpty':'Log a run, ride, or swim to factor it into recovery.',
+  'progress.yourBests':'Your bests','progress.bestsEmpty':'No lifts, holds, or sets logged yet.',
+  'progress.history':'Workout history','progress.historyEmpty':'Complete a workout to see it here.',
+
+  'recap.thisWeek':'This week','recap.lastWeek':'({n} last week)',
+  'recap.avgEnergy':'Average energy {v}/5','recap.energyUp':' (up from {v})','recap.energyDown':' (down from {v})',
+  'recap.soreness':'Soreness reported in {n} {unit} this week.',
+
+  'cross.title':'Strength/skill vs endurance','cross.week':'Week','cross.strength':'Strength',
+  'cross.avgRir':'Avg RIR','cross.cleanPct':'Clean %','cross.endurance':'Endurance',
+  'cross.worse':'{linked} of the {total} times you reported performing worse than usual, there was a hard endurance session (RPE≥7) in the previous 36h.',
+
+  'library.title':'Library','library.addExercise':'+ Exercise','library.search':'Search',
+  'library.empty':'No exercises found.',
+
+  'builder.setsPh':'sets','builder.repsPh':'reps','builder.rirPh':'RIR',
+  'builder.rirTitle':'Target RIR (reps in reserve)',
+  'builder.restBetween':'Rest between sets','builder.custom':'custom',
+
+  'feed.seriesMin':'{sets} sets · {min} min','feed.soreness':'Soreness: {area}','feed.noArea':'no area',
+
+  'session.minutes':'minutes','session.energy':'Energy {v}/5','session.sleep':'Sleep {h}h',
+  'session.feltWorse':'Performed worse','session.soreness':'Soreness','session.notSpecified':'Not specified',
+  'session.notes':'Notes','session.exercises':'Exercises','session.set':'Set {n}',
+  'session.clean':'clean','session.broken':'broken','session.notLogged':'not logged',
+  'session.noSets':'No sets logged.','session.delete':'Delete this workout',
+  'session.confirmDelete':'Delete this workout? This cannot be undone.',
+
+  'leader.kg':'{v} kg','leader.reps':'{v} reps','leader.hold':'hold','leader.bestSet':'best set',
+
+  'recovery.now':'now','recovery.lessHour':'<1h',
+  'recovery.title':'Muscle recovery','recovery.readyIn':'{name} ready in {time}',
+  'recovery.allFresh':'All muscles fresh','recovery.rested':'{n} rested',
+  'recovery.fullMap':'View full body map','recovery.openMap':'Open body recovery map',
+  'recovery.readiness':'Body readiness','recovery.needsRecovery':'{name} needs recovery',
+  'recovery.bodyReady':'Body is ready','recovery.mRested':'{n} {unit} rested',
+  'recovery.readySuffix':' · ready in {time}',
+
+  'body.title':'Body','body.daysSince':'days since last training','body.musclesRested':'muscles rested',
+  'body.flip':'Flip front and back','body.recovering':'Recovering','body.restedLegend':'Rested',
+  'body.tapHint':'Tap a muscle for details · showing {view}','body.front':'front','body.back':'back',
+  'body.muscleStatus':'Muscle status','body.readyNow':'Ready now','body.readyIn':'Ready in {time}',
+  'body.recentActivities':'Recent activities','body.noActivities':'No manual activities logged yet.',
+
+  'muscle.trainedBy':'Exercises that trained {name} recently',
+  'muscle.pctOfExercise':'{p}% of exercise',
+  'muscle.noSets':'No sets logged for this muscle recently.',
+  'muscle.activitiesTrained':'Activities that trained {name} recently',
+  'muscle.pctSplit':'{p}% split',
+  'muscle.noActivities':'No manual activities logged for this muscle recently.',
+  'muscle.bestExercises':'Best exercises for {name}',
+  'muscle.noExercises':'No exercises target this muscle yet.',
+
+  'activity.running':'Running','activity.cycling':'Cycling','activity.swimming':'Swimming',
+  'activity.rowing':'Rowing','activity.walking':'Walking','activity.other':'Other','activity.fallback':'Activity',
+
+  'logAct.title':'Log activity','logAct.goal':'Goal: {goal}','logAct.type':'Activity type',
+  'logAct.duration':'Duration (minutes)','logAct.durationPh':'e.g. 40',
+  'logAct.distance':'Distance (km, optional)','logAct.distancePh':'e.g. 6.5',
+  'logAct.hr':'Avg heart rate (bpm, optional)','logAct.hrPh':'e.g. 148',
+  'logAct.intensity':'Intensity (effort, 1-10)','logAct.when':'When','logAct.save':'Save activity',
+  'logAct.errDuration':'Enter a duration in minutes.',
+  'logAct.errIntensity':'Intensity must be between 1 and 10.',
+  'logAct.errWhen':'Choose when this activity happened.',
+  'logAct.errFuture':'This activity is in the future — check the date/time.',
+  'logAct.errHr':'Enter a heart rate between 30 and 230 bpm.',
+  'logAct.rowIntensity':'intensity {v}/10',
+  'logAct.confirmDelete':'Delete this activity?',
+
+  'bw.title':'Bodyweight','bw.log':'+ Log weight','bw.vsLast':'{unit} vs last log',
+  'bw.empty':'Log your weight to track it alongside strength and skill numbers.',
+  'bw.modalTitle':'Log bodyweight','bw.weightLabel':'Weight ({unit})','bw.weightPh':'e.g. {v}',
+  'bw.alreadyToday':'You already logged today — saving replaces it.',
+  'bw.errWeight':'Enter a valid weight.','bw.errDate':'Choose a date.',
+  'bw.errRange':'Enter a weight between 20 and 300kg (or the lb equivalent).',
+  'bw.confirmDelete':'Delete this bodyweight entry?',
+
+  'plan.editTitle':'Edit endurance plan','plan.newTitle':'New endurance plan',
+  'plan.targetDistance':'Target distance (km, optional)','plan.targetDistancePh':'e.g. 5',
+  'plan.targetDuration':'Target duration (minutes, optional)',
+  'plan.targetPace':'Target pace (min:sec per km, optional)','plan.targetPacePh':'e.g. 5:40',
+  'plan.targetZone':'Target heart rate zone (optional)','plan.noZone':'No zone',
+  'plan.save':'Save plan','plan.errPace':'Enter pace as minutes:seconds per km, e.g. 5:40.',
+  'plan.confirmDelete':'Remove this recurring plan?',
+
+  'workout.busy':'Finish or cancel your current workout before starting another.',
+  'workout.startTraining':'Start training',
+  'workout.netHiccup':'Connection hiccup starting the workout — check your signal and try again.',
+  'workout.confirmFinish':'Finish this workout and prepare the final report?',
+  'workout.todayLabel':'Today workout','workout.blockLabel':'Today workout · Week {week}/{total}',
+  'workout.deloadSuffix':' · Deload',
+  'workout.collapseTimer':'Collapse timer','workout.expandTimer':'Expand timer',
+  'workout.elapsed':'Elapsed','workout.pauseTimer':'Pause timer','workout.resumeTimer':'Resume timer',
+  'workout.minus30':'Remove 30 seconds from rest','workout.plus30':'Add 30 seconds to rest',
+  'workout.rest':'Rest','workout.restProgress':'Rest progress','workout.defaultUnit':'Default weight unit',
+  'workout.minimize':'Minimize workout','workout.exercises':'Exercises','workout.slashSets':'/ {n} sets',
+  'workout.addExercise':'Add exercise (this session only)',
+  'workout.finish':'Finish workout',
+  'workout.confirmCancel':'Cancel this workout? Your logged sets will be deleted.',
+  'workout.totalHours':'{n} total hours','workout.hms':'hours : minutes : seconds','workout.ms':'minutes : seconds',
+
+  'prog.easier':'Easier progression','prog.easierName':'Easier: {name}','prog.easiest':'Easiest progression',
+  'prog.harder':'Harder progression','prog.harderName':'Harder: {name}','prog.hardest':'Hardest progression',
+  'prog.step':'Progression {i}/{n}','prog.readyFor':'Ready for {name} — tap to level up',
+  'prog.history':'Progression history','prog.trend':'trend over the last {n} sessions',
+
+  'ex.restSec':'rest {n}s','ex.cleanCount':'Clean {done}/{total}',
+  'ex.swap':'Swap exercise','ex.removeFromSession':'Remove exercise from this session',
+  'ex.removeShort':'Remove from this session',
+  'ex.colSec':'SEC','ex.colReps':'REPS','ex.colClean':'CLN','ex.colRir':'RIR',
+  'ex.switchToLb':'Switch this exercise to pounds','ex.switchToKg':'Switch this exercise to kilograms',
+  'ex.holdClean':'Clean','ex.holdBroken':'Broken form','ex.holdUnset':'Not marked — tap to set',
+  'ex.holdQuality':'Hold quality: {v}','ex.secPh':'sec','ex.removeSet':'Remove set','ex.addSet':'+ Add set',
+  'ex.replaceWith':'Replace with...',
+  'ex.confirmRemove':"Remove {name} from today's session? This won't change your saved routine.",
+  'ex.thisExercise':'this exercise',
+  'ex.errNumber':'Enter a valid number.','ex.errWeight':'Enter a weight between 0 and 500kg.',
+  'ex.errSeconds':'Enter a hold time between 0 and 7200 seconds.','ex.errRir':'Enter RIR between 0 and 10.',
+
+  'report.title':'Workout saved','report.logged':'{time} of work logged',
+  'report.difficulty':'Difficulty','report.diffNormal':'Normal','report.diffEasy':'Easy','report.diffHeavy':'Heavy',
+  'report.energy':'Energy','report.sleep':'Sleep last night (hours)','report.sleepPh':'e.g. 7.5',
+  'report.worseTitle':'I performed worse than usual today',
+  'report.worseBody':'Check this if the previous session left you tired or underperforming.',
+  'report.soreTitle':'I noticed soreness or pain',
+  'report.soreBody':'Mark the area so we can track it week by week.',
+  'report.sorePh':'Area: shoulder, elbow, lower back...',
+  'report.notePh':'How did you feel, what was harder, what would you change...',
+  'report.shareTitle':'Share with crew',
+  'report.shareBody':'Soreness notes and this report are only visible to you if unchecked.',
+  'report.save':'Save workout','report.errSleep':'Enter sleep hours between 0 and 24.',
+
+  'exd.backToWorkout':'Back to workout',
+  'exd.noMedia':'Paste a Gymvisual GIF or another source in the library to see technique here.',
+  'exd.openReference':'Open Gymvisual reference','exd.editMedia':'Edit technique media',
+  'exd.musclesInvolved':'Muscles involved','exd.howTo':'How to do it',
+  'exd.noInstructions':'No instructions added yet.','exd.coachTips':'Coach tips',
+  'exd.noTips':'No coach tips added yet.',
+  'exd.mediaTitle':'Edit media','exd.upload':'Upload from your gallery',
+  'exd.orPaste':'Or paste a direct GIF/video URL','exd.directUrl':'Direct GIF/video URL',
+  'exd.pageUrl':'Reference page URL','exd.saveMedia':'Save media','exd.uploadError':'Upload error: {msg}',
+
+  'tpl.editTitle':'Edit routine','tpl.newTitle':'New routine','tpl.namePh':'Routine name',
+  'tpl.notePh':'Workout note','tpl.shareTitle':'Share with crew',
+  'tpl.shareBody':'Other crew members can see and fork this routine.',
+  'tpl.save':'Save routine','tpl.errName':'Add a name and at least one exercise.',
+  'tpl.filterAll':'All','tpl.filterSelected':'Selected ({n})',
+  'tpl.noneSelected':'No exercises selected yet.','tpl.noMatch':'No exercises match your search.',
+  'tpl.notFound':'Routine not found.',
+
+  'week.addTitle':'Add to my week','week.alreadyHas':' — already has {name}',
+  'week.confirmRemove':'Remove this routine from that day? The routine itself is kept, just unscheduled.',
+  'week.chooseRoutine':'Choose a routine','week.use':'Use',
+  'week.createInstead':'+ Create a new routine instead',
+  'week.scheduledFor':'Scheduled for {day}','week.startWorkout':'Start workout',
+  'week.replaceRoutine':'Replace routine','week.editRoutine':'Edit routine',
+  'week.moveToDay':'Move to another day','week.removeFrom':'Remove from {day}',
+  'week.moveTitle':'Move {name}','week.currentlyOn':'Currently on {day}','week.moveBtn':'Move routine',
+
+  'newex.title':'New exercise','newex.name':'Exercise name','newex.namePh':'e.g. Dumbbell Row',
+  'newex.altName':'Alternative name','newex.category':'Category','newex.equipment':'Equipment',
+  'newex.equipmentPh':'Optional: dumbbells, bench','newex.media':'Media',
+  'newex.mediaPh':'Direct GIF/video URL (optional)','newex.pagePh':'Reference page URL (optional)',
+  'newex.muscles':'Muscles',
+  'newex.musclesNote':'Set only the muscles this exercise actually uses. Total does not need to equal 100.',
+  'newex.clear':'Clear','newex.save':'Save exercise',
+  'newex.errName':'Add an exercise name.','newex.errMuscle':'Set at least one muscle above 0%.',
+  'newex.errDup':'An exercise with that name already exists in the catalog.',
+
+  'group.Chest':'Chest','group.Back':'Back','group.Shoulders':'Shoulders','group.Arms':'Arms',
+  'group.Legs':'Legs','group.Core':'Core','group.Other':'Other',
+  'm.Chest':'Chest','m.Back':'Back','m.Shoulders':'Shoulders','m.Biceps':'Biceps','m.Triceps':'Triceps',
+  'm.Forearms':'Forearms','m.Quads':'Quads','m.Hamstrings':'Hamstrings','m.Glutes':'Glutes',
+  'm.Calves':'Calves','m.Core':'Core','m.Hip Flexors':'Hip Flexors',
+  'cat.Strength':'Strength','cat.Cardio':'Cardio','cat.Mobility':'Mobility','cat.Core':'Core',
+  'cat.Conditioning':'Conditioning','cat.Rehab':'Rehab',
+  'preset.Push':'Push','preset.Pull':'Pull','preset.Legs':'Legs','preset.Core':'Core',
+  'diff.normal':'Normal','diff.facil':'Easy','diff.pesado':'Heavy'
+},
+es:{
+  'auth.title':'Entrena con la tripulación',
+  'auth.blurb':'Una app ligera de entrenamiento para la tripulación DOF del Skandi Nomad. Inicia sesión o crea una cuenta para armar rutinas, registrar tus series y seguir el progreso del barco.',
+  'auth.signin':'Iniciar sesión','auth.createAccount':'Crear cuenta',
+  'auth.firstName':'Nombre','auth.lastName':'Apellido','auth.password':'Contraseña',
+  'auth.langSwitch':'English',
+  'auth.errRequired':'El correo y la contraseña son obligatorios.',
+  'auth.errNames':'El nombre y el apellido son obligatorios.',
+  'auth.signingIn':'Iniciando sesión...','auth.creatingAccount':'Creando cuenta...',
+  'auth.created':'Cuenta creada. Revisa tu correo si hace falta confirmarla y luego inicia sesión.',
+  'auth.profileError':'No se pudo crear tu perfil: {msg}. Cierra sesión y vuelve a entrar.',
+
+  'tab.home':'Inicio','tab.train':'Entrenar','tab.crew':'Tripulación','tab.progress':'Progreso','tab.body':'Cuerpo','tab.library':'Biblioteca',
+
+  'settings.title':'Configuración','settings.language':'Idioma','settings.units':'Unidad de peso por defecto',
+  'settings.account':'Cuenta','settings.signedInAs':'Sesión iniciada como','settings.signOut':'Cerrar sesión',
+  'settings.langNote':'Cambiar el idioma traduce toda la app. Tus rutinas, ejercicios e historial no se ven afectados.',
+  'settings.close':'Cerrar',
+
+  'common.close':'Cerrar','common.save':'Guardar','common.delete':'Eliminar','common.edit':'Editar','common.cancel':'Cancelar',
+  'common.saving':'Guardando...','common.optional':'Opcional','common.notesOptional':'Notas (opcional)',
+  'common.crewMember':'Tripulante','common.exercise':'Ejercicio','common.noMatches':'Sin resultados.',
+  'common.searchExercise':'Buscar ejercicio...','common.day':'Día','common.date':'Fecha',
+  'common.reps':'reps','common.sets':'series','common.min':'min','common.byName':'por {name}',
+  'common.exercises_one':'ejercicio','common.exercises_other':'ejercicios',
+  'common.routines_one':'rutina','common.routines_other':'rutinas',
+  'common.workouts_one':'entrenamiento','common.workouts_other':'entrenamientos',
+  'common.plans_one':'plan','common.plans_other':'planes',
+  'common.sessions_one':'sesión','common.sessions_other':'sesiones',
+  'common.muscles_one':'músculo','common.muscles_other':'músculos',
+  'common.setsLogged_one':'serie registrada','common.setsLogged_other':'series registradas',
+
+  'banner.inProgress':'Entrenamiento en curso · {time}','banner.resume':'Continuar',
+
+  'endurance.today':'Resistencia hoy','endurance.noTarget':'Sin objetivo definido',
+  'endurance.logged':'Registrado','endurance.logIt':'Registrar','endurance.zone':'Zona {z}',
+
+  'block.eyebrow':'Programa',
+  'block.none':'No tienes un bloque de entrenamiento configurado. Toca para definir cuántas semanas de carga van antes de tu semana de descarga.',
+  'block.ended':'Bloque terminado',
+  'block.endedBody':'Revisa si Front Lever/Handstand/Planche mejoraron y si las cargas subieron sin perder técnica, y arranca el siguiente bloque.',
+  'block.deloadWeek':'Semana de descarga','block.buildWeek':'Semana de carga','block.weekOf':'Semana {week} de {total}',
+  'block.deloadBody':'Reduce 30-40% el volumen, conserva RIR 2-3, quita el bloque intenso de carrera y baja los contactos de pliometría. Los pesos de sets nuevos ya salen ~30% más ligeros — ajústalos si hace falta.',
+  'block.editTitle':'Editar bloque','block.newTitle':'Nuevo bloque',
+  'block.buildWeeksLabel':'Semanas de carga antes de la descarga',
+  'block.startDate':'Fecha de inicio',
+  'block.notePh':'Nota (opcional): qué mejoró en el bloque anterior, qué ajustar...',
+  'block.saveChanges':'Guardar cambios','block.save':'Guardar bloque',
+  'block.startNew':'+ Empezar bloque nuevo','block.delete':'Eliminar este bloque',
+  'block.pickDate':'Elige una fecha de inicio.',
+  'block.confirmDelete':'¿Eliminar este bloque? Tus entrenamientos y series no se tocan, solo se borra el conteo de semana/descarga.',
+
+  'home.weekRange':'De lunes a domingo','home.hey':'Hola, {name}',
+  'home.firstRoutine':'Crea tu primera rutina','home.focusNow':'Tu foco ahora',
+  'home.startAria':'Empezar {name}',
+  'home.weekProgress':'{done} de {total} {unit} esta semana. {note}',
+  'home.encStart':'Hoy puede ser el arranque.','home.encDone':'Semana completa. Buen trabajo.',
+  'home.encOne':'Falta uno. Tú puedes.','home.encRhythm':'Estás agarrando ritmo.',
+  'home.startToday':'Empezar el entrenamiento de hoy','home.setupToday':'Configurar la rutina de hoy',
+  'home.thisWeek':'esta semana','home.yourRoutines':'tus rutinas',
+  'home.noRoutine':'Todavía no tienes una rutina. Crea una desde Entrenar.',
+  'home.latest':'Lo último del barco','home.viewCrew':'Ver tripulación',
+  'home.feedEmpty':'Cuando alguien termine un entrenamiento, aparecerá aquí.',
+
+  'train.title':'Entrenar','train.addRoutine':'+ Rutina','train.yourWeek':'Tu semana',
+  'train.addRoutineDay':'Agregar rutina','train.manageDay':'Gestionar {day}',
+  'train.endurance':'Resistencia','train.addPlan':'Agregar plan','train.managePlanDay':'Gestionar el plan de {day}',
+  'train.myRoutines':'Mis rutinas','train.newRoutine':'+ Nueva rutina',
+  'train.noRoutines':'Todavía no has creado ninguna rutina.',
+  'train.communityRoutines':'Rutinas de la tripulación',
+  'train.noCommunity':'Aún nadie de la tripulación ha compartido rutinas.',
+
+  'card.exCount':'{n} ej.','card.adaptedFrom':'Adaptada de {name}',
+  'card.start':'Empezar','card.addToWeek':'+ Agregar a mi semana',
+
+  'crew.title':'Tripulación','crew.refresh':'Actualizar','crew.recentPrs':'Récords recientes',
+  'crew.prsEmpty':'Registra un levantamiento, hold o serie para armar la tabla.',
+  'crew.feed':'Muro de entrenamientos','crew.feedEmpty':'Aún no hay entrenamientos compartidos.',
+
+  'progress.title':'Progreso','progress.needsAttention':'Requiere atención',
+  'progress.soreWarn':'<strong>{area}</strong> — reportado en {n} de tus últimas sesiones. Considera descansar esa zona o regresar a una variante más fácil.',
+  'progress.stallWarn':'<strong>{name}</strong> estancado 3 sesiones ({marks}). Quizá toca descargar o aguantar más.',
+  'progress.allTime':'Histórico','progress.savedWorkouts':'entrenamientos guardados','progress.minutesTrained':'minutos entrenados',
+  'progress.externalActivities':'Actividades externas','progress.logActivity':'+ Registrar actividad',
+  'progress.activitiesEmpty':'Registra una carrera, bici o natación para incluirla en la recuperación.',
+  'progress.yourBests':'Tus mejores marcas','progress.bestsEmpty':'Aún no hay levantamientos, holds ni series registradas.',
+  'progress.history':'Historial de entrenamientos','progress.historyEmpty':'Completa un entrenamiento para verlo aquí.',
+
+  'recap.thisWeek':'Esta semana','recap.lastWeek':'({n} la semana pasada)',
+  'recap.avgEnergy':'Energía promedio {v}/5','recap.energyUp':' (subió desde {v})','recap.energyDown':' (bajó desde {v})',
+  'recap.soreness':'Dolor reportado en {n} {unit} esta semana.',
+
+  'cross.title':'Fuerza/skill vs resistencia','cross.week':'Semana','cross.strength':'Fuerza',
+  'cross.avgRir':'RIR prom.','cross.cleanPct':'Clean %','cross.endurance':'Resistencia',
+  'cross.worse':'{linked} de {total} veces que reportaste rendir peor de lo normal, hubo una sesión de resistencia intensa (RPE≥7) en las 36h previas.',
+
+  'library.title':'Biblioteca','library.addExercise':'+ Ejercicio','library.search':'Buscar',
+  'library.empty':'No se encontraron ejercicios.',
+
+  'builder.setsPh':'series','builder.repsPh':'reps','builder.rirPh':'RIR',
+  'builder.rirTitle':'RIR objetivo (repeticiones en reserva)',
+  'builder.restBetween':'Descanso entre series','builder.custom':'personalizado',
+
+  'feed.seriesMin':'{sets} series · {min} min','feed.soreness':'Dolor: {area}','feed.noArea':'sin zona',
+
+  'session.minutes':'minutos','session.energy':'Energía {v}/5','session.sleep':'Sueño {h}h',
+  'session.feltWorse':'Rindió peor','session.soreness':'Dolor','session.notSpecified':'Sin especificar',
+  'session.notes':'Notas','session.exercises':'Ejercicios','session.set':'Serie {n}',
+  'session.clean':'limpio','session.broken':'roto','session.notLogged':'sin registrar',
+  'session.noSets':'No hay series registradas.','session.delete':'Eliminar este entrenamiento',
+  'session.confirmDelete':'¿Eliminar este entrenamiento? No se puede deshacer.',
+
+  'leader.kg':'{v} kg','leader.reps':'{v} reps','leader.hold':'hold','leader.bestSet':'mejor serie',
+
+  'recovery.now':'ya','recovery.lessHour':'<1h',
+  'recovery.title':'Recuperación muscular','recovery.readyIn':'{name} listo en {time}',
+  'recovery.allFresh':'Todos los músculos frescos','recovery.rested':'{n} descansados',
+  'recovery.fullMap':'Ver mapa corporal completo','recovery.openMap':'Abrir el mapa de recuperación',
+  'recovery.readiness':'Estado del cuerpo','recovery.needsRecovery':'{name} necesita recuperarse',
+  'recovery.bodyReady':'El cuerpo está listo','recovery.mRested':'{n} {unit} descansados',
+  'recovery.readySuffix':' · listo en {time}',
+
+  'body.title':'Cuerpo','body.daysSince':'días desde el último entrenamiento','body.musclesRested':'músculos descansados',
+  'body.flip':'Girar frente y espalda','body.recovering':'Recuperando','body.restedLegend':'Descansado',
+  'body.tapHint':'Toca un músculo para ver detalles · mostrando {view}','body.front':'frente','body.back':'espalda',
+  'body.muscleStatus':'Estado muscular','body.readyNow':'Listo ya','body.readyIn':'Listo en {time}',
+  'body.recentActivities':'Actividades recientes','body.noActivities':'Aún no has registrado actividades manuales.',
+
+  'muscle.trainedBy':'Ejercicios que trabajaron {name} hace poco',
+  'muscle.pctOfExercise':'{p}% del ejercicio',
+  'muscle.noSets':'No hay series recientes para este músculo.',
+  'muscle.activitiesTrained':'Actividades que trabajaron {name} hace poco',
+  'muscle.pctSplit':'{p}% del reparto',
+  'muscle.noActivities':'No hay actividades manuales recientes para este músculo.',
+  'muscle.bestExercises':'Mejores ejercicios para {name}',
+  'muscle.noExercises':'Todavía no hay ejercicios para este músculo.',
+
+  'activity.running':'Correr','activity.cycling':'Ciclismo','activity.swimming':'Natación',
+  'activity.rowing':'Remo','activity.walking':'Caminar','activity.other':'Otro','activity.fallback':'Actividad',
+
+  'logAct.title':'Registrar actividad','logAct.goal':'Objetivo: {goal}','logAct.type':'Tipo de actividad',
+  'logAct.duration':'Duración (minutos)','logAct.durationPh':'ej. 40',
+  'logAct.distance':'Distancia (km, opcional)','logAct.distancePh':'ej. 6.5',
+  'logAct.hr':'Frecuencia cardiaca media (ppm, opcional)','logAct.hrPh':'ej. 148',
+  'logAct.intensity':'Intensidad (esfuerzo, 1-10)','logAct.when':'Cuándo','logAct.save':'Guardar actividad',
+  'logAct.errDuration':'Escribe una duración en minutos.',
+  'logAct.errIntensity':'La intensidad debe estar entre 1 y 10.',
+  'logAct.errWhen':'Elige cuándo ocurrió esta actividad.',
+  'logAct.errFuture':'Esta actividad está en el futuro — revisa la fecha/hora.',
+  'logAct.errHr':'Escribe una frecuencia cardiaca entre 30 y 230 ppm.',
+  'logAct.rowIntensity':'intensidad {v}/10',
+  'logAct.confirmDelete':'¿Eliminar esta actividad?',
+
+  'bw.title':'Peso corporal','bw.log':'+ Registrar peso','bw.vsLast':'{unit} vs registro anterior',
+  'bw.empty':'Registra tu peso para seguirlo junto con tus números de fuerza y skill.',
+  'bw.modalTitle':'Registrar peso corporal','bw.weightLabel':'Peso ({unit})','bw.weightPh':'ej. {v}',
+  'bw.alreadyToday':'Ya tienes un registro hoy — guardar lo reemplaza.',
+  'bw.errWeight':'Escribe un peso válido.','bw.errDate':'Elige una fecha.',
+  'bw.errRange':'Escribe un peso entre 20 y 300 kg (o su equivalente en lb).',
+  'bw.confirmDelete':'¿Eliminar este registro de peso?',
+
+  'plan.editTitle':'Editar plan de resistencia','plan.newTitle':'Nuevo plan de resistencia',
+  'plan.targetDistance':'Distancia objetivo (km, opcional)','plan.targetDistancePh':'ej. 5',
+  'plan.targetDuration':'Duración objetivo (minutos, opcional)',
+  'plan.targetPace':'Ritmo objetivo (min:seg por km, opcional)','plan.targetPacePh':'ej. 5:40',
+  'plan.targetZone':'Zona de frecuencia cardiaca objetivo (opcional)','plan.noZone':'Sin zona',
+  'plan.save':'Guardar plan','plan.errPace':'Escribe el ritmo como minutos:segundos por km, ej. 5:40.',
+  'plan.confirmDelete':'¿Quitar este plan recurrente?',
+
+  'workout.busy':'Termina o cancela tu entrenamiento actual antes de empezar otro.',
+  'workout.startTraining':'Empezar a entrenar',
+  'workout.netHiccup':'Falló la conexión al iniciar el entrenamiento — revisa tu señal e inténtalo de nuevo.',
+  'workout.confirmFinish':'¿Terminar este entrenamiento y preparar el reporte final?',
+  'workout.todayLabel':'Entrenamiento de hoy','workout.blockLabel':'Entrenamiento de hoy · Semana {week}/{total}',
+  'workout.deloadSuffix':' · Descarga',
+  'workout.collapseTimer':'Contraer el cronómetro','workout.expandTimer':'Expandir el cronómetro',
+  'workout.elapsed':'Transcurrido','workout.pauseTimer':'Pausar cronómetro','workout.resumeTimer':'Reanudar cronómetro',
+  'workout.minus30':'Quitar 30 segundos al descanso','workout.plus30':'Agregar 30 segundos al descanso',
+  'workout.rest':'Descanso','workout.restProgress':'Progreso del descanso','workout.defaultUnit':'Unidad de peso por defecto',
+  'workout.minimize':'Minimizar el entrenamiento','workout.exercises':'Ejercicios','workout.slashSets':'/ {n} series',
+  'workout.addExercise':'Agregar ejercicio (solo esta sesión)',
+  'workout.finish':'Terminar entrenamiento',
+  'workout.confirmCancel':'¿Cancelar este entrenamiento? Se borrarán las series registradas.',
+  'workout.totalHours':'{n} horas en total','workout.hms':'horas : minutos : segundos','workout.ms':'minutos : segundos',
+
+  'prog.easier':'Progresión más fácil','prog.easierName':'Más fácil: {name}','prog.easiest':'La más fácil',
+  'prog.harder':'Progresión más difícil','prog.harderName':'Más difícil: {name}','prog.hardest':'La más difícil',
+  'prog.step':'Progresión {i}/{n}','prog.readyFor':'Listo para {name} — toca para subir de nivel',
+  'prog.history':'Historial de progresión','prog.trend':'evolución de las últimas {n} sesiones',
+
+  'ex.restSec':'descanso {n}s','ex.cleanCount':'Limpios {done}/{total}',
+  'ex.swap':'Cambiar ejercicio','ex.removeFromSession':'Quitar el ejercicio de esta sesión',
+  'ex.removeShort':'Quitar de esta sesión',
+  'ex.colSec':'SEG','ex.colReps':'REPS','ex.colClean':'LIM','ex.colRir':'RIR',
+  'ex.switchToLb':'Cambiar este ejercicio a libras','ex.switchToKg':'Cambiar este ejercicio a kilos',
+  'ex.holdClean':'Limpio','ex.holdBroken':'Forma rota','ex.holdUnset':'Sin marcar — toca para definir',
+  'ex.holdQuality':'Calidad del hold: {v}','ex.secPh':'seg','ex.removeSet':'Quitar serie','ex.addSet':'+ Agregar serie',
+  'ex.replaceWith':'Reemplazar con...',
+  'ex.confirmRemove':'¿Quitar {name} de la sesión de hoy? Tu rutina guardada no cambia.',
+  'ex.thisExercise':'este ejercicio',
+  'ex.errNumber':'Escribe un número válido.','ex.errWeight':'Escribe un peso entre 0 y 500 kg.',
+  'ex.errSeconds':'Escribe un tiempo de hold entre 0 y 7200 segundos.','ex.errRir':'Escribe un RIR entre 0 y 10.',
+
+  'report.title':'Entrenamiento guardado','report.logged':'{time} de trabajo registrado',
+  'report.difficulty':'Dificultad','report.diffNormal':'Normal','report.diffEasy':'Fácil','report.diffHeavy':'Pesado',
+  'report.energy':'Energía','report.sleep':'Sueño anoche (horas)','report.sleepPh':'ej. 7.5',
+  'report.worseTitle':'Rendí peor de lo normal hoy',
+  'report.worseBody':'Marca si sientes que el entrenamiento anterior te dejó cansado o bajo de rendimiento.',
+  'report.soreTitle':'Noté dolor o molestia',
+  'report.soreBody':'Marca la zona para poder seguirla semana a semana.',
+  'report.sorePh':'Zona: hombro, codo, lumbar...',
+  'report.notePh':'Cómo te sentiste, qué costó más, qué cambiarías...',
+  'report.shareTitle':'Compartir con la tripulación',
+  'report.shareBody':'Si lo dejas sin marcar, las notas de dolor y este reporte solo los ves tú.',
+  'report.save':'Guardar entrenamiento','report.errSleep':'Escribe horas de sueño entre 0 y 24.',
+
+  'exd.backToWorkout':'Volver al entrenamiento',
+  'exd.noMedia':'Pega un GIF de Gymvisual u otra fuente en la biblioteca para ver la técnica aquí.',
+  'exd.openReference':'Abrir referencia de Gymvisual','exd.editMedia':'Editar media de técnica',
+  'exd.musclesInvolved':'Músculos implicados','exd.howTo':'Cómo hacerlo',
+  'exd.noInstructions':'Aún no hay instrucciones.','exd.coachTips':'Consejos del coach',
+  'exd.noTips':'Aún no hay consejos del coach.',
+  'exd.mediaTitle':'Editar media','exd.upload':'Subir desde tu galería',
+  'exd.orPaste':'O pega una URL directa de GIF/video','exd.directUrl':'URL directa de GIF/video',
+  'exd.pageUrl':'URL de la página de referencia','exd.saveMedia':'Guardar media','exd.uploadError':'Error al subir: {msg}',
+
+  'tpl.editTitle':'Editar rutina','tpl.newTitle':'Nueva rutina','tpl.namePh':'Nombre de la rutina',
+  'tpl.notePh':'Nota del entrenamiento','tpl.shareTitle':'Compartir con la tripulación',
+  'tpl.shareBody':'Otros tripulantes podrán ver y copiar esta rutina.',
+  'tpl.save':'Guardar rutina','tpl.errName':'Agrega un nombre y al menos un ejercicio.',
+  'tpl.filterAll':'Todos','tpl.filterSelected':'Seleccionados ({n})',
+  'tpl.noneSelected':'Aún no has seleccionado ejercicios.','tpl.noMatch':'Ningún ejercicio coincide con tu búsqueda.',
+  'tpl.notFound':'Rutina no encontrada.',
+
+  'week.addTitle':'Agregar a mi semana','week.alreadyHas':' — ya tiene {name}',
+  'week.confirmRemove':'¿Quitar esta rutina de ese día? La rutina se conserva, solo queda sin programar.',
+  'week.chooseRoutine':'Elige una rutina','week.use':'Usar',
+  'week.createInstead':'+ Mejor crear una rutina nueva',
+  'week.scheduledFor':'Programada para {day}','week.startWorkout':'Empezar entrenamiento',
+  'week.replaceRoutine':'Reemplazar rutina','week.editRoutine':'Editar rutina',
+  'week.moveToDay':'Mover a otro día','week.removeFrom':'Quitar de {day}',
+  'week.moveTitle':'Mover {name}','week.currentlyOn':'Actualmente en {day}','week.moveBtn':'Mover rutina',
+
+  'newex.title':'Nuevo ejercicio','newex.name':'Nombre del ejercicio','newex.namePh':'ej. Remo con mancuerna',
+  'newex.altName':'Nombre alternativo','newex.category':'Categoría','newex.equipment':'Equipo',
+  'newex.equipmentPh':'Opcional: mancuernas, banco','newex.media':'Media',
+  'newex.mediaPh':'URL directa de GIF/video (opcional)','newex.pagePh':'URL de página de referencia (opcional)',
+  'newex.muscles':'Músculos',
+  'newex.musclesNote':'Marca solo los músculos que este ejercicio realmente usa. El total no tiene que sumar 100.',
+  'newex.clear':'Limpiar','newex.save':'Guardar ejercicio',
+  'newex.errName':'Agrega un nombre de ejercicio.','newex.errMuscle':'Pon al menos un músculo por encima de 0%.',
+  'newex.errDup':'Ya existe un ejercicio con ese nombre en el catálogo.',
+
+  'group.Chest':'Pecho','group.Back':'Espalda','group.Shoulders':'Hombros','group.Arms':'Brazos',
+  'group.Legs':'Piernas','group.Core':'Core','group.Other':'Otros',
+  'm.Chest':'Pecho','m.Back':'Espalda','m.Shoulders':'Hombros','m.Biceps':'Bíceps','m.Triceps':'Tríceps',
+  'm.Forearms':'Antebrazos','m.Quads':'Cuádriceps','m.Hamstrings':'Isquios','m.Glutes':'Glúteos',
+  'm.Calves':'Pantorrillas','m.Core':'Core','m.Hip Flexors':'Flexores de cadera',
+  'cat.Strength':'Fuerza','cat.Cardio':'Cardio','cat.Mobility':'Movilidad','cat.Core':'Core',
+  'cat.Conditioning':'Acondicionamiento','cat.Rehab':'Rehabilitación',
+  'preset.Push':'Empuje','preset.Pull':'Jalón','preset.Legs':'Piernas','preset.Core':'Core',
+  'diff.normal':'Normal','diff.facil':'Fácil','diff.pesado':'Pesado'
+}
+};
+let LANG=(()=>{
+  const saved=localStorage.getItem(LANG_STORAGE_KEY);
+  if(saved&&I18N[saved]) return saved;
+  return (navigator.language||navigator.userLanguage||'en').toLowerCase().startsWith('es')?'es':'en';
+})();
+function t(key,vars){
+  let s=I18N[LANG]?.[key];
+  if(s==null) s=I18N.en[key];
+  if(s==null) return key;
+  return vars?s.replace(/\{(\w+)\}/g,(m,k)=>vars[k]!=null?vars[k]:m):s;
+}
+// Counted strings: `<key>_one` / `<key>_other`, with {n} always available.
+function tp(n,key,vars){ return t(`${key}_${n===1?'one':'other'}`,Object.assign({n},vars||{})); }
+
+const DOW_BY_LANG={
+  en:['MON','TUE','WED','THU','FRI','SAT','SUN'],
+  es:['LUN','MAR','MIÉ','JUE','VIE','SÁB','DOM']
+};
+// Reassigned by applyLang() so every existing `DOW[i]` / `DOW.map(...)` call site stays as-is.
+let DOW=DOW_BY_LANG[LANG]||DOW_BY_LANG.en;
+// Stored DB values on the left, translated labels on the right (rebuilt on language change).
+const ACTIVITY_TYPES=['running','cycling','swimming','rowing','walking','other'];
+let ACTIVITY_LABELS={};
+function rebuildActivityLabels(){
+  ACTIVITY_LABELS=Object.fromEntries(ACTIVITY_TYPES.map(k=>[k,t('activity.'+k)]));
+}
+// Stored values reach these helpers straight out of the database, so a row written before a
+// label existed (a custom category, a muscle key we don't translate) has to fall back to the
+// raw value rather than rendering a bare "cat.Whatever" key.
+function tOr(key,fallback){ const s=t(key); return s===key?fallback:s; }
+const muscleLabel=name=>tOr('m.'+name,name);
+const groupLabel=name=>tOr('group.'+name,name);
+const categoryLabel=name=>name?tOr('cat.'+name,name):'';
+const presetLabel=name=>tOr('preset.'+name,name);
+const difficultyLabel=v=>{ const key=v||'normal'; return tOr('diff.'+key,key); };
+
+// Fills the static markup (auth screen, tab bar, avatar button) that lives outside render().
+function applyStaticI18n(){
+  document.documentElement.lang=LANG;
+  document.querySelectorAll('[data-i18n]').forEach(el=>{ el.textContent=t(el.dataset.i18n); });
+  document.querySelectorAll('[data-i18n-ph]').forEach(el=>{ el.placeholder=t(el.dataset.i18nPh); });
+  document.querySelectorAll('[data-i18n-title]').forEach(el=>{ el.title=t(el.dataset.i18nTitle); });
+  document.querySelectorAll('[data-i18n-aria]').forEach(el=>{ el.setAttribute('aria-label',t(el.dataset.i18nAria)); });
+}
+
+// Re-renders the whole app in the new language. The modal is deliberately left alone: the only
+// two call sites are the auth-screen toggle (no modal open) and the Settings sheet, which
+// re-renders itself right after — closing/reopening it here would fight that and thrash the
+// body-scroll lock.
+function applyLang(lang){
+  LANG=I18N[lang]?lang:'en';
+  localStorage.setItem(LANG_STORAGE_KEY,LANG);
+  DOW=DOW_BY_LANG[LANG]||DOW_BY_LANG.en;
+  rebuildActivityLabels();
+  applyStaticI18n();
+  // setAuthMode owns the auth button/tab labels (they depend on login vs signup), so re-run it
+  // rather than letting the static pass stamp a stale "Sign in" over a signup form.
+  if(!$('auth').classList.contains('hidden')) setAuthMode(state.authMode);
+  if(state.user) render();
+}
+function setLang(lang){ if(lang!==LANG) applyLang(lang); }
+function toggleLang(){ applyLang(LANG==='es'?'en':'es'); }
+
 const MUSCLE_GROUP_ORDER=['Chest','Back','Shoulders','Arms','Legs','Core','Other'];
 const MUSCLE_GROUP_MAP={Chest:'Chest',Back:'Back',Shoulders:'Shoulders',Biceps:'Arms',Triceps:'Arms',Forearms:'Arms',Quads:'Legs',Hamstrings:'Legs',Glutes:'Legs',Calves:'Legs','Hip Flexors':'Legs',Core:'Core'};
 const EXERCISE_MUSCLES=['Chest','Back','Shoulders','Biceps','Triceps','Forearms','Quads','Hamstrings','Glutes','Calves','Core'];
@@ -440,9 +1046,9 @@ function fmtWorkoutTime(sec){
 function workoutTimeHint(sec){
   sec=Math.max(0,Math.floor(sec||0));
   const d=Math.floor(sec/86400);
-  if(d>0) return `${Math.floor(sec/3600)} total hours`;
-  if(sec>=3600) return 'hours : minutes : seconds';
-  return 'minutes : seconds';
+  if(d>0) return t('workout.totalHours',{n:Math.floor(sec/3600)});
+  if(sec>=3600) return t('workout.hms');
+  return t('workout.ms');
 }
 const todayDow=()=>{const d=new Date().getDay();return d===0?6:d-1};
 const isToday=d=>{const t=new Date(); return d.getFullYear()===t.getFullYear()&&d.getMonth()===t.getMonth()&&d.getDate()===t.getDate();};
@@ -499,7 +1105,7 @@ function setAuthMode(mode){
   $('loginTab')?.classList.toggle('active',mode==='login');
   $('signupTab')?.classList.toggle('active',mode==='signup');
   $('signupNames')?.classList.toggle('hidden',mode!=='signup');
-  if($('authBtn')) $('authBtn').textContent=mode==='login'?'Sign in':'Create account';
+  if($('authBtn')) $('authBtn').textContent=mode==='login'?t('auth.signin'):t('auth.createAccount');
   if($('authMsg')) $('authMsg').textContent='';
 }
 
@@ -511,12 +1117,12 @@ async function submitAuth(){
   const firstName=($('firstName')?.value||'').trim();
   const lastName=($('lastName')?.value||'').trim();
   const fullName=[firstName,lastName].filter(Boolean).join(' ');
-  if(!email||!password) return $('authMsg').textContent='Email and password are required.';
-  if(state.authMode==='signup'&&(!firstName||!lastName)) return $('authMsg').textContent='First name and last name are required.';
+  if(!email||!password) return $('authMsg').textContent=t('auth.errRequired');
+  if(state.authMode==='signup'&&(!firstName||!lastName)) return $('authMsg').textContent=t('auth.errNames');
   submittingAuth=true;
   const btn=$('authBtn');
   if(btn) btn.disabled=true;
-  $('authMsg').textContent=state.authMode==='login'?'Signing in...':'Creating account...';
+  $('authMsg').textContent=state.authMode==='login'?t('auth.signingIn'):t('auth.creatingAccount');
   try{
     if(state.authMode==='login'){
       const {data,error}=await sb.auth.signInWithPassword({email,password});
@@ -534,7 +1140,7 @@ async function submitAuth(){
       await loadAll();
       return showApp();
     }
-    $('authMsg').textContent='Account created. Check your email if confirmation is required, then sign in.';
+    $('authMsg').textContent=t('auth.created');
   } finally {
     submittingAuth=false;
     if(btn) btn.disabled=false;
@@ -579,7 +1185,7 @@ async function loadAll(){
     // Every Skandi write is FK'd to profiles(id), so self-heal it here before anything breaks.
     const {error:ensureError}=await sb.rpc('ensure_own_profile',{p_name:state.user?.user_metadata?.name||state.user?.email?.split('@')[0]||''});
     if(ensureError){
-      alert('Could not set up your profile: '+ensureError.message+'. Try signing out and back in.');
+      alert(t('auth.profileError',{msg:ensureError.message}));
     } else {
       ({data:profile}=await sb.from('profiles').select('id,name,avatar_url').eq('id',state.user.id).maybeSingle());
     }
@@ -679,8 +1285,8 @@ function activeWorkoutBanner(){
   if(!state.active) return '';
   return `<section class="card" style="border-color:rgba(1,36,86,.20);background:linear-gradient(135deg,#ffffff,#e8f1f8);cursor:pointer" onclick="openActiveWorkout()">
     <div class="row">
-      <div><h2>${esc(state.active.title)}</h2><p>Workout in progress · ${fmtWorkoutTime(state.elapsed)}</p></div>
-      <span class="pill">Resume ${icon('play',14)}</span>
+      <div><h2>${esc(state.active.title)}</h2><p>${esc(t('banner.inProgress',{time:fmtWorkoutTime(state.elapsed)}))}</p></div>
+      <span class="pill">${esc(t('banner.resume'))} ${icon('play',14)}</span>
     </div>
   </section>`;
 }
@@ -693,12 +1299,12 @@ function enduranceTodayCard(){
     plan.target_distance_km?`${plan.target_distance_km} km`:null,
     plan.target_duration_min?`${plan.target_duration_min} min`:null,
     plan.target_pace_sec_per_km?`${fmtPace(plan.target_pace_sec_per_km)}/km`:null,
-    plan.target_zone?`Zone ${plan.target_zone}`:null
-  ].filter(Boolean).join(' · ')||'No target set';
+    plan.target_zone?t('endurance.zone',{z:plan.target_zone}):null
+  ].filter(Boolean).join(' · ')||t('endurance.noTarget');
   return `<section class="card click-card" onclick="openLogActivity('${plan.id}')">
     <div class="row">
-      <div><div class="eyebrow">Endurance today</div><h2>${esc(activityTypeLabel(plan.activity_type))}</h2><p>${esc(goal)}</p></div>
-      <span class="pill ${loggedToday?'dark':''}">${loggedToday?'Logged '+icon('check',14):'Log it '+icon('play',14)}</span>
+      <div><div class="eyebrow">${esc(t('endurance.today'))}</div><h2>${esc(activityTypeLabel(plan.activity_type))}</h2><p>${esc(goal)}</p></div>
+      <span class="pill ${loggedToday?'dark':''}">${loggedToday?esc(t('endurance.logged'))+' '+icon('check',14):esc(t('endurance.logIt'))+' '+icon('play',14)}</span>
     </div>
   </section>`;
 }
@@ -706,23 +1312,23 @@ function enduranceTodayCard(){
 function trainingBlockCardHtml(){
   const info=trainingBlockWeekInfo();
   if(!info) return `<section class="card click-card" onclick="openTrainingBlockForm()">
-    <div class="eyebrow">Programa</div>
-    <p style="margin-top:6px">No tienes un bloque de entrenamiento configurado. Toca para definir cuántas semanas de carga antes de tu semana de descarga.</p>
+    <div class="eyebrow">${esc(t('block.eyebrow'))}</div>
+    <p style="margin-top:6px">${esc(t('block.none'))}</p>
   </section>`;
   if(info.ended) return `<section class="card click-card" style="border-color:rgba(212,72,84,.30);background:#fff7f7" onclick="openTrainingBlockForm()">
-    <div class="eyebrow" style="color:var(--pink)">Bloque terminado</div>
-    <p style="margin-top:6px">Revisa si Front Lever/Handstand/Planche mejoraron y si las cargas subieron sin perder técnica, y arranca el siguiente bloque.</p>
+    <div class="eyebrow" style="color:var(--pink)">${esc(t('block.ended'))}</div>
+    <p style="margin-top:6px">${esc(t('block.endedBody'))}</p>
   </section>`;
   const deload=info.deload;
   return `<section class="card click-card" style="${deload?'border-color:rgba(240,160,60,.35);background:#fff8ef':''}" onclick="openTrainingBlockForm()">
     <div class="row">
       <div>
-        <div class="eyebrow" style="${deload?'color:#c8790a':''}">${deload?'Semana de descarga':'Semana de carga'}</div>
-        <h2 style="margin-top:4px">Semana ${info.week} de ${info.totalWeeks}</h2>
+        <div class="eyebrow" style="${deload?'color:#c8790a':''}">${esc(deload?t('block.deloadWeek'):t('block.buildWeek'))}</div>
+        <h2 style="margin-top:4px">${esc(t('block.weekOf',{week:info.week,total:info.totalWeeks}))}</h2>
       </div>
       <span class="pill dark">${info.block.build_weeks}+1</span>
     </div>
-    ${deload?`<p style="margin-top:8px">Reduce 30-40% el volumen, conserva RIR 2-3, quita el bloque intenso de carrera y baja los contactos de pliometría. Los pesos de sets nuevos ya salen ~30% más ligeros — ajústalos si hace falta.</p>`:''}
+    ${deload?`<p style="margin-top:8px">${esc(t('block.deloadBody'))}</p>`:''}
   </section>`;
 }
 
@@ -737,23 +1343,23 @@ function openTrainingBlockForm(opts){
   const isEdit=!!block;
   $('modal').classList.add('show');
   $('modalCard').innerHTML=`
-    <div class="row"><h1>${isEdit?'Editar bloque':'Nuevo bloque'}</h1><button class="x" onclick="closeModal()">${icon('close',20)}</button></div>
-    <label class="eyebrow">Semanas de carga antes de la descarga</label>
+    <div class="row"><h1>${esc(isEdit?t('block.editTitle'):t('block.newTitle'))}</h1><button class="x" onclick="closeModal()" aria-label="${esc(t('common.close'))}">${icon('close',20)}</button></div>
+    <label class="eyebrow">${esc(t('block.buildWeeksLabel'))}</label>
     <select id="blockWeeks" class="field left">
       ${[3,4,5,6].map(n=>`<option value="${n}" ${(block?.build_weeks??4)===n?'selected':''}>${n}</option>`).join('')}
     </select>
-    <label class="eyebrow">Fecha de inicio</label>
+    <label class="eyebrow">${esc(t('block.startDate'))}</label>
     <input id="blockStart" type="date" class="field left" value="${block?.start_date||new Date().toISOString().slice(0,10)}">
-    <textarea id="blockNote" class="field" placeholder="Nota (opcional): qué mejoró en el bloque anterior, qué ajustar...">${esc(block?.note||'')}</textarea>
-    <button class="btn primary" style="width:100%;margin-top:10px" onclick="saveTrainingBlock(${block?`'${block.id}'`:'null'})">${isEdit?'Guardar cambios':'Guardar bloque'}</button>
-    ${isEdit?`<button class="btn" style="width:100%;margin-top:10px" onclick="openTrainingBlockForm({forceNew:true})">+ Empezar bloque nuevo</button>
-    <button class="btn danger" style="width:100%;margin-top:10px" onclick="deleteTrainingBlock('${block.id}')">${icon('trash',16)} Eliminar este bloque</button>`:''}`;
+    <textarea id="blockNote" class="field" placeholder="${esc(t('block.notePh'))}">${esc(block?.note||'')}</textarea>
+    <button class="btn primary" style="width:100%;margin-top:10px" onclick="saveTrainingBlock(${block?`'${block.id}'`:'null'})">${esc(isEdit?t('block.saveChanges'):t('block.save'))}</button>
+    ${isEdit?`<button class="btn" style="width:100%;margin-top:10px" onclick="openTrainingBlockForm({forceNew:true})">${esc(t('block.startNew'))}</button>
+    <button class="btn danger" style="width:100%;margin-top:10px" onclick="deleteTrainingBlock('${block.id}')">${icon('trash',16)} ${esc(t('block.delete'))}</button>`:''}`;
 }
 
 async function saveTrainingBlock(blockId){
   const buildWeeks=Number($('blockWeeks').value);
   const startDate=$('blockStart').value;
-  if(!startDate) return alert('Elige una fecha de inicio.');
+  if(!startDate) return alert(t('block.pickDate'));
   const note=$('blockNote').value.trim()||null;
   const {error}=blockId
     ?await sb.from('skandi_training_blocks').update({start_date:startDate,build_weeks:buildWeeks,note}).eq('id',blockId)
@@ -765,7 +1371,7 @@ async function saveTrainingBlock(blockId){
 }
 
 async function deleteTrainingBlock(blockId){
-  if(!confirm('¿Eliminar este bloque? Tus entrenamientos y sets no se tocan, solo se borra el conteo de semana/descarga.')) return;
+  if(!confirm(t('block.confirmDelete'))) return;
   const {error}=await sb.from('skandi_training_blocks').delete().eq('id',blockId);
   if(error) return alert(error.message);
   closeModal();
@@ -791,23 +1397,24 @@ function homeView(){
   const weekTotal=state.templates.filter(t=>t.user_id===state.user.id&&t.weekday!=null).length||5;
   const pct=Math.min(100,Math.round((weekCount/weekTotal)*100));
   const remaining=weekTotal-weekCount;
-  const encouragement=weekCount===0?'Today can be the start.'
-    :remaining<=0?'All done for the week. Strong work.'
-    :remaining===1?'One more to go. You got this.'
-    :'You are building rhythm.';
+  const encouragement=weekCount===0?t('home.encStart')
+    :remaining<=0?t('home.encDone')
+    :remaining===1?t('home.encOne')
+    :t('home.encRhythm');
   const focusAction=todayTpl?`openWorkoutOverview('${todayTpl.id}')`:`openDayPicker(${todayDow()})`;
+  const myRoutineCount=state.templates.filter(x=>x.user_id===state.user.id).length;
   return `
     ${activeWorkoutBanner()}
     <section class="hero">
-      <div class="eyebrow">Monday to Sunday</div>
-      <h1>Hey, ${esc(firstName())}</h1>
-      <button class="focus action" onclick="${focusAction}" aria-label="${todayTpl?'Start '+esc(todayTpl.name):'Create your first routine'}">
+      <div class="eyebrow">${esc(t('home.weekRange'))}</div>
+      <h1>${esc(t('home.hey',{name:firstName()}))}</h1>
+      <button class="focus action" onclick="${focusAction}" aria-label="${esc(todayTpl?t('home.startAria',{name:todayTpl.name}):t('home.firstRoutine'))}">
         <div class="row">
           <div>
-            <div class="eyebrow">Your focus now</div>
-            <h2>${esc(todayTpl?.name||'Create your first routine')}</h2>
-            <p>${weekCount} of ${weekTotal} ${plural(weekTotal,'workout')} done this week. ${esc(encouragement)}</p>
-            <span class="focus-cta"><i>${todayTpl?icon('play',17):'+'}</i>${todayTpl?'Start today workout':'Set up today routine'}</span>
+            <div class="eyebrow">${esc(t('home.focusNow'))}</div>
+            <h2>${esc(todayTpl?.name||t('home.firstRoutine'))}</h2>
+            <p>${esc(t('home.weekProgress',{done:weekCount,total:weekTotal,unit:tp(weekTotal,'common.workouts'),note:encouragement}))}</p>
+            <span class="focus-cta"><i>${todayTpl?icon('play',17):'+'}</i>${esc(todayTpl?t('home.startToday'):t('home.setupToday'))}</span>
           </div>
           <div class="ring" style="--p:${pct}%"><span>${pct}%</span></div>
         </div>
@@ -817,57 +1424,57 @@ function homeView(){
     ${enduranceTodayCard()}
     ${attentionBannerHtml()}
     <section class="grid">
-      <div class="stat click-card" onclick="setView('progress')"><strong>${weekCount}</strong><small>this week</small></div>
-      <div class="stat click-card" onclick="setView('train')"><strong>${state.templates.filter(t=>t.user_id===state.user.id).length}</strong><small>your routines</small></div>
+      <div class="stat click-card" onclick="setView('progress')"><strong>${weekCount}</strong><small>${esc(t('home.thisWeek'))}</small></div>
+      <div class="stat click-card" onclick="setView('train')"><strong>${myRoutineCount}</strong><small>${esc(t('home.yourRoutines'))}</small></div>
     </section>
     ${miniBodyRecoveryCard()}
-    ${todayTpl?`<div class="click-card" onclick="setView('train')">${workoutCard(todayTpl,true)}</div>`:empty('You do not have a routine yet. Create one from Train.')}
+    ${todayTpl?`<div class="click-card" onclick="setView('train')">${workoutCard(todayTpl,true)}</div>`:empty(t('home.noRoutine'))}
     <section class="card click-card" onclick="setView('crew')">
-      <div class="row"><h2>Latest from the boat</h2><button class="btn small" onclick="setView('crew')">View crew</button></div>
-      ${state.sessions.filter(s=>s.completed_at&&s.visibility==='crew').slice(0,4).map(feedItem).join('')||empty('When someone finishes a workout, it will show up here.')}
+      <div class="row"><h2>${esc(t('home.latest'))}</h2><button class="btn small" onclick="setView('crew')">${esc(t('home.viewCrew'))}</button></div>
+      ${state.sessions.filter(s=>s.completed_at&&s.visibility==='crew').slice(0,4).map(feedItem).join('')||empty(t('home.feedEmpty'))}
     </section>`;
 }
 
 function trainView(){
-  const mine=state.templates.filter(t=>t.user_id===state.user.id);
-  const community=state.templates.filter(t=>t.user_id!==state.user.id);
-  const myPlans=state.activityTemplates.filter(t=>t.user_id===state.user.id);
+  const mine=state.templates.filter(x=>x.user_id===state.user.id);
+  const community=state.templates.filter(x=>x.user_id!==state.user.id);
+  const myPlans=state.activityTemplates.filter(x=>x.user_id===state.user.id);
   return `
     ${activeWorkoutBanner()}
-    <div class="row"><h1>Train</h1><button class="btn primary" onclick="openDayPicker(todayDow())">+ Routine</button></div>
+    <div class="row"><h1>${esc(t('train.title'))}</h1><button class="btn primary" onclick="openDayPicker(todayDow())">${esc(t('train.addRoutine'))}</button></div>
     <section class="card">
-      <div class="row"><h2>Your week</h2><span class="muted">${mine.length} ${plural(mine.length,'routine')}</span></div>
+      <div class="row"><h2>${esc(t('train.yourWeek'))}</h2><span class="muted">${mine.length} ${esc(tp(mine.length,'common.routines'))}</span></div>
       <div class="week">
         ${DOW.map((d,i)=>{
-          const t=mine.find(x=>x.weekday===i);
-          if(!t) return `<button class="day ${i===todayDow()?'today':''}" onclick="openDayPicker(${i})"><span>${d}</span><span>Add routine</span><span>${icon('chevronRight',18)}</span></button>`;
+          const tpl=mine.find(x=>x.weekday===i);
+          if(!tpl) return `<button class="day ${i===todayDow()?'today':''}" onclick="openDayPicker(${i})"><span>${d}</span><span>${esc(t('train.addRoutineDay'))}</span><span>${icon('chevronRight',18)}</span></button>`;
           return `<div class="day ${i===todayDow()?'today':''}" style="grid-template-columns:64px 1fr auto">
             <span>${d}</span>
-            <span style="cursor:pointer" onclick="openWorkoutOverview('${t.id}')">${esc(t.name)}</span>
-            <button class="icon-btn tiny" onclick="openDayManage('${t.id}',${i})" aria-label="Manage ${d}">${icon('ellipsis',16)}</button>
+            <span style="cursor:pointer" onclick="openWorkoutOverview('${tpl.id}')">${esc(tpl.name)}</span>
+            <button class="icon-btn tiny" onclick="openDayManage('${tpl.id}',${i})" aria-label="${esc(t('train.manageDay',{day:d}))}">${icon('ellipsis',16)}</button>
           </div>`;
         }).join('')}
       </div>
     </section>
     <section class="card">
-      <div class="row"><h2>Endurance</h2><span class="muted">${myPlans.length} ${plural(myPlans.length,'plan')}</span></div>
+      <div class="row"><h2>${esc(t('train.endurance'))}</h2><span class="muted">${myPlans.length} ${esc(tp(myPlans.length,'common.plans'))}</span></div>
       <div class="week">
         ${DOW.map((d,i)=>{
           const p=myPlans.find(x=>x.weekday===i);
-          if(!p) return `<button class="day ${i===todayDow()?'today':''}" onclick="openActivityTemplateBuilder(${i})"><span>${d}</span><span>Add plan</span><span>${icon('chevronRight',18)}</span></button>`;
+          if(!p) return `<button class="day ${i===todayDow()?'today':''}" onclick="openActivityTemplateBuilder(${i})"><span>${d}</span><span>${esc(t('train.addPlan'))}</span><span>${icon('chevronRight',18)}</span></button>`;
           const summary=[activityTypeLabel(p.activity_type),p.target_distance_km?`${p.target_distance_km}km`:null].filter(Boolean).join(' · ');
           return `<div class="day ${i===todayDow()?'today':''}" style="grid-template-columns:64px 1fr auto">
             <span>${d}</span>
             <span style="cursor:pointer" onclick="openActivityTemplateBuilder(${i},'${p.id}')">${esc(summary)}</span>
-            <button class="icon-btn tiny" onclick="openActivityTemplateBuilder(${i},'${p.id}')" aria-label="Manage ${d} plan">${icon('ellipsis',16)}</button>
+            <button class="icon-btn tiny" onclick="openActivityTemplateBuilder(${i},'${p.id}')" aria-label="${esc(t('train.managePlanDay',{day:d}))}">${icon('ellipsis',16)}</button>
           </div>`;
         }).join('')}
       </div>
     </section>
-    <div class="row"><h2>My routines</h2><button class="btn small" onclick="openTemplateBuilder()">+ New routine</button></div>
-    ${mine.length?mine.map(t=>workoutCard(t)).join(''):empty('You have not created a routine yet.')}
-    <h2>Community routines</h2>
-    ${community.length?community.map(t=>workoutCard(t)).join(''):empty('No routines shared by other crew yet.')}`;
+    <div class="row"><h2>${esc(t('train.myRoutines'))}</h2><button class="btn small" onclick="openTemplateBuilder()">${esc(t('train.newRoutine'))}</button></div>
+    ${mine.length?mine.map(x=>workoutCard(x)).join(''):empty(t('train.noRoutines'))}
+    <h2>${esc(t('train.communityRoutines'))}</h2>
+    ${community.length?community.map(x=>workoutCard(x)).join(''):empty(t('train.noCommunity'))}`;
 }
 
 function toggleRoutineCard(id){
@@ -876,26 +1483,26 @@ function toggleRoutineCard(id){
   render();
 }
 
-function workoutCard(t){
-  const its=state.items.filter(i=>i.template_id===t.id);
-  const names=its.slice(0,4).map(i=>`<span class="pill dark">${esc(i.exercise?.name||'Exercise')}</span>`).join('');
-  const mine=t.user_id===state.user.id;
-  const creator=t.profile?.name||'Crew member';
-  const open=state.expandedRoutines.has(t.id);
-  return `<article class="workout card routine-card ${open?'open':''}" onclick="toggleRoutineCard('${t.id}')">
+function workoutCard(tpl){
+  const its=state.items.filter(i=>i.template_id===tpl.id);
+  const names=its.slice(0,4).map(i=>`<span class="pill dark">${esc(i.exercise?.name||t('common.exercise'))}</span>`).join('');
+  const mine=tpl.user_id===state.user.id;
+  const creator=tpl.profile?.name||t('common.crewMember');
+  const open=state.expandedRoutines.has(tpl.id);
+  return `<article class="workout card routine-card ${open?'open':''}" onclick="toggleRoutineCard('${tpl.id}')">
     <div class="row routine-summary">
       <div class="routine-title">
-        <h2>${esc(t.name)}</h2>
-        <p>${its.length} ${plural(its.length,'exercise')} ${t.weekday!=null?'· '+DOW[t.weekday]:''}${mine?'':' · by '+esc(creator)}</p>
+        <h2>${esc(tpl.name)}</h2>
+        <p>${its.length} ${esc(tp(its.length,'common.exercises'))} ${tpl.weekday!=null?'· '+DOW[tpl.weekday]:''}${mine?'':' · '+esc(t('common.byName',{name:creator}))}</p>
       </div>
-      <span class="routine-count"><span class="pill">${its.length} ex.</span><span class="routine-toggle">${icon('chevronRight',18)}</span></span>
+      <span class="routine-count"><span class="pill">${esc(t('card.exCount',{n:its.length}))}</span><span class="routine-toggle">${icon('chevronRight',18)}</span></span>
     </div>
     ${open?`<div class="routine-details">
-      ${t.forked_from_name?`<p class="muted">Adapted from ${esc(t.forked_from_name)}</p>`:''}
+      ${tpl.forked_from_name?`<p class="muted">${esc(t('card.adaptedFrom',{name:tpl.forked_from_name}))}</p>`:''}
       <div class="muscles">${names}${its.length>4?`<span class="pill dark">+${its.length-4}</span>`:''}</div>
       <div class="row">
-        <button class="btn primary" onclick="event.stopPropagation();openWorkoutOverview('${t.id}')">${icon('play',16)} Start</button>
-        ${mine?`<button class="btn" onclick="event.stopPropagation();openTemplateBuilder(null,'${t.id}')">Edit</button>`:`<button class="btn" onclick="event.stopPropagation();openAddToWeek('${t.id}')">+ Add to my week</button>`}
+        <button class="btn primary" onclick="event.stopPropagation();openWorkoutOverview('${tpl.id}')">${icon('play',16)} ${esc(t('card.start'))}</button>
+        ${mine?`<button class="btn" onclick="event.stopPropagation();openTemplateBuilder(null,'${tpl.id}')">${esc(t('common.edit'))}</button>`:`<button class="btn" onclick="event.stopPropagation();openAddToWeek('${tpl.id}')">${esc(t('card.addToWeek'))}</button>`}
       </div>
     </div>`:''}
   </article>`;
@@ -904,13 +1511,13 @@ function workoutCard(t){
 function crewView(){
   const leaders=leaderboard();
   return `
-    <div class="row"><h1>Crew</h1><button class="btn" onclick="loadAll().then(render)">Refresh</button></div>
+    <div class="row"><h1>${esc(t('crew.title'))}</h1><button class="btn" onclick="loadAll().then(render)">${esc(t('crew.refresh'))}</button></div>
     <section class="card">
-      <h2>Recent PRs</h2>
-      ${leaders.map(x=>leaderRowHtml(x)).join('')||empty('Log a lift, hold, or set to build the leaderboard.')}
+      <h2>${esc(t('crew.recentPrs'))}</h2>
+      ${leaders.map(x=>leaderRowHtml(x)).join('')||empty(t('crew.prsEmpty'))}
     </section>
-    <h2>Workout feed</h2>
-    ${state.sessions.filter(s=>s.completed_at&&s.visibility==='crew').map(feedItem).join('')||empty('No shared workouts yet.')}`;
+    <h2>${esc(t('crew.feed'))}</h2>
+    ${state.sessions.filter(s=>s.completed_at&&s.visibility==='crew').map(feedItem).join('')||empty(t('crew.feedEmpty'))}`;
 }
 
 function progressView(){
@@ -919,41 +1526,41 @@ function progressView(){
   const stalls=progressionStallWarnings();
   const sore=repeatedSorenessWarnings();
   return `
-    <h1>Progress</h1>
+    <h1>${esc(t('progress.title'))}</h1>
     ${weeklyRecapCard()}
     ${(stalls.length||sore.length)?`<section class="card" style="border-color:rgba(212,72,84,.30);background:#fff7f7">
-      <div class="eyebrow" style="color:var(--pink)">Needs attention</div>
-      ${sore.map(w=>`<p style="margin-top:8px"><strong>${esc(w.area)}</strong> — reported ${w.count} of your last sessions. Consider resting that area or regressing.</p>`).join('')}
-      ${stalls.map(w=>`<div class="row click-card" style="margin-top:8px" onclick="openExercise('${w.exercise.id}')"><p><strong>${esc(w.exercise.name)}</strong> flat for 3 sessions (${w.marks.map(m=>w.exercise.log_mode==='seconds'?fmtSec(m):m+' reps').join(' → ')}). Maybe deload or hold longer.</p>${icon('chevronRight',18)}</div>`).join('')}
+      <div class="eyebrow" style="color:var(--pink)">${esc(t('progress.needsAttention'))}</div>
+      ${sore.map(w=>`<p style="margin-top:8px">${t('progress.soreWarn',{area:esc(w.area),n:w.count})}</p>`).join('')}
+      ${stalls.map(w=>`<div class="row click-card" style="margin-top:8px" onclick="openExercise('${w.exercise.id}')"><p>${t('progress.stallWarn',{name:esc(w.exercise.name),marks:esc(w.marks.map(m=>w.exercise.log_mode==='seconds'?fmtSec(m):m+' '+t('common.reps')).join(' → '))})}</p>${icon('chevronRight',18)}</div>`).join('')}
     </section>`:''}
     <section class="card">
-      <div class="eyebrow">All time</div>
+      <div class="eyebrow">${esc(t('progress.allTime'))}</div>
       <div class="grid" style="margin-top:10px">
-        <div class="stat"><strong>${mine.length}</strong><small>saved workouts</small></div>
-        <div class="stat"><strong>${Math.round(mine.reduce((a,s)=>a+(s.duration_sec||0),0)/60)}</strong><small>minutes trained</small></div>
+        <div class="stat"><strong>${mine.length}</strong><small>${esc(t('progress.savedWorkouts'))}</small></div>
+        <div class="stat"><strong>${Math.round(mine.reduce((a,s)=>a+(s.duration_sec||0),0)/60)}</strong><small>${esc(t('progress.minutesTrained'))}</small></div>
       </div>
     </section>
     ${crossTrainingCardHtml()}
     ${bodyweightCardHtml()}
-    ${muscleLoadCard('Muscle recovery')}
+    ${muscleLoadCard(t('recovery.title'))}
     <section class="card">
-      <div class="row"><h2>External activities</h2><button class="btn small" onclick="openLogActivity()">+ Log activity</button></div>
-      ${(state.externalActivities||[]).slice(0,4).map(externalActivityRow).join('')||empty('Log a run, ride, or swim to factor it into recovery.')}
+      <div class="row"><h2>${esc(t('progress.externalActivities'))}</h2><button class="btn small" onclick="openLogActivity()">${esc(t('progress.logActivity'))}</button></div>
+      ${(state.externalActivities||[]).slice(0,4).map(externalActivityRow).join('')||empty(t('progress.activitiesEmpty'))}
     </section>
     <section class="card">
-      <h2>Your bests</h2>
-      ${prs.map(x=>leaderRowHtml(x,false)).join('')||empty('No lifts, holds, or sets logged yet.')}
+      <h2>${esc(t('progress.yourBests'))}</h2>
+      ${prs.map(x=>leaderRowHtml(x,false)).join('')||empty(t('progress.bestsEmpty'))}
     </section>
     <section class="card">
-      <h2>Workout history</h2>
-      ${mine.slice(0,20).map(feedItem).join('')||empty('Complete a workout to see it here.')}
+      <h2>${esc(t('progress.history'))}</h2>
+      ${mine.slice(0,20).map(feedItem).join('')||empty(t('progress.historyEmpty'))}
     </section>`;
 }
 
 function libraryView(){
   return `
-    <div class="row"><h1>Library</h1><button class="btn primary" onclick="openExerciseBuilder()">+ Exercise</button></div>
-    <div class="search"><input id="q" class="field left" placeholder="Search exercise..." oninput="renderLibraryList()"><button class="btn" onclick="renderLibraryList()">Search</button></div>
+    <div class="row"><h1>${esc(t('library.title'))}</h1><button class="btn primary" onclick="openExerciseBuilder()">${esc(t('library.addExercise'))}</button></div>
+    <div class="search"><input id="q" class="field left" placeholder="${esc(t('common.searchExercise'))}" oninput="renderLibraryList()"><button class="btn" onclick="renderLibraryList()">${esc(t('library.search'))}</button></div>
     <div id="libraryList">${exerciseList(state.exercises)}</div>`;
 }
 
@@ -964,7 +1571,7 @@ function renderLibraryList(){
 }
 
 function exerciseList(list){
-  return list.map(e=>exerciseCard(e,false)).join('')||empty('No exercises found.');
+  return list.map(e=>exerciseCard(e,false)).join('')||empty(t('library.empty'));
 }
 
 function muscleGroupOf(e){
@@ -990,18 +1597,18 @@ function templateExerciseOption(e){
   const checked=!!cfg;
   return `<label class="card" style="display:block;margin:0 0 8px">
     <div class="row">
-      <div><strong>${esc(e.name)}</strong><p>${esc(e.category)}</p></div>
+      <div><strong>${esc(e.name)}</strong><p>${esc(categoryLabel(e.category))}</p></div>
       <input class="tplEx" type="checkbox" value="${e.id}" ${checked?'checked':''} onchange="toggleBuilderExercise('${e.id}',this.checked)">
     </div>
     ${checked?`<div class="row" style="margin-top:10px;gap:8px">
-      <input class="field" type="number" min="1" max="12" inputmode="numeric" value="${cfg.sets}" placeholder="sets" onclick="event.preventDefault()" onchange="updateBuilderConfig('${e.id}','sets',this.value)">
-      <input class="field" type="text" value="${esc(cfg.reps)}" placeholder="reps" onclick="event.preventDefault()" onchange="updateBuilderConfig('${e.id}','reps',this.value)">
-      ${e.log_mode!=='seconds'?`<input class="field" type="number" min="0" max="10" inputmode="numeric" value="${cfg.rir??''}" placeholder="RIR" title="Target RIR (reps in reserve)" onclick="event.preventDefault()" onchange="updateBuilderConfig('${e.id}','rir',this.value)">`:''}
+      <input class="field" type="number" min="1" max="12" inputmode="numeric" value="${cfg.sets}" placeholder="${esc(t('builder.setsPh'))}" onclick="event.preventDefault()" onchange="updateBuilderConfig('${e.id}','sets',this.value)">
+      <input class="field" type="text" value="${esc(cfg.reps)}" placeholder="${esc(t('builder.repsPh'))}" onclick="event.preventDefault()" onchange="updateBuilderConfig('${e.id}','reps',this.value)">
+      ${e.log_mode!=='seconds'?`<input class="field" type="number" min="0" max="10" inputmode="numeric" value="${cfg.rir??''}" placeholder="${esc(t('builder.rirPh'))}" title="${esc(t('builder.rirTitle'))}" onclick="event.preventDefault()" onchange="updateBuilderConfig('${e.id}','rir',this.value)">`:''}
     </div>
-    <p class="muted" style="margin:10px 0 6px;font-size:12px;font-weight:800;letter-spacing:.1em;text-transform:uppercase">Rest between sets</p>
+    <p class="muted" style="margin:10px 0 6px;font-size:12px;font-weight:800;letter-spacing:.1em;text-transform:uppercase">${esc(t('builder.restBetween'))}</p>
     <div class="rest-presets" style="justify-content:flex-start">
       ${[30,45,60,90,120,180].map(s=>`<button type="button" class="chip ${cfg.rest===s?'active':''}" onclick="event.preventDefault();updateBuilderConfig('${e.id}','rest',${s});renderTemplateExercisePicker()">${s<60?s+'s':(s/60)+'m'}</button>`).join('')}
-      <input class="field" type="number" min="0" max="900" step="5" inputmode="numeric" value="${cfg.rest}" placeholder="custom" style="width:80px;flex:0 0 auto" onclick="event.preventDefault()" onchange="updateBuilderConfig('${e.id}','rest',this.value);renderTemplateExercisePicker()">
+      <input class="field" type="number" min="0" max="900" step="5" inputmode="numeric" value="${cfg.rest}" placeholder="${esc(t('builder.custom'))}" style="width:80px;flex:0 0 auto" onclick="event.preventDefault()" onchange="updateBuilderConfig('${e.id}','rest',this.value);renderTemplateExercisePicker()">
     </div>`:''}
   </label>`;
 }
@@ -1011,10 +1618,10 @@ function exerciseCard(e,tracking){
   return `<article class="exercise">
     <div class="ex-head" onclick="openExercise('${e.id}')">
       ${mediaThumb(e)}
-      <div><h3>${esc(e.name)}</h3><p>${esc(exerciseSubtitle(e)||e.category||'')}</p></div>
+      <div><h3>${esc(e.name)}</h3><p>${esc(exerciseSubtitle(e)||categoryLabel(e.category)||'')}</p></div>
       <div class="play">${icon('play',18)}</div>
     </div>
-    <div class="muscles">${muscles.map(([m,p])=>`<span class="pill dark">${esc(m)} ${p}%</span>`).join('')}</div>
+    <div class="muscles">${muscles.map(([m,p])=>`<span class="pill dark">${esc(muscleLabel(m))} ${p}%</span>`).join('')}</div>
   </article>`;
 }
 
@@ -1031,12 +1638,12 @@ function mediaThumb(e){
 }
 
 function feedItem(s){
-  const name=s.profile?.name||'Crew member';
+  const name=s.profile?.name||t('common.crewMember');
   const doneSets=state.sets.filter(x=>x.session_id===s.id&&x.done).length;
   return `<article class="feed" style="cursor:pointer" onclick="openSessionDetail('${s.id}')">
-    <div class="feed-title"><span class="dot"></span><div><h3>${esc(name)} · ${esc(s.title)}</h3><p>${doneSets} series · ${Math.round((s.duration_sec||0)/60)} min</p></div></div>
+    <div class="feed-title"><span class="dot"></span><div><h3>${esc(name)} · ${esc(s.title)}</h3><p>${esc(t('feed.seriesMin',{sets:doneSets,min:Math.round((s.duration_sec||0)/60)}))}</p></div></div>
     ${s.report_note?`<p style="margin-top:10px">${esc(s.report_note)}</p>`:''}
-      ${s.report_soreness?`<span class="pill dark" style="margin-top:10px;color:var(--pink)">Soreness: ${esc(s.report_soreness_area||'no area')}</span>`:''}
+      ${s.report_soreness?`<span class="pill dark" style="margin-top:10px;color:var(--pink)">${esc(t('feed.soreness',{area:s.report_soreness_area||t('feed.noArea')}))}</span>`:''}
   </article>`;
 }
 
@@ -1049,7 +1656,7 @@ function openSessionDetail(sessionId){
     // x.exercise (the join used to load sets) only carries name/slug — look the full row up
     // in state.exercises for log_mode, same as leaderboard(), so seconds-based holds render
     // their clean/broken tag here instead of a meaningless "weight × reps".
-    if(!byExercise.has(x.exercise_id)) byExercise.set(x.exercise_id,{name:x.exercise?.name||'Exercise',seconds:state.exercises.find(e=>e.id===x.exercise_id)?.log_mode==='seconds',sets:[]});
+    if(!byExercise.has(x.exercise_id)) byExercise.set(x.exercise_id,{name:x.exercise?.name||t('common.exercise'),seconds:state.exercises.find(e=>e.id===x.exercise_id)?.log_mode==='seconds',sets:[]});
     byExercise.get(x.exercise_id).sets.push(x);
   });
   const mine=s.user_id===state.user.id;
@@ -1057,32 +1664,32 @@ function openSessionDetail(sessionId){
   $('modal').classList.add('show');
   $('modalCard').innerHTML=`
     <div class="row">
-      <div><p class="muted">${when.toLocaleDateString(undefined,{weekday:'long',month:'short',day:'numeric'})}${mine?'':' · by '+esc(s.profile?.name||'Crew member')}</p><h1>${esc(s.title)}</h1></div>
-      <button class="x" onclick="closeModal()">${icon('close',20)}</button>
+      <div><p class="muted">${when.toLocaleDateString(LANG,{weekday:'long',month:'short',day:'numeric'})}${mine?'':' · '+esc(t('common.byName',{name:s.profile?.name||t('common.crewMember')}))}</p><h1>${esc(s.title)}</h1></div>
+      <button class="x" onclick="closeModal()" aria-label="${esc(t('common.close'))}">${icon('close',20)}</button>
     </div>
     <section class="grid">
-      <div class="stat"><strong>${Math.round((s.duration_sec||0)/60)}</strong><small>minutes</small></div>
-      <div class="stat"><strong>${sets.filter(x=>x.done).length}</strong><small>sets logged</small></div>
+      <div class="stat"><strong>${Math.round((s.duration_sec||0)/60)}</strong><small>${esc(t('session.minutes'))}</small></div>
+      <div class="stat"><strong>${sets.filter(x=>x.done).length}</strong><small>${esc(tp(sets.filter(x=>x.done).length,'common.setsLogged'))}</small></div>
     </section>
-    ${s.report_difficulty||s.report_energy?`<section class="card"><div class="row"><span class="pill dark">${esc(s.report_difficulty||'normal')}</span><span class="pill dark">Energy ${s.report_energy||'-'}/5</span>${s.report_sleep_hours!=null?`<span class="pill dark">Sleep ${s.report_sleep_hours}h</span>`:''}${s.report_felt_worse?`<span class="pill dark" style="color:var(--pink)">Rindió peor</span>`:''}</div></section>`:''}
-    ${s.report_soreness?`<section class="card" style="border-color:rgba(212,72,84,.30);background:#fff7f7"><strong style="color:var(--pink)">Soreness</strong><p style="margin-top:6px">${esc(s.report_soreness_area||'Not specified')}</p></section>`:''}
-    ${s.report_note?`<section class="card"><div class="eyebrow">Notes</div><p style="margin-top:8px">${esc(s.report_note)}</p></section>`:''}
+    ${s.report_difficulty||s.report_energy?`<section class="card"><div class="row"><span class="pill dark">${esc(difficultyLabel(s.report_difficulty))}</span><span class="pill dark">${esc(t('session.energy',{v:s.report_energy||'-'}))}</span>${s.report_sleep_hours!=null?`<span class="pill dark">${esc(t('session.sleep',{h:s.report_sleep_hours}))}</span>`:''}${s.report_felt_worse?`<span class="pill dark" style="color:var(--pink)">${esc(t('session.feltWorse'))}</span>`:''}</div></section>`:''}
+    ${s.report_soreness?`<section class="card" style="border-color:rgba(212,72,84,.30);background:#fff7f7"><strong style="color:var(--pink)">${esc(t('session.soreness'))}</strong><p style="margin-top:6px">${esc(s.report_soreness_area||t('session.notSpecified'))}</p></section>`:''}
+    ${s.report_note?`<section class="card"><div class="eyebrow">${esc(t('session.notes'))}</div><p style="margin-top:8px">${esc(s.report_note)}</p></section>`:''}
     <section class="card">
-      <div class="eyebrow">Exercises</div>
+      <div class="eyebrow">${esc(t('session.exercises'))}</div>
       ${[...byExercise.values()].map(ex=>`
         <div style="margin-top:12px">
           <strong>${esc(ex.name)}</strong>
           <div class="stack" style="margin-top:6px">
-            ${ex.sets.map(x=>`<div class="row"><small class="muted">Set ${x.set_idx}</small><small>${x.done?(ex.seconds?`${fmtSec(x.seconds)}${x.hold_clean===true?' · clean':x.hold_clean===false?' · broken':''}`:`${x.weight_kg??'-'} kg × ${x.reps??'-'}${x.rir!=null?` · RIR ${x.rir}`:''}`):'not logged'}</small></div>`).join('')}
+            ${ex.sets.map(x=>`<div class="row"><small class="muted">${esc(t('session.set',{n:x.set_idx}))}</small><small>${x.done?esc(ex.seconds?`${fmtSec(x.seconds)}${x.hold_clean===true?' · '+t('session.clean'):x.hold_clean===false?' · '+t('session.broken'):''}`:`${x.weight_kg??'-'} kg × ${x.reps??'-'}${x.rir!=null?` · RIR ${x.rir}`:''}`):esc(t('session.notLogged'))}</small></div>`).join('')}
           </div>
         </div>
-      `).join('')||empty('No sets logged.')}
+      `).join('')||empty(t('session.noSets'))}
     </section>
-    ${mine?`<button class="btn danger" style="width:100%;margin-top:14px" onclick="deleteSession('${s.id}')">${icon('trash',16)} Delete this workout</button>`:''}`;
+    ${mine?`<button class="btn danger" style="width:100%;margin-top:14px" onclick="deleteSession('${s.id}')">${icon('trash',16)} ${esc(t('session.delete'))}</button>`:''}`;
 }
 
 async function deleteSession(sessionId){
-  if(!confirm('Delete this workout? This cannot be undone.')) return;
+  if(!confirm(t('session.confirmDelete'))) return;
   const {error}=await sb.from('skandi_sessions').delete().eq('id',sessionId).eq('user_id',state.user.id);
   if(error) return alert(error.message);
   closeModal();
@@ -1091,7 +1698,7 @@ async function deleteSession(sessionId){
 }
 
 function leaderboard(){
-  const profiles=new Map(state.sessions.map(s=>[s.user_id,s.profile?.name||'Crew member']));
+  const profiles=new Map(state.sessions.map(s=>[s.user_id,s.profile?.name||t('common.crewMember')]));
   const best=new Map();
   state.sets.filter(s=>s.done).forEach(s=>{
     // s.exercise (the join used to load sets) only carries name/slug — look the full row up in
@@ -1112,7 +1719,7 @@ function leaderboard(){
     const key=`${s.user_id}:${s.exercise_id}`;
     const current=best.get(key);
     if(!current||mark>current.mark) best.set(key,{
-      user_id:s.user_id,name:profiles.get(s.user_id)||'Crew member',exercise:ex.name,mode,mark,reps:Number(s.reps)||0
+      user_id:s.user_id,name:profiles.get(s.user_id)||t('common.crewMember'),exercise:ex.name,mode,mark,reps:Number(s.reps)||0
     });
   });
   return [...best.values()].sort((a,b)=>b.mark-a.mark);
@@ -1121,8 +1728,8 @@ function leaderboard(){
 // on how this exercise is tracked (weight, timed hold, or bodyweight reps). showName is off for
 // "Your bests" since every row there is already the current user's.
 function leaderRowHtml(x,showName=true){
-  const value=x.mode==='seconds'?fmtSec(x.mark):x.mode==='weight'?`${x.mark} kg`:`${x.mark} reps`;
-  const detail=x.mode==='seconds'?'hold':x.mode==='weight'?`${x.reps||0} reps`:'best set';
+  const value=x.mode==='seconds'?fmtSec(x.mark):x.mode==='weight'?t('leader.kg',{v:x.mark}):t('leader.reps',{v:x.mark});
+  const detail=x.mode==='seconds'?t('leader.hold'):x.mode==='weight'?t('leader.reps',{v:x.reps||0}):t('leader.bestSet');
   const subtitle=showName?`${esc(x.name)} · ${detail}`:detail;
   return `<div class="leader"><div><strong>${esc(x.exercise)}</strong><p>${subtitle}</p></div><strong class="accent">${value}</strong></div>`;
 }
@@ -1205,9 +1812,9 @@ function attentionBannerHtml(){
   const sore=repeatedSorenessWarnings();
   if(!stalls.length&&!sore.length) return '';
   return `<section class="card click-card" style="border-color:rgba(212,72,84,.30);background:#fff7f7" onclick="setView('progress')">
-    <div class="eyebrow" style="color:var(--pink)">Needs attention</div>
-    ${sore.map(w=>`<p style="margin-top:8px"><strong>${esc(w.area)}</strong> — reported ${w.count} of your last sessions. Consider resting that area or regressing.</p>`).join('')}
-    ${stalls.map(w=>`<p style="margin-top:8px"><strong>${esc(w.exercise.name)}</strong> — flat for 3 sessions (${w.marks.map(m=>w.exercise.log_mode==='seconds'?fmtSec(m):m+' reps').join(' → ')}). Maybe deload or hold longer.</p>`).join('')}
+    <div class="eyebrow" style="color:var(--pink)">${esc(t('progress.needsAttention'))}</div>
+    ${sore.map(w=>`<p style="margin-top:8px">${t('progress.soreWarn',{area:esc(w.area),n:w.count})}</p>`).join('')}
+    ${stalls.map(w=>`<p style="margin-top:8px">${t('progress.stallWarn',{name:esc(w.exercise.name),marks:esc(w.marks.map(m=>w.exercise.log_mode==='seconds'?fmtSec(m):m+' '+t('common.reps')).join(' → '))})}</p>`).join('')}
   </section>`;
 }
 
@@ -1215,13 +1822,13 @@ function weeklyRecapCard(){
   const r=weeklyRecap();
   const energyTrend=r.avgEnergy==null||r.lastAvgEnergy==null?null:r.avgEnergy-r.lastAvgEnergy;
   return `<section class="card">
-    <div class="eyebrow">This week</div>
+    <div class="eyebrow">${esc(t('recap.thisWeek'))}</div>
     <div class="grid" style="margin-top:10px">
-      <div class="stat"><strong>${r.count}</strong><small>workouts${r.lastCount?` (${r.lastCount} last week)`:''}</small></div>
-      <div class="stat"><strong>${r.minutes}</strong><small>minutes trained</small></div>
+      <div class="stat"><strong>${r.count}</strong><small>${esc(tp(r.count,'common.workouts'))}${r.lastCount?' '+esc(t('recap.lastWeek',{n:r.lastCount})):''}</small></div>
+      <div class="stat"><strong>${r.minutes}</strong><small>${esc(t('progress.minutesTrained'))}</small></div>
     </div>
-    ${r.avgEnergy!=null?`<p style="margin-top:10px">Average energy ${r.avgEnergy}/5${energyTrend!=null?(energyTrend>0?` (up from ${r.lastAvgEnergy})`:energyTrend<0?` (down from ${r.lastAvgEnergy})`:''):''}.</p>`:''}
-    ${r.soreCount?`<p style="margin-top:6px;color:var(--pink)">Soreness reported in ${r.soreCount} ${plural(r.soreCount,'session')} this week.</p>`:''}
+    ${r.avgEnergy!=null?`<p style="margin-top:10px">${esc(t('recap.avgEnergy',{v:r.avgEnergy}))}${esc(energyTrend!=null?(energyTrend>0?t('recap.energyUp',{v:r.lastAvgEnergy}):energyTrend<0?t('recap.energyDown',{v:r.lastAvgEnergy}):''):'')}.</p>`:''}
+    ${r.soreCount?`<p style="margin-top:6px;color:var(--pink)">${esc(t('recap.soreness',{n:r.soreCount,unit:tp(r.soreCount,'common.sessions')}))}</p>`:''}
     ${r.progressions.length?`<div class="muscles" style="margin-top:10px">${r.progressions.map(e=>`<span class="pill dark">${esc(e.name)}</span>`).join('')}</div>`:''}
   </section>`;
 }
@@ -1291,24 +1898,24 @@ function crossTrainingCardHtml(){
   if(!weeks.some(w=>w.strengthSessions||w.enduranceSessions)) return '';
   const worse=feltWorseAfterEndurance();
   return `<section class="card">
-    <h2>Fuerza/skill vs resistencia</h2>
+    <h2>${esc(t('cross.title'))}</h2>
     <div style="margin-top:10px;overflow-x:auto">
       <table style="width:100%;border-collapse:collapse;font-size:13px;white-space:nowrap">
         <thead><tr style="text-align:left;color:var(--muted)">
-          <th style="padding:6px 8px 6px 0">Semana</th><th style="padding:6px 8px">Fuerza</th><th style="padding:6px 8px">RIR prom.</th><th style="padding:6px 8px">Clean %</th><th style="padding:6px 0">Resistencia</th>
+          <th style="padding:6px 8px 6px 0">${esc(t('cross.week'))}</th><th style="padding:6px 8px">${esc(t('cross.strength'))}</th><th style="padding:6px 8px">${esc(t('cross.avgRir'))}</th><th style="padding:6px 8px">${esc(t('cross.cleanPct'))}</th><th style="padding:6px 0">${esc(t('cross.endurance'))}</th>
         </tr></thead>
         <tbody>
           ${weeks.map(w=>`<tr style="border-top:1px solid var(--line)">
-            <td style="padding:6px 8px 6px 0">${new Date(w.week+'T00:00:00').toLocaleDateString(undefined,{month:'short',day:'numeric'})}</td>
-            <td style="padding:6px 8px">${w.strengthSessions} · ${w.setsDone} sets</td>
+            <td style="padding:6px 8px 6px 0">${new Date(w.week+'T00:00:00').toLocaleDateString(LANG,{month:'short',day:'numeric'})}</td>
+            <td style="padding:6px 8px">${w.strengthSessions} · ${w.setsDone} ${esc(t('common.sets'))}</td>
             <td style="padding:6px 8px">${w.avgRir??'—'}</td>
             <td style="padding:6px 8px">${w.cleanPct!=null?w.cleanPct+'%':'—'}</td>
-            <td style="padding:6px 0">${w.enduranceMin} min${w.enduranceSessions?` (${w.enduranceSessions})`:''}</td>
+            <td style="padding:6px 0">${w.enduranceMin} ${esc(t('common.min'))}${w.enduranceSessions?` (${w.enduranceSessions})`:''}</td>
           </tr>`).join('')}
         </tbody>
       </table>
     </div>
-    ${worse&&worse.total?`<p style="margin-top:10px">${worse.linked} de ${worse.total} veces que reportaste rendir peor de lo normal, hubo una sesión de resistencia intensa (RPE≥7) en las 36h previas.</p>`:''}
+    ${worse&&worse.total?`<p style="margin-top:10px">${esc(t('cross.worse',{linked:worse.linked,total:worse.total}))}</p>`:''}
   </section>`;
 }
 
@@ -1322,8 +1929,8 @@ function getMyRecovery(){
 }
 
 function formatHours(h){
-  if(h<=0) return 'now';
-  if(h<1) return '<1h';
+  if(h<=0) return t('recovery.now');
+  if(h<1) return t('recovery.lessHour');
   if(h<24) return `${Math.ceil(h)}h`;
   const d=Math.floor(h/24),r=Math.round(h%24);
   return r?`${d}d ${r}h`:`${d}d`;
@@ -1348,13 +1955,13 @@ function muscleLoadCard(title){
   const restedCount=rows.filter(r=>r.rested).length;
   return `<section class="card">
     <div class="row">
-      <div><h2>${esc(title)}</h2><p>${needsWork&&!needsWork.rested?`${esc(needsWork.name)} ready in ${formatHours(needsWork.hoursUntilFresh)}`:'All muscles fresh'}</p></div>
-      <span class="pill">${restedCount} rested</span>
+      <div><h2>${esc(title)}</h2><p>${esc(needsWork&&!needsWork.rested?t('recovery.readyIn',{name:muscleLabel(needsWork.name),time:formatHours(needsWork.hoursUntilFresh)}):t('recovery.allFresh'))}</p></div>
+      <span class="pill">${esc(t('recovery.rested',{n:restedCount}))}</span>
     </div>
     <div class="row" style="margin-top:14px;flex-wrap:wrap;gap:8px">
-      ${rows.slice(0,4).map(r=>`<span class="pill dark" style="background:${freshColor(r.score)};color:var(--dof-deep)">${esc(r.name)} ${r.score}%</span>`).join('')}
+      ${rows.slice(0,4).map(r=>`<span class="pill dark" style="background:${freshColor(r.score)};color:var(--dof-deep)">${esc(muscleLabel(r.name))} ${r.score}%</span>`).join('')}
     </div>
-    <button class="btn" style="width:100%;margin-top:14px" onclick="setView('body')">View full body map</button>
+    <button class="btn" style="width:100%;margin-top:14px" onclick="setView('body')">${esc(t('recovery.fullMap'))}</button>
   </section>`;
 }
 
@@ -1364,15 +1971,15 @@ function miniBodyRecoveryCard(){
   const needsWork=rows[0];
   const restedCount=rows.filter(r=>r.rested).length;
   return `<section class="card mini-body-card click-card" onclick="setView('body')">
-    <div class="mini-body-fig" aria-label="Open body recovery map">
+    <div class="mini-body-fig" aria-label="${esc(t('recovery.openMap'))}">
       ${bodyFigureSVG('front',scoreByName,false)}
     </div>
     <div>
-      <div class="eyebrow">Body readiness</div>
-      <h2>${needsWork&&!needsWork.rested?`${esc(needsWork.name)} needs recovery`:'Body is ready'}</h2>
-      <p>${restedCount} ${plural(restedCount,'muscle')} rested${needsWork&&!needsWork.rested?` · ready in ${formatHours(needsWork.hoursUntilFresh)}`:''}</p>
+      <div class="eyebrow">${esc(t('recovery.readiness'))}</div>
+      <h2>${esc(needsWork&&!needsWork.rested?t('recovery.needsRecovery',{name:muscleLabel(needsWork.name)}):t('recovery.bodyReady'))}</h2>
+      <p>${esc(t('recovery.mRested',{n:restedCount,unit:tp(restedCount,'common.muscles')}))}${esc(needsWork&&!needsWork.rested?t('recovery.readySuffix',{time:formatHours(needsWork.hoursUntilFresh)}):'')}</p>
       <div class="mini-body-chips">
-        ${rows.slice(0,3).map(r=>`<span class="pill dark" style="background:${freshColor(r.score)};color:var(--dof-deep)">${esc(r.name)} ${r.score}%</span>`).join('')}
+        ${rows.slice(0,3).map(r=>`<span class="pill dark" style="background:${freshColor(r.score)};color:var(--dof-deep)">${esc(muscleLabel(r.name))} ${r.score}%</span>`).join('')}
       </div>
     </div>
   </section>`;
@@ -1430,32 +2037,32 @@ function bodyView(){
   const daysSince=lastCompletedAt?Math.floor((Date.now()-lastCompletedAt)/864e5):null;
   const view=state.bodyFlip==='back'?'back':'front';
   return `
-    <h1>Body</h1>
+    <h1>${esc(t('body.title'))}</h1>
     <section class="grid">
-      <div class="stat"><strong>${daysSince===null?'-':daysSince}</strong><small>days since last training</small></div>
-      <div class="stat"><strong>${restedCount}</strong><small>muscles rested</small></div>
+      <div class="stat"><strong>${daysSince===null?'-':daysSince}</strong><small>${esc(t('body.daysSince'))}</small></div>
+      <div class="stat"><strong>${restedCount}</strong><small>${esc(t('body.musclesRested'))}</small></div>
     </section>
     <section class="card">
       <div class="body-fig-wrap">
         ${bodyFigureSVG(view,scoreByName)}
-        <button class="body-flip-btn" onclick="toggleBodyView()" aria-label="Flip front and back">${icon('swap',18)}</button>
+        <button class="body-flip-btn" onclick="toggleBodyView()" aria-label="${esc(t('body.flip'))}">${icon('swap',18)}</button>
       </div>
       <div class="muscle-legend">
-        <span><i style="background:${freshColor(0)}"></i>Recovering</span>
-        <span><i style="background:${freshColor(100)}"></i>Rested</span>
+        <span><i style="background:${freshColor(0)}"></i>${esc(t('body.recovering'))}</span>
+        <span><i style="background:${freshColor(100)}"></i>${esc(t('body.restedLegend'))}</span>
       </div>
-      <p class="muted" style="text-align:center;margin-top:8px;font-size:12px">Tap a muscle for details · showing ${view}</p>
+      <p class="muted" style="text-align:center;margin-top:8px;font-size:12px">${esc(t('body.tapHint',{view:t('body.'+view)}))}</p>
     </section>
     <section class="card">
-      <div class="row"><h2>Muscle status</h2><button class="btn small" onclick="openLogActivity()">+ Log activity</button></div>
+      <div class="row"><h2>${esc(t('body.muscleStatus'))}</h2><button class="btn small" onclick="openLogActivity()">${esc(t('progress.logActivity'))}</button></div>
       ${rows.map(r=>`<div class="row" style="margin-top:10px;cursor:pointer" onclick="openMuscleDetail('${r.name}')">
-        <div><strong>${esc(r.name)}</strong><p>${r.rested?'Ready now':'Ready in '+formatHours(r.hoursUntilFresh)}</p></div>
+        <div><strong>${esc(muscleLabel(r.name))}</strong><p>${esc(r.rested?t('body.readyNow'):t('body.readyIn',{time:formatHours(r.hoursUntilFresh)}))}</p></div>
         <span class="pill dark" style="background:${freshColor(r.score)};color:var(--dof-deep)">${r.score}%</span>
       </div>`).join('')}
     </section>
     <section class="card">
-      <h2>Recent activities</h2>
-      ${(state.externalActivities||[]).slice(0,6).map(externalActivityRow).join('')||empty('No manual activities logged yet.')}
+      <h2>${esc(t('body.recentActivities'))}</h2>
+      ${(state.externalActivities||[]).slice(0,6).map(externalActivityRow).join('')||empty(t('body.noActivities'))}
     </section>`;
 }
 
@@ -1495,41 +2102,42 @@ function openMuscleDetail(name){
     .sort((a,b)=>(b.muscles[name]||0)-(a.muscles[name]||0)).slice(0,6);
   $('modal').classList.add('show');
   $('modalCard').innerHTML=`
-    <div class="row"><h1>${esc(name)}</h1><button class="x" onclick="closeModal()">${icon('close',20)}</button></div>
+    <div class="row"><h1>${esc(muscleLabel(name))}</h1><button class="x" onclick="closeModal()" aria-label="${esc(t('common.close'))}">${icon('close',20)}</button></div>
     <section class="card" style="text-align:center">
       <div style="width:96px;height:96px;border-radius:50%;margin:0 auto;background:${freshColor(row.score)};display:grid;place-items:center;font-weight:1000;font-size:22px;color:var(--dof-deep)">${row.score}%</div>
-      <p style="margin-top:10px">${row.rested?'Ready now':'Ready in '+formatHours(row.hoursUntilFresh)}</p>
+      <p style="margin-top:10px">${esc(row.rested?t('body.readyNow'):t('body.readyIn',{time:formatHours(row.hoursUntilFresh)}))}</p>
     </section>
     <section class="card">
-      <div class="eyebrow">Exercises that trained ${esc(name)} recently</div>
-      ${exerciseRows.length?exerciseRows.map(b=>`<div class="row" style="margin-top:10px"><div><strong>${esc(b.name)}</strong><p>${b.sets} set${b.sets===1?'':'s'} logged</p></div><span class="pill dark">${b.pct}% of exercise</span></div>`).join(''):empty('No sets logged for this muscle recently.')}
+      <div class="eyebrow">${esc(t('muscle.trainedBy',{name:muscleLabel(name)}))}</div>
+      ${exerciseRows.length?exerciseRows.map(b=>`<div class="row" style="margin-top:10px"><div><strong>${esc(b.name)}</strong><p>${b.sets} ${esc(tp(b.sets,'common.setsLogged'))}</p></div><span class="pill dark">${esc(t('muscle.pctOfExercise',{p:b.pct}))}</span></div>`).join(''):empty(t('muscle.noSets'))}
     </section>
     <section class="card">
-      <div class="eyebrow">Activities that trained ${esc(name)} recently</div>
-      ${activityRows.length?activityRows.map(a=>`<div class="row" style="margin-top:10px"><div><strong>${esc(a.label)}</strong><p>${new Date(a.when).toLocaleDateString()}</p></div><span class="pill dark">${a.pct}% split</span></div>`).join(''):empty('No manual activities logged for this muscle recently.')}
+      <div class="eyebrow">${esc(t('muscle.activitiesTrained',{name:muscleLabel(name)}))}</div>
+      ${activityRows.length?activityRows.map(a=>`<div class="row" style="margin-top:10px"><div><strong>${esc(a.label)}</strong><p>${new Date(a.when).toLocaleDateString(LANG)}</p></div><span class="pill dark">${esc(t('muscle.pctSplit',{p:a.pct}))}</span></div>`).join(''):empty(t('muscle.noActivities'))}
     </section>
     <section class="card">
-      <div class="eyebrow">Best exercises for ${esc(name)}</div>
-      ${library.length?library.map(e=>`<div class="row" style="margin-top:8px;cursor:pointer" onclick="closeModal();openExercise('${e.id}')"><strong>${esc(e.name)}</strong><span class="pill dark">${e.muscles[name]}%</span></div>`).join(''):empty('No exercises target this muscle yet.')}
+      <div class="eyebrow">${esc(t('muscle.bestExercises',{name:muscleLabel(name)}))}</div>
+      ${library.length?library.map(e=>`<div class="row" style="margin-top:8px;cursor:pointer" onclick="closeModal();openExercise('${e.id}')"><strong>${esc(e.name)}</strong><span class="pill dark">${e.muscles[name]}%</span></div>`).join(''):empty(t('muscle.noExercises'))}
     </section>`;
 }
 
 // ---- External activity logging ----
 
-const ACTIVITY_LABELS={running:'Running',cycling:'Cycling',swimming:'Swimming',rowing:'Rowing',walking:'Walking',other:'Other'};
-const activityTypeLabel=t=>ACTIVITY_LABELS[t]||'Activity';
+// ACTIVITY_LABELS itself is built by rebuildActivityLabels() in the i18n block above — the
+// keys are the stored activity_type values, only the labels are translated.
+const activityTypeLabel=type=>ACTIVITY_LABELS[type]||t('activity.fallback');
 
 function localDatetimeValue(d){
   const pad=n=>String(n).padStart(2,'0');
   return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
 }
 
-function activityGoalLine(t){
+function activityGoalLine(plan){
   return [
-    t.target_distance_km?`${t.target_distance_km} km`:null,
-    t.target_duration_min?`${t.target_duration_min} min`:null,
-    t.target_pace_sec_per_km?`${fmtPace(t.target_pace_sec_per_km)}/km`:null,
-    t.target_zone?`Zone ${t.target_zone}`:null
+    plan.target_distance_km?`${plan.target_distance_km} km`:null,
+    plan.target_duration_min?`${plan.target_duration_min} ${t('common.min')}`:null,
+    plan.target_pace_sec_per_km?`${fmtPace(plan.target_pace_sec_per_km)}/km`:null,
+    plan.target_zone?t('endurance.zone',{z:plan.target_zone}):null
   ].filter(Boolean).join(' · ');
 }
 
@@ -1537,43 +2145,43 @@ function activityGoalLine(t){
 // form with that plan's targets and tags the logged row with template_id so "did I do today's
 // run" can be answered later — the member still just types in what actually happened.
 function openLogActivity(templateId){
-  const t=templateId?state.activityTemplates.find(x=>x.id===templateId):null;
+  const plan=templateId?state.activityTemplates.find(x=>x.id===templateId):null;
   $('modal').classList.add('show');
   $('modalCard').innerHTML=`
-    <div class="row"><h1>Log activity</h1><button class="x" onclick="closeModal()">${icon('close',20)}</button></div>
-    ${t?`<p class="muted">Goal: ${esc(activityGoalLine(t)||'—')}</p>`:''}
-    <input type="hidden" id="actTemplateId" value="${t?t.id:''}">
-    <label class="eyebrow">Activity type</label>
-    <select id="actType" class="field left">${Object.entries(ACTIVITY_LABELS).map(([v,l])=>`<option value="${v}" ${(t?.activity_type||'running')===v?'selected':''}>${l}</option>`).join('')}</select>
-    <label class="eyebrow">Duration (minutes)</label>
-    <input id="actDuration" class="field left" type="number" min="1" max="600" inputmode="numeric" placeholder="e.g. 40" value="${t?.target_duration_min??''}">
-    <label class="eyebrow">Distance (km, optional)</label>
-    <input id="actDistance" class="field left" type="number" min="0" step="0.1" inputmode="decimal" placeholder="e.g. 6.5" value="${t?.target_distance_km??''}">
-    <label class="eyebrow">Avg heart rate (bpm, optional)</label>
-    <input id="actHeartRate" class="field left" type="number" min="30" max="230" inputmode="numeric" placeholder="e.g. 148">
-    <label class="eyebrow">Intensity (effort, 1-10)</label>
+    <div class="row"><h1>${esc(t('logAct.title'))}</h1><button class="x" onclick="closeModal()" aria-label="${esc(t('common.close'))}">${icon('close',20)}</button></div>
+    ${plan?`<p class="muted">${esc(t('logAct.goal',{goal:activityGoalLine(plan)||'—'}))}</p>`:''}
+    <input type="hidden" id="actTemplateId" value="${plan?plan.id:''}">
+    <label class="eyebrow">${esc(t('logAct.type'))}</label>
+    <select id="actType" class="field left">${Object.entries(ACTIVITY_LABELS).map(([v,l])=>`<option value="${v}" ${(plan?.activity_type||'running')===v?'selected':''}>${esc(l)}</option>`).join('')}</select>
+    <label class="eyebrow">${esc(t('logAct.duration'))}</label>
+    <input id="actDuration" class="field left" type="number" min="1" max="600" inputmode="numeric" placeholder="${esc(t('logAct.durationPh'))}" value="${plan?.target_duration_min??''}">
+    <label class="eyebrow">${esc(t('logAct.distance'))}</label>
+    <input id="actDistance" class="field left" type="number" min="0" step="0.1" inputmode="decimal" placeholder="${esc(t('logAct.distancePh'))}" value="${plan?.target_distance_km??''}">
+    <label class="eyebrow">${esc(t('logAct.hr'))}</label>
+    <input id="actHeartRate" class="field left" type="number" min="30" max="230" inputmode="numeric" placeholder="${esc(t('logAct.hrPh'))}">
+    <label class="eyebrow">${esc(t('logAct.intensity'))}</label>
     <input id="actIntensity" class="field left" type="number" min="1" max="10" inputmode="numeric" value="5">
-    <label class="eyebrow">When</label>
+    <label class="eyebrow">${esc(t('logAct.when'))}</label>
     <input id="actWhen" class="field left" type="datetime-local" max="${localDatetimeValue(new Date())}" value="${localDatetimeValue(new Date())}">
-    <textarea id="actNote" class="field" placeholder="Notes (optional)"></textarea>
-    <button class="btn primary" style="width:100%" onclick="saveExternalActivity()">Save activity</button>`;
+    <textarea id="actNote" class="field" placeholder="${esc(t('common.notesOptional'))}"></textarea>
+    <button class="btn primary" style="width:100%" onclick="saveExternalActivity()">${esc(t('logAct.save'))}</button>`;
 }
 
 async function saveExternalActivity(){
   const duration=Number($('actDuration').value);
   const intensity=Number($('actIntensity').value);
-  if(!duration||duration<1) return alert('Enter a duration in minutes.');
-  if(!intensity||intensity<1||intensity>10) return alert('Intensity must be between 1 and 10.');
-  if(!$('actWhen').value) return alert('Choose when this activity happened.');
+  if(!duration||duration<1) return alert(t('logAct.errDuration'));
+  if(!intensity||intensity<1||intensity>10) return alert(t('logAct.errIntensity'));
+  if(!$('actWhen').value) return alert(t('logAct.errWhen'));
   const performedAt=new Date($('actWhen').value);
   // The datetime input's max="now" is only a soft browser hint (unreliable on mobile) — a
   // future-dated activity would otherwise show up in "Recent activities" while contributing
   // nothing to the freshness score above it (the recovery engine already excludes t > now),
   // a visibly contradictory state. Reject it outright instead.
-  if(performedAt.getTime()>Date.now()+60000) return alert('This activity is in the future — check the date/time.');
+  if(performedAt.getTime()>Date.now()+60000) return alert(t('logAct.errFuture'));
   const heartRateStr=$('actHeartRate').value;
   const heartRate=heartRateStr?Number(heartRateStr):null;
-  if(heartRate!==null&&(heartRate<30||heartRate>230)) return alert('Enter a heart rate between 30 and 230 bpm.');
+  if(heartRate!==null&&(heartRate<30||heartRate>230)) return alert(t('logAct.errHr'));
   const payload={
     user_id:state.user.id,
     activity_type:$('actType').value,
@@ -1597,20 +2205,20 @@ function externalActivityRow(a){
   // disagree, and it's the only extra number worth showing on a run that a target didn't set.
   const pace=a.distance_km?Math.round((a.duration_min*60)/a.distance_km):null;
   const parts=[
-    `${a.duration_min} min`,`intensity ${a.intensity}/10`,
+    `${a.duration_min} ${t('common.min')}`,t('logAct.rowIntensity',{v:a.intensity}),
     a.distance_km?`${a.distance_km} km`:null,
     pace?`${fmtPace(pace)}/km`:null,
     a.avg_heart_rate?`${a.avg_heart_rate} bpm`:null,
-    new Date(a.performed_at).toLocaleDateString()
+    new Date(a.performed_at).toLocaleDateString(LANG)
   ].filter(Boolean).join(' · ');
   return `<div class="row" style="margin-top:10px">
     <div><strong>${esc(activityTypeLabel(a.activity_type))}</strong><p>${esc(parts)}</p></div>
-    <button class="icon-btn tiny danger" onclick="deleteExternalActivity('${a.id}')" aria-label="Delete">${icon('trash',16)}</button>
+    <button class="icon-btn tiny danger" onclick="deleteExternalActivity('${a.id}')" aria-label="${esc(t('common.delete'))}">${icon('trash',16)}</button>
   </div>`;
 }
 
 async function deleteExternalActivity(id){
-  if(!confirm('Delete this activity?')) return;
+  if(!confirm(t('logAct.confirmDelete'))) return;
   const {error}=await sb.from('skandi_external_activities').delete().eq('id',id);
   if(error) return alert(error.message);
   await loadAll();
@@ -1626,14 +2234,14 @@ function bodyweightCardHtml(){
   const prev=logs[1];
   const delta=latest&&prev?kgToDisplay(latest.weight_kg,unit)-kgToDisplay(prev.weight_kg,unit):null;
   return `<section class="card">
-    <div class="row"><h2>Bodyweight</h2><button class="btn small" onclick="openLogBodyweight()">+ Log weight</button></div>
+    <div class="row"><h2>${esc(t('bw.title'))}</h2><button class="btn small" onclick="openLogBodyweight()">${esc(t('bw.log'))}</button></div>
     ${latest?`<div class="row" style="margin-top:10px">
-      <div class="stat"><strong>${fmtWeightInput(latest.weight_kg,unit)}</strong><small>${unit} · ${new Date(latest.logged_at+'T00:00:00').toLocaleDateString()}</small></div>
-      ${delta!=null?`<div class="stat"><strong>${delta>0?'+':''}${Math.round(delta*10)/10}</strong><small>${unit} vs last log</small></div>`:''}
-    </div>`:empty('Log your weight to track it alongside strength and skill numbers.')}
+      <div class="stat"><strong>${fmtWeightInput(latest.weight_kg,unit)}</strong><small>${unit} · ${new Date(latest.logged_at+'T00:00:00').toLocaleDateString(LANG)}</small></div>
+      ${delta!=null?`<div class="stat"><strong>${delta>0?'+':''}${Math.round(delta*10)/10}</strong><small>${esc(t('bw.vsLast',{unit}))}</small></div>`:''}
+    </div>`:empty(t('bw.empty'))}
     ${logs.slice(0,5).map(l=>`<div class="row" style="margin-top:10px">
-      <div><strong>${fmtWeightInput(l.weight_kg,unit)} ${unit}</strong><p>${new Date(l.logged_at+'T00:00:00').toLocaleDateString()}${l.note?' · '+esc(l.note):''}</p></div>
-      <button class="icon-btn tiny danger" onclick="deleteBodyweightLog('${l.id}')" aria-label="Delete">${icon('trash',16)}</button>
+      <div><strong>${fmtWeightInput(l.weight_kg,unit)} ${unit}</strong><p>${new Date(l.logged_at+'T00:00:00').toLocaleDateString(LANG)}${l.note?' · '+esc(l.note):''}</p></div>
+      <button class="icon-btn tiny danger" onclick="deleteBodyweightLog('${l.id}')" aria-label="${esc(t('common.delete'))}">${icon('trash',16)}</button>
     </div>`).join('')}
   </section>`;
 }
@@ -1643,23 +2251,23 @@ function openLogBodyweight(){
   const existing=state.bodyweightLogs.find(l=>l.logged_at===today);
   $('modal').classList.add('show');
   $('modalCard').innerHTML=`
-    <div class="row"><h1>Log bodyweight</h1><button class="x" onclick="closeModal()">${icon('close',20)}</button></div>
-    <label class="eyebrow">Weight (${state.weightUnit})</label>
-    <input id="bwWeight" class="field left" type="number" min="1" step="0.1" inputmode="decimal" placeholder="e.g. ${state.weightUnit==='lb'?'165':'75'}" value="${existing?fmtWeightInput(existing.weight_kg,state.weightUnit):''}">
-    <label class="eyebrow">Date</label>
+    <div class="row"><h1>${esc(t('bw.modalTitle'))}</h1><button class="x" onclick="closeModal()" aria-label="${esc(t('common.close'))}">${icon('close',20)}</button></div>
+    <label class="eyebrow">${esc(t('bw.weightLabel',{unit:state.weightUnit}))}</label>
+    <input id="bwWeight" class="field left" type="number" min="1" step="0.1" inputmode="decimal" placeholder="${esc(t('bw.weightPh',{v:state.weightUnit==='lb'?'165':'75'}))}" value="${existing?fmtWeightInput(existing.weight_kg,state.weightUnit):''}">
+    <label class="eyebrow">${esc(t('common.date'))}</label>
     <input id="bwDate" class="field left" type="date" max="${today}" value="${existing?.logged_at||today}">
-    <textarea id="bwNote" class="field" placeholder="Notes (optional)">${esc(existing?.note||'')}</textarea>
-    ${existing?`<p class="muted" style="margin-top:6px">Ya tienes un registro hoy — guardar lo reemplaza.</p>`:''}
-    <button class="btn primary" style="width:100%;margin-top:10px" onclick="saveBodyweight()">Save</button>`;
+    <textarea id="bwNote" class="field" placeholder="${esc(t('common.notesOptional'))}">${esc(existing?.note||'')}</textarea>
+    ${existing?`<p class="muted" style="margin-top:6px">${esc(t('bw.alreadyToday'))}</p>`:''}
+    <button class="btn primary" style="width:100%;margin-top:10px" onclick="saveBodyweight()">${esc(t('common.save'))}</button>`;
 }
 
 async function saveBodyweight(){
   const raw=$('bwWeight').value;
   const logDate=$('bwDate').value;
-  if(!raw||!Number.isFinite(Number(raw))||Number(raw)<=0) return alert('Enter a valid weight.');
-  if(!logDate) return alert('Choose a date.');
+  if(!raw||!Number.isFinite(Number(raw))||Number(raw)<=0) return alert(t('bw.errWeight'));
+  if(!logDate) return alert(t('bw.errDate'));
   const weightKg=displayToKg(raw,state.weightUnit);
-  if(weightKg<20||weightKg>300) return alert('Enter a weight between 20 and 300kg (or the lb equivalent).');
+  if(weightKg<20||weightKg>300) return alert(t('bw.errRange'));
   const {error}=await sb.from('skandi_bodyweight_logs').upsert({
     user_id:state.user.id,logged_at:logDate,weight_kg:Math.round(weightKg*100)/100,note:$('bwNote').value.trim()||null
   },{onConflict:'user_id,logged_at'});
@@ -1670,7 +2278,7 @@ async function saveBodyweight(){
 }
 
 async function deleteBodyweightLog(id){
-  if(!confirm('Delete this bodyweight entry?')) return;
+  if(!confirm(t('bw.confirmDelete'))) return;
   const {error}=await sb.from('skandi_bodyweight_logs').delete().eq('id',id);
   if(error) return alert(error.message);
   await loadAll();
@@ -1680,36 +2288,36 @@ async function deleteBodyweightLog(id){
 // ---- Recurring endurance plans ("every Wednesday run 5km at Zone 2") ----
 
 function openActivityTemplateBuilder(day=null,id=null){
-  const t=state.activityTemplates.find(x=>x.id===id)||{activity_type:'running',weekday:day??todayDow(),target_distance_km:null,target_duration_min:null,target_pace_sec_per_km:null,target_zone:null,notes:''};
+  const plan=state.activityTemplates.find(x=>x.id===id)||{activity_type:'running',weekday:day??todayDow(),target_distance_km:null,target_duration_min:null,target_pace_sec_per_km:null,target_zone:null,notes:''};
   $('modal').classList.add('show');
   $('modalCard').innerHTML=`
-    <div class="row"><h1>${id?'Edit':'New'} endurance plan</h1><button class="x" onclick="closeModal()">${icon('close',20)}</button></div>
-    <label class="eyebrow">Activity type</label>
-    <select id="tplActType" class="field left">${Object.entries(ACTIVITY_LABELS).map(([v,l])=>`<option value="${v}" ${t.activity_type===v?'selected':''}>${l}</option>`).join('')}</select>
-    <label class="eyebrow">Day</label>
-    <select id="tplActDay" class="field left">${DOW.map((d,i)=>`<option value="${i}" ${t.weekday===i?'selected':''}>${d}</option>`).join('')}</select>
-    <label class="eyebrow">Target distance (km, optional)</label>
-    <input id="tplActDistance" class="field left" type="number" min="0" step="0.1" inputmode="decimal" placeholder="e.g. 5" value="${t.target_distance_km??''}">
-    <label class="eyebrow">Target duration (minutes, optional)</label>
-    <input id="tplActDuration" class="field left" type="number" min="1" max="600" inputmode="numeric" placeholder="e.g. 40" value="${t.target_duration_min??''}">
-    <label class="eyebrow">Target pace (min:sec per km, optional)</label>
-    <input id="tplActPace" class="field left" placeholder="e.g. 5:40" value="${t.target_pace_sec_per_km?fmtPace(t.target_pace_sec_per_km):''}">
-    <label class="eyebrow">Target heart rate zone (optional)</label>
+    <div class="row"><h1>${esc(id?t('plan.editTitle'):t('plan.newTitle'))}</h1><button class="x" onclick="closeModal()" aria-label="${esc(t('common.close'))}">${icon('close',20)}</button></div>
+    <label class="eyebrow">${esc(t('logAct.type'))}</label>
+    <select id="tplActType" class="field left">${Object.entries(ACTIVITY_LABELS).map(([v,l])=>`<option value="${v}" ${plan.activity_type===v?'selected':''}>${esc(l)}</option>`).join('')}</select>
+    <label class="eyebrow">${esc(t('common.day'))}</label>
+    <select id="tplActDay" class="field left">${DOW.map((d,i)=>`<option value="${i}" ${plan.weekday===i?'selected':''}>${d}</option>`).join('')}</select>
+    <label class="eyebrow">${esc(t('plan.targetDistance'))}</label>
+    <input id="tplActDistance" class="field left" type="number" min="0" step="0.1" inputmode="decimal" placeholder="${esc(t('plan.targetDistancePh'))}" value="${plan.target_distance_km??''}">
+    <label class="eyebrow">${esc(t('plan.targetDuration'))}</label>
+    <input id="tplActDuration" class="field left" type="number" min="1" max="600" inputmode="numeric" placeholder="${esc(t('logAct.durationPh'))}" value="${plan.target_duration_min??''}">
+    <label class="eyebrow">${esc(t('plan.targetPace'))}</label>
+    <input id="tplActPace" class="field left" placeholder="${esc(t('plan.targetPacePh'))}" value="${plan.target_pace_sec_per_km?fmtPace(plan.target_pace_sec_per_km):''}">
+    <label class="eyebrow">${esc(t('plan.targetZone'))}</label>
     <select id="tplActZone" class="field left">
-      <option value="">No zone</option>
-      ${[1,2,3,4,5].map(z=>`<option value="${z}" ${t.target_zone===z?'selected':''}>Zone ${z}</option>`).join('')}
+      <option value="">${esc(t('plan.noZone'))}</option>
+      ${[1,2,3,4,5].map(z=>`<option value="${z}" ${plan.target_zone===z?'selected':''}>${esc(t('endurance.zone',{z}))}</option>`).join('')}
     </select>
-    <textarea id="tplActNotes" class="field" placeholder="Notes (optional)">${esc(t.notes||'')}</textarea>
+    <textarea id="tplActNotes" class="field" placeholder="${esc(t('common.notesOptional'))}">${esc(plan.notes||'')}</textarea>
     <div class="row" style="margin-top:14px">
-      ${id?`<button class="btn danger" onclick="deleteActivityTemplate('${id}')">Delete</button>`:'<span></span>'}
-      <button class="btn primary" onclick="saveActivityTemplate('${id||''}')">Save plan</button>
+      ${id?`<button class="btn danger" onclick="deleteActivityTemplate('${id}')">${esc(t('common.delete'))}</button>`:'<span></span>'}
+      <button class="btn primary" onclick="saveActivityTemplate('${id||''}')">${esc(t('plan.save'))}</button>
     </div>`;
 }
 
 async function saveActivityTemplate(id){
   const paceStr=$('tplActPace').value.trim();
   const pace=paceStr?parsePaceToSec(paceStr):null;
-  if(paceStr&&pace===null) return alert('Enter pace as minutes:seconds per km, e.g. 5:40.');
+  if(paceStr&&pace===null) return alert(t('plan.errPace'));
   const zoneVal=$('tplActZone').value;
   const payload={
     user_id:state.user.id,
@@ -1731,7 +2339,7 @@ async function saveActivityTemplate(id){
 }
 
 async function deleteActivityTemplate(id){
-  if(!confirm('Remove this recurring plan?')) return;
+  if(!confirm(t('plan.confirmDelete'))) return;
   const {error}=await sb.from('skandi_activity_templates').delete().eq('id',id);
   if(error) return alert(error.message);
   closeModal();
@@ -1835,19 +2443,19 @@ let startingWorkout=false;
 function openWorkoutOverview(templateId){
   if(state.active){
     if(state.active.template_id===templateId){ openActiveWorkout(); return; }
-    return alert('Finish or cancel your current workout before starting another.');
+    return alert(t('workout.busy'));
   }
-  const t=state.templates.find(x=>x.id===templateId);
-  if(!t) return;
+  const tpl=state.templates.find(x=>x.id===templateId);
+  if(!tpl) return;
   const its=state.items.filter(i=>i.template_id===templateId).slice().sort((a,b)=>a.sort_order-b.sort_order);
   $('modal').classList.add('show');
   $('modalCard').innerHTML=`
-    <div class="row"><h1>${esc(t.name)}</h1><button class="x" onclick="closeModal()">${icon('close',20)}</button></div>
-    <p class="muted">${its.length} ${plural(its.length,'exercise')}${t.weekday!=null?' · '+DOW[t.weekday]:''}</p>
+    <div class="row"><h1>${esc(tpl.name)}</h1><button class="x" onclick="closeModal()" aria-label="${esc(t('common.close'))}">${icon('close',20)}</button></div>
+    <p class="muted">${its.length} ${esc(tp(its.length,'common.exercises'))}${tpl.weekday!=null?' · '+DOW[tpl.weekday]:''}</p>
     <div class="stack" style="margin-top:14px">
-      ${its.map(i=>`<div class="row"><span>${esc(i.exercise?.name||'Exercise')}</span><span class="muted">${i.target_sets}×${esc(i.target_reps||'')}</span></div>`).join('')}
+      ${its.map(i=>`<div class="row"><span>${esc(i.exercise?.name||t('common.exercise'))}</span><span class="muted">${i.target_sets}×${esc(i.target_reps||'')}</span></div>`).join('')}
     </div>
-    <button class="btn primary" style="width:100%;margin-top:18px" onclick="startWorkout('${t.id}')">${icon('play',16)} Start training</button>`;
+    <button class="btn primary" style="width:100%;margin-top:18px" onclick="startWorkout('${tpl.id}')">${icon('play',16)} ${esc(t('workout.startTraining'))}</button>`;
 }
 
 // supabase-js resolves (rather than throws) on a fetch failure, surfacing it as
@@ -1872,9 +2480,9 @@ async function startWorkout(templateId){
                                // await resolves and state.active gets set
   if(state.active){
     if(state.active.template_id===templateId){ openActiveWorkout(); return; }
-    return alert('Finish or cancel your current workout before starting another.');
+    return alert(t('workout.busy'));
   }
-  const tpl=state.templates.find(t=>t.id===templateId);
+  const tpl=state.templates.find(x=>x.id===templateId);
   const templateItems=state.items.filter(i=>i.template_id===templateId);
   // A routine can deliberately include more than one rung of the same progression ladder in one
   // day (e.g. Wall Handstand as a fixed technique slot before Freestanding Handstand as the main
@@ -1910,7 +2518,7 @@ async function startWorkout(templateId){
   startingWorkout=true;
   try{
     const {data:session,error}=await withNetworkRetry(()=>sb.from('skandi_sessions').insert({user_id:state.user.id,template_id:tpl.id,title:tpl.name}).select().single());
-    if(error) return alert(isTransientFetchError(error)?'Connection hiccup starting the workout — check your signal and try again.':error.message);
+    if(error) return alert(isTransientFetchError(error)?t('workout.netHiccup'):error.message);
     const rows=its.flatMap(item=>{
       const previous=previousCompletedSetsForExercise(item.exercise_id);
       return Array.from({length:item.target_sets},(_,idx)=>{
@@ -1928,7 +2536,7 @@ async function startWorkout(templateId){
     const {data:insertedSets,error:setsError}=await withNetworkRetry(()=>sb.from('skandi_sets').insert(rows).select());
     if(setsError){
       await sb.from('skandi_sessions').delete().eq('id',session.id);
-      return alert(isTransientFetchError(setsError)?'Connection hiccup starting the workout — check your signal and try again.':setsError.message);
+      return alert(isTransientFetchError(setsError)?t('workout.netHiccup'):setsError.message);
     }
     state.active=session;
     state.sets=dedupeById([...state.sets,...(insertedSets||[])]);
@@ -2143,7 +2751,7 @@ function adjustRest(delta){
 
 function confirmFinishWorkout(){
   if(!state.active) return;
-  if(!confirm('Finish this workout and prepare the final report?')) return;
+  if(!confirm(t('workout.confirmFinish'))) return;
   openReport();
 }
 
@@ -2158,7 +2766,9 @@ function renderActiveWorkout(){
   const done=allSets.filter(s=>s.done).length;
   const running=!!state.timer;
   const blockInfo=trainingBlockWeekInfo();
-  const blockLabel=blockInfo&&!blockInfo.ended?`Today workout · Semana ${blockInfo.week}/${blockInfo.totalWeeks}${blockInfo.deload?' · Descarga':''}`:'Today workout';
+  const blockLabel=blockInfo&&!blockInfo.ended
+    ?t('workout.blockLabel',{week:blockInfo.week,total:blockInfo.totalWeeks})+(blockInfo.deload?t('workout.deloadSuffix'):'')
+    :t('workout.todayLabel');
   const card=$('modalCard');
   // Checking off a set, editing weight/reps/time, adding/removing a set — all of these
   // re-render this whole card via one big innerHTML replace, which silently resets its
@@ -2168,7 +2778,7 @@ function renderActiveWorkout(){
   const scrollTop=card.scrollTop;
   card.innerHTML=`
     <div class="float-timer ${state.floatTimerOpen?'open':''}">
-      <button type="button" class="float-timer-chip" onclick="toggleFloatTimer()" aria-label="${state.floatTimerOpen?'Collapse timer':'Expand timer'}" aria-expanded="${state.floatTimerOpen}" title="${state.floatTimerOpen?'Collapse timer':'Expand timer'}">
+      <button type="button" class="float-timer-chip" onclick="toggleFloatTimer()" aria-label="${esc(state.floatTimerOpen?t('workout.collapseTimer'):t('workout.expandTimer'))}" aria-expanded="${state.floatTimerOpen}" title="${esc(state.floatTimerOpen?t('workout.collapseTimer'):t('workout.expandTimer'))}">
         <span class="float-timer-dot ${running?'':'paused'}"></span>
         <strong id="floatStopwatch">${fmtWorkoutTime(state.elapsed)}</strong>
         <span class="float-timer-restbadge ${state.rest>0?'resting':''}" id="floatRestBadge">${fmtSec(state.rest)}</span>
@@ -2178,22 +2788,22 @@ function renderActiveWorkout(){
       <div class="float-timer-panel">
         <div class="row-head">
           <div>
-            <span class="timer-label">Elapsed</span>
+            <span class="timer-label">${esc(t('workout.elapsed'))}</span>
             <strong class="elapsed-big" id="activeStopwatch">${fmtWorkoutTime(state.elapsed)}</strong>
-            <em class="elapsed-hint" id="activeStopwatchHint">${workoutTimeHint(state.elapsed)}</em>
+            <em class="elapsed-hint" id="activeStopwatchHint">${esc(workoutTimeHint(state.elapsed))}</em>
           </div>
-          <button class="timer-toggle" onclick="toggleWorkoutTimer()" aria-label="${running?'Pause timer':'Resume timer'}" title="${running?'Pause timer':'Resume timer'}">${running?icon('pause',18):icon('play',18)}</button>
+          <button class="timer-toggle" onclick="toggleWorkoutTimer()" aria-label="${esc(running?t('workout.pauseTimer'):t('workout.resumeTimer'))}" title="${esc(running?t('workout.pauseTimer'):t('workout.resumeTimer'))}">${running?icon('pause',18):icon('play',18)}</button>
         </div>
         <div class="rest-row">
-          <button class="timer-step" onclick="adjustRest(-30)" aria-label="Remove 30 seconds from rest">-30s</button>
+          <button class="timer-step" onclick="adjustRest(-30)" aria-label="${esc(t('workout.minus30'))}">-30s</button>
           <div class="timer-rest">
-            <span>Rest</span>
+            <span>${esc(t('workout.rest'))}</span>
             <strong id="activeRest">${fmtSec(state.rest)}</strong>
           </div>
-          <button class="timer-step" onclick="adjustRest(30)" aria-label="Add 30 seconds to rest">+30s</button>
+          <button class="timer-step" onclick="adjustRest(30)" aria-label="${esc(t('workout.plus30'))}">+30s</button>
         </div>
-        <div class="rest-progress" aria-label="Rest progress"><i id="restProgress" style="width:${restProgressPct()}%"></i></div>
-        <div class="unit-toggle" aria-label="Default weight unit">
+        <div class="rest-progress" aria-label="${esc(t('workout.restProgress'))}"><i id="restProgress" style="width:${restProgressPct()}%"></i></div>
+        <div class="unit-toggle" aria-label="${esc(t('workout.defaultUnit'))}">
           <button class="${state.weightUnit==='kg'?'active':''}" onclick="setWeightUnit('kg')">KG</button>
           <button class="${state.weightUnit==='lb'?'active':''}" onclick="setWeightUnit('lb')">LB</button>
         </div>
@@ -2202,22 +2812,22 @@ function renderActiveWorkout(){
     <div class="workout-bar">
       <div class="workout-bar-title">
         <div><small>${esc(blockLabel)}</small><h1>${esc(state.active.title)}</h1></div>
-        <button class="x" onclick="closeModal()" aria-label="Minimize workout" title="Minimize workout">${icon('minimize',22)}</button>
+        <button class="x" onclick="closeModal()" aria-label="${esc(t('workout.minimize'))}" title="${esc(t('workout.minimize'))}">${icon('minimize',22)}</button>
       </div>
     </div>
     <div class="workout-content">
       <div class="workout-section-head">
-        <h2>Exercises</h2>
+        <h2>${esc(t('workout.exercises'))}</h2>
         <div class="workout-progress-row">
-          <span class="progress-pill"><strong>${done}</strong><small>/ ${allSets.length} sets</small></span>
+          <span class="progress-pill"><strong>${done}</strong><small>${esc(t('workout.slashSets',{n:allSets.length}))}</small></span>
         </div>
       </div>
       ${state.activeItems.map(item=>activeExercise(item,item.sets)).join('')}
-      <button class="btn small ghost" style="width:100%;margin-top:4px" onclick="toggleAddExercise()">${icon('plus',16)} Add exercise (this session only)</button>
+      <button class="btn small ghost" style="width:100%;margin-top:4px" onclick="toggleAddExercise()">${icon('plus',16)} ${esc(t('workout.addExercise'))}</button>
       <div id="addExPanel">${addExercisePanelHtml()}</div>
       <div class="workout-footer">
-        <button class="btn danger-action" onclick="cancelWorkout()">${icon('close',15)} Cancel</button>
-        <button class="btn primary" onclick="confirmFinishWorkout()">${icon('check',17)} Finish workout</button>
+        <button class="btn danger-action" onclick="cancelWorkout()">${icon('close',15)} ${esc(t('common.cancel'))}</button>
+        <button class="btn primary" onclick="confirmFinishWorkout()">${icon('check',17)} ${esc(t('workout.finish'))}</button>
       </div>
     </div>
     `;
@@ -2234,11 +2844,11 @@ function progressionStepperHtml(e,exerciseId){
   const idx=siblings.findIndex(x=>x.id===e.id);
   if(idx<0) return '';
   const prev=siblings[idx-1],next=siblings[idx+1];
-  const prevBtn=prev?`<button class="btn small ghost" onclick="event.stopPropagation();stepProgression('${exerciseId}','${prev.id}')" aria-label="Easier progression" title="Easier: ${esc(prev.name)}">◀</button>`
-    :`<button class="btn small ghost" disabled aria-label="Easiest progression">◀</button>`;
-  const nextBtn=next?`<button class="btn small ghost" onclick="event.stopPropagation();stepProgression('${exerciseId}','${next.id}')" aria-label="Harder progression" title="Harder: ${esc(next.name)}">▶</button>`
-    :`<button class="btn small ghost" disabled aria-label="Hardest progression">▶</button>`;
-  return `<div class="row" style="margin-top:6px" onclick="event.stopPropagation()">${prevBtn}<small class="muted">Progression ${idx+1}/${siblings.length}</small>${nextBtn}</div>`;
+  const prevBtn=prev?`<button class="btn small ghost" onclick="event.stopPropagation();stepProgression('${exerciseId}','${prev.id}')" aria-label="${esc(t('prog.easier'))}" title="${esc(t('prog.easierName',{name:prev.name}))}">◀</button>`
+    :`<button class="btn small ghost" disabled aria-label="${esc(t('prog.easiest'))}">◀</button>`;
+  const nextBtn=next?`<button class="btn small ghost" onclick="event.stopPropagation();stepProgression('${exerciseId}','${next.id}')" aria-label="${esc(t('prog.harder'))}" title="${esc(t('prog.harderName',{name:next.name}))}">▶</button>`
+    :`<button class="btn small ghost" disabled aria-label="${esc(t('prog.hardest'))}">▶</button>`;
+  return `<div class="row" style="margin-top:6px" onclick="event.stopPropagation()">${prevBtn}<small class="muted">${esc(t('prog.step',{i:idx+1,n:siblings.length}))}</small>${nextBtn}</div>`;
 }
 
 // Surfaced once progressionReadiness() confirms two consecutive clean sessions at target —
@@ -2248,7 +2858,7 @@ function progressionReadinessHtml(e,exerciseId){
   const siblings=progressionSiblings(e.progression_group);
   const next=siblings[siblings.findIndex(x=>x.id===e.id)+1];
   if(!next) return '';
-  return `<button type="button" class="progression-ready" onclick="event.stopPropagation();stepProgression('${exerciseId}','${next.id}')">Ready for ${esc(next.name)} — tap to level up</button>`;
+  return `<button type="button" class="progression-ready" onclick="event.stopPropagation();stepProgression('${exerciseId}','${next.id}')">${esc(t('prog.readyFor',{name:next.name}))}</button>`;
 }
 
 function activeExercise(item,sets){
@@ -2262,12 +2872,12 @@ function activeExercise(item,sets){
   // seconds-based skill holds (front lever, handstand, planche — judged on position, not load).
   const rowClass=showWeight?'set-row':'set-row no-weight';
   return `<article class="exercise">
-    <div class="ex-head" onclick="openExercise('${e.id}',true)">${mediaThumb(e)}<div><h3>${esc(e.name)} <span class="ex-info-hint">${icon('chevronRight',13)}</span></h3><p>${[esc(exerciseSubtitle(e)),`${item.target_sets} x ${esc(item.target_reps)}`,`rest ${item.target_rest_sec}s`].filter(Boolean).join(' · ')}</p>${progressionStepperHtml(e,item.exercise_id)}${progressionReadinessHtml(e,item.exercise_id)}</div>
+    <div class="ex-head" onclick="openExercise('${e.id}',true)">${mediaThumb(e)}<div><h3>${esc(e.name)} <span class="ex-info-hint">${icon('chevronRight',13)}</span></h3><p>${[esc(exerciseSubtitle(e)),`${item.target_sets} x ${esc(item.target_reps)}`,esc(t('ex.restSec',{n:item.target_rest_sec}))].filter(Boolean).join(' · ')}</p>${progressionStepperHtml(e,item.exercise_id)}${progressionReadinessHtml(e,item.exercise_id)}</div>
       <div class="ex-actions">
-        <span class="muted">${sets.filter(s=>s.done).length}/${sets.length}${seconds&&sets.some(s=>s.done)?` · Clean ${sets.filter(s=>s.done&&s.hold_clean===true).length}/${sets.filter(s=>s.done).length}`:''}</span>
+        <span class="muted">${sets.filter(s=>s.done).length}/${sets.length}${seconds&&sets.some(s=>s.done)?' · '+esc(t('ex.cleanCount',{done:sets.filter(s=>s.done&&s.hold_clean===true).length,total:sets.filter(s=>s.done).length})):''}</span>
         <div class="ex-actions-row">
-          ${undone?`<button class="icon-btn tiny" onclick="event.stopPropagation();toggleSwap('${item.exercise_id}')" aria-label="Swap exercise" title="Swap exercise">${icon('swap',14)}</button>`:''}
-          <button class="icon-btn tiny danger" onclick="event.stopPropagation();removeExerciseFromSession('${item.exercise_id}')" aria-label="Remove exercise from this session" title="Remove from this session">${icon('trash',14)}</button>
+          ${undone?`<button class="icon-btn tiny" onclick="event.stopPropagation();toggleSwap('${item.exercise_id}')" aria-label="${esc(t('ex.swap'))}" title="${esc(t('ex.swap'))}">${icon('swap',14)}</button>`:''}
+          <button class="icon-btn tiny danger" onclick="event.stopPropagation();removeExerciseFromSession('${item.exercise_id}')" aria-label="${esc(t('ex.removeFromSession'))}" title="${esc(t('ex.removeShort'))}">${icon('trash',14)}</button>
         </div>
       </div>
     </div>
@@ -2275,8 +2885,8 @@ function activeExercise(item,sets){
     <div class="stack">
       <div class="${rowClass}">
         <span></span>
-        ${showWeight?`<button type="button" class="pill dark" style="cursor:pointer;justify-self:start" onclick="event.stopPropagation();setExerciseWeightUnit('${item.exercise_id}','${unit==='kg'?'lb':'kg'}')" aria-label="Switch this exercise to ${unit==='kg'?'pounds':'kilograms'}" title="Switch this exercise to ${unit==='kg'?'lb':'kg'}">${unit.toUpperCase()}</button>`:''}
-        <small class="muted">${seconds?'SEC':'REPS'}</small><small class="muted" style="font-size:10px">${seconds?'CLN':'RIR'}</small><span></span><span></span>
+        ${showWeight?`<button type="button" class="pill dark" style="cursor:pointer;justify-self:start" onclick="event.stopPropagation();setExerciseWeightUnit('${item.exercise_id}','${unit==='kg'?'lb':'kg'}')" aria-label="${esc(unit==='kg'?t('ex.switchToLb'):t('ex.switchToKg'))}" title="${esc(unit==='kg'?t('ex.switchToLb'):t('ex.switchToKg'))}">${unit.toUpperCase()}</button>`:''}
+        <small class="muted">${esc(seconds?t('ex.colSec'):t('ex.colReps'))}</small><small class="muted" style="font-size:10px">${esc(seconds?t('ex.colClean'):t('ex.colRir'))}</small><span></span><span></span>
       </div>
       ${sets.map((s,i)=>{
         // A row's own exercise can differ from the card's current one (item.exercise) right
@@ -2291,21 +2901,21 @@ function activeExercise(item,sets){
         const rowShowWeight=rowEx.log_weight!==false;
         const rowUnit=exerciseWeightUnit(s.exercise_id);
         const rc=rowShowWeight?'set-row':'set-row no-weight';
-        const cleanLabel=s.hold_clean===true?'Clean':s.hold_clean===false?'Broken form':'Not marked — tap to set';
+        const cleanLabel=s.hold_clean===true?t('ex.holdClean'):s.hold_clean===false?t('ex.holdBroken'):t('ex.holdUnset');
         return `<div class="${rc}">
         <strong>${i+1}</strong>
         ${rowShowWeight?`<input class="field" inputmode="decimal" value="${fmtWeightInput(s.weight_kg,rowUnit)}" placeholder="${rowUnit}" onchange="updateSet('${s.id}','weight_kg',this.value)">`:''}
         ${rowSeconds
-          ?`<input class="field" inputmode="numeric" value="${s.seconds??''}" placeholder="${esc(s.target_reps||'sec')}" onchange="updateSet('${s.id}','seconds',this.value)">`
-          :`<input class="field" inputmode="numeric" value="${s.reps??''}" placeholder="${esc(s.target_reps||'reps')}" onchange="updateSet('${s.id}','reps',this.value)">`}
+          ?`<input class="field" inputmode="numeric" value="${s.seconds??''}" placeholder="${esc(s.target_reps||t('ex.secPh'))}" onchange="updateSet('${s.id}','seconds',this.value)">`
+          :`<input class="field" inputmode="numeric" value="${s.reps??''}" placeholder="${esc(s.target_reps||t('common.reps'))}" onchange="updateSet('${s.id}','reps',this.value)">`}
         ${rowSeconds
-          ?`<button type="button" class="clean-toggle ${s.hold_clean===true?'clean':s.hold_clean===false?'broken':''}" onclick="event.stopPropagation();toggleHoldClean('${s.id}')" aria-label="Hold quality: ${cleanLabel}" title="${cleanLabel}">${s.hold_clean===true?'✓':s.hold_clean===false?'✕':'–'}</button>`
+          ?`<button type="button" class="clean-toggle ${s.hold_clean===true?'clean':s.hold_clean===false?'broken':''}" onclick="event.stopPropagation();toggleHoldClean('${s.id}')" aria-label="${esc(t('ex.holdQuality',{v:cleanLabel}))}" title="${esc(cleanLabel)}">${s.hold_clean===true?'✓':s.hold_clean===false?'✕':'–'}</button>`
           :`<input class="field field-narrow" inputmode="numeric" value="${s.rir??''}" onchange="updateSet('${s.id}','rir',this.value)">`}
         <button class="check ${s.done?'done':''}" onclick="toggleSet('${s.id}',${item.target_rest_sec})">${icon('check',18)}</button>
-        <button class="set-remove" onclick="removeSet('${s.id}')" aria-label="Remove set">${icon('close',11)}</button>
+        <button class="set-remove" onclick="removeSet('${s.id}')" aria-label="${esc(t('ex.removeSet'))}">${icon('close',11)}</button>
       </div>`;}).join('')}
     </div>
-    <button class="add-set-link" onclick="addSet('${item.exercise_id}')">+ Add set</button>
+    <button class="add-set-link" onclick="addSet('${item.exercise_id}')">${esc(t('ex.addSet'))}</button>
   </article>`;
 }
 
@@ -2321,7 +2931,7 @@ function toggleSwap(exerciseId){
 function swapPanelHtml(exerciseId){
   if(state.swapTarget!==exerciseId) return '';
   return `<div class="stack" style="margin:8px 0;padding:10px;border:1px solid var(--border,#e5e5e5);border-radius:10px" onclick="event.stopPropagation()">
-    <input id="swapQuery-${exerciseId}" class="field left" placeholder="Replace with..." value="${esc(state.swapQuery)}" oninput="renderSwapList('${exerciseId}')" autofocus>
+    <input id="swapQuery-${exerciseId}" class="field left" placeholder="${esc(t('ex.replaceWith'))}" value="${esc(state.swapQuery)}" oninput="renderSwapList('${exerciseId}')" autofocus>
     <div id="swapList-${exerciseId}" class="stack">${swapListHtml(exerciseId)}</div>
   </div>`;
 }
@@ -2341,7 +2951,7 @@ function swapListHtml(exerciseId){
     });
   }
   list=list.slice(0,20);
-  if(!list.length) return `<p class="muted">No matches.</p>`;
+  if(!list.length) return `<p class="muted">${esc(t('common.noMatches'))}</p>`;
   return list.map(e=>`<button type="button" class="btn small ghost" style="width:100%;text-align:left" onclick="performSwap('${exerciseId}','${e.id}')">${esc(e.name)}${exerciseSubtitle(e)?` <small class="muted">${esc(exerciseSubtitle(e))}</small>`:''}</button>`).join('');
 }
 
@@ -2408,7 +3018,7 @@ function toggleAddExercise(){
 function addExercisePanelHtml(){
   if(!state.addExOpen) return '';
   return `<div class="stack" style="margin:8px 0;padding:10px;border:1px solid var(--border,#e5e5e5);border-radius:10px">
-    <input id="addExQuery" class="field left" placeholder="Search exercise..." value="${esc(state.addExQuery)}" oninput="renderAddExerciseList()" autofocus>
+    <input id="addExQuery" class="field left" placeholder="${esc(t('common.searchExercise'))}" value="${esc(state.addExQuery)}" oninput="renderAddExerciseList()" autofocus>
     <div id="addExList" class="stack">${addExerciseListHtml()}</div>
   </div>`;
 }
@@ -2417,7 +3027,7 @@ function addExerciseListHtml(){
   const q=state.addExQuery.trim().toLowerCase();
   const already=new Set(state.activeItems.map(i=>i.exercise_id));
   const list=state.exercises.filter(e=>!already.has(e.id)&&(!q||`${e.name} ${e.english_name||''}`.toLowerCase().includes(q))).slice(0,20);
-  if(!list.length) return `<p class="muted">No matches.</p>`;
+  if(!list.length) return `<p class="muted">${esc(t('common.noMatches'))}</p>`;
   return list.map(e=>`<button type="button" class="btn small ghost" style="width:100%;text-align:left" onclick="addExerciseToSession('${e.id}')">${esc(e.name)}${exerciseSubtitle(e)?` <small class="muted">${esc(exerciseSubtitle(e))}</small>`:''}</button>`).join('');
 }
 
@@ -2455,7 +3065,7 @@ async function removeExerciseFromSession(exerciseId){
   const sessionId=state.active.id;
   const item=state.activeItems.find(i=>i.exercise_id===exerciseId);
   if(!item) return;
-  if(!confirm(`Remove ${item.exercise?.name||'this exercise'} from today's session? This won't change your saved routine.`)) return;
+  if(!confirm(t('ex.confirmRemove',{name:item.exercise?.name||t('ex.thisExercise')}))) return;
   // Delete by id, not by exercise_id: after a mid-exercise swap/progression-step this card can
   // hold sets logged against more than one exercise_id (see computeActiveItems) — filtering by
   // the current exercise_id alone would leave the older exercise's completed sets behind.
@@ -2471,12 +3081,12 @@ async function updateSet(id,key,value){
   const patch={updated_at:new Date().toISOString()};
   const existing=state.sets.find(x=>x.id===id);
   const parsed=value===''?null:(key==='weight_kg'?displayToKg(value,exerciseWeightUnit(existing?.exercise_id)):Number(value));
-  if(parsed!==null&&!Number.isFinite(parsed)) return alert('Enter a valid number.');
+  if(parsed!==null&&!Number.isFinite(parsed)) return alert(t('ex.errNumber'));
   // Matches the DB check constraints on skandi_sets (migrations 040/053/064) — catch it here
   // instead of round-tripping to a raw Postgres error.
-  if(key==='weight_kg'&&parsed!==null&&(parsed<0||parsed>500)) return alert('Enter a weight between 0 and 500kg.');
-  if(key==='seconds'&&parsed!==null&&(parsed<0||parsed>7200)) return alert('Enter a hold time between 0 and 7200 seconds.');
-  if(key==='rir'&&parsed!==null&&(parsed<0||parsed>10)) return alert('Enter RIR between 0 and 10.');
+  if(key==='weight_kg'&&parsed!==null&&(parsed<0||parsed>500)) return alert(t('ex.errWeight'));
+  if(key==='seconds'&&parsed!==null&&(parsed<0||parsed>7200)) return alert(t('ex.errSeconds'));
+  if(key==='rir'&&parsed!==null&&(parsed<0||parsed>10)) return alert(t('ex.errRir'));
   patch[key]=parsed===null?null:(key==='weight_kg'?Math.round(parsed*100)/100:Math.round(parsed));
   const {error}=await sb.from('skandi_sets').update(patch).eq('id',id);
   if(error) return alert(error.message);
@@ -2561,7 +3171,7 @@ async function removeSet(id){
 
 async function cancelWorkout(){
   if(!state.active) return;
-  if(!confirm('Cancel this workout? Your logged sets will be deleted.')) return;
+  if(!confirm(t('workout.confirmCancel'))) return;
   const sessionId=state.active.id;
   const cancelledSession=state.active;
   const cancelledElapsed=state.elapsed;
@@ -2591,26 +3201,26 @@ async function cancelWorkout(){
 
 function openReport(){
   $('modalCard').innerHTML=`
-    <div class="row"><h1>Workout saved</h1><button class="x" onclick="closeModal()">${icon('close',20)}</button></div>
-    <section class="card" style="border-color:rgba(1,36,86,.20);background:linear-gradient(135deg,#ffffff,#e8f1f8)"><h2>${esc(state.active.title)}</h2><p>${fmtSec(state.elapsed)} of work logged</p></section>
-    <label class="eyebrow">Difficulty</label>
-    <select id="difficulty" class="field left"><option value="normal">Normal</option><option value="facil">Easy</option><option value="pesado">Heavy</option></select>
-    <label class="eyebrow">Energy</label>
+    <div class="row"><h1>${esc(t('report.title'))}</h1><button class="x" onclick="closeModal()" aria-label="${esc(t('common.close'))}">${icon('close',20)}</button></div>
+    <section class="card" style="border-color:rgba(1,36,86,.20);background:linear-gradient(135deg,#ffffff,#e8f1f8)"><h2>${esc(state.active.title)}</h2><p>${esc(t('report.logged',{time:fmtSec(state.elapsed)}))}</p></section>
+    <label class="eyebrow">${esc(t('report.difficulty'))}</label>
+    <select id="difficulty" class="field left"><option value="normal">${esc(t('report.diffNormal'))}</option><option value="facil">${esc(t('report.diffEasy'))}</option><option value="pesado">${esc(t('report.diffHeavy'))}</option></select>
+    <label class="eyebrow">${esc(t('report.energy'))}</label>
     <select id="energy" class="field left"><option value="3">3 / 5</option><option value="1">1 / 5</option><option value="2">2 / 5</option><option value="4">4 / 5</option><option value="5">5 / 5</option></select>
-    <label class="eyebrow">Sleep last night (hours)</label>
-    <input id="sleepHours" class="field left" inputmode="decimal" placeholder="e.g. 7.5">
-    <label class="card row"><div><h3>Rendí peor de lo normal hoy</h3><p>Marca si sientes que el entrenamiento anterior te dejó cansado o bajo de rendimiento.</p></div><input id="feltWorse" type="checkbox"></label>
-    <label class="card row" style="border-color:rgba(212,72,84,.30);background:#fff7f7"><div><h3>I noticed soreness or pain</h3><p>Mark the area so we can track it week by week.</p></div><input id="sore" type="checkbox"></label>
-    <input id="soreArea" class="field left" placeholder="Area: shoulder, elbow, lower back...">
-    <textarea id="note" class="field" placeholder="How did you feel, what was harder, what would you change..."></textarea>
-    <label class="card row" style="margin:0 0 14px"><div><h3>Share with crew</h3><p>Soreness notes and this report are only visible to you if unchecked.</p></div><input id="shareCrew" type="checkbox" checked></label>
-    <button class="btn primary" style="width:100%" onclick="finishWorkout()">Save workout</button>`;
+    <label class="eyebrow">${esc(t('report.sleep'))}</label>
+    <input id="sleepHours" class="field left" inputmode="decimal" placeholder="${esc(t('report.sleepPh'))}">
+    <label class="card row"><div><h3>${esc(t('report.worseTitle'))}</h3><p>${esc(t('report.worseBody'))}</p></div><input id="feltWorse" type="checkbox"></label>
+    <label class="card row" style="border-color:rgba(212,72,84,.30);background:#fff7f7"><div><h3>${esc(t('report.soreTitle'))}</h3><p>${esc(t('report.soreBody'))}</p></div><input id="sore" type="checkbox"></label>
+    <input id="soreArea" class="field left" placeholder="${esc(t('report.sorePh'))}">
+    <textarea id="note" class="field" placeholder="${esc(t('report.notePh'))}"></textarea>
+    <label class="card row" style="margin:0 0 14px"><div><h3>${esc(t('report.shareTitle'))}</h3><p>${esc(t('report.shareBody'))}</p></div><input id="shareCrew" type="checkbox" checked></label>
+    <button class="btn primary" style="width:100%" onclick="finishWorkout()">${esc(t('report.save'))}</button>`;
 }
 
 async function finishWorkout(){
   const sleepRaw=$('sleepHours').value.trim();
   const sleepHours=sleepRaw===''?null:Number(sleepRaw);
-  if(sleepHours!==null&&(!Number.isFinite(sleepHours)||sleepHours<0||sleepHours>24)) return alert('Enter sleep hours between 0 and 24.');
+  if(sleepHours!==null&&(!Number.isFinite(sleepHours)||sleepHours<0||sleepHours>24)) return alert(t('report.errSleep'));
   const patch={
     completed_at:new Date().toISOString(),
     duration_sec:state.elapsed,
@@ -2681,12 +3291,12 @@ function progressionHistoryHtml(exercise){
   const shown=rows.slice(0,12);
   // rows is newest-first (for the list below); the trend line reads left-to-right oldest-first.
   const trend=sparklineSvg(shown.slice().reverse().map(r=>r.best));
-  return `<section class="card"><div class="eyebrow">Progression history</div>
-    ${trend?`<div>${trend}<p class="muted" style="margin-top:2px">evolución últimas ${shown.length} sesiones</p></div>`:''}
+  return `<section class="card"><div class="eyebrow">${esc(t('prog.history'))}</div>
+    ${trend?`<div>${trend}<p class="muted" style="margin-top:2px">${esc(t('prog.trend',{n:shown.length}))}</p></div>`:''}
     ${shown.map(r=>`
     <div class="row" style="margin-top:8px">
-      <div><strong>${esc(r.name)}</strong><p class="muted">${new Date(r.date).toLocaleDateString()}</p></div>
-      <span>${r.mode==='seconds'?fmtSec(r.best):r.best+' reps'}${r.weight?` · +${fmtWeightInput(r.weight)}${state.weightUnit}`:''}</span>
+      <div><strong>${esc(r.name)}</strong><p class="muted">${new Date(r.date).toLocaleDateString(LANG)}</p></div>
+      <span>${r.mode==='seconds'?fmtSec(r.best):esc(r.best+' '+t('common.reps'))}${r.weight?` · +${fmtWeightInput(r.weight)}${state.weightUnit}`:''}</span>
     </div>`).join('')}</section>`;
 }
 
@@ -2701,16 +3311,16 @@ function openExercise(id,fromWorkout=false){
   const closeAction=backToWorkout?'openActiveWorkout()':'closeModal()';
   $('modal').classList.add('show');
   $('modalCard').innerHTML=`
-    <div class="row"><h1>${esc(e.name)}</h1><button class="x" onclick="${closeAction}" aria-label="${backToWorkout?'Back to workout':'Close'}" title="${backToWorkout?'Back to workout':'Close'}">${icon(backToWorkout?'minimize':'close',20)}</button></div>
+    <div class="row"><h1>${esc(e.name)}</h1><button class="x" onclick="${closeAction}" aria-label="${esc(backToWorkout?t('exd.backToWorkout'):t('common.close'))}" title="${esc(backToWorkout?t('exd.backToWorkout'):t('common.close'))}">${icon(backToWorkout?'minimize':'close',20)}</button></div>
     <div class="card">
-      ${e.media_url?(isVideoUrl(e.media_url)?`<video src="${esc(e.media_url)}" controls playsinline style="width:100%;border-radius:20px;max-height:520px;object-fit:cover"></video>`:`<img src="${esc(e.media_url)}" alt="${esc(e.name)}" style="width:100%;border-radius:20px;max-height:520px;object-fit:cover">`):empty('Paste a Gymvisual GIF or another source in the library to see technique here.')}
-      ${e.media_page_url?`<p style="margin-top:12px"><a class="accent" href="${esc(e.media_page_url)}" target="_blank" rel="noreferrer">Open Gymvisual reference</a></p>`:''}
-      <button class="btn" style="width:100%;margin-top:12px" onclick="openExerciseMediaEdit('${e.id}',${backToWorkout})">${icon('edit',16)} Edit technique media</button>
+      ${e.media_url?(isVideoUrl(e.media_url)?`<video src="${esc(e.media_url)}" controls playsinline style="width:100%;border-radius:20px;max-height:520px;object-fit:cover"></video>`:`<img src="${esc(e.media_url)}" alt="${esc(e.name)}" style="width:100%;border-radius:20px;max-height:520px;object-fit:cover">`):empty(t('exd.noMedia'))}
+      ${e.media_page_url?`<p style="margin-top:12px"><a class="accent" href="${esc(e.media_page_url)}" target="_blank" rel="noreferrer">${esc(t('exd.openReference'))}</a></p>`:''}
+      <button class="btn" style="width:100%;margin-top:12px" onclick="openExerciseMediaEdit('${e.id}',${backToWorkout})">${icon('edit',16)} ${esc(t('exd.editMedia'))}</button>
     </div>
     ${progressionHistoryHtml(e)}
-    <section class="card"><div class="eyebrow">Muscles involved</div>${muscles.map(([m,p])=>`<div style="margin-top:10px"><div class="row"><strong>${esc(m)}</strong><span>${p}%</span></div><div class="bar"><i style="width:${p}%"></i></div></div>`).join('')}</section>
-    <section class="card"><div class="eyebrow">How to do it</div>${e.instructions?.length?`<ol>${e.instructions.map(x=>`<li>${esc(x)}</li>`).join('')}</ol>`:empty('No instructions added yet.')}</section>
-    <section class="card"><div class="eyebrow">Coach tips</div>${e.coach_tips?.length?`<ul>${e.coach_tips.map(x=>`<li>${esc(x)}</li>`).join('')}</ul>`:empty('No coach tips added yet.')}</section>`;
+    <section class="card"><div class="eyebrow">${esc(t('exd.musclesInvolved'))}</div>${muscles.map(([m,p])=>`<div style="margin-top:10px"><div class="row"><strong>${esc(muscleLabel(m))}</strong><span>${p}%</span></div><div class="bar"><i style="width:${p}%"></i></div></div>`).join('')}</section>
+    <section class="card"><div class="eyebrow">${esc(t('exd.howTo'))}</div>${e.instructions?.length?`<ol>${e.instructions.map(x=>`<li>${esc(x)}</li>`).join('')}</ol>`:empty(t('exd.noInstructions'))}</section>
+    <section class="card"><div class="eyebrow">${esc(t('exd.coachTips'))}</div>${e.coach_tips?.length?`<ul>${e.coach_tips.map(x=>`<li>${esc(x)}</li>`).join('')}</ul>`:empty(t('exd.noTips'))}</section>`;
 }
 
 let exerciseMediaFile=null;
@@ -2719,21 +3329,21 @@ function openExerciseMediaEdit(id,fromWorkout=false){
   if(!e) return;
   exerciseMediaFile=null;
   $('modalCard').innerHTML=`
-    <div class="row"><h1>Edit media</h1><button class="x" onclick="openExercise('${e.id}',${fromWorkout})">${icon('close',20)}</button></div>
+    <div class="row"><h1>${esc(t('exd.mediaTitle'))}</h1><button class="x" onclick="openExercise('${e.id}',${fromWorkout})" aria-label="${esc(t('common.close'))}">${icon('close',20)}</button></div>
     <p class="muted">${esc(e.name)}</p>
-    <label class="eyebrow" style="margin-top:14px">Upload from your gallery</label>
+    <label class="eyebrow" style="margin-top:14px">${esc(t('exd.upload'))}</label>
     <input id="exMediaFile" type="file" accept="video/*,image/gif" class="field left" onchange="exerciseMediaFile=this.files[0]||null; $('exMediaFilePreview').textContent=exerciseMediaFile?exerciseMediaFile.name:''">
     <p id="exMediaFilePreview" class="muted" style="margin-top:6px"></p>
-    <label class="eyebrow" style="margin-top:14px">Or paste a direct GIF/video URL</label>
-    <input id="exMediaUrl" class="field left" placeholder="Direct GIF/video URL" value="${esc(e.media_url||'')}">
-    <label class="eyebrow" style="margin-top:14px">Reference page URL</label>
-    <input id="exMediaPageUrl" class="field left" placeholder="Optional" value="${esc(e.media_page_url||'')}">
-    <button class="btn primary" style="width:100%;margin-top:14px" id="exMediaSaveBtn" onclick="saveExerciseMedia('${e.id}',${fromWorkout})">Save media</button>`;
+    <label class="eyebrow" style="margin-top:14px">${esc(t('exd.orPaste'))}</label>
+    <input id="exMediaUrl" class="field left" placeholder="${esc(t('exd.directUrl'))}" value="${esc(e.media_url||'')}">
+    <label class="eyebrow" style="margin-top:14px">${esc(t('exd.pageUrl'))}</label>
+    <input id="exMediaPageUrl" class="field left" placeholder="${esc(t('common.optional'))}" value="${esc(e.media_page_url||'')}">
+    <button class="btn primary" style="width:100%;margin-top:14px" id="exMediaSaveBtn" onclick="saveExerciseMedia('${e.id}',${fromWorkout})">${esc(t('exd.saveMedia'))}</button>`;
 }
 
 async function saveExerciseMedia(id,fromWorkout=false){
   const btn=$('exMediaSaveBtn');
-  if(btn){btn.disabled=true;btn.textContent='Saving...';}
+  if(btn){btn.disabled=true;btn.textContent=t('common.saving');}
   try{
     let mediaUrl=$('exMediaUrl').value.trim();
     if(exerciseMediaFile){
@@ -2741,7 +3351,7 @@ async function saveExerciseMedia(id,fromWorkout=false){
       const ext=(file.name.split('.').pop()||'mp4').toLowerCase();
       const path=`${id}/${Date.now()}.${ext}`;
       const{error:upErr}=await sb.storage.from('skandi-exercise-media').upload(path,file,{contentType:file.type||'video/mp4',upsert:false});
-      if(upErr) return alert('Upload error: '+upErr.message);
+      if(upErr) return alert(t('exd.uploadError',{msg:upErr.message}));
       const{data:urlData}=sb.storage.from('skandi-exercise-media').getPublicUrl(path);
       mediaUrl=urlData.publicUrl;
     }
@@ -2753,25 +3363,25 @@ async function saveExerciseMedia(id,fromWorkout=false){
     await loadAll();
     openExercise(id,fromWorkout);
   } finally {
-    if(btn){btn.disabled=false;btn.textContent='Save media';}
+    if(btn){btn.disabled=false;btn.textContent=t('exd.saveMedia');}
   }
 }
 
 function openTemplateBuilder(day=null,id=null){
-  const t=state.templates.find(x=>x.id===id)||{name:'',weekday:day??todayDow(),notes:''};
+  const tpl=state.templates.find(x=>x.id===id)||{name:'',weekday:day??todayDow(),notes:''};
   const items=state.items.filter(i=>i.template_id===id);
   builderState={selected:new Map(items.map(i=>[i.exercise_id,{sets:i.target_sets||3,reps:i.target_reps||'8-12',rest:i.target_rest_sec??90,rir:i.target_rir??2}])),group:'All'};
   $('modal').classList.add('show');
   $('modalCard').innerHTML=`
-    <div class="row"><h1>${id?'Edit':'New'} routine</h1><button class="x" onclick="closeModal()">${icon('close',20)}</button></div>
-    <input id="tplName" class="field left" placeholder="Routine name" value="${esc(t.name)}">
-    <select id="tplDay" class="field left">${DOW.map((d,i)=>`<option value="${i}" ${t.weekday===i?'selected':''}>${d}</option>`).join('')}</select>
-    <textarea id="tplNotes" class="field" placeholder="Workout note">${esc(t.notes||'')}</textarea>
-    <label class="card row" style="margin:0 0 14px"><div><h3>Share with crew</h3><p>Other crew members can see and fork this routine.</p></div><input id="tplPublic" type="checkbox" ${t.is_public===false?'':'checked'}></label>
-    <h2>Exercises</h2>
-    <input id="tplExSearch" class="field left" placeholder="Search exercise..." oninput="renderTemplateExercisePicker()">
+    <div class="row"><h1>${esc(id?t('tpl.editTitle'):t('tpl.newTitle'))}</h1><button class="x" onclick="closeModal()" aria-label="${esc(t('common.close'))}">${icon('close',20)}</button></div>
+    <input id="tplName" class="field left" placeholder="${esc(t('tpl.namePh'))}" value="${esc(tpl.name)}">
+    <select id="tplDay" class="field left">${DOW.map((d,i)=>`<option value="${i}" ${tpl.weekday===i?'selected':''}>${d}</option>`).join('')}</select>
+    <textarea id="tplNotes" class="field" placeholder="${esc(t('tpl.notePh'))}">${esc(tpl.notes||'')}</textarea>
+    <label class="card row" style="margin:0 0 14px"><div><h3>${esc(t('tpl.shareTitle'))}</h3><p>${esc(t('tpl.shareBody'))}</p></div><input id="tplPublic" type="checkbox" ${tpl.is_public===false?'':'checked'}></label>
+    <h2>${esc(t('workout.exercises'))}</h2>
+    <input id="tplExSearch" class="field left" placeholder="${esc(t('common.searchExercise'))}" oninput="renderTemplateExercisePicker()">
     <div id="tplExPicker"></div>
-    <div class="tpl-save-bar"><button class="btn primary" style="width:100%" onclick="saveTemplate('${id||''}')">Save routine</button></div>`;
+    <div class="tpl-save-bar"><button class="btn primary" style="width:100%" onclick="saveTemplate('${id||''}')">${esc(t('tpl.save'))}</button></div>`;
   renderTemplateExercisePicker();
 }
 
@@ -2786,14 +3396,15 @@ function renderTemplateExercisePicker(){
     if(q&&!`${e.name} ${e.english_name||''}`.toLowerCase().includes(q)) return false;
     return true;
   });
-  const filters=['All',`Selected (${builderState.selected.size})`,...MUSCLE_GROUP_ORDER].map(g=>{
-    const key=g.startsWith('Selected')?'Selected':g;
-    return `<button type="button" class="btn small ${builderState.group===key?'primary':''}" style="margin:0 6px 8px 0" onclick="setBuilderGroup('${key}')">${esc(g)}</button>`;
-  }).join('');
+  // Keys stay English (they drive the muscleGroupOf filter); only the button label is translated.
+  const filters=[['All',t('tpl.filterAll')],['Selected',t('tpl.filterSelected',{n:builderState.selected.size})],
+    ...MUSCLE_GROUP_ORDER.map(g=>[g,groupLabel(g)])].map(([key,label])=>
+    `<button type="button" class="btn small ${builderState.group===key?'primary':''}" style="margin:0 6px 8px 0" onclick="setBuilderGroup('${key}')">${esc(label)}</button>`
+  ).join('');
   const groups=groupExercisesByMuscle(list).map(([group,items])=>`
-    <div class="eyebrow" style="margin-top:14px">${esc(group)} · ${items.length}</div>
+    <div class="eyebrow" style="margin-top:14px">${esc(groupLabel(group))} · ${items.length}</div>
     ${items.map(e=>templateExerciseOption(e)).join('')}
-  `).join('')||empty(builderState.group==='Selected'?'No exercises selected yet.':'No exercises match your search.');
+  `).join('')||empty(builderState.group==='Selected'?t('tpl.noneSelected'):t('tpl.noMatch'));
   $('tplExPicker').innerHTML=`<div style="margin-top:10px">${filters}</div><div class="stack">${groups}</div>`;
 }
 
@@ -2829,10 +3440,10 @@ async function saveTemplate(id){
   if(savingTemplate) return; // guards against a double-tap racing two delete+insert cycles into the
                               // same (template_id, exercise_id, sort_order) unique constraint
   const checked=[...builderState.selected.keys()];
-  if(!$('tplName').value.trim()||!checked.length) return alert('Add a name and at least one exercise.');
+  if(!$('tplName').value.trim()||!checked.length) return alert(t('tpl.errName'));
   savingTemplate=true;
   const btn=document.querySelector('#modalCard button.primary');
-  if(btn){btn.disabled=true;btn.textContent='Saving...';}
+  if(btn){btn.disabled=true;btn.textContent=t('common.saving');}
   try{
     const payload={user_id:state.user.id,name:$('tplName').value.trim(),weekday:Number($('tplDay').value),notes:$('tplNotes').value.trim()||null,is_public:$('tplPublic').checked,updated_at:new Date().toISOString()};
     let templateId=id;
@@ -2860,23 +3471,23 @@ async function saveTemplate(id){
   } finally {
     savingTemplate=false;
     // btn may already be gone from the DOM if closeModal() ran (success path) — harmless no-op then.
-    if(btn){btn.disabled=false;btn.textContent='Save routine';}
+    if(btn){btn.disabled=false;btn.textContent=t('tpl.save');}
   }
 }
 
 function openAddToWeek(templateId){
-  const t=state.templates.find(x=>x.id===templateId);
-  if(!t) return;
+  const tpl=state.templates.find(x=>x.id===templateId);
+  if(!tpl) return;
   const mine=state.templates.filter(x=>x.user_id===state.user.id);
   $('modal').classList.add('show');
   $('modalCard').innerHTML=`
-    <div class="row"><h1>Add to my week</h1><button class="x" onclick="closeModal()">${icon('close',20)}</button></div>
-    <p class="muted">${esc(t.name)} · by ${esc(t.profile?.name||'Crew member')}</p>
+    <div class="row"><h1>${esc(t('week.addTitle'))}</h1><button class="x" onclick="closeModal()" aria-label="${esc(t('common.close'))}">${icon('close',20)}</button></div>
+    <p class="muted">${esc(tpl.name)} · ${esc(t('common.byName',{name:tpl.profile?.name||t('common.crewMember')}))}</p>
     <select id="forkDay" class="field left">${DOW.map((d,i)=>{
       const taken=mine.find(x=>x.weekday===i);
-      return `<option value="${i}" ${i===todayDow()?'selected':''}>${d}${taken?' — already has '+esc(taken.name):''}</option>`;
+      return `<option value="${i}" ${i===todayDow()?'selected':''}>${d}${taken?esc(t('week.alreadyHas',{name:taken.name})):''}</option>`;
     }).join('')}</select>
-    <button class="btn primary" style="width:100%;margin-top:14px" onclick="confirmAddToWeek('${templateId}')">Add to my week</button>`;
+    <button class="btn primary" style="width:100%;margin-top:14px" onclick="confirmAddToWeek('${templateId}')">${esc(t('week.addTitle'))}</button>`;
 }
 
 // Shared by every path that assigns/forks a routine onto a weekday (confirmAddToWeek,
@@ -2899,15 +3510,15 @@ async function confirmAddToWeek(templateId){
 }
 
 async function forkTemplateToDay(templateId,weekday){
-  const t=state.templates.find(x=>x.id===templateId);
-  if(!t) return {error:{message:'Routine not found.'}};
+  const tpl=state.templates.find(x=>x.id===templateId);
+  if(!tpl) return {error:{message:t('tpl.notFound')}};
   const sourceItems=state.items.filter(i=>i.template_id===templateId).sort((a,b)=>a.sort_order-b.sort_order);
   const bumped=state.templates.find(x=>x.user_id===state.user.id&&x.weekday===weekday);
   if(bumped){
     const {error:bumpError}=await sb.from('skandi_templates').update({weekday:null,updated_at:new Date().toISOString()}).eq('id',bumped.id);
     if(bumpError) return {error:bumpError};
   }
-  const payload={user_id:state.user.id,name:t.name,notes:t.notes,weekday,is_public:true,forked_from:t.id,forked_from_name:t.profile?.name||'Crew member',updated_at:new Date().toISOString()};
+  const payload={user_id:state.user.id,name:tpl.name,notes:tpl.notes,weekday,is_public:true,forked_from:tpl.id,forked_from_name:tpl.profile?.name||t('common.crewMember'),updated_at:new Date().toISOString()};
   const {data,error}=await sb.from('skandi_templates').insert(payload).select().single();
   if(error) return {error};
   const rows=sourceItems.map((i,idx)=>({template_id:data.id,exercise_id:i.exercise_id,sort_order:idx,target_sets:i.target_sets,target_reps:i.target_reps,target_rest_sec:i.target_rest_sec,target_rir:i.target_rir,note:i.note}));
@@ -2935,7 +3546,7 @@ async function assignOwnRoutineToDay(templateId,weekday){
 }
 
 async function removeRoutineFromDay(templateId){
-  if(!confirm('Remove this routine from that day? The routine itself is kept, just unscheduled.')) return;
+  if(!confirm(t('week.confirmRemove'))) return;
   const {error}=await sb.from('skandi_templates').update({weekday:null,updated_at:new Date().toISOString()}).eq('id',templateId);
   if(error) return alert(error.message);
   closeModal();
@@ -2944,21 +3555,23 @@ async function removeRoutineFromDay(templateId){
 }
 
 function openDayPicker(day){
-  const mine=state.templates.filter(t=>t.user_id===state.user.id);
-  const community=state.templates.filter(t=>t.user_id!==state.user.id);
-  const pickerRow=(t,isMine)=>`<div class="row card" style="margin:0 0 8px">
-    <div><strong>${esc(t.name)}</strong><p>${state.items.filter(i=>i.template_id===t.id).length} ${plural(state.items.filter(i=>i.template_id===t.id).length,'exercise')}${isMine?'':' · by '+esc(t.profile?.name||'Crew member')}</p></div>
-    <button class="btn small primary" onclick="${isMine?`assignOwnRoutineToDay('${t.id}',Number($('dayPickerDay').value))`:`useCommunityRoutineForDay('${t.id}')`}">Use</button>
-  </div>`;
+  const mine=state.templates.filter(x=>x.user_id===state.user.id);
+  const community=state.templates.filter(x=>x.user_id!==state.user.id);
+  const pickerRow=(tpl,isMine)=>{
+    const count=state.items.filter(i=>i.template_id===tpl.id).length;
+    return `<div class="row card" style="margin:0 0 8px">
+    <div><strong>${esc(tpl.name)}</strong><p>${count} ${esc(tp(count,'common.exercises'))}${isMine?'':' · '+esc(t('common.byName',{name:tpl.profile?.name||t('common.crewMember')}))}</p></div>
+    <button class="btn small primary" onclick="${isMine?`assignOwnRoutineToDay('${tpl.id}',Number($('dayPickerDay').value))`:`useCommunityRoutineForDay('${tpl.id}')`}">${esc(t('week.use'))}</button>
+  </div>`;};
   $('modal').classList.add('show');
   $('modalCard').innerHTML=`
-    <div class="row"><h1>Choose a routine</h1><button class="x" onclick="closeModal()">${icon('close',20)}</button></div>
+    <div class="row"><h1>${esc(t('week.chooseRoutine'))}</h1><button class="x" onclick="closeModal()" aria-label="${esc(t('common.close'))}">${icon('close',20)}</button></div>
     <select id="dayPickerDay" class="field left">${DOW.map((d,i)=>`<option value="${i}" ${i===day?'selected':''}>${d}</option>`).join('')}</select>
-    <h2 style="margin-top:16px">My routines</h2>
-    ${mine.length?mine.map(t=>pickerRow(t,true)).join(''):empty('You have not created a routine yet.')}
-    <h2 style="margin-top:16px">Community routines</h2>
-    ${community.length?community.map(t=>pickerRow(t,false)).join(''):empty('No routines shared by other crew yet.')}
-    <button class="btn" style="width:100%;margin-top:6px" onclick="createRoutineForPickedDay()">+ Create a new routine instead</button>`;
+    <h2 style="margin-top:16px">${esc(t('train.myRoutines'))}</h2>
+    ${mine.length?mine.map(x=>pickerRow(x,true)).join(''):empty(t('train.noRoutines'))}
+    <h2 style="margin-top:16px">${esc(t('train.communityRoutines'))}</h2>
+    ${community.length?community.map(x=>pickerRow(x,false)).join(''):empty(t('train.noCommunity'))}
+    <button class="btn" style="width:100%;margin-top:6px" onclick="createRoutineForPickedDay()">${esc(t('week.createInstead'))}</button>`;
 }
 
 async function useCommunityRoutineForDay(templateId){
@@ -2983,60 +3596,60 @@ function createRoutineForPickedDay(){
 }
 
 function openDayManage(templateId,day){
-  const t=state.templates.find(x=>x.id===templateId);
-  if(!t) return;
+  const tpl=state.templates.find(x=>x.id===templateId);
+  if(!tpl) return;
   $('modal').classList.add('show');
   $('modalCard').innerHTML=`
-    <div class="row"><h1>${esc(t.name)}</h1><button class="x" onclick="closeModal()">${icon('close',20)}</button></div>
-    <p class="muted">Scheduled for ${DOW[day]}</p>
+    <div class="row"><h1>${esc(tpl.name)}</h1><button class="x" onclick="closeModal()" aria-label="${esc(t('common.close'))}">${icon('close',20)}</button></div>
+    <p class="muted">${esc(t('week.scheduledFor',{day:DOW[day]}))}</p>
     <div class="stack" style="margin-top:14px">
-      <button class="btn primary" style="width:100%" onclick="openWorkoutOverview('${t.id}')">${icon('play',16)} Start workout</button>
-      <button class="btn" style="width:100%" onclick="openDayPicker(${day})">${icon('swap',16)} Replace routine</button>
-      <button class="btn" style="width:100%" onclick="openTemplateBuilder(null,'${t.id}')">${icon('edit',16)} Edit routine</button>
-      <button class="btn" style="width:100%" onclick="openMoveRoutine('${t.id}',${day})">${icon('calendar',16)} Move to another day</button>
-      <button class="btn danger" style="width:100%" onclick="removeRoutineFromDay('${t.id}')">${icon('trash',16)} Remove from ${DOW[day]}</button>
+      <button class="btn primary" style="width:100%" onclick="openWorkoutOverview('${tpl.id}')">${icon('play',16)} ${esc(t('week.startWorkout'))}</button>
+      <button class="btn" style="width:100%" onclick="openDayPicker(${day})">${icon('swap',16)} ${esc(t('week.replaceRoutine'))}</button>
+      <button class="btn" style="width:100%" onclick="openTemplateBuilder(null,'${tpl.id}')">${icon('edit',16)} ${esc(t('week.editRoutine'))}</button>
+      <button class="btn" style="width:100%" onclick="openMoveRoutine('${tpl.id}',${day})">${icon('calendar',16)} ${esc(t('week.moveToDay'))}</button>
+      <button class="btn danger" style="width:100%" onclick="removeRoutineFromDay('${tpl.id}')">${icon('trash',16)} ${esc(t('week.removeFrom',{day:DOW[day]}))}</button>
     </div>`;
 }
 
 function openMoveRoutine(templateId,day){
-  const t=state.templates.find(x=>x.id===templateId);
-  if(!t) return;
+  const tpl=state.templates.find(x=>x.id===templateId);
+  if(!tpl) return;
   $('modalCard').innerHTML=`
-    <div class="row"><h1>Move ${esc(t.name)}</h1><button class="x" onclick="closeModal()">${icon('close',20)}</button></div>
-    <p class="muted">Currently on ${DOW[day]}</p>
+    <div class="row"><h1>${esc(t('week.moveTitle',{name:tpl.name}))}</h1><button class="x" onclick="closeModal()" aria-label="${esc(t('common.close'))}">${icon('close',20)}</button></div>
+    <p class="muted">${esc(t('week.currentlyOn',{day:DOW[day]}))}</p>
     <select id="moveDay" class="field left">${DOW.map((d,i)=>`<option value="${i}" ${i===day?'selected':''}>${d}</option>`).join('')}</select>
-    <button class="btn primary" style="width:100%;margin-top:14px" onclick="assignOwnRoutineToDay('${templateId}',Number($('moveDay').value))">Move routine</button>`;
+    <button class="btn primary" style="width:100%;margin-top:14px" onclick="assignOwnRoutineToDay('${templateId}',Number($('moveDay').value))">${esc(t('week.moveBtn'))}</button>`;
 }
 
 function openExerciseBuilder(){
   $('modal').classList.add('show');
   $('modalCard').innerHTML=`
-    <div class="row"><h1>New exercise</h1><button class="x" onclick="closeModal()">${icon('close',20)}</button></div>
-    <label class="eyebrow">Exercise name</label>
-    <input id="exName" class="field left" placeholder="e.g. Dumbbell Row">
-    <label class="eyebrow">Alternative name</label>
-    <input id="exEnglish" class="field left" placeholder="Optional">
-    <label class="eyebrow">Category</label>
+    <div class="row"><h1>${esc(t('newex.title'))}</h1><button class="x" onclick="closeModal()" aria-label="${esc(t('common.close'))}">${icon('close',20)}</button></div>
+    <label class="eyebrow">${esc(t('newex.name'))}</label>
+    <input id="exName" class="field left" placeholder="${esc(t('newex.namePh'))}">
+    <label class="eyebrow">${esc(t('newex.altName'))}</label>
+    <input id="exEnglish" class="field left" placeholder="${esc(t('common.optional'))}">
+    <label class="eyebrow">${esc(t('newex.category'))}</label>
     <select id="exCategory" class="field left">
-      ${['Strength','Cardio','Mobility','Core','Conditioning','Rehab'].map(c=>`<option value="${c}">${c}</option>`).join('')}
+      ${['Strength','Cardio','Mobility','Core','Conditioning','Rehab'].map(c=>`<option value="${c}">${esc(categoryLabel(c))}</option>`).join('')}
     </select>
-    <label class="eyebrow">Equipment</label>
-    <input id="exEquipment" class="field left" placeholder="Optional: dumbbells, bench">
-    <label class="eyebrow">Media</label>
-    <input id="exMedia" class="field left" placeholder="Direct GIF/video URL (optional)">
-    <input id="exPage" class="field left" placeholder="Reference page URL (optional)">
-    <div class="row" style="margin-top:12px"><div><h2>Muscles</h2><p class="form-note">Set only the muscles this exercise actually uses. Total does not need to equal 100.</p></div><button class="btn small" onclick="resetExerciseMuscles()">Clear</button></div>
+    <label class="eyebrow">${esc(t('newex.equipment'))}</label>
+    <input id="exEquipment" class="field left" placeholder="${esc(t('newex.equipmentPh'))}">
+    <label class="eyebrow">${esc(t('newex.media'))}</label>
+    <input id="exMedia" class="field left" placeholder="${esc(t('newex.mediaPh'))}">
+    <input id="exPage" class="field left" placeholder="${esc(t('newex.pagePh'))}">
+    <div class="row" style="margin-top:12px"><div><h2>${esc(t('newex.muscles'))}</h2><p class="form-note">${esc(t('newex.musclesNote'))}</p></div><button class="btn small" onclick="resetExerciseMuscles()">${esc(t('newex.clear'))}</button></div>
     <div class="rest-presets" style="margin-top:0">
-      ${Object.keys(EXERCISE_PRESETS).map(p=>`<button type="button" class="chip" onclick="applyExercisePreset('${p}')">${p}</button>`).join('')}
+      ${Object.keys(EXERCISE_PRESETS).map(p=>`<button type="button" class="chip" onclick="applyExercisePreset('${p}')">${esc(presetLabel(p))}</button>`).join('')}
     </div>
     <div class="muscle-builder">
       ${EXERCISE_MUSCLES.map(m=>`<div class="muscle-builder-row">
-        <strong>${m}</strong>
+        <strong>${esc(muscleLabel(m))}</strong>
         <input id="muscleRange${m}" type="range" min="0" max="100" step="5" value="0" oninput="setExerciseMuscle('${m}',this.value,'range')">
         <input id="muscleVal${m}" class="field" type="number" min="0" max="100" step="5" value="0" inputmode="numeric" onchange="setExerciseMuscle('${m}',this.value,'number')">
       </div>`).join('')}
     </div>
-    <button class="btn primary" style="width:100%" onclick="saveExercise()">Save exercise</button>`;
+    <button class="btn primary" style="width:100%" onclick="saveExercise()">${esc(t('newex.save'))}</button>`;
 }
 
 function setExerciseMuscle(name,value,source){
@@ -3058,26 +3671,55 @@ function applyExercisePreset(name){
 
 async function saveExercise(){
   const name=$('exName').value.trim();
-  if(!name) return alert('Add an exercise name.');
+  if(!name) return alert(t('newex.errName'));
   let muscles={};
   document.querySelectorAll('[id^="muscleVal"]').forEach(input=>{
     const muscle=input.id.replace('muscleVal','');
     const value=Math.max(0,Math.min(100,Number(input.value)||0));
     if(value>0) muscles[muscle]=value;
   });
-  if(!Object.keys(muscles).length) return alert('Set at least one muscle above 0%.');
+  if(!Object.keys(muscles).length) return alert(t('newex.errMuscle'));
   const slug=name.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'');
   const equipment=$('exEquipment').value.split(',').map(x=>x.trim()).filter(Boolean);
-  if(state.exercises.some(e=>e.slug===slug)) return alert('An exercise with that name already exists in the catalog.');
+  if(state.exercises.some(e=>e.slug===slug)) return alert(t('newex.errDup'));
   const {error}=await sb.from('skandi_exercises').insert({
     slug,name,english_name:$('exEnglish').value.trim()||null,category:$('exCategory').value,
     equipment,muscles,media_url:$('exMedia').value.trim()||null,media_page_url:$('exPage').value.trim()||null,
     instructions:[],coach_tips:[],created_by:state.user.id
   });
-  if(error) return alert(error.code==='23505'?'An exercise with that name already exists in the catalog.':error.message);
+  if(error) return alert(error.code==='23505'?t('newex.errDup'):error.message);
   closeModal();
   await loadAll();
   render();
+}
+
+// Settings lives behind the header avatar (which used to sign out on a single tap). Language
+// and the default weight unit are both device-local preferences (localStorage), so nothing here
+// writes to the database.
+function openSettings(){
+  $('modal').classList.add('show');
+  $('modalCard').innerHTML=`
+    <div class="row"><h1>${esc(t('settings.title'))}</h1><button class="x" onclick="closeModal()" aria-label="${esc(t('settings.close'))}">${icon('close',20)}</button></div>
+    <section class="card">
+      <div class="eyebrow">${esc(t('settings.language'))}</div>
+      <div class="seg" style="margin-top:10px">
+        <button class="${LANG==='es'?'active':''}" onclick="setLang('es');openSettings()">Español</button>
+        <button class="${LANG==='en'?'active':''}" onclick="setLang('en');openSettings()">English</button>
+      </div>
+      <p class="form-note" style="margin:10px 0 0">${esc(t('settings.langNote'))}</p>
+    </section>
+    <section class="card">
+      <div class="eyebrow">${esc(t('settings.units'))}</div>
+      <div class="seg" style="margin-top:10px">
+        <button class="${state.weightUnit==='kg'?'active':''}" onclick="setWeightUnit('kg');render();openSettings()">KG</button>
+        <button class="${state.weightUnit==='lb'?'active':''}" onclick="setWeightUnit('lb');render();openSettings()">LB</button>
+      </div>
+    </section>
+    <section class="card">
+      <div class="eyebrow">${esc(t('settings.account'))}</div>
+      <p style="margin-top:8px">${esc(t('settings.signedInAs'))}: <strong>${esc(state.user?.email||displayName())}</strong></p>
+      <button class="btn danger" style="width:100%;margin-top:12px" onclick="signOut()">${esc(t('settings.signOut'))}</button>
+    </section>`;
 }
 
 function closeModal(){
@@ -3112,6 +3754,10 @@ new MutationObserver(()=>{
 function empty(msg){ return `<div class="empty">${esc(msg)}</div>`; }
 
 sb.auth.onAuthStateChange((_event,session)=>{ if(session&&!state.user){ state.user=session.user; loadAll().then(showApp); } });
+// Stamp the stored/detected language onto the static markup before the first paint, so the auth
+// screen and tab bar never flash English at a Spanish user.
+rebuildActivityLabels();
+applyStaticI18n();
 init();
 </script>
 </body>
