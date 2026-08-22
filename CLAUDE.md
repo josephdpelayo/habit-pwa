@@ -137,6 +137,27 @@ and nothing else:
   rowing, walking; manual entry with RPE, heart rate and target zone (046, 063)
 - `skandi_training_blocks` (N build weeks + deload, 066), `skandi_bodyweight_logs` (067),
   `skandi_progression_state` (calisthenics progressions)
+- Skill lines (078): `progression_group` + `progression_rank` order a ladder, and levelling up
+  is a **standard, not a best set** — `progression_target_sets` sets at `progression_target`,
+  each rated `form_quality` >= 8, in two consecutive sessions that trained that rank.
+  `progression_criteria` is the one-line form standard for that rung and is shown on the card
+  during the workout, because "clean" means something different on a tuck than on a straddle.
+  `skandi_sets.form_quality` (1–10) replaces the tri-state `hold_clean` (065), which is never
+  written any more but is still read as a fallback for older sets (`setQuality()` in
+  `skandi.html`: clean → 8, broken → 4, untagged → null). Quality replaces the RIR column for
+  any exercise with `track_quality` — a nordic curl or a front lever raise is taken to where
+  form breaks, not to RIR 2
+- Skill depth (079). A skill line's progress is **one curve, not one per rank**: `skillLevel()`
+  = `progression_rank + min(1, mark / progression_target)`, so levelling up lands on exactly the
+  number the previous rank ended at. It is derived, not stored — there is no difficulty
+  coefficient column to keep honest. `skandi_progression_events` is the memory
+  `skandi_progression_state` never had (it holds only the current rank), and is seeded by
+  reconstructing when each variant first appears in a completed session. `skandi_skill_goals`
+  holds a weekly time-under-tension target per line, where TUT = logged seconds + reps ×
+  `REP_TUT_SEC` (3) — in statics the volume is seconds, not sets. `skandi_sets.side` splits
+  unilateral work (`skandi_exercises.unilateral`; sides are pre-alternated at set creation) and
+  `clip_path` points into the **private** `skandi-set-clips` bucket, one folder per uid — unlike
+  the shared public `skandi-exercise-media` (058), a set clip is the member's own
 - `skandi_foods` / `skandi_meals` / `skandi_meal_items` / `skandi_nutrition_targets` /
   `skandi_ai_usage` — nutrition (073, 074, 075). Meal macros are stored **absolute** per row, meal
   totals are maintained by a trigger (never by the app), and meals are strictly private — no crew

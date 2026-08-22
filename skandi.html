@@ -8,14 +8,14 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="Skandi Fit">
 <meta name="application-name" content="Skandi Fit">
-<link rel="manifest" href="/skandi-manifest.json?v=20260822-07">
-<link rel="apple-touch-icon" sizes="180x180" href="/icons/skandi-180.png?v=20260822-07">
-<link rel="icon" type="image/png" sizes="192x192" href="/icons/skandi-192.png?v=20260822-07">
+<link rel="manifest" href="/skandi-manifest.json?v=20260822-08">
+<link rel="apple-touch-icon" sizes="180x180" href="/icons/skandi-180.png?v=20260822-08">
+<link rel="icon" type="image/png" sizes="192x192" href="/icons/skandi-192.png?v=20260822-08">
 <title>Skandi Fit</title>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="/skandi-recovery.js?v=20260822-07"></script>
-<script src="/body-figure.js?v=20260822-07"></script>
-<script src="/skandi-nutrition.js?v=20260822-07"></script>
+<script src="/skandi-recovery.js?v=20260822-08"></script>
+<script src="/body-figure.js?v=20260822-08"></script>
+<script src="/skandi-nutrition.js?v=20260822-08"></script>
 <style>
 :root{
   --bg:#eef4f8;
@@ -171,9 +171,16 @@ p{color:var(--muted);line-height:1.45;margin:0}
 .bar i{display:block;height:100%;background:linear-gradient(90deg,var(--dof-navy),var(--blue));width:0}
 .set-row{display:grid;grid-template-columns:26px 1fr 1fr 34px 46px 30px;gap:6px;align-items:center}
 .set-row.no-weight{grid-template-columns:26px 1fr 34px 46px 30px}
-.clean-toggle{height:100%;border-radius:10px;background:var(--panel2);color:var(--muted);border:1px solid var(--line);font-weight:1000;font-size:13px}
-.clean-toggle.clean{background:#e4f7ee;color:#1f9d5c;border-color:#bfe9d3}
-.clean-toggle.broken{background:#fdeceb;color:var(--pink);border-color:#f6c9c5}
+.quality-select{-webkit-appearance:none;appearance:none;width:100%;height:48px;padding:0;text-align:center;text-align-last:center;border-radius:10px;background:var(--panel2);color:var(--muted);border:1px solid var(--line);font-weight:900;font-size:13px}
+.quality-select.q-good{background:#e4f7ee;color:#1f9d5c;border-color:#bfe9d3}
+.quality-select.q-mid{background:#fff6e5;color:#a86a08;border-color:#f3ddb3}
+.quality-select.q-bad{background:#fdeceb;color:var(--pink);border-color:#f6c9c5}
+.set-num{height:100%;border:0;background:transparent;color:var(--text);font-weight:900;font-size:13px;padding:0;text-align:left;line-height:1.1}
+.set-num small{display:block;font-size:9px;font-weight:800;color:var(--blue);letter-spacing:.04em}
+.set-options{margin:2px 0 8px;padding:10px;border:1px solid var(--line);border-radius:10px;background:var(--panel2)}
+.set-options video{width:100%;border-radius:8px;margin-top:8px;background:#000}
+.prog-criteria{margin-top:6px;padding:7px 10px;background:var(--panel2);border:1px solid var(--line);border-radius:8px;font-size:11.5px;line-height:1.35;color:var(--muted)}
+.prog-criteria b{color:var(--text);font-weight:800}
 .progression-ready{display:block;width:100%;text-align:left;margin-top:6px;padding:7px 10px;background:#e4f7ee;color:#1f9d5c;border:1px solid #bfe9d3;border-radius:8px;font-weight:700;font-size:12px}
 .field{width:100%;background:#fff;border:1px solid var(--line);color:var(--text);border-radius:10px;padding:13px;text-align:center;box-shadow:inset 0 1px 0 rgba(1,36,86,.03)}
 .field-narrow{padding:13px 3px}
@@ -401,7 +408,7 @@ textarea.field{min-height:112px;text-align:left;resize:vertical}
 // Versión compartida con app.html (APP_VERSION) y sw.js (CACHE_VERSION): un solo service
 // worker sirve las dos apps, así que una sola cadena las invalida a las dos. Al cambiarla
 // hay que actualizarla también en los ?v= del <head>, en index.html y en los dos manifests.
-const SKANDI_VERSION='20260822-07';
+const SKANDI_VERSION='20260822-08';
 const SUPABASE_URL='https://pmpjteuqjusbiduevbwq.supabase.co';
 const SUPABASE_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBtcGp0ZXVxanVzYmlkdWV2YndxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc2OTI1NjUsImV4cCI6MjA5MzI2ODU2NX0.XbMzZoo2yqtrD8znLnyo_1zDfrdJAvAPj1lqGOyXnLw';
 const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
@@ -551,6 +558,8 @@ en:{
 
   'progress.title':'Progress','progress.needsAttention':'Needs attention',
   'progress.soreWarn':'<strong>{area}</strong> — reported in {n} of your last sessions. Consider resting that area or regressing.',
+  'progress.stepDownTo':'Step down to {name}','progress.startDeload':'Set up a deload',
+  'progress.confirmDemote':'Go back down to {name}? Your history stays, only the rank you are working changes.',
   'progress.stallWarn':'<strong>{name}</strong> flat for 3 sessions ({marks}). Maybe deload or hold longer.',
   'progress.allTime':'All time','progress.savedWorkouts':'saved workouts','progress.minutesTrained':'minutes trained',
   'progress.externalActivities':'External activities','progress.logActivity':'+ Log activity',
@@ -608,7 +617,7 @@ en:{
   'recap.soreness':'Soreness reported in {n} {unit} this week.',
 
   'cross.title':'Strength/skill vs endurance','cross.week':'Week','cross.strength':'Strength',
-  'cross.avgRir':'Avg RIR','cross.cleanPct':'Clean %','cross.endurance':'Endurance',
+  'cross.avgRir':'Avg RIR','cross.avgQuality':'Avg quality','cross.endurance':'Endurance',
   'cross.worse':'{linked} of the {total} times you reported performing worse than usual, there was a hard endurance session (RPE≥7) in the previous 36h.',
 
   'library.title':'Library','library.addExercise':'+ Exercise','library.search':'Search',
@@ -623,7 +632,7 @@ en:{
   'session.minutes':'minutes','session.energy':'Energy {v}/5','session.sleep':'Sleep {h}h',
   'session.feltWorse':'Performed worse','session.soreness':'Soreness','session.notSpecified':'Not specified',
   'session.notes':'Notes','session.exercises':'Exercises','session.set':'Set {n}',
-  'session.clean':'clean','session.broken':'broken','session.notLogged':'not logged',
+  'session.quality':'quality {v}/10','session.notLogged':'not logged','session.sideLeft':'left','session.sideRight':'right',
   'session.noSets':'No sets logged.','session.delete':'Delete this workout',
   'session.confirmDelete':'Delete this workout? This cannot be undone.',
 
@@ -703,15 +712,38 @@ en:{
   'prog.easier':'Easier progression','prog.easierName':'Easier: {name}','prog.easiest':'Easiest progression',
   'prog.harder':'Harder progression','prog.harderName':'Harder: {name}','prog.hardest':'Hardest progression',
   'prog.step':'Progression {i}/{n}','prog.readyFor':'Ready for {name} — tap to level up',
+  'prog.criteria':'Clean = {v}','prog.target':'Level up: {sets} × {v} at 8+/10, two sessions in a row',
+  'prog.secUnit':'{n}s','prog.repUnit':'{n} reps',
   'prog.history':'Progression history','prog.trend':'trend over the last {n} sessions',
+  'skill.title':'Skills','skill.intro':'One curve per skill line, across every rank. Tap for the ladder, the weekly time under tension and the history.',
+  'skill.level':'level {v} / {n}','skill.noData':'Not trained yet',
+  'skill.currentAt':'{name} — level {v} of {n}',
+  'skill.curve':'Level over time','skill.curveHint':'Level = rank + how far into that rank you are, so it does not reset when you move up.',
+  'skill.weekTut':'{done} this week of {goal}','skill.weekTutNoGoal':'{done} this week · no weekly goal set',
+  'skill.tutTitle':'Weekly time under tension','skill.tutHint':'In statics the volume is seconds, not sets. A rep counts as 3 seconds.',
+  'skill.goalPh':'minutes per week','skill.errGoal':'The goal goes from 0 to 120 minutes a week.',
+  'skill.sides':'Left vs right','skill.sideGap':'Weak side is {pct}% behind. Start the sets with it.',
+  'skill.steppedDown':'stepped down','skill.daysAtRank':'{n} days','skill.daysSoFar':'{n} days so far',
+  'skill.historyEmpty':'No rank changes recorded yet.',
+  'skill.ladder':'The ladder','skill.rankTarget':'{sets} × {v}','skill.finalRank':'final rank',
+  'tempo.hold':'Tempo {n}s','tempo.rep':'Tempo {n}s',
+  'fatigue.title':'Skill work on a tired muscle','fatigue.warn':'<strong>{name}</strong> leans on {muscle}, at {score}% recovered.',
+  'fatigue.hint':'Expect a shorter set than usual. Log the quality honestly — this is fatigue, not a lost skill.',
 
-  'ex.restSec':'rest {n}s','ex.cleanCount':'Clean {done}/{total}',
+  'ex.restSec':'rest {n}s','ex.qualityAvg':'quality {v}/10',
   'ex.swap':'Swap exercise','ex.removeFromSession':'Remove exercise from this session',
   'ex.removeShort':'Remove from this session',
-  'ex.colSec':'SEC','ex.colReps':'REPS','ex.colClean':'CLN','ex.colRir':'RIR',
+  'ex.colSec':'SEC','ex.colReps':'REPS','ex.colQuality':'QLT','ex.colRir':'RIR',
   'ex.switchToLb':'Switch this exercise to pounds','ex.switchToKg':'Switch this exercise to kilograms',
-  'ex.holdClean':'Clean','ex.holdBroken':'Broken form','ex.holdUnset':'Not marked — tap to set',
-  'ex.holdQuality':'Hold quality: {v}','ex.secPh':'sec','ex.removeSet':'Remove set','ex.addSet':'+ Add set',
+  'ex.qualityAria':'Execution quality 1-10',
+  'ex.setOptions':'Set options: side and form clip',
+  'ex.side':'Side','ex.sideLeft':'Left','ex.sideRight':'Right','ex.sideNone':'None','ex.sideShortL':'L','ex.sideShortR':'R',
+  'ex.clip':'Form clip','ex.clipAdd':'+ Clip','ex.clipRemove':'Remove clip',
+  'ex.clipConfirmRemove':'Delete this clip? It cannot be recovered.',
+  'ex.clipTooBig':'The clip must be under 25 MB. Record 5-10 seconds, not the whole set.',
+  'ex.clipError':'The clip could not be uploaded: {msg}',
+  'ex.errQuality':'Quality goes from 1 to 10.',
+  'ex.secPh':'sec','ex.removeSet':'Remove set','ex.addSet':'+ Add set',
   'ex.replaceWith':'Replace with...',
   'ex.confirmRemove':"Remove {name} from today's session? This won't change your saved routine.",
   'ex.thisExercise':'this exercise',
@@ -912,6 +944,8 @@ es:{
 
   'progress.title':'Progreso','progress.needsAttention':'Requiere atención',
   'progress.soreWarn':'<strong>{area}</strong> — reportado en {n} de tus últimas sesiones. Considera descansar esa zona o regresar a una variante más fácil.',
+  'progress.stepDownTo':'Bajar a {name}','progress.startDeload':'Programar descarga',
+  'progress.confirmDemote':'¿Regresar a {name}? Tu historial se queda, solo cambia el escalón que estás trabajando.',
   'progress.stallWarn':'<strong>{name}</strong> estancado 3 sesiones ({marks}). Quizá toca descargar o aguantar más.',
   'progress.allTime':'Histórico','progress.savedWorkouts':'entrenamientos guardados','progress.minutesTrained':'minutos entrenados',
   'progress.externalActivities':'Actividades externas','progress.logActivity':'+ Registrar actividad',
@@ -969,7 +1003,7 @@ es:{
   'recap.soreness':'Dolor reportado en {n} {unit} esta semana.',
 
   'cross.title':'Fuerza/skill vs resistencia','cross.week':'Semana','cross.strength':'Fuerza',
-  'cross.avgRir':'RIR prom.','cross.cleanPct':'Clean %','cross.endurance':'Resistencia',
+  'cross.avgRir':'RIR prom.','cross.avgQuality':'Calidad prom.','cross.endurance':'Resistencia',
   'cross.worse':'{linked} de {total} veces que reportaste rendir peor de lo normal, hubo una sesión de resistencia intensa (RPE≥7) en las 36h previas.',
 
   'library.title':'Biblioteca','library.addExercise':'+ Ejercicio','library.search':'Buscar',
@@ -984,7 +1018,7 @@ es:{
   'session.minutes':'minutos','session.energy':'Energía {v}/5','session.sleep':'Sueño {h}h',
   'session.feltWorse':'Rindió peor','session.soreness':'Dolor','session.notSpecified':'Sin especificar',
   'session.notes':'Notas','session.exercises':'Ejercicios','session.set':'Serie {n}',
-  'session.clean':'limpio','session.broken':'roto','session.notLogged':'sin registrar',
+  'session.quality':'calidad {v}/10','session.notLogged':'sin registrar','session.sideLeft':'izq','session.sideRight':'der',
   'session.noSets':'No hay series registradas.','session.delete':'Eliminar este entrenamiento',
   'session.confirmDelete':'¿Eliminar este entrenamiento? No se puede deshacer.',
 
@@ -1064,15 +1098,38 @@ es:{
   'prog.easier':'Progresión más fácil','prog.easierName':'Más fácil: {name}','prog.easiest':'La más fácil',
   'prog.harder':'Progresión más difícil','prog.harderName':'Más difícil: {name}','prog.hardest':'La más difícil',
   'prog.step':'Progresión {i}/{n}','prog.readyFor':'Listo para {name} — toca para subir de nivel',
+  'prog.criteria':'Limpio = {v}','prog.target':'Subir de nivel: {sets} × {v} a 8+/10, dos sesiones seguidas',
+  'prog.secUnit':'{n}s','prog.repUnit':'{n} reps',
   'prog.history':'Historial de progresión','prog.trend':'evolución de las últimas {n} sesiones',
+  'skill.title':'Habilidades','skill.intro':'Una sola curva por habilidad, a través de todos los escalones. Toca para ver la escalera, el tiempo bajo tensión semanal y el historial.',
+  'skill.level':'nivel {v} / {n}','skill.noData':'Aún sin entrenar',
+  'skill.currentAt':'{name} — nivel {v} de {n}',
+  'skill.curve':'Nivel a lo largo del tiempo','skill.curveHint':'Nivel = escalón + qué tan lejos vas dentro de ese escalón, por eso no se reinicia al subir.',
+  'skill.weekTut':'{done} esta semana de {goal}','skill.weekTutNoGoal':'{done} esta semana · sin meta semanal',
+  'skill.tutTitle':'Tiempo bajo tensión semanal','skill.tutHint':'En estáticos el volumen son segundos, no series. Una repetición cuenta como 3 segundos.',
+  'skill.goalPh':'minutos por semana','skill.errGoal':'La meta va de 0 a 120 minutos por semana.',
+  'skill.sides':'Izquierda vs derecha','skill.sideGap':'El lado débil va {pct}% abajo. Empieza las series con él.',
+  'skill.steppedDown':'bajaste de escalón','skill.daysAtRank':'{n} días','skill.daysSoFar':'{n} días hasta hoy',
+  'skill.historyEmpty':'Todavía no hay cambios de escalón registrados.',
+  'skill.ladder':'La escalera','skill.rankTarget':'{sets} × {v}','skill.finalRank':'último escalón',
+  'tempo.hold':'Tempo {n}s','tempo.rep':'Tempo {n}s',
+  'fatigue.title':'Habilidad con el músculo cansado','fatigue.warn':'<strong>{name}</strong> carga sobre {muscle}, al {score}% de recuperación.',
+  'fatigue.hint':'Espera una serie más corta de lo normal. Califica la calidad con honestidad — esto es fatiga, no habilidad perdida.',
 
-  'ex.restSec':'descanso {n}s','ex.cleanCount':'Limpios {done}/{total}',
+  'ex.restSec':'descanso {n}s','ex.qualityAvg':'calidad {v}/10',
   'ex.swap':'Cambiar ejercicio','ex.removeFromSession':'Quitar el ejercicio de esta sesión',
   'ex.removeShort':'Quitar de esta sesión',
-  'ex.colSec':'SEG','ex.colReps':'REPS','ex.colClean':'LIM','ex.colRir':'RIR',
+  'ex.colSec':'SEG','ex.colReps':'REPS','ex.colQuality':'CAL','ex.colRir':'RIR',
   'ex.switchToLb':'Cambiar este ejercicio a libras','ex.switchToKg':'Cambiar este ejercicio a kilos',
-  'ex.holdClean':'Limpio','ex.holdBroken':'Forma rota','ex.holdUnset':'Sin marcar — toca para definir',
-  'ex.holdQuality':'Calidad del hold: {v}','ex.secPh':'seg','ex.removeSet':'Quitar serie','ex.addSet':'+ Agregar serie',
+  'ex.qualityAria':'Calidad de ejecución 1-10',
+  'ex.setOptions':'Opciones de la serie: lado y clip de forma',
+  'ex.side':'Lado','ex.sideLeft':'Izquierdo','ex.sideRight':'Derecho','ex.sideNone':'Ninguno','ex.sideShortL':'IZQ','ex.sideShortR':'DER',
+  'ex.clip':'Clip de forma','ex.clipAdd':'+ Clip','ex.clipRemove':'Quitar clip',
+  'ex.clipConfirmRemove':'¿Borrar este clip? No se puede recuperar.',
+  'ex.clipTooBig':'El clip debe pesar menos de 25 MB. Graba 5-10 segundos, no la serie completa.',
+  'ex.clipError':'No se pudo subir el clip: {msg}',
+  'ex.errQuality':'La calidad va de 1 a 10.',
+  'ex.secPh':'seg','ex.removeSet':'Quitar serie','ex.addSet':'+ Agregar serie',
   'ex.replaceWith':'Reemplazar con...',
   'ex.confirmRemove':'¿Quitar {name} de la sesión de hoy? Tu rutina guardada no cambia.',
   'ex.thisExercise':'este ejercicio',
@@ -1214,7 +1271,7 @@ const EXERCISE_PRESETS={
 };
 
 const ACTIVE_WORKOUT_MAX_HOURS=18;
-const state={user:null,profile:null,view:'home',authMode:'login',exercises:[],templates:[],items:[],sessions:[],sets:[],externalActivities:[],activityTemplates:[],progressionState:[],trainingBlocks:[],bodyweightLogs:[],programs:[],programDays:[],active:null,activeItems:[],timer:null,elapsed:0,rest:0,restTotal:0,bodyFlip:'front',weightUnit:localStorage.getItem('skandi_weight_unit')||'kg',weightUnitOverrides:(()=>{try{return JSON.parse(localStorage.getItem('skandi_weight_unit_overrides')||'{}');}catch(e){return {};}})(),expandedRoutines:new Set(),progressTab:'summary',progressQuery:'',progressMetric:'best',historyFilter:{month:'all',title:'all'},crewFeedLimit:6,swapTarget:null,swapQuery:'',addExOpen:false,addExQuery:'',pausedMs:0,pausedAt:null,floatTimerOpen:false,meals:[],mealItems:[],foods:[],dishes:[],dishItems:[],nutritionTargets:null,aiCallsToday:0,foodDayOffset:0,foodPicker:{query:'',mealId:null},pendingMeal:null};
+const state={user:null,profile:null,view:'home',authMode:'login',exercises:[],templates:[],items:[],sessions:[],sets:[],externalActivities:[],activityTemplates:[],progressionState:[],progressionEvents:[],skillGoals:[],trainingBlocks:[],bodyweightLogs:[],programs:[],programDays:[],active:null,activeItems:[],timer:null,elapsed:0,rest:0,restTotal:0,bodyFlip:'front',weightUnit:localStorage.getItem('skandi_weight_unit')||'kg',weightUnitOverrides:(()=>{try{return JSON.parse(localStorage.getItem('skandi_weight_unit_overrides')||'{}');}catch(e){return {};}})(),expandedRoutines:new Set(),progressTab:'summary',progressQuery:'',progressMetric:'best',historyFilter:{month:'all',title:'all'},crewFeedLimit:6,swapTarget:null,swapQuery:'',setOptionsId:null,skillTab:null,addExOpen:false,addExQuery:'',pausedMs:0,pausedAt:null,floatTimerOpen:false,meals:[],mealItems:[],foods:[],dishes:[],dishItems:[],nutritionTargets:null,aiCallsToday:0,foodDayOffset:0,foodPicker:{query:'',mealId:null},pendingMeal:null};
 let builderState={selected:new Map(),group:'All'};
 
 const $=id=>document.getElementById(id);
@@ -1406,7 +1463,7 @@ async function loadAll(){
   let [{data:profile},{data:exercises},{data:templates},{data:items},
        {data:ownSessions},{data:crewSessions},{data:ownSets},{data:crewSets},
        {data:externalActivities},{data:activityTemplates},{data:progressionState},{data:trainingBlocks},{data:bodyweightLogs},
-       {data:programs},{data:programDays}]=await Promise.all([
+       {data:programs},{data:programDays},{data:progressionEvents},{data:skillGoals}]=await Promise.all([
     sb.from('profiles').select('id,name,avatar_url').eq('id',state.user.id).maybeSingle(),
     sb.from('skandi_exercises').select('*').order('name'),
     sb.from('skandi_templates').select('*, profile:profiles(name,avatar_url)').order('weekday',{nullsFirst:false}).order('created_at',{ascending:false}),
@@ -1423,7 +1480,9 @@ async function loadAll(){
     sb.from('skandi_programs').select('*').eq('user_id',state.user.id).order('created_at',{ascending:false}),
     // No user_id filter: skandi_program_days has no user_id column of its own, its RLS policy
     // resolves ownership through the parent program (migration 069).
-    sb.from('skandi_program_days').select('*')
+    sb.from('skandi_program_days').select('*'),
+    sb.from('skandi_progression_events').select('*').eq('user_id',state.user.id).order('created_at',{ascending:false}),
+    sb.from('skandi_skill_goals').select('*').eq('user_id',state.user.id)
   ]);
   if(!profile){
     // Some signups end up with an auth user but no profiles row (trigger race condition).
@@ -1465,6 +1524,9 @@ async function loadAll(){
   // of the app (and the week itself) works fine without programs.
   state.programs=programs||[];
   state.programDays=programDays||[];
+  // Igual que programs: [] en vez de reventar si la migración 079 todavía no se corrió.
+  state.progressionEvents=progressionEvents||[];
+  state.skillGoals=skillGoals||[];
   await nutritionLoad;
   hydrateActiveWorkout();
 }
@@ -2124,7 +2186,16 @@ function progressSummaryTab(){
     ${(stalls.length||sore.length)?`<section class="card" style="border-color:rgba(212,72,84,.30);background:#fff7f7">
       <div class="eyebrow" style="color:var(--pink)">${esc(t('progress.needsAttention'))}</div>
       ${sore.map(w=>`<p style="margin-top:8px">${t('progress.soreWarn',{area:esc(w.area),n:w.count})}</p>`).join('')}
-      ${stalls.map(w=>`<div class="row click-card" style="margin-top:8px" onclick="openExercise('${w.exercise.id}')"><p>${t('progress.stallWarn',{name:esc(w.exercise.name),marks:esc(w.marks.map(m=>w.exercise.log_mode==='seconds'?fmtSec(m):m+' '+t('common.reps')).join(' → '))})}</p>${icon('chevronRight',18)}</div>`).join('')}
+      ${stalls.map(w=>{
+        const siblings=progressionSiblings(w.group);
+        const prev=siblings[siblings.findIndex(x=>x.id===w.exercise.id)-1];
+        return `<div style="margin-top:10px">
+          <div class="row click-card" onclick="openExercise('${w.exercise.id}')"><p>${t('progress.stallWarn',{name:esc(w.exercise.name),marks:esc(w.marks.map(m=>w.exercise.log_mode==='seconds'?fmtSec(m):m+' '+t('common.reps')).join(' → '))})}</p>${icon('chevronRight',18)}</div>
+          <div class="row" style="gap:6px;margin-top:6px">
+            ${prev?`<button class="btn small ghost" onclick="demoteProgression('${w.group}')">${esc(t('progress.stepDownTo',{name:prev.name}))}</button>`:''}
+            <button class="btn small ghost" onclick="openTrainingBlockForm()">${esc(t('progress.startDeload'))}</button>
+          </div>
+        </div>`;}).join('')}
     </section>`:''}
     ${weeklyRecapCard()}
     <section class="card">
@@ -2204,8 +2275,126 @@ function trainedExercises(){
 
 function progressExercisesTab(){
   return `
+    ${skillsCardHtml()}
     <div class="search"><input id="pgQ" class="field left" placeholder="${esc(t('progress.searchExercise'))}" value="${esc(state.progressQuery||'')}" oninput="state.progressQuery=this.value;renderProgressExerciseList()"></div>
     <div id="pgExList">${progressExerciseListHtml()}</div>`;
+}
+
+// ---- Skills: the long game, above the per-exercise list -------------------------------------
+
+const fmtTut=sec=>sec>=60?`${Math.round(sec/60)} min`:`${sec}s`;
+
+// Only lines the crew member has actually touched — the catalog carries every skill ladder,
+// and a Progress tab listing five skills you have never trained is noise, not information.
+function trainedSkillGroups(){
+  const trained=new Set(state.sets.filter(x=>x.user_id===state.user.id&&x.done).map(x=>x.exercise_id));
+  return skillGroups().filter(g=>progressionSiblings(g).some(e=>trained.has(e.id)));
+}
+
+function skillsCardHtml(){
+  const groups=trainedSkillGroups();
+  if(!groups.length) return '';
+  return `<section class="card">
+    <div class="row"><h2>${esc(t('skill.title'))}</h2></div>
+    <p class="muted">${esc(t('skill.intro'))}</p>
+    ${groups.map(group=>{
+      const series=skillLevelSeries(group);
+      const last=series[series.length-1];
+      const siblings=progressionSiblings(group);
+      const week=skillTutByWeek(group,1)[0];
+      const goal=skillGoalSec(group);
+      const pct=goal?Math.min(100,Math.round(((week?.sec||0)/goal)*100)):null;
+      return `<article class="click-card" style="margin-top:12px" onclick="openSkillDetail('${group}')">
+        <div class="row">
+          <div style="min-width:0">
+            <strong>${esc(skillGroupLabel(group))}</strong>
+            <p class="muted">${last?esc(last.exercise.name):esc(t('skill.noData'))}</p>
+          </div>
+          <strong class="accent" style="flex:0 0 auto">${last?esc(t('skill.level',{v:last.level.toFixed(1),n:siblings.length})):'—'}</strong>
+        </div>
+        ${series.length>1?sparklineSvg(series.slice(-10).map(p=>p.level)):''}
+        ${goal?`<div class="bar" style="margin-top:8px"><i style="width:${pct}%"></i></div>
+        <p class="muted" style="margin-top:4px">${esc(t('skill.weekTut',{done:fmtTut(week?.sec||0),goal:fmtTut(goal)}))}</p>`
+        :`<p class="muted" style="margin-top:6px">${esc(t('skill.weekTutNoGoal',{done:fmtTut(week?.sec||0)}))}</p>`}
+      </article>`;
+    }).join('')}
+  </section>`;
+}
+
+function openSkillDetail(group){
+  const siblings=progressionSiblings(group);
+  const series=skillLevelSeries(group);
+  const last=series[series.length-1];
+  const currentId=state.progressionState.find(p=>p.progression_group===group)?.exercise_id;
+  const current=state.exercises.find(e=>e.id===currentId)||last?.exercise;
+  const weeks=skillTutByWeek(group,6);
+  const goal=skillGoalSec(group);
+  const events=skillEventRows(group);
+  const sides=current?bestBySide(current.id):null;
+  $('modal').classList.add('show');
+  $('modalCard').innerHTML=`
+    <div class="row"><h1>${esc(skillGroupLabel(group))}</h1><button class="x" onclick="closeModal()" aria-label="${esc(t('common.close'))}">${icon('close',20)}</button></div>
+    <p class="muted">${last?esc(t('skill.currentAt',{name:current?.name||last.exercise.name,v:last.level.toFixed(1),n:siblings.length})):esc(t('skill.noData'))}</p>
+
+    <section class="card">
+      <div class="eyebrow">${esc(t('skill.curve'))}</div>
+      ${series.length>1?`${progressChartSvg(series.map(p=>p.level))}
+      <div class="chart-legend">
+        <span>${esc(new Date(series[0].date).toLocaleDateString(LANG,{day:'numeric',month:'short'}))}</span>
+        <span>${series[0].level.toFixed(1)} → ${series[series.length-1].level.toFixed(1)}</span>
+        <span>${esc(new Date(series[series.length-1].date).toLocaleDateString(LANG,{day:'numeric',month:'short'}))}</span>
+      </div>`:empty(t('chart.noData'))}
+      <p class="muted" style="margin-top:8px">${esc(t('skill.curveHint'))}</p>
+    </section>
+
+    ${sides?`<section class="card">
+      <div class="eyebrow">${esc(t('skill.sides'))}</div>
+      <div class="grid" style="margin-top:10px">
+        <div class="stat"><strong>${esc(sides.left!=null?formatMark(exerciseTrackingMode(current),sides.left):'—')}</strong><small>${esc(t('ex.sideLeft'))}</small></div>
+        <div class="stat"><strong>${esc(sides.right!=null?formatMark(exerciseTrackingMode(current),sides.right):'—')}</strong><small>${esc(t('ex.sideRight'))}</small></div>
+      </div>
+      ${sides.left!=null&&sides.right!=null&&Math.max(sides.left,sides.right)>0
+        ?`<p class="muted" style="margin-top:8px">${esc(t('skill.sideGap',{pct:Math.round((1-Math.min(sides.left,sides.right)/Math.max(sides.left,sides.right))*100)}))}</p>`:''}
+    </section>`:''}
+
+    <section class="card">
+      <div class="row"><div class="eyebrow">${esc(t('skill.tutTitle'))}</div></div>
+      <p class="muted">${esc(t('skill.tutHint'))}</p>
+      <div class="row" style="gap:8px;margin-top:10px">
+        <input id="skillGoal-${group}" class="field left" inputmode="numeric" style="flex:1" placeholder="${esc(t('skill.goalPh'))}" value="${goal?Math.round(goal/60):''}">
+        <button class="btn small" onclick="saveSkillGoal('${group}',$('skillGoal-${group}').value)">${esc(t('common.save'))}</button>
+      </div>
+      <div class="stack" style="margin-top:12px">
+        ${weeks.map(w=>{
+          const pct=goal?Math.min(100,Math.round((w.sec/goal)*100)):null;
+          return `<div>
+            <div class="row"><small class="muted">${esc(new Date(w.week+'T12:00:00').toLocaleDateString(LANG,{day:'numeric',month:'short'}))}</small><small>${esc(fmtTut(w.sec))}${pct!=null?` · ${pct}%`:''}</small></div>
+            ${goal?`<div class="bar" style="margin-top:4px"><i style="width:${pct}%"></i></div>`:''}
+          </div>`;}).join('')}
+      </div>
+    </section>
+
+    <section class="card">
+      <div class="eyebrow">${esc(t('prog.history'))}</div>
+      ${events.length?events.map(e=>`<div class="row" style="margin-top:10px">
+        <div style="min-width:0">
+          <strong>${esc(e.to?.name||t('common.exercise'))}</strong>
+          <p class="muted">${esc(new Date(e.created_at).toLocaleDateString(LANG,{day:'numeric',month:'short',year:'numeric'}))}${e.direction==='down'?' · '+esc(t('skill.steppedDown')):''}</p>
+        </div>
+        <span class="pill dark">${esc(e.ongoing?t('skill.daysSoFar',{n:e.days}):t('skill.daysAtRank',{n:e.days}))}</span>
+      </div>`).join(''):empty(t('skill.historyEmpty'))}
+    </section>
+
+    <section class="card">
+      <div class="eyebrow">${esc(t('skill.ladder'))}</div>
+      ${siblings.map(e=>`<div class="row click-card" style="margin-top:8px" onclick="openExercise('${e.id}')">
+        <div style="min-width:0">
+          <strong${e.id===current?.id?' class="accent"':''}>${e.progression_rank}. ${esc(e.name)}</strong>
+          ${e.progression_criteria?`<p class="muted">${esc(e.progression_criteria)}</p>`:''}
+        </div>
+        <span class="pill dark">${e.progression_target?esc(t('skill.rankTarget',{sets:e.progression_target_sets||1,v:e.log_mode==='seconds'?t('prog.secUnit',{n:e.progression_target}):t('prog.repUnit',{n:e.progression_target})})):esc(t('skill.finalRank'))}</span>
+      </div>`).join('')}
+    </section>`;
 }
 
 // Replaces only the list (like renderLibraryList) -- a full render() on every keystroke would
@@ -2479,7 +2668,8 @@ function openSessionDetail(sessionId){
         <div style="margin-top:12px">
           <strong>${esc(ex.name)}</strong>
           <div class="stack" style="margin-top:6px">
-            ${ex.sets.map(x=>`<div class="row"><small class="muted">${esc(t('session.set',{n:x.set_idx}))}</small><small>${x.done?esc(ex.seconds?`${fmtSec(x.seconds)}${x.hold_clean===true?' · '+t('session.clean'):x.hold_clean===false?' · '+t('session.broken'):''}`:`${x.weight_kg??'-'} kg × ${x.reps??'-'}${x.rir!=null?` · RIR ${x.rir}`:''}`):esc(t('session.notLogged'))}</small></div>`).join('')}
+            ${ex.sets.map(x=>`<div class="row"><small class="muted">${esc(t('session.set',{n:x.set_idx}))}${x.side?' · '+esc(t(x.side==='left'?'session.sideLeft':'session.sideRight')):''}</small><small>${x.done?esc([ex.seconds?fmtSec(x.seconds):`${x.weight_kg??'-'} kg × ${x.reps??'-'}`,setQuality(x)!=null?t('session.quality',{v:setQuality(x)}):null,!ex.seconds&&x.rir!=null?`RIR ${x.rir}`:null].filter(Boolean).join(' · ')):esc(t('session.notLogged'))}</small></div>
+            ${x.clip_path?`<video src="${esc(setClipUrl(x.clip_path))}" data-clip="${esc(x.clip_path)}" controls playsinline preload="metadata" style="width:100%;border-radius:8px;margin:6px 0 10px;background:#000"></video>`:''}`).join('')}
           </div>
         </div>
       `).join('')||empty(t('session.noSets'))}
@@ -2573,6 +2763,24 @@ async function deleteSession(sessionId){
   render();
 }
 
+// Execution quality, 1-10 (migration 078). The old tri-state hold_clean (065) is still the
+// only rating the sets logged before it exists have, so it is read as a fallback rather than
+// rewritten in the DB: a hold tagged clean becomes an 8 (the bar for "counts toward levelling
+// up"), a broken one a 4. Anything never rated stays null — that is not the same as bad.
+const QUALITY_CLEAN=8;   // at or above this a set counts toward the next progression rank
+const QUALITY_BROKEN=6;  // below this a set can't set a personal best, however long it ran
+function setQuality(s){
+  if(s?.form_quality!=null) return s.form_quality;
+  if(s?.hold_clean===true) return 8;
+  if(s?.hold_clean===false) return 4;
+  return null;
+}
+function qualityClass(q){ return q==null?'':(q>=QUALITY_CLEAN?'q-good':(q>=QUALITY_BROKEN?'q-mid':'q-bad')); }
+function avgQuality(sets){
+  const vals=sets.map(setQuality).filter(v=>v!=null);
+  return vals.length?Math.round((vals.reduce((a,b)=>a+b,0)/vals.length)*10)/10:null;
+}
+
 function leaderboard(){
   const profiles=new Map(state.sessions.map(s=>[s.user_id,s.profile?.name||t('common.crewMember')]));
   const best=new Map();
@@ -2586,10 +2794,13 @@ function leaderboard(){
     // lever, planche, handstand and every other bodyweight/hold exercise could never post a PR
     // and silently never appeared on the leaderboard at all.
     const mode=ex.log_mode==='seconds'?'seconds':(ex.log_weight!==false?'weight':'reps');
-    // A hold explicitly tagged broken doesn't get to set the PR, even if it ran long —
-    // "mejor hold limpio" per the training plan. Untagged (hold_clean null) holds still count,
-    // so this doesn't silently erase every PR set before the clean/broken toggle existed.
-    if(mode==='seconds'&&s.hold_clean===false) return;
+    // A set rated below QUALITY_BROKEN doesn't get to set the PR, however long it ran —
+    // "mejor hold limpio" per the training plan, now extended to every skill exercise that
+    // tracks quality (a nordic curl that collapsed is no more of a record than a broken hold).
+    // Unrated sets still count, so this doesn't silently erase every PR logged before rating
+    // existed.
+    const quality=setQuality(s);
+    if(ex.track_quality&&quality!=null&&quality<QUALITY_BROKEN) return;
     const mark=mode==='seconds'?Number(s.seconds):(mode==='weight'?Number(s.weight_kg):Number(s.reps));
     if(!(mark>0)) return;
     const key=`${s.user_id}:${s.exercise_id}`;
@@ -2727,7 +2938,7 @@ function crossTrainingWeeks(numWeeks=6){
   const myActivities=state.externalActivities||[];
   const weeks=new Map();
   const ensure=key=>{
-    if(!weeks.has(key)) weeks.set(key,{week:key,strengthSessions:0,setsDone:0,rirSamples:[],cleanDone:0,cleanTotal:0,enduranceMin:0,enduranceSessions:0,feltWorse:0});
+    if(!weeks.has(key)) weeks.set(key,{week:key,strengthSessions:0,setsDone:0,rirSamples:[],qualitySamples:[],enduranceMin:0,enduranceSessions:0,feltWorse:0});
     return weeks.get(key);
   };
   mySessions.forEach(s=>{
@@ -2737,7 +2948,8 @@ function crossTrainingWeeks(numWeeks=6){
     state.sets.filter(x=>x.session_id===s.id&&x.done).forEach(x=>{
       w.setsDone++;
       if(x.rir!=null) w.rirSamples.push(x.rir);
-      if(x.hold_clean!=null){ w.cleanTotal++; if(x.hold_clean) w.cleanDone++; }
+      const q=setQuality(x);
+      if(q!=null) w.qualitySamples.push(q);
     });
   });
   myActivities.forEach(a=>{
@@ -2748,7 +2960,7 @@ function crossTrainingWeeks(numWeeks=6){
   return [...weeks.values()].sort((a,b)=>b.week.localeCompare(a.week)).slice(0,numWeeks).map(w=>({
     ...w,
     avgRir:w.rirSamples.length?Math.round((w.rirSamples.reduce((a,b)=>a+b,0)/w.rirSamples.length)*10)/10:null,
-    cleanPct:w.cleanTotal?Math.round((w.cleanDone/w.cleanTotal)*100):null
+    avgQuality:w.qualitySamples.length?Math.round((w.qualitySamples.reduce((a,b)=>a+b,0)/w.qualitySamples.length)*10)/10:null
   }));
 }
 
@@ -2778,14 +2990,14 @@ function crossTrainingCardHtml(){
     <div style="margin-top:10px;overflow-x:auto">
       <table style="width:100%;border-collapse:collapse;font-size:13px;white-space:nowrap">
         <thead><tr style="text-align:left;color:var(--muted)">
-          <th style="padding:6px 8px 6px 0">${esc(t('cross.week'))}</th><th style="padding:6px 8px">${esc(t('cross.strength'))}</th><th style="padding:6px 8px">${esc(t('cross.avgRir'))}</th><th style="padding:6px 8px">${esc(t('cross.cleanPct'))}</th><th style="padding:6px 0">${esc(t('cross.endurance'))}</th>
+          <th style="padding:6px 8px 6px 0">${esc(t('cross.week'))}</th><th style="padding:6px 8px">${esc(t('cross.strength'))}</th><th style="padding:6px 8px">${esc(t('cross.avgRir'))}</th><th style="padding:6px 8px">${esc(t('cross.avgQuality'))}</th><th style="padding:6px 0">${esc(t('cross.endurance'))}</th>
         </tr></thead>
         <tbody>
           ${weeks.map(w=>`<tr style="border-top:1px solid var(--line)">
             <td style="padding:6px 8px 6px 0">${new Date(w.week+'T00:00:00').toLocaleDateString(LANG,{month:'short',day:'numeric'})}</td>
             <td style="padding:6px 8px">${w.strengthSessions} · ${w.setsDone} ${esc(t('common.sets'))}</td>
             <td style="padding:6px 8px">${w.avgRir??'—'}</td>
-            <td style="padding:6px 8px">${w.cleanPct!=null?w.cleanPct+'%':'—'}</td>
+            <td style="padding:6px 8px">${w.avgQuality!=null?w.avgQuality+'/10':'—'}</td>
             <td style="padding:6px 0">${w.enduranceMin} ${esc(t('common.min'))}${w.enduranceSessions?` (${w.enduranceSessions})`:''}</td>
           </tr>`).join('')}
         </tbody>
@@ -2802,6 +3014,25 @@ function getMyRecovery(){
     sets:state.sets, sessions:state.sessions, exercises:state.exercises,
     activities:state.externalActivities, userId:state.user.id, now:Date.now()
   });
+}
+
+// A static is a strength skill, not conditioning: held on a fatigued prime mover it just posts a
+// short, ugly set that then gets logged as a bad quality score, when the real cause was the
+// session two days ago. The recovery engine already knows this — it just never said so before
+// the workout, which is the only moment the information is worth anything.
+const SKILL_FATIGUE_FLOOR=60;
+function skillFatigueWarnings(exercises){
+  const byMuscle=new Map(getMyRecovery().map(r=>[r.name,r]));
+  const seen=new Set();
+  const out=[];
+  for(const ex of exercises){
+    if(!ex?.progression_group||seen.has(ex.id)) continue;
+    seen.add(ex.id);
+    const [muscle]=Object.entries(ex.muscles||{}).sort((a,b)=>b[1]-a[1])[0]||[];
+    const row=muscle&&byMuscle.get(muscle);
+    if(row&&row.score<SKILL_FATIGUE_FLOOR) out.push({exercise:ex,muscle,score:row.score});
+  }
+  return out;
 }
 
 function formatHours(h){
@@ -3207,14 +3438,31 @@ function currentProgressionExercise(exercise){
 }
 
 async function saveProgressionState(group,exerciseId){
+  const existing=state.progressionState.find(p=>p.progression_group===group);
+  const previousId=existing?.exercise_id||null;
   const {error}=await sb.from('skandi_progression_state').upsert(
     {user_id:state.user.id,progression_group:group,exercise_id:exerciseId,updated_at:new Date().toISOString()},
     {onConflict:'user_id,progression_group'}
   );
   if(error) return; // best-effort — the session-local swap already happened either way
-  const existing=state.progressionState.find(p=>p.progression_group===group);
   if(existing) existing.exercise_id=exerciseId;
   else state.progressionState.push({user_id:state.user.id,progression_group:group,exercise_id:exerciseId});
+  // Every rank change is history worth keeping, in both directions — stepping back down after a
+  // stall is as much a part of the story as levelling up (migration 079).
+  if(previousId!==exerciseId) await logProgressionEvent(group,previousId,exerciseId);
+}
+
+// Stepping down a rank from outside a live workout (the stall warning's own button): there are
+// no session sets to move, only the saved rank to change.
+async function demoteProgression(group){
+  const siblings=progressionSiblings(group);
+  const currentId=state.progressionState.find(p=>p.progression_group===group)?.exercise_id;
+  const idx=siblings.findIndex(x=>x.id===currentId);
+  const prev=idx>0?siblings[idx-1]:null;
+  if(!prev) return;
+  if(!confirm(t('progress.confirmDemote',{name:prev.name}))) return;
+  await saveProgressionState(group,prev.id);
+  render();
 }
 
 function previousCompletedSetsForExercise(exerciseId){
@@ -3242,39 +3490,182 @@ function previousCompletedSetsForExercise(exerciseId){
   return [];
 }
 
-// Progression readiness: has the user hit this exact variant's progression_target CLEAN
-// in each of the last two sessions where they trained it? Unlike previousCompletedSetsFor-
-// Exercise, siblings aren't pooled here — readiness is about mastering the CURRENT rank,
-// not the skill line's history overall. Sessions where this variant wasn't trained are
-// skipped rather than breaking the streak; a session where it WAS trained but missed the
-// target does break it, so this needs two CONSECUTIVE qualifying sessions, not just two ever.
-function exerciseBestMark(exerciseId,sessionId){
-  const ex=state.exercises.find(e=>e.id===exerciseId);
-  if(!ex) return null;
-  const seconds=ex.log_mode==='seconds';
-  const sets=state.sets.filter(s=>s.session_id===sessionId&&s.exercise_id===exerciseId&&s.done);
-  // Only clean holds count toward a hold's standard — a broken-form hold that happened to
-  // last long enough shouldn't push someone into a harder variant.
-  const usable=seconds?sets.filter(s=>s.hold_clean===true):sets;
-  if(!usable.length) return null;
-  return Math.max(...usable.map(s=>seconds?(s.seconds||0):(s.reps||0)));
+// How many sets of this session met the rank's whole standard: the mark (seconds or reps) at
+// or above progression_target AND the execution at 8+/10. On a quality-tracked exercise an
+// unrated set does NOT count — leaving the rating blank is the same as not having proved the
+// rep, which is the incentive the 1-10 scale exists for (migration 078).
+function qualifyingSetCount(exercise,sessionId){
+  const seconds=exercise.log_mode==='seconds';
+  return state.sets.filter(s=>s.session_id===sessionId&&s.exercise_id===exercise.id&&s.done).filter(s=>{
+    if((seconds?(s.seconds||0):(s.reps||0))<exercise.progression_target) return false;
+    if(!exercise.track_quality) return true;
+    const q=setQuality(s);
+    return q!=null&&q>=QUALITY_CLEAN;
+  }).length;
 }
 
+function trainedInSession(exerciseId,sessionId){
+  return state.sets.some(s=>s.session_id===sessionId&&s.exercise_id===exerciseId&&s.done);
+}
+
+// Progression readiness: has the user hit this exact variant's full standard —
+// progression_target_sets sets at target, all of them 8+/10 — in each of the last two
+// sessions where they trained it? Unlike previousCompletedSetsForExercise, siblings aren't
+// pooled here — readiness is about mastering the CURRENT rank, not the skill line's history
+// overall. Sessions where this variant wasn't trained are skipped rather than breaking the
+// streak; a session where it WAS trained but missed the standard does break it, so this needs
+// two CONSECUTIVE qualifying sessions, not just two ever. Requiring N sets instead of the
+// single best one (migration 078) is deliberate: one lucky hold used to be enough to be told
+// you were ready for a rank you could not repeat.
 function progressionReadiness(exercise){
   if(!exercise?.progression_group||!exercise.progression_target) return false;
   const siblings=progressionSiblings(exercise.progression_group);
   if(siblings.findIndex(x=>x.id===exercise.id)===siblings.length-1) return false; // already the hardest rank
+  const needed=exercise.progression_target_sets||1;
   const completed=state.sessions
     .filter(s=>s.user_id===state.user.id&&s.completed_at&&s.id!==state.active?.id)
     .sort((a,b)=>new Date(b.completed_at).getTime()-new Date(a.completed_at).getTime());
   let qualifying=0;
   for(const session of completed){
-    const mark=exerciseBestMark(exercise.id,session.id);
-    if(mark==null) continue;
-    if(mark<exercise.progression_target) return false;
+    if(!trainedInSession(exercise.id,session.id)) continue;
+    if(qualifyingSetCount(exercise,session.id)<needed) return false;
     if(++qualifying>=2) return true;
   }
   return false;
+}
+
+// ---- Skill lines: one continuous curve per progression group -------------------------------
+
+// A skill rep is worth about three seconds under tension (pull in, one second at the position,
+// lower under control). It is a convention, not a measurement, but it lets one weekly time-
+// under-tension number cover a line that mixes holds and raises instead of two numbers nobody
+// compares.
+const REP_TUT_SEC=3;
+
+function skillGroups(){
+  return [...new Set(state.exercises.filter(e=>e.progression_group).map(e=>e.progression_group))].sort();
+}
+const skillGroupLabel=g=>g.split('-').map(w=>w.charAt(0).toUpperCase()+w.slice(1)).join(' ');
+
+// The whole point of a skill line is that it is ONE thing you get better at for years, but the
+// raw mark resets at every rank: 20s of tuck becomes 6s of advanced tuck and the chart reads as
+// a collapse. Level = rank + how far into that rank you are, so levelling up lands at exactly
+// the number you left the previous rank on and the curve stays continuous across the whole
+// ladder. Derived from progression_rank and progression_target, both of which are already the
+// standard the app judges you against — no invented difficulty coefficients.
+function skillLevel(exercise,mark){
+  if(!exercise?.progression_group||!exercise.progression_rank) return null;
+  const siblings=progressionSiblings(exercise.progression_group);
+  const idx=siblings.findIndex(x=>x.id===exercise.id);
+  // The last rank has no target of its own — it is measured against the previous rank's, which
+  // is the mark you had to hit to arrive there.
+  const target=exercise.progression_target||siblings[idx-1]?.progression_target;
+  if(!target) return exercise.progression_rank;
+  return Math.round((exercise.progression_rank+Math.min(1,(mark||0)/target))*100)/100;
+}
+
+function skillSetMark(ex,st){ return ex.log_mode==='seconds'?(Number(st.seconds)||0):(Number(st.reps)||0); }
+
+// Best level reached per completed session, oldest first. A set rated clearly broken is skipped
+// (same bar as a personal best) — the curve is what you can hold, not what you attempted.
+function skillLevelSeries(group){
+  const ids=new Set(progressionSiblings(group).map(e=>e.id));
+  const out=[];
+  for(const session of myCompletedSessions()){
+    let best=null;
+    for(const st of state.sets.filter(x=>x.session_id===session.id&&ids.has(x.exercise_id)&&x.done)){
+      const ex=state.exercises.find(e=>e.id===st.exercise_id);
+      if(!ex) continue;
+      const q=setQuality(st);
+      if(ex.track_quality&&q!=null&&q<QUALITY_BROKEN) continue;
+      const mark=skillSetMark(ex,st);
+      const level=skillLevel(ex,mark);
+      if(level!=null&&(best==null||level>best.level)) best={level,exercise:ex,mark};
+    }
+    if(best) out.push({sessionId:session.id,date:session.completed_at,...best});
+  }
+  return out.reverse(); // myCompletedSessions is newest-first, the chart reads left to right
+}
+
+// Weekly time under tension for a whole line. In statics the training volume IS seconds — sets
+// and reps say nothing about whether a week was 40 seconds of front lever or 200.
+function skillTutByWeek(group,numWeeks=6){
+  const ids=new Set(progressionSiblings(group).map(e=>e.id));
+  const weeks=new Map();
+  const thisWeek=weekStart(new Date()).toISOString().slice(0,10);
+  weeks.set(thisWeek,0);
+  for(const session of myCompletedSessions()){
+    const key=weekStart(session.completed_at).toISOString().slice(0,10);
+    let sec=0;
+    for(const st of state.sets.filter(x=>x.session_id===session.id&&ids.has(x.exercise_id)&&x.done)){
+      const ex=state.exercises.find(e=>e.id===st.exercise_id);
+      if(ex) sec+=ex.log_mode==='seconds'?(Number(st.seconds)||0):(Number(st.reps)||0)*REP_TUT_SEC;
+    }
+    if(sec) weeks.set(key,(weeks.get(key)||0)+sec);
+  }
+  return [...weeks.entries()].sort((a,b)=>b[0].localeCompare(a[0])).slice(0,numWeeks)
+    .map(([week,sec])=>({week,sec}));
+}
+
+const skillGoalSec=group=>state.skillGoals.find(g=>g.progression_group===group)?.weekly_tut_sec??null;
+
+async function saveSkillGoal(group,minutes){
+  const sec=Math.round(Number(minutes)*60);
+  if(!Number.isFinite(sec)||sec<0||sec>7200) return alert(t('skill.errGoal'));
+  const {error}=await sb.from('skandi_skill_goals').upsert(
+    {user_id:state.user.id,progression_group:group,weekly_tut_sec:sec,updated_at:new Date().toISOString()},
+    {onConflict:'user_id,progression_group'}
+  );
+  if(error) return alert(error.message);
+  const existing=state.skillGoals.find(g=>g.progression_group===group);
+  if(existing) existing.weekly_tut_sec=sec;
+  else state.skillGoals.push({user_id:state.user.id,progression_group:group,weekly_tut_sec:sec});
+  openSkillDetail(group);
+}
+
+// skandi_progression_state only ever holds the CURRENT rank, so without this there is no way to
+// answer "how long did the tuck take me" — the single most motivating number in a skill line.
+async function logProgressionEvent(group,fromExerciseId,toExerciseId){
+  const from=state.exercises.find(e=>e.id===fromExerciseId);
+  const to=state.exercises.find(e=>e.id===toExerciseId);
+  const direction=from&&to&&(to.progression_rank??0)<(from.progression_rank??0)?'down':'up';
+  const row={user_id:state.user.id,progression_group:group,from_exercise_id:fromExerciseId||null,
+    to_exercise_id:toExerciseId,direction,created_at:new Date().toISOString()};
+  const {data,error}=await sb.from('skandi_progression_events').insert(row).select().single();
+  if(error) return; // best-effort: the rank change itself already happened
+  state.progressionEvents.unshift(data);
+}
+
+function skillEvents(group){
+  return state.progressionEvents.filter(e=>e.progression_group===group)
+    .slice().sort((a,b)=>new Date(b.created_at)-new Date(a.created_at));
+}
+
+// How long each rank took, computed from consecutive events — "9 weeks in the tuck" is the
+// answer people actually want out of a progression history.
+function skillEventRows(group){
+  const events=skillEvents(group);
+  return events.map((e,i)=>{
+    const next=events[i-1]; // events are newest-first, so the NEXT step is the previous index
+    const endedAt=next?new Date(next.created_at):new Date();
+    const days=Math.max(0,Math.round((endedAt-new Date(e.created_at))/864e5));
+    return {...e,
+      to:state.exercises.find(x=>x.id===e.to_exercise_id),
+      days, ongoing:!next};
+  });
+}
+
+// Per-side bests for unilateral work. Averaging the two sides hides the weak one, and on a
+// one-leg lever or a weight shift the weak side is the whole point.
+function bestBySide(exerciseId){
+  const ex=state.exercises.find(e=>e.id===exerciseId);
+  if(!ex?.unilateral) return null;
+  const out={left:null,right:null};
+  state.sets.filter(x=>x.user_id===state.user.id&&x.done&&x.exercise_id===exerciseId&&x.side).forEach(x=>{
+    const mark=skillSetMark(ex,x);
+    if(out[x.side]==null||mark>out[x.side]) out[x.side]=mark;
+  });
+  return (out.left!=null||out.right!=null)?out:null;
 }
 
 let startingWorkout=false;
@@ -3289,12 +3680,22 @@ function openWorkoutOverview(templateId){
   const tpl=state.templates.find(x=>x.id===templateId);
   if(!tpl) return;
   const its=state.items.filter(i=>i.template_id===templateId).slice().sort((a,b)=>a.sort_order-b.sort_order);
+  // The variant actually trained is the saved rank of the line, not whatever the routine slot
+  // was authored with — the overview used to name the authored one and then start a different
+  // exercise, which is also why the fatigue check has to run on the resolved list.
+  const resolved=its.map(i=>({...i,exercise:currentProgressionExercise(i.exercise)}));
+  const fatigued=skillFatigueWarnings(resolved.map(i=>i.exercise));
   $('modal').classList.add('show');
   $('modalCard').innerHTML=`
     <div class="row"><h1>${esc(tpl.name)}</h1><button class="x" onclick="closeModal()" aria-label="${esc(t('common.close'))}">${icon('close',20)}</button></div>
     <p class="muted">${its.length} ${esc(tp(its.length,'common.exercises'))}${tpl.weekday!=null?' · '+DOW[tpl.weekday]:''}</p>
+    ${fatigued.length?`<section class="card" style="margin-top:14px;border-color:rgba(212,72,84,.30);background:#fff7f7">
+      <div class="eyebrow" style="color:var(--pink)">${esc(t('fatigue.title'))}</div>
+      ${fatigued.map(f=>`<p style="margin-top:8px">${t('fatigue.warn',{name:esc(f.exercise.name),muscle:esc(muscleLabel(f.muscle)),score:f.score})}</p>`).join('')}
+      <p class="muted" style="margin-top:8px">${esc(t('fatigue.hint'))}</p>
+    </section>`:''}
     <div class="stack" style="margin-top:14px">
-      ${its.map(i=>`<div class="row"><span>${esc(i.exercise?.name||t('common.exercise'))}</span><span class="muted">${i.target_sets}×${esc(i.target_reps||'')}</span></div>`).join('')}
+      ${resolved.map(i=>`<div class="row"><span>${esc(i.exercise?.name||t('common.exercise'))}</span><span class="muted">${i.target_sets}×${esc(i.target_reps||'')}</span></div>`).join('')}
     </div>
     <button class="btn primary" style="width:100%;margin-top:18px" onclick="startWorkout('${tpl.id}')">${icon('play',16)} ${esc(t('workout.startTraining'))}</button>`;
 }
@@ -3370,7 +3771,10 @@ async function startWorkout(templateId){
           // rir starts from what was actually logged last time, same as weight/reps/seconds —
           // the routine's target_rir only kicks in the very first time this exercise (or its
           // progression line) has ever been trained, when there's no prior rir to carry.
-          weight_kg:deloadAdjustedWeight(prev.weight_kg??null),reps:prev.reps??null,seconds:prev.seconds??null,rir:prev.rir??item.target_rir??null
+          weight_kg:deloadAdjustedWeight(prev.weight_kg??null),reps:prev.reps??null,seconds:prev.seconds??null,rir:prev.rir??item.target_rir??null,
+          // Unilateral work is logged one side per set, so the sides are laid out alternating
+          // up front — left/right is something you correct, not something you type every set.
+          side:item.exercise?.unilateral?(idx%2===0?'left':'right'):null
         };
       });
     });
@@ -3692,6 +4096,18 @@ function progressionStepperHtml(e,exerciseId){
   return `<div class="row" style="margin-top:6px" onclick="event.stopPropagation()">${prevBtn}<small class="muted">${esc(t('prog.step',{i:idx+1,n:siblings.length}))}</small>${nextBtn}</div>`;
 }
 
+// The rank's own form standard and the exact bar for levelling up, shown on the card while
+// the set is being logged — the moment the standard is actually actionable. Without it the
+// 1-10 rating is a vibe: "clean" means something different on a tuck than on a straddle.
+function progressionCriteriaHtml(e){
+  if(!e?.progression_criteria&&!e?.progression_target) return '';
+  const unit=n=>e.log_mode==='seconds'?t('prog.secUnit',{n}):t('prog.repUnit',{n});
+  const lines=[];
+  if(e.progression_criteria) lines.push(esc(t('prog.criteria',{v:e.progression_criteria})));
+  if(e.progression_target) lines.push(esc(t('prog.target',{sets:e.progression_target_sets||1,v:unit(e.progression_target)})));
+  return `<div class="prog-criteria" onclick="event.stopPropagation()">${lines.join('<br>')}</div>`;
+}
+
 // Surfaced once progressionReadiness() confirms two consecutive clean sessions at target —
 // tapping it is exactly the same step the ▶ button above already performs.
 function progressionReadinessHtml(e,exerciseId){
@@ -3702,20 +4118,142 @@ function progressionReadinessHtml(e,exerciseId){
   return `<button type="button" class="progression-ready" onclick="event.stopPropagation();stepProgression('${exerciseId}','${next.id}')">${esc(t('prog.readyFor',{name:next.name}))}</button>`;
 }
 
+// A set row has six columns at 375px and no room for a seventh, so the two things that only
+// SOME sets need — which side it was, and the form clip — live behind the row number instead of
+// each claiming a column nobody else uses. Same inline-panel pattern as the swap search.
+function toggleSetOptions(id){
+  state.setOptionsId=state.setOptionsId===id?null:id;
+  renderActiveWorkout();
+}
+
+function setOptionsHtml(s,ex){
+  if(state.setOptionsId!==s.id) return '';
+  const sideBtn=(v,label)=>`<button class="btn small ${s.side===v?'primary':'ghost'}" onclick="event.stopPropagation();setSetSide('${s.id}','${v}')">${esc(label)}</button>`;
+  const clipUrl=s.clip_path?setClipUrl(s.clip_path):'';
+  return `<div class="set-options" onclick="event.stopPropagation()">
+    ${ex.unilateral?`<div class="row"><small class="muted">${esc(t('ex.side'))}</small><div class="row" style="gap:6px">
+      ${sideBtn('left',t('ex.sideLeft'))}${sideBtn('right',t('ex.sideRight'))}
+      <button class="btn small ghost" onclick="event.stopPropagation();setSetSide('${s.id}','')">${esc(t('ex.sideNone'))}</button>
+    </div></div>`:''}
+    <div class="row" style="margin-top:${ex.unilateral?'10px':'0'}">
+      <small class="muted">${esc(t('ex.clip'))}</small>
+      <div class="row" style="gap:6px">
+        ${s.clip_path
+          ?`<button class="btn small ghost danger" onclick="event.stopPropagation();removeSetClip('${s.id}')">${esc(t('ex.clipRemove'))}</button>`
+          :`<label class="btn small ghost" style="cursor:pointer">${esc(t('ex.clipAdd'))}<input type="file" accept="video/*" style="display:none" onchange="uploadSetClip('${s.id}',this.files[0])"></label>`}
+      </div>
+    </div>
+    ${s.clip_path?`<video src="${esc(clipUrl)}" data-clip="${esc(s.clip_path)}" controls playsinline preload="metadata"></video>`:''}
+  </div>`;
+}
+
+async function setSetSide(id,side){
+  const value=side||null;
+  const {error}=await sb.from('skandi_sets').update({side:value,updated_at:new Date().toISOString()}).eq('id',id);
+  if(error) return alert(error.message);
+  const s=state.sets.find(x=>x.id===id);
+  if(s) s.side=value;
+  renderActiveWorkout();
+}
+
+// The bucket is private and keyed by owner folder (migration 079), so the path has to start
+// with the uid or the storage policy rejects the upload.
+async function uploadSetClip(id,file){
+  if(!file) return;
+  if(file.size>26214400) return alert(t('ex.clipTooBig'));
+  const ext=(file.name.split('.').pop()||'mp4').toLowerCase().replace(/[^a-z0-9]/g,'')||'mp4';
+  const path=`${state.user.id}/${id}-${Date.now()}.${ext}`;
+  const {error:upErr}=await sb.storage.from('skandi-set-clips').upload(path,file,{contentType:file.type||'video/mp4'});
+  if(upErr) return alert(t('ex.clipError',{msg:upErr.message}));
+  const {error}=await sb.from('skandi_sets').update({clip_path:path,updated_at:new Date().toISOString()}).eq('id',id);
+  if(error) return alert(error.message);
+  const s=state.sets.find(x=>x.id===id);
+  if(s) s.clip_path=path;
+  renderActiveWorkout();
+}
+
+async function removeSetClip(id){
+  const s=state.sets.find(x=>x.id===id);
+  if(!s?.clip_path) return;
+  if(!confirm(t('ex.clipConfirmRemove'))) return;
+  const path=s.clip_path;
+  const {error}=await sb.from('skandi_sets').update({clip_path:null,updated_at:new Date().toISOString()}).eq('id',id);
+  if(error) return alert(error.message);
+  s.clip_path=null;
+  sb.storage.from('skandi-set-clips').remove([path]);
+  delete setClipUrl.cache[path];
+  renderActiveWorkout();
+}
+
+// Same signed-URL-with-memory-cache dance as mealPhotoUrl: the bucket is private, so there is
+// no public URL to render straight into the tag.
+function setClipUrl(path){
+  if(!path) return '';
+  if(setClipUrl.cache[path]) return setClipUrl.cache[path];
+  setClipUrl.cache[path]='';
+  sb.storage.from('skandi-set-clips').createSignedUrl(path,3600).then(({data})=>{
+    if(!data?.signedUrl) return;
+    setClipUrl.cache[path]=data.signedUrl;
+    document.querySelectorAll(`video[data-clip="${path}"]`).forEach(v=>{v.src=data.signedUrl;});
+  });
+  return '';
+}
+setClipUrl.cache={};
+
+// ---- Tempo metronome -----------------------------------------------------------------------
+
+// A criterion like "4-5 s down" or "1 s pause at horizontal" is unenforceable by feel — everyone
+// rushes the eccentric when it burns. Clicks on the beat, bell at the end. Scheduled straight on
+// the audio clock rather than with setInterval, which drifts and stalls when the screen sleeps.
+function tempoClick(ctx,at){
+  const osc=ctx.createOscillator();
+  const gain=ctx.createGain();
+  osc.type='square';
+  osc.frequency.value=1180;
+  gain.gain.setValueAtTime(0,at);
+  gain.gain.linearRampToValueAtTime(0.22,at+0.004);
+  gain.gain.exponentialRampToValueAtTime(0.0005,at+0.06);
+  osc.connect(gain).connect(ctx.destination);
+  osc.start(at);
+  osc.stop(at+0.09);
+}
+
+function startTempo(seconds,every){
+  unlockAudioCtx();
+  try{
+    const ctx=getAudioCtx();
+    const now=ctx.currentTime;
+    for(let at=every;at<seconds;at+=every) tempoClick(ctx,now+at);
+    strikeBell(ctx,now+seconds);
+  }catch(e){ /* Web Audio blocked — the number on the button is still the instruction */ }
+}
+
+// Holds beat every 5s up to the rank's target; rep work beats every second through the
+// eccentric. Nothing is shown for exercises with neither, rather than inventing a tempo.
+function tempoButtonHtml(e){
+  const isHold=e.log_mode==='seconds';
+  const seconds=isHold?(e.progression_target||null):(e.tempo_seconds||null);
+  if(!seconds) return '';
+  const every=isHold?5:1;
+  const label=isHold?t('tempo.hold',{n:seconds}):t('tempo.rep',{n:seconds});
+  return `<button type="button" class="btn small ghost" style="margin-top:6px" onclick="event.stopPropagation();startTempo(${seconds},${every})">${icon('play',13)} ${esc(label)}${e.tempo_note&&!isHold?` · ${esc(e.tempo_note)}`:''}</button>`;
+}
+
 function activeExercise(item,sets){
   const e=item.exercise;
   const undone=sets.filter(s=>!s.done).length;
   const seconds=e.log_mode==='seconds';
   const showWeight=e.log_weight!==false; // pure plyometric/balance drills (migration 061) skip the weight field entirely
   const unit=exerciseWeightUnit(item.exercise_id);
-  // Every set row gets one extra column beyond weight/reps-or-seconds: RIR for rep-based work
-  // (the plan's progression rules are RIR 1-2 on compounds) or a clean/broken toggle for
-  // seconds-based skill holds (front lever, handstand, planche — judged on position, not load).
+  // Every set row gets one extra column beyond weight/reps-or-seconds: an execution rating
+  // 1-10 for skill work (every hold plus every exercise on a progression line — a nordic curl
+  // or a front lever raise is judged on position, and it is the rating that gates levelling
+  // up), or RIR for ordinary load work, where the plan's progression rule is RIR 1-2.
   const rowClass=showWeight?'set-row':'set-row no-weight';
   return `<article class="exercise">
-    <div class="ex-head" onclick="openExercise('${e.id}',true)">${mediaThumb(e)}<div><h3>${esc(e.name)} <span class="ex-info-hint">${icon('chevronRight',13)}</span></h3><p>${[esc(exerciseSubtitle(e)),`${item.target_sets} x ${esc(item.target_reps)}`,esc(t('ex.restSec',{n:item.target_rest_sec}))].filter(Boolean).join(' · ')}</p>${progressionStepperHtml(e,item.exercise_id)}${progressionReadinessHtml(e,item.exercise_id)}</div>
+    <div class="ex-head" onclick="openExercise('${e.id}',true)">${mediaThumb(e)}<div><h3>${esc(e.name)} <span class="ex-info-hint">${icon('chevronRight',13)}</span></h3><p>${[esc(exerciseSubtitle(e)),`${item.target_sets} x ${esc(item.target_reps)}`,esc(t('ex.restSec',{n:item.target_rest_sec}))].filter(Boolean).join(' · ')}</p>${progressionStepperHtml(e,item.exercise_id)}${progressionCriteriaHtml(e)}${tempoButtonHtml(e)}${progressionReadinessHtml(e,item.exercise_id)}</div>
       <div class="ex-actions">
-        <span class="muted">${sets.filter(s=>s.done).length}/${sets.length}${seconds&&sets.some(s=>s.done)?' · '+esc(t('ex.cleanCount',{done:sets.filter(s=>s.done&&s.hold_clean===true).length,total:sets.filter(s=>s.done).length})):''}</span>
+        <span class="muted">${sets.filter(s=>s.done).length}/${sets.length}${(()=>{const q=e.track_quality?avgQuality(sets.filter(x=>x.done)):null; return q!=null?' · '+esc(t('ex.qualityAvg',{v:q})):'';})()}</span>
         <div class="ex-actions-row">
           ${undone?`<button class="icon-btn tiny" onclick="event.stopPropagation();toggleSwap('${item.exercise_id}')" aria-label="${esc(t('ex.swap'))}" title="${esc(t('ex.swap'))}">${icon('swap',14)}</button>`:''}
           <button class="icon-btn tiny danger" onclick="event.stopPropagation();removeExerciseFromSession('${item.exercise_id}')" aria-label="${esc(t('ex.removeFromSession'))}" title="${esc(t('ex.removeShort'))}">${icon('trash',14)}</button>
@@ -3727,7 +4265,7 @@ function activeExercise(item,sets){
       <div class="${rowClass}">
         <span></span>
         ${showWeight?`<button type="button" class="pill dark" style="cursor:pointer;justify-self:start" onclick="event.stopPropagation();setExerciseWeightUnit('${item.exercise_id}','${unit==='kg'?'lb':'kg'}')" aria-label="${esc(unit==='kg'?t('ex.switchToLb'):t('ex.switchToKg'))}" title="${esc(unit==='kg'?t('ex.switchToLb'):t('ex.switchToKg'))}">${unit.toUpperCase()}</button>`:''}
-        <small class="muted">${esc(seconds?t('ex.colSec'):t('ex.colReps'))}</small><small class="muted" style="font-size:10px">${esc(seconds?t('ex.colClean'):t('ex.colRir'))}</small><span></span><span></span>
+        <small class="muted">${esc(seconds?t('ex.colSec'):t('ex.colReps'))}</small><small class="muted" style="font-size:10px">${esc(e.track_quality?t('ex.colQuality'):t('ex.colRir'))}</small><span></span><span></span>
       </div>
       ${sets.map((s,i)=>{
         // A row's own exercise can differ from the card's current one (item.exercise) right
@@ -3742,19 +4280,21 @@ function activeExercise(item,sets){
         const rowShowWeight=rowEx.log_weight!==false;
         const rowUnit=exerciseWeightUnit(s.exercise_id);
         const rc=rowShowWeight?'set-row':'set-row no-weight';
-        const cleanLabel=s.hold_clean===true?t('ex.holdClean'):s.hold_clean===false?t('ex.holdBroken'):t('ex.holdUnset');
+        const rowQuality=setQuality(s);
+        const sideTag=s.side?t(s.side==='left'?'ex.sideShortL':'ex.sideShortR'):'';
+        const setTag=[sideTag,s.clip_path?'●':''].filter(Boolean).join(' ');
         return `<div class="${rc}">
-        <strong>${i+1}</strong>
+        <button type="button" class="set-num" onclick="event.stopPropagation();toggleSetOptions('${s.id}')" aria-label="${esc(t('ex.setOptions'))}" title="${esc(t('ex.setOptions'))}">${i+1}${setTag?`<small>${esc(setTag)}</small>`:''}</button>
         ${rowShowWeight?`<input class="field" inputmode="decimal" value="${fmtWeightInput(s.weight_kg,rowUnit)}" placeholder="${rowUnit}" onchange="updateSet('${s.id}','weight_kg',this.value)">`:''}
         ${rowSeconds
           ?`<input class="field" inputmode="numeric" value="${s.seconds??''}" placeholder="${esc(s.target_reps||t('ex.secPh'))}" onchange="updateSet('${s.id}','seconds',this.value)">`
           :`<input class="field" inputmode="numeric" value="${s.reps??''}" placeholder="${esc(s.target_reps||t('common.reps'))}" onchange="updateSet('${s.id}','reps',this.value)">`}
-        ${rowSeconds
-          ?`<button type="button" class="clean-toggle ${s.hold_clean===true?'clean':s.hold_clean===false?'broken':''}" onclick="event.stopPropagation();toggleHoldClean('${s.id}')" aria-label="${esc(t('ex.holdQuality',{v:cleanLabel}))}" title="${esc(cleanLabel)}">${s.hold_clean===true?'✓':s.hold_clean===false?'✕':'–'}</button>`
+        ${rowEx.track_quality
+          ?`<select class="quality-select ${qualityClass(rowQuality)}" aria-label="${esc(t('ex.qualityAria'))}" onchange="updateSet('${s.id}','form_quality',this.value)"><option value=""${rowQuality==null?' selected':''}>–</option>${[1,2,3,4,5,6,7,8,9,10].map(n=>`<option value="${n}"${rowQuality===n?' selected':''}>${n}</option>`).join('')}</select>`
           :`<input class="field field-narrow" inputmode="numeric" value="${s.rir??''}" onchange="updateSet('${s.id}','rir',this.value)">`}
         <button class="check ${s.done?'done':''}" onclick="toggleSet('${s.id}',${item.target_rest_sec})">${icon('check',18)}</button>
         <button class="set-remove" onclick="removeSet('${s.id}')" aria-label="${esc(t('ex.removeSet'))}">${icon('close',11)}</button>
-      </div>`;}).join('')}
+      </div>${setOptionsHtml(s,rowEx)}`;}).join('')}
     </div>
     <button class="add-set-link" onclick="addSet('${item.exercise_id}')">${esc(t('ex.addSet'))}</button>
   </article>`;
@@ -3928,11 +4468,16 @@ async function updateSet(id,key,value){
   if(key==='weight_kg'&&parsed!==null&&(parsed<0||parsed>500)) return alert(t('ex.errWeight'));
   if(key==='seconds'&&parsed!==null&&(parsed<0||parsed>7200)) return alert(t('ex.errSeconds'));
   if(key==='rir'&&parsed!==null&&(parsed<0||parsed>10)) return alert(t('ex.errRir'));
+  if(key==='form_quality'&&parsed!==null&&(parsed<1||parsed>10)) return alert(t('ex.errQuality'));
   patch[key]=parsed===null?null:(key==='weight_kg'?Math.round(parsed*100)/100:Math.round(parsed));
   const {error}=await sb.from('skandi_sets').update(patch).eq('id',id);
   if(error) return alert(error.message);
   const s=state.sets.find(x=>x.id===id);
   if(s) Object.assign(s,patch);
+  // The rating recolours its own control, so unlike the plain number fields this one needs a
+  // repaint; it is also deliberately never copied down to the other sets — quality is an
+  // observation of one set, not a value you plan ahead.
+  if(key==='form_quality') renderActiveWorkout();
   if(s&&s.set_idx===1&&patch[key]!=null&&(key==='weight_kg'||key==='reps'||key==='seconds'||key==='rir')){
     const targets=state.sets.filter(x=>x.session_id===s.session_id&&x.exercise_id===s.exercise_id&&x.id!==s.id&&!x.done&&(x[key]==null||x[key]===''));
     if(targets.length){
@@ -3942,19 +4487,6 @@ async function updateSet(id,key,value){
       renderActiveWorkout();
     }
   }
-}
-
-// Cycles a hold's quality tag: unset -> clean -> broken -> unset. Three states because
-// "unset" (never tapped) has to stay distinguishable from "explicitly broken" — collapsing
-// them into a plain checkbox would make every untagged historical hold look intentionally bad.
-async function toggleHoldClean(id){
-  const s=state.sets.find(x=>x.id===id);
-  if(!s) return;
-  const next=s.hold_clean===true?false:s.hold_clean===false?null:true;
-  const {error}=await sb.from('skandi_sets').update({hold_clean:next,updated_at:new Date().toISOString()}).eq('id',id);
-  if(error) return alert(error.message);
-  s.hold_clean=next;
-  renderActiveWorkout();
 }
 
 async function toggleSet(id,rest){
@@ -3996,7 +4528,8 @@ async function addSet(exerciseId){
     target_rest_sec:seed.target_rest_sec??item?.target_rest_sec??null,
     target_rir:seed.target_rir??item?.target_rir??null,
     sort_order:seed.sort_order??item?.sort_order??null,
-    weight_kg:seed.weight_kg??null,reps:seed.reps??null,seconds:seed.seconds??null,rir:seed.rir??item?.target_rir??null
+    weight_kg:seed.weight_kg??null,reps:seed.reps??null,seconds:seed.seconds??null,rir:seed.rir??item?.target_rir??null,
+    side:item?.exercise?.unilateral?(existing.slice(-1)[0]?.side==='left'?'right':'left'):null
   }).select().single();
   if(error) return alert(error.message);
   state.sets.push(data);
