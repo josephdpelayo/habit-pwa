@@ -154,7 +154,9 @@ and nothing else:
 - `SkandiNutrition.dayRecommendation()` adjusts today's target by the **difference between today's
   planned training burn and the weekly average**, never by the whole burn — the target's activity
   factor already assumes training, so adding the day's burn on top double-counts. The delta goes to
-  carbs only
+  carbs only. `plannedSessions()` + `fuelPlan()` turn that delta into timed advice (carbs before,
+  during only for endurance over 75 min, carbs+protein after). A short easy session deliberately
+  gets no pre-load — inventing one just pushes the member to eat more
 
 ### Time & Slots
 All time logic uses **America/Mazatlan (UTC−7)**. The constant `MAZ_UTC_OFFSET_H = 7` converts UTC midnight to Mazatlán midnight. A day has 48 slots of 30 minutes. A typical booking is `slots_used = 3` (90 min). Access windows open 10 minutes before a booking's `start_idx`.

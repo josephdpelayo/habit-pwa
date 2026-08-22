@@ -264,16 +264,25 @@ function dayRecommendation(opts) {
   if (!targets) return null;
   const week = weeklyPlan(plan);
   const planned = plannedDayKcal(dow, plan);
-  const today = hasLoggedActivity ? Math.max(loggedKcal, 0) : planned;
+  // Haber registrado algo no significa haber terminado el día: si todavía falta la mitad de
+  // lo planeado, la meta del día no debe encogerse ni deben desaparecer los consejos de la
+  // sesión que falta. Por eso el día vale lo MAYOR entre lo hecho y lo planeado.
+  const today = Math.max(num(loggedKcal), planned);
+  const pendingKcal = Math.max(0, planned - num(loggedKcal));
+  // "Terminado" = ya se hizo el grueso de lo planeado (o no había plan y entrenó de más).
+  const finished = hasLoggedActivity && pendingKcal <= planned * 0.3;
   const delta = round(today - week.avgDaily, 10);
   const meaningful = Math.abs(delta) >= NEUTRAL_DELTA;
 
   return {
     plannedKcal: planned,
     todayKcal: today,
+    loggedKcal: num(loggedKcal),
+    pendingKcal,
     avgDaily: week.avgDaily,
     weeklyKcal: week.total,
-    fromLog: hasLoggedActivity,
+    hasLog: hasLoggedActivity,
+    fromLog: finished,
     delta: meaningful ? delta : 0,
     level: !meaningful ? 'normal' : delta > 0 ? 'alto' : 'bajo',
     // La meta ajustada: solo los carbos se mueven.
@@ -282,11 +291,108 @@ function dayRecommendation(opts) {
   };
 }
 
+// ---- Cómo comerlo, no solo cuánto ----
+//
+// Saber que hoy te faltan 400 kcal no te dice qué hacer. Lo accionable es el TIMING: unos
+// carbos antes de la carrera, algo de proteína al terminar. Las cantidades siguen las
+// referencias estándar de nutrición deportiva, escaladas a tu peso:
+//
+//   Antes  : ~1 g/kg de carbos 60-90 min antes, solo si la sesión lo amerita.
+//   Durante: 30-60 g/hora, y solo por arriba de ~75 min. Abajo de eso no hace falta nada.
+//   Después: ~1 g/kg de carbos y ~0.3 g/kg de proteína en la primera hora y media.
+//
+// La regla que evita el consejo tonto: una sesión corta y suave NO necesita carga previa.
+// Decirle a alguien que se coma 80 g de carbos antes de trotar 25 minutos es empujarlo a
+// comer de más con cara de consejo experto.
+
+const FUEL = {
+  PRE_G_PER_KG: 1.0,
+  POST_CARB_G_PER_KG: 1.0,
+  POST_PROTEIN_G_PER_KG: 0.3,
+  PRE_MINUTES: 75,
+  POST_MINUTES: 90,
+  DURING_MIN_MINUTES: 75,
+  DURING_G_PER_HOUR: 45,
+  // Debajo de esto (y a intensidad baja) no hay nada que cargar antes.
+  EASY_MINUTES: 45,
+  EASY_RPE: 6
+};
+
+// Las sesiones que un día de la semana tiene PLANEADAS, ya normalizadas a un formato común.
+function plannedSessions(dow, plan) {
+  const { templates = [], templateItems = [], activityTemplates = [], weightKg } = plan || {};
+  const out = [];
+
+  templates.filter(tp => tp.weekday === dow).forEach(tp => {
+    const sets = templateItems
+      .filter(it => it.template_id === tp.id)
+      .reduce((acc, it) => acc + (num(it.target_sets) || 3), 0);
+    if (!sets) return;
+    out.push({
+      kind: 'strength',
+      name: tp.name || '',
+      activity_type: 'strength',
+      minutes: Math.round(sets * MIN_PER_SET),
+      intensity: 7,
+      kcal: strengthKcal(sets, weightKg)
+    });
+  });
+
+  activityTemplates.filter(at => at.weekday === dow).forEach(at => {
+    const minutes = at.target_duration_min || estimateMinutesFromDistance(at);
+    if (!minutes) return;
+    const intensity = at.target_zone ? at.target_zone * 2 : 5;
+    out.push({
+      kind: 'endurance',
+      name: '',
+      activity_type: at.activity_type,
+      distance_km: num(at.target_distance_km) || null,
+      minutes,
+      intensity,
+      kcal: activityKcal({ activity_type: at.activity_type, duration_min: minutes, intensity }, weightKg)
+    });
+  });
+
+  return out;
+}
+
+function fuelPlan(session, weightKg) {
+  const w = num(weightKg);
+  const minutes = num(session && session.minutes);
+  if (w <= 0 || minutes <= 0) return null;
+
+  const easy = minutes < FUEL.EASY_MINUTES && num(session.intensity) <= FUEL.EASY_RPE;
+  const long = minutes >= FUEL.DURING_MIN_MINUTES;
+
+  return {
+    kind: session.kind,
+    activity_type: session.activity_type,
+    minutes,
+    distance_km: session.distance_km || null,
+    kcal: session.kcal || 0,
+    // Una sesión corta y suave se puede hacer en ayunas sin problema: no inventamos una carga.
+    before: easy ? null : {
+      carbs_g: round(w * FUEL.PRE_G_PER_KG * (session.kind === 'strength' ? 0.6 : 1), 5),
+      minutes_before: FUEL.PRE_MINUTES
+    },
+    // Solo en cardio largo. Comer carbos a media sesión de pesas no es una recomendación
+    // real, es ruido con cara de consejo experto.
+    during: long && session.kind === 'endurance' ? { carbs_g_per_hour: FUEL.DURING_G_PER_HOUR } : null,
+    after: {
+      carbs_g: round(w * FUEL.POST_CARB_G_PER_KG * (easy ? 0.5 : 1), 5),
+      protein_g: round(w * FUEL.POST_PROTEIN_G_PER_KG, 5),
+      minutes_after: FUEL.POST_MINUTES
+    },
+    easy
+  };
+}
+
 const api = {
   KCAL_PER_G, ACTIVITY_FACTORS, MODE_FACTOR, MET,
   suggestTargets, kcalFromMacros, itemsTotal, dayTotals, remaining, pct,
   scaleFood, rescaleItem, itemToFood,
-  activityKcal, strengthKcal, plannedDayKcal, weeklyPlan, dayRecommendation
+  activityKcal, strengthKcal, plannedDayKcal, weeklyPlan, dayRecommendation,
+  FUEL, plannedSessions, fuelPlan
 };
 
 if (typeof module !== 'undefined' && module.exports) module.exports = api;

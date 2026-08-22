@@ -8,14 +8,14 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="Skandi Fit">
 <meta name="application-name" content="Skandi Fit">
-<link rel="manifest" href="/skandi-manifest.json?v=20260822-03">
-<link rel="apple-touch-icon" sizes="180x180" href="/icons/skandi-180.png?v=20260822-03">
-<link rel="icon" type="image/png" sizes="192x192" href="/icons/skandi-192.png?v=20260822-03">
+<link rel="manifest" href="/skandi-manifest.json?v=20260822-06">
+<link rel="apple-touch-icon" sizes="180x180" href="/icons/skandi-180.png?v=20260822-06">
+<link rel="icon" type="image/png" sizes="192x192" href="/icons/skandi-192.png?v=20260822-06">
 <title>Skandi Fit</title>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="/skandi-recovery.js?v=20260822-03"></script>
-<script src="/body-figure.js?v=20260822-03"></script>
-<script src="/skandi-nutrition.js?v=20260822-03"></script>
+<script src="/skandi-recovery.js?v=20260822-06"></script>
+<script src="/body-figure.js?v=20260822-06"></script>
+<script src="/skandi-nutrition.js?v=20260822-06"></script>
 <style>
 :root{
   --bg:#eef4f8;
@@ -401,7 +401,7 @@ textarea.field{min-height:112px;text-align:left;resize:vertical}
 // Versión compartida con app.html (APP_VERSION) y sw.js (CACHE_VERSION): un solo service
 // worker sirve las dos apps, así que una sola cadena las invalida a las dos. Al cambiarla
 // hay que actualizarla también en los ?v= del <head>, en index.html y en los dos manifests.
-const SKANDI_VERSION='20260822-03';
+const SKANDI_VERSION='20260822-06';
 const SUPABASE_URL='https://pmpjteuqjusbiduevbwq.supabase.co';
 const SUPABASE_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBtcGp0ZXVxanVzYmlkdWV2YndxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc2OTI1NjUsImV4cCI6MjA5MzI2ODU2NX0.XbMzZoo2yqtrD8znLnyo_1zDfrdJAvAPj1lqGOyXnLw';
 const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
@@ -472,6 +472,17 @@ en:{
   'food.trainAdjust':'Today: {kcal} kcal and {carbs} g of carbs',
   'food.trainWhy':'Your target already assumes you train on an average week, so only the difference is adjusted.',
   'food.trainNoPlan':'Nothing scheduled today.',
+  'fuel.plan':'How to fuel it',
+  'fuel.session':'{name} · {min} min',
+  'fuel.sessionKm':'{km} km · {min} min',
+  'fuel.before':'{g} g of carbs about {min} min before — banana, oats, toast, honey.',
+  'fuel.beforeEasy':'Short and easy: you do not need to carb up first.',
+  'fuel.during':'{g} g of carbs per hour during it — gel, dates, sports drink.',
+  'fuel.after':'Within {min} min after: {carbs} g of carbs and {protein} g of protein.',
+  'fuel.dayUp':'And {kcal} kcal more today, on top of your usual target.',
+  'fuel.dayDown':'And {kcal} kcal less today: you are not training.',
+  'fuel.done':'Done. Recovery window: {carbs} g of carbs and {protein} g of protein.',
+  'fuel.strength':'Strength',
 
   'settings.title':'Settings','settings.language':'Language','settings.units':'Default weight unit',
   'settings.account':'Account','settings.signedInAs':'Signed in as','settings.signOut':'Sign out',
@@ -822,6 +833,17 @@ es:{
   'food.trainAdjust':'Hoy: {kcal} kcal y {carbs} g de carbos',
   'food.trainWhy':'Tu meta ya supone que entrenas en una semana normal, así que solo se ajusta la diferencia.',
   'food.trainNoPlan':'Hoy no tienes nada programado.',
+  'fuel.plan':'Cómo comerlo',
+  'fuel.session':'{name} · {min} min',
+  'fuel.sessionKm':'{km} km · {min} min',
+  'fuel.before':'{g} g de carbos unos {min} min antes — plátano, avena, pan tostado, miel.',
+  'fuel.beforeEasy':'Es corto y suave: no necesitas cargar antes.',
+  'fuel.during':'{g} g de carbos por hora durante — gel, dátiles, bebida deportiva.',
+  'fuel.after':'En los {min} min de después: {carbs} g de carbos y {protein} g de proteína.',
+  'fuel.dayUp':'Y {kcal} kcal más hoy, encima de tu meta de siempre.',
+  'fuel.dayDown':'Y {kcal} kcal menos hoy: no estás entrenando.',
+  'fuel.done':'Ya lo hiciste. Ventana de recuperación: {carbs} g de carbos y {protein} g de proteína.',
+  'fuel.strength':'Fuerza',
 
   'settings.title':'Configuración','settings.language':'Idioma','settings.units':'Unidad de peso por defecto',
   'settings.account':'Cuenta','settings.signedInAs':'Sesión iniciada como','settings.signOut':'Cerrar sesión',
@@ -4689,6 +4711,7 @@ function trainingDayCard(){
   });
   if(!rec||(!rec.plannedKcal&&!rec.todayKcal)) return '';
 
+  const sessions=SkandiNutrition.plannedSessions(todayDow(),plan);
   const label=rec.level==='alto'?t('food.trainHigh'):rec.level==='bajo'?t('food.trainLow'):t('food.trainNormal');
   const deltaStr=(rec.delta>0?'+':'')+rec.delta+' kcal';
   const line=rec.fromLog?t('food.trainLogged',{kcal:rec.todayKcal,delta:deltaStr})
@@ -4698,9 +4721,58 @@ function trainingDayCard(){
   return `<section class="card" style="${tone}">
     <div class="eyebrow">${esc(label)}</div>
     <p style="margin-top:6px">${esc(line)}</p>
-    ${rec.delta?`<p style="margin-top:6px"><strong>${esc(t('food.trainAdjust',{kcal:rec.kcalTarget,carbs:rec.carbsTarget}))}</strong></p>
-    <p class="muted" style="font-size:11.5px;margin-top:6px">${esc(t('food.trainWhy'))}</p>`:''}
+    ${rec.delta?`<p style="margin-top:6px"><strong>${esc(t('food.trainAdjust',{kcal:rec.kcalTarget,carbs:rec.carbsTarget}))}</strong></p>`:''}
+    ${fuelPlanHtml(sessions,weightKg,rec)}
+    ${rec.delta?`<p class="muted" style="font-size:11.5px;margin-top:8px">${esc(t('food.trainWhy'))}</p>`:''}
   </section>`;
+}
+
+// El consejo accionable: cuándo comer, no solo cuánto. Un número no le dice a nadie qué hacer;
+// "80 g de carbos 75 min antes de la carrera" sí.
+// Qué se entrenó hoy, según lo registrado: la actividad más reciente, o 'strength' si lo que
+// hay son series marcadas.
+function lastLoggedType(){
+  const today=dayKey(new Date());
+  const acts=state.externalActivities.filter(a=>dayKey(a.performed_at)===today)
+    .sort((a,b)=>new Date(b.performed_at)-new Date(a.performed_at));
+  if(acts.length) return acts[0].activity_type;
+  const sets=state.sets.some(x=>x.user_id===state.user.id&&x.done&&dayKey(x.created_at)===today);
+  return sets?'strength':null;
+}
+
+function fuelPlanHtml(sessions,weightKg,rec){
+  if(!sessions.length) return '';
+  // Lo ya entrenado abre la ventana de recuperación. Los gramos salen de la sesión que
+  // coincide con lo registrado, no de la primera de la lista: una carrera suave pide la mitad
+  // de carbos que un día de pierna, y dar el número del otro es dar un número casi correcto.
+  const doneSession=rec.hasLog?(sessions.find(x=>x.activity_type===lastLoggedType())||sessions[0]):null;
+  const doneFuel=doneSession?SkandiNutrition.fuelPlan(doneSession,weightKg):null;
+  const doneLine=doneFuel
+    ? `<p style="margin-top:8px">${esc(t('fuel.done',{carbs:doneFuel.after.carbs_g,protein:doneFuel.after.protein_g}))}</p>`
+    : '';
+  // ...pero si todavía falta parte de lo planeado, los consejos de esa sesión siguen siendo
+  // lo más útil de la tarjeta. Registrar la carrera de la mañana no debe borrar el plan de
+  // la sesión de pesas de la tarde.
+  if(rec.fromLog) return doneLine;
+  const blocks=sessions.slice(0,2).map(session=>{
+    const fuel=SkandiNutrition.fuelPlan(session,weightKg);
+    if(!fuel) return '';
+    const title=session.kind==='strength'
+      ? t('fuel.session',{name:session.name||t('fuel.strength'),min:session.minutes})
+      : session.distance_km
+        ? `${(ACTIVITY_LABELS[session.activity_type]||session.activity_type)} · ${t('fuel.sessionKm',{km:session.distance_km,min:session.minutes})}`
+        : t('fuel.session',{name:(ACTIVITY_LABELS[session.activity_type]||session.activity_type),min:session.minutes});
+    const lines=[
+      fuel.before?t('fuel.before',{g:fuel.before.carbs_g,min:fuel.before.minutes_before}):t('fuel.beforeEasy'),
+      fuel.during?t('fuel.during',{g:fuel.during.carbs_g_per_hour}):'',
+      t('fuel.after',{min:fuel.after.minutes_after,carbs:fuel.after.carbs_g,protein:fuel.after.protein_g})
+    ].filter(Boolean);
+    return `<div style="margin-top:10px">
+      <div class="eyebrow">${esc(title)}</div>
+      <ul style="margin:6px 0 0;padding-left:18px">${lines.map(l=>`<li style="margin-top:3px">${esc(l)}</li>`).join('')}</ul>
+    </div>`;
+  }).join('');
+  return `${doneLine}<div class="eyebrow" style="margin-top:12px">${esc(t('fuel.plan'))}</div>${blocks}`;
 }
 
 function dayRingCard(totals,targets){

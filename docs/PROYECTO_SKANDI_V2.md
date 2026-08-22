@@ -554,6 +554,36 @@ Verificado: correr 10 km a RPE 7 con 80 kg da 611 kcal (~60 kcal/km, que es la r
 semana está armada en Entrenar. Con un solo día programado, ese día parece enorme contra un
 promedio de casi cero.
 
+**2026-08-22 — El consejo, no solo el número.**
+
+"Hoy te faltan 700 kcal" no le dice a nadie qué hacer. Lo accionable es el **timing**, así que la
+tarjeta del día ahora dice cuánto comer, de qué, y cuándo, para cada sesión programada:
+
+- **Antes**: ~1 g/kg de carbos unos 75 min antes (0.6 g/kg si es fuerza).
+- **Durante**: 45 g/hora, y **solo** en cardio de más de 75 min. Comer carbos a media sesión de
+  pesas no es una recomendación real, es ruido con cara de consejo experto.
+- **Después**: ~1 g/kg de carbos y ~0.3 g/kg de proteína en los primeros 90 min.
+
+La regla que evita el consejo tonto: **una sesión corta y suave no lleva carga previa**. Decirle a
+alguien que se coma 80 g de carbos antes de trotar 25 minutos es empujarlo a comer de más con cara
+de rigor. Debajo de 45 min y RPE ≤ 6, el consejo es "no necesitas cargar antes" y la recuperación
+se reduce a la mitad.
+
+Dos casos que costaron más de lo que parecen:
+
+- **Registrar algo no es haber terminado el día.** Si corriste en la mañana pero falta la sesión de
+  pesas, la meta del día no debe encogerse ni deben desaparecer los consejos de lo que falta. El
+  día vale lo mayor entre lo hecho y lo planeado, y solo se considera terminado cuando queda menos
+  del 30% de lo planeado.
+- **La ventana de recuperación usa la sesión que coincide con lo registrado**, no la primera de la
+  lista: una carrera suave pide la mitad de carbos que un día de pierna, y dar el número del otro
+  es dar un número casi correcto, que es la peor clase de número.
+
+**Nota de proceso:** durante la verificación el service worker me sirvió una copia cacheada de
+`skandi-nutrition.js` y estuve depurando código viejo. Es exactamente la regla del versionado de
+`CLAUDE.md` aplicándose a quien la escribió: **editar un módulo compartido sin bumpear la versión
+sirve código rancio**. Vale la pena recordarlo antes de perseguir un fantasma.
+
 ## 12. Siguiente paso
 
 1. ✅ Migraciones 073-075 corridas y `ANTHROPIC_API_KEY` cargada en Vercel (2026-08-22).
