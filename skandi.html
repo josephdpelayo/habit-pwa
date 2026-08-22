@@ -8,14 +8,14 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="Skandi Fit">
 <meta name="application-name" content="Skandi Fit">
-<link rel="manifest" href="/skandi-manifest.json?v=20260822-02">
-<link rel="apple-touch-icon" sizes="180x180" href="/icons/skandi-180.png?v=20260822-02">
-<link rel="icon" type="image/png" sizes="192x192" href="/icons/skandi-192.png?v=20260822-02">
+<link rel="manifest" href="/skandi-manifest.json?v=20260822-03">
+<link rel="apple-touch-icon" sizes="180x180" href="/icons/skandi-180.png?v=20260822-03">
+<link rel="icon" type="image/png" sizes="192x192" href="/icons/skandi-192.png?v=20260822-03">
 <title>Skandi Fit</title>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="/skandi-recovery.js?v=20260822-02"></script>
-<script src="/body-figure.js?v=20260822-02"></script>
-<script src="/skandi-nutrition.js?v=20260822-02"></script>
+<script src="/skandi-recovery.js?v=20260822-03"></script>
+<script src="/body-figure.js?v=20260822-03"></script>
+<script src="/skandi-nutrition.js?v=20260822-03"></script>
 <style>
 :root{
   --bg:#eef4f8;
@@ -120,6 +120,9 @@ p{color:var(--muted);line-height:1.45;margin:0}
 .macro-row.p .bar i{background:var(--blue)}
 .macro-row.c .bar i{background:var(--amber)}
 .macro-row.f .bar i{background:var(--lime)}
+.macro-row.s .bar i{background:var(--dof-steel)}
+.macro-row.s.over .bar i{background:var(--pink)}
+.macro-row.s.over{color:var(--pink)}
 .meal-card{display:grid;grid-template-columns:56px 1fr auto;gap:12px;align-items:center;padding:11px;border-radius:12px;border:1px solid var(--line);background:var(--panel);margin-top:9px;cursor:pointer;text-align:left;width:100%}
 .meal-thumb{width:56px;height:56px;border-radius:10px;object-fit:cover;background:var(--panel3);display:grid;place-items:center;color:var(--muted);overflow:hidden}
 .meal-thumb img{width:100%;height:100%;object-fit:cover}
@@ -398,7 +401,7 @@ textarea.field{min-height:112px;text-align:left;resize:vertical}
 // Versión compartida con app.html (APP_VERSION) y sw.js (CACHE_VERSION): un solo service
 // worker sirve las dos apps, así que una sola cadena las invalida a las dos. Al cambiarla
 // hay que actualizarla también en los ?v= del <head>, en index.html y en los dos manifests.
-const SKANDI_VERSION='20260822-02';
+const SKANDI_VERSION='20260822-03';
 const SUPABASE_URL='https://pmpjteuqjusbiduevbwq.supabase.co';
 const SUPABASE_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBtcGp0ZXVxanVzYmlkdWV2YndxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc2OTI1NjUsImV4cCI6MjA5MzI2ODU2NX0.XbMzZoo2yqtrD8znLnyo_1zDfrdJAvAPj1lqGOyXnLw';
 const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
@@ -461,6 +464,14 @@ en:{
   'food.errNoInput':'Write what you ate or pick a photo.','food.errGrams':'Enter the grams.',
   'food.errName':'The dish needs a name.','food.searchPh':'Search food…','food.noMatches':'Nothing matches.',
   'food.newFood':'New food','food.per100':'Per 100 g','food.name':'Name',
+  'food.sugar':'Sugar','food.sugarCap':'cap','food.fiber':'Fiber','food.targetSugar':'Sugar cap',
+  'food.sugarHint':'A ceiling, not a goal — it turns red when you go over. Leave it empty to ignore it.',
+  'food.trainHigh':'Hard training day','food.trainLow':'Rest day','food.trainNormal':'Average day',
+  'food.trainPlanned':'{kcal} kcal planned · {delta} vs your average day',
+  'food.trainLogged':'{kcal} kcal logged · {delta} vs your average day',
+  'food.trainAdjust':'Today: {kcal} kcal and {carbs} g of carbs',
+  'food.trainWhy':'Your target already assumes you train on an average week, so only the difference is adjusted.',
+  'food.trainNoPlan':'Nothing scheduled today.',
 
   'settings.title':'Settings','settings.language':'Language','settings.units':'Default weight unit',
   'settings.account':'Account','settings.signedInAs':'Signed in as','settings.signOut':'Sign out',
@@ -803,6 +814,14 @@ es:{
   'food.errNoInput':'Escribe qué comiste o elige una foto.','food.errGrams':'Pon los gramos.',
   'food.errName':'El platillo necesita nombre.','food.searchPh':'Buscar alimento…','food.noMatches':'Nada coincide.',
   'food.newFood':'Alimento nuevo','food.per100':'Por 100 g','food.name':'Nombre',
+  'food.sugar':'Azúcar','food.sugarCap':'techo','food.fiber':'Fibra','food.targetSugar':'Techo de azúcar',
+  'food.sugarHint':'Es un techo, no una meta: se pone rojo al pasarte. Déjalo vacío si no lo quieres vigilar.',
+  'food.trainHigh':'Día de entrenamiento fuerte','food.trainLow':'Día de descanso','food.trainNormal':'Día promedio',
+  'food.trainPlanned':'{kcal} kcal planeadas · {delta} contra tu día promedio',
+  'food.trainLogged':'{kcal} kcal registradas · {delta} contra tu día promedio',
+  'food.trainAdjust':'Hoy: {kcal} kcal y {carbs} g de carbos',
+  'food.trainWhy':'Tu meta ya supone que entrenas en una semana normal, así que solo se ajusta la diferencia.',
+  'food.trainNoPlan':'Hoy no tienes nada programado.',
 
   'settings.title':'Configuración','settings.language':'Idioma','settings.units':'Unidad de peso por defecto',
   'settings.account':'Cuenta','settings.signedInAs':'Sesión iniciada como','settings.signOut':'Cerrar sesión',
@@ -4634,6 +4653,7 @@ function foodView(){
       </div>
     </section>
     ${targets?dayRingCard(totals,targets):noTargetCard()}
+    ${trainingDayCard()}
     <section class="card">
       <div class="row"><div class="eyebrow">${esc(t('food.items'))}</div>
         <span class="chip">${meals.length}</span></div>
@@ -4642,6 +4662,45 @@ function foodView(){
     </section>
     ${quickPicksCard()}
     <button class="add-fab" onclick="openAddMeal()" aria-label="${esc(t('food.addMeal'))}">${icon('plus',26)}</button>`;
+}
+
+// Lo que entrenas hoy cambia lo que deberías comer hoy — pero solo la DIFERENCIA contra tu
+// día promedio, porque la meta base ya supone que entrenas (ver skandi-nutrition.js).
+function trainingDayCard(){
+  const targets=state.nutritionTargets;
+  if(!targets||state.foodDayOffset!==0) return '';
+  const weightKg=latestWeightKg();
+  if(!weightKg) return '';
+
+  const plan={
+    weightKg,
+    templates:state.templates.filter(x=>x.user_id===state.user.id),
+    templateItems:state.items,
+    activityTemplates:state.activityTemplates
+  };
+  const today=dayKey(new Date());
+  const loggedToday=state.externalActivities.filter(a=>dayKey(a.performed_at)===today);
+  const loggedSets=state.sets.filter(x=>x.user_id===state.user.id&&x.done&&dayKey(x.created_at)===today).length;
+  const loggedKcal=loggedToday.reduce((acc,a)=>acc+SkandiNutrition.activityKcal(a,weightKg),0)
+    +SkandiNutrition.strengthKcal(loggedSets,weightKg);
+  const rec=SkandiNutrition.dayRecommendation({
+    targets,plan,dow:todayDow(),loggedKcal,
+    hasLoggedActivity:loggedToday.length>0||loggedSets>0
+  });
+  if(!rec||(!rec.plannedKcal&&!rec.todayKcal)) return '';
+
+  const label=rec.level==='alto'?t('food.trainHigh'):rec.level==='bajo'?t('food.trainLow'):t('food.trainNormal');
+  const deltaStr=(rec.delta>0?'+':'')+rec.delta+' kcal';
+  const line=rec.fromLog?t('food.trainLogged',{kcal:rec.todayKcal,delta:deltaStr})
+                        :t('food.trainPlanned',{kcal:rec.todayKcal,delta:deltaStr});
+  const tone=rec.level==='alto'?'border-color:rgba(0,168,200,.35);background:#f2fbfd'
+            :rec.level==='bajo'?'border-color:rgba(240,162,46,.35);background:#fffaf2':'';
+  return `<section class="card" style="${tone}">
+    <div class="eyebrow">${esc(label)}</div>
+    <p style="margin-top:6px">${esc(line)}</p>
+    ${rec.delta?`<p style="margin-top:6px"><strong>${esc(t('food.trainAdjust',{kcal:rec.kcalTarget,carbs:rec.carbsTarget}))}</strong></p>
+    <p class="muted" style="font-size:11.5px;margin-top:6px">${esc(t('food.trainWhy'))}</p>`:''}
+  </section>`;
 }
 
 function dayRingCard(totals,targets){
@@ -4657,10 +4716,21 @@ function dayRingCard(totals,targets){
         ${macroRowHtml('p',t('food.protein'),totals.protein_g,targets.protein_g_target)}
         ${macroRowHtml('c',t('food.carbs'),totals.carbs_g,targets.carbs_g_target)}
         ${macroRowHtml('f',t('food.fat'),totals.fat_g,targets.fat_g_target)}
+        ${targets.sugar_g_target?sugarRowHtml(totals.sugar_g,targets.sugar_g_target):''}
       </div>
     </div>
     <p class="muted" style="margin-top:10px;font-size:12px">${Math.round(totals.kcal)} / ${targets.kcal_target} kcal · ${esc(t('food.aiLeft',{n:aiLeft()}))}</p>
   </section>`;
+}
+
+// El azúcar se pinta distinto porque significa otra cosa: llenar la barra es malo, no bueno.
+function sugarRowHtml(value,cap){
+  const p=SkandiNutrition.pct(value,cap);
+  const over=value>cap;
+  return `<div class="macro-row s ${over?'over':''}">
+    <div class="row"><span>${esc(t('food.sugar'))}</span><span>${Math.round(value)} / ${cap} g ${esc(t('food.sugarCap'))}</span></div>
+    <div class="bar"><i style="width:${Math.min(p,100)}%"></i></div>
+  </div>`;
 }
 
 function macroRowHtml(kind,label,value,target){
@@ -5224,6 +5294,9 @@ function openTargets(){
       <div><label class="eyebrow">${esc(t('food.carbs'))}</label><input id="tgC" class="field" type="number" min="0" max="1200" value="${tg?.carbs_g_target||''}"></div>
       <div><label class="eyebrow">${esc(t('food.fat'))}</label><input id="tgF" class="field" type="number" min="0" max="400" value="${tg?.fat_g_target||''}"></div>
     </div>
+    <label class="eyebrow">${esc(t('food.targetSugar'))}</label>
+    <input id="tgS" class="field" type="number" min="0" max="500" inputmode="numeric" value="${tg?.sugar_g_target??''}">
+    <p class="muted" style="font-size:12px;margin-top:6px">${esc(t('food.sugarHint'))}</p>
     <p class="muted" style="font-size:12px;margin-top:10px">${esc(t('food.targetHint'))}</p>
     <button class="btn primary" style="width:100%;margin-top:10px" onclick="saveTargets()">${esc(t('food.save'))}</button>`;
 }
@@ -5241,6 +5314,7 @@ function fillSuggestedTargets(){
   $('tgP').value=s.protein_g;
   $('tgC').value=s.carbs_g;
   $('tgF').value=s.fat_g;
+  $('tgS').value=s.sugar_g;
 }
 
 async function saveTargets(){
@@ -5253,6 +5327,8 @@ async function saveTargets(){
     protein_g_target:Math.round(Number($('tgP').value)||0),
     carbs_g_target:Math.round(Number($('tgC').value)||0),
     fat_g_target:Math.round(Number($('tgF').value)||0),
+    // Vacío significa "no me lo vigiles", que no es lo mismo que un techo de cero.
+    sugar_g_target:$('tgS').value===''?null:Math.round(Number($('tgS').value)),
     activity_factor:Number($('tgActivity').value),
     updated_at:new Date().toISOString()
   },{onConflict:'user_id'});

@@ -67,6 +67,8 @@ Catálogo: si un alimento del catálogo del usuario coincide con lo que ves o le
 
 Los macros de cada renglón van en gramos absolutos para la porción estimada, no por 100 g. Las kcal deben ser coherentes con los macros (proteína 4, carbohidratos 4, grasa 9 kcal/g).
 
+sugar_g es la parte de carbs_g que son azúcares (los del refresco, el pan dulce, la salsa BBQ, la fruta), NO un macro aparte: ya va contado dentro de carbs_g y no debe sumarse otra vez a las kcal. En algo sin azúcar añadida ni fruta, es 0.
+
 Si no hay comida que estimar (la foto no es comida, o el texto no describe alimentos), devuelve is_food=false con items vacío y di por qué en notes.`;
 
 const MEAL_SCHEMA = {
@@ -88,11 +90,12 @@ const MEAL_SCHEMA = {
           carbs_g: { type: 'number' },
           fat_g: { type: 'number' },
           fiber_g: { type: 'number' },
+          sugar_g: { type: 'number', description: 'azúcares del renglón, ya incluidos dentro de carbs_g' },
           confidence: { type: 'number' },
           catalog_id: { type: 'string', description: 'id del alimento del catálogo, o cadena vacía' },
           is_cooking_fat: { type: 'boolean', description: 'true solo para el renglón de aceite/grasa de cocción' },
         },
-        required: ['label', 'grams', 'kcal', 'protein_g', 'carbs_g', 'fat_g', 'fiber_g', 'confidence', 'catalog_id', 'is_cooking_fat'],
+        required: ['label', 'grams', 'kcal', 'protein_g', 'carbs_g', 'fat_g', 'fiber_g', 'sugar_g', 'confidence', 'catalog_id', 'is_cooking_fat'],
         additionalProperties: false,
       },
     },
@@ -304,6 +307,7 @@ module.exports = async function handler(req, res) {
       carbs_g: clamp(item.carbs_g, 1000),
       fat_g: clamp(item.fat_g, 1000),
       fiber_g: clamp(item.fiber_g, 1000),
+      sugar_g: clamp(item.sugar_g, 1000),
       // Solo aceptamos un id que de verdad esté en el catálogo que le mandamos: un id
       // inventado rompería la llave foránea y tiraría el insert completo.
       food_id: catalogIds.has(item.catalog_id) ? item.catalog_id : '',

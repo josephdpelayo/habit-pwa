@@ -148,6 +148,13 @@ and nothing else:
   `skandi_add_food_to_meal` covers "180 g of chicken", which is a multiplication, not a vision
   problem. The `skandi_quick_picks` view is what the UI should show before ever opening the camera.
   Deliberately, saved dishes are NOT sent to the model: the saving is in not calling it
+- Sugar (077) is tracked as its own macro across all five tables, but it is a **ceiling, not a
+  goal** — the UI turns it red on excess and a null `sugar_g_target` means "don't track it". Its
+  kcal already live inside `carbs_g`; never add it to the calorie total
+- `SkandiNutrition.dayRecommendation()` adjusts today's target by the **difference between today's
+  planned training burn and the weekly average**, never by the whole burn — the target's activity
+  factor already assumes training, so adding the day's burn on top double-counts. The delta goes to
+  carbs only
 
 ### Time & Slots
 All time logic uses **America/Mazatlan (UTC−7)**. The constant `MAZ_UTC_OFFSET_H = 7` converts UTC midnight to Mazatlán midnight. A day has 48 slots of 30 minutes. A typical booking is `slots_used = 3` (90 min). Access windows open 10 minutes before a booking's `start_idx`.

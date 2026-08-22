@@ -78,7 +78,7 @@ module.exports = async function handler(req, res) {
     // 1. ¿Ya lo tenemos? El catálogo propio manda sobre el global.
     const { data: known, error: knownError } = await supabase
       .from('skandi_foods')
-      .select('id,user_id,name,brand,barcode,serving_label,serving_grams,kcal_100g,protein_100g,carbs_100g,fat_100g,fiber_100g,source')
+      .select('id,user_id,name,brand,barcode,serving_label,serving_grams,kcal_100g,protein_100g,carbs_100g,fat_100g,fiber_100g,sugar_100g,source')
       .eq('barcode', barcode)
       .or(`user_id.eq.${userId},user_id.is.null`)
       .order('user_id', { ascending: true, nullsFirst: false })
@@ -138,13 +138,14 @@ module.exports = async function handler(req, res) {
       carbs_100g: Math.min(num(nutriments.carbohydrates_100g) || 0, 100),
       fat_100g: Math.min(num(nutriments.fat_100g) || 0, 100),
       fiber_100g: Math.min(num(nutriments.fiber_100g) || 0, 100),
+      sugar_100g: Math.min(num(nutriments.sugars_100g) || 0, 100),
       source: 'off',
     };
 
     const { data: saved, error: saveError } = await supabase
       .from('skandi_foods')
       .insert(food)
-      .select('id,user_id,name,brand,barcode,serving_label,serving_grams,kcal_100g,protein_100g,carbs_100g,fat_100g,fiber_100g,source')
+      .select('id,user_id,name,brand,barcode,serving_label,serving_grams,kcal_100g,protein_100g,carbs_100g,fat_100g,fiber_100g,sugar_100g,source')
       .single();
 
     if (saveError) {

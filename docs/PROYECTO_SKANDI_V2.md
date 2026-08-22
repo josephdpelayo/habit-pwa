@@ -525,11 +525,45 @@ SQL trata como cadenas opacas. Las 78 migraciones del repo pasan.
 ejercitado, pero la respuesta del endpoint solo se habrá visto de verdad con la primera foto en
 producción.
 
+**2026-08-22 — Azúcar como macro propio, y la comida que depende de lo que entrenas.**
+
+Migración 077. El azúcar toca cinco tablas porque un macro nuevo viaja por toda la cadena: el
+alimento lo guarda por 100 g, el renglón absoluto, la comida lo suma, el platillo lo congela y la
+meta lo compara. Dos decisiones:
+
+- **El azúcar es un techo, no una meta.** Se pinta distinto (gris que se vuelve rojo al pasarte,
+  nunca verde al "llegar") y dejar el campo vacío significa "no me lo vigiles", que no es lo mismo
+  que un techo de cero. El default sugerido es el 10% de las calorías, la recomendación de la OMS.
+- **No suma calorías aparte**: sus kcal ya están dentro de los carbohidratos. Contarlo dos veces
+  sería el bug obvio, y el prompt se lo dice al modelo explícitamente.
+
+**La recomendación por entrenamiento del día.** Aquí había una trampa fácil de pisar: el factor de
+actividad de la meta **ya incluye que entrenas**. Sumarle a la meta las calorías del entrenamiento
+de hoy las cuenta dos veces — es el error que hace que una app te diga que te comas 3,400 kcal por
+haber corrido 5 km. Lo correcto es ajustar por la **diferencia contra tu día promedio de la
+semana**: hoy entrenas más que tu promedio, te faltan calorías; hoy descansas, te sobran; un día
+promedio no ajusta nada. El ajuste va todo a carbohidratos: la proteína es por kilo de peso y no
+cambia porque hoy corras, y la grasa tiene un piso hormonal que no conviene mover a diario.
+
+La estimación usa METs por tipo de actividad, modulados por el RPE (o por la zona de FC cuando es
+un plan sin RPE), y las series de la rutina para calcular la duración de una sesión de fuerza.
+Si ya registraste la actividad de hoy, manda lo hecho sobre lo planeado — un plan no es un hecho.
+Verificado: correr 10 km a RPE 7 con 80 kg da 611 kcal (~60 kcal/km, que es la referencia real).
+
+**Ojo con esto:** el ajuste es relativo a **tu** semana, así que solo tiene sentido cuando la
+semana está armada en Entrenar. Con un solo día programado, ese día parece enorme contra un
+promedio de casi cero.
+
 ## 12. Siguiente paso
 
 1. ✅ Migraciones 073-075 corridas y `ANTHROPIC_API_KEY` cargada en Vercel (2026-08-22).
    Falta correr `076_skandi_dishes.sql`. **Nada está vivo todavía: el código no se ha empujado.**
 3. ✅ Tab "Comida" completo (2026-08-22).
-4. **Primera foto real en producción**: es la única prueba que falta del camino IA.
-5. Primera medición de tino: pesar 10 platillos frecuentes y comparar contra la estimación.
-6. Fase 2 — el motor de decisiones, que ya nace con datos de comida (§8).
+4. Correr `077_skandi_sugar_and_targets.sql` en Supabase.
+5. **Primera foto real en producción**: es la única prueba que falta del camino IA.
+6. Primera medición de tino: pesar 10 platillos frecuentes y comparar contra la estimación.
+7. **Fase 4 (Strava)**: bloqueada hasta tener `STRAVA_CLIENT_ID` y `STRAVA_CLIENT_SECRET` de
+   strava.com/settings/api, y hasta que el código viva en producción (el webhook necesita una URL
+   pública estable). Ver §3.1: Garmin entra por aquí.
+8. Fase 2 — el motor de decisiones. La recomendación por entrenamiento del día ya es su primer
+   ladrillo, puesto por adelantado (§8).

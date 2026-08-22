@@ -55,9 +55,16 @@ function suggestTargets(opts) {
   const fat = round(weightKg * FAT_G_PER_KG, 5);
   // Los carbohidratos salen por diferencia y nunca bajan de cero: en un déficit agresivo
   // sobre alguien muy pesado, proteína + grasa solas podrían pasarse de la meta.
-  const carbs = Math.max(0, round((kcal - protein * KCAL_PER_G.protein - fat * KCAL_PER_G.fat) / KCAL_PER_G.carbs, 5));
+  // Piso, no redondeo: así los macros nunca suman más que la meta de calorías.
+  const carbs = Math.max(0, Math.floor((kcal - protein * KCAL_PER_G.protein - fat * KCAL_PER_G.fat) / KCAL_PER_G.carbs / 5) * 5);
 
-  return { kcal, protein_g: protein, carbs_g: carbs, fat_g: fat, maintenance: round(maintenance, 10), mode, activityFactor };
+  // Azúcar: techo en 10% de las calorías (la recomendación de la OMS), en gramos.
+  // Fibra: 14 g por cada 1000 kcal, que es la referencia dietética habitual.
+  const sugar = round((kcal * 0.10) / KCAL_PER_G.carbs, 5);
+  const fiber = round((kcal / 1000) * 14, 5);
+
+  return { kcal, protein_g: protein, carbs_g: carbs, fat_g: fat, sugar_g: sugar, fiber_g: fiber,
+           maintenance: round(maintenance, 10), mode, activityFactor };
 }
 
 // Coherencia: lo que suman los macros contra lo que dice la meta de kcal. Sirve para avisar
@@ -72,7 +79,7 @@ function kcalFromMacros(protein, carbs, fat) {
 // trigger de la base, repetida aquí porque la UI suma en vivo mientras editas, antes de que
 // nada llegue al servidor.
 function itemsTotal(items) {
-  const total = { kcal: 0, protein_g: 0, carbs_g: 0, fat_g: 0, fiber_g: 0 };
+  const total = { kcal: 0, protein_g: 0, carbs_g: 0, fat_g: 0, fiber_g: 0, sugar_g: 0 };
   (items || []).forEach(it => {
     if (it && it.included === false) return;
     total.kcal += num(it.kcal);
@@ -80,6 +87,7 @@ function itemsTotal(items) {
     total.carbs_g += num(it.carbs_g);
     total.fat_g += num(it.fat_g);
     total.fiber_g += num(it.fiber_g);
+    total.sugar_g += num(it.sugar_g);
   });
   Object.keys(total).forEach(k => { total[k] = Math.round(total[k] * 10) / 10; });
   return total;
@@ -87,7 +95,8 @@ function itemsTotal(items) {
 
 function dayTotals(meals) {
   return itemsTotal((meals || []).map(m => ({
-    kcal: m.kcal, protein_g: m.protein_g, carbs_g: m.carbs_g, fat_g: m.fat_g, fiber_g: m.fiber_g
+    kcal: m.kcal, protein_g: m.protein_g, carbs_g: m.carbs_g, fat_g: m.fat_g,
+    fiber_g: m.fiber_g, sugar_g: m.sugar_g
   })));
 }
 
@@ -99,7 +108,10 @@ function remaining(targets, totals) {
     kcal: round(num(targets.kcal_target) - num(totals.kcal)),
     protein_g: round(num(targets.protein_g_target) - num(totals.protein_g)),
     carbs_g: round(num(targets.carbs_g_target) - num(totals.carbs_g)),
-    fat_g: round(num(targets.fat_g_target) - num(totals.fat_g))
+    fat_g: round(num(targets.fat_g_target) - num(totals.fat_g)),
+    // El azúcar es un techo, no una meta: aquí "restante" significa cuánto te queda antes de
+    // pasarte. Sin techo definido no hay nada que comparar.
+    sugar_g: targets.sugar_g_target == null ? null : round(num(targets.sugar_g_target) - num(totals.sugar_g))
   };
 }
 
@@ -123,7 +135,8 @@ function scaleFood(food, grams) {
     protein_g: cap(food.protein_100g, 1000),
     carbs_g: cap(food.carbs_100g, 1000),
     fat_g: cap(food.fat_100g, 1000),
-    fiber_g: cap(food.fiber_100g, 1000)
+    fiber_g: cap(food.fiber_100g, 1000),
+    sugar_g: cap(food.sugar_100g, 1000)
   };
 }
 
@@ -142,7 +155,8 @@ function rescaleItem(item, newGrams) {
     protein_g: cap(item.protein_g, 1000),
     carbs_g: cap(item.carbs_g, 1000),
     fat_g: cap(item.fat_g, 1000),
-    fiber_g: cap(item.fiber_g, 1000)
+    fiber_g: cap(item.fiber_g, 1000),
+    sugar_g: cap(item.sugar_g, 1000)
   });
 }
 
@@ -159,14 +173,120 @@ function itemToFood(item) {
     carbs_100g: Math.min(per100(item.carbs_g), 100),
     fat_100g: Math.min(per100(item.fat_g), 100),
     fiber_100g: Math.min(per100(item.fiber_g), 100),
+    sugar_100g: Math.min(per100(item.sugar_g), 100),
     serving_grams: Math.round(g * 10) / 10
   };
 }
 
+// ---- El entrenamiento del día ----
+//
+// Aquí hay una trampa fácil de pisar: el factor de actividad de la meta YA incluye que
+// entrenas. Sumarle a la meta las calorías del entrenamiento de hoy sería contarlas dos
+// veces, y es el error que hace que una app te diga que te comas 3,400 kcal por haber
+// corrido 5 km.
+//
+// Lo correcto es ajustar por la DIFERENCIA contra tu día promedio de la semana: si hoy
+// entrenas más que tu promedio, te faltan calorías; si hoy descansas, te sobran. Un día
+// promedio no ajusta nada, que es exactamente como debe ser.
+//
+// El ajuste va a carbohidratos. La proteína es por kilo de peso y no cambia porque hoy
+// corras, y la grasa tiene un piso hormonal que no conviene mover día con día.
+
+const MET = {
+  running: 9.8, cycling: 7.5, swimming: 7.0, rowing: 7.0,
+  walking: 3.5, hiit: 9.0, strength_class: 6.0, other: 5.0
+};
+const STRENGTH_MET = 5.0;   // levantar pesas con descansos reales, no en circuito
+const MIN_PER_SET = 3.5;    // serie + descanso: la duración de una sesión sale de sus series
+const NEUTRAL_DELTA = 120;  // por debajo de esto, el día no se considera distinto al promedio
+
+// El esfuerzo percibido (RPE 1-10) modula el MET: correr a 5 no quema lo mismo que a 9.
+function effortFactor(intensity) {
+  const rpe = num(intensity) || 5;
+  return Math.max(0.6, Math.min(1.35, 0.75 + (rpe - 5) * 0.05));
+}
+
+function activityKcal(activity, weightKg) {
+  const w = num(weightKg);
+  const minutes = num(activity && activity.duration_min);
+  if (w <= 0 || minutes <= 0) return 0;
+  const met = MET[activity.activity_type] || MET.other;
+  return Math.round(met * w * (minutes / 60) * effortFactor(activity.intensity));
+}
+
+function strengthKcal(sets, weightKg) {
+  const w = num(weightKg);
+  const n = num(sets);
+  if (w <= 0 || n <= 0) return 0;
+  return Math.round(STRENGTH_MET * w * ((n * MIN_PER_SET) / 60));
+}
+
+// Lo que un día de la semana tiene PLANEADO quemar, según la rutina y el plan de cardio
+// asignados a ese día. dow: 0 = lunes, como en todo el resto de la app.
+function plannedDayKcal(dow, plan) {
+  const { templates = [], templateItems = [], activityTemplates = [], weightKg } = plan || {};
+  let kcal = 0;
+  templates.filter(tp => tp.weekday === dow).forEach(tp => {
+    const sets = templateItems
+      .filter(it => it.template_id === tp.id)
+      .reduce((acc, it) => acc + (num(it.target_sets) || 3), 0);
+    kcal += strengthKcal(sets, weightKg);
+  });
+  activityTemplates.filter(at => at.weekday === dow).forEach(at => {
+    kcal += activityKcal({
+      activity_type: at.activity_type,
+      duration_min: at.target_duration_min || estimateMinutesFromDistance(at),
+      // Sin RPE en un plan, la zona de FC es la mejor pista: zona 2 es suave, zona 4-5 es dura.
+      intensity: at.target_zone ? at.target_zone * 2 : 5
+    }, weightKg);
+  });
+  return kcal;
+}
+
+// Un plan que solo dice "5 km" sí tiene duración: la del ritmo objetivo, o un ritmo típico.
+function estimateMinutesFromDistance(at) {
+  const km = num(at && at.target_distance_km);
+  if (km <= 0) return 0;
+  const pace = num(at.target_pace_sec_per_km) || 330; // 5:30/km por defecto
+  return Math.round((km * pace) / 60);
+}
+
+function weeklyPlan(plan) {
+  const byDow = [0, 1, 2, 3, 4, 5, 6].map(d => plannedDayKcal(d, plan));
+  const total = byDow.reduce((a, b) => a + b, 0);
+  return { byDow, total, avgDaily: Math.round(total / 7) };
+}
+
+// La recomendación del día. `loggedKcal` son las actividades YA registradas hoy: si ya
+// corriste, manda lo que hiciste sobre lo que estaba planeado — un plan no es un hecho.
+function dayRecommendation(opts) {
+  const { targets, plan, dow, loggedKcal = 0, hasLoggedActivity = false } = opts || {};
+  if (!targets) return null;
+  const week = weeklyPlan(plan);
+  const planned = plannedDayKcal(dow, plan);
+  const today = hasLoggedActivity ? Math.max(loggedKcal, 0) : planned;
+  const delta = round(today - week.avgDaily, 10);
+  const meaningful = Math.abs(delta) >= NEUTRAL_DELTA;
+
+  return {
+    plannedKcal: planned,
+    todayKcal: today,
+    avgDaily: week.avgDaily,
+    weeklyKcal: week.total,
+    fromLog: hasLoggedActivity,
+    delta: meaningful ? delta : 0,
+    level: !meaningful ? 'normal' : delta > 0 ? 'alto' : 'bajo',
+    // La meta ajustada: solo los carbos se mueven.
+    kcalTarget: num(targets.kcal_target) + (meaningful ? delta : 0),
+    carbsTarget: Math.max(0, round(num(targets.carbs_g_target) + (meaningful ? delta / KCAL_PER_G.carbs : 0), 5))
+  };
+}
+
 const api = {
-  KCAL_PER_G, ACTIVITY_FACTORS, MODE_FACTOR,
+  KCAL_PER_G, ACTIVITY_FACTORS, MODE_FACTOR, MET,
   suggestTargets, kcalFromMacros, itemsTotal, dayTotals, remaining, pct,
-  scaleFood, rescaleItem, itemToFood
+  scaleFood, rescaleItem, itemToFood,
+  activityKcal, strengthKcal, plannedDayKcal, weeklyPlan, dayRecommendation
 };
 
 if (typeof module !== 'undefined' && module.exports) module.exports = api;
