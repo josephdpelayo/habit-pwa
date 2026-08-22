@@ -6,16 +6,27 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 HABIT Training Hub — a PWA for a gym in Mazatlán, Mexico. Members book training slots, pay via Stripe, and open the gym door from their phone. The app is deployed on Vercel with Supabase as the backend.
 
+This repo ships **two** front-ends off the same Vercel project and the same Supabase database:
+
+- **HABIT Training Hub** (`app.html`, served at `/`) — the gym: bookings, payments, door access, coaching.
+- **Skandi Fit** (`skandi.html`, served at `/skandi`) — a separate training app for the crew of the
+  Skandi Nomad (a DOF vessel). Shares `profiles` and `auth.users` with HABIT, and shares two pure JS
+  modules (`skandi-recovery.js`, `body-figure.js`), but has its own tables (`skandi_*`), its own
+  manifest, and no overlap in UI code. See `docs/PROYECTO_SKANDI_V2.md` for the roadmap in progress.
+
 ## Commands
 
 ```bash
 # Check syntax of all API files and sw.js
 npm run check
 
+# Parse every migration against the real PostgreSQL grammar (needs `pip install --user pglast`)
+npm run check:sql
+
 # Deploy: push to git → Vercel auto-deploys
 ```
 
-There is no build step, no bundler, no test suite. `npm run check` runs `node --check` on each API file — it validates syntax only, not runtime behavior.
+There is no build step, no bundler, no test suite. `npm run check` runs `node --check` on each API file — it validates syntax only, not runtime behavior. `npm run check:sql` parses `migrations/*.sql` with libpg_query (Postgres' own parser), including plpgsql function bodies — worth running before pasting a migration into the Supabase SQL Editor, where a syntax error leaves you half-applied. It checks syntax, not that the tables or columns exist.
 
 ## Architecture
 
@@ -25,10 +36,27 @@ A single ~5500-line file containing all HTML, CSS, and JavaScript. There is no f
 The app has four screens (`#s-auth`, `#s-main`, `#s-admin`, `#s-reception`), toggled by adding/removing the `.active` CSS class. Within `#s-main`, tabs are toggled via `.view.active`. Admin has its own tab system via `admTab()`.
 
 - `index.html` — just redirects to `app.html` with a version query string for cache busting
-- `sw.js` — service worker: push notifications + app shell cache. Has a fetch handler: icons are cache-first, navigation is network-first (falls back to cached `app.html` when offline), API calls pass through untouched.
-- `manifest.json` — PWA manifest
+- `sw.js` — service worker: push notifications + app shell cache. **One registration at scope `/` serves both apps** — two service workers at the root would evict each other, so Skandi registers this same file. Fetch handler: icons and the shared JS modules are cache-first, navigation is network-first (and refreshes the cached shell with what it just fetched), API calls pass through untouched. `shellFor()` picks the offline fallback by path: `/skandi*` → `skandi.html`, everything else → `app.html`.
+- `manifest.json` / `skandi-manifest.json` — one PWA manifest per app. Both use `scope: "/"` and are told apart by `id`.
 
-**Version / cache busting**: `APP_VERSION` is defined in `app.html` (e.g. `'20260505-20'`). When making changes that clients need to pick up, update this constant and the matching `?v=` strings in `index.html` and the `<link>` tags at the top of `app.html`. Also update `CACHE_VERSION` in `sw.js` to the same value — this invalidates the old shell cache and forces clients to download the new version.
+**Version / cache busting**: one version string covers the whole project, because one service worker caches both apps. It lives in `APP_VERSION` (`app.html`), `SKANDI_VERSION` (`skandi.html`) and `CACHE_VERSION` (`sw.js`), plus the `?v=` strings in `index.html`, both manifests' `start_url`, and the `<link>`/`<script>` tags at the top of `app.html` and `skandi.html`. **Changing either app means bumping all of them to the same value** — a stale `CACHE_VERSION` leaves the offline shell frozen at the previous deploy.
+
+### Frontend (`skandi.html`)
+Same architecture as `app.html` — a single ~4,500-line vanilla-JS file, Supabase from CDN, no build
+step — but a completely separate app with its own navy/ice design system and its own i18n (`t()`,
+Spanish/English). Views (`home`, `train`, `crew`, `progress`, `body`, `library`) are swapped by
+`setView()`, which re-renders `#screen` from template strings.
+
+Pure logic lives in sibling modules, never inline: `skandi-recovery.js` (per-muscle fatigue decay,
+the engine behind the body figure), `body-figure.js` (the 11-region SVG) and `skandi-nutrition.js`
+(targets, daily totals, portion scaling). All three are DOM-free and Supabase-free so they can be
+exercised from Node — keep new engines to that pattern rather than growing `skandi.html`.
+
+The `food` view is the nutrition tab. Its ordering rule is load-bearing: the add-meal chooser lists
+saved dish and catalog food (free, instant, offline) above photo and text (AI, priced in the label).
+Editing an item's grams rescales it by density and upserts the correction into `skandi_foods` —
+that's the mechanism that makes the AI progressively unnecessary. Adding it took the tab bar from 6
+to 7 columns, which is why the Spanish labels for crew and library were shortened to fit 375px.
 
 ### Backend (`api/*.js`)
 Vercel serverless functions. Files prefixed with `_` (`_plans.js`, `_fulfillment.js`) are shared modules, not routes.
@@ -38,6 +66,13 @@ Key routes:
 - `create-checkout-session.js` / `confirm-checkout-session.js` — Stripe Checkout flow
 - `validate-access-code.js` — physical keypad validation; authenticated with `ACCESS_API_SECRET` bearer token
 - `request-door-open.js` — in-app door open button; authenticated with Supabase JWT + GPS proximity check, then triggers Shelly Cloud relay API
+- `analyze-meal.js` — Skandi Fit: a meal photo and/or a written description → Claude (vision) with
+  a strict JSON-Schema `output_config.format` → `skandi_meal_items`. Supabase JWT auth; the photo is
+  pulled from the private bucket with service-role. Daily quota is enforced in the DB
+  (`skandi_bump_ai_usage`, migration 074), never in the client. Needs `ANTHROPIC_API_KEY`
+- `lookup-barcode.js` — Skandi Fit: barcode → Open Food Facts → a `skandi_foods` row. **No AI, no
+  quota** — a packaged product ships its own macros; only the portion is unknown, and that's the
+  client's question to ask
 - `search-users.js` — admin user search (service-role Supabase query)
 - `sync-stripe-payments.js` — admin-triggered payment sync
 
@@ -84,6 +119,36 @@ a silent overwrite.
 - `booking_guest_passes` — group session guest passes (from `group-guest-passes.sql`)
 - `admin_notifs` — in-app notifications for admin
 
+**Skandi Fit tables** (all prefixed `skandi_`, migrations 040–073). They share `profiles` with HABIT
+and nothing else:
+- `skandi_exercises` — Skandi's own exercise catalog, separate from HABIT's `exercise_catalog`.
+  `muscles` is a jsonb split (`{"Chest":60,"Triceps":25}`) summing to ~100, in the recovery engine's
+  muscle names — that split is what `skandi-recovery.js` consumes
+- `skandi_templates` / `skandi_template_items` — routines; `weekday` is the single source of truth
+  for "my week" (`skandi_programs` / `skandi_program_days` just re-stamp it, migration 069)
+- `skandi_sessions` / `skandi_sets` — logged workouts, with `rir` per set and `report_*` recovery
+  fields on the session (064)
+- `skandi_external_activities` / `skandi_activity_templates` — cardio: running, cycling, swimming,
+  rowing, walking; manual entry with RPE, heart rate and target zone (046, 063)
+- `skandi_training_blocks` (N build weeks + deload, 066), `skandi_bodyweight_logs` (067),
+  `skandi_progression_state` (calisthenics progressions)
+- `skandi_foods` / `skandi_meals` / `skandi_meal_items` / `skandi_nutrition_targets` /
+  `skandi_ai_usage` — nutrition (073, 074, 075). Meal macros are stored **absolute** per row, meal
+  totals are maintained by a trigger (never by the app), and meals are strictly private — no crew
+  visibility, and the `skandi-meals` storage bucket is private, unlike the public
+  `skandi-exercise-media` (058). A meal is registered four ways (`input_kind`): photo, free text,
+  barcode, or manual. Cooking fat is never folded into a dish — the model returns it as its own
+  `is_cooking_fat` row, and `skandi_meals.venue` (casa/restaurante/fonda) decides both how much it
+  estimates and whether that row arrives checked. Unchecking sets `included = false`, which drops
+  it from the trigger's sum without destroying it
+- `skandi_dishes` / `skandi_dish_items` — saved dishes (076). **The cost ladder for logging a meal
+  is: saved dish → catalog food → AI.** A dish is snapshotted from an already-corrected meal
+  (`skandi_save_meal_as_dish`), so it carries the user's fixes, not the model's guess; logging it
+  again is `skandi_create_meal_from_dish` with a scale factor — zero tokens, works offline.
+  `skandi_add_food_to_meal` covers "180 g of chicken", which is a multiplication, not a vision
+  problem. The `skandi_quick_picks` view is what the UI should show before ever opening the camera.
+  Deliberately, saved dishes are NOT sent to the model: the saving is in not calling it
+
 ### Time & Slots
 All time logic uses **America/Mazatlan (UTC−7)**. The constant `MAZ_UTC_OFFSET_H = 7` converts UTC midnight to Mazatlán midnight. A day has 48 slots of 30 minutes. A typical booking is `slots_used = 3` (90 min). Access windows open 10 minutes before a booking's `start_idx`.
 
@@ -110,9 +175,12 @@ SHELLY_DEVICE_ID
 SHELLY_CHANNEL           # default 0
 SHELLY_TURN              # 'off' releases the magnetic lock
 PUBLIC_APP_URL
+ANTHROPIC_API_KEY        # Skandi Fit meal analysis (api/analyze-meal.js)
+MEAL_AI_DAILY_LIMIT      # default 25 analyses per user per day
+MEAL_AI_MODEL            # default claude-opus-5
 ```
 
 `LOCATION_EXEMPT_EMAILS` in `request-door-open.js` lists emails that bypass GPS checks.
 
 ### SQL Migrations
-All migrations live in `migrations/` with numeric prefixes (`001_schema.sql` … `017_community_images_storage.sql`). Run them in order in the Supabase SQL Editor. New migrations follow the same naming convention. The API handlers detect missing tables and return descriptive error messages pointing to the required migration.
+All migrations live in `migrations/` with numeric prefixes (`001_schema.sql` … `073_skandi_nutrition.sql`). Run them in order in the Supabase SQL Editor. New migrations follow the same naming convention. The API handlers detect missing tables and return descriptive error messages pointing to the required migration.

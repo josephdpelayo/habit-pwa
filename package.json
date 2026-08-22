@@ -4,9 +4,11 @@
   "private": true,
   "scripts": {
     "check": "for f in api/*.js lib/*.js sw.js; do node --check \"$f\" || exit 1; done",
+    "check:sql": "python3 scripts/check-sql.py",
     "lint": "eslint api/*.js sw.js"
   },
   "dependencies": {
+    "@anthropic-ai/sdk": "^0.120.0",
     "@capacitor/android": "^8.3.4",
     "@capacitor/cli": "^8.3.4",
     "@capacitor/core": "^8.3.4",

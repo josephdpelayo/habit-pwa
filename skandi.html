@@ -4,10 +4,18 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
 <meta name="theme-color" content="#012456">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="Skandi Fit">
+<meta name="application-name" content="Skandi Fit">
+<link rel="manifest" href="/skandi-manifest.json?v=20260822-02">
+<link rel="apple-touch-icon" sizes="180x180" href="/icons/skandi-180.png?v=20260822-02">
+<link rel="icon" type="image/png" sizes="192x192" href="/icons/skandi-192.png?v=20260822-02">
 <title>Skandi Fit</title>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="skandi-recovery.js"></script>
-<script src="body-figure.js"></script>
+<script src="/skandi-recovery.js?v=20260822-02"></script>
+<script src="/body-figure.js?v=20260822-02"></script>
+<script src="/skandi-nutrition.js?v=20260822-02"></script>
 <style>
 :root{
   --bg:#eef4f8;
@@ -95,8 +103,49 @@ p{color:var(--muted);line-height:1.45;margin:0}
 .btn.danger{color:var(--pink)}
 .btn.small{padding:9px 12px;border-radius:10px;font-size:14px}
 .tabs{position:fixed;left:0;right:0;bottom:0;background:rgba(255,255,255,.88);backdrop-filter:blur(18px);border-top:1px solid rgba(1,36,86,.10);z-index:20;box-shadow:0 -16px 34px rgba(1,36,86,.10)}
-.tabs-inner{max-width:820px;margin:0 auto;display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:2px;padding:6px 6px calc(6px + env(safe-area-inset-bottom))}
+.tabs-inner{max-width:820px;margin:0 auto;display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:2px;padding:6px 6px calc(6px + env(safe-area-inset-bottom))}
 .tab{background:transparent;color:#727482;display:grid;gap:2px;place-items:center;font-weight:900;font-size:11px;padding:6px 1px;border-radius:8px;min-height:50px}
+.tab span{max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+@media(max-width:430px){.tab{font-size:9.5px;padding:6px 0}.tab svg{width:20px;height:20px}}
+/* ── Comida ─────────────────────────────────────────────────────────────── */
+.kcal-ring{width:118px;height:118px;border-radius:50%;display:grid;place-items:center;flex:0 0 auto;
+  background:conic-gradient(var(--lime) var(--p),rgba(1,36,86,.10) 0);position:relative}
+.kcal-ring.over{background:conic-gradient(var(--pink) 100%,var(--pink) 0)}
+.kcal-ring i{position:absolute;inset:9px;border-radius:50%;background:var(--panel);display:grid;place-items:center;text-align:center;font-style:normal;line-height:1.05}
+.kcal-ring b{display:block;font-size:25px;font-weight:1000}
+.kcal-ring small{color:var(--muted);font-size:10px;letter-spacing:.1em;text-transform:uppercase;font-weight:1000}
+.macro-grid{display:grid;gap:11px;flex:1;min-width:0}
+.macro-row .row{margin-bottom:5px;font-size:13px}
+.macro-row .bar i{background:var(--dof-navy)}
+.macro-row.p .bar i{background:var(--blue)}
+.macro-row.c .bar i{background:var(--amber)}
+.macro-row.f .bar i{background:var(--lime)}
+.meal-card{display:grid;grid-template-columns:56px 1fr auto;gap:12px;align-items:center;padding:11px;border-radius:12px;border:1px solid var(--line);background:var(--panel);margin-top:9px;cursor:pointer;text-align:left;width:100%}
+.meal-thumb{width:56px;height:56px;border-radius:10px;object-fit:cover;background:var(--panel3);display:grid;place-items:center;color:var(--muted);overflow:hidden}
+.meal-thumb img{width:100%;height:100%;object-fit:cover}
+.meal-card h3{font-size:15px;margin:0}
+.meal-card p{color:var(--muted);font-size:12px;margin:2px 0 0}
+.meal-kcal{font-weight:1000;font-size:16px;white-space:nowrap}
+.pick-row{display:flex;gap:8px;overflow-x:auto;padding:2px 0 6px;-webkit-overflow-scrolling:touch}
+.pick{flex:0 0 auto;background:var(--panel2);border:1px solid var(--line);border-radius:999px;padding:9px 14px;font-weight:900;font-size:13px;color:var(--text);display:flex;align-items:center;gap:7px}
+.pick b{font-weight:1000}
+.pick small{color:var(--muted);font-weight:900}
+.add-fab{position:fixed;right:max(14px,calc(50% - 396px));bottom:calc(84px + env(safe-area-inset-bottom));width:60px;height:60px;border-radius:50%;background:var(--dof-navy);color:#fff;display:grid;place-items:center;box-shadow:0 16px 32px rgba(1,36,86,.34);z-index:19}
+.item-row{display:grid;grid-template-columns:26px 1fr 74px;gap:9px;align-items:center;padding:9px 0;border-top:1px solid var(--line)}
+.item-row:first-of-type{border-top:0}
+.item-row .lbl{min-width:0}
+.item-row .lbl strong{display:block;font-size:14px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.item-row .lbl small{color:var(--muted);font-size:11.5px}
+.item-row input.g{width:74px;padding:8px;text-align:right;border:1px solid var(--line);border-radius:9px;background:#fff;font-weight:900}
+.item-row.off{opacity:.45}
+.item-row.fat{background:rgba(240,162,46,.07);border-radius:9px;padding:9px 7px;border-top:0;margin-top:6px}
+.conf{display:inline-block;width:7px;height:7px;border-radius:50%;margin-right:5px;vertical-align:middle}
+.conf.hi{background:var(--green)}.conf.mid{background:var(--amber)}.conf.lo{background:var(--pink)}
+.input-choice{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-top:6px}
+.input-choice button{background:var(--panel2);border:1px solid var(--line);border-radius:12px;padding:15px 11px;display:grid;gap:5px;place-items:center;font-weight:1000;color:var(--text);text-align:center;font-size:13px}
+.input-choice button small{color:var(--muted);font-weight:900;font-size:10.5px;letter-spacing:.03em}
+.input-choice button:disabled{opacity:.5}
+.venue-row{display:grid;grid-template-columns:repeat(3,1fr);gap:7px;margin-top:6px}
 .tab svg{width:22px;height:22px;stroke:currentColor;stroke-width:2.4;fill:none}
 .tab.active{color:var(--dof-navy);background:rgba(1,36,86,.08)}
 .week{display:grid;gap:9px}
@@ -335,6 +384,7 @@ textarea.field{min-height:112px;text-align:left;resize:vertical}
   <div class="tabs-inner">
     <button class="tab active" data-view="home" onclick="setView('home')"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg><span data-i18n="tab.home">Home</span></button>
     <button class="tab" data-view="train" onclick="setView('train')"><svg viewBox="0 0 24 24"><path d="M4 14h2m12 0h2M7 10v8m10-8v8M9 12h6"/></svg><span data-i18n="tab.train">Train</span></button>
+    <button class="tab" data-view="food" onclick="setView('food')"><svg viewBox="0 0 24 24"><path d="M5 3v8a3 3 0 0 0 6 0V3"/><path d="M8 11v10"/><path d="M17 3c-1.5 2-2 3.5-2 6 0 1.7.7 2.6 2 3v9"/></svg><span data-i18n="tab.food">Food</span></button>
     <button class="tab" data-view="crew" onclick="setView('crew')"><svg viewBox="0 0 24 24"><path d="M16 11a4 4 0 1 0-8 0"/><path d="M4 21a8 8 0 0 1 16 0"/></svg><span data-i18n="tab.crew">Crew</span></button>
     <button class="tab" data-view="progress" onclick="setView('progress')"><svg viewBox="0 0 24 24"><path d="M4 19V5"/><path d="M4 19h16"/><path d="m7 15 3-3 3 2 5-7"/></svg><span data-i18n="tab.progress">Progress</span></button>
     <button class="tab" data-view="body" onclick="setView('body')"><svg viewBox="0 0 24 24"><circle cx="12" cy="6" r="3"/><path d="M6 21v-2a6 6 0 0 1 12 0v2"/></svg><span data-i18n="tab.body">Body</span></button>
@@ -345,6 +395,10 @@ textarea.field{min-height:112px;text-align:left;resize:vertical}
 <div class="modal" id="modal"><div class="modal-card" id="modalCard"></div></div>
 
 <script>
+// Versión compartida con app.html (APP_VERSION) y sw.js (CACHE_VERSION): un solo service
+// worker sirve las dos apps, así que una sola cadena las invalida a las dos. Al cambiarla
+// hay que actualizarla también en los ?v= del <head>, en index.html y en los dos manifests.
+const SKANDI_VERSION='20260822-02';
 const SUPABASE_URL='https://pmpjteuqjusbiduevbwq.supabase.co';
 const SUPABASE_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBtcGp0ZXVxanVzYmlkdWV2YndxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc2OTI1NjUsImV4cCI6MjA5MzI2ODU2NX0.XbMzZoo2yqtrD8znLnyo_1zDfrdJAvAPj1lqGOyXnLw';
 const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
@@ -373,6 +427,40 @@ en:{
   'auth.profileError':'Could not set up your profile: {msg}. Try signing out and back in.',
 
   'tab.home':'Home','tab.train':'Train','tab.crew':'Crew','tab.progress':'Progress','tab.body':'Body','tab.library':'Library',
+  'tab.food':'Food',
+
+  'food.title':'Food','food.today':'Today','food.eaten':'eaten','food.left':'left','food.over':'over',
+  'food.noTarget':'Set a daily target','food.noTargetHint':'Log your bodyweight and we suggest one.',
+  'food.setTarget':'Daily target','food.protein':'Protein','food.carbs':'Carbs','food.fat':'Fat',
+  'food.addMeal':'Add food','food.empty':'Nothing logged today.','food.emptyHint':'Start with a photo, or a saved dish.',
+  'food.quickPicks':'Repeat something','food.dishes':'Saved dishes','food.recent':'Recent foods',
+  'food.analyzing':'Analyzing…','food.failed':'Analysis failed','food.retry':'Retry','food.tapToFix':'Tap to review',
+  'food.aiLeft':'{n} AI analyses left today',
+  'food.how':'How do you want to log it?',
+  'food.byDish':'Saved dish','food.byDishHint':'Free · instant','food.byFood':'From catalog','food.byFoodHint':'Free · instant',
+  'food.byPhoto':'Photo','food.byPhotoHint':'AI · ~2¢','food.byText':'Describe it','food.byTextHint':'AI · ~1¢',
+  'food.byBarcode':'Barcode','food.byBarcodeHint':'Free','food.mealType':'Meal','food.venue':'Where',
+  'venue.casa':'Home','venue.restaurante':'Restaurant','venue.fonda':'Diner','venue.otro':'Other',
+  'meal.desayuno':'Breakfast','meal.comida':'Lunch','meal.cena':'Dinner','meal.snack':'Snack',
+  'food.describe':'What did you eat?','food.describePh':'two eggs with beans and a tortilla',
+  'food.context':'Context (optional)','food.contextPh':'half portion, extra cream…',
+  'food.photoHint':'A photo of the plate. Adding context makes it much more accurate.',
+  'food.takePhoto':'Choose photo','food.analyze':'Analyze','food.uploading':'Uploading…',
+  'food.barcodePh':'Barcode number','food.scan':'Scan','food.scanning':'Point at the barcode',
+  'food.noScanner':'Your browser cannot scan. Type the number.',
+  'food.grams':'Grams','food.portion':'Portion','food.portionOf':'How much of {name}?',
+  'food.serving':'1 serving = {g} g','food.addToMeal':'Add',
+  'food.items':'Items','food.cookingFat':'Cooking fat','food.cookingFatHint':'Uncheck it if you cooked without oil.',
+  'food.saveAsDish':'Save as dish','food.dishName':'Dish name','food.dishSaved':'Saved as “{name}”',
+  'food.useDish':'Log it','food.scale':'Portion','food.scaleHalf':'½','food.scaleOne':'1','food.scaleOneHalf':'1½','food.scaleTwo':'2',
+  'food.delete':'Delete meal','food.deleteConfirm':'Delete this meal?','food.save':'Save',
+  'food.targetKcal':'Calories','food.targetMode':'Goal','food.mode.deficit':'Lose fat',
+  'food.mode.mantenimiento':'Maintain','food.mode.superavit':'Gain','food.activity':'Activity level',
+  'food.suggest':'Suggest from my weight','food.needWeight':'Log your bodyweight first (Body tab).',
+  'food.targetHint':'A starting point, not a verdict: adjust it against your weight trend in 2-3 weeks.',
+  'food.errNoInput':'Write what you ate or pick a photo.','food.errGrams':'Enter the grams.',
+  'food.errName':'The dish needs a name.','food.searchPh':'Search food…','food.noMatches':'Nothing matches.',
+  'food.newFood':'New food','food.per100':'Per 100 g','food.name':'Name',
 
   'settings.title':'Settings','settings.language':'Language','settings.units':'Default weight unit',
   'settings.account':'Account','settings.signedInAs':'Signed in as','settings.signOut':'Sign out',
@@ -680,7 +768,41 @@ es:{
   'auth.created':'Cuenta creada. Revisa tu correo si hace falta confirmarla y luego inicia sesión.',
   'auth.profileError':'No se pudo crear tu perfil: {msg}. Cierra sesión y vuelve a entrar.',
 
-  'tab.home':'Inicio','tab.train':'Entrenar','tab.crew':'Tripulación','tab.progress':'Progreso','tab.body':'Cuerpo','tab.library':'Biblioteca',
+  'tab.home':'Inicio','tab.train':'Entrenar','tab.crew':'Crew','tab.progress':'Progreso','tab.body':'Cuerpo','tab.library':'Catálogo',
+  'tab.food':'Comida',
+
+  'food.title':'Comida','food.today':'Hoy','food.eaten':'comidas','food.left':'restan','food.over':'de más',
+  'food.noTarget':'Pon tu meta diaria','food.noTargetHint':'Registra tu peso y te sugerimos una.',
+  'food.setTarget':'Meta diaria','food.protein':'Proteína','food.carbs':'Carbos','food.fat':'Grasa',
+  'food.addMeal':'Agregar comida','food.empty':'Nada registrado hoy.','food.emptyHint':'Empieza con una foto, o con un platillo guardado.',
+  'food.quickPicks':'Repetir algo','food.dishes':'Platillos guardados','food.recent':'Alimentos recientes',
+  'food.analyzing':'Analizando…','food.failed':'Falló el análisis','food.retry':'Reintentar','food.tapToFix':'Toca para revisar',
+  'food.aiLeft':'Te quedan {n} análisis con IA hoy',
+  'food.how':'¿Cómo lo quieres registrar?',
+  'food.byDish':'Platillo guardado','food.byDishHint':'Gratis · al instante','food.byFood':'Del catálogo','food.byFoodHint':'Gratis · al instante',
+  'food.byPhoto':'Foto','food.byPhotoHint':'IA · ~2¢','food.byText':'Descríbelo','food.byTextHint':'IA · ~1¢',
+  'food.byBarcode':'Código de barras','food.byBarcodeHint':'Gratis','food.mealType':'Comida','food.venue':'Dónde',
+  'venue.casa':'Casa','venue.restaurante':'Restaurante','venue.fonda':'Fonda','venue.otro':'Otro',
+  'meal.desayuno':'Desayuno','meal.comida':'Comida','meal.cena':'Cena','meal.snack':'Snack',
+  'food.describe':'¿Qué comiste?','food.describePh':'dos huevos con frijoles y una tortilla',
+  'food.context':'Contexto (opcional)','food.contextPh':'media porción, con crema extra…',
+  'food.photoHint':'Una foto del plato. Agregar contexto la hace mucho más precisa.',
+  'food.takePhoto':'Elegir foto','food.analyze':'Analizar','food.uploading':'Subiendo…',
+  'food.barcodePh':'Número del código','food.scan':'Escanear','food.scanning':'Apunta al código de barras',
+  'food.noScanner':'Tu navegador no puede escanear. Escribe el número.',
+  'food.grams':'Gramos','food.portion':'Porción','food.portionOf':'¿Cuánto de {name}?',
+  'food.serving':'1 porción = {g} g','food.addToMeal':'Agregar',
+  'food.items':'Alimentos','food.cookingFat':'Aceite de cocción','food.cookingFatHint':'Quítale la palomita si cocinaste sin aceite.',
+  'food.saveAsDish':'Guardar como platillo','food.dishName':'Nombre del platillo','food.dishSaved':'Guardado como «{name}»',
+  'food.useDish':'Registrarlo','food.scale':'Porción','food.scaleHalf':'½','food.scaleOne':'1','food.scaleOneHalf':'1½','food.scaleTwo':'2',
+  'food.delete':'Borrar comida','food.deleteConfirm':'¿Borrar esta comida?','food.save':'Guardar',
+  'food.targetKcal':'Calorías','food.targetMode':'Objetivo','food.mode.deficit':'Bajar grasa',
+  'food.mode.mantenimiento':'Mantener','food.mode.superavit':'Subir','food.activity':'Nivel de actividad',
+  'food.suggest':'Sugerir con mi peso','food.needWeight':'Registra tu peso primero (tab Cuerpo).',
+  'food.targetHint':'Es un punto de partida, no un veredicto: ajústala contra la tendencia de tu peso en 2-3 semanas.',
+  'food.errNoInput':'Escribe qué comiste o elige una foto.','food.errGrams':'Pon los gramos.',
+  'food.errName':'El platillo necesita nombre.','food.searchPh':'Buscar alimento…','food.noMatches':'Nada coincide.',
+  'food.newFood':'Alimento nuevo','food.per100':'Por 100 g','food.name':'Nombre',
 
   'settings.title':'Configuración','settings.language':'Idioma','settings.units':'Unidad de peso por defecto',
   'settings.account':'Cuenta','settings.signedInAs':'Sesión iniciada como','settings.signOut':'Cerrar sesión',
@@ -1051,7 +1173,7 @@ const EXERCISE_PRESETS={
 };
 
 const ACTIVE_WORKOUT_MAX_HOURS=18;
-const state={user:null,profile:null,view:'home',authMode:'login',exercises:[],templates:[],items:[],sessions:[],sets:[],externalActivities:[],activityTemplates:[],progressionState:[],trainingBlocks:[],bodyweightLogs:[],programs:[],programDays:[],active:null,activeItems:[],timer:null,elapsed:0,rest:0,restTotal:0,bodyFlip:'front',weightUnit:localStorage.getItem('skandi_weight_unit')||'kg',weightUnitOverrides:(()=>{try{return JSON.parse(localStorage.getItem('skandi_weight_unit_overrides')||'{}');}catch(e){return {};}})(),expandedRoutines:new Set(),progressTab:'summary',progressQuery:'',progressMetric:'best',historyFilter:{month:'all',title:'all'},crewFeedLimit:6,swapTarget:null,swapQuery:'',addExOpen:false,addExQuery:'',pausedMs:0,pausedAt:null,floatTimerOpen:false};
+const state={user:null,profile:null,view:'home',authMode:'login',exercises:[],templates:[],items:[],sessions:[],sets:[],externalActivities:[],activityTemplates:[],progressionState:[],trainingBlocks:[],bodyweightLogs:[],programs:[],programDays:[],active:null,activeItems:[],timer:null,elapsed:0,rest:0,restTotal:0,bodyFlip:'front',weightUnit:localStorage.getItem('skandi_weight_unit')||'kg',weightUnitOverrides:(()=>{try{return JSON.parse(localStorage.getItem('skandi_weight_unit_overrides')||'{}');}catch(e){return {};}})(),expandedRoutines:new Set(),progressTab:'summary',progressQuery:'',progressMetric:'best',historyFilter:{month:'all',title:'all'},crewFeedLimit:6,swapTarget:null,swapQuery:'',addExOpen:false,addExQuery:'',pausedMs:0,pausedAt:null,floatTimerOpen:false,meals:[],mealItems:[],foods:[],dishes:[],dishItems:[],nutritionTargets:null,aiCallsToday:0,foodDayOffset:0,foodPicker:{query:'',mealId:null},pendingMeal:null};
 let builderState={selected:new Map(),group:'All'};
 
 const $=id=>document.getElementById(id);
@@ -1233,6 +1355,9 @@ function dedupeById(rows){
 }
 
 async function loadAll(){
+  // La nutrición vive en sus propias tablas y no la necesita nada de abajo: se dispara en
+  // paralelo y se espera al final, para no sumarle un viaje redondo al arranque.
+  const nutritionLoad=loadNutrition();
   // Sessions/sets are split into "own" (unbounded — this is the data an active workout and a
   // user's own stats/history depend on, and silently truncating it is a real bug: it can make
   // exercises vanish mid-workout or PRs disappear once the crew collectively logs enough rows)
@@ -1299,6 +1424,7 @@ async function loadAll(){
   // of the app (and the week itself) works fine without programs.
   state.programs=programs||[];
   state.programDays=programDays||[];
+  await nutritionLoad;
   hydrateActiveWorkout();
 }
 
@@ -1360,7 +1486,7 @@ function setView(view){
 }
 
 function render(){
-  const map={home:homeView,train:trainView,crew:crewView,progress:progressView,body:bodyView,library:libraryView};
+  const map={home:homeView,train:trainView,food:foodView,crew:crewView,progress:progressView,body:bodyView,library:libraryView};
   $('screen').innerHTML=map[state.view]();
 }
 
@@ -4437,12 +4563,729 @@ new MutationObserver(()=>{
 
 function empty(msg){ return `<div class="empty">${esc(msg)}</div>`; }
 
+// ═══════════════════════════════════════════════════════════════════════════
+// Comida
+//
+// La regla que ordena toda esta pantalla: la IA es el último recurso. Registrar algo que ya
+// comiste antes (un platillo guardado, un alimento del catálogo) no gasta un token, es
+// instantáneo y funciona sin señal. Solo lo que nunca has comido pasa por el modelo.
+// ═══════════════════════════════════════════════════════════════════════════
+
+const MEAL_TYPES=['desayuno','comida','cena','snack'];
+const VENUES=['casa','restaurante','fonda','otro'];
+const MEAL_PHOTO_MAX_SIDE=1024;   // la API de vision no gana nada con más de ~1568 px
+const MEAL_PHOTO_QUALITY=0.8;
+const AI_DAILY_LIMIT=25;          // espejo de MEAL_AI_DAILY_LIMIT; el tope real lo aplica la base
+
+const dayKey=d=>{const x=new Date(d);return `${x.getFullYear()}-${String(x.getMonth()+1).padStart(2,'0')}-${String(x.getDate()).padStart(2,'0')}`;};
+const foodDay=()=>{const d=new Date();d.setDate(d.getDate()+state.foodDayOffset);return dayKey(d);};
+const mealsOfDay=key=>state.meals.filter(m=>dayKey(m.eaten_at)===key).sort((a,b)=>new Date(b.eaten_at)-new Date(a.eaten_at));
+const itemsOfMeal=id=>state.mealItems.filter(i=>i.meal_id===id).sort((a,b)=>a.sort_order-b.sort_order);
+const itemsOfDish=id=>state.dishItems.filter(i=>i.dish_id===id).sort((a,b)=>a.sort_order-b.sort_order);
+const mealTypeLabel=v=>t(`meal.${v}`);
+const venueLabel=v=>t(`venue.${v||'otro'}`);
+const latestWeightKg=()=>state.bodyweightLogs.length?Number(state.bodyweightLogs[0].weight_kg):null;
+const aiLeft=()=>Math.max(0,AI_DAILY_LIMIT-state.aiCallsToday);
+
+async function loadNutrition(){
+  if(!state.user) return;
+  // 45 días: suficiente para la tira de tendencia semanal sin traerse el historial entero.
+  const since=new Date();since.setDate(since.getDate()-45);
+  const [{data:meals},{data:items},{data:foods},{data:dishes},{data:dishItems},{data:targets},{data:usage}]=await Promise.all([
+    sb.from('skandi_meals').select('*').eq('user_id',state.user.id).gte('eaten_at',since.toISOString()).order('eaten_at',{ascending:false}),
+    sb.from('skandi_meal_items').select('*').eq('user_id',state.user.id).order('sort_order'),
+    sb.from('skandi_foods').select('*').or(`user_id.eq.${state.user.id},user_id.is.null`).order('times_used',{ascending:false}).limit(300),
+    sb.from('skandi_dishes').select('*').eq('user_id',state.user.id).order('times_used',{ascending:false}),
+    sb.from('skandi_dish_items').select('*').eq('user_id',state.user.id).order('sort_order'),
+    sb.from('skandi_nutrition_targets').select('*').eq('user_id',state.user.id).maybeSingle(),
+    sb.from('skandi_ai_usage').select('calls').eq('user_id',state.user.id).eq('day',dayKey(new Date())).maybeSingle()
+  ]);
+  // Todo cae a vacío si las migraciones 073-076 no se han corrido: el resto de la app no
+  // tiene por qué dejar de funcionar porque falte la parte de nutrición.
+  state.meals=meals||[];
+  state.mealItems=items||[];
+  state.foods=foods||[];
+  state.dishes=dishes||[];
+  state.dishItems=dishItems||[];
+  state.nutritionTargets=targets||null;
+  state.aiCallsToday=usage?.calls||0;
+}
+
+// ---- Vista ----
+
+function foodView(){
+  const key=foodDay();
+  const meals=mealsOfDay(key);
+  const totals=SkandiNutrition.dayTotals(meals);
+  const targets=state.nutritionTargets;
+  const isToday=state.foodDayOffset===0;
+  const label=isToday?t('food.today'):new Date(key+'T12:00:00').toLocaleDateString(LANG==='es'?'es-MX':'en-US',{weekday:'long',day:'numeric',month:'short'});
+  return `
+    <section class="hero">
+      <div class="row">
+        <div>
+          <div class="eyebrow">${esc(t('food.title'))}</div>
+          <h1 style="text-transform:capitalize">${esc(label)}</h1>
+        </div>
+        <div class="row" style="gap:6px">
+          <button class="chip" onclick="shiftFoodDay(-1)" aria-label="←">←</button>
+          <button class="chip" onclick="shiftFoodDay(1)" ${isToday?'disabled style="opacity:.4"':''} aria-label="→">→</button>
+        </div>
+      </div>
+    </section>
+    ${targets?dayRingCard(totals,targets):noTargetCard()}
+    <section class="card">
+      <div class="row"><div class="eyebrow">${esc(t('food.items'))}</div>
+        <span class="chip">${meals.length}</span></div>
+      ${meals.length?meals.map(mealCardHtml).join(''):empty(t('food.empty'))}
+      ${meals.length?'':`<p class="muted" style="margin-top:8px">${esc(t('food.emptyHint'))}</p>`}
+    </section>
+    ${quickPicksCard()}
+    <button class="add-fab" onclick="openAddMeal()" aria-label="${esc(t('food.addMeal'))}">${icon('plus',26)}</button>`;
+}
+
+function dayRingCard(totals,targets){
+  const left=SkandiNutrition.remaining(targets,totals);
+  const p=SkandiNutrition.pct(totals.kcal,targets.kcal_target);
+  const over=left.kcal<0;
+  return `<section class="card click-card" onclick="openTargets()">
+    <div class="row" style="gap:16px;align-items:center">
+      <div class="kcal-ring ${over?'over':''}" style="--p:${Math.min(p,100)}%">
+        <i><span><b>${Math.abs(left.kcal)}</b><small>${esc(over?t('food.over'):t('food.left'))}</small></span></i>
+      </div>
+      <div class="macro-grid">
+        ${macroRowHtml('p',t('food.protein'),totals.protein_g,targets.protein_g_target)}
+        ${macroRowHtml('c',t('food.carbs'),totals.carbs_g,targets.carbs_g_target)}
+        ${macroRowHtml('f',t('food.fat'),totals.fat_g,targets.fat_g_target)}
+      </div>
+    </div>
+    <p class="muted" style="margin-top:10px;font-size:12px">${Math.round(totals.kcal)} / ${targets.kcal_target} kcal · ${esc(t('food.aiLeft',{n:aiLeft()}))}</p>
+  </section>`;
+}
+
+function macroRowHtml(kind,label,value,target){
+  const p=SkandiNutrition.pct(value,target);
+  return `<div class="macro-row ${kind}">
+    <div class="row"><span>${esc(label)}</span><span>${Math.round(value)} / ${target} g</span></div>
+    <div class="bar"><i style="width:${Math.min(p,100)}%"></i></div>
+  </div>`;
+}
+
+function noTargetCard(){
+  return `<section class="card click-card" onclick="openTargets()" style="border-color:rgba(0,168,200,.35)">
+    <div class="row"><div><h2>${esc(t('food.noTarget'))}</h2><p class="muted">${esc(t('food.noTargetHint'))}</p></div>${icon('chevronRight',20)}</div>
+  </section>`;
+}
+
+function mealCardHtml(m){
+  const pending=m.analysis_status==='pending';
+  const failed=m.analysis_status==='failed';
+  const time=new Date(m.eaten_at).toLocaleTimeString(LANG==='es'?'es-MX':'en-US',{hour:'numeric',minute:'2-digit'});
+  const sub=failed?t('food.failed'):pending?t('food.analyzing'):`${mealTypeLabel(m.meal_type)} · ${time}`;
+  const title=m.note||mealTypeLabel(m.meal_type);
+  const photoUrl=m.photo_path?mealPhotoUrl(m.photo_path):'';
+  return `<button class="meal-card" onclick="openMealDetail('${m.id}')">
+    <span class="meal-thumb">${photoUrl?`<img src="${esc(photoUrl)}" alt="" loading="lazy">`:icon('image',22)}</span>
+    <span class="lbl"><h3>${esc(String(title).slice(0,60))}</h3><p>${esc(sub)}</p></span>
+    <span class="meal-kcal" style="${failed?'color:var(--pink)':''}">${pending?'…':Math.round(m.kcal)+' kcal'}</span>
+  </button>`;
+}
+
+function quickPicksCard(){
+  const dishes=state.dishes.slice(0,10);
+  const foods=state.foods.filter(f=>f.user_id&&f.times_used>0).slice(0,12);
+  if(!dishes.length&&!foods.length) return '';
+  return `<section class="card">
+    <div class="eyebrow">${esc(t('food.quickPicks'))}</div>
+    ${dishes.length?`<div class="pick-row" style="margin-top:9px">${dishes.map(d=>{
+      const kcal=Math.round(SkandiNutrition.itemsTotal(itemsOfDish(d.id)).kcal);
+      return `<button class="pick" onclick="openDishLog('${d.id}')"><b>${esc(d.name)}</b><small>${kcal} kcal</small></button>`;
+    }).join('')}</div>`:''}
+    ${foods.length?`<div class="pick-row">${foods.map(f=>
+      `<button class="pick" onclick="openFoodPortion('${f.id}',null)"><b>${esc(f.name)}</b><small>${Math.round(f.kcal_100g)}/100g</small></button>`
+    ).join('')}</div>`:''}
+  </section>`;
+}
+
+function mealPhotoUrl(path){
+  // El bucket es privado, así que no hay URL pública: firmamos en el cliente y cacheamos la
+  // firma en memoria mientras dure la sesión.
+  if(!path) return '';
+  if(mealPhotoUrl.cache[path]) return mealPhotoUrl.cache[path];
+  mealPhotoUrl.cache[path]='';
+  sb.storage.from('skandi-meals').createSignedUrl(path,3600).then(({data})=>{
+    if(data?.signedUrl){
+      mealPhotoUrl.cache[path]=data.signedUrl;
+      if(state.view==='food') render();
+      // El detalle abierto también espera esa foto; sin esto se queda en blanco hasta cerrar.
+      document.querySelectorAll(`img[data-photo="${path}"]`).forEach(img=>{img.src=data.signedUrl;});
+    }
+  });
+  return '';
+}
+mealPhotoUrl.cache={};
+
+function shiftFoodDay(delta){
+  const next=state.foodDayOffset+delta;
+  if(next>0) return;
+  state.foodDayOffset=next;
+  render();
+}
+
+// ---- Alta: el selector ----
+
+function openAddMeal(){
+  const noDishes=!state.dishes.length;
+  const noFoods=!state.foods.filter(f=>f.user_id).length;
+  $('modal').classList.add('show');
+  $('modalCard').innerHTML=`
+    <div class="row"><h1>${esc(t('food.addMeal'))}</h1><button class="x" onclick="closeModal()" aria-label="${esc(t('common.close'))}">${icon('close',20)}</button></div>
+    <p class="muted">${esc(t('food.how'))}</p>
+    <div class="input-choice">
+      <button onclick="openDishPicker()" ${noDishes?'disabled':''}>${icon('check',22)}${esc(t('food.byDish'))}<small>${esc(t('food.byDishHint'))}</small></button>
+      <button onclick="openFoodPicker(null)" ${noFoods?'disabled':''}>${icon('plus',22)}${esc(t('food.byFood'))}<small>${esc(t('food.byFoodHint'))}</small></button>
+      <button onclick="openBarcode()">${icon('image',22)}${esc(t('food.byBarcode'))}<small>${esc(t('food.byBarcodeHint'))}</small></button>
+      <button onclick="openMealInput('text')">${icon('edit',22)}${esc(t('food.byText'))}<small>${esc(t('food.byTextHint'))}</small></button>
+    </div>
+    <button class="btn primary" style="width:100%;margin-top:10px" onclick="openMealInput('photo')">${icon('image',20)} ${esc(t('food.byPhoto'))} · ${esc(t('food.byPhotoHint'))}</button>`;
+}
+
+// ---- Alta: foto y/o texto (los dos caminos que sí usan IA) ----
+
+function openMealInput(kind){
+  state.pendingMeal={kind,blob:null,dataUrl:null};
+  $('modal').classList.add('show');
+  $('modalCard').innerHTML=`
+    <div class="row"><h1>${esc(kind==='photo'?t('food.byPhoto'):t('food.byText'))}</h1><button class="x" onclick="closeModal()" aria-label="${esc(t('common.close'))}">${icon('close',20)}</button></div>
+    ${kind==='photo'?`
+      <p class="muted">${esc(t('food.photoHint'))}</p>
+      <label class="btn" style="width:100%;margin-top:8px">${icon('image',20)} <span id="photoBtnLabel">${esc(t('food.takePhoto'))}</span>
+        <input id="mealPhoto" type="file" accept="image/*" capture="environment" style="display:none" onchange="onMealPhotoPicked(this)">
+      </label>
+      <div id="mealPhotoPreview"></div>`:''}
+    <label class="eyebrow">${esc(kind==='photo'?t('food.context'):t('food.describe'))}</label>
+    <textarea id="mealDesc" class="field" placeholder="${esc(kind==='photo'?t('food.contextPh'):t('food.describePh'))}"></textarea>
+    <label class="eyebrow">${esc(t('food.mealType'))}</label>
+    <select id="mealType" class="field left">${MEAL_TYPES.map(v=>`<option value="${v}" ${v===guessMealType()?'selected':''}>${esc(mealTypeLabel(v))}</option>`).join('')}</select>
+    <label class="eyebrow">${esc(t('food.venue'))}</label>
+    <div class="venue-row">${VENUES.slice(0,3).map((v,i)=>
+      `<button type="button" class="chip venue-chip ${i===0?'active':''}" data-venue="${v}" onclick="pickVenue('${v}')">${esc(venueLabel(v))}</button>`).join('')}</div>
+    <p class="muted" style="font-size:12px;margin-top:8px">${esc(t('food.cookingFatHint'))}</p>
+    <button id="mealGo" class="btn primary" style="width:100%;margin-top:12px" onclick="submitMealForAnalysis()">${esc(t('food.analyze'))}</button>`;
+}
+
+// La hora decide el tipo de comida por default: nadie quiere elegir "desayuno" a las 8 am.
+function guessMealType(){
+  const h=new Date().getHours();
+  return h<11?'desayuno':h<17?'comida':h<22?'cena':'snack';
+}
+
+function pickVenue(v){
+  document.querySelectorAll('.venue-chip').forEach(b=>b.classList.toggle('active',b.dataset.venue===v));
+}
+const pickedVenue=()=>document.querySelector('.venue-chip.active')?.dataset.venue||'casa';
+
+async function onMealPhotoPicked(input){
+  const file=input.files&&input.files[0];
+  if(!file) return;
+  try{
+    const blob=await compressImage(file);
+    state.pendingMeal.blob=blob;
+    const url=URL.createObjectURL(blob);
+    $('mealPhotoPreview').innerHTML=`<img src="${url}" alt="" style="width:100%;border-radius:12px;margin-top:10px;max-height:220px;object-fit:cover">`;
+    $('photoBtnLabel').textContent=`${Math.round(blob.size/1024)} KB ✓`;
+  }catch(e){
+    alert(e.message||String(e));
+  }
+}
+
+// Comprimir en el cliente no es cosmético: sube una foto de 4 MB del celular y estás pagando
+// tokens por píxeles que el modelo no aprovecha, además de tardar en subir con datos móviles.
+function compressImage(file,maxSide=MEAL_PHOTO_MAX_SIDE,quality=MEAL_PHOTO_QUALITY){
+  return new Promise((resolve,reject)=>{
+    const img=new Image();
+    const url=URL.createObjectURL(file);
+    img.onload=()=>{
+      URL.revokeObjectURL(url);
+      const scale=Math.min(1,maxSide/Math.max(img.width,img.height));
+      const canvas=document.createElement('canvas');
+      canvas.width=Math.round(img.width*scale);
+      canvas.height=Math.round(img.height*scale);
+      canvas.getContext('2d').drawImage(img,0,0,canvas.width,canvas.height);
+      canvas.toBlob(b=>b?resolve(b):reject(new Error('No se pudo procesar la imagen')),'image/jpeg',quality);
+    };
+    img.onerror=()=>{URL.revokeObjectURL(url);reject(new Error('No se pudo leer la imagen'));};
+    img.src=url;
+  });
+}
+
+async function submitMealForAnalysis(){
+  const pending=state.pendingMeal;
+  if(!pending) return;
+  const desc=$('mealDesc').value.trim();
+  if(!pending.blob&&!desc) return alert(t('food.errNoInput'));
+  const btn=$('mealGo');
+  btn.disabled=true;btn.textContent=t('food.uploading');
+
+  try{
+    let photoPath=null;
+    if(pending.blob){
+      photoPath=`${state.user.id}/${crypto.randomUUID()}.jpg`;
+      const {error:upErr}=await sb.storage.from('skandi-meals').upload(photoPath,pending.blob,{contentType:'image/jpeg'});
+      if(upErr) throw upErr;
+    }
+    // La comida se guarda ANTES de llamar al modelo: si el análisis falla o tarda, ya quedó
+    // registrada y se puede reintentar o capturar a mano.
+    const {data:meal,error}=await sb.from('skandi_meals').insert({
+      user_id:state.user.id,
+      meal_type:$('mealType').value,
+      venue:pickedVenue(),
+      note:desc||null,
+      photo_path:photoPath,
+      input_kind:photoPath?'photo':'text',
+      analysis_status:'pending'
+    }).select().single();
+    if(error) throw error;
+
+    closeModal();
+    state.pendingMeal=null;
+    await loadNutrition();
+    setView('food');
+    analyzeMeal(meal.id);
+  }catch(e){
+    btn.disabled=false;btn.textContent=t('food.analyze');
+    alert(e.message||String(e));
+  }
+}
+
+async function analyzeMeal(mealId){
+  try{
+    const {data:{session}}=await sb.auth.getSession();
+    const res=await fetch('/api/analyze-meal',{
+      method:'POST',
+      headers:{'Content-Type':'application/json',Authorization:`Bearer ${session.access_token}`},
+      body:JSON.stringify({meal_id:mealId})
+    });
+    const body=await res.json().catch(()=>({}));
+    await loadNutrition();
+    if(state.view==='food') render();
+    if(!res.ok){
+      alert(body.message||t('food.failed'));
+      return;
+    }
+    openMealDetail(mealId);
+  }catch(e){
+    await loadNutrition();
+    if(state.view==='food') render();
+    alert(e.message||String(e));
+  }
+}
+
+async function retryAnalysis(mealId){
+  await sb.from('skandi_meals').update({analysis_status:'pending',analysis_error:null}).eq('id',mealId);
+  await loadNutrition();
+  render();
+  analyzeMeal(mealId);
+}
+
+// ---- Alta: platillo guardado (nivel 1, cero tokens) ----
+
+function openDishPicker(){
+  $('modal').classList.add('show');
+  $('modalCard').innerHTML=`
+    <div class="row"><h1>${esc(t('food.dishes'))}</h1><button class="x" onclick="closeModal()" aria-label="${esc(t('common.close'))}">${icon('close',20)}</button></div>
+    ${state.dishes.length?state.dishes.map(d=>{
+      const totals=SkandiNutrition.itemsTotal(itemsOfDish(d.id));
+      return `<button class="meal-card" onclick="openDishLog('${d.id}')">
+        <span class="meal-thumb">${icon('check',20)}</span>
+        <span class="lbl"><h3>${esc(d.name)}</h3><p>${itemsOfDish(d.id).length} · ${esc(venueLabel(d.venue))}${d.times_used?` · ×${d.times_used}`:''}</p></span>
+        <span class="meal-kcal">${Math.round(totals.kcal)}</span>
+      </button>`;
+    }).join(''):empty(t('food.empty'))}`;
+}
+
+function openDishLog(dishId){
+  const dish=state.dishes.find(d=>d.id===dishId);
+  if(!dish) return;
+  const totals=SkandiNutrition.itemsTotal(itemsOfDish(dishId));
+  $('modal').classList.add('show');
+  $('modalCard').innerHTML=`
+    <div class="row"><h1>${esc(dish.name)}</h1><button class="x" onclick="closeModal()" aria-label="${esc(t('common.close'))}">${icon('close',20)}</button></div>
+    <p class="muted">${Math.round(totals.kcal)} kcal · P ${Math.round(totals.protein_g)} · C ${Math.round(totals.carbs_g)} · G ${Math.round(totals.fat_g)}</p>
+    <label class="eyebrow">${esc(t('food.mealType'))}</label>
+    <select id="dishMealType" class="field left">${MEAL_TYPES.map(v=>`<option value="${v}" ${v===guessMealType()?'selected':''}>${esc(mealTypeLabel(v))}</option>`).join('')}</select>
+    <label class="eyebrow">${esc(t('food.scale'))}</label>
+    <div class="venue-row" style="grid-template-columns:repeat(4,1fr)">
+      ${[[0.5,'scaleHalf'],[1,'scaleOne'],[1.5,'scaleOneHalf'],[2,'scaleTwo']].map(([v,k])=>
+        `<button type="button" class="chip scale-chip ${v===1?'active':''}" data-scale="${v}" onclick="pickScale(${v})">${esc(t('food.'+k))}</button>`).join('')}
+    </div>
+    <button class="btn primary" style="width:100%;margin-top:12px" onclick="logDish('${dishId}')">${esc(t('food.useDish'))}</button>`;
+}
+
+function pickScale(v){
+  document.querySelectorAll('.scale-chip').forEach(b=>b.classList.toggle('active',Number(b.dataset.scale)===v));
+}
+
+async function logDish(dishId){
+  const scale=Number(document.querySelector('.scale-chip.active')?.dataset.scale||1);
+  const {data,error}=await sb.rpc('skandi_create_meal_from_dish',{
+    p_dish_id:dishId,p_meal_type:$('dishMealType').value,p_scale:scale
+  });
+  if(error) return alert(error.message);
+  closeModal();
+  await loadNutrition();
+  state.foodDayOffset=0;
+  setView('food');
+  if(data) openMealDetail(data);
+}
+
+// ---- Alta: alimento del catálogo (nivel 2, cero tokens) ----
+
+function openFoodPicker(mealId){
+  state.foodPicker={query:'',mealId};
+  $('modal').classList.add('show');
+  $('modalCard').innerHTML=`
+    <div class="row"><h1>${esc(t('food.byFood'))}</h1><button class="x" onclick="closeModal()" aria-label="${esc(t('common.close'))}">${icon('close',20)}</button></div>
+    <input id="foodQuery" class="field left" type="search" placeholder="${esc(t('food.searchPh'))}" oninput="renderFoodList(this.value)" autocomplete="off">
+    <div id="foodList" style="margin-top:10px">${foodListHtml('')}</div>`;
+}
+
+function renderFoodList(q){
+  state.foodPicker.query=q;
+  $('foodList').innerHTML=foodListHtml(q);
+}
+
+function foodListHtml(q){
+  const needle=(q||'').trim().toLowerCase();
+  const list=state.foods
+    .filter(f=>!needle||`${f.name} ${f.brand||''}`.toLowerCase().includes(needle))
+    .slice(0,40);
+  if(!list.length) return empty(t('food.noMatches'));
+  return list.map(f=>`<button class="meal-card" onclick="openFoodPortion('${f.id}',${state.foodPicker.mealId?`'${state.foodPicker.mealId}'`:'null'})">
+    <span class="meal-thumb">${icon('plus',20)}</span>
+    <span class="lbl"><h3>${esc(f.name)}</h3><p>${esc(f.brand||'')}${f.brand?' · ':''}${Math.round(f.kcal_100g)} kcal/100 g</p></span>
+    <span class="meal-kcal">${f.serving_grams?Math.round(f.serving_grams)+' g':''}</span>
+  </button>`).join('');
+}
+
+function openFoodPortion(foodId,mealId){
+  const food=state.foods.find(f=>f.id===foodId);
+  if(!food) return;
+  const preset=food.serving_grams||100;
+  $('modal').classList.add('show');
+  $('modalCard').innerHTML=`
+    <div class="row"><h1>${esc(t('food.portionOf',{name:food.name}))}</h1><button class="x" onclick="closeModal()" aria-label="${esc(t('common.close'))}">${icon('close',20)}</button></div>
+    <p class="muted">${Math.round(food.kcal_100g)} kcal/100 g${food.serving_grams?` · ${esc(t('food.serving',{g:Math.round(food.serving_grams)}))}`:''}</p>
+    <label class="eyebrow">${esc(t('food.grams'))}</label>
+    <input id="portionGrams" class="field" type="number" min="1" max="5000" inputmode="numeric" value="${preset}" oninput="previewPortion('${foodId}')">
+    <p id="portionPreview" class="muted" style="margin-top:8px"></p>
+    ${mealId?'':`<label class="eyebrow">${esc(t('food.mealType'))}</label>
+    <select id="portionMealType" class="field left">${MEAL_TYPES.map(v=>`<option value="${v}" ${v===guessMealType()?'selected':''}>${esc(mealTypeLabel(v))}</option>`).join('')}</select>`}
+    <button class="btn primary" style="width:100%;margin-top:12px" onclick="addFoodPortion('${foodId}',${mealId?`'${mealId}'`:'null'})">${esc(t('food.addToMeal'))}</button>`;
+  previewPortion(foodId);
+}
+
+function previewPortion(foodId){
+  const food=state.foods.find(f=>f.id===foodId);
+  const scaled=SkandiNutrition.scaleFood(food,Number($('portionGrams').value));
+  $('portionPreview').textContent=`${Math.round(scaled.kcal)} kcal · P ${scaled.protein_g} · C ${scaled.carbs_g} · G ${scaled.fat_g}`;
+}
+
+async function addFoodPortion(foodId,mealId){
+  const grams=Number($('portionGrams').value);
+  if(!grams||grams<=0) return alert(t('food.errGrams'));
+  let target=mealId;
+  if(!target){
+    const food=state.foods.find(f=>f.id===foodId);
+    const {data:meal,error}=await sb.from('skandi_meals').insert({
+      user_id:state.user.id,
+      meal_type:$('portionMealType').value,
+      note:food?food.name:null,
+      input_kind:'manual',
+      analysis_status:'manual'
+    }).select().single();
+    if(error) return alert(error.message);
+    target=meal.id;
+  }
+  const {error}=await sb.rpc('skandi_add_food_to_meal',{p_meal_id:target,p_food_id:foodId,p_grams:grams});
+  if(error) return alert(error.message);
+  closeModal();
+  await loadNutrition();
+  state.foodDayOffset=0;
+  setView('food');
+  openMealDetail(target);
+}
+
+// ---- Alta: código de barras (cero tokens, datos del empaque) ----
+
+function openBarcode(){
+  const canScan=typeof window.BarcodeDetector!=='undefined';
+  $('modal').classList.add('show');
+  $('modalCard').innerHTML=`
+    <div class="row"><h1>${esc(t('food.byBarcode'))}</h1><button class="x" onclick="closeBarcode()" aria-label="${esc(t('common.close'))}">${icon('close',20)}</button></div>
+    ${canScan?`<video id="bcVideo" playsinline muted style="width:100%;border-radius:12px;background:#000;max-height:260px;object-fit:cover"></video>
+      <p class="muted" style="margin-top:8px">${esc(t('food.scanning'))}</p>`
+      :`<p class="muted">${esc(t('food.noScanner'))}</p>`}
+    <label class="eyebrow">${esc(t('food.barcodePh'))}</label>
+    <input id="bcNumber" class="field" type="text" inputmode="numeric" autocomplete="off" placeholder="7501000673209">
+    <button class="btn primary" style="width:100%;margin-top:12px" onclick="lookupBarcode()">${esc(t('food.scan'))}</button>`;
+  if(canScan) startBarcodeScan();
+}
+
+let bcStream=null,bcTimer=null;
+
+async function startBarcodeScan(){
+  try{
+    const detector=new window.BarcodeDetector({formats:['ean_13','ean_8','upc_a','upc_e','code_128']});
+    bcStream=await navigator.mediaDevices.getUserMedia({video:{facingMode:'environment'}});
+    const video=$('bcVideo');
+    if(!video){stopBarcodeScan();return;}
+    video.srcObject=bcStream;
+    await video.play();
+    bcTimer=setInterval(async()=>{
+      if(!$('bcVideo')) return stopBarcodeScan();
+      try{
+        const codes=await detector.detect(video);
+        if(codes.length&&codes[0].rawValue){
+          $('bcNumber').value=codes[0].rawValue;
+          stopBarcodeScan();
+          lookupBarcode();
+        }
+      }catch(e){/* un frame ilegible no es un error que valga interrumpir */}
+    },600);
+  }catch(e){
+    // Sin permiso de cámara el camino manual sigue funcionando: no hay nada que avisar.
+    stopBarcodeScan();
+  }
+}
+
+function stopBarcodeScan(){
+  if(bcTimer){clearInterval(bcTimer);bcTimer=null;}
+  if(bcStream){bcStream.getTracks().forEach(tr=>tr.stop());bcStream=null;}
+}
+
+function closeBarcode(){
+  stopBarcodeScan();
+  closeModal();
+}
+
+async function lookupBarcode(){
+  const code=($('bcNumber').value||'').replace(/\D/g,'');
+  if(code.length<8) return alert(t('food.errNoInput'));
+  stopBarcodeScan();
+  try{
+    const {data:{session}}=await sb.auth.getSession();
+    const res=await fetch('/api/lookup-barcode',{
+      method:'POST',
+      headers:{'Content-Type':'application/json',Authorization:`Bearer ${session.access_token}`},
+      body:JSON.stringify({barcode:code})
+    });
+    const body=await res.json().catch(()=>({}));
+    if(!res.ok||!body.food) return alert(body.message||t('food.noMatches'));
+    await loadNutrition();
+    // El escaneo da el producto; la porción la pones tú, que es lo único que el código no sabe.
+    if(body.food.id) openFoodPortion(body.food.id,null);
+    else alert(t('food.noMatches'));
+  }catch(e){
+    alert(e.message||String(e));
+  }
+}
+
+// ---- Detalle y corrección ----
+
+function openMealDetail(mealId){
+  const meal=state.meals.find(m=>m.id===mealId);
+  if(!meal) return;
+  const items=itemsOfMeal(mealId);
+  const totals=SkandiNutrition.itemsTotal(items);
+  const fat=items.filter(i=>i.is_cooking_fat);
+  const rest=items.filter(i=>!i.is_cooking_fat);
+  const detailPhoto=meal.photo_path?mealPhotoUrl(meal.photo_path):'';
+  $('modal').classList.add('show');
+  $('modalCard').innerHTML=`
+    <div class="row"><h1>${esc(meal.note||mealTypeLabel(meal.meal_type))}</h1><button class="x" onclick="closeModal()" aria-label="${esc(t('common.close'))}">${icon('close',20)}</button></div>
+    <div class="row"><span class="pill dark">${esc(mealTypeLabel(meal.meal_type))}</span><span class="pill dark">${esc(venueLabel(meal.venue))}</span>
+      <span class="pill">${Math.round(totals.kcal)} kcal</span></div>
+    ${meal.analysis_status==='failed'?`<section class="card" style="border-color:rgba(212,72,84,.3);background:#fff7f7;margin-top:10px">
+      <strong style="color:var(--pink)">${esc(t('food.failed'))}</strong>
+      <p class="muted" style="margin-top:4px">${esc(meal.analysis_error||'')}</p>
+      <button class="btn" style="width:100%;margin-top:9px" onclick="retryAnalysis('${mealId}')">${esc(t('food.retry'))}</button>
+    </section>`:''}
+    ${meal.photo_path?`<img data-photo="${esc(meal.photo_path)}" ${detailPhoto?`src="${esc(detailPhoto)}"`:''} alt="" style="width:100%;border-radius:12px;margin-top:10px;max-height:200px;object-fit:cover">`:''}
+    <div class="eyebrow" style="margin-top:14px">${esc(t('food.items'))}</div>
+    ${rest.map(i=>itemRowHtml(i)).join('')||empty(t('food.empty'))}
+    ${fat.map(i=>itemRowHtml(i,true)).join('')}
+    ${fat.length?`<p class="muted" style="font-size:12px;margin-top:6px">${esc(t('food.cookingFatHint'))}</p>`:''}
+    <p class="muted" style="margin-top:10px">P ${Math.round(totals.protein_g)} · C ${Math.round(totals.carbs_g)} · G ${Math.round(totals.fat_g)}</p>
+    <button class="btn" style="width:100%;margin-top:10px" onclick="openFoodPicker('${mealId}')">${icon('plus',18)} ${esc(t('food.byFood'))}</button>
+    <button class="btn" style="width:100%;margin-top:8px" onclick="promptSaveAsDish('${mealId}')">${icon('check',18)} ${esc(t('food.saveAsDish'))}</button>
+    <button class="btn" style="width:100%;margin-top:8px;color:var(--pink)" onclick="deleteMeal('${mealId}')">${icon('trash',18)} ${esc(t('food.delete'))}</button>`;
+}
+
+function itemRowHtml(item,isFat=false){
+  const conf=item.ai_confidence==null?'':`<span class="conf ${item.ai_confidence>=0.8?'hi':item.ai_confidence>=0.5?'mid':'lo'}"></span>`;
+  return `<div class="item-row ${item.included?'':'off'} ${isFat?'fat':''}">
+    <input type="checkbox" ${item.included?'checked':''} onchange="toggleMealItem('${item.id}',this.checked)" aria-label="${esc(item.label)}">
+    <span class="lbl"><strong>${conf}${esc(isFat?t('food.cookingFat'):item.label)}</strong>
+      <small>${Math.round(item.kcal)} kcal · P ${item.protein_g} · C ${item.carbs_g} · G ${item.fat_g}</small></span>
+    <input class="g" type="number" min="0" max="5000" inputmode="numeric" value="${item.grams==null?'':Math.round(item.grams)}"
+      onchange="updateItemGrams('${item.id}',this.value)" aria-label="${esc(t('food.grams'))}">
+  </div>`;
+}
+
+async function toggleMealItem(itemId,included){
+  const {error}=await sb.from('skandi_meal_items').update({included}).eq('id',itemId);
+  if(error) return alert(error.message);
+  const item=state.mealItems.find(i=>i.id===itemId);
+  await loadNutrition();
+  render();
+  if(item) openMealDetail(item.meal_id);
+}
+
+// Corregir los gramos reescala el renglón conservando su densidad: el modelo acertó qué era,
+// se equivocó en cuánto. Y la corrección se guarda como alimento del catálogo, que es lo que
+// hace que la próxima vez este platillo ya no necesite IA.
+async function updateItemGrams(itemId,value){
+  const item=state.mealItems.find(i=>i.id===itemId);
+  if(!item) return;
+  const grams=Number(value);
+  if(!grams||grams<=0) return alert(t('food.errGrams'));
+  const next=SkandiNutrition.rescaleItem(item,grams);
+  const {error}=await sb.from('skandi_meal_items').update({
+    grams:next.grams,kcal:next.kcal,protein_g:next.protein_g,carbs_g:next.carbs_g,fat_g:next.fat_g,fiber_g:next.fiber_g,
+    source:'manual'
+  }).eq('id',itemId);
+  if(error) return alert(error.message);
+  await rememberFood(next);
+  await loadNutrition();
+  render();
+  openMealDetail(item.meal_id);
+}
+
+async function rememberFood(item){
+  if(item.is_cooking_fat||item.food_id) return;
+  const food=SkandiNutrition.itemToFood(item);
+  if(!food||!food.name) return;
+  // onConflict con el índice único (usuario, nombre, marca) de la migración 073: corregir dos
+  // veces el mismo alimento lo actualiza en vez de llenar el catálogo de duplicados.
+  await sb.from('skandi_foods').upsert(
+    {...food,user_id:state.user.id,source:'manual',brand:null},
+    {onConflict:'user_id,name,brand',ignoreDuplicates:false}
+  );
+}
+
+function promptSaveAsDish(mealId){
+  const meal=state.meals.find(m=>m.id===mealId);
+  const name=prompt(t('food.dishName'),meal?.note||mealTypeLabel(meal?.meal_type||'snack'));
+  if(name===null) return;
+  if(!name.trim()) return alert(t('food.errName'));
+  saveMealAsDish(mealId,name.trim());
+}
+
+async function saveMealAsDish(mealId,name){
+  const {error}=await sb.rpc('skandi_save_meal_as_dish',{p_meal_id:mealId,p_name:name});
+  if(error) return alert(error.message);
+  await loadNutrition();
+  render();
+  alert(t('food.dishSaved',{name}));
+}
+
+async function deleteMeal(mealId){
+  if(!confirm(t('food.deleteConfirm'))) return;
+  const meal=state.meals.find(m=>m.id===mealId);
+  const {error}=await sb.from('skandi_meals').delete().eq('id',mealId);
+  if(error) return alert(error.message);
+  // La foto se va con la comida: dejarla en el bucket es basura privada acumulándose.
+  if(meal?.photo_path) sb.storage.from('skandi-meals').remove([meal.photo_path]);
+  closeModal();
+  await loadNutrition();
+  render();
+}
+
+// ---- Metas ----
+
+function openTargets(){
+  const tg=state.nutritionTargets;
+  const weight=latestWeightKg();
+  $('modal').classList.add('show');
+  $('modalCard').innerHTML=`
+    <div class="row"><h1>${esc(t('food.setTarget'))}</h1><button class="x" onclick="closeModal()" aria-label="${esc(t('common.close'))}">${icon('close',20)}</button></div>
+    <label class="eyebrow">${esc(t('food.targetMode'))}</label>
+    <select id="tgMode" class="field left">${['deficit','mantenimiento','superavit'].map(m=>
+      `<option value="${m}" ${(tg?.mode||'mantenimiento')===m?'selected':''}>${esc(t('food.mode.'+m))}</option>`).join('')}</select>
+    <label class="eyebrow">${esc(t('food.activity'))}</label>
+    <select id="tgActivity" class="field left">${Object.entries(SkandiNutrition.ACTIVITY_FACTORS).map(([k,v])=>
+      `<option value="${v}" ${Number(tg?.activity_factor||1.55)===v?'selected':''}>${k}</option>`).join('')}</select>
+    <button class="btn" style="width:100%;margin-top:10px" onclick="fillSuggestedTargets()" ${weight?'':'disabled'}>${esc(weight?t('food.suggest'):t('food.needWeight'))}</button>
+    <label class="eyebrow">${esc(t('food.targetKcal'))}</label>
+    <input id="tgKcal" class="field" type="number" min="800" max="8000" inputmode="numeric" value="${tg?.kcal_target||''}">
+    <div class="grid" style="grid-template-columns:repeat(3,1fr);gap:8px">
+      <div><label class="eyebrow">${esc(t('food.protein'))}</label><input id="tgP" class="field" type="number" min="0" max="500" value="${tg?.protein_g_target||''}"></div>
+      <div><label class="eyebrow">${esc(t('food.carbs'))}</label><input id="tgC" class="field" type="number" min="0" max="1200" value="${tg?.carbs_g_target||''}"></div>
+      <div><label class="eyebrow">${esc(t('food.fat'))}</label><input id="tgF" class="field" type="number" min="0" max="400" value="${tg?.fat_g_target||''}"></div>
+    </div>
+    <p class="muted" style="font-size:12px;margin-top:10px">${esc(t('food.targetHint'))}</p>
+    <button class="btn primary" style="width:100%;margin-top:10px" onclick="saveTargets()">${esc(t('food.save'))}</button>`;
+}
+
+function fillSuggestedTargets(){
+  const weight=latestWeightKg();
+  if(!weight) return alert(t('food.needWeight'));
+  const s=SkandiNutrition.suggestTargets({
+    weightKg:weight,
+    activityFactor:Number($('tgActivity').value),
+    mode:$('tgMode').value
+  });
+  if(!s) return;
+  $('tgKcal').value=s.kcal;
+  $('tgP').value=s.protein_g;
+  $('tgC').value=s.carbs_g;
+  $('tgF').value=s.fat_g;
+}
+
+async function saveTargets(){
+  const kcal=Number($('tgKcal').value);
+  if(!kcal||kcal<800||kcal>8000) return alert(t('food.errGrams'));
+  const {error}=await sb.from('skandi_nutrition_targets').upsert({
+    user_id:state.user.id,
+    mode:$('tgMode').value,
+    kcal_target:Math.round(kcal),
+    protein_g_target:Math.round(Number($('tgP').value)||0),
+    carbs_g_target:Math.round(Number($('tgC').value)||0),
+    fat_g_target:Math.round(Number($('tgF').value)||0),
+    activity_factor:Number($('tgActivity').value),
+    updated_at:new Date().toISOString()
+  },{onConflict:'user_id'});
+  if(error) return alert(error.message);
+  closeModal();
+  await loadNutrition();
+  render();
+}
+
 sb.auth.onAuthStateChange((_event,session)=>{ if(session&&!state.user){ state.user=session.user; loadAll().then(showApp); } });
 // Stamp the stored/detected language onto the static markup before the first paint, so the auth
 // screen and tab bar never flash English at a Spanish user.
 rebuildActivityLabels();
 applyStaticI18n();
 init();
+
+// Service worker: es el mismo /sw.js que registra app.html (alcance '/', una sola
+// registración por origen — dos service workers en la raíz se desalojarían entre sí).
+// Su handler de navegación ya distingue /skandi de /app.html para el fallback offline.
+if('serviceWorker' in navigator){
+  let swRefreshing=false;
+  navigator.serviceWorker.addEventListener('controllerchange',()=>{
+    if(swRefreshing) return;
+    swRefreshing=true;
+    window.location.reload();
+  });
+  window.addEventListener('load',async()=>{
+    try{
+      const reg=await navigator.serviceWorker.register('/sw.js?v='+SKANDI_VERSION);
+      reg.update();
+    }catch(e){ console.warn(e); }
+  });
+}
 </script>
 </body>
 </html>

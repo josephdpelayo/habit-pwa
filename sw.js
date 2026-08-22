@@ -1,13 +1,19 @@
 // HABIT Training Hub — Service Worker
 // Push notifications + app shell caching
 
-const CACHE_VERSION = '20260821-15'; // keep in sync with APP_VERSION in app.html
+const CACHE_VERSION = '20260822-02'; // keep in sync with APP_VERSION in app.html
 const CACHE = `habit-${CACHE_VERSION}`;
 
 // Librerías compartidas con Skandi Fit: la app no arranca sin ellas, así que
 // entran al shell cacheado igual que app.html. Van con ?v= para que la versión
 // nueva invalide la vieja.
-const SHELL = ['/app.html', `/skandi-recovery.js?v=${CACHE_VERSION}`, `/body-figure.js?v=${CACHE_VERSION}`];
+// Skandi Fit vive en el mismo origen y bajo el mismo alcance ('/'), así que este
+// service worker sirve las dos apps: cada una tiene su propio shell offline.
+const SHELL = ['/app.html', '/skandi.html', `/skandi-recovery.js?v=${CACHE_VERSION}`, `/body-figure.js?v=${CACHE_VERSION}`, `/skandi-nutrition.js?v=${CACHE_VERSION}`];
+
+// Qué shell le toca a una navegación. Sin esto, abrir /skandi sin señal servía el
+// fallback de HABIT: la app equivocada, con la sesión equivocada.
+const shellFor = pathname => (pathname === '/skandi' || pathname.startsWith('/skandi.html')) ? '/skandi.html' : '/app.html';
 
 self.addEventListener('install', e => {
   e.waitUntil(
@@ -35,7 +41,8 @@ self.addEventListener('fetch', e => {
   // una entrada vieja caduca sola al subir la versión)
   if (url.pathname.startsWith('/icons/')
       || url.pathname === '/skandi-recovery.js'
-      || url.pathname === '/body-figure.js') {
+      || url.pathname === '/body-figure.js'
+      || url.pathname === '/skandi-nutrition.js') {
     e.respondWith(
       caches.match(request).then(cached => {
         if (cached) return cached;
@@ -54,17 +61,23 @@ self.addEventListener('fetch', e => {
   // for a navigation ("Response served by service worker has redirections").
   // Rebuilding a plain Response from the body strips that flag; Chrome is unaffected.
   if (request.mode === 'navigate') {
+    const shell = shellFor(url.pathname);
     e.respondWith(
       fetch(request).then(res => {
+        // Refrescar el shell guardado con lo que acaba de bajar de la red: si no,
+        // la copia offline se quedaba congelada en la versión del último install
+        // y podía servir HTML viejo durante semanas.
+        if (res.ok && res.type === 'basic') {
+          const copy = res.clone();
+          e.waitUntil(caches.open(CACHE).then(c => c.put(shell, copy)));
+        }
         if (!res.redirected) return res;
         return res.blob().then(body => new Response(body, {
           status: res.status,
           statusText: res.statusText,
           headers: res.headers,
         }));
-      }).catch(() =>
-        caches.match(request).then(r => r || caches.match('/app.html'))
-      )
+      }).catch(() => caches.match(shell))
     );
   }
 });
