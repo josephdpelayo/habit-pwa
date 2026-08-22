@@ -2,6 +2,8 @@
 
 > Documento de planeación. Fecha: 2026-08-22. Dueño: Joseph.
 > Este archivo es la fuente de verdad del proyecto: se actualiza conforme avanzan las fases.
+> Para la estructura del entrenamiento (calendario, periodización, triatlón, HIIT) ver
+> `PLAN_ENTRENAMIENTO_SKANDI.md`, que absorbe y amplía lo que aquí era la Fase 3.
 
 ---
 
@@ -94,10 +96,11 @@ skandi.html                 UI (tabs: Home · Entrenar · Comida · Progreso · 
 api/
 ├── analyze-meal.js         [hecho]   foto y/o texto → Claude Vision → JSON de alimentos
 ├── lookup-barcode.js       [hecho]   código de barras → Open Food Facts → alimento (sin IA)
-├── strava-connect.js       [F4]      inicia OAuth
-├── strava-callback.js      [F4]      guarda tokens
-├── strava-webhook.js       [F4]      recibe actividades nuevas
-└── strava-sync.js          [F4]      backfill manual
+└── (Strava)                [hecho]   NO son archivos: son seis acciones dentro de skandi.js
+                                      (connect · callback · webhook · sync · disconnect ·
+                                      subscription). El techo de 12 funciones no daba para
+                                      un archivo nuevo; las dos rutas que Strava necesita
+                                      con URL fija salen de rewrites en vercel.json
 
 migrations/073..078         nutrición, HIIT, detalle de actividades, check-in diario, integraciones
 ```
@@ -179,11 +182,23 @@ Complementa (no duplica) los `report_*` de `skandi_sessions`, que solo existen l
 ```
 skandi_integrations
   user_id, provider ('strava'), access_token, refresh_token, expires_at,
-  athlete_id, scope, connected_at
-  RLS: DENY ALL. Solo las funciones serverless con service-role la tocan.
+  athlete_id, scope, connected_at, last_sync_at, last_error
+  RLS: activa y SIN NINGUNA POLÍTICA = niega todo. Solo la service-role la toca.
+  unique (provider, athlete_id): un atleta de Strava, un solo miembro.
+  El cliente pregunta por skandi_strava_status(), que nunca devuelve tokens.
 
-skandi_external_activities += external_source, external_id  (unique parcial para deduplicar)
+skandi_external_activities += external_source, external_id, external_type,
+  elevation_gain_m, max_heart_rate, calories, intensity_source
+  unique (user_id, external_source, external_id) — NO parcial: un índice parcial no
+  puede arbitrar un ON CONFLICT que no repita su predicado.
+
+skandi_settings
+  user_id, max_heart_rate. Fuera de `profiles` a propósito: profiles lo lee cualquier
+  usuario autenticado del gimnasio, y esto es un dato de salud.
 ```
+
+**Se quedó en 081, no en 078:** la numeración del roadmap se escribió antes de las migraciones
+073-080. La de Strava es `081_skandi_strava.sql`.
 
 ---
 
@@ -195,7 +210,7 @@ skandi_external_activities += external_source, external_id  (unique parcial para
 | **1** | **Nutrición: foto, texto, código de barras** — registrar, analizar, corregir, metas, resumen del día | 073 ✅ · 074 ✅ · 075 | 3–4 sesiones |
 | **2** | **Motor de decisiones** — readiness diario, ACWR, balance energético, recomendación en Home | 077 | 2–3 sesiones |
 | **3** | **Cardio y HIIT de primera clase** — intervalos, splits, nado, mapa muscular correcto | 076 | 2 sesiones |
-| **4** | **Strava (Garmin vía Strava)** — OAuth, webhook, deduplicación, backfill | 078 | 2–3 sesiones |
+| **4** | ✅ **Strava (Garmin vía Strava)** — OAuth, webhook, deduplicación, backfill | 081 ✅ | hecha |
 | **5** | **Pulido analítico** — tendencias, correlaciones, exportar CSV, apertura al crew | 079+ | continuo |
 
 El orden 1 → 2 no es negociable: el motor de decisiones sin datos de comida da consejos ciegos.
@@ -614,8 +629,20 @@ no cuatro archivos — si no, el build vuelve a fallar. La alternativa es Pro, y
 4. Correr `077_skandi_sugar_and_targets.sql` en Supabase.
 5. **Primera foto real en producción**: es la única prueba que falta del camino IA.
 6. Primera medición de tino: pesar 10 platillos frecuentes y comparar contra la estimación.
-7. **Fase 4 (Strava)**: bloqueada hasta tener `STRAVA_CLIENT_ID` y `STRAVA_CLIENT_SECRET` de
-   strava.com/settings/api, y hasta que el código viva en producción (el webhook necesita una URL
-   pública estable). Ver §3.1: Garmin entra por aquí.
+7. **Fase 4 (Strava)**: código escrito. Para encenderla faltan tres cosas, en este orden:
+   1. Crear la app en strava.com/settings/api. **Authorization Callback Domain** =
+      `habittraininghub.app` (el dominio pelón, sin `https://` y sin ruta), o el redirect se
+      rechaza sin explicar por qué.
+   2. Cargar en Vercel `STRAVA_CLIENT_ID`, `STRAVA_CLIENT_SECRET` y
+      `STRAVA_WEBHOOK_VERIFY_TOKEN` (esta última es una cadena larga cualquiera, la inventas
+      tú; Strava solo la repite de vuelta para probar que el endpoint es nuestro).
+   3. Correr `081_skandi_strava.sql`, desplegar, conectar desde Ajustes → Strava, y **desde
+      una cuenta admin** dar de alta la suscripción del webhook una sola vez:
+      `POST /api/skandi {action:'strava-subscription', op:'create'}`. Con `op:'list'` se
+      verifica y con `op:'delete'` se da de baja.
+
+   El webhook no se puede probar en local: Strava tiene que poder llamar a la URL pública.
+   Mientras tanto, "Sincronizar ahora" en Ajustes hace el mismo trabajo a mano — y sigue ahí
+   después como red de seguridad, porque un webhook perdido no avisa que se perdió.
 8. Fase 2 — el motor de decisiones. La recomendación por entrenamiento del día ya es su primer
    ladrillo, puesto por adelantado (§8).

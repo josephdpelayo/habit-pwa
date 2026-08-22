@@ -56,34 +56,46 @@ function setStimulusUnits(set){
   return (load * repsEquivalent) / SET_WORK_REFERENCE;
 }
 
-// Absolute-bpm bands used as a heart rate zone proxy (no personalized max HR on file —
-// manual entry only, no device integration) mapped onto the same 1-10 scale as effort-based
-// RPE, so a run logged with heart rate feeds the exact same stimulus formula. Distance/pace
-// aren't given a separate term: for a fixed duration a harder pace already shows up as a
-// higher heart rate, and where duration itself differs that's already in the duration term —
-// adding pace on top would double-count the same effort.
-function heartRateIntensity(bpm){
+// Heart rate mapped onto the same 1-10 scale as effort-based RPE, so a run logged with heart
+// rate feeds the exact same stimulus formula. Distance/pace aren't given a separate term: for
+// a fixed duration a harder pace already shows up as a higher heart rate, and where duration
+// itself differs that's already in the duration term — adding pace on top would double-count
+// the same effort.
+//
+// The bands are relative, not absolute: 130 bpm is a jog for one person and near-maximal for
+// another, so what matters is the fraction of that athlete's own max. HR_BANDS keeps the
+// original absolute edges, and HR_MAX_REFERENCE is the max HR they implied — dividing one by
+// the other turns them into percentages. With no max HR on file (skandi_settings.max_heart_rate,
+// migration 081) the reference is used as-is, which reproduces the old absolute behaviour
+// exactly, so no existing activity's stimulus moves until the member fills the field in.
+const HR_BANDS = [[110, 3], [130, 5], [150, 6.5], [170, 8]];
+const HR_TOP_INTENSITY = 9.5;
+const HR_MAX_REFERENCE = 190;
+
+function heartRateIntensity(bpm, maxHeartRate){
   bpm = Number(bpm) || 0;
   if (!bpm) return null;
-  if (bpm < 110) return 3;
-  if (bpm < 130) return 5;
-  if (bpm < 150) return 6.5;
-  if (bpm < 170) return 8;
-  return 9.5;
+  const max = Number(maxHeartRate);
+  const reference = max >= 120 && max <= 230 ? max : HR_MAX_REFERENCE;
+  const pct = bpm / reference;
+  for (let i = 0; i < HR_BANDS.length; i++) {
+    if (pct < HR_BANDS[i][0] / HR_MAX_REFERENCE) return HR_BANDS[i][1];
+  }
+  return HR_TOP_INTENSITY;
 }
 
 // One external activity -> stimulus units. Calibrated so 30 min @ RPE 5 == 1.0 SU (~one hard
 // set). Heart rate, when logged, replaces the manual RPE as the intensity driver — it's the
 // more objective signal of actual cardiovascular effort. Falls back to RPE when no heart rate
 // was entered, so older/unlogged activities are unaffected.
-function activityStimulusUnits(activity){
+function activityStimulusUnits(activity, maxHeartRate){
   const duration = Number(activity.duration_min) || 0;
-  const intensity = heartRateIntensity(activity.avg_heart_rate) ?? (Number(activity.intensity) || 5);
+  const intensity = heartRateIntensity(activity.avg_heart_rate, maxHeartRate) ?? (Number(activity.intensity) || 5);
   return (duration * intensity) / 150;
 }
 
 // Flatten sets+activities into per-muscle timestamped stimulus events within the lookback window.
-function buildStimulusEvents({ sets, sessions, exercises, activities, userId, now }){
+function buildStimulusEvents({ sets, sessions, exercises, activities, userId, now, maxHeartRate }){
   const sessionById = new Map((sessions||[]).map(s => [s.id, s]));
   const exerciseById = new Map((exercises||[]).map(e => [e.id, e]));
   const since = now - RECOVERY_LOOKBACK_DAYS * 864e5;
@@ -108,7 +120,7 @@ function buildStimulusEvents({ sets, sessions, exercises, activities, userId, no
     if (userId && a.user_id !== userId) return;
     const t = new Date(a.performed_at).getTime();
     if (!t || t < since || t > now) return;
-    const su = activityStimulusUnits(a);
+    const su = activityStimulusUnits(a, maxHeartRate);
     const map = ACTIVITY_MUSCLE_MAP[a.activity_type] || ACTIVITY_MUSCLE_MAP.other;
     Object.entries(map).forEach(([muscle, pct]) => {
       events.push({ t, muscle, su: su * pct / 100 });
@@ -149,9 +161,9 @@ function hoursUntilFresh(fatigueNow, muscleName){
 }
 
 // Public entry point: returns rows sorted ascending by score (least-fresh/most-fatigued first).
-function computeMuscleRecovery({ sets, sessions, exercises, activities, userId, now }){
+function computeMuscleRecovery({ sets, sessions, exercises, activities, userId, now, maxHeartRate }){
   now = now || Date.now();
-  const events = buildStimulusEvents({ sets, sessions, exercises, activities, userId, now });
+  const events = buildStimulusEvents({ sets, sessions, exercises, activities, userId, now, maxHeartRate });
   const F = muscleFatigueAt(events, now);
   return RECOVERY_MUSCLES.map(name => {
     const f = F.get(name) || 0;
@@ -168,7 +180,7 @@ function computeMuscleRecovery({ sets, sessions, exercises, activities, userId, 
 
 const SkandiRecovery = {
   MUSCLE_RECOVERY_HOURS, RECOVERY_MUSCLES, ACTIVITY_MUSCLE_MAP,
-  RECOVERY_LOOKBACK_DAYS, FRESH_THRESHOLD,
+  RECOVERY_LOOKBACK_DAYS, FRESH_THRESHOLD, HR_MAX_REFERENCE,
   tauHoursForMuscle, setStimulusUnits, activityStimulusUnits, heartRateIntensity,
   buildStimulusEvents, muscleFatigueAt, freshnessScore, hoursUntilFresh,
   computeMuscleRecovery

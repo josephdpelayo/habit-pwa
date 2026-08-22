@@ -48,9 +48,12 @@ Spanish/English). Views (`home`, `train`, `crew`, `progress`, `body`, `library`)
 `setView()`, which re-renders `#screen` from template strings.
 
 Pure logic lives in sibling modules, never inline: `skandi-recovery.js` (per-muscle fatigue decay,
-the engine behind the body figure), `body-figure.js` (the 11-region SVG) and `skandi-nutrition.js`
-(targets, daily totals, portion scaling). All three are DOM-free and Supabase-free so they can be
+the engine behind the body figure), `body-figure.js` (the 11-region SVG), `skandi-nutrition.js`
+(targets, daily totals, portion scaling) and `skandi-strava.js` (one Strava activity → one
+`skandi_external_activities` row). All four are DOM-free and Supabase-free so they can be
 exercised from Node — keep new engines to that pattern rather than growing `skandi.html`.
+`skandi-strava.js` is the odd one out: it is the **only** module the browser never loads (the
+server `require`s it and nothing else consumes it), so it is absent from `sw.js`'s `SHELL`.
 
 The `food` view is the nutrition tab. Its ordering rule is load-bearing: the add-meal chooser lists
 saved dish and catalog food (free, instant, offline) above photo and text (AI, priced in the label).
@@ -63,21 +66,35 @@ Vercel serverless functions. Files prefixed with `_` (`_plans.js`, `_fulfillment
 
 **Hard ceiling: 12 functions.** The Hobby plan refuses to build a deployment with more than 12
 Serverless Functions, and this project sits exactly at 12. One file = one function, so a new
-endpoint means folding it into an existing router by `req.body.action` (see `nutrition.js`, and
+endpoint means folding it into an existing router by `req.body.action` (see `skandi.js`, and
 `search-users.js`, which carries `create` / `reception-active` / `email`), not adding a file.
-Strava, when it lands, is one `strava.js` with four actions — not four files.
+Strava did exactly this: it is six actions inside `skandi.js`, not a `strava.js` of its own — the
+file was renamed from `nutrition.js` when it stopped being only about food. When a third party
+needs a fixed URL it cannot get by posting an `action` (Strava's OAuth callback and webhook), the
+answer is a **rewrite in `vercel.json`** to `/api/skandi?action=…` — a rewrite costs no function.
 
 Key routes:
 - `stripe-webhook.js` — receives `checkout.session.completed` from Stripe; calls `activateMembership()` from `_fulfillment.js`
 - `create-checkout-session.js` / `confirm-checkout-session.js` — Stripe Checkout flow
 - `validate-access-code.js` — physical keypad validation; authenticated with `ACCESS_API_SECRET` bearer token
 - `request-door-open.js` — in-app door open button; authenticated with Supabase JWT + GPS proximity check, then triggers Shelly Cloud relay API
-- `nutrition.js` — Skandi Fit, two actions behind one function. `{action:'analyze'}`: a meal photo
+- `skandi.js` — Skandi Fit's whole server side behind one function (was `nutrition.js`; the old
+  path is kept alive by a rewrite for clients holding a cached HTML). `{action:'analyze'}`: a meal photo
   and/or written description → Claude (vision) with a strict JSON-Schema `output_config.format` →
   `skandi_meal_items`; the photo is pulled from the private bucket with service-role and the daily
   quota is enforced in the DB (`skandi_bump_ai_usage`, migration 074), never in the client. Needs
   `ANTHROPIC_API_KEY`. `{action:'barcode'}`: barcode → Open Food Facts → a `skandi_foods` row, **no
-  AI and no quota** — a packaged product ships its own macros. Both take a Supabase JWT
+  AI and no quota** — a packaged product ships its own macros. Both take a Supabase JWT.
+  Then Strava (migration 081): `strava-connect` returns the authorize URL with an **HMAC-signed
+  `state`** — the callback arrives with no session, so the signed state is the only thing saying
+  whose `code` it is; `strava-callback` (GET, via rewrite) exchanges it and stores the tokens;
+  `strava-webhook` (GET answers `hub.challenge`, POST takes events) **replies 200 before doing the
+  work**, because Strava wants an answer in two seconds; `strava-sync` is the manual pull that
+  doubles as the webhook's safety net; `strava-disconnect` deauthorizes at Strava then deletes the
+  tokens, keeping the already-imported activities (they happened); `strava-subscription` is the
+  one-time webhook subscription admin, gated on `profiles.role = 'admin'`.
+  Re-importing an activity **never overwrites an `intensity_source = 'manual'` effort** — that is
+  why the import is a read-then-split, not a blind upsert
 - `search-users.js` — admin user search (service-role Supabase query)
 - `sync-stripe-payments.js` — admin-triggered payment sync
 
@@ -134,9 +151,29 @@ and nothing else:
 - `skandi_sessions` / `skandi_sets` — logged workouts, with `rir` per set and `report_*` recovery
   fields on the session (064)
 - `skandi_external_activities` / `skandi_activity_templates` — cardio: running, cycling, swimming,
-  rowing, walking; manual entry with RPE, heart rate and target zone (046, 063)
+  rowing, walking; manual entry with RPE, heart rate and target zone (046, 063), plus Strava
+  import (081). `external_source` + `external_id` carry a **plain unique index, not a partial
+  one** — a partial index cannot arbitrate an `ON CONFLICT` that does not repeat its predicate,
+  which PostgREST never emits, and NULLs are distinct so hand-logged rows never collide.
+  `external_type` keeps Strava's raw `sport_type` because `activity_type` reduces ~50 sports to
+  six (that reduction exists only to pick a muscle map). `intensity_source` says where the effort
+  number came from — `default` means nobody measured it and the row is badged for review.
+  046's `duration_min <= 600` / `distance_km <= 500` were raised to 1440 / 1000: on a form those
+  ceilings catch typos, on an import they silently drop a real activity
 - `skandi_training_blocks` (N build weeks + deload, 066), `skandi_bodyweight_logs` (067),
   `skandi_progression_state` (calisthenics progressions)
+- Strava (081): `skandi_integrations` holds the OAuth tokens and has **RLS on with zero
+  policies** — that denies every client read, which is the point; only the service-role in
+  `api/skandi.js` touches it, and the app asks the `skandi_strava_status()` definer RPC for the
+  handful of facts it may know. A partial unique index on `(provider, athlete_id)` forbids two
+  members claiming one Strava athlete, because the webhook identifies the owner by `athlete_id`
+  alone and ambiguity there has no safe resolution. `skandi_settings.max_heart_rate` is what
+  turns bpm into comparable effort; it lives in its own private table and **not on `profiles`,
+  which every authenticated gym member can read** (migration 007). With it unset,
+  `SkandiRecovery.heartRateIntensity()` falls back to absolute bpm bands — the same numbers as
+  before, since those bands were the `HR_MAX_REFERENCE = 190` case all along. Strength sessions
+  logged in Strava (`WeightTraining`, `Crossfit`) are deliberately **not** imported: Skandi
+  already has them as `skandi_sessions`, and importing would fatigue the same muscle twice
 - Skill lines (078): `progression_group` + `progression_rank` order a ladder, and levelling up
   is a **standard, not a best set** — `progression_target_sets` sets at `progression_target`,
   each rated `form_quality` >= 8, in two consecutive sessions that trained that rank.
@@ -210,12 +247,18 @@ SHELLY_DEVICE_ID
 SHELLY_CHANNEL           # default 0
 SHELLY_TURN              # 'off' releases the magnetic lock
 PUBLIC_APP_URL
-ANTHROPIC_API_KEY        # Skandi Fit meal analysis (api/analyze-meal.js)
+ANTHROPIC_API_KEY        # Skandi Fit meal analysis (api/skandi.js)
 MEAL_AI_DAILY_LIMIT      # default 25 analyses per user per day
 MEAL_AI_MODEL            # default claude-opus-5
+STRAVA_CLIENT_ID         # strava.com/settings/api
+STRAVA_CLIENT_SECRET
+STRAVA_WEBHOOK_VERIFY_TOKEN  # any long random string; Strava echoes it back on subscribe
 ```
+
+Strava's app settings need `Authorization Callback Domain` set to the bare host of
+`PUBLIC_APP_URL` (`habittraininghub.app`, no scheme, no path) or the OAuth redirect is rejected.
 
 `LOCATION_EXEMPT_EMAILS` in `request-door-open.js` lists emails that bypass GPS checks.
 
 ### SQL Migrations
-All migrations live in `migrations/` with numeric prefixes (`001_schema.sql` … `073_skandi_nutrition.sql`). Run them in order in the Supabase SQL Editor. New migrations follow the same naming convention. The API handlers detect missing tables and return descriptive error messages pointing to the required migration.
+All migrations live in `migrations/` with numeric prefixes (`001_schema.sql` … `081_skandi_strava.sql`). Run them in order in the Supabase SQL Editor. New migrations follow the same naming convention. The API handlers detect missing tables and return descriptive error messages pointing to the required migration.

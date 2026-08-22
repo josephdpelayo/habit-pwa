@@ -8,14 +8,14 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="Skandi Fit">
 <meta name="application-name" content="Skandi Fit">
-<link rel="manifest" href="/skandi-manifest.json?v=20260822-08">
-<link rel="apple-touch-icon" sizes="180x180" href="/icons/skandi-180.png?v=20260822-08">
-<link rel="icon" type="image/png" sizes="192x192" href="/icons/skandi-192.png?v=20260822-08">
+<link rel="manifest" href="/skandi-manifest.json?v=20260822-11">
+<link rel="apple-touch-icon" sizes="180x180" href="/icons/skandi-180.png?v=20260822-11">
+<link rel="icon" type="image/png" sizes="192x192" href="/icons/skandi-192.png?v=20260822-11">
 <title>Skandi Fit</title>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="/skandi-recovery.js?v=20260822-08"></script>
-<script src="/body-figure.js?v=20260822-08"></script>
-<script src="/skandi-nutrition.js?v=20260822-08"></script>
+<script src="/skandi-recovery.js?v=20260822-11"></script>
+<script src="/body-figure.js?v=20260822-11"></script>
+<script src="/skandi-nutrition.js?v=20260822-11"></script>
 <style>
 :root{
   --bg:#eef4f8;
@@ -156,6 +156,36 @@ p{color:var(--muted);line-height:1.45;margin:0}
 .day.today{background:var(--dof-navy);color:#fff;box-shadow:0 14px 28px rgba(1,36,86,.16)}
 .day.today .icon-btn{background:rgba(255,255,255,.14);border-color:rgba(255,255,255,.25);color:#fff}
 .day span:nth-child(2){color:inherit;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+/* Calendario (migración 080). La semana es un renglón de 7 celdas: a 375 px una celda de mes
+   completo mide 50 px y no cabe el nombre del entrenamiento. Color solo para el estado. */
+.cal-nav{display:inline-flex;align-items:center;gap:6px}
+.cal-week.current{border-color:rgba(1,36,86,.22);box-shadow:0 14px 30px rgba(1,36,86,.10)}
+.cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:4px}
+.cal-day{display:flex;flex-direction:column;align-items:stretch;gap:3px;min-height:76px;padding:6px 3px;
+  background:var(--panel2);border:1px solid rgba(1,36,86,.08);border-radius:8px;text-align:center}
+.cal-day.today{border-color:var(--dof-navy);border-width:2px;background:#fff}
+.cal-dow{font-size:9px;letter-spacing:.08em;color:var(--dof-steel);font-weight:900}
+.cal-num{font-size:13px;font-weight:1000;color:var(--text);line-height:1}
+.cal-chip{display:block;font-size:9px;line-height:1.25;font-weight:900;color:var(--dof-navy);
+  background:rgba(36,95,159,.10);border-radius:5px;padding:2px 1px;overflow:hidden;white-space:nowrap;text-overflow:ellipsis}
+.cal-chip b{font-size:10px;margin-right:2px}
+.cal-chip.done{background:rgba(29,154,108,.14);color:var(--green)}
+.cal-chip.skipped{background:transparent;color:var(--dof-steel);text-decoration:line-through}
+.cal-chip.partial{background:rgba(240,162,46,.16);color:#8a5c07}
+.cal-chip.extra{background:transparent;color:var(--muted);border:1px dashed #bfd0df}
+/* Renglón de sesión (hoy y hoja del día) */
+.plan-row{display:grid;grid-template-columns:26px 1fr auto;align-items:center;gap:10px;padding:11px 12px;
+  background:var(--panel2);border:1px solid rgba(1,36,86,.08);border-radius:8px;text-align:left;cursor:pointer}
+.plan-row.done{background:rgba(29,154,108,.08);border-color:rgba(29,154,108,.22)}
+.plan-row.skipped{opacity:.55}
+.plan-row.skipped .plan-body strong{text-decoration:line-through}
+.plan-row.extra{background:transparent;border-style:dashed}
+.plan-row .disc{font-size:15px;color:var(--dof-navy);text-align:center}
+.plan-body strong{display:block;font-size:15px}
+.plan-body p{margin:2px 0 0;font-size:12px;color:var(--muted)}
+.plan-status{font-size:10px;font-weight:1000;letter-spacing:.06em;text-transform:uppercase;color:var(--dof-steel)}
+.plan-status.done{color:var(--green)}
+.plan-status.extra{color:var(--muted)}
 .exercise{padding:14px;display:grid;gap:10px;margin:10px 0}
 .ex-head{display:grid;grid-template-columns:72px 1fr auto;gap:12px;align-items:center}
 .ex-actions{display:flex;flex-direction:column;align-items:flex-end;gap:8px}
@@ -166,6 +196,8 @@ p{color:var(--muted);line-height:1.45;margin:0}
 .play{color:var(--blue);display:grid;place-items:center}
 .pill{display:inline-flex;align-items:center;gap:6px;padding:8px 11px;background:rgba(36,95,159,.10);color:var(--dof-navy);border-radius:999px;font-weight:1000}
 .pill.dark{background:var(--panel2);color:var(--muted)}
+.pill.tiny{padding:3px 8px;font-size:11px;letter-spacing:.02em}
+.pill.warn{background:rgba(240,162,46,.16);color:#8a5a05}
 .muscles{display:flex;flex-wrap:wrap;gap:8px}
 .bar{height:8px;background:#e2eaf2;border-radius:999px;overflow:hidden}
 .bar i{display:block;height:100%;background:linear-gradient(90deg,var(--dof-navy),var(--blue));width:0}
@@ -408,7 +440,7 @@ textarea.field{min-height:112px;text-align:left;resize:vertical}
 // Versión compartida con app.html (APP_VERSION) y sw.js (CACHE_VERSION): un solo service
 // worker sirve las dos apps, así que una sola cadena las invalida a las dos. Al cambiarla
 // hay que actualizarla también en los ?v= del <head>, en index.html y en los dos manifests.
-const SKANDI_VERSION='20260822-08';
+const SKANDI_VERSION='20260822-11';
 const SUPABASE_URL='https://pmpjteuqjusbiduevbwq.supabase.co';
 const SUPABASE_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBtcGp0ZXVxanVzYmlkdWV2YndxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc2OTI1NjUsImV4cCI6MjA5MzI2ODU2NX0.XbMzZoo2yqtrD8znLnyo_1zDfrdJAvAPj1lqGOyXnLw';
 const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
@@ -548,6 +580,30 @@ en:{
   'train.noRoutines':'You have not created a routine yet.',
   'train.communityRoutines':'Community routines',
   'train.noCommunity':'No routines shared by other crew yet.',
+  'train.tabToday':'Today','train.tabCalendar':'Calendar','train.tabRoutines':'Routines',
+  'cal.today':'Today','cal.thisWeek':'This week','cal.prev':'Previous weeks','cal.next':'Next weeks',
+  'cal.moreWeeks':'Show more weeks','cal.emptyDay':'Nothing planned for this day.',
+  'cal.addSession':'Add session','cal.back':'Back',
+  'cal.status.planned':'Planned','cal.status.done':'Done','cal.status.partial':'Partial',
+  'cal.status.skipped':'Skipped','cal.status.moved':'Moved','cal.status.extra':'Unplanned',
+  'cal.start':'Start','cal.log':'Log it','cal.markDone':'Mark as done','cal.undone':'Mark as not done',
+  'cal.unskip':'Restore','cal.move':'Move to another day','cal.copy':'Copy to…','cal.edit':'Edit',
+  'cal.remove':'Remove','cal.removeConfirm':'Remove this session from the plan?',
+  'cal.fromTemplate':'From your week. Editing it only changes this day.',
+  'cal.edited':'Edited for this day — your week no longer overwrites it.',
+  'cal.discipline':'Discipline','cal.routine':'Routine','cal.noRoutine':'No routine',
+  'cal.titleLabel':'Title','cal.titlePh':'e.g. 6×400 intervals',
+  'cal.durationLabel':'Duration (min)','cal.distanceLabel':'Distance (km)',
+  'cal.zoneLabel':'Zone','cal.zoneNone':'No zone','cal.dateLabel':'Date',
+  'cal.addTitle':'Add to {date}','cal.editTitle':'Edit session','cal.save':'Save',
+  'cal.moveTitle':'Move session','cal.copyTitle':'Copy session',
+  'cal.needsMigration':'Run migration 080 in Supabase to turn the calendar on.',
+  'disc.strength':'Strength','disc.run':'Run','disc.bike':'Bike','disc.swim':'Swim','disc.row':'Row',
+  'disc.walk':'Walk','disc.hiit':'HIIT','disc.hyrox':'Hyrox','disc.mobility':'Mobility',
+  'disc.rest':'Rest','disc.other':'Other',
+  'disc.short.strength':'Str','disc.short.run':'Run','disc.short.bike':'Bike','disc.short.swim':'Swim',
+  'disc.short.row':'Row','disc.short.walk':'Walk','disc.short.hiit':'HIIT','disc.short.hyrox':'Hyrox',
+  'disc.short.mobility':'Mob','disc.short.rest':'Rest','disc.short.other':'Misc',
 
   'card.exCount':'{n} ex.','card.adaptedFrom':'Adapted from {name}',
   'card.start':'Start','card.addToWeek':'+ Add to my week',
@@ -663,6 +719,29 @@ en:{
 
   'activity.running':'Running','activity.cycling':'Cycling','activity.swimming':'Swimming',
   'activity.rowing':'Rowing','activity.walking':'Walking','activity.other':'Other','activity.fallback':'Activity',
+
+  'strava.title':'Strava','strava.badge':'Strava','strava.checkEffort':'check effort',
+  'strava.pitch':'Your watch already syncs to Strava. Connect it and every run, ride or swim lands here on its own — no typing, and the recovery engine sees it.',
+  'strava.connect':'Connect Strava','strava.disconnect':'Disconnect',
+  'strava.connectedAs':'Connected · athlete {athlete}',
+  'strava.summary':'{n} activities imported · last sync {when}','strava.never':'never',
+  'strava.sync':'Sync now','strava.syncing':'Syncing…','strava.backfill':'Import the last year',
+  'strava.syncDone':'{imported} new, {updated} updated.',
+  'strava.disconnectConfirm':'Disconnect Strava? Already-imported activities stay — they happened.',
+  'strava.failed':'Strava did not answer. Try again in a moment.',
+  'strava.connectError':'Strava could not be connected ({reason}).',
+  'strava.reason.bad_state':'the link expired, try again',
+  'strava.reason.no_scope':'activity permission was not granted',
+  'strava.reason.athlete_taken':'that Strava account is already linked to another member',
+  'strava.reason.token_exchange':'Strava rejected the authorization',
+  'strava.reason.missing_env':'the server is missing its Strava keys',
+  'strava.reason.access_denied':'you declined the permission',
+  'strava.reason.no_athlete':'Strava did not return an athlete',
+  'strava.reason.save_failed':'the link could not be saved',
+  'strava.reason.unknown':'unknown reason',
+  'strava.maxHr':'Max heart rate','strava.maxHrPh':'e.g. 186',
+  'strava.maxHrNote':'Turns beats into effort: 150 bpm is a jog for one person and near-maximal for another. Leave it empty and absolute bands are used instead.',
+  'strava.errMaxHr':'Max heart rate must be between 120 and 230.',
 
   'logAct.title':'Log activity','logAct.goal':'Goal: {goal}','logAct.type':'Activity type',
   'logAct.duration':'Duration (minutes)','logAct.durationPh':'e.g. 40',
@@ -934,6 +1013,30 @@ es:{
   'train.noRoutines':'Todavía no has creado ninguna rutina.',
   'train.communityRoutines':'Rutinas de la tripulación',
   'train.noCommunity':'Aún nadie de la tripulación ha compartido rutinas.',
+  'train.tabToday':'Hoy','train.tabCalendar':'Calendario','train.tabRoutines':'Rutinas',
+  'cal.today':'Hoy','cal.thisWeek':'Esta semana','cal.prev':'Semanas anteriores','cal.next':'Semanas siguientes',
+  'cal.moreWeeks':'Ver más semanas','cal.emptyDay':'Nada planeado para este día.',
+  'cal.addSession':'Agregar sesión','cal.back':'Volver',
+  'cal.status.planned':'Planeado','cal.status.done':'Hecho','cal.status.partial':'Parcial',
+  'cal.status.skipped':'Saltado','cal.status.moved':'Movido','cal.status.extra':'Sin planear',
+  'cal.start':'Empezar','cal.log':'Registrar','cal.markDone':'Marcar como hecho','cal.undone':'Marcar como no hecho',
+  'cal.unskip':'Restaurar','cal.move':'Mover a otro día','cal.copy':'Copiar a…','cal.edit':'Editar',
+  'cal.remove':'Quitar','cal.removeConfirm':'¿Quitar esta sesión del plan?',
+  'cal.fromTemplate':'De tu semana. Editarla solo cambia este día.',
+  'cal.edited':'Editado para este día — tu semana ya no lo pisa.',
+  'cal.discipline':'Disciplina','cal.routine':'Rutina','cal.noRoutine':'Sin rutina',
+  'cal.titleLabel':'Título','cal.titlePh':'ej. series 6×400',
+  'cal.durationLabel':'Duración (min)','cal.distanceLabel':'Distancia (km)',
+  'cal.zoneLabel':'Zona','cal.zoneNone':'Sin zona','cal.dateLabel':'Fecha',
+  'cal.addTitle':'Agregar al {date}','cal.editTitle':'Editar sesión','cal.save':'Guardar',
+  'cal.moveTitle':'Mover sesión','cal.copyTitle':'Copiar sesión',
+  'cal.needsMigration':'Corre la migración 080 en Supabase para encender el calendario.',
+  'disc.strength':'Fuerza','disc.run':'Correr','disc.bike':'Bici','disc.swim':'Nadar','disc.row':'Remo',
+  'disc.walk':'Caminar','disc.hiit':'HIIT','disc.hyrox':'Hyrox','disc.mobility':'Movilidad',
+  'disc.rest':'Descanso','disc.other':'Otro',
+  'disc.short.strength':'Fza','disc.short.run':'Corr','disc.short.bike':'Bici','disc.short.swim':'Nado',
+  'disc.short.row':'Remo','disc.short.walk':'Cam','disc.short.hiit':'HIIT','disc.short.hyrox':'Hyrox',
+  'disc.short.mobility':'Mov','disc.short.rest':'Desc','disc.short.other':'Otro',
 
   'card.exCount':'{n} ej.','card.adaptedFrom':'Adaptada de {name}',
   'card.start':'Empezar','card.addToWeek':'+ Agregar a mi semana',
@@ -1049,6 +1152,29 @@ es:{
 
   'activity.running':'Correr','activity.cycling':'Ciclismo','activity.swimming':'Natación',
   'activity.rowing':'Remo','activity.walking':'Caminar','activity.other':'Otro','activity.fallback':'Actividad',
+
+  'strava.title':'Strava','strava.badge':'Strava','strava.checkEffort':'revisa el esfuerzo',
+  'strava.pitch':'Tu reloj ya sincroniza a Strava. Conéctalo y cada carrera, rodada o nado llega solo — sin teclear nada, y el motor de recuperación lo ve.',
+  'strava.connect':'Conectar Strava','strava.disconnect':'Desconectar',
+  'strava.connectedAs':'Conectado · atleta {athlete}',
+  'strava.summary':'{n} actividades importadas · última vez {when}','strava.never':'nunca',
+  'strava.sync':'Sincronizar ahora','strava.syncing':'Sincronizando…','strava.backfill':'Traer el último año',
+  'strava.syncDone':'{imported} nuevas, {updated} actualizadas.',
+  'strava.disconnectConfirm':'¿Desconectar Strava? Las actividades ya importadas se quedan: sí ocurrieron.',
+  'strava.failed':'Strava no contestó. Intenta en un momento.',
+  'strava.connectError':'No se pudo conectar Strava ({reason}).',
+  'strava.reason.bad_state':'el enlace caducó, inténtalo otra vez',
+  'strava.reason.no_scope':'no se otorgó el permiso de actividades',
+  'strava.reason.athlete_taken':'esa cuenta de Strava ya está ligada a otro miembro',
+  'strava.reason.token_exchange':'Strava rechazó la autorización',
+  'strava.reason.missing_env':'al servidor le faltan las llaves de Strava',
+  'strava.reason.access_denied':'rechazaste el permiso',
+  'strava.reason.no_athlete':'Strava no devolvió un atleta',
+  'strava.reason.save_failed':'no se pudo guardar la conexión',
+  'strava.reason.unknown':'motivo desconocido',
+  'strava.maxHr':'Frecuencia cardiaca máxima','strava.maxHrPh':'ej. 186',
+  'strava.maxHrNote':'Convierte pulsaciones en esfuerzo: 150 bpm son un trote para uno y casi el tope para otro. Déjalo vacío y se usan bandas absolutas.',
+  'strava.errMaxHr':'La frecuencia máxima debe estar entre 120 y 230.',
 
   'logAct.title':'Registrar actividad','logAct.goal':'Objetivo: {goal}','logAct.type':'Tipo de actividad',
   'logAct.duration':'Duración (minutos)','logAct.durationPh':'ej. 40',
@@ -1271,7 +1397,7 @@ const EXERCISE_PRESETS={
 };
 
 const ACTIVE_WORKOUT_MAX_HOURS=18;
-const state={user:null,profile:null,view:'home',authMode:'login',exercises:[],templates:[],items:[],sessions:[],sets:[],externalActivities:[],activityTemplates:[],progressionState:[],progressionEvents:[],skillGoals:[],trainingBlocks:[],bodyweightLogs:[],programs:[],programDays:[],active:null,activeItems:[],timer:null,elapsed:0,rest:0,restTotal:0,bodyFlip:'front',weightUnit:localStorage.getItem('skandi_weight_unit')||'kg',weightUnitOverrides:(()=>{try{return JSON.parse(localStorage.getItem('skandi_weight_unit_overrides')||'{}');}catch(e){return {};}})(),expandedRoutines:new Set(),progressTab:'summary',progressQuery:'',progressMetric:'best',historyFilter:{month:'all',title:'all'},crewFeedLimit:6,swapTarget:null,swapQuery:'',setOptionsId:null,skillTab:null,addExOpen:false,addExQuery:'',pausedMs:0,pausedAt:null,floatTimerOpen:false,meals:[],mealItems:[],foods:[],dishes:[],dishItems:[],nutritionTargets:null,aiCallsToday:0,foodDayOffset:0,foodPicker:{query:'',mealId:null},pendingMeal:null};
+const state={user:null,profile:null,view:'home',authMode:'login',exercises:[],templates:[],items:[],sessions:[],sets:[],externalActivities:[],activityTemplates:[],progressionState:[],progressionEvents:[],skillGoals:[],trainingBlocks:[],planned:[],plannedReady:true,ensuredWeeks:new Set(),weekSig:null,trainTab:'today',calOffset:0,calWeeks:4,dayOpen:null,bodyweightLogs:[],programs:[],programDays:[],active:null,activeItems:[],timer:null,elapsed:0,rest:0,restTotal:0,bodyFlip:'front',weightUnit:localStorage.getItem('skandi_weight_unit')||'kg',weightUnitOverrides:(()=>{try{return JSON.parse(localStorage.getItem('skandi_weight_unit_overrides')||'{}');}catch(e){return {};}})(),expandedRoutines:new Set(),progressTab:'summary',progressQuery:'',progressMetric:'best',historyFilter:{month:'all',title:'all'},crewFeedLimit:6,swapTarget:null,swapQuery:'',setOptionsId:null,skillTab:null,addExOpen:false,addExQuery:'',pausedMs:0,pausedAt:null,floatTimerOpen:false,meals:[],mealItems:[],foods:[],dishes:[],dishItems:[],nutritionTargets:null,aiCallsToday:0,foodDayOffset:0,foodPicker:{query:'',mealId:null},pendingMeal:null,stravaStatus:null,skandiSettings:null,stravaSyncing:false};
 let builderState={selected:new Map(),group:'All'};
 
 const $=id=>document.getElementById(id);
@@ -1392,6 +1518,7 @@ function showApp(){
   const name=displayName();
   $('avatar').textContent=initials(name);
   render();
+  handleStravaReturn();
 }
 
 function setAuthMode(mode){
@@ -1456,6 +1583,8 @@ async function loadAll(){
   // La nutrición vive en sus propias tablas y no la necesita nada de abajo: se dispara en
   // paralelo y se espera al final, para no sumarle un viaje redondo al arranque.
   const nutritionLoad=loadNutrition();
+  // Igual: ni Strava ni los ajustes los necesita nada de abajo.
+  const integrationsLoad=loadIntegrations();
   // Sessions/sets are split into "own" (unbounded — this is the data an active workout and a
   // user's own stats/history depend on, and silently truncating it is a real bug: it can make
   // exercises vanish mid-workout or PRs disappear once the crew collectively logs enough rows)
@@ -1463,7 +1592,8 @@ async function loadAll(){
   let [{data:profile},{data:exercises},{data:templates},{data:items},
        {data:ownSessions},{data:crewSessions},{data:ownSets},{data:crewSets},
        {data:externalActivities},{data:activityTemplates},{data:progressionState},{data:trainingBlocks},{data:bodyweightLogs},
-       {data:programs},{data:programDays},{data:progressionEvents},{data:skillGoals}]=await Promise.all([
+       {data:programs},{data:programDays},{data:progressionEvents},{data:skillGoals},
+       {data:planned,error:plannedError}]=await Promise.all([
     sb.from('profiles').select('id,name,avatar_url').eq('id',state.user.id).maybeSingle(),
     sb.from('skandi_exercises').select('*').order('name'),
     sb.from('skandi_templates').select('*, profile:profiles(name,avatar_url)').order('weekday',{nullsFirst:false}).order('created_at',{ascending:false}),
@@ -1482,7 +1612,14 @@ async function loadAll(){
     // resolves ownership through the parent program (migration 069).
     sb.from('skandi_program_days').select('*'),
     sb.from('skandi_progression_events').select('*').eq('user_id',state.user.id).order('created_at',{ascending:false}),
-    sb.from('skandi_skill_goals').select('*').eq('user_id',state.user.id)
+    sb.from('skandi_skill_goals').select('*').eq('user_id',state.user.id),
+    // Ventana del calendario: un mes atrás (para leer adherencia reciente) y medio año
+    // adelante. Traer todo el histórico de un plan no sirve para nada y crece sin techo.
+    sb.from('skandi_planned_sessions').select('*')
+      .eq('user_id',state.user.id)
+      .gte('day',dayKey(addDays(mondayOf(new Date()),-28)))
+      .lte('day',dayKey(addDays(mondayOf(new Date()),182)))
+      .order('day')
   ]);
   if(!profile){
     // Some signups end up with an auth user but no profiles row (trigger race condition).
@@ -1527,8 +1664,19 @@ async function loadAll(){
   // Igual que programs: [] en vez de reventar si la migración 079 todavía no se corrió.
   state.progressionEvents=progressionEvents||[];
   state.skillGoals=skillGoals||[];
+  // plannedReady=false = la migración 080 todavía no se corrió. La app entera sigue
+  // funcionando sin calendario; Entrenar se cae a las tarjetas de siempre.
+  state.plannedReady=!plannedError;
+  state.planned=planned||[];
+  // Si cambió qué rutina vive en qué día, los estampados anteriores pueden haber quedado
+  // obsoletos: se permite que el RPC vuelva a sincronizar las semanas ya visitadas.
+  const sig=weekTemplateSignature();
+  if(sig!==state.weekSig){ state.weekSig=sig; state.ensuredWeeks.clear(); }
   await nutritionLoad;
+  await integrationsLoad;
   hydrateActiveWorkout();
+  // La semana en curso se estampa siempre (es la que pinta "Hoy"); las demás, al abrirlas.
+  ensureCalendarWeeks(1,0);
 }
 
 function hydrateActiveWorkout(){
@@ -1968,13 +2116,490 @@ async function deleteProgram(id){
   render();
 }
 
+// ═══════════════════════════════════════════════════════════════════════════
+// Calendario fechado (migración 080)
+//
+// Tres capas, y cada una contesta una pregunta distinta:
+//   plantilla (lo que se repite) → calendario (lo que toca ESE día) → sesión (lo que hiciste).
+//
+// La regla que resuelve el conflicto fuerza-vs-resistencia es `is_edited`: la plantilla se
+// propaga sola a los días futuros que nadie tocó, y en cuanto editas un día concreto ese día
+// queda congelado. Por eso la fuerza se planea una vez y la resistencia semana a semana, con
+// el mismo mecanismo y sin dos sistemas de agenda paralelos.
+//
+// Todo lo que estampa vive en el RPC skandi_ensure_week; aquí nunca se genera un plan a mano.
+// ═══════════════════════════════════════════════════════════════════════════
+
+const DISCIPLINES=['strength','run','bike','swim','row','walk','hiit','hyrox','mobility','rest','other'];
+// Un glifo por disciplina en vez de iconos a color: en una celda de ~48 px un icono de 24
+// no deja lugar para el texto, y el color se reserva para el estado (hecho / saltado).
+const DISC_GLYPH={strength:'●',run:'▲',bike:'◆',swim:'≈',row:'■',walk:'·',hiit:'✦',hyrox:'✦',mobility:'○',rest:'—',other:'◇'};
+const ACT_TO_DISC={running:'run',cycling:'bike',swimming:'swim',rowing:'row',walking:'walk',other:'other'};
+const DISC_TO_ACT={run:'running',bike:'cycling',swim:'swimming',row:'rowing',walk:'walking',hiit:'other',hyrox:'other',mobility:'other',other:'other'};
+const disciplineLabel=d=>tOr('disc.'+d,d);
+const disciplineShort=d=>tOr('disc.short.'+d,d);
+
+const mondayOf=date=>{const d=new Date(date);d.setHours(0,0,0,0);d.setDate(d.getDate()-((d.getDay()+6)%7));return d;};
+const addDays=(date,n)=>{const d=new Date(date);d.setDate(d.getDate()+n);return d;};
+// `day` es una columna date sin zona: la clave se arma en hora local (dayKey), nunca con
+// toISOString(), que en Mazatlán (UTC-7) corre el día para todo lo de antes de las 7 pm.
+const todayKey=()=>dayKey(new Date());
+const keyToDate=key=>new Date(key+'T00:00:00');
+
+function plannedRows(){ return state.planned.filter(p=>p.user_id===state.user.id); }
+
+function plannedOfDay(key){
+  return plannedRows().filter(p=>p.day===key)
+    .sort((a,b)=>(a.sort_order-b.sort_order)||(new Date(a.created_at)-new Date(b.created_at)));
+}
+
+// Lo que entrenaste sin que estuviera planeado. No es un error que haya que capturar en un
+// formulario: aparece en el día con borde punteado y ya. Sin esto, un plan estricto convierte
+// cualquier improvisación en un hueco.
+function extrasOfDay(key){
+  const linkedS=new Set(plannedRows().map(p=>p.session_id).filter(Boolean));
+  const linkedA=new Set(plannedRows().map(p=>p.activity_id).filter(Boolean));
+  const out=[];
+  state.sessions.filter(s=>s.user_id===state.user.id&&s.completed_at&&dayKey(s.completed_at)===key&&!linkedS.has(s.id))
+    .forEach(s=>out.push({kind:'session',id:s.id,discipline:'strength',title:s.title,
+      sub:[s.duration_sec?`${Math.round(s.duration_sec/60)} ${t('common.min')}`:null].filter(Boolean).join(' · ')}));
+  state.externalActivities.filter(a=>dayKey(a.performed_at)===key&&!linkedA.has(a.id))
+    .forEach(a=>out.push({kind:'activity',id:a.id,discipline:ACT_TO_DISC[a.activity_type]||'other',
+      title:activityTypeLabel(a.activity_type),
+      sub:[`${a.duration_min} ${t('common.min')}`,a.distance_km?`${a.distance_km} km`:null].filter(Boolean).join(' · ')}));
+  return out;
+}
+
+function plannedTitle(p){
+  if(p.title) return p.title;
+  const tpl=p.template_id?state.templates.find(x=>x.id===p.template_id):null;
+  return tpl?tpl.name:disciplineLabel(p.discipline);
+}
+
+function plannedSub(p){
+  const parts=[];
+  if(p.discipline==='strength'&&p.template_id){
+    const n=state.items.filter(i=>i.template_id===p.template_id).length;
+    if(n) parts.push(`${n} ${tp(n,'common.exercises')}`);
+  }
+  if(p.target_distance_km) parts.push(`${p.target_distance_km} km`);
+  if(p.target_duration_min) parts.push(`${p.target_duration_min} ${t('common.min')}`);
+  if(p.target_zone) parts.push(`Z${p.target_zone}`);
+  if(p.notes) parts.push(p.notes);
+  return parts.join(' · ');
+}
+
+// Lo que cabe en una celda de calendario: distancia si la hay, si no duración, si no el
+// nombre corto de la disciplina.
+function plannedShort(p){
+  if(p.target_distance_km) return `${Math.round(p.target_distance_km*10)/10}k`;
+  if(p.target_duration_min) return `${p.target_duration_min}'`;
+  if(p.discipline==='strength'){
+    const name=plannedTitle(p);
+    return name.length>6?name.slice(0,6):name;
+  }
+  return disciplineShort(p.discipline);
+}
+
+// ---- Estampado ----------------------------------------------------------------------------
+
+// Una semana se estampa cuando se abre, nunca por adelantado: materializar un año entero
+// significaría que cambiar una rutina tiene que reescribir 52 semanas de filas.
+async function ensureWeek(monday){
+  const key=dayKey(monday);
+  if(state.ensuredWeeks.has(key)) return 0;
+  state.ensuredWeeks.add(key);
+  const {data,error}=await sb.rpc('skandi_ensure_week',{p_week_start:key});
+  if(error){ state.plannedReady=false; return 0; }
+  return Number(data)||0;
+}
+
+async function reloadPlanned(){
+  const from=dayKey(addDays(mondayOf(new Date()),-28));
+  const to=dayKey(addDays(mondayOf(new Date()),182));
+  const {data,error}=await sb.from('skandi_planned_sessions').select('*')
+    .eq('user_id',state.user.id).gte('day',from).lte('day',to).order('day');
+  if(error){ state.plannedReady=false; return; }
+  state.plannedReady=true;
+  state.planned=data||[];
+}
+
+// Firma de "qué rutina vive en qué día". Si cambió desde la última carga, los estampados que
+// ya se hicieron pueden haber quedado obsoletos y hay que dejar que el RPC los re-sincronice.
+// Es lo que hace que mover la rutina del martes al jueves se propague sin un botón de "aplicar".
+function weekTemplateSignature(){
+  return [
+    ...state.templates.filter(x=>x.user_id===state.user.id&&x.weekday!=null).map(x=>`t${x.id}:${x.weekday}`),
+    ...state.activityTemplates.filter(x=>x.weekday!=null).map(x=>`a${x.id}:${x.weekday}`)
+  ].sort().join('|');
+}
+
+async function ensureCalendarWeeks(weeks=1,offset=0){
+  if(!state.plannedReady) return;
+  const start=mondayOf(addDays(new Date(),offset*7));
+  const counts=await Promise.all(Array.from({length:weeks},(_,i)=>ensureWeek(addDays(start,i*7))));
+  if(counts.reduce((a,b)=>a+b,0)>0){ await reloadPlanned(); render(); }
+}
+
+// ---- Conciliación planeado ↔ hecho --------------------------------------------------------
+
+// Sin esto el calendario es una agenda decorativa: no hay adherencia, y la adherencia es la
+// única razón por la que un plan sirve de algo. Corre sola al terminar una sesión o registrar
+// una actividad — nunca se le pide al usuario que ligue nada a mano.
+async function reconcilePlanned({day,discipline,sessionId=null,activityId=null,plannedId=null}){
+  if(!state.plannedReady) return;
+  const row=plannedId
+    ? plannedRows().find(p=>p.id===plannedId)
+    : plannedRows().find(p=>p.day===day&&p.discipline===discipline&&p.status==='planned'&&!p.session_id&&!p.activity_id);
+  if(!row) return;
+  await sb.from('skandi_planned_sessions').update({
+    status:'done',completed_at:new Date().toISOString(),
+    session_id:sessionId,activity_id:activityId
+  }).eq('id',row.id);
+}
+
+// ---- Vista Entrenar -----------------------------------------------------------------------
+
+function setTrainTab(tab){
+  state.trainTab=tab;
+  render();
+  if(tab==='calendar') ensureCalendarWeeks(state.calWeeks,state.calOffset);
+}
+
 function trainView(){
+  const tab=state.trainTab||'today';
+  const tabs=[['today','train.tabToday'],['calendar','train.tabCalendar'],['routines','train.tabRoutines']];
+  const body=tab==='calendar'?calendarTab():tab==='routines'?routinesTab():trainTodayTab();
+  return `
+    ${activeWorkoutBanner()}
+    <div class="row"><h1>${esc(t('train.title'))}</h1>${tab==='routines'?`<button class="btn primary" onclick="openDayPicker(todayDow())">${esc(t('train.addRoutine'))}</button>`:''}</div>
+    <div class="seg sub" style="margin:12px 0 16px">
+      ${tabs.map(([key,label])=>`<button class="${tab===key?'active':''}" onclick="setTrainTab('${key}')">${esc(t(label))}</button>`).join('')}
+    </div>
+    ${body}`;
+}
+
+function trainTodayTab(){
+  if(!state.plannedReady) return legacyTodayTab();
+  const key=todayKey();
+  const rows=plannedOfDay(key);
+  const extras=extrasOfDay(key);
+  const dateLabel=keyToDate(key).toLocaleDateString(LANG,{weekday:'long',day:'numeric',month:'long'});
+  return `
+    <section class="card">
+      <div class="row"><h2>${esc(t('cal.today'))}</h2><span class="muted">${esc(dateLabel)}</span></div>
+      ${rows.length||extras.length
+        ?`<div class="stack" style="margin-top:12px">${rows.map(plannedRowHtml).join('')}${extras.map(extraRowHtml).join('')}</div>`
+        :empty(t('cal.emptyDay'))}
+      <button class="btn" style="width:100%;margin-top:12px" onclick="openPlannedForm('${key}')">${icon('plus',16)} ${esc(t('cal.addSession'))}</button>
+    </section>
+    ${trainingBlockCardHtml()}`;
+}
+
+// Antes de correr la migración 080 el calendario no existe, pero la app sí: se cae a las
+// tarjetas de siempre en vez de mostrar una pantalla vacía.
+function legacyTodayTab(){
+  const todayTpl=state.templates.find(x=>x.user_id===state.user.id&&x.weekday===todayDow());
+  return `
+    <p class="form-note">${esc(t('cal.needsMigration'))}</p>
+    ${enduranceTodayCard()}
+    ${todayTpl?workoutCard(todayTpl):empty(t('home.noRoutine'))}
+    ${trainingBlockCardHtml()}`;
+}
+
+function plannedRowHtml(p){
+  const sub=plannedSub(p);
+  return `<div class="plan-row ${p.status}" onclick="openPlannedItem('${p.id}')">
+    <span class="disc">${DISC_GLYPH[p.discipline]||'◇'}</span>
+    <div class="plan-body">
+      <strong>${esc(plannedTitle(p))}</strong>
+      ${sub?`<p>${esc(sub)}</p>`:''}
+    </div>
+    <span class="plan-status ${p.status}">${esc(t('cal.status.'+p.status))}</span>
+  </div>`;
+}
+
+function extraRowHtml(x){
+  return `<div class="plan-row extra" onclick="${x.kind==='session'?`openSessionDetail('${x.id}')`:`setView('body')`}">
+    <span class="disc">${DISC_GLYPH[x.discipline]||'◇'}</span>
+    <div class="plan-body">
+      <strong>${esc(x.title)}</strong>
+      ${x.sub?`<p>${esc(x.sub)}</p>`:''}
+    </div>
+    <span class="plan-status extra">${esc(t('cal.status.extra'))}</span>
+  </div>`;
+}
+
+// ---- La cuadrícula ------------------------------------------------------------------------
+//
+// TrainingPeaks pone un mes completo porque es una app de escritorio. A 375 px eso son celdas
+// de 50 px donde no cabe el nombre del entrenamiento: aquí la semana es un renglón y se ven
+// cuatro, con la adherencia de cada una en el encabezado.
+
+function calShift(delta){
+  state.calOffset+=delta*state.calWeeks;
+  render();
+  ensureCalendarWeeks(state.calWeeks,state.calOffset);
+}
+
+function calToday(){
+  state.calOffset=0;
+  render();
+  ensureCalendarWeeks(state.calWeeks,state.calOffset);
+}
+
+function calMore(){
+  state.calWeeks+=4;
+  render();
+  ensureCalendarWeeks(state.calWeeks,state.calOffset);
+}
+
+function calendarTab(){
+  if(!state.plannedReady) return `<p class="form-note">${esc(t('cal.needsMigration'))}</p>`;
+  const start=mondayOf(addDays(new Date(),state.calOffset*7));
+  const weeks=Array.from({length:state.calWeeks},(_,i)=>addDays(start,i*7));
+  const monthLabel=start.toLocaleDateString(LANG,{month:'long',year:'numeric'});
+  return `
+    <div class="row" style="margin-bottom:12px">
+      <span class="eyebrow">${esc(monthLabel)}</span>
+      <span class="cal-nav">
+        <button class="icon-btn tiny" onclick="calShift(-1)" aria-label="${esc(t('cal.prev'))}">‹</button>
+        <button class="btn small" onclick="calToday()">${esc(t('cal.today'))}</button>
+        <button class="icon-btn tiny" onclick="calShift(1)" aria-label="${esc(t('cal.next'))}">›</button>
+      </span>
+    </div>
+    ${weeks.map(weekRowHtml).join('')}
+    <button class="btn" style="width:100%" onclick="calMore()">${esc(t('cal.moreWeeks'))}</button>`;
+}
+
+function weekRowHtml(monday){
+  const days=Array.from({length:7},(_,i)=>dayKey(addDays(monday,i)));
+  const rows=days.flatMap(k=>plannedOfDay(k));
+  const total=rows.filter(p=>p.status!=='skipped').length;
+  // La adherencia cuenta SOLO filas planeadas. Sumarle los extras daría "3 / 3" en una semana
+  // donde se hizo una de tres cosas planeadas y dos improvisadas: leería como semana completa
+  // justo cuando el plan se abandonó. Los extras se ven en la celda, no en el número.
+  const done=rows.filter(p=>p.status==='done').length;
+  const pct=total?Math.min(100,Math.round(done/total*100)):0;
+  const isCurrent=dayKey(monday)===dayKey(mondayOf(new Date()));
+  const label=`${monday.toLocaleDateString(LANG,{day:'numeric',month:'short'})} – ${addDays(monday,6).toLocaleDateString(LANG,{day:'numeric',month:'short'})}`;
+  return `<section class="card cal-week ${isCurrent?'current':''}">
+    <div class="row">
+      <div class="eyebrow">${esc(isCurrent?t('cal.thisWeek'):label)}</div>
+      <span class="muted">${done} / ${total}</span>
+    </div>
+    ${total?`<div class="bar" style="margin:8px 0 10px"><i style="width:${pct}%"></i></div>`:'<div style="height:10px"></div>'}
+    <div class="cal-grid">${days.map((k,i)=>dayCellHtml(k,i)).join('')}</div>
+  </section>`;
+}
+
+function dayCellHtml(key,i){
+  const rows=plannedOfDay(key);
+  const extras=extrasOfDay(key);
+  const isToday=key===todayKey();
+  const chips=[
+    ...rows.map(p=>`<span class="cal-chip ${p.status}"><b>${DISC_GLYPH[p.discipline]||'◇'}</b>${esc(plannedShort(p))}</span>`),
+    ...extras.map(x=>`<span class="cal-chip extra"><b>${DISC_GLYPH[x.discipline]||'◇'}</b></span>`)
+  ];
+  return `<button class="cal-day ${isToday?'today':''}" onclick="openPlannedDay('${key}')">
+    <span class="cal-dow">${esc(DOW[i])}</span>
+    <span class="cal-num">${keyToDate(key).getDate()}</span>
+    ${chips.join('')}
+  </button>`;
+}
+
+// ---- La hoja del día ----------------------------------------------------------------------
+
+function openPlannedDay(key){
+  state.dayOpen=key;
+  $('modal').classList.add('show');
+  $('modalCard').innerHTML=plannedDayHtml(key);
+}
+
+function refreshDaySheet(){
+  if(state.dayOpen&&$('modal').classList.contains('show')) $('modalCard').innerHTML=plannedDayHtml(state.dayOpen);
+}
+
+function plannedDayHtml(key){
+  const rows=plannedOfDay(key);
+  const extras=extrasOfDay(key);
+  const dateLabel=keyToDate(key).toLocaleDateString(LANG,{weekday:'long',day:'numeric',month:'long'});
+  return `
+    <div class="row"><h1 style="text-transform:capitalize">${esc(dateLabel)}</h1><button class="x" onclick="closeModal()" aria-label="${esc(t('common.close'))}">${icon('close',20)}</button></div>
+    ${rows.length||extras.length
+      ?`<div class="stack" style="margin-top:14px">${rows.map(plannedRowHtml).join('')}${extras.map(extraRowHtml).join('')}</div>`
+      :empty(t('cal.emptyDay'))}
+    <button class="btn primary" style="width:100%;margin-top:14px" onclick="openPlannedForm('${key}')">${icon('plus',16)} ${esc(t('cal.addSession'))}</button>`;
+}
+
+function openPlannedItem(id){
+  const p=plannedRows().find(x=>x.id===id);
+  if(!p) return;
+  const sub=plannedSub(p);
+  const isStrength=p.discipline==='strength';
+  const skipped=p.status==='skipped';
+  const done=p.status==='done';
+  $('modal').classList.add('show');
+  $('modalCard').innerHTML=`
+    <div class="row"><h1>${esc(plannedTitle(p))}</h1><button class="x" onclick="closeModal()" aria-label="${esc(t('common.close'))}">${icon('close',20)}</button></div>
+    <p class="muted">${esc([keyToDate(p.day).toLocaleDateString(LANG,{weekday:'long',day:'numeric',month:'long'}),sub].filter(Boolean).join(' · '))}</p>
+    ${p.source==='template'?`<p class="form-note">${esc(p.is_edited?t('cal.edited'):t('cal.fromTemplate'))}</p>`:''}
+    <div class="stack" style="margin-top:14px">
+      ${done?'':(isStrength&&p.template_id
+        ?`<button class="btn primary" style="width:100%" onclick="closeModal();openWorkoutOverview('${p.template_id}')">${icon('play',16)} ${esc(t('cal.start'))}</button>`
+        :(isStrength?'':`<button class="btn primary" style="width:100%" onclick="closeModal();openLogActivity(${p.activity_template_id?`'${p.activity_template_id}'`:'null'},'${p.id}')">${icon('plus',16)} ${esc(t('cal.log'))}</button>`))}
+      ${done
+        ?`<button class="btn" style="width:100%" onclick="setPlannedStatus('${p.id}','planned')">${esc(t('cal.undone'))}</button>`
+        :`<button class="btn" style="width:100%" onclick="setPlannedStatus('${p.id}','done')">${icon('check',16)} ${esc(t('cal.markDone'))}</button>`}
+      <button class="btn" style="width:100%" onclick="openPlannedForm('${p.day}','${p.id}')">${icon('edit',16)} ${esc(t('cal.edit'))}</button>
+      <button class="btn" style="width:100%" onclick="openPlannedMove('${p.id}','move')">${icon('calendar',16)} ${esc(t('cal.move'))}</button>
+      <button class="btn" style="width:100%" onclick="openPlannedMove('${p.id}','copy')">${icon('swap',16)} ${esc(t('cal.copy'))}</button>
+      ${skipped
+        ?`<button class="btn" style="width:100%" onclick="setPlannedStatus('${p.id}','planned')">${esc(t('cal.unskip'))}</button>`
+        :`<button class="btn danger" style="width:100%" onclick="removePlanned('${p.id}')">${icon('trash',16)} ${esc(t('cal.remove'))}</button>`}
+      <button class="btn" style="width:100%" onclick="openPlannedDay('${p.day}')">${esc(t('cal.back'))}</button>
+    </div>`;
+}
+
+// ---- Mutaciones ---------------------------------------------------------------------------
+//
+// Todas marcan is_edited: tocar un día lo congela frente al estampado. Sin eso, la próxima
+// vez que se abra la semana la plantilla borraría el ajuste.
+
+async function afterPlannedWrite(error){
+  if(error){ alert(error.message); return false; }
+  await reloadPlanned();
+  render();
+  refreshDaySheet();
+  return true;
+}
+
+async function setPlannedStatus(id,status){
+  const patch={status,is_edited:true};
+  if(status==='done') patch.completed_at=new Date().toISOString();
+  if(status==='planned'){ patch.completed_at=null; patch.session_id=null; patch.activity_id=null; }
+  const {error}=await sb.from('skandi_planned_sessions').update(patch).eq('id',id);
+  if(await afterPlannedWrite(error)) openPlannedDay(plannedRows().find(x=>x.id===id)?.day||state.dayOpen);
+}
+
+// Quitar un día estampado NO borra la fila: la deja como 'skipped'. Es a la vez la lápida que
+// evita que el RPC la vuelva a estampar la próxima vez que se abra la semana, y el dato
+// honesto de que esa sesión existía y no se hizo. Una fila manual sí se borra: nadie la va a
+// re-crear.
+async function removePlanned(id){
+  const p=plannedRows().find(x=>x.id===id);
+  if(!p) return;
+  if(!confirm(t('cal.removeConfirm'))) return;
+  const {error}=p.source==='template'
+    ? await sb.from('skandi_planned_sessions').update({status:'skipped',is_edited:true}).eq('id',id)
+    : await sb.from('skandi_planned_sessions').delete().eq('id',id);
+  if(await afterPlannedWrite(error)) openPlannedDay(p.day);
+}
+
+function openPlannedMove(id,mode){
+  const p=plannedRows().find(x=>x.id===id);
+  if(!p) return;
+  $('modalCard').innerHTML=`
+    <div class="row"><h1>${esc(t(mode==='copy'?'cal.copyTitle':'cal.moveTitle'))}</h1><button class="x" onclick="closeModal()" aria-label="${esc(t('common.close'))}">${icon('close',20)}</button></div>
+    <p class="muted">${esc(plannedTitle(p))}</p>
+    <label class="eyebrow">${esc(t('cal.dateLabel'))}</label>
+    <input id="planMoveDate" class="field left" type="date" value="${p.day}">
+    <button class="btn primary" style="width:100%;margin-top:14px" onclick="${mode==='copy'?`copyPlannedTo('${id}')`:`movePlannedTo('${id}')`}">${esc(t(mode==='copy'?'cal.copy':'cal.move'))}</button>
+    <button class="btn" style="width:100%;margin-top:8px" onclick="openPlannedItem('${id}')">${esc(t('cal.back'))}</button>`;
+}
+
+async function movePlannedTo(id){
+  const day=$('planMoveDate').value;
+  if(!day) return;
+  const {error}=await sb.from('skandi_planned_sessions').update({day,is_edited:true}).eq('id',id);
+  if(await afterPlannedWrite(error)) openPlannedDay(day);
+}
+
+// Copiar el miércoles de la semana 5 a la 6 y subirle 10% es la operación que más se repite
+// planeando resistencia: escribirla desde cero cada semana es justo lo que hace que un plan
+// se abandone.
+async function copyPlannedTo(id){
+  const day=$('planMoveDate').value;
+  const p=plannedRows().find(x=>x.id===id);
+  if(!day||!p) return;
+  const {error}=await sb.from('skandi_planned_sessions').insert({
+    user_id:state.user.id,day,sort_order:p.sort_order,discipline:p.discipline,
+    source:'manual',is_edited:true,
+    template_id:p.template_id,activity_template_id:p.activity_template_id,
+    title:p.title,structure:p.structure,
+    target_duration_min:p.target_duration_min,target_distance_km:p.target_distance_km,
+    target_zone:p.target_zone,notes:p.notes
+  });
+  if(await afterPlannedWrite(error)) openPlannedDay(day);
+}
+
+function openPlannedForm(key,id=null){
+  const p=id?plannedRows().find(x=>x.id===id):null;
+  const day=p?p.day:key;
+  const disc=p?p.discipline:'run';
+  const mine=state.templates.filter(x=>x.user_id===state.user.id);
+  $('modal').classList.add('show');
+  $('modalCard').innerHTML=`
+    <div class="row"><h1>${esc(p?t('cal.editTitle'):t('cal.addTitle',{date:keyToDate(day).toLocaleDateString(LANG,{weekday:'long',day:'numeric'})}))}</h1><button class="x" onclick="closeModal()" aria-label="${esc(t('common.close'))}">${icon('close',20)}</button></div>
+    <input type="hidden" id="planDay" value="${day}">
+    <label class="eyebrow">${esc(t('cal.discipline'))}</label>
+    <select id="planDiscipline" class="field left" onchange="togglePlannedRoutine()">
+      ${DISCIPLINES.map(d=>`<option value="${d}" ${d===disc?'selected':''}>${esc(disciplineLabel(d))}</option>`).join('')}
+    </select>
+    <div id="planRoutineWrap" style="display:${disc==='strength'?'block':'none'}">
+      <label class="eyebrow">${esc(t('cal.routine'))}</label>
+      <select id="planTemplate" class="field left">
+        <option value="">${esc(t('cal.noRoutine'))}</option>
+        ${mine.map(x=>`<option value="${x.id}" ${p?.template_id===x.id?'selected':''}>${esc(x.name)}</option>`).join('')}
+      </select>
+    </div>
+    <label class="eyebrow">${esc(t('cal.titleLabel'))}</label>
+    <input id="planTitle" class="field left" type="text" placeholder="${esc(t('cal.titlePh'))}" value="${esc(p?.title||'')}">
+    <label class="eyebrow">${esc(t('cal.durationLabel'))}</label>
+    <input id="planDuration" class="field left" type="number" min="1" max="600" inputmode="numeric" value="${p?.target_duration_min??''}">
+    <label class="eyebrow">${esc(t('cal.distanceLabel'))}</label>
+    <input id="planDistance" class="field left" type="number" min="0" step="0.1" inputmode="decimal" value="${p?.target_distance_km??''}">
+    <label class="eyebrow">${esc(t('cal.zoneLabel'))}</label>
+    <select id="planZone" class="field left">
+      <option value="">${esc(t('cal.zoneNone'))}</option>
+      ${[1,2,3,4,5].map(z=>`<option value="${z}" ${p?.target_zone===z?'selected':''}>Z${z}</option>`).join('')}
+    </select>
+    <textarea id="planNotes" class="field" placeholder="${esc(t('common.notesOptional'))}">${esc(p?.notes||'')}</textarea>
+    <button class="btn primary" style="width:100%" onclick="savePlanned(${id?`'${id}'`:'null'})">${esc(t('cal.save'))}</button>`;
+}
+
+function togglePlannedRoutine(){
+  $('planRoutineWrap').style.display=$('planDiscipline').value==='strength'?'block':'none';
+}
+
+async function savePlanned(id){
+  const day=$('planDay').value;
+  const discipline=$('planDiscipline').value;
+  const duration=$('planDuration').value?Number($('planDuration').value):null;
+  const distance=$('planDistance').value?Number($('planDistance').value):null;
+  if(duration!==null&&(!Number.isFinite(duration)||duration<1||duration>600)) return alert(t('logAct.errDuration'));
+  const payload={
+    day,discipline,
+    template_id:discipline==='strength'?($('planTemplate').value||null):null,
+    title:$('planTitle').value.trim()||null,
+    target_duration_min:duration,
+    target_distance_km:distance,
+    target_zone:$('planZone').value?Number($('planZone').value):null,
+    notes:$('planNotes').value.trim()||null,
+    is_edited:true
+  };
+  const {error}=id
+    ? await sb.from('skandi_planned_sessions').update(payload).eq('id',id)
+    : await sb.from('skandi_planned_sessions').insert({...payload,user_id:state.user.id,source:'manual',sort_order:discipline==='strength'?0:1});
+  if(await afterPlannedWrite(error)) openPlannedDay(day);
+}
+
+// ---- Rutinas (las plantillas, con nombre honesto) -----------------------------------------
+function routinesTab(){
   const mine=state.templates.filter(x=>x.user_id===state.user.id);
   const community=state.templates.filter(x=>x.user_id!==state.user.id);
   const myPlans=state.activityTemplates.filter(x=>x.user_id===state.user.id);
   return `
-    ${activeWorkoutBanner()}
-    <div class="row"><h1>${esc(t('train.title'))}</h1><button class="btn primary" onclick="openDayPicker(todayDow())">${esc(t('train.addRoutine'))}</button></div>
     ${programCardHtml()}
     <section class="card">
       <div class="row"><h2>${esc(t('train.yourWeek'))}</h2><span class="muted">${mine.length} ${esc(tp(mine.length,'common.routines'))}</span></div>
@@ -3012,7 +3637,9 @@ function crossTrainingCardHtml(){
 function getMyRecovery(){
   return SkandiRecovery.computeMuscleRecovery({
     sets:state.sets, sessions:state.sessions, exercises:state.exercises,
-    activities:state.externalActivities, userId:state.user.id, now:Date.now()
+    activities:state.externalActivities, userId:state.user.id, now:Date.now(),
+    // Sin FCmáx capturada el motor cae a bandas absolutas de bpm, que es lo que hacía antes.
+    maxHeartRate:state.skandiSettings?.max_heart_rate||null
   });
 }
 
@@ -3216,13 +3843,23 @@ function activityGoalLine(plan){
 // templateId, when passed (from the "Endurance today" card or the plan list), pre-fills the
 // form with that plan's targets and tags the logged row with template_id so "did I do today's
 // run" can be answered later — the member still just types in what actually happened.
-function openLogActivity(templateId){
-  const plan=templateId?state.activityTemplates.find(x=>x.id===templateId):null;
+function openLogActivity(templateId,plannedId){
+  const planned=plannedId?state.planned.find(x=>x.id===plannedId):null;
+  const tplPlan=templateId?state.activityTemplates.find(x=>x.id===templateId):null;
+  // La fila del calendario manda sobre la plantilla: es la que trae el ajuste de esta semana.
+  const plan=planned?{
+    id:tplPlan?.id||'',
+    activity_type:DISC_TO_ACT[planned.discipline]||'other',
+    target_duration_min:planned.target_duration_min??tplPlan?.target_duration_min??null,
+    target_distance_km:planned.target_distance_km??tplPlan?.target_distance_km??null,
+    target_zone:planned.target_zone??tplPlan?.target_zone??null
+  }:tplPlan;
   $('modal').classList.add('show');
   $('modalCard').innerHTML=`
     <div class="row"><h1>${esc(t('logAct.title'))}</h1><button class="x" onclick="closeModal()" aria-label="${esc(t('common.close'))}">${icon('close',20)}</button></div>
     ${plan?`<p class="muted">${esc(t('logAct.goal',{goal:activityGoalLine(plan)||'—'}))}</p>`:''}
     <input type="hidden" id="actTemplateId" value="${plan?plan.id:''}">
+    <input type="hidden" id="actPlannedId" value="${plannedId||''}">
     <label class="eyebrow">${esc(t('logAct.type'))}</label>
     <select id="actType" class="field left">${Object.entries(ACTIVITY_LABELS).map(([v,l])=>`<option value="${v}" ${(plan?.activity_type||'running')===v?'selected':''}>${esc(l)}</option>`).join('')}</select>
     <label class="eyebrow">${esc(t('logAct.duration'))}</label>
@@ -3265,8 +3902,14 @@ async function saveExternalActivity(){
     performed_at:performedAt.toISOString(),
     note:$('actNote').value.trim()||null
   };
-  const {error}=await sb.from('skandi_external_activities').insert(payload);
+  const {data:inserted,error}=await sb.from('skandi_external_activities').insert(payload).select('id').single();
   if(error) return alert(error.message);
+  await reconcilePlanned({
+    day:dayKey(performedAt),
+    discipline:ACT_TO_DISC[payload.activity_type]||'other',
+    activityId:inserted?.id||null,
+    plannedId:$('actPlannedId')?.value||null
+  });
   closeModal();
   await loadAll();
   render();
@@ -3283,8 +3926,15 @@ function externalActivityRow(a){
     a.avg_heart_rate?`${a.avg_heart_rate} bpm`:null,
     new Date(a.performed_at).toLocaleDateString(LANG)
   ].filter(Boolean).join(' · ');
+  // Dos marcas, y solo dos: de dónde vino, y si el esfuerzo es un número que nadie midió.
+  // La segunda importa porque un 5 puesto por defecto se ve idéntico a un 5 que sí se sintió,
+  // y el motor de fatiga los trata igual.
+  const badges=[
+    a.external_source==='strava'?`<span class="pill tiny">${esc(t('strava.badge'))}</span>`:'',
+    a.intensity_source==='default'?`<span class="pill tiny warn">${esc(t('strava.checkEffort'))}</span>`:''
+  ].join('');
   return `<div class="row" style="margin-top:10px">
-    <div><strong>${esc(activityTypeLabel(a.activity_type))}</strong><p>${esc(parts)}</p></div>
+    <div><strong>${esc(activityTypeLabel(a.activity_type))}</strong> ${badges}<p>${esc(parts)}</p></div>
     <button class="icon-btn tiny danger" onclick="deleteExternalActivity('${a.id}')" aria-label="${esc(t('common.delete'))}">${icon('trash',16)}</button>
   </div>`;
 }
@@ -4619,6 +5269,10 @@ async function finishWorkout(){
   };
   const {error}=await sb.from('skandi_sessions').update(patch).eq('id',state.active.id);
   if(error) return alert(error.message);
+  // El calendario se concilia solo: la sesión que acaba de cerrarse busca su fila planeada
+  // del día y la marca hecha. Si no había ninguna, la sesión aparece como extra en vez de
+  // perderse — entrenar algo no planeado no es un error que haya que capturar.
+  await reconcilePlanned({day:dayKey(completedAt),discipline:'strength',sessionId:state.active.id});
   pauseWorkoutTimer();
   state.active=null;
   state.activeItems=[];
@@ -5099,11 +5753,52 @@ function openSettings(){
         <button class="${state.weightUnit==='lb'?'active':''}" onclick="setWeightUnit('lb');render();openSettings()">LB</button>
       </div>
     </section>
+    ${stravaSettingsCard()}
     <section class="card">
       <div class="eyebrow">${esc(t('settings.account'))}</div>
       <p style="margin-top:8px">${esc(t('settings.signedInAs'))}: <strong>${esc(state.user?.email||displayName())}</strong></p>
       <button class="btn danger" style="width:100%;margin-top:12px" onclick="signOut()">${esc(t('settings.signOut'))}</button>
     </section>`;
+}
+
+// La tarjeta de Strava vive en Ajustes y no en Entrenar a propósito: conectar un reloj se
+// hace una vez en la vida y el jalón manual es el respaldo del webhook, no el camino normal.
+// Lo que sí se ve todos los días —la carrera ya importada— aparece solo en la lista de
+// actividades, sin que nadie tenga que venir aquí a pedirla.
+function stravaSettingsCard(){
+  const st=state.stravaStatus;
+  const maxHr=state.skandiSettings?.max_heart_rate??'';
+  const hrField=`
+    <label class="eyebrow" style="display:block;margin-top:14px">${esc(t('strava.maxHr'))}</label>
+    <div class="row" style="gap:8px;margin-top:6px">
+      <input id="setMaxHr" class="field left" type="number" min="120" max="230" inputmode="numeric"
+             placeholder="${esc(t('strava.maxHrPh'))}" value="${maxHr}">
+      <button class="btn" onclick="saveMaxHeartRate()">${esc(t('common.save'))}</button>
+    </div>
+    <p class="form-note" style="margin:8px 0 0">${esc(t('strava.maxHrNote'))}</p>`;
+
+  if(!st){
+    return `<section class="card">
+      <div class="eyebrow">${esc(t('strava.title'))}</div>
+      <p class="form-note" style="margin:8px 0 0">${esc(t('strava.pitch'))}</p>
+      <button class="btn primary" style="width:100%;margin-top:12px" onclick="connectStrava()">${esc(t('strava.connect'))}</button>
+      ${hrField}
+    </section>`;
+  }
+
+  const last=st.last_sync_at?new Date(st.last_sync_at).toLocaleString(LANG):t('strava.never');
+  return `<section class="card">
+    <div class="eyebrow">${esc(t('strava.title'))}</div>
+    <p style="margin-top:8px">${esc(t('strava.connectedAs',{athlete:st.athlete_id}))}</p>
+    <p class="form-note" style="margin:6px 0 0">${esc(t('strava.summary',{n:st.imported||0,when:last}))}</p>
+    ${st.last_error?`<p class="form-note" style="margin:6px 0 0;color:var(--pink)">${esc(st.last_error)}</p>`:''}
+    <div class="row" style="gap:8px;margin-top:12px">
+      <button id="stravaBtn" class="btn" style="flex:1" onclick="syncStrava()">${esc(t('strava.sync'))}</button>
+      <button class="btn danger" onclick="disconnectStrava()">${esc(t('strava.disconnect'))}</button>
+    </div>
+    <button class="btn ghost" style="width:100%;margin-top:8px" onclick="syncStrava(365)">${esc(t('strava.backfill'))}</button>
+    ${hrField}
+  </section>`;
 }
 
 function closeModal(){
@@ -5160,6 +5855,109 @@ const mealTypeLabel=v=>t(`meal.${v}`);
 const venueLabel=v=>t(`venue.${v||'otro'}`);
 const latestWeightKg=()=>state.bodyweightLogs.length?Number(state.bodyweightLogs[0].weight_kg):null;
 const aiLeft=()=>Math.max(0,AI_DAILY_LIMIT-state.aiCallsToday);
+
+// ---- Strava y ajustes del atleta ----
+
+// El estado de la integración NO se lee de skandi_integrations: esa tabla tiene RLS que niega
+// todo, porque guarda los tokens. skandi_strava_status() (migración 081) devuelve solo lo que
+// el cliente puede saber, y cero filas cuando no hay conexión.
+async function loadIntegrations(){
+  if(!state.user) return;
+  const [{data:status},{data:settings}]=await Promise.all([
+    sb.rpc('skandi_strava_status'),
+    sb.from('skandi_settings').select('*').eq('user_id',state.user.id).maybeSingle()
+  ]);
+  // Todo a null si la migración 081 no se ha corrido: el resto de la app no tiene por qué
+  // dejar de funcionar porque falte Strava.
+  state.stravaStatus=(status&&status[0])||null;
+  state.skandiSettings=settings||null;
+}
+
+async function stravaApi(action,body){
+  const {data:{session}}=await sb.auth.getSession();
+  const res=await fetch('/api/skandi',{
+    method:'POST',
+    headers:{'Content-Type':'application/json',Authorization:`Bearer ${session.access_token}`},
+    body:JSON.stringify({action,...(body||{})})
+  });
+  const data=await res.json().catch(()=>({}));
+  if(!res.ok) throw new Error(data.message||t('strava.failed'));
+  return data;
+}
+
+async function connectStrava(){
+  try{
+    const {url}=await stravaApi('strava-connect');
+    // Fuera de la app: Strava pide permiso en su propio dominio y regresa al callback.
+    window.location.href=url;
+  }catch(e){ alert(e.message||String(e)); }
+}
+
+async function syncStrava(days){
+  if(state.stravaSyncing) return;
+  state.stravaSyncing=true;
+  if($('stravaBtn')){ $('stravaBtn').disabled=true; $('stravaBtn').textContent=t('strava.syncing'); }
+  try{
+    const r=await stravaApi('strava-sync',days?{days}:{});
+    // Una carrera que acaba de llegar de Strava tiene que poder marcar hecho el día que la
+    // planeaba: esa conciliación de arrastre vive en skandi_ensure_week (migración 080), y el
+    // RPC no se vuelve a llamar mientras la semana siga en ensuredWeeks. Olvidarla aquí es lo
+    // que hacía falta reiniciar la app para ver el plan actualizarse.
+    state.ensuredWeeks.clear();
+    await loadAll(); // ya arrastra loadIntegrations(), que es de donde sale "última vez"
+    render();
+    alert(t('strava.syncDone',{imported:r.imported,updated:r.updated}));
+  }catch(e){
+    alert(e.message||String(e));
+  }finally{
+    state.stravaSyncing=false;
+    if($('modal').classList.contains('show')) openSettings();
+  }
+}
+
+async function disconnectStrava(){
+  if(!confirm(t('strava.disconnectConfirm'))) return;
+  try{
+    await stravaApi('strava-disconnect');
+    await loadIntegrations();
+    openSettings();
+  }catch(e){ alert(e.message||String(e)); }
+}
+
+async function saveMaxHeartRate(){
+  const raw=$('setMaxHr').value.trim();
+  const value=raw===''?null:Number(raw);
+  if(value!==null&&(!Number.isFinite(value)||value<120||value>230)) return alert(t('strava.errMaxHr'));
+  const {error}=await sb.from('skandi_settings').upsert({
+    user_id:state.user.id,
+    max_heart_rate:value===null?null:Math.round(value),
+    updated_at:new Date().toISOString()
+  },{onConflict:'user_id'});
+  if(error) return alert(error.message);
+  await loadIntegrations();
+  // La FCmáx cambia el esfuerzo derivado de cada actividad con pulso, así que el cuerpo y la
+  // frescura se repintan: sería raro guardarla y no ver moverse nada.
+  render();
+  openSettings();
+}
+
+// Strava regresa al navegador con ?strava=ok|error. Se lee una vez, se limpia de la URL (para
+// que un refresh no repita el aviso) y en el caso bueno se jala de inmediato: acabar de
+// conectar y no ver ninguna carrera se siente roto, aunque el webhook ya esté escuchando.
+async function handleStravaReturn(){
+  const params=new URLSearchParams(window.location.search);
+  const result=params.get('strava');
+  if(!result) return;
+  params.delete('strava');
+  const reason=params.get('reason');
+  params.delete('reason');
+  const rest=params.toString();
+  history.replaceState(null,'',window.location.pathname+(rest?'?'+rest:''));
+  if(result==='ok'){ await syncStrava(); return; }
+  // t() devuelve la propia llave cuando no existe: eso es exactamente lo que queremos para
+  // un motivo que Strava inventó y nosotros no traducimos — se ve el código crudo, no vacío.
+  alert(t('strava.connectError',{reason:t('strava.reason.'+(reason||'unknown'))}));
+}
 
 async function loadNutrition(){
   if(!state.user) return;
@@ -5539,16 +6337,30 @@ async function submitMealForAnalysis(){
   }
 }
 
-async function analyzeMeal(mealId){
+async function analyzeMeal(mealId,attempt=0){
   try{
     const {data:{session}}=await sb.auth.getSession();
-    const res=await fetch('/api/nutrition',{
+    const res=await fetch('/api/skandi',{
       method:'POST',
       headers:{'Content-Type':'application/json',Authorization:`Bearer ${session.access_token}`},
       body:JSON.stringify({action:'analyze',meal_id:mealId})
     });
     const body=await res.json().catch(()=>({}));
     if(!res.ok){
+      // 429/5xx de Claude y 504 de Vercel son transitorios. Antes obligábamos al usuario a
+      // pulsar "Reintentar" aunque exactamente la misma llamada funcionara segundos después.
+      // El servidor devuelve retryable cuando alcanzó a clasificarlo; status >= 500 cubre el
+      // caso en que Vercel mató la función antes de que pudiera mandar JSON.
+      if(attempt<1&&(body.retryable===true||res.status>=500)){
+        const settled=await waitForAnalysis(mealId);
+        if(settled&&settled.analysis_status==='ready'){
+          await loadNutrition();
+          if(state.view==='food') render();
+          return openMealDetail(mealId);
+        }
+        await prepareMealRetry(mealId);
+        return analyzeMeal(mealId,attempt+1);
+      }
       // El servidor marca la comida como fallida en casi todos sus caminos, pero no puede
       // hacerlo en los que fallan antes de saber de qué comida hablamos (falta la API key,
       // sesión inválida, cuota agotada). Sin esto la tarjeta se queda en "Analizando..."
@@ -5571,6 +6383,10 @@ async function analyzeMeal(mealId){
     await loadNutrition();
     if(state.view==='food') render();
     if(settled&&settled.analysis_status==='ready') return openMealDetail(mealId);
+    if(attempt<1){
+      await prepareMealRetry(mealId);
+      return analyzeMeal(mealId,attempt+1);
+    }
     await markMealFailed(mealId,(settled&&settled.analysis_error)||e.message||String(e));
     await loadNutrition();
     if(state.view==='food') render();
@@ -5601,10 +6417,16 @@ async function markMealFailed(mealId,message){
     .eq('id',mealId);
 }
 
-async function retryAnalysis(mealId){
-  await sb.from('skandi_meals').update({analysis_status:'pending',analysis_error:null}).eq('id',mealId);
+async function prepareMealRetry(mealId){
+  await sb.from('skandi_meals')
+    .update({analysis_status:'pending',analysis_error:null})
+    .eq('id',mealId);
   await loadNutrition();
-  render();
+  if(state.view==='food') render();
+}
+
+async function retryAnalysis(mealId){
+  await prepareMealRetry(mealId);
   analyzeMeal(mealId);
 }
 
@@ -5795,7 +6617,7 @@ async function lookupBarcode(){
   stopBarcodeScan();
   try{
     const {data:{session}}=await sb.auth.getSession();
-    const res=await fetch('/api/nutrition',{
+    const res=await fetch('/api/skandi',{
       method:'POST',
       headers:{'Content-Type':'application/json',Authorization:`Bearer ${session.access_token}`},
       body:JSON.stringify({action:'barcode',barcode:code})

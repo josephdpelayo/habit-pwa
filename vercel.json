@@ -4,10 +4,22 @@
     {
       "source": "/",
       "destination": "/app.html"
+    },
+    {
+      "source": "/api/strava/callback",
+      "destination": "/api/skandi?action=strava-callback"
+    },
+    {
+      "source": "/api/strava/webhook",
+      "destination": "/api/skandi?action=strava-webhook"
+    },
+    {
+      "source": "/api/nutrition",
+      "destination": "/api/skandi"
     }
   ],
   "functions": {
-    "api/nutrition.js": {
+    "api/skandi.js": {
       "maxDuration": 60
     }
   },
