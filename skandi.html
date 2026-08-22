@@ -5352,9 +5352,15 @@ function noTargetCard(){
   </section>`;
 }
 
+// Una comida que lleva más de esto en 'pending' ya no está analizándose: se perdió la
+// respuesta (se cerró la app, se cayó la red, el endpoint murió sin poder marcarla). Pintarla
+// como fallida es lo honesto, y además saca el botón de reintentar.
+const STALE_PENDING_MS=5*60*1000;
+
 function mealCardHtml(m){
-  const pending=m.analysis_status==='pending';
-  const failed=m.analysis_status==='failed';
+  const stale=m.analysis_status==='pending'&&Date.now()-new Date(m.created_at||m.eaten_at).getTime()>STALE_PENDING_MS;
+  const pending=m.analysis_status==='pending'&&!stale;
+  const failed=m.analysis_status==='failed'||stale;
   const time=new Date(m.eaten_at).toLocaleTimeString(LANG==='es'?'es-MX':'en-US',{hour:'numeric',minute:'2-digit'});
   const sub=failed?t('food.failed'):pending?t('food.analyzing'):`${mealTypeLabel(m.meal_type)} · ${time}`;
   const title=m.note||mealTypeLabel(m.meal_type);
@@ -5435,7 +5441,7 @@ function openMealInput(kind){
     ${kind==='photo'?`
       <p class="muted">${esc(t('food.photoHint'))}</p>
       <label class="btn" style="width:100%;margin-top:8px">${icon('image',20)} <span id="photoBtnLabel">${esc(t('food.takePhoto'))}</span>
-        <input id="mealPhoto" type="file" accept="image/*" capture="environment" style="display:none" onchange="onMealPhotoPicked(this)">
+        <input id="mealPhoto" type="file" accept="image/*" style="display:none" onchange="onMealPhotoPicked(this)">
       </label>
       <div id="mealPhotoPreview"></div>`:''}
     <label class="eyebrow">${esc(kind==='photo'?t('food.context'):t('food.describe'))}</label>
@@ -5542,18 +5548,33 @@ async function analyzeMeal(mealId){
       body:JSON.stringify({action:'analyze',meal_id:mealId})
     });
     const body=await res.json().catch(()=>({}));
-    await loadNutrition();
-    if(state.view==='food') render();
     if(!res.ok){
+      // El servidor marca la comida como fallida en casi todos sus caminos, pero no puede
+      // hacerlo en los que fallan antes de saber de qué comida hablamos (falta la API key,
+      // sesión inválida, cuota agotada). Sin esto la tarjeta se queda en "Analizando..."
+      // para siempre y no aparece el botón de reintentar.
+      await markMealFailed(mealId,body.message||t('food.failed'));
+      await loadNutrition();
+      if(state.view==='food') render();
       alert(body.message||t('food.failed'));
       return;
     }
+    await loadNutrition();
+    if(state.view==='food') render();
     openMealDetail(mealId);
   }catch(e){
+    // Se cayó la red a media llamada: mismo problema, misma cura.
+    await markMealFailed(mealId,e.message||String(e));
     await loadNutrition();
     if(state.view==='food') render();
     alert(e.message||String(e));
   }
+}
+
+async function markMealFailed(mealId,message){
+  await sb.from('skandi_meals')
+    .update({analysis_status:'failed',analysis_error:String(message||'').slice(0,500)})
+    .eq('id',mealId);
 }
 
 async function retryAnalysis(mealId){
@@ -5781,7 +5802,7 @@ function openMealDetail(mealId){
     <div class="row"><h1>${esc(meal.note||mealTypeLabel(meal.meal_type))}</h1><button class="x" onclick="closeModal()" aria-label="${esc(t('common.close'))}">${icon('close',20)}</button></div>
     <div class="row"><span class="pill dark">${esc(mealTypeLabel(meal.meal_type))}</span><span class="pill dark">${esc(venueLabel(meal.venue))}</span>
       <span class="pill">${Math.round(totals.kcal)} kcal</span></div>
-    ${meal.analysis_status==='failed'?`<section class="card" style="border-color:rgba(212,72,84,.3);background:#fff7f7;margin-top:10px">
+    ${(meal.analysis_status==='failed'||(meal.analysis_status==='pending'&&Date.now()-new Date(meal.created_at||meal.eaten_at).getTime()>STALE_PENDING_MS))?`<section class="card" style="border-color:rgba(212,72,84,.3);background:#fff7f7;margin-top:10px">
       <strong style="color:var(--pink)">${esc(t('food.failed'))}</strong>
       <p class="muted" style="margin-top:4px">${esc(meal.analysis_error||'')}</p>
       <button class="btn" style="width:100%;margin-top:9px" onclick="retryAnalysis('${mealId}')">${esc(t('food.retry'))}</button>
