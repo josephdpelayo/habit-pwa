@@ -6,18 +6,18 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="HABIT">
 <meta name="application-name" content="HABIT">
-<link rel="manifest" href="/manifest.json?v=20260821-13">
-<link rel="apple-touch-icon" sizes="120x120" href="/icons/icon-120.png?v=20260821-13">
-<link rel="apple-touch-icon" sizes="152x152" href="/icons/icon-152.png?v=20260821-13">
-<link rel="apple-touch-icon" sizes="167x167" href="/icons/icon-167.png?v=20260821-13">
-<link rel="apple-touch-icon" sizes="180x180" href="/icons/icon-180.png?v=20260821-13">
-<link rel="icon" type="image/png" sizes="32x32" href="/icons/icon-32.png?v=20260821-13">
+<link rel="manifest" href="/manifest.json?v=20260821-14">
+<link rel="apple-touch-icon" sizes="120x120" href="/icons/icon-120.png?v=20260821-14">
+<link rel="apple-touch-icon" sizes="152x152" href="/icons/icon-152.png?v=20260821-14">
+<link rel="apple-touch-icon" sizes="167x167" href="/icons/icon-167.png?v=20260821-14">
+<link rel="apple-touch-icon" sizes="180x180" href="/icons/icon-180.png?v=20260821-14">
+<link rel="icon" type="image/png" sizes="32x32" href="/icons/icon-32.png?v=20260821-14">
 <title>HABIT</title>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Share+Tech+Mono&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="/skandi-recovery.js?v=20260821-13"></script>
-<script src="/body-figure.js?v=20260821-13"></script>
+<script src="/skandi-recovery.js?v=20260821-14"></script>
+<script src="/body-figure.js?v=20260821-14"></script>
 <style>
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
 :root{
@@ -1680,6 +1680,14 @@ body.admin-mode #courtesy-modal label{border-radius:14px!important;border-color:
 .admin-mobile-menu-btn,.adm-mobile-sheet-head,.adm-mobile-backdrop,.adm-mobile-logout,.admin-mobile-quick-nav{display:none}
 .admin-list-tools{display:grid;grid-template-columns:minmax(0,1fr) minmax(160px,220px);gap:9px;align-items:center;margin-bottom:10px}
 .admin-list-tools .admin-toolbar{margin:0!important}
+.admin-user-overview{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin-bottom:10px}
+.admin-user-overview button{min-width:0;text-align:left;border:1px solid rgba(255,255,255,.075);border-radius:14px;background:rgba(255,255,255,.03);padding:10px 11px;color:#8d96a4;cursor:pointer}
+.admin-user-overview button span{display:block;font-size:9px;font-weight:820;letter-spacing:.07em;text-transform:uppercase;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.admin-user-overview button strong{display:block;margin-top:4px;font-size:19px;line-height:1;color:#20d492;font-variant-numeric:tabular-nums}
+.admin-user-overview button.attention strong{color:var(--amber)}
+.admin-user-overview button.danger strong{color:#ff6b6b}
+.user-filter-count{display:inline-flex;align-items:center;justify-content:center;min-width:19px;height:19px;margin-left:4px;padding:0 5px;border-radius:999px;background:rgba(255,255,255,.065);font-size:9px;font-weight:820;color:#8f98a6}
+.filter-chip.active .user-filter-count{background:rgba(255,255,255,.11);color:#fff}
 .admin-action-center{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;margin-bottom:2px}
 .admin-action{min-width:0;text-align:left;border:1px solid rgba(255,255,255,.075);border-radius:16px;background:rgba(255,255,255,.032);padding:12px;color:var(--white);cursor:pointer}
 .admin-action:hover{border-color:rgba(127,176,255,.25);background:rgba(255,255,255,.048)}
@@ -1782,7 +1790,11 @@ body.admin-mode #courtesy-modal label{border-radius:14px!important;border-color:
   body.admin-mode #a-users .admin-list-tools{position:sticky;top:-10px;z-index:15;grid-template-columns:minmax(0,1fr) 112px;gap:7px;margin:0 -4px 7px;padding:8px 4px;background:linear-gradient(180deg,#080809 80%,rgba(8,8,9,.94));backdrop-filter:blur(14px)}
   body.admin-mode #a-users .adm-search,body.admin-mode #a-users .admin-select{min-height:43px;font-size:12px;padding:10px 11px}
   body.admin-mode #a-users .admin-filter-strip{margin:0 -2px 5px;padding:0 2px 8px;scrollbar-width:none}
-  body.admin-mode #a-users .admin-filter-strip .filter-chip{min-width:auto;padding:8px 11px;font-size:10px}
+  body.admin-mode #a-users .admin-filter-strip .filter-chip{flex:0 0 auto!important;width:auto!important;min-width:max-content!important;padding:8px 10px;font-size:10px}
+  body.admin-mode #a-users .admin-user-overview{grid-template-columns:repeat(3,minmax(0,1fr));gap:6px;margin-bottom:9px}
+  body.admin-mode #a-users .admin-user-overview button{padding:9px;border-radius:13px}
+  body.admin-mode #a-users .admin-user-overview button span{font-size:8px}
+  body.admin-mode #a-users .admin-user-overview button strong{font-size:18px}
   body.admin-mode #a-users #user-count{margin:2px 2px 8px!important;font-size:10px!important;color:#7f8997!important}
   body.admin-mode #a-users .admin-user-card{grid-template-columns:38px minmax(0,1fr) auto;gap:10px;min-height:68px;padding:10px 11px;border-radius:15px}
   body.admin-mode #a-users .admin-user-card .post-av{width:38px;height:38px}
@@ -2512,19 +2524,21 @@ body.admin-mode #courtesy-modal label{border-radius:14px!important;border-color:
         <button class="btn" onclick="adminCreateUserSb()">Crear socio</button>
       </div>
 
+      <div id="user-overview" class="admin-user-overview"></div>
       <div class="admin-list-tools"><div class="admin-toolbar">
         <input class="adm-search" id="user-search" placeholder="Buscar por nombre, correo o teléfono..." oninput="renderUsersSb()">
       </div>
       <select id="user-sort" onchange="renderUsersSb()" class="admin-select" aria-label="Ordenar socios">
         <option value="reciente">Más reciente</option><option value="nombre">A–Z Nombre</option><option value="nombre-z">Z–A Nombre</option><option value="antiguedad">Más antiguo</option><option value="vencimiento">Próx. vencimiento</option><option value="creditos">Más visitas</option>
       </select></div>
-      <div class="admin-filter-strip">
-          <button class="filter-chip active" data-filter="todos" onclick="setUserFilter(this)">Todos</button>
-          <button class="filter-chip" data-filter="activo" onclick="setUserFilter(this)">Activos</button>
-          <button class="filter-chip" data-filter="vencido" onclick="setUserFilter(this)">Vencidos</button>
-          <button class="filter-chip" data-filter="por-vencer" onclick="setUserFilter(this)">Por vencer</button>
-          <button class="filter-chip" data-filter="sin-plan" onclick="setUserFilter(this)">Sin plan</button>
-          <button class="filter-chip" data-filter="coaching" onclick="setUserFilter(this)">Coaching</button>
+      <div class="admin-filter-strip" aria-label="Filtrar socios por estado">
+          <button class="filter-chip active" data-filter="todos" onclick="setUserFilter(this)">Todos <span class="user-filter-count" data-user-filter-count="todos"></span></button>
+          <button class="filter-chip" data-filter="activo" onclick="setUserFilter(this)">Activos <span class="user-filter-count" data-user-filter-count="activo"></span></button>
+          <button class="filter-chip" data-filter="por-vencer" onclick="setUserFilter(this)">Por renovar <span class="user-filter-count" data-user-filter-count="por-vencer"></span></button>
+          <button class="filter-chip" data-filter="sin-visitas" onclick="setUserFilter(this)">Sin visitas <span class="user-filter-count" data-user-filter-count="sin-visitas"></span></button>
+          <button class="filter-chip" data-filter="vencido" onclick="setUserFilter(this)">Vencidos <span class="user-filter-count" data-user-filter-count="vencido"></span></button>
+          <button class="filter-chip" data-filter="sin-plan" onclick="setUserFilter(this)">Sin plan <span class="user-filter-count" data-user-filter-count="sin-plan"></span></button>
+          <button class="filter-chip" data-filter="coaching" onclick="setUserFilter(this)">Coaching <span class="user-filter-count" data-user-filter-count="coaching"></span></button>
       </div>
       <div id="user-count" style="font-size:11px;color:var(--gray);margin-bottom:8px"></div>
       <div id="user-list"></div>
@@ -3043,7 +3057,7 @@ body.admin-mode #courtesy-modal label{border-radius:14px!important;border-color:
 // ── CONFIG & SUPABASE ───────────────────────────────────────
 const SUPABASE_URL='https://pmpjteuqjusbiduevbwq.supabase.co';
 const SUPABASE_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBtcGp0ZXVxanVzYmlkdWV2YndxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc2OTI1NjUsImV4cCI6MjA5MzI2ODU2NX0.XbMzZoo2yqtrD8znLnyo_1zDfrdJAvAPj1lqGOyXnLw';
-const APP_VERSION='20260821-13';
+const APP_VERSION='20260821-14';
 // La pierna va separada en cuádriceps, femorales y pantorrillas: la figura
 // corporal pinta esas tres regiones por separado y el motor de recuperación les
 // da ventanas de descanso distintas. 'Piernas' sigue reconociéndose al leer
@@ -12707,9 +12721,39 @@ async function markAllAdminNotifsRead(){
 }
 
 let _userFilter='todos';
+function adminUserState(u){
+  const plan=[...PLANS.individual,...PLANS.grupal].find(p=>p.id===u.plan_id);
+  const expired=!!(u.plan_expiry&&new Date(u.plan_expiry)<new Date());
+  const days=daysUntil(u.plan_expiry);
+  const unlimited=u.credits>=999||(plan&&plan.credits>=999);
+  const credits=Number(u.credits)||0;
+  const noPlan=!u.plan_id;
+  const noVisits=!expired&&!noPlan&&!unlimited&&credits<=0;
+  const active=!expired&&!noPlan&&(unlimited||credits>0);
+  const expiring=!expired&&days!==null&&days>=0&&days<=7;
+  return{plan,expired,days,unlimited,credits,noPlan,noVisits,active,expiring};
+}
+function updateAdminUserOverview(rows){
+  const stats={todos:rows.length,activo:0,'por-vencer':0,'sin-visitas':0,vencido:0,'sin-plan':0,coaching:0};
+  rows.forEach(u=>{
+    const s=adminUserState(u);
+    if(s.active)stats.activo++;
+    if(s.expiring)stats['por-vencer']++;
+    if(s.noVisits)stats['sin-visitas']++;
+    if(s.expired)stats.vencido++;
+    if(s.noPlan)stats['sin-plan']++;
+    if(u.coaching_beta)stats.coaching++;
+  });
+  document.querySelectorAll('[data-user-filter-count]').forEach(el=>{el.textContent=stats[el.dataset.userFilterCount]??0;});
+  const overview=document.getElementById('user-overview');
+  if(overview)overview.innerHTML=
+    '<button onclick="openAdminUserFilter(\'activo\')"><span>Activos</span><strong>'+stats.activo+'</strong></button>'
+    +'<button class="attention" onclick="openAdminUserFilter(\'por-vencer\')"><span>Por renovar</span><strong>'+stats['por-vencer']+'</strong></button>'
+    +'<button class="danger" onclick="openAdminUserFilter(\'sin-visitas\')"><span>Sin visitas</span><strong>'+stats['sin-visitas']+'</strong></button>';
+}
 function setUserFilter(btn){
   _userFilter=btn.dataset.filter;
-  document.querySelectorAll('.filter-chip').forEach(c=>c.classList.remove('active'));
+  document.querySelectorAll('#a-users .filter-chip').forEach(c=>c.classList.remove('active'));
   btn.classList.add('active');
   renderUsersSb();
 }
@@ -12724,23 +12768,16 @@ async function renderUsersSb(){
   try{
     const{data:allU,error}=await sb.from('profiles').select('*').neq('source','skandi').order('created_at');
     if(error)throw error;
-    // Para "Activos": un socio solo cuenta si tiene al menos un pago real en su
-    // historial (no cortesía) — esto también cubre cortesías viejas dadas antes
-    // de que existiera plan_is_courtesy, sin necesidad de marcarlas a mano.
-    let realPayerIds=null;
-    if(_userFilter==='activo'){
-      const{data:realPays}=await sb.from('payments').select('user_id,amount,payment_method,net_amount').not('user_id','is',null);
-      realPayerIds=new Set((realPays||[]).filter(isRealMemberPayment).map(p=>p.user_id));
-    }
-    let filtered=(allU||[]).filter(u=>u.role!=='admin'&&u.role!=='reception'&&(!q||((u.name||'').toLowerCase().includes(q)||(u.phone||'').includes(q)||(u.email||'').toLowerCase().includes(q))));
+    const memberRows=(allU||[]).filter(u=>u.role!=='admin'&&u.role!=='reception');
+    updateAdminUserOverview(memberRows);
+    let filtered=memberRows.filter(u=>!q||((u.name||'').toLowerCase().includes(q)||(u.phone||'').includes(q)||(u.email||'').toLowerCase().includes(q)));
     filtered=filtered.filter(u=>{
-      const expired=u.plan_expiry&&new Date(u.plan_expiry)<new Date();
-      const days=daysUntil(u.plan_expiry);
-      const active=(u.credits>=999||u.credits>0)&&!expired;
-      if(_userFilter==='activo') return active&&!(days!==null&&days<=7&&days>=0)&&u.plan_id!=='prueba'&&!u.plan_is_courtesy&&realPayerIds.has(u.id);
-      if(_userFilter==='vencido') return expired||(u.credits!==undefined&&u.credits!==null&&u.credits<=0&&!u.plan_expiry);
-      if(_userFilter==='por-vencer') return days!==null&&days>=0&&days<=7;
-      if(_userFilter==='sin-plan') return !u.plan_id&&(!u.credits||u.credits<=0);
+      const s=adminUserState(u);
+      if(_userFilter==='activo') return s.active;
+      if(_userFilter==='vencido') return s.expired;
+      if(_userFilter==='por-vencer') return s.expiring;
+      if(_userFilter==='sin-visitas') return s.noVisits;
+      if(_userFilter==='sin-plan') return s.noPlan;
       if(_userFilter==='coaching') return !!u.coaching_beta;
       return true;
     });
@@ -12760,18 +12797,14 @@ async function renderUsersSb(){
     }
     list.innerHTML='';
     filtered.forEach(u=>{
-      const expired=u.plan_expiry&&new Date(u.plan_expiry)<new Date();
-      const active=hasActive({credits:u.credits,plan:u.plan_id,planExpiry:u.plan_expiry,planType:u.plan_type})&&!expired;
-      const plan=[...PLANS.individual,...PLANS.grupal].find(p=>p.id===u.plan_id);
+      const state=adminUserState(u);
+      const{expired,active,plan,days,unlimited:isUnlimited,noPlan,noVisits}=state;
       const planName=plan?plan.name:((u.credits||0)>0?'Visitas manuales':'Sin plan');
-      const days=daysUntil(u.plan_expiry);
-      const isUnlimited=u.credits>=999||(plan&&plan.credits>=999);
-      const noCredits=!isUnlimited&&(u.credits||0)<=0;
       const lowCredits=!isUnlimited&&(u.credits||0)>0&&(u.credits||0)<=3;
       const expiring=days!==null&&days<=5&&days>=0;
       const isPrueba=u.plan_id==='prueba'||!!u.plan_is_courtesy;
-      const statusCls=isPrueba?'bg-amber':expired||noCredits?'bg-red':(lowCredits||expiring)?'bg-amber':active?'bg-green':'bg-gray';
-      const statusTxt=isPrueba?'Cortesía':expired?'Vencida':noCredits?'Sin visitas':isUnlimited&&active?'Mensual':lowCredits?'Pocas visitas':expiring?'Por vencer':active?'Activo':'Sin plan';
+      const statusCls=isPrueba?'bg-amber':expired||noVisits?'bg-red':(lowCredits||expiring)?'bg-amber':active?'bg-green':'bg-gray';
+      const statusTxt=isPrueba?'Cortesía':expired?'Vencida':noPlan?'Sin plan':noVisits?'Sin visitas':isUnlimited&&active?'Mensual':lowCredits?'Pocas visitas':expiring?'Por renovar':active?'Activo':'Sin plan';
       const div=document.createElement('div');
       div.className='admin-user-card';
       div.setAttribute('role','button');div.tabIndex=0;div.setAttribute('aria-label','Abrir perfil de '+(u.name||'socio'));
