@@ -61,18 +61,23 @@ to 7 columns, which is why the Spanish labels for crew and library were shortene
 ### Backend (`api/*.js`)
 Vercel serverless functions. Files prefixed with `_` (`_plans.js`, `_fulfillment.js`) are shared modules, not routes.
 
+**Hard ceiling: 12 functions.** The Hobby plan refuses to build a deployment with more than 12
+Serverless Functions, and this project sits exactly at 12. One file = one function, so a new
+endpoint means folding it into an existing router by `req.body.action` (see `nutrition.js`, and
+`search-users.js`, which carries `create` / `reception-active` / `email`), not adding a file.
+Strava, when it lands, is one `strava.js` with four actions — not four files.
+
 Key routes:
 - `stripe-webhook.js` — receives `checkout.session.completed` from Stripe; calls `activateMembership()` from `_fulfillment.js`
 - `create-checkout-session.js` / `confirm-checkout-session.js` — Stripe Checkout flow
 - `validate-access-code.js` — physical keypad validation; authenticated with `ACCESS_API_SECRET` bearer token
 - `request-door-open.js` — in-app door open button; authenticated with Supabase JWT + GPS proximity check, then triggers Shelly Cloud relay API
-- `analyze-meal.js` — Skandi Fit: a meal photo and/or a written description → Claude (vision) with
-  a strict JSON-Schema `output_config.format` → `skandi_meal_items`. Supabase JWT auth; the photo is
-  pulled from the private bucket with service-role. Daily quota is enforced in the DB
-  (`skandi_bump_ai_usage`, migration 074), never in the client. Needs `ANTHROPIC_API_KEY`
-- `lookup-barcode.js` — Skandi Fit: barcode → Open Food Facts → a `skandi_foods` row. **No AI, no
-  quota** — a packaged product ships its own macros; only the portion is unknown, and that's the
-  client's question to ask
+- `nutrition.js` — Skandi Fit, two actions behind one function. `{action:'analyze'}`: a meal photo
+  and/or written description → Claude (vision) with a strict JSON-Schema `output_config.format` →
+  `skandi_meal_items`; the photo is pulled from the private bucket with service-role and the daily
+  quota is enforced in the DB (`skandi_bump_ai_usage`, migration 074), never in the client. Needs
+  `ANTHROPIC_API_KEY`. `{action:'barcode'}`: barcode → Open Food Facts → a `skandi_foods` row, **no
+  AI and no quota** — a packaged product ships its own macros. Both take a Supabase JWT
 - `search-users.js` — admin user search (service-role Supabase query)
 - `sync-stripe-payments.js` — admin-triggered payment sync
 

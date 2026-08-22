@@ -351,6 +351,33 @@ async function searchUsers(req, res, token) {
   return res.status(200).json({ users });
 }
 
+// El correo de un socio vive en auth.users, no en profiles, así que hace falta service-role
+// para leerlo. Era su propio endpoint (api/get-user-email) hasta que el plan Hobby de Vercel
+// nos puso en el tope de 12 funciones: es admin, es sobre usuarios y ya había router aquí,
+// así que vive como una acción más en vez de gastar una función entera.
+async function getUserEmail(req, res, token) {
+  if (!token) return res.status(401).json({ error: 'Sesion requerida' });
+
+  const { data: authData, error: authError } = await supabase.auth.getUser(token);
+  if (authError || !authData.user) return res.status(401).json({ error: 'Sesion invalida' });
+
+  const { data: adminProfile, error: profileError } = await supabase
+    .from('profiles')
+    .select('role')
+    .eq('id', authData.user.id)
+    .single();
+  if (profileError) throw profileError;
+  if (adminProfile.role !== 'admin') return res.status(403).json({ error: 'Solo admin puede ver correos' });
+
+  const userId = String((req.body && req.body.user_id) || '').trim();
+  if (!userId) return res.status(400).json({ error: 'Falta user_id' });
+
+  const { data, error } = await supabase.auth.admin.getUserById(userId);
+  if (error) throw error;
+
+  return res.status(200).json({ email: data.user && data.user.email ? data.user.email : '' });
+}
+
 module.exports = async function handler(req, res) {
   applyCors(res);
   if (req.method === 'OPTIONS') return res.status(204).end();
@@ -363,6 +390,7 @@ module.exports = async function handler(req, res) {
     const token = getToken(req);
     if ((req.body && req.body.action) === 'create') return createUser(req, res, token);
     if ((req.body && req.body.action) === 'reception-active') return receptionActive(req, res, token);
+    if ((req.body && req.body.action) === 'email') return getUserEmail(req, res, token);
     return searchUsers(req, res, token);
   } catch (err) {
     console.error(err);

@@ -1,21 +1,34 @@
-// Skandi Fit — análisis de comida con Claude (vision + texto).
+// Skandi Fit — nutrición: análisis de comida y código de barras.
 //
-// Tres maneras de entrar, una sola ruta: foto, descripción escrita ("dos huevos con frijoles
-// y una tortilla"), o las dos juntas — la foto con contexto es la que mejor acierta, porque
-// el texto resuelve justo lo que la cámara no ve: el aceite, el relleno, si el agua era de
-// sabor. El cuarto camino, código de barras, no pasa por aquí: es /api/lookup-barcode y no
-// gasta IA.
+// Dos caminos muy distintos viven en el mismo archivo por una razón de plataforma, no de
+// diseño: el plan Hobby de Vercel admite 12 Serverless Functions por deployment, y el
+// proyecto ya estaba en el tope. Un archivo = una función, así que las rutas se agrupan y se
+// despachan por `action`. Si algún día esto crece a Pro, separarlas otra vez es mover dos
+// funciones a sus propios archivos y cambiar dos fetch en el cliente.
 //
-// Contrato: el cliente ya creó la fila en skandi_meals con analysis_status='pending' (y, si
-// hay foto, ya la subió al bucket privado skandi-meals). Aquí solo recibimos { meal_id }. Ese
-// orden es deliberado: si el modelo tarda o falla, la comida YA quedó registrada. Un diario
-// que pierde entradas por un timeout no se usa dos semanas.
+//   { action: 'analyze', meal_id }  -> foto y/o texto -> Claude (vision). Gasta cuota.
+//   { action: 'barcode', barcode }  -> Open Food Facts. Sin IA y sin cuota.
 //
 // Seguridad: la ANTHROPIC_API_KEY vive solo aquí. El cliente nunca habla con Anthropic, y la
 // foto se descarga con service-role porque el bucket es privado (migración 073).
 
 const { createClient } = require('@supabase/supabase-js');
 const Anthropic = require('@anthropic-ai/sdk');
+
+const supabase = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_SERVICE_ROLE_KEY);
+
+function applyCors(res) {
+  res.setHeader('Access-Control-Allow-Origin', 'https://habittraininghub.app');
+  res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+}
+
+function fail(res, status, reason, message) {
+  return res.status(status).json({ ok: false, reason, message });
+}
+
+// ── Análisis de comida con Claude ───────────────────────────────────────────
+
 
 const BUCKET = 'skandi-meals';
 const DEFAULT_DAILY_LIMIT = 25;
@@ -39,7 +52,6 @@ const VENUE_LABELS = {
   otro: 'no especificado',
 };
 
-const supabase = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_SERVICE_ROLE_KEY);
 
 const SYSTEM_PROMPT = `Eres un nutriólogo estimando la ingesta de un atleta en Mazatlán, México, para su diario. Recibes una foto, una descripción escrita, o las dos.
 
@@ -104,16 +116,6 @@ const MEAL_SCHEMA = {
   additionalProperties: false,
 };
 
-function applyCors(res) {
-  res.setHeader('Access-Control-Allow-Origin', 'https://habittraininghub.app');
-  res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
-  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
-}
-
-function fail(res, status, reason, message) {
-  return res.status(status).json({ ok: false, reason, message });
-}
-
 function dailyLimit() {
   const n = Number(process.env.MEAL_AI_DAILY_LIMIT || DEFAULT_DAILY_LIMIT);
   return Number.isFinite(n) && n > 0 ? Math.floor(n) : DEFAULT_DAILY_LIMIT;
@@ -148,13 +150,7 @@ async function markFailed(mealId, message) {
     .eq('id', mealId);
 }
 
-module.exports = async function handler(req, res) {
-  applyCors(res);
-  if (req.method === 'OPTIONS') return res.status(204).end();
-  if (req.method !== 'POST') {
-    res.setHeader('Allow', 'POST');
-    return fail(res, 405, 'method_not_allowed', 'Método no permitido');
-  }
+async function analyzeMeal(req, res) {
 
   const apiKey = process.env.ANTHROPIC_API_KEY;
   if (!apiKey) return fail(res, 500, 'missing_api_key', 'Falta configurar ANTHROPIC_API_KEY en Vercel.');
@@ -363,4 +359,159 @@ module.exports = async function handler(req, res) {
     }
     return fail(res, 500, 'server_error', 'No pudimos analizar la foto. Intenta de nuevo.');
   }
+}
+
+
+// ── Código de barras (Open Food Facts) ──────────────────────────────────────
+
+
+const OFF_BASE = 'https://world.openfoodfacts.org/api/v2/product';
+const OFF_FIELDS = 'code,product_name,product_name_es,brands,quantity,serving_size,serving_quantity,nutriments';
+// Open Food Facts pide identificarse en el User-Agent; sin esto pueden limitar o bloquear.
+const OFF_UA = 'SkandiFit/1.0 (https://habittraininghub.app)';
+const OFF_TIMEOUT_MS = 8000;
+
+
+function num(value) {
+  const n = Number(value);
+  return Number.isFinite(n) && n >= 0 ? n : null;
+}
+
+// OFF no siempre trae energy-kcal_100g; a veces solo el valor en kilojoules.
+function kcalFrom(nutriments) {
+  const direct = num(nutriments['energy-kcal_100g']);
+  if (direct !== null) return direct;
+  const kj = num(nutriments['energy-kj_100g']) ?? num(nutriments.energy_100g);
+  return kj === null ? null : Math.round(kj / 4.184);
+}
+
+function servingGrams(product) {
+  const q = num(product.serving_quantity);
+  if (q) return Math.min(q, 5000);
+  // serving_size viene como texto libre: "15 g", "1 taza (240 ml)", "30g".
+  const match = String(product.serving_size || '').match(/([\d.,]+)\s*(g|ml)\b/i);
+  if (!match) return null;
+  const parsed = Number(match[1].replace(',', '.'));
+  return Number.isFinite(parsed) && parsed > 0 ? Math.min(parsed, 5000) : null;
+}
+
+async function lookupBarcode(req, res) {
+  if (!process.env.SUPABASE_URL || !process.env.SUPABASE_SERVICE_ROLE_KEY) {
+    return fail(res, 500, 'missing_supabase_env', 'Falta configurar SUPABASE_URL / SUPABASE_SERVICE_ROLE_KEY.');
+  }
+
+  try {
+    const token = String(req.headers.authorization || '').replace(/^Bearer\s+/i, '').trim();
+    if (!token) return fail(res, 401, 'no_session', 'Sesión requerida');
+
+    const { data: authData, error: authError } = await supabase.auth.getUser(token);
+    if (authError || !authData.user) return fail(res, 401, 'bad_session', 'Sesión inválida');
+    const userId = authData.user.id;
+
+    const barcode = String((req.body && req.body.barcode) || '').replace(/\D/g, '');
+    if (barcode.length < 8 || barcode.length > 14) {
+      return fail(res, 400, 'bad_barcode', 'Ese código de barras no parece válido.');
+    }
+
+    // 1. ¿Ya lo tenemos? El catálogo propio manda sobre el global.
+    const { data: known, error: knownError } = await supabase
+      .from('skandi_foods')
+      .select('id,user_id,name,brand,barcode,serving_label,serving_grams,kcal_100g,protein_100g,carbs_100g,fat_100g,fiber_100g,sugar_100g,source')
+      .eq('barcode', barcode)
+      .or(`user_id.eq.${userId},user_id.is.null`)
+      .order('user_id', { ascending: true, nullsFirst: false })
+      .limit(1);
+
+    if (knownError && /relation .* does not exist/i.test(knownError.message)) {
+      return fail(res, 500, 'missing_migration', 'Falta correr la migración 073_skandi_nutrition.sql en Supabase.');
+    }
+    if (known && known.length) {
+      return res.status(200).json({ ok: true, source: 'catalog', food: known[0] });
+    }
+
+    // 2. Open Food Facts. Con timeout: un producto no encontrado no debe colgar la pantalla.
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), OFF_TIMEOUT_MS);
+    let payload;
+    try {
+      const off = await fetch(`${OFF_BASE}/${barcode}.json?fields=${OFF_FIELDS}`, {
+        headers: { 'User-Agent': OFF_UA, Accept: 'application/json' },
+        signal: controller.signal,
+      });
+      if (!off.ok) {
+        return fail(res, 502, 'off_error', 'La base de productos no respondió. Captúralo a mano.');
+      }
+      payload = await off.json();
+    } catch (e) {
+      const aborted = e && e.name === 'AbortError';
+      return fail(res, aborted ? 504 : 502, 'off_unreachable',
+        aborted ? 'La base de productos tardó demasiado. Captúralo a mano.' : 'No pudimos consultar la base de productos.');
+    } finally {
+      clearTimeout(timer);
+    }
+
+    const product = payload && payload.status === 1 ? payload.product : null;
+    if (!product) {
+      return fail(res, 404, 'not_found', 'Ese producto no está en la base. Captúralo a mano una vez y queda guardado.');
+    }
+
+    const nutriments = product.nutriments || {};
+    const kcal = kcalFrom(nutriments);
+    const name = String(product.product_name_es || product.product_name || '').trim();
+    if (kcal === null || !name) {
+      return fail(res, 422, 'no_nutrition',
+        'Ese producto está en la base pero sin datos nutricionales completos. Captúralo a mano.');
+    }
+
+    const grams = servingGrams(product);
+    const food = {
+      user_id: userId,
+      name: name.slice(0, 120),
+      brand: String(product.brands || '').split(',')[0].trim().slice(0, 80) || null,
+      barcode,
+      serving_label: String(product.serving_size || '').trim().slice(0, 60) || null,
+      serving_grams: grams,
+      kcal_100g: Math.min(kcal, 1000),
+      protein_100g: Math.min(num(nutriments.proteins_100g) || 0, 100),
+      carbs_100g: Math.min(num(nutriments.carbohydrates_100g) || 0, 100),
+      fat_100g: Math.min(num(nutriments.fat_100g) || 0, 100),
+      fiber_100g: Math.min(num(nutriments.fiber_100g) || 0, 100),
+      sugar_100g: Math.min(num(nutriments.sugars_100g) || 0, 100),
+      source: 'off',
+    };
+
+    const { data: saved, error: saveError } = await supabase
+      .from('skandi_foods')
+      .insert(food)
+      .select('id,user_id,name,brand,barcode,serving_label,serving_grams,kcal_100g,protein_100g,carbs_100g,fat_100g,fiber_100g,sugar_100g,source')
+      .single();
+
+    if (saveError) {
+      // Guardar es una comodidad, no el objetivo: si el índice único lo rechaza por una
+      // carrera, devolvemos igual los datos y que el cliente siga con su porción.
+      console.warn('lookup-barcode: no se pudo guardar', saveError.message);
+      return res.status(200).json({ ok: true, source: 'openfoodfacts', saved: false, food });
+    }
+
+    return res.status(200).json({ ok: true, source: 'openfoodfacts', saved: true, food: saved });
+  } catch (err) {
+    console.error('lookup-barcode error:', err);
+    return fail(res, 500, 'server_error', 'No pudimos buscar ese código. Intenta de nuevo.');
+  }
+}
+
+
+// ── Despachador ─────────────────────────────────────────────────────────────
+
+module.exports = async function handler(req, res) {
+  applyCors(res);
+  if (req.method === 'OPTIONS') return res.status(204).end();
+  if (req.method !== 'POST') {
+    res.setHeader('Allow', 'POST');
+    return fail(res, 405, 'method_not_allowed', 'Método no permitido');
+  }
+  const action = String((req.body && req.body.action) || 'analyze');
+  if (action === 'barcode') return lookupBarcode(req, res);
+  if (action === 'analyze') return analyzeMeal(req, res);
+  return fail(res, 400, 'bad_action', `Acción desconocida: ${action}`);
 };

@@ -584,6 +584,28 @@ Dos casos que costaron más de lo que parecen:
 `CLAUDE.md` aplicándose a quien la escribió: **editar un módulo compartido sin bumpear la versión
 sirve código rancio**. Vale la pena recordarlo antes de perseguir un fantasma.
 
+**2026-08-22 — El build de producción falló: tope de 12 funciones.**
+
+`No more than 12 Serverless Functions can be added to a Deployment on the Hobby plan.` El proyecto
+ya estaba justo en 12 y mis dos endpoints nuevos lo pusieron en 14. La app nunca se cayó —
+producción siguió sirviendo el deployment anterior— pero nada de nutrición llegó a estar vivo.
+
+Arreglado sin tocar comportamiento, plegando dos pares en routers por `action`:
+
+- `analyze-meal.js` + `lookup-barcode.js` → **`api/nutrition.js`** (`action: 'analyze' | 'barcode'`).
+  Cada rama conserva sus propias guardas: la de código de barras no necesita `ANTHROPIC_API_KEY` ni
+  toca la cuota.
+- `get-user-email.js` → una acción más en **`search-users.js`**, que ya tenía router (`create`,
+  `reception-active`). Era el endpoint más chico del repo (41 líneas), es admin, es sobre usuarios y
+  tenía un solo punto de llamada.
+
+De 14 a 12. Verificado: el despachador enruta bien, rechaza acciones desconocidas, `analyze` es el
+default, y no quedaron referencias muertas a las rutas viejas.
+
+**Regla nueva para el futuro:** un archivo en `api/` = una función. Cada endpoint nuevo se pliega en
+un router existente, no agrega archivo. **Strava serán cuatro acciones en un solo `api/strava.js`**,
+no cuatro archivos — si no, el build vuelve a fallar. La alternativa es Pro, y esa es decisión tuya.
+
 ## 12. Siguiente paso
 
 1. ✅ Migraciones 073-075 corridas y `ANTHROPIC_API_KEY` cargada en Vercel (2026-08-22).

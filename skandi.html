@@ -8,14 +8,14 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="Skandi Fit">
 <meta name="application-name" content="Skandi Fit">
-<link rel="manifest" href="/skandi-manifest.json?v=20260822-06">
-<link rel="apple-touch-icon" sizes="180x180" href="/icons/skandi-180.png?v=20260822-06">
-<link rel="icon" type="image/png" sizes="192x192" href="/icons/skandi-192.png?v=20260822-06">
+<link rel="manifest" href="/skandi-manifest.json?v=20260822-07">
+<link rel="apple-touch-icon" sizes="180x180" href="/icons/skandi-180.png?v=20260822-07">
+<link rel="icon" type="image/png" sizes="192x192" href="/icons/skandi-192.png?v=20260822-07">
 <title>Skandi Fit</title>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="/skandi-recovery.js?v=20260822-06"></script>
-<script src="/body-figure.js?v=20260822-06"></script>
-<script src="/skandi-nutrition.js?v=20260822-06"></script>
+<script src="/skandi-recovery.js?v=20260822-07"></script>
+<script src="/body-figure.js?v=20260822-07"></script>
+<script src="/skandi-nutrition.js?v=20260822-07"></script>
 <style>
 :root{
   --bg:#eef4f8;
@@ -401,7 +401,7 @@ textarea.field{min-height:112px;text-align:left;resize:vertical}
 // Versión compartida con app.html (APP_VERSION) y sw.js (CACHE_VERSION): un solo service
 // worker sirve las dos apps, así que una sola cadena las invalida a las dos. Al cambiarla
 // hay que actualizarla también en los ?v= del <head>, en index.html y en los dos manifests.
-const SKANDI_VERSION='20260822-06';
+const SKANDI_VERSION='20260822-07';
 const SUPABASE_URL='https://pmpjteuqjusbiduevbwq.supabase.co';
 const SUPABASE_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBtcGp0ZXVxanVzYmlkdWV2YndxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc2OTI1NjUsImV4cCI6MjA5MzI2ODU2NX0.XbMzZoo2yqtrD8znLnyo_1zDfrdJAvAPj1lqGOyXnLw';
 const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
@@ -5003,10 +5003,10 @@ async function submitMealForAnalysis(){
 async function analyzeMeal(mealId){
   try{
     const {data:{session}}=await sb.auth.getSession();
-    const res=await fetch('/api/analyze-meal',{
+    const res=await fetch('/api/nutrition',{
       method:'POST',
       headers:{'Content-Type':'application/json',Authorization:`Bearer ${session.access_token}`},
-      body:JSON.stringify({meal_id:mealId})
+      body:JSON.stringify({action:'analyze',meal_id:mealId})
     });
     const body=await res.json().catch(()=>({}));
     await loadNutrition();
@@ -5217,10 +5217,10 @@ async function lookupBarcode(){
   stopBarcodeScan();
   try{
     const {data:{session}}=await sb.auth.getSession();
-    const res=await fetch('/api/lookup-barcode',{
+    const res=await fetch('/api/nutrition',{
       method:'POST',
       headers:{'Content-Type':'application/json',Authorization:`Bearer ${session.access_token}`},
-      body:JSON.stringify({barcode:code})
+      body:JSON.stringify({action:'barcode',barcode:code})
     });
     const body=await res.json().catch(()=>({}));
     if(!res.ok||!body.food) return alert(body.message||t('food.noMatches'));

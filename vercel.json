@@ -7,7 +7,7 @@
     }
   ],
   "functions": {
-    "api/analyze-meal.js": {
+    "api/nutrition.js": {
       "maxDuration": 60
     }
   },
