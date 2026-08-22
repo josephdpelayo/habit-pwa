@@ -6,18 +6,18 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="HABIT">
 <meta name="application-name" content="HABIT">
-<link rel="manifest" href="/manifest.json?v=20260821-09">
-<link rel="apple-touch-icon" sizes="120x120" href="/icons/icon-120.png?v=20260821-09">
-<link rel="apple-touch-icon" sizes="152x152" href="/icons/icon-152.png?v=20260821-09">
-<link rel="apple-touch-icon" sizes="167x167" href="/icons/icon-167.png?v=20260821-09">
-<link rel="apple-touch-icon" sizes="180x180" href="/icons/icon-180.png?v=20260821-09">
-<link rel="icon" type="image/png" sizes="32x32" href="/icons/icon-32.png?v=20260821-09">
+<link rel="manifest" href="/manifest.json?v=20260821-10">
+<link rel="apple-touch-icon" sizes="120x120" href="/icons/icon-120.png?v=20260821-10">
+<link rel="apple-touch-icon" sizes="152x152" href="/icons/icon-152.png?v=20260821-10">
+<link rel="apple-touch-icon" sizes="167x167" href="/icons/icon-167.png?v=20260821-10">
+<link rel="apple-touch-icon" sizes="180x180" href="/icons/icon-180.png?v=20260821-10">
+<link rel="icon" type="image/png" sizes="32x32" href="/icons/icon-32.png?v=20260821-10">
 <title>HABIT</title>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Share+Tech+Mono&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="/skandi-recovery.js?v=20260821-09"></script>
-<script src="/body-figure.js?v=20260821-09"></script>
+<script src="/skandi-recovery.js?v=20260821-10"></script>
+<script src="/body-figure.js?v=20260821-10"></script>
 <style>
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
 :root{
@@ -1677,6 +1677,7 @@ body.admin-mode #courtesy-modal label{border-radius:14px!important;border-color:
 .adm-nav-group{display:contents}
 .adm-nav-label{display:none}
 .adm-nav-icon{width:18px;height:18px;display:grid;place-items:center;flex:0 0 auto;font-size:13px;font-weight:850;color:currentColor}
+.admin-mobile-menu-btn,.adm-mobile-sheet-head,.adm-mobile-backdrop{display:none}
 .admin-list-tools{display:grid;grid-template-columns:minmax(0,1fr) minmax(160px,220px);gap:9px;align-items:center;margin-bottom:10px}
 .admin-list-tools .admin-toolbar{margin:0!important}
 .admin-action-center{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;margin-bottom:2px}
@@ -1709,12 +1710,28 @@ body.admin-mode #courtesy-modal label{border-radius:14px!important;border-color:
   body.admin-mode #a-dash>.slbl,body.admin-mode #a-dash>.admin-chart-card,body.admin-mode #expiry-section{grid-row:auto!important}
 }
 @media(max-width:899px){
-  #s-admin .hdr{justify-content:space-between}
-  #s-admin .logo-wrap{border:0;color:inherit;text-align:left;background:transparent}
-  #s-admin .adm-nav{display:flex;gap:6px;overflow-x:auto;padding:8px;scrollbar-width:none}
-  #s-admin .adm-nav-group{display:flex;gap:6px;flex:0 0 auto}
-  #s-admin .adm-nav-label{display:none}
-  #s-admin .adm-tab{width:auto;min-width:max-content;padding:9px 11px}
+  body.admin-menu-open{overflow:hidden}
+  #s-admin .hdr{justify-content:flex-start;gap:8px;padding:12px 14px;min-height:68px}
+  #s-admin .logo-wrap{border:0;color:inherit;text-align:left;background:transparent;margin:0;padding:5px 3px;flex:1;min-width:0}
+  #s-admin .logo-wrap .header-logo-img{width:28px;height:28px}
+  #s-admin .logo-wrap .ltxt{font-size:17px}
+  #s-admin .logo-wrap .lsub{font-size:7px;white-space:nowrap}
+  #s-admin .logout-btn{padding:8px 6px;font-size:11px}
+  .admin-mobile-menu-btn{display:flex;align-items:center;gap:7px;min-height:38px;padding:0 11px;border:1px solid rgba(255,255,255,.1);border-radius:12px;background:rgba(255,255,255,.055);color:#dbe3ef;font-size:11.5px;font-weight:780;cursor:pointer}
+  .admin-mobile-menu-btn b{font-size:15px;font-weight:600}
+  #s-admin .adm-nav{position:fixed;z-index:10002;left:10px;right:10px;bottom:calc(10px + env(safe-area-inset-bottom,0px));top:auto;display:block;max-height:min(78dvh,680px);overflow-y:auto;padding:8px 10px 14px;border:1px solid rgba(255,255,255,.11);border-radius:22px;background:#111216;box-shadow:0 28px 90px rgba(0,0,0,.72);transform:translateY(calc(100% + 24px));opacity:0;pointer-events:none;transition:transform .22s ease,opacity .18s ease}
+  #s-admin .adm-nav.mobile-open{transform:translateY(0);opacity:1;pointer-events:auto}
+  #s-admin .adm-mobile-sheet-head{display:flex;align-items:center;justify-content:space-between;position:sticky;top:-8px;z-index:2;margin:0 -2px 5px;padding:12px 8px 10px;background:#111216;border-bottom:1px solid rgba(255,255,255,.07)}
+  #s-admin .adm-mobile-sheet-head strong{display:block;font-size:17px;color:#fff}
+  #s-admin .adm-mobile-sheet-head span{display:block;margin-top:2px;font-size:10px;color:#7f8997}
+  #s-admin .adm-mobile-sheet-head button{width:34px;height:34px;border:1px solid rgba(255,255,255,.09);border-radius:11px;background:rgba(255,255,255,.045);color:#d9e1ec;font-size:22px;cursor:pointer}
+  #s-admin .adm-nav-group{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:6px;padding:9px 0;border-top:1px solid rgba(255,255,255,.06)}
+  #s-admin .adm-nav-group:first-of-type{border-top:0}
+  #s-admin .adm-nav-label{display:block;grid-column:1/-1;padding:0 5px 3px;font-size:9px;font-weight:820;letter-spacing:.11em;text-transform:uppercase;color:#657080}
+  #s-admin .adm-tab{justify-content:flex-start;width:100%;min-width:0;min-height:42px;padding:0 11px;border-radius:12px;text-align:left}
+  #s-admin .adm-tab .adm-tab-badge{margin-left:auto}
+  .adm-mobile-backdrop{position:fixed;z-index:10001;inset:0;display:block;border:0;background:rgba(0,0,0,.66);backdrop-filter:blur(4px);opacity:0;pointer-events:none;transition:opacity .18s ease}
+  .adm-mobile-backdrop.show{opacity:1;pointer-events:auto}
   .admin-action-center{grid-template-columns:repeat(2,minmax(0,1fr))}
   .admin-list-tools{grid-template-columns:1fr}
   .admin-date-rail{grid-template-columns:40px auto minmax(130px,1fr) 40px}
@@ -2341,9 +2358,11 @@ body.admin-mode #courtesy-modal label{border-radius:14px!important;border-color:
 <div id="s-admin" class="screen">
   <div class="hdr">
     <button class="logo-wrap active" data-admin-tab="dash" onclick="admTab('dash')" aria-label="Ir al inicio del admin"><img src="icons/logo-original.png" class="header-logo-img" alt=""><span><span class="ltxt">HABIT</span><span class="lsub">CENTRO DE OPERACIONES</span></span></button>
+    <button class="admin-mobile-menu-btn" type="button" aria-expanded="false" onclick="toggleAdminMobileMenu()"><span>Menú</span><b>☰</b></button>
     <button class="logout-btn" onclick="doLogout()">Salir</button>
   </div>
   <nav class="adm-nav" aria-label="Secciones administrativas">
+    <div class="adm-mobile-sheet-head"><div><strong>Menú</strong><span>Centro de operaciones</span></div><button type="button" onclick="toggleAdminMobileMenu(false)" aria-label="Cerrar menú">×</button></div>
     <div class="adm-nav-group"><div class="adm-nav-label">General</div>
       <button class="adm-tab" data-admin-tab="dash" onclick="admTab('dash')"><span class="adm-nav-icon">⌂</span><span>Inicio</span></button>
     </div>
@@ -2367,6 +2386,7 @@ body.admin-mode #courtesy-modal label{border-radius:14px!important;border-color:
       <button class="adm-tab" data-admin-tab="notifs" onclick="admTab('notifs')"><span class="adm-nav-icon">!</span><span>Alertas</span><span id="adm-alertas-badge" class="adm-tab-badge"></span></button>
     </div>
   </nav>
+  <button class="adm-mobile-backdrop" type="button" onclick="toggleAdminMobileMenu(false)" aria-label="Cerrar menú"></button>
   <div class="scroll-area" style="padding-top:.75rem">
 
     <!-- DASHBOARD -->
@@ -2955,7 +2975,7 @@ body.admin-mode #courtesy-modal label{border-radius:14px!important;border-color:
 // ── CONFIG & SUPABASE ───────────────────────────────────────
 const SUPABASE_URL='https://pmpjteuqjusbiduevbwq.supabase.co';
 const SUPABASE_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBtcGp0ZXVxanVzYmlkdWV2YndxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc2OTI1NjUsImV4cCI6MjA5MzI2ODU2NX0.XbMzZoo2yqtrD8znLnyo_1zDfrdJAvAPj1lqGOyXnLw';
-const APP_VERSION='20260821-09';
+const APP_VERSION='20260821-10';
 // La pierna va separada en cuádriceps, femorales y pantorrillas: la figura
 // corporal pinta esas tres regiones por separado y el motor de recuperación les
 // da ventanas de descanso distintas. 'Piernas' sigue reconociéndose al leer
@@ -4622,6 +4642,7 @@ function showAdmin(){
   document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
   const adm=document.getElementById('s-admin');
   if(adm)adm.classList.add('active');
+  toggleAdminMobileMenu(false);
   const d=document.getElementById('adm-date');if(d){d.value=mazToday();d.max=addDaysDS(mazToday(),ADMIN_BLOCK_ADVANCE_DAYS);}
   const savedAdminTab=sessionStorage.getItem('habit-admin-tab');
   const safeAdminTabs=['dash','slots','users','coaching','boards','payments','shop','gaia','reports','mensajes','comunidad','notifs'];
@@ -4928,6 +4949,7 @@ function sv(v){
 function admTab(t){
   const target=document.getElementById('a-'+t);
   if(!target)return;
+  toggleAdminMobileMenu(false);
   sessionStorage.setItem('habit-admin-tab',t);
   document.querySelectorAll('[data-admin-tab]').forEach(b=>b.classList.toggle('active',b.dataset.adminTab===t));
   document.querySelectorAll('.adm-section').forEach(el=>el.classList.remove('active'));
@@ -4944,6 +4966,18 @@ function admTab(t){
   if(t==='comunidad')renderAdminFeed();
   if(t==='notifs')renderAdmNotifsSb();
   if(t==='gaia')renderGaiaTab();
+}
+
+function toggleAdminMobileMenu(force){
+  const nav=document.querySelector('#s-admin .adm-nav');
+  const backdrop=document.querySelector('#s-admin .adm-mobile-backdrop');
+  const trigger=document.querySelector('#s-admin .admin-mobile-menu-btn');
+  if(!nav)return;
+  const open=typeof force==='boolean'?force:!nav.classList.contains('mobile-open');
+  nav.classList.toggle('mobile-open',open);
+  if(backdrop)backdrop.classList.toggle('show',open);
+  if(trigger)trigger.setAttribute('aria-expanded',String(open));
+  document.body.classList.toggle('admin-menu-open',open);
 }
 
 function changeAdminDate(delta){
