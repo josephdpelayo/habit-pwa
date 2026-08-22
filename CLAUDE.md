@@ -261,4 +261,4 @@ Strava's app settings need `Authorization Callback Domain` set to the bare host 
 `LOCATION_EXEMPT_EMAILS` in `request-door-open.js` lists emails that bypass GPS checks.
 
 ### SQL Migrations
-All migrations live in `migrations/` with numeric prefixes (`001_schema.sql` … `081_skandi_strava.sql`). Run them in order in the Supabase SQL Editor. New migrations follow the same naming convention. The API handlers detect missing tables and return descriptive error messages pointing to the required migration.
+All migrations live in `migrations/` with numeric prefixes (`001_schema.sql` … `082_skandi_intervals.sql`). Run them in order in the Supabase SQL Editor. New migrations follow the same naming convention. The API handlers detect missing tables and return descriptive error messages pointing to the required migration.

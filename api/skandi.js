@@ -1,4 +1,4 @@
-// Skandi Fit — el router del servidor: nutrición y Strava.
+// Skandi Fit — el router del servidor: nutrición e integraciones deportivas.
 //
 // Caminos muy distintos viven en el mismo archivo por una razón de plataforma, no de diseño:
 // el plan Hobby de Vercel admite 12 Serverless Functions por deployment, y el proyecto está
@@ -10,6 +10,7 @@
 //   { action: 'analyze', meal_id }  -> foto y/o texto -> Claude (vision). Gasta cuota.
 //   { action: 'barcode', barcode }  -> Open Food Facts. Sin IA y sin cuota.
 //   strava-connect / -callback / -webhook / -sync / -disconnect / -subscription
+//   intervals-connect / -status / -sync / -disconnect
 //
 // Seguridad: la ANTHROPIC_API_KEY vive solo aquí. El cliente nunca habla con Anthropic, y la
 // foto se descarga con service-role porque el bucket es privado (migración 073). Los tokens
@@ -561,6 +562,7 @@ async function lookupBarcode(req, res) {
 
 const crypto = require('crypto');
 const SkandiStrava = require('../skandi-strava.js');
+const SkandiIntervals = require('../skandi-intervals.js');
 
 const STRAVA_AUTH_URL = 'https://www.strava.com/oauth/authorize';
 const STRAVA_TOKEN_URL = 'https://www.strava.com/oauth/token';
@@ -990,6 +992,188 @@ async function stravaSubscription(req, res) {
 }
 
 
+// ── Intervals.icu ───────────────────────────────────────────────────────────
+// Garmin Connect sube al reloj a Intervals.icu y nosotros leemos únicamente esas actividades.
+// La API key nunca vuelve al cliente: se cifra con AES-GCM y la tabla tiene RLS sin políticas.
+
+const INTERVALS_API = 'https://intervals.icu/api/v1';
+const INTERVALS_FIELDS = [
+  'id','start_date','start_date_local','type','name','distance','moving_time','elapsed_time',
+  'total_elevation_gain','average_heartrate','max_heartrate','calories','perceived_exertion',
+  'icu_rpe','session_rpe','athlete_max_hr','device_name','source',
+].join(',');
+
+function intervalsKey() {
+  return crypto.createHash('sha256')
+    .update(String(process.env.SUPABASE_SERVICE_ROLE_KEY || ''))
+    .digest();
+}
+
+function encryptIntervalsKey(value) {
+  const iv = crypto.randomBytes(12);
+  const cipher = crypto.createCipheriv('aes-256-gcm', intervalsKey(), iv);
+  const encrypted = Buffer.concat([cipher.update(String(value), 'utf8'), cipher.final()]);
+  return ['v1', iv.toString('hex'), cipher.getAuthTag().toString('hex'), encrypted.toString('hex')].join('.');
+}
+
+function decryptIntervalsKey(value) {
+  const [version, ivHex, tagHex, encryptedHex] = String(value || '').split('.');
+  if (version !== 'v1' || !ivHex || !tagHex || !encryptedHex) throw new Error('Credencial inválida; vuelve a conectar Intervals.icu.');
+  const decipher = crypto.createDecipheriv('aes-256-gcm', intervalsKey(), Buffer.from(ivHex, 'hex'));
+  decipher.setAuthTag(Buffer.from(tagHex, 'hex'));
+  return Buffer.concat([decipher.update(Buffer.from(encryptedHex, 'hex')), decipher.final()]).toString('utf8');
+}
+
+async function intervalsGet(apiKey, path, params) {
+  const url = new URL(INTERVALS_API + path);
+  Object.entries(params || {}).forEach(([key, value]) => url.searchParams.set(key, String(value)));
+  const auth = Buffer.from(`API_KEY:${apiKey}`).toString('base64');
+  const response = await fetch(url, { headers: { Authorization: `Basic ${auth}` } });
+  if (response.status === 401 || response.status === 403) throw new Error('Intervals.icu rechazó la API key. Revísala y vuelve a conectar.');
+  if (response.status === 429) throw new Error('Intervals.icu está limitando las peticiones. Intenta en unos minutos.');
+  const data = await response.json().catch(() => null);
+  if (!response.ok) throw new Error(`Intervals.icu respondió ${response.status}.`);
+  return data;
+}
+
+async function intervalsCredential(userId) {
+  const { data, error } = await supabase.from('skandi_intervals_credentials')
+    .select('*').eq('user_id', userId).maybeSingle();
+  if (error) throw new Error(error.message);
+  return data || null;
+}
+
+async function importIntervalsActivities(userId, activities) {
+  const maxHeartRate = await maxHeartRateOf(userId);
+  const rows = (activities || [])
+    .map(activity => SkandiIntervals.toActivityRow(activity, { userId, maxHeartRate }))
+    .filter(Boolean);
+  const result = { imported: 0, updated: 0, skipped: (activities || []).length - rows.length };
+  if (!rows.length) return result;
+
+  const { data: existing, error: readError } = await supabase
+    .from('skandi_external_activities')
+    .select('id,external_id,intensity_source')
+    .eq('user_id', userId).eq('external_source', 'intervals')
+    .in('external_id', rows.map(row => row.external_id));
+  if (readError) throw new Error(readError.message);
+
+  const known = new Map((existing || []).map(row => [row.external_id, row]));
+  const fresh = rows.filter(row => !known.has(row.external_id));
+  if (fresh.length) {
+    const { error } = await supabase.from('skandi_external_activities').insert(fresh);
+    if (error) throw new Error(error.message);
+    result.imported = fresh.length;
+  }
+
+  for (const row of rows) {
+    const previous = known.get(row.external_id);
+    if (!previous) continue;
+    const patch = { ...row };
+    delete patch.user_id;
+    delete patch.external_source;
+    delete patch.external_id;
+    if (previous.intensity_source === 'manual') {
+      delete patch.intensity;
+      delete patch.intensity_source;
+    }
+    const { error } = await supabase.from('skandi_external_activities')
+      .update(patch).eq('id', previous.id);
+    if (error) throw new Error(error.message);
+    result.updated += 1;
+  }
+  return result;
+}
+
+async function intervalsConnect(req, res) {
+  const userId = await requireUser(req, res);
+  if (!userId) return;
+  const apiKey = String(req.body && req.body.api_key || '').trim();
+  if (apiKey.length < 12 || apiKey.length > 300) return fail(res, 400, 'bad_api_key', 'Escribe una API key válida de Intervals.icu.');
+
+  try {
+    const athlete = await intervalsGet(apiKey, '/athlete/0');
+    const athleteId = String(athlete && athlete.id || '').trim();
+    if (!athleteId) return fail(res, 502, 'no_athlete', 'Intervals.icu no devolvió el atleta.');
+    const { error } = await supabase.from('skandi_intervals_credentials').upsert({
+      user_id: userId, athlete_id: athleteId,
+      api_key_ciphertext: encryptIntervalsKey(apiKey),
+      connected_at: new Date().toISOString(), last_error: null,
+    }, { onConflict: 'user_id' });
+    if (error) {
+      const message = error.code === '23505'
+        ? 'Esa cuenta de Intervals.icu ya está conectada a otro miembro.' : error.message;
+      return fail(res, 409, 'save_failed', message);
+    }
+    return res.status(200).json({ ok: true, athlete_id: athleteId });
+  } catch (err) {
+    console.error('intervals-connect error:', err.message);
+    return fail(res, 502, 'intervals_failed', err.message);
+  }
+}
+
+async function intervalsStatus(req, res) {
+  const userId = await requireUser(req, res);
+  if (!userId) return;
+  try {
+    const credential = await intervalsCredential(userId);
+    if (!credential) return res.status(200).json({ ok: true, connected: false });
+    const { count, error } = await supabase.from('skandi_external_activities')
+      .select('id', { count: 'exact', head: true })
+      .eq('user_id', userId).eq('external_source', 'intervals');
+    if (error) throw new Error(error.message);
+    return res.status(200).json({
+      ok: true, connected: true, athlete_id: credential.athlete_id,
+      connected_at: credential.connected_at, last_sync_at: credential.last_sync_at,
+      last_error: credential.last_error, imported: count || 0,
+    });
+  } catch (err) {
+    console.error('intervals-status error:', err.message);
+    return fail(res, 500, 'status_failed', err.message);
+  }
+}
+
+async function intervalsSync(req, res) {
+  const userId = await requireUser(req, res);
+  if (!userId) return;
+  let credential;
+  try { credential = await intervalsCredential(userId); }
+  catch (err) { return fail(res, 500, 'read_failed', err.message); }
+  if (!credential) return fail(res, 409, 'not_connected', 'Conecta Intervals.icu primero.');
+
+  const requested = Number(req.body && req.body.days || 0);
+  const days = requested > 0 ? Math.min(Math.round(requested), SYNC_MAX_DAYS) : SYNC_DEFAULT_DAYS;
+  const newest = new Date();
+  const oldest = new Date(newest.getTime() - days * 864e5);
+  const date = value => value.toISOString().slice(0, 10);
+  try {
+    const apiKey = decryptIntervalsKey(credential.api_key_ciphertext);
+    const activities = await intervalsGet(apiKey,
+      `/athlete/${encodeURIComponent(credential.athlete_id)}/activities`, {
+        oldest: date(oldest), newest: date(newest), limit: 1000, fields: INTERVALS_FIELDS,
+      });
+    if (!Array.isArray(activities)) throw new Error('Intervals.icu devolvió una respuesta inesperada.');
+    const totals = await importIntervalsActivities(userId, activities);
+    await supabase.from('skandi_intervals_credentials')
+      .update({ last_sync_at: new Date().toISOString(), last_error: null }).eq('user_id', userId);
+    return res.status(200).json({ ok: true, days, ...totals });
+  } catch (err) {
+    console.error('intervals-sync error:', err.message);
+    await supabase.from('skandi_intervals_credentials')
+      .update({ last_error: String(err.message).slice(0, 300) }).eq('user_id', userId);
+    return fail(res, 502, 'intervals_failed', err.message);
+  }
+}
+
+async function intervalsDisconnect(req, res) {
+  const userId = await requireUser(req, res);
+  if (!userId) return;
+  const { error } = await supabase.from('skandi_intervals_credentials').delete().eq('user_id', userId);
+  if (error) return fail(res, 500, 'delete_failed', error.message);
+  return res.status(200).json({ ok: true });
+}
+
+
 // ── Despachador ─────────────────────────────────────────────────────────────
 
 module.exports = async function handler(req, res) {
@@ -1029,5 +1213,9 @@ module.exports = async function handler(req, res) {
   if (action === 'strava-sync') return stravaSync(req, res);
   if (action === 'strava-disconnect') return stravaDisconnect(req, res);
   if (action === 'strava-subscription') return stravaSubscription(req, res);
+  if (action === 'intervals-connect') return intervalsConnect(req, res);
+  if (action === 'intervals-status') return intervalsStatus(req, res);
+  if (action === 'intervals-sync') return intervalsSync(req, res);
+  if (action === 'intervals-disconnect') return intervalsDisconnect(req, res);
   return fail(res, 400, 'bad_action', `Acción desconocida: ${action}`);
 };

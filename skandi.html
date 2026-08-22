@@ -8,14 +8,14 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="Skandi Fit">
 <meta name="application-name" content="Skandi Fit">
-<link rel="manifest" href="/skandi-manifest.json?v=20260822-11">
-<link rel="apple-touch-icon" sizes="180x180" href="/icons/skandi-180.png?v=20260822-11">
-<link rel="icon" type="image/png" sizes="192x192" href="/icons/skandi-192.png?v=20260822-11">
+<link rel="manifest" href="/skandi-manifest.json?v=20260822-12">
+<link rel="apple-touch-icon" sizes="180x180" href="/icons/skandi-180.png?v=20260822-12">
+<link rel="icon" type="image/png" sizes="192x192" href="/icons/skandi-192.png?v=20260822-12">
 <title>Skandi Fit</title>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="/skandi-recovery.js?v=20260822-11"></script>
-<script src="/body-figure.js?v=20260822-11"></script>
-<script src="/skandi-nutrition.js?v=20260822-11"></script>
+<script src="/skandi-recovery.js?v=20260822-12"></script>
+<script src="/body-figure.js?v=20260822-12"></script>
+<script src="/skandi-nutrition.js?v=20260822-12"></script>
 <style>
 :root{
   --bg:#eef4f8;
@@ -440,7 +440,7 @@ textarea.field{min-height:112px;text-align:left;resize:vertical}
 // Versión compartida con app.html (APP_VERSION) y sw.js (CACHE_VERSION): un solo service
 // worker sirve las dos apps, así que una sola cadena las invalida a las dos. Al cambiarla
 // hay que actualizarla también en los ?v= del <head>, en index.html y en los dos manifests.
-const SKANDI_VERSION='20260822-11';
+const SKANDI_VERSION='20260822-12';
 const SUPABASE_URL='https://pmpjteuqjusbiduevbwq.supabase.co';
 const SUPABASE_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBtcGp0ZXVxanVzYmlkdWV2YndxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc2OTI1NjUsImV4cCI6MjA5MzI2ODU2NX0.XbMzZoo2yqtrD8znLnyo_1zDfrdJAvAPj1lqGOyXnLw';
 const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
@@ -467,6 +467,7 @@ en:{
   'auth.signingIn':'Signing in...','auth.creatingAccount':'Creating account...',
   'auth.created':'Account created. Check your email if confirmation is required, then sign in.',
   'auth.profileError':'Could not set up your profile: {msg}. Try signing out and back in.',
+  'auth.sessionExpired':'Your session expired. Sign in again.',
 
   'tab.home':'Home','tab.train':'Train','tab.crew':'Crew','tab.progress':'Progress','tab.body':'Body','tab.library':'Library',
   'tab.food':'Food',
@@ -743,6 +744,20 @@ en:{
   'strava.maxHrNote':'Turns beats into effort: 150 bpm is a jog for one person and near-maximal for another. Leave it empty and absolute bands are used instead.',
   'strava.errMaxHr':'Max heart rate must be between 120 and 230.',
 
+  'intervals.title':'Garmin · Intervals.icu','intervals.badge':'Garmin · Intervals.icu',
+  'intervals.pitch':'Bring workouts from your Garmin watch into Skandi automatically through your free Intervals.icu account.',
+  'intervals.key':'Intervals.icu API key','intervals.keyPh':'Paste your personal API key',
+  'intervals.keyNote':'It is sent directly to Skandi, validated, and stored encrypted. It is never shown again or exposed to the browser.',
+  'intervals.connect':'Connect Garmin','intervals.connecting':'Connecting…',
+  'intervals.connectedAs':'Connected · athlete {athlete}',
+  'intervals.summary':'{n} Garmin activities imported · last sync {when}',
+  'intervals.never':'never','intervals.sync':'Sync now','intervals.syncing':'Syncing…',
+  'intervals.backfill':'Import the last year','intervals.disconnect':'Disconnect',
+  'intervals.syncDone':'{imported} new, {updated} updated, {skipped} skipped.',
+  'intervals.disconnectConfirm':'Disconnect Intervals.icu? Already-imported workouts stay in your history.',
+  'intervals.failed':'Intervals.icu did not answer. Try again in a moment.',
+  'intervals.keyRequired':'Paste your Intervals.icu API key.',
+
   'logAct.title':'Log activity','logAct.goal':'Goal: {goal}','logAct.type':'Activity type',
   'logAct.duration':'Duration (minutes)','logAct.durationPh':'e.g. 40',
   'logAct.distance':'Distance (km, optional)','logAct.distancePh':'e.g. 6.5',
@@ -900,6 +915,7 @@ es:{
   'auth.signingIn':'Iniciando sesión...','auth.creatingAccount':'Creando cuenta...',
   'auth.created':'Cuenta creada. Revisa tu correo si hace falta confirmarla y luego inicia sesión.',
   'auth.profileError':'No se pudo crear tu perfil: {msg}. Cierra sesión y vuelve a entrar.',
+  'auth.sessionExpired':'Tu sesión caducó. Vuelve a iniciar sesión.',
 
   'tab.home':'Inicio','tab.train':'Entrenar','tab.crew':'Crew','tab.progress':'Progreso','tab.body':'Cuerpo','tab.library':'Catálogo',
   'tab.food':'Comida',
@@ -1176,6 +1192,20 @@ es:{
   'strava.maxHrNote':'Convierte pulsaciones en esfuerzo: 150 bpm son un trote para uno y casi el tope para otro. Déjalo vacío y se usan bandas absolutas.',
   'strava.errMaxHr':'La frecuencia máxima debe estar entre 120 y 230.',
 
+  'intervals.title':'Garmin · Intervals.icu','intervals.badge':'Garmin · Intervals.icu',
+  'intervals.pitch':'Trae automáticamente a Skandi los entrenamientos de tu reloj Garmin usando tu cuenta gratuita de Intervals.icu.',
+  'intervals.key':'API key de Intervals.icu','intervals.keyPh':'Pega tu API key personal',
+  'intervals.keyNote':'Se envía directo a Skandi, se valida y se guarda cifrada. No vuelve a mostrarse ni queda expuesta al navegador.',
+  'intervals.connect':'Conectar Garmin','intervals.connecting':'Conectando…',
+  'intervals.connectedAs':'Conectado · atleta {athlete}',
+  'intervals.summary':'{n} actividades de Garmin importadas · última vez {when}',
+  'intervals.never':'nunca','intervals.sync':'Sincronizar ahora','intervals.syncing':'Sincronizando…',
+  'intervals.backfill':'Traer el último año','intervals.disconnect':'Desconectar',
+  'intervals.syncDone':'{imported} nuevas, {updated} actualizadas, {skipped} omitidas.',
+  'intervals.disconnectConfirm':'¿Desconectar Intervals.icu? Los entrenamientos ya importados se quedan en tu historial.',
+  'intervals.failed':'Intervals.icu no contestó. Intenta en un momento.',
+  'intervals.keyRequired':'Pega tu API key de Intervals.icu.',
+
   'logAct.title':'Registrar actividad','logAct.goal':'Objetivo: {goal}','logAct.type':'Tipo de actividad',
   'logAct.duration':'Duración (minutos)','logAct.durationPh':'ej. 40',
   'logAct.distance':'Distancia (km, opcional)','logAct.distancePh':'ej. 6.5',
@@ -1397,7 +1427,7 @@ const EXERCISE_PRESETS={
 };
 
 const ACTIVE_WORKOUT_MAX_HOURS=18;
-const state={user:null,profile:null,view:'home',authMode:'login',exercises:[],templates:[],items:[],sessions:[],sets:[],externalActivities:[],activityTemplates:[],progressionState:[],progressionEvents:[],skillGoals:[],trainingBlocks:[],planned:[],plannedReady:true,ensuredWeeks:new Set(),weekSig:null,trainTab:'today',calOffset:0,calWeeks:4,dayOpen:null,bodyweightLogs:[],programs:[],programDays:[],active:null,activeItems:[],timer:null,elapsed:0,rest:0,restTotal:0,bodyFlip:'front',weightUnit:localStorage.getItem('skandi_weight_unit')||'kg',weightUnitOverrides:(()=>{try{return JSON.parse(localStorage.getItem('skandi_weight_unit_overrides')||'{}');}catch(e){return {};}})(),expandedRoutines:new Set(),progressTab:'summary',progressQuery:'',progressMetric:'best',historyFilter:{month:'all',title:'all'},crewFeedLimit:6,swapTarget:null,swapQuery:'',setOptionsId:null,skillTab:null,addExOpen:false,addExQuery:'',pausedMs:0,pausedAt:null,floatTimerOpen:false,meals:[],mealItems:[],foods:[],dishes:[],dishItems:[],nutritionTargets:null,aiCallsToday:0,foodDayOffset:0,foodPicker:{query:'',mealId:null},pendingMeal:null,stravaStatus:null,skandiSettings:null,stravaSyncing:false};
+const state={user:null,profile:null,view:'home',authMode:'login',exercises:[],templates:[],items:[],sessions:[],sets:[],externalActivities:[],activityTemplates:[],progressionState:[],progressionEvents:[],skillGoals:[],trainingBlocks:[],planned:[],plannedReady:true,ensuredWeeks:new Set(),weekSig:null,trainTab:'today',calOffset:0,calWeeks:4,dayOpen:null,bodyweightLogs:[],programs:[],programDays:[],active:null,activeItems:[],timer:null,elapsed:0,rest:0,restTotal:0,bodyFlip:'front',weightUnit:localStorage.getItem('skandi_weight_unit')||'kg',weightUnitOverrides:(()=>{try{return JSON.parse(localStorage.getItem('skandi_weight_unit_overrides')||'{}');}catch(e){return {};}})(),expandedRoutines:new Set(),progressTab:'summary',progressQuery:'',progressMetric:'best',historyFilter:{month:'all',title:'all'},crewFeedLimit:6,swapTarget:null,swapQuery:'',setOptionsId:null,skillTab:null,addExOpen:false,addExQuery:'',pausedMs:0,pausedAt:null,floatTimerOpen:false,meals:[],mealItems:[],foods:[],dishes:[],dishItems:[],nutritionTargets:null,aiCallsToday:0,foodDayOffset:0,foodPicker:{query:'',mealId:null},pendingMeal:null,stravaStatus:null,intervalsStatus:null,skandiSettings:null,stravaSyncing:false,intervalsSyncing:false};
 let builderState={selected:new Map(),group:'All'};
 
 const $=id=>document.getElementById(id);
@@ -1519,6 +1549,7 @@ function showApp(){
   $('avatar').textContent=initials(name);
   render();
   handleStravaReturn();
+  setTimeout(autoSyncIntervals,500);
 }
 
 function setAuthMode(mode){
@@ -3931,6 +3962,7 @@ function externalActivityRow(a){
   // y el motor de fatiga los trata igual.
   const badges=[
     a.external_source==='strava'?`<span class="pill tiny">${esc(t('strava.badge'))}</span>`:'',
+    a.external_source==='intervals'?`<span class="pill tiny">${esc(t('intervals.badge'))}</span>`:'',
     a.intensity_source==='default'?`<span class="pill tiny warn">${esc(t('strava.checkEffort'))}</span>`:''
   ].join('');
   return `<div class="row" style="margin-top:10px">
@@ -5753,7 +5785,7 @@ function openSettings(){
         <button class="${state.weightUnit==='lb'?'active':''}" onclick="setWeightUnit('lb');render();openSettings()">LB</button>
       </div>
     </section>
-    ${stravaSettingsCard()}
+    ${intervalsSettingsCard()}
     <section class="card">
       <div class="eyebrow">${esc(t('settings.account'))}</div>
       <p style="margin-top:8px">${esc(t('settings.signedInAs'))}: <strong>${esc(state.user?.email||displayName())}</strong></p>
@@ -5797,6 +5829,46 @@ function stravaSettingsCard(){
       <button class="btn danger" onclick="disconnectStrava()">${esc(t('strava.disconnect'))}</button>
     </div>
     <button class="btn ghost" style="width:100%;margin-top:8px" onclick="syncStrava(365)">${esc(t('strava.backfill'))}</button>
+    ${hrField}
+  </section>`;
+}
+
+function intervalsSettingsCard(){
+  const st=state.intervalsStatus;
+  const maxHr=state.skandiSettings?.max_heart_rate??'';
+  const hrField=`
+    <label class="eyebrow" style="display:block;margin-top:14px">${esc(t('strava.maxHr'))}</label>
+    <div class="row" style="gap:8px;margin-top:6px">
+      <input id="setMaxHr" class="field left" type="number" min="120" max="230" inputmode="numeric"
+             placeholder="${esc(t('strava.maxHrPh'))}" value="${maxHr}">
+      <button class="btn" onclick="saveMaxHeartRate()">${esc(t('common.save'))}</button>
+    </div>
+    <p class="form-note" style="margin:8px 0 0">${esc(t('strava.maxHrNote'))}</p>`;
+
+  if(!st){
+    return `<section class="card">
+      <div class="eyebrow">${esc(t('intervals.title'))}</div>
+      <p class="form-note" style="margin:8px 0 0">${esc(t('intervals.pitch'))}</p>
+      <label class="eyebrow" style="display:block;margin-top:14px">${esc(t('intervals.key'))}</label>
+      <input id="intervalsKey" class="field left" type="password" autocomplete="off"
+             placeholder="${esc(t('intervals.keyPh'))}" style="margin-top:6px">
+      <p class="form-note" style="margin:8px 0 0">${esc(t('intervals.keyNote'))}</p>
+      <button id="intervalsConnectBtn" class="btn primary" style="width:100%;margin-top:12px" onclick="connectIntervals()">${esc(t('intervals.connect'))}</button>
+      ${hrField}
+    </section>`;
+  }
+
+  const last=st.last_sync_at?new Date(st.last_sync_at).toLocaleString(LANG):t('intervals.never');
+  return `<section class="card">
+    <div class="eyebrow">${esc(t('intervals.title'))}</div>
+    <p style="margin-top:8px">${esc(t('intervals.connectedAs',{athlete:st.athlete_id}))}</p>
+    <p class="form-note" style="margin:6px 0 0">${esc(t('intervals.summary',{n:st.imported||0,when:last}))}</p>
+    ${st.last_error?`<p class="form-note" style="margin:6px 0 0;color:var(--pink)">${esc(st.last_error)}</p>`:''}
+    <div class="row" style="gap:8px;margin-top:12px">
+      <button id="intervalsBtn" class="btn" style="flex:1" onclick="syncIntervals()">${esc(t('intervals.sync'))}</button>
+      <button class="btn danger" onclick="disconnectIntervals()">${esc(t('intervals.disconnect'))}</button>
+    </div>
+    <button class="btn ghost" style="width:100%;margin-top:8px" onclick="syncIntervals(365)">${esc(t('intervals.backfill'))}</button>
     ${hrField}
   </section>`;
 }
@@ -5863,31 +5935,88 @@ const aiLeft=()=>Math.max(0,AI_DAILY_LIMIT-state.aiCallsToday);
 // el cliente puede saber, y cero filas cuando no hay conexión.
 async function loadIntegrations(){
   if(!state.user) return;
-  const [{data:status},{data:settings}]=await Promise.all([
+  const [{data:status},{data:settings},intervals]=await Promise.all([
     sb.rpc('skandi_strava_status'),
-    sb.from('skandi_settings').select('*').eq('user_id',state.user.id).maybeSingle()
+    sb.from('skandi_settings').select('*').eq('user_id',state.user.id).maybeSingle(),
+    skandiApi('intervals-status').catch(()=>null)
   ]);
   // Todo a null si la migración 081 no se ha corrido: el resto de la app no tiene por qué
   // dejar de funcionar porque falte Strava.
   state.stravaStatus=(status&&status[0])||null;
+  state.intervalsStatus=intervals&&intervals.connected?intervals:null;
   state.skandiSettings=settings||null;
 }
 
-async function stravaApi(action,body){
+async function skandiApi(action,body){
   const {data:{session}}=await sb.auth.getSession();
+  if(!session) throw new Error(t('auth.sessionExpired'));
   const res=await fetch('/api/skandi',{
     method:'POST',
     headers:{'Content-Type':'application/json',Authorization:`Bearer ${session.access_token}`},
     body:JSON.stringify({action,...(body||{})})
   });
   const data=await res.json().catch(()=>({}));
-  if(!res.ok) throw new Error(data.message||t('strava.failed'));
+  if(!res.ok) throw new Error(data.message||t(action.startsWith('intervals-')?'intervals.failed':'strava.failed'));
   return data;
+}
+
+async function connectIntervals(){
+  const apiKey=$('intervalsKey')?.value.trim();
+  if(!apiKey) return alert(t('intervals.keyRequired'));
+  const button=$('intervalsConnectBtn');
+  if(button){button.disabled=true;button.textContent=t('intervals.connecting');}
+  try{
+    await skandiApi('intervals-connect',{api_key:apiKey});
+    if($('intervalsKey')) $('intervalsKey').value='';
+    await loadIntegrations();
+    openSettings();
+    await syncIntervals();
+  }catch(e){
+    alert(e.message||String(e));
+    if(button){button.disabled=false;button.textContent=t('intervals.connect');}
+  }
+}
+
+async function syncIntervals(days,silent=false){
+  if(state.intervalsSyncing) return;
+  state.intervalsSyncing=true;
+  if($('intervalsBtn')){$('intervalsBtn').disabled=true;$('intervalsBtn').textContent=t('intervals.syncing');}
+  try{
+    const result=await skandiApi('intervals-sync',days?{days}:{});
+    state.ensuredWeeks.clear();
+    await loadAll();
+    render();
+    if(!silent) alert(t('intervals.syncDone',result));
+  }catch(e){
+    if(!silent) alert(e.message||String(e));
+  }finally{
+    state.intervalsSyncing=false;
+    if(!silent&&$('modal').classList.contains('show')) openSettings();
+  }
+}
+
+async function disconnectIntervals(){
+  if(!confirm(t('intervals.disconnectConfirm'))) return;
+  try{
+    await skandiApi('intervals-disconnect');
+    await loadIntegrations();
+    openSettings();
+  }catch(e){alert(e.message||String(e));}
+}
+
+function autoSyncIntervals(){
+  const status=state.intervalsStatus;
+  if(!status||state.intervalsSyncing) return;
+  const marker=`skandi_intervals_auto_${state.user.id}`;
+  if(sessionStorage.getItem(marker)) return;
+  sessionStorage.setItem(marker,'1');
+  const last=status.last_sync_at?new Date(status.last_sync_at).getTime():0;
+  if(!last||Date.now()-last>15*60e3) syncIntervals(undefined,true);
 }
 
 async function connectStrava(){
   try{
-    const {url}=await stravaApi('strava-connect');
+    const {url}=await skandiApi('strava-connect');
     // Fuera de la app: Strava pide permiso en su propio dominio y regresa al callback.
     window.location.href=url;
   }catch(e){ alert(e.message||String(e)); }
@@ -5898,7 +6027,7 @@ async function syncStrava(days){
   state.stravaSyncing=true;
   if($('stravaBtn')){ $('stravaBtn').disabled=true; $('stravaBtn').textContent=t('strava.syncing'); }
   try{
-    const r=await stravaApi('strava-sync',days?{days}:{});
+    const r=await skandiApi('strava-sync',days?{days}:{});
     // Una carrera que acaba de llegar de Strava tiene que poder marcar hecho el día que la
     // planeaba: esa conciliación de arrastre vive en skandi_ensure_week (migración 080), y el
     // RPC no se vuelve a llamar mientras la semana siga en ensuredWeeks. Olvidarla aquí es lo
@@ -5918,7 +6047,7 @@ async function syncStrava(days){
 async function disconnectStrava(){
   if(!confirm(t('strava.disconnectConfirm'))) return;
   try{
-    await stravaApi('strava-disconnect');
+    await skandiApi('strava-disconnect');
     await loadIntegrations();
     openSettings();
   }catch(e){ alert(e.message||String(e)); }
