@@ -5563,12 +5563,36 @@ async function analyzeMeal(mealId){
     if(state.view==='food') render();
     openMealDetail(mealId);
   }catch(e){
-    // Se cayó la red a media llamada: mismo problema, misma cura.
-    await markMealFailed(mealId,e.message||String(e));
+    // Safari en iOS corta un fetch largo ("Load failed") aunque el servidor siga trabajando:
+    // lo que se pierde es la RESPUESTA, no el análisis. Dar la comida por fallida aquí sería
+    // mentir, y peor: reintentar gastaría una llamada de más por algo que ya se pagó. Así que
+    // preguntamos por la comida unos segundos más antes de decidir.
+    const settled=await waitForAnalysis(mealId);
     await loadNutrition();
     if(state.view==='food') render();
-    alert(e.message||String(e));
+    if(settled&&settled.analysis_status==='ready') return openMealDetail(mealId);
+    await markMealFailed(mealId,(settled&&settled.analysis_error)||e.message||String(e));
+    await loadNutrition();
+    if(state.view==='food') render();
+    alert((settled&&settled.analysis_error)||e.message||String(e));
   }
+}
+
+// Cuánto esperamos a que el servidor termine cuando la respuesta se perdió. El análisis
+// tarda entre 10 y 40 segundos según la foto, así que ~75 s cubre el caso normal sin dejar la
+// tarjeta girando para siempre.
+const ANALYSIS_POLL_MS=3000;
+const ANALYSIS_POLL_TRIES=25;
+
+async function waitForAnalysis(mealId){
+  for(let i=0;i<ANALYSIS_POLL_TRIES;i++){
+    await new Promise(r=>setTimeout(r,ANALYSIS_POLL_MS));
+    const {data}=await sb.from('skandi_meals')
+      .select('analysis_status,analysis_error').eq('id',mealId).maybeSingle();
+    if(!data) return null;
+    if(data.analysis_status!=='pending') return data;
+  }
+  return null;
 }
 
 async function markMealFailed(mealId,message){
