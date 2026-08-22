@@ -1085,6 +1085,50 @@ async function importIntervalsActivities(userId, activities) {
   return result;
 }
 
+async function linkIntervalsStrengthActivities(userId, activities) {
+  const strength = (activities || []).filter(SkandiIntervals.isStrengthActivity);
+  if (!strength.length) return { matched_strength: 0, unmatched_strength: 0 };
+  const starts = strength.map(a => new Date(a.start_date || a.start_date_local).getTime()).filter(Number.isFinite);
+  if (!starts.length) return { matched_strength: 0, unmatched_strength: strength.length };
+  const from = new Date(Math.min(...starts) - 6 * 3600e3).toISOString();
+  const to = new Date(Math.max(...starts) + 30 * 3600e3).toISOString();
+  const { data: sessions, error } = await supabase.from('skandi_sessions')
+    .select('id,started_at,completed_at,duration_sec,duration_source,garmin_external_id')
+    .eq('user_id', userId).not('completed_at', 'is', null)
+    .gte('started_at', from).lte('started_at', to);
+  if (error) throw new Error(error.message);
+
+  const maxHeartRate = await maxHeartRateOf(userId);
+  const linked = SkandiIntervals.matchStrengthActivities(strength, sessions || [], { maxHeartRate });
+  for (const { session, metric } of linked.matches) {
+    const patch = {
+      garmin_external_id: metric.externalId,
+      garmin_started_at: metric.startedAt,
+      garmin_duration_sec: metric.durationSec,
+      garmin_avg_heart_rate: metric.avgHeartRate,
+      garmin_max_heart_rate: metric.maxHeartRate,
+      garmin_calories: metric.calories,
+      garmin_intensity: metric.intensity,
+      garmin_intensity_source: metric.intensitySource,
+      garmin_device_name: metric.deviceName,
+      garmin_activity_name: metric.activityName,
+      garmin_synced_at: new Date().toISOString(),
+    };
+    // Una duración corregida por la persona manda. Si todavía viene del cronómetro de
+    // Skandi (o de un Garmin anterior), el intervalo completo medido por el reloj es mejor.
+    if (session.duration_source !== 'manual') {
+      patch.started_at = metric.startedAt;
+      patch.completed_at = new Date(new Date(metric.startedAt).getTime() + metric.durationSec * 1000).toISOString();
+      patch.duration_sec = metric.durationSec;
+      patch.duration_source = 'garmin';
+    }
+    const { error: updateError } = await supabase.from('skandi_sessions')
+      .update(patch).eq('id', session.id).eq('user_id', userId);
+    if (updateError) throw new Error(updateError.message);
+  }
+  return { matched_strength: linked.matches.length, unmatched_strength: linked.unmatched };
+}
+
 async function intervalsConnect(req, res) {
   const userId = await requireUser(req, res);
   if (!userId) return;
@@ -1122,10 +1166,13 @@ async function intervalsStatus(req, res) {
       .select('id', { count: 'exact', head: true })
       .eq('user_id', userId).eq('external_source', 'intervals');
     if (error) throw new Error(error.message);
+    const { count: strengthLinked } = await supabase.from('skandi_sessions')
+      .select('id', { count: 'exact', head: true })
+      .eq('user_id', userId).not('garmin_external_id', 'is', null);
     return res.status(200).json({
       ok: true, connected: true, athlete_id: credential.athlete_id,
       connected_at: credential.connected_at, last_sync_at: credential.last_sync_at,
-      last_error: credential.last_error, imported: count || 0,
+      last_error: credential.last_error, imported: count || 0, strength_linked: strengthLinked || 0,
     });
   } catch (err) {
     console.error('intervals-status error:', err.message);
@@ -1154,9 +1201,10 @@ async function intervalsSync(req, res) {
       });
     if (!Array.isArray(activities)) throw new Error('Intervals.icu devolvió una respuesta inesperada.');
     const totals = await importIntervalsActivities(userId, activities);
+    const strengthTotals = await linkIntervalsStrengthActivities(userId, activities);
     await supabase.from('skandi_intervals_credentials')
       .update({ last_sync_at: new Date().toISOString(), last_error: null }).eq('user_id', userId);
-    return res.status(200).json({ ok: true, days, ...totals });
+    return res.status(200).json({ ok: true, days, ...totals, ...strengthTotals });
   } catch (err) {
     console.error('intervals-sync error:', err.message);
     await supabase.from('skandi_intervals_credentials')

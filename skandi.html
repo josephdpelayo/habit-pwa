@@ -8,14 +8,14 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="Skandi Fit">
 <meta name="application-name" content="Skandi Fit">
-<link rel="manifest" href="/skandi-manifest.json?v=20260822-12">
-<link rel="apple-touch-icon" sizes="180x180" href="/icons/skandi-180.png?v=20260822-12">
-<link rel="icon" type="image/png" sizes="192x192" href="/icons/skandi-192.png?v=20260822-12">
+<link rel="manifest" href="/skandi-manifest.json?v=20260822-13">
+<link rel="apple-touch-icon" sizes="180x180" href="/icons/skandi-180.png?v=20260822-13">
+<link rel="icon" type="image/png" sizes="192x192" href="/icons/skandi-192.png?v=20260822-13">
 <title>Skandi Fit</title>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="/skandi-recovery.js?v=20260822-12"></script>
-<script src="/body-figure.js?v=20260822-12"></script>
-<script src="/skandi-nutrition.js?v=20260822-12"></script>
+<script src="/skandi-recovery.js?v=20260822-13"></script>
+<script src="/body-figure.js?v=20260822-13"></script>
+<script src="/skandi-nutrition.js?v=20260822-13"></script>
 <style>
 :root{
   --bg:#eef4f8;
@@ -440,7 +440,7 @@ textarea.field{min-height:112px;text-align:left;resize:vertical}
 // Versión compartida con app.html (APP_VERSION) y sw.js (CACHE_VERSION): un solo service
 // worker sirve las dos apps, así que una sola cadena las invalida a las dos. Al cambiarla
 // hay que actualizarla también en los ?v= del <head>, en index.html y en los dos manifests.
-const SKANDI_VERSION='20260822-12';
+const SKANDI_VERSION='20260822-13';
 const SUPABASE_URL='https://pmpjteuqjusbiduevbwq.supabase.co';
 const SUPABASE_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBtcGp0ZXVxanVzYmlkdWV2YndxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc2OTI1NjUsImV4cCI6MjA5MzI2ODU2NX0.XbMzZoo2yqtrD8znLnyo_1zDfrdJAvAPj1lqGOyXnLw';
 const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
@@ -750,13 +750,16 @@ en:{
   'intervals.keyNote':'It is sent directly to Skandi, validated, and stored encrypted. It is never shown again or exposed to the browser.',
   'intervals.connect':'Connect Garmin','intervals.connecting':'Connecting…',
   'intervals.connectedAs':'Connected · athlete {athlete}',
-  'intervals.summary':'{n} Garmin activities imported · last sync {when}',
+  'intervals.summary':'{n} cardio activities · {strength} strength workouts linked · last sync {when}',
   'intervals.never':'never','intervals.sync':'Sync now','intervals.syncing':'Syncing…',
   'intervals.backfill':'Import the last year','intervals.disconnect':'Disconnect',
-  'intervals.syncDone':'{imported} new, {updated} updated, {skipped} skipped.',
+  'intervals.syncDone':'{imported} cardio activities new, {updated} updated · {matched_strength} strength workouts linked.',
   'intervals.disconnectConfirm':'Disconnect Intervals.icu? Already-imported workouts stay in your history.',
   'intervals.failed':'Intervals.icu did not answer. Try again in a moment.',
   'intervals.keyRequired':'Paste your Intervals.icu API key.',
+  'garmin.title':'Garmin workout data','garmin.measuredDuration':'Duration measured by watch',
+  'garmin.avgHr':'Average HR','garmin.maxHr':'Maximum HR','garmin.calories':'Calories',
+  'garmin.effort':'Effort','garmin.device':'Device','garmin.durationSource':'Garmin duration',
 
   'logAct.title':'Log activity','logAct.goal':'Goal: {goal}','logAct.type':'Activity type',
   'logAct.duration':'Duration (minutes)','logAct.durationPh':'e.g. 40',
@@ -1198,13 +1201,16 @@ es:{
   'intervals.keyNote':'Se envía directo a Skandi, se valida y se guarda cifrada. No vuelve a mostrarse ni queda expuesta al navegador.',
   'intervals.connect':'Conectar Garmin','intervals.connecting':'Conectando…',
   'intervals.connectedAs':'Conectado · atleta {athlete}',
-  'intervals.summary':'{n} actividades de Garmin importadas · última vez {when}',
+  'intervals.summary':'{n} actividades de cardio · {strength} entrenamientos de fuerza enlazados · última vez {when}',
   'intervals.never':'nunca','intervals.sync':'Sincronizar ahora','intervals.syncing':'Sincronizando…',
   'intervals.backfill':'Traer el último año','intervals.disconnect':'Desconectar',
-  'intervals.syncDone':'{imported} nuevas, {updated} actualizadas, {skipped} omitidas.',
+  'intervals.syncDone':'{imported} actividades de cardio nuevas, {updated} actualizadas · {matched_strength} entrenamientos de fuerza enlazados.',
   'intervals.disconnectConfirm':'¿Desconectar Intervals.icu? Los entrenamientos ya importados se quedan en tu historial.',
   'intervals.failed':'Intervals.icu no contestó. Intenta en un momento.',
   'intervals.keyRequired':'Pega tu API key de Intervals.icu.',
+  'garmin.title':'Datos del entrenamiento Garmin','garmin.measuredDuration':'Duración medida por el reloj',
+  'garmin.avgHr':'FC promedio','garmin.maxHr':'FC máxima','garmin.calories':'Calorías',
+  'garmin.effort':'Esfuerzo','garmin.device':'Dispositivo','garmin.durationSource':'Duración Garmin',
 
   'logAct.title':'Registrar actividad','logAct.goal':'Objetivo: {goal}','logAct.type':'Tipo de actividad',
   'logAct.duration':'Duración (minutos)','logAct.durationPh':'ej. 40',
@@ -3312,10 +3318,20 @@ function openSessionDetail(sessionId){
       <button class="x" onclick="closeModal()" aria-label="${esc(t('common.close'))}">${icon('close',20)}</button>
     </div>
     <section class="grid">
-      <div class="stat"><strong>${Math.round((s.duration_sec||0)/60)}</strong><small>${esc(t('session.minutes'))}</small></div>
+      <div class="stat"><strong>${Math.round((s.duration_sec||0)/60)}</strong><small>${esc(t('session.minutes'))}${s.duration_source==='garmin'?' · '+esc(t('garmin.durationSource')):''}</small></div>
       <div class="stat"><strong>${sets.filter(x=>x.done).length}</strong><small>${esc(tp(sets.filter(x=>x.done).length,'common.setsLogged'))}</small></div>
     </section>
     ${s.report_difficulty||s.report_energy?`<section class="card"><div class="row"><span class="pill dark">${esc(difficultyLabel(s.report_difficulty))}</span><span class="pill dark">${esc(t('session.energy',{v:s.report_energy||'-'}))}</span>${s.report_sleep_hours!=null?`<span class="pill dark">${esc(t('session.sleep',{h:s.report_sleep_hours}))}</span>`:''}${s.report_felt_worse?`<span class="pill dark" style="color:var(--pink)">${esc(t('session.feltWorse'))}</span>`:''}</div></section>`:''}
+    ${s.garmin_external_id?`<section class="card">
+      <div class="row"><div class="eyebrow">${esc(t('garmin.title'))}</div><span class="pill tiny">${esc(t('intervals.badge'))}</span></div>
+      <div class="grid" style="margin-top:10px">
+        <div class="stat"><strong>${Math.round((s.garmin_duration_sec||0)/60)}</strong><small>${esc(t('garmin.measuredDuration'))} · min</small></div>
+        <div class="stat"><strong>${s.garmin_avg_heart_rate??'-'}</strong><small>${esc(t('garmin.avgHr'))} · bpm</small></div>
+        <div class="stat"><strong>${s.garmin_max_heart_rate??'-'}</strong><small>${esc(t('garmin.maxHr'))} · bpm</small></div>
+        <div class="stat"><strong>${s.garmin_calories??'-'}</strong><small>${esc(t('garmin.calories'))} · kcal</small></div>
+      </div>
+      <p class="form-note" style="margin:10px 0 0">${esc([s.garmin_intensity?t('garmin.effort')+' '+s.garmin_intensity+'/10':null,s.garmin_device_name?t('garmin.device')+': '+s.garmin_device_name:null].filter(Boolean).join(' · '))}</p>
+    </section>`:''}
     ${s.report_soreness?`<section class="card" style="border-color:rgba(212,72,84,.30);background:#fff7f7"><strong style="color:var(--pink)">${esc(t('session.soreness'))}</strong><p style="margin-top:6px">${esc(s.report_soreness_area||t('session.notSpecified'))}</p></section>`:''}
     ${s.report_note?`<section class="card"><div class="eyebrow">${esc(t('session.notes'))}</div><p style="margin-top:8px">${esc(s.report_note)}</p></section>`:''}
     <section class="card">
@@ -3393,6 +3409,7 @@ async function saveSessionEdit(sessionId){
       completed_at:completedAt.toISOString(),
       started_at:new Date(completedAt.getTime()-durationSec*1000).toISOString(),
       duration_sec:durationSec,
+      duration_source:'manual',
       report_difficulty:$('seDifficulty').value,
       report_energy:Number($('seEnergy').value),
       report_soreness:$('seSore').checked,
@@ -5862,7 +5879,7 @@ function intervalsSettingsCard(){
   return `<section class="card">
     <div class="eyebrow">${esc(t('intervals.title'))}</div>
     <p style="margin-top:8px">${esc(t('intervals.connectedAs',{athlete:st.athlete_id}))}</p>
-    <p class="form-note" style="margin:6px 0 0">${esc(t('intervals.summary',{n:st.imported||0,when:last}))}</p>
+    <p class="form-note" style="margin:6px 0 0">${esc(t('intervals.summary',{n:st.imported||0,strength:st.strength_linked||0,when:last}))}</p>
     ${st.last_error?`<p class="form-note" style="margin:6px 0 0;color:var(--pink)">${esc(st.last_error)}</p>`:''}
     <div class="row" style="gap:8px;margin-top:12px">
       <button id="intervalsBtn" class="btn" style="flex:1" onclick="syncIntervals()">${esc(t('intervals.sync'))}</button>

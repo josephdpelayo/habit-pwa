@@ -6,6 +6,8 @@
 
 const Strava = require('./skandi-strava.js');
 
+const STRENGTH_TYPES = new Set(['weighttraining', 'strengthtraining', 'functionalstrengthtraining', 'crossfit']);
+
 function isGarminActivity(activity) {
   return String(activity && activity.source || '').toUpperCase() === 'GARMIN_CONNECT';
 }
@@ -14,8 +16,87 @@ function rpeOf(activity) {
   return activity.perceived_exertion || activity.icu_rpe || activity.session_rpe || null;
 }
 
+function strengthTypeOf(activity) {
+  return String(activity && activity.type || '').replace(/[^a-z]/gi, '').toLowerCase();
+}
+
+function isStrengthActivity(activity) {
+  return isGarminActivity(activity) && STRENGTH_TYPES.has(strengthTypeOf(activity));
+}
+
+function clampInt(value, min, max) {
+  const number = Math.round(Number(value));
+  return Number.isFinite(number) && number >= min && number <= max ? number : null;
+}
+
+function strengthMetrics(activity, { maxHeartRate } = {}) {
+  if (!isStrengthActivity(activity) || !activity.id) return null;
+  const startedAt = activity.start_date || activity.start_date_local;
+  const startMs = new Date(startedAt).getTime();
+  if (!Number.isFinite(startMs)) return null;
+  // En fuerza los descansos entre series son parte del entrenamiento, por eso elapsed_time
+  // tiene prioridad sobre moving_time (al revés que en carrera o ciclismo).
+  const durationSec = Math.round(Number(activity.elapsed_time) || Number(activity.moving_time) || 0);
+  if (durationSec < 1 || durationSec > 86400) return null;
+  const effort = Strava.deriveIntensity({
+    perceived_exertion: rpeOf(activity),
+    average_heartrate: activity.average_heartrate,
+  }, maxHeartRate || activity.athlete_max_hr || null);
+  return {
+    externalId: String(activity.id),
+    startedAt: new Date(startMs).toISOString(),
+    durationSec,
+    avgHeartRate: clampInt(activity.average_heartrate, 30, 230),
+    maxHeartRate: clampInt(activity.max_heartrate, 30, 230),
+    calories: clampInt(activity.calories, 0, 20000),
+    intensity: effort.intensity,
+    intensitySource: effort.source,
+    deviceName: String(activity.device_name || '').trim().slice(0, 120) || null,
+    activityName: String(activity.name || '').trim().slice(0, 200) || null,
+  };
+}
+
+// Devuelve parejas inequívocas actividad↔sesión. Una actividad ya enlazada conserva su
+// sesión; para una nueva se exige solapamiento o inicios a <= 90 minutos. Cada sesión solo
+// puede consumir una actividad Garmin.
+function matchStrengthActivities(activities, sessions, { maxHeartRate } = {}) {
+  const metrics = (activities || []).map(a => strengthMetrics(a, { maxHeartRate })).filter(Boolean);
+  const available = (sessions || []).filter(s => s && s.id && s.completed_at);
+  const used = new Set();
+  const matches = [];
+
+  for (const metric of metrics) {
+    const already = available.find(s => String(s.garmin_external_id || '') === metric.externalId);
+    if (already) {
+      used.add(already.id);
+      matches.push({ session: already, metric });
+      continue;
+    }
+    const start = new Date(metric.startedAt).getTime();
+    const end = start + metric.durationSec * 1000;
+    let best = null;
+    for (const session of available) {
+      if (used.has(session.id) || session.garmin_external_id) continue;
+      const sessionStart = new Date(session.started_at).getTime();
+      const sessionEnd = new Date(session.completed_at).getTime();
+      if (!Number.isFinite(sessionStart) || !Number.isFinite(sessionEnd)) continue;
+      const overlap = Math.max(0, Math.min(end, sessionEnd) - Math.max(start, sessionStart));
+      const startDelta = Math.abs(start - sessionStart);
+      if (overlap < 10 * 60e3 && startDelta > 90 * 60e3) continue;
+      const sessionDuration = Math.max(60e3, sessionEnd - sessionStart);
+      const score = startDelta + Math.abs(metric.durationSec * 1000 - sessionDuration) * 0.35 - overlap * 0.5;
+      if (!best || score < best.score) best = { session, score };
+    }
+    if (best) {
+      used.add(best.session.id);
+      matches.push({ session: best.session, metric });
+    }
+  }
+  return { matches, unmatched: metrics.length - matches.length, strengthActivities: metrics.length };
+}
+
 function toActivityRow(activity, { userId, maxHeartRate } = {}) {
-  if (!activity || !activity.id || !isGarminActivity(activity)) return null;
+  if (!activity || !activity.id || !isGarminActivity(activity) || isStrengthActivity(activity)) return null;
   const start = activity.start_date || activity.start_date_local;
   if (!start || Number.isNaN(new Date(start).getTime())) return null;
 
@@ -38,4 +119,7 @@ function toActivityRow(activity, { userId, maxHeartRate } = {}) {
   };
 }
 
-module.exports = { isGarminActivity, rpeOf, toActivityRow };
+module.exports = {
+  STRENGTH_TYPES, isGarminActivity, rpeOf, strengthTypeOf, isStrengthActivity,
+  strengthMetrics, matchStrengthActivities, toActivityRow,
+};
