@@ -6,18 +6,18 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="HABIT">
 <meta name="application-name" content="HABIT">
-<link rel="manifest" href="/manifest.json?v=20260821-14">
-<link rel="apple-touch-icon" sizes="120x120" href="/icons/icon-120.png?v=20260821-14">
-<link rel="apple-touch-icon" sizes="152x152" href="/icons/icon-152.png?v=20260821-14">
-<link rel="apple-touch-icon" sizes="167x167" href="/icons/icon-167.png?v=20260821-14">
-<link rel="apple-touch-icon" sizes="180x180" href="/icons/icon-180.png?v=20260821-14">
-<link rel="icon" type="image/png" sizes="32x32" href="/icons/icon-32.png?v=20260821-14">
+<link rel="manifest" href="/manifest.json?v=20260821-15">
+<link rel="apple-touch-icon" sizes="120x120" href="/icons/icon-120.png?v=20260821-15">
+<link rel="apple-touch-icon" sizes="152x152" href="/icons/icon-152.png?v=20260821-15">
+<link rel="apple-touch-icon" sizes="167x167" href="/icons/icon-167.png?v=20260821-15">
+<link rel="apple-touch-icon" sizes="180x180" href="/icons/icon-180.png?v=20260821-15">
+<link rel="icon" type="image/png" sizes="32x32" href="/icons/icon-32.png?v=20260821-15">
 <title>HABIT</title>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Share+Tech+Mono&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="/skandi-recovery.js?v=20260821-14"></script>
-<script src="/body-figure.js?v=20260821-14"></script>
+<script src="/skandi-recovery.js?v=20260821-15"></script>
+<script src="/body-figure.js?v=20260821-15"></script>
 <style>
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
 :root{
@@ -2538,6 +2538,7 @@ body.admin-mode #courtesy-modal label{border-radius:14px!important;border-color:
           <button class="filter-chip" data-filter="sin-visitas" onclick="setUserFilter(this)">Sin visitas <span class="user-filter-count" data-user-filter-count="sin-visitas"></span></button>
           <button class="filter-chip" data-filter="vencido" onclick="setUserFilter(this)">Vencidos <span class="user-filter-count" data-user-filter-count="vencido"></span></button>
           <button class="filter-chip" data-filter="sin-plan" onclick="setUserFilter(this)">Sin plan <span class="user-filter-count" data-user-filter-count="sin-plan"></span></button>
+          <button class="filter-chip" data-filter="nunca-compro" onclick="setUserFilter(this)">Nunca compraron <span class="user-filter-count" data-user-filter-count="nunca-compro"></span></button>
           <button class="filter-chip" data-filter="coaching" onclick="setUserFilter(this)">Coaching <span class="user-filter-count" data-user-filter-count="coaching"></span></button>
       </div>
       <div id="user-count" style="font-size:11px;color:var(--gray);margin-bottom:8px"></div>
@@ -3057,7 +3058,7 @@ body.admin-mode #courtesy-modal label{border-radius:14px!important;border-color:
 // ── CONFIG & SUPABASE ───────────────────────────────────────
 const SUPABASE_URL='https://pmpjteuqjusbiduevbwq.supabase.co';
 const SUPABASE_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBtcGp0ZXVxanVzYmlkdWV2YndxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc2OTI1NjUsImV4cCI6MjA5MzI2ODU2NX0.XbMzZoo2yqtrD8znLnyo_1zDfrdJAvAPj1lqGOyXnLw';
-const APP_VERSION='20260821-14';
+const APP_VERSION='20260821-15';
 // La pierna va separada en cuádriceps, femorales y pantorrillas: la figura
 // corporal pinta esas tres regiones por separado y el motor de recuperación les
 // da ventanas de descanso distintas. 'Piernas' sigue reconociéndose al leer
@@ -12733,8 +12734,8 @@ function adminUserState(u){
   const expiring=!expired&&days!==null&&days>=0&&days<=7;
   return{plan,expired,days,unlimited,credits,noPlan,noVisits,active,expiring};
 }
-function updateAdminUserOverview(rows){
-  const stats={todos:rows.length,activo:0,'por-vencer':0,'sin-visitas':0,vencido:0,'sin-plan':0,coaching:0};
+function updateAdminUserOverview(rows,realPayerIds){
+  const stats={todos:rows.length,activo:0,'por-vencer':0,'sin-visitas':0,vencido:0,'sin-plan':0,'nunca-compro':0,coaching:0};
   rows.forEach(u=>{
     const s=adminUserState(u);
     if(s.active)stats.activo++;
@@ -12742,6 +12743,7 @@ function updateAdminUserOverview(rows){
     if(s.noVisits)stats['sin-visitas']++;
     if(s.expired)stats.vencido++;
     if(s.noPlan)stats['sin-plan']++;
+    if(!realPayerIds.has(u.id))stats['nunca-compro']++;
     if(u.coaching_beta)stats.coaching++;
   });
   document.querySelectorAll('[data-user-filter-count]').forEach(el=>{el.textContent=stats[el.dataset.userFilterCount]??0;});
@@ -12766,10 +12768,16 @@ async function renderUsersSb(){
   if(!list)return;
   list.innerHTML='<div class="empty">Cargando...</div>';
   try{
-    const{data:allU,error}=await sb.from('profiles').select('*').neq('source','skandi').order('created_at');
-    if(error)throw error;
+    const[userRes,paymentRes]=await Promise.all([
+      sb.from('profiles').select('*').neq('source','skandi').order('created_at'),
+      sb.from('payments').select('user_id,amount,payment_method,net_amount').not('user_id','is',null)
+    ]);
+    if(userRes.error)throw userRes.error;
+    if(paymentRes.error)throw paymentRes.error;
+    const allU=userRes.data||[];
+    const realPayerIds=new Set((paymentRes.data||[]).filter(isRealMemberPayment).map(p=>p.user_id));
     const memberRows=(allU||[]).filter(u=>u.role!=='admin'&&u.role!=='reception');
-    updateAdminUserOverview(memberRows);
+    updateAdminUserOverview(memberRows,realPayerIds);
     let filtered=memberRows.filter(u=>!q||((u.name||'').toLowerCase().includes(q)||(u.phone||'').includes(q)||(u.email||'').toLowerCase().includes(q)));
     filtered=filtered.filter(u=>{
       const s=adminUserState(u);
@@ -12778,6 +12786,7 @@ async function renderUsersSb(){
       if(_userFilter==='por-vencer') return s.expiring;
       if(_userFilter==='sin-visitas') return s.noVisits;
       if(_userFilter==='sin-plan') return s.noPlan;
+      if(_userFilter==='nunca-compro') return !realPayerIds.has(u.id);
       if(_userFilter==='coaching') return !!u.coaching_beta;
       return true;
     });
