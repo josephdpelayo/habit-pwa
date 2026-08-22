@@ -6,18 +6,18 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="HABIT">
 <meta name="application-name" content="HABIT">
-<link rel="manifest" href="/manifest.json?v=20260821-11">
-<link rel="apple-touch-icon" sizes="120x120" href="/icons/icon-120.png?v=20260821-11">
-<link rel="apple-touch-icon" sizes="152x152" href="/icons/icon-152.png?v=20260821-11">
-<link rel="apple-touch-icon" sizes="167x167" href="/icons/icon-167.png?v=20260821-11">
-<link rel="apple-touch-icon" sizes="180x180" href="/icons/icon-180.png?v=20260821-11">
-<link rel="icon" type="image/png" sizes="32x32" href="/icons/icon-32.png?v=20260821-11">
+<link rel="manifest" href="/manifest.json?v=20260821-12">
+<link rel="apple-touch-icon" sizes="120x120" href="/icons/icon-120.png?v=20260821-12">
+<link rel="apple-touch-icon" sizes="152x152" href="/icons/icon-152.png?v=20260821-12">
+<link rel="apple-touch-icon" sizes="167x167" href="/icons/icon-167.png?v=20260821-12">
+<link rel="apple-touch-icon" sizes="180x180" href="/icons/icon-180.png?v=20260821-12">
+<link rel="icon" type="image/png" sizes="32x32" href="/icons/icon-32.png?v=20260821-12">
 <title>HABIT</title>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Share+Tech+Mono&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="/skandi-recovery.js?v=20260821-11"></script>
-<script src="/body-figure.js?v=20260821-11"></script>
+<script src="/skandi-recovery.js?v=20260821-12"></script>
+<script src="/body-figure.js?v=20260821-12"></script>
 <style>
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
 :root{
@@ -1677,7 +1677,7 @@ body.admin-mode #courtesy-modal label{border-radius:14px!important;border-color:
 .adm-nav-group{display:contents}
 .adm-nav-label{display:none}
 .adm-nav-icon{width:18px;height:18px;display:grid;place-items:center;flex:0 0 auto;font-size:13px;font-weight:850;color:currentColor}
-.admin-mobile-menu-btn,.adm-mobile-sheet-head,.adm-mobile-backdrop,.adm-mobile-logout{display:none}
+.admin-mobile-menu-btn,.adm-mobile-sheet-head,.adm-mobile-backdrop,.adm-mobile-logout,.admin-mobile-quick-nav{display:none}
 .admin-list-tools{display:grid;grid-template-columns:minmax(0,1fr) minmax(160px,220px);gap:9px;align-items:center;margin-bottom:10px}
 .admin-list-tools .admin-toolbar{margin:0!important}
 .admin-action-center{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;margin-bottom:2px}
@@ -1728,12 +1728,20 @@ body.admin-mode #courtesy-modal label{border-radius:14px!important;border-color:
   #s-admin .adm-mobile-sheet-head button{width:34px;height:34px;border:1px solid rgba(255,255,255,.09);border-radius:11px;background:rgba(255,255,255,.045);color:#d9e1ec;font-size:22px;cursor:pointer}
   #s-admin .adm-nav-group{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:6px;padding:9px 0;border-top:1px solid rgba(255,255,255,.06)}
   #s-admin .adm-nav-group:first-of-type{border-top:0}
+  #s-admin .adm-nav-group[data-admin-group="operation"]{display:none}
+  #s-admin .adm-nav .adm-tab[data-admin-tab="mensajes"]{display:none}
   #s-admin .adm-nav-label{display:block;grid-column:1/-1;padding:0 5px 3px;font-size:9px;font-weight:820;letter-spacing:.11em;text-transform:uppercase;color:#657080}
   #s-admin .adm-tab{justify-content:flex-start;width:100%;min-width:0;min-height:42px;padding:0 11px;border-radius:12px;text-align:left}
   #s-admin .adm-tab .adm-tab-badge{margin-left:auto}
   #s-admin .adm-mobile-logout{display:block;width:100%;min-height:44px;margin-top:8px;border:1px solid rgba(239,68,68,.22);border-radius:13px;background:rgba(239,68,68,.07);color:#f19a9a;font-size:12px;font-weight:780;cursor:pointer}
   .adm-mobile-backdrop{position:fixed;z-index:10001;inset:0;display:block;border:0;background:rgba(0,0,0,.66);backdrop-filter:blur(4px);opacity:0;pointer-events:none;transition:opacity .18s ease}
   .adm-mobile-backdrop.show{opacity:1;pointer-events:auto}
+  body.admin-mode #s-admin .admin-mobile-quick-nav{position:fixed;z-index:9998;left:0;right:0;bottom:0;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:4px;padding:7px 10px calc(7px + env(safe-area-inset-bottom,0px));border-top:1px solid rgba(255,255,255,.08);background:rgba(10,10,11,.96);backdrop-filter:blur(18px);box-shadow:0 -14px 34px rgba(0,0,0,.32)}
+  .admin-mobile-quick-item{position:relative;min-height:54px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;border:0;border-radius:14px;background:transparent;color:#858e9c;font-size:9.5px;font-weight:760;cursor:pointer}
+  .admin-mobile-quick-item.active{background:rgba(255,255,255,.075);color:#fff}
+  .admin-mobile-quick-icon{font-size:18px;line-height:1;color:currentColor}
+  .admin-mobile-quick-item .adm-tab-badge{position:absolute;top:3px;left:calc(50% + 10px);margin:0;min-width:17px;height:17px;font-size:9px;box-shadow:0 0 0 2px #0a0a0b}
+  body.admin-mode #s-admin .scroll-area{padding-bottom:calc(84px + env(safe-area-inset-bottom,0px))!important}
   .admin-action-center{grid-template-columns:repeat(2,minmax(0,1fr))}
   .admin-list-tools{grid-template-columns:1fr}
   .admin-date-rail{grid-template-columns:40px auto minmax(130px,1fr) 40px}
@@ -2368,7 +2376,7 @@ body.admin-mode #courtesy-modal label{border-radius:14px!important;border-color:
     <div class="adm-nav-group"><div class="adm-nav-label">General</div>
       <button class="adm-tab" data-admin-tab="dash" onclick="admTab('dash')"><span class="adm-nav-icon">⌂</span><span>Inicio</span></button>
     </div>
-    <div class="adm-nav-group"><div class="adm-nav-label">Operación</div>
+    <div class="adm-nav-group" data-admin-group="operation"><div class="adm-nav-label">Operación</div>
       <button class="adm-tab" data-admin-tab="slots" onclick="admTab('slots')"><span class="adm-nav-icon">▦</span><span>Agenda</span></button>
       <button class="adm-tab" data-admin-tab="users" onclick="admTab('users')"><span class="adm-nav-icon">◎</span><span>Socios</span></button>
     </div>
@@ -2390,6 +2398,11 @@ body.admin-mode #courtesy-modal label{border-radius:14px!important;border-color:
     <button class="adm-mobile-logout" type="button" onclick="doLogout()">Cerrar sesión</button>
   </nav>
   <button class="adm-mobile-backdrop" type="button" onclick="toggleAdminMobileMenu(false)" aria-label="Cerrar menú"></button>
+  <nav class="admin-mobile-quick-nav" aria-label="Accesos principales del admin">
+    <button class="admin-mobile-quick-item" data-admin-quick="slots" onclick="admTab('slots')"><span class="admin-mobile-quick-icon">▦</span><span>Agenda</span></button>
+    <button class="admin-mobile-quick-item" data-admin-quick="users" onclick="admTab('users')"><span class="admin-mobile-quick-icon">◎</span><span>Socios</span></button>
+    <button class="admin-mobile-quick-item" data-admin-quick="mensajes" onclick="admTab('mensajes')"><span class="adm-tab-badge" data-badge-source="adm-mensajes-badge"></span><span class="admin-mobile-quick-icon">□</span><span>Mensajes</span></button>
+  </nav>
   <div class="scroll-area" style="padding-top:.75rem">
 
     <!-- DASHBOARD -->
@@ -2978,7 +2991,7 @@ body.admin-mode #courtesy-modal label{border-radius:14px!important;border-color:
 // ── CONFIG & SUPABASE ───────────────────────────────────────
 const SUPABASE_URL='https://pmpjteuqjusbiduevbwq.supabase.co';
 const SUPABASE_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBtcGp0ZXVxanVzYmlkdWV2YndxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc2OTI1NjUsImV4cCI6MjA5MzI2ODU2NX0.XbMzZoo2yqtrD8znLnyo_1zDfrdJAvAPj1lqGOyXnLw';
-const APP_VERSION='20260821-11';
+const APP_VERSION='20260821-12';
 // La pierna va separada en cuádriceps, femorales y pantorrillas: la figura
 // corporal pinta esas tres regiones por separado y el motor de recuperación les
 // da ventanas de descanso distintas. 'Piernas' sigue reconociéndose al leer
@@ -4955,6 +4968,7 @@ function admTab(t){
   toggleAdminMobileMenu(false);
   sessionStorage.setItem('habit-admin-tab',t);
   document.querySelectorAll('[data-admin-tab]').forEach(b=>b.classList.toggle('active',b.dataset.adminTab===t));
+  document.querySelectorAll('[data-admin-quick]').forEach(b=>b.classList.toggle('active',b.dataset.adminQuick===t));
   document.querySelectorAll('.adm-section').forEach(el=>el.classList.remove('active'));
   target.classList.add('active');
   const scroll=document.querySelector('#s-admin .scroll-area');if(scroll)scroll.scrollTop=0;
@@ -15386,8 +15400,12 @@ function setAdminHeaderBadge(id,count){
   const el=document.getElementById(id);
   if(!el)return;
   const n=Number(count)||0;
-  el.textContent=n?String(Math.min(n,99))+(n>99?'+':''):'';
+  const label=n?String(Math.min(n,99))+(n>99?'+':''):'';
+  el.textContent=label;
   el.classList.toggle('show',!!n);
+  document.querySelectorAll('[data-badge-source="'+id+'"]').forEach(mirror=>{
+    mirror.textContent=label;mirror.classList.toggle('show',!!n);
+  });
   el.closest('.admin-icon-action')?.classList.toggle('has-alert',!!n);
 }
 function ensureAdminSeenBaselines(){

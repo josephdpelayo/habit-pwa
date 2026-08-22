@@ -1,7 +1,7 @@
 // HABIT Training Hub — Service Worker
 // Push notifications + app shell caching
 
-const CACHE_VERSION = '20260821-11'; // keep in sync with APP_VERSION in app.html
+const CACHE_VERSION = '20260821-12'; // keep in sync with APP_VERSION in app.html
 const CACHE = `habit-${CACHE_VERSION}`;
 
 // Librerías compartidas con Skandi Fit: la app no arranca sin ellas, así que
