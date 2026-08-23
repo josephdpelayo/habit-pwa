@@ -8,16 +8,16 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="Skandi Fit">
 <meta name="application-name" content="Skandi Fit">
-<link rel="manifest" href="/skandi-manifest.json?v=20260823-5">
-<link rel="apple-touch-icon" sizes="180x180" href="/icons/skandi-180.png?v=20260823-5">
-<link rel="icon" type="image/png" sizes="192x192" href="/icons/skandi-192.png?v=20260823-5">
+<link rel="manifest" href="/skandi-manifest.json?v=20260823-6">
+<link rel="apple-touch-icon" sizes="180x180" href="/icons/skandi-180.png?v=20260823-6">
+<link rel="icon" type="image/png" sizes="192x192" href="/icons/skandi-192.png?v=20260823-6">
 <title>Skandi Fit</title>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="/skandi-recovery.js?v=20260823-5"></script>
-<script src="/body-figure.js?v=20260823-5"></script>
-<script src="/skandi-nutrition.js?v=20260823-5"></script>
-<script src="/skandi-load.js?v=20260823-5"></script>
-<script src="/skandi-brief.js?v=20260823-5"></script>
+<script src="/skandi-recovery.js?v=20260823-6"></script>
+<script src="/body-figure.js?v=20260823-6"></script>
+<script src="/skandi-nutrition.js?v=20260823-6"></script>
+<script src="/skandi-load.js?v=20260823-6"></script>
+<script src="/skandi-brief.js?v=20260823-6"></script>
 <style>
 :root{
   --bg:#eef4f8;
@@ -132,6 +132,10 @@ p{color:var(--muted);line-height:1.45;margin:0}
 .detail-row svg{flex:0 0 auto;color:var(--blue);margin-top:1px}
 .detail-row b{display:block;font-size:13px;color:var(--text);font-weight:800}
 .detail-row span{display:block;font-size:12.5px;color:var(--muted);margin-top:1px}
+.detail-row.click{cursor:pointer}
+.detail-row .detail-body{flex:1;min-width:0}
+.detail-row .chev{align-self:center;margin-left:auto;flex:0 0 auto;display:flex}
+.detail-row .chev svg{color:var(--dof-steel)}
 /* ── Comida ─────────────────────────────────────────────────────────────── */
 .kcal-ring{width:118px;height:118px;border-radius:50%;display:grid;place-items:center;flex:0 0 auto;
   background:conic-gradient(var(--lime) var(--p),rgba(1,36,86,.10) 0);position:relative}
@@ -384,6 +388,10 @@ textarea.field{min-height:112px;text-align:left;resize:vertical}
 .muscle-builder-row .field{padding:8px}
 .form-note{font-size:12px;color:var(--muted);margin:-4px 0 10px}
 .body-flip-btn{position:absolute;left:12px;bottom:12px;width:44px;height:44px;border-radius:50%;background:#fff;border:1px solid var(--line);display:grid;place-items:center;color:var(--text);box-shadow:0 10px 22px rgba(1,36,86,.14)}
+.photo-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.photo-thumb{aspect-ratio:3/4;border-radius:10px;overflow:hidden;position:relative;background:var(--panel2);border:1px solid var(--line);display:grid;place-items:center;color:var(--dof-steel)}
+.photo-thumb img{width:100%;height:100%;object-fit:cover;display:block;position:absolute;inset:0}
+.photo-thumb span{position:absolute;left:0;right:0;bottom:0;padding:4px 6px;background:linear-gradient(0deg,rgba(0,0,0,.55),transparent);color:#fff;font-size:10px;font-weight:800;text-align:left}
 .muscle-region{cursor:pointer;transition:opacity .15s}
 .muscle-region:hover,.muscle-region:active{opacity:.82}
 .muscle-legend{display:flex;align-items:center;justify-content:center;gap:14px;margin-top:12px;flex-wrap:wrap}
@@ -516,7 +524,7 @@ textarea.field{min-height:112px;text-align:left;resize:vertical}
 // Versión compartida con app.html (APP_VERSION) y sw.js (CACHE_VERSION): un solo service
 // worker sirve las dos apps, así que una sola cadena las invalida a las dos. Al cambiarla
 // hay que actualizarla también en los ?v= del <head>, en index.html y en los dos manifests.
-const SKANDI_VERSION='20260823-5';
+const SKANDI_VERSION='20260823-6';
 const SUPABASE_URL='https://pmpjteuqjusbiduevbwq.supabase.co';
 const SUPABASE_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBtcGp0ZXVxanVzYmlkdWV2YndxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc2OTI1NjUsImV4cCI6MjA5MzI2ODU2NX0.XbMzZoo2yqtrD8znLnyo_1zDfrdJAvAPj1lqGOyXnLw';
 const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
@@ -852,6 +860,15 @@ en:{
   'body.tapHint':'Tap a muscle for details · showing {view}','body.front':'front','body.back':'back',
   'body.muscleStatus':'Muscle status','body.readyNow':'Ready now','body.readyIn':'Ready in {time}',
   'body.recentActivities':'Recent activities','body.noActivities':'No manual activities logged yet.',
+  'body.tabRecovery':'Recovery','body.tabMeasurements':'Measurements','body.tabPhotos':'Photos',
+  'body.measurements':'Measurements','body.logMeasurement':'Log measurement','body.noMeasurements':'No measurements logged yet — a scale is not reliable at sea, but a tape measure is.',
+  'body.history':'History','body.measuredOn':'Measured on {date}','body.errDate':'Pick a date.',
+  'body.errEmpty':'Enter at least one measurement.','body.alreadyLogged':'You already logged a measurement this day — saving again updates it.',
+  'body.confirmDelete':'Delete this measurement?',
+  'body.neck':'Neck','body.chest':'Chest','body.waist':'Waist','body.hip':'Hip','body.arm':'Arm','body.thigh':'Thigh','body.calf':'Calf',
+  'body.photos':'Progress photos','body.addPhoto':'Add photo','body.noPhotos':'No progress photos yet.',
+  'body.pose':'Angle','body.pose.frente':'Front','body.pose.lado':'Side','body.pose.espalda':'Back','body.pose.otro':'Other',
+  'body.errNoPhoto':'Choose a photo first.','body.confirmDeletePhoto':'Delete this photo?',
 
   'muscle.trainedBy':'Exercises that trained {name} recently',
   'muscle.pctOfExercise':'{p}% of exercise',
@@ -1393,6 +1410,15 @@ es:{
   'body.tapHint':'Toca un músculo para ver detalles · mostrando {view}','body.front':'frente','body.back':'espalda',
   'body.muscleStatus':'Estado muscular','body.readyNow':'Listo ya','body.readyIn':'Listo en {time}',
   'body.recentActivities':'Actividades recientes','body.noActivities':'Aún no has registrado actividades manuales.',
+  'body.tabRecovery':'Recuperación','body.tabMeasurements':'Medidas','body.tabPhotos':'Fotos',
+  'body.measurements':'Medidas','body.logMeasurement':'Registrar medida','body.noMeasurements':'Todavía no registras medidas — una báscula no es confiable en el mar, pero una cinta métrica sí.',
+  'body.history':'Historial','body.measuredOn':'Medido el {date}','body.errDate':'Elige una fecha.',
+  'body.errEmpty':'Pon al menos una medida.','body.alreadyLogged':'Ya registraste una medida este día — guardar de nuevo la actualiza.',
+  'body.confirmDelete':'¿Borrar esta medida?',
+  'body.neck':'Cuello','body.chest':'Pecho','body.waist':'Cintura','body.hip':'Cadera','body.arm':'Brazo','body.thigh':'Muslo','body.calf':'Pantorrilla',
+  'body.photos':'Fotos de progreso','body.addPhoto':'Agregar foto','body.noPhotos':'Todavía no hay fotos de progreso.',
+  'body.pose':'Ángulo','body.pose.frente':'Frente','body.pose.lado':'Lado','body.pose.espalda':'Espalda','body.pose.otro':'Otro',
+  'body.errNoPhoto':'Elige una foto primero.','body.confirmDeletePhoto':'¿Borrar esta foto?',
 
   'muscle.trainedBy':'Ejercicios que trabajaron {name} hace poco',
   'muscle.pctOfExercise':'{p}% del ejercicio',
@@ -1697,7 +1723,7 @@ const EXERCISE_PRESETS={
 };
 
 const ACTIVE_WORKOUT_MAX_HOURS=18;
-const state={user:null,profile:null,view:'home',authMode:'login',exercises:[],templates:[],items:[],sessions:[],sets:[],externalActivities:[],activityTemplates:[],progressionState:[],progressionEvents:[],skillGoals:[],trainingBlocks:[],planned:[],plannedReady:true,ensuredWeeks:new Set(),weekSig:null,trainTab:'today',calOffset:0,calWeeks:4,dayOpen:null,bodyweightLogs:[],programs:[],programDays:[],active:null,activeItems:[],timer:null,elapsed:0,rest:0,restTotal:0,bodyFlip:'front',weightUnit:localStorage.getItem('skandi_weight_unit')||'kg',weightUnitOverrides:(()=>{try{return JSON.parse(localStorage.getItem('skandi_weight_unit_overrides')||'{}');}catch(e){return {};}})(),expandedRoutines:new Set(),progressTab:'summary',progressQuery:'',progressMetric:'best',historyFilter:{month:'all',title:'all'},crewFeedLimit:6,swapTarget:null,swapQuery:'',setOptionsId:null,skillTab:null,addExOpen:false,addExQuery:'',pausedMs:0,pausedAt:null,floatTimerOpen:false,meals:[],mealItems:[],foods:[],dishes:[],dishItems:[],nutritionTargets:null,aiCallsToday:0,foodDayOffset:0,foodPicker:{query:'',mealId:null},pendingMeal:null,wellness:[],intervalsUnmatched:[],stravaStatus:null,intervalsStatus:null,skandiSettings:null,stravaSyncing:false,intervalsSyncing:false};
+const state={user:null,profile:null,view:'home',authMode:'login',exercises:[],templates:[],items:[],sessions:[],sets:[],externalActivities:[],activityTemplates:[],progressionState:[],progressionEvents:[],skillGoals:[],trainingBlocks:[],planned:[],plannedReady:true,ensuredWeeks:new Set(),weekSig:null,trainTab:'today',calOffset:0,calWeeks:4,dayOpen:null,bodyweightLogs:[],programs:[],programDays:[],active:null,activeItems:[],timer:null,elapsed:0,rest:0,restTotal:0,bodyFlip:'front',weightUnit:localStorage.getItem('skandi_weight_unit')||'kg',weightUnitOverrides:(()=>{try{return JSON.parse(localStorage.getItem('skandi_weight_unit_overrides')||'{}');}catch(e){return {};}})(),expandedRoutines:new Set(),progressTab:'summary',progressQuery:'',progressMetric:'best',historyFilter:{month:'all',title:'all'},crewFeedLimit:6,swapTarget:null,swapQuery:'',setOptionsId:null,skillTab:null,addExOpen:false,addExQuery:'',pausedMs:0,pausedAt:null,floatTimerOpen:false,meals:[],mealItems:[],foods:[],dishes:[],dishItems:[],nutritionTargets:null,aiCallsToday:0,foodDayOffset:0,foodPicker:{query:'',mealId:null},pendingMeal:null,wellness:[],intervalsUnmatched:[],stravaStatus:null,intervalsStatus:null,skandiSettings:null,stravaSyncing:false,intervalsSyncing:false,bodyMeasurements:[],progressPhotos:[],pendingPhoto:null,bodyTab:'recovery'};
 let builderState={selected:new Map(),group:'All'};
 
 const $=id=>document.getElementById(id);
@@ -1901,6 +1927,7 @@ async function loadAll(){
        {data:ownSessions},{data:crewSessions},{data:ownSets},{data:crewSets},
        {data:externalActivities},{data:activityTemplates},{data:progressionState},{data:trainingBlocks},{data:bodyweightLogs},
        {data:programs},{data:programDays},{data:progressionEvents},{data:skillGoals},
+       {data:bodyMeasurements},{data:progressPhotos},
        {data:planned,error:plannedError}]=await Promise.all([
     sb.from('profiles').select('id,name,avatar_url').eq('id',state.user.id).maybeSingle(),
     sb.from('skandi_exercises').select('*').order('name'),
@@ -1921,6 +1948,9 @@ async function loadAll(){
     sb.from('skandi_program_days').select('*'),
     sb.from('skandi_progression_events').select('*').eq('user_id',state.user.id).order('created_at',{ascending:false}),
     sb.from('skandi_skill_goals').select('*').eq('user_id',state.user.id),
+    // [] si la migración 090 no se ha corrido, igual que programs/progressionEvents arriba.
+    sb.from('skandi_body_measurements').select('*').eq('user_id',state.user.id).order('measured_at',{ascending:false}),
+    sb.from('skandi_progress_photos').select('*').eq('user_id',state.user.id).order('taken_at',{ascending:false}),
     // Ventana del calendario: un mes atrás (para leer adherencia reciente) y medio año
     // adelante. Traer todo el histórico de un plan no sirve para nada y crece sin techo.
     sb.from('skandi_planned_sessions').select('*')
@@ -1972,6 +2002,9 @@ async function loadAll(){
   // Igual que programs: [] en vez de reventar si la migración 079 todavía no se corrió.
   state.progressionEvents=progressionEvents||[];
   state.skillGoals=skillGoals||[];
+  // Igual: [] si la migración 090 (medidas y fotos) todavía no se corrió.
+  state.bodyMeasurements=bodyMeasurements||[];
+  state.progressPhotos=progressPhotos||[];
   // plannedReady=false = la migración 080 todavía no se corrió. La app entera sigue
   // funcionando sin calendario; Entrenar se cae a las tarjetas de siempre.
   state.plannedReady=!plannedError;
@@ -2255,17 +2288,37 @@ function todayDetailCard(){
   // ya vive en Comida, que es donde de verdad hace falta cuando llega la hora de comer.
   const fuelBefore=brief.fuel.find(x=>x.key==='brief.fuel.before');
 
+  // Cada fila era texto plano — la única forma de ver más era adivinar en qué pestaña vivía.
+  // Ahora cada una lleva a donde de verdad está el detalle completo: el plan de combustible
+  // entero (antes+durante+después) vive en Comida, no aquí; el sueño/pulso completos en un
+  // modal que reusa wellnessCardHtml (no hay pestaña propia para eso); la fatiga muscular en
+  // Cuerpo; la carga en Progreso.
+  const cautionTarget=key=>
+    (key==='brief.caution.sleep'||key==='brief.caution.hr')?'openWellnessDetail()'
+    :(key==='brief.caution.load'||key==='brief.caution.deloadWeak')?`setView('progress')`
+    :key==='brief.caution.muscle'?`setView('body')`
+    :`setView('train')`;
+  const rowLink=(name,title,sub,action,tone)=>
+    `<div class="detail-row click" onclick="${action}" style="${tone?`color:${tone}`:''}">${icon(name,18)}<div class="detail-body"><b>${esc(title)}</b>${sub?`<span>${esc(sub)}</span>`:''}</div><i class="chev">${icon('chevronRight',16)}</i></div>`;
+
   const rows2=[
-    `<div class="detail-row">${icon('trending',18)}<div><b>${esc(t(brief.headline.key,brief.headline.params||{}))}</b>${block?`<span>${esc(t('block.weekOf',{week:block.week,total:block.totalWeeks}))}</span>`:''}</div></div>`,
-    wellnessLine?`<div class="detail-row">${icon('moon',18)}<div><b>${esc(t('wellness.title'))}</b><span>${esc(wellnessLine)}</span></div></div>`:'',
-    ...brief.cautions.map(x=>`<div class="detail-row" style="color:var(--amber)">${icon('warning',18)}<div><b>${esc(t('brief.cautionTitle'))}</b><span>${esc(line(x))}</span></div></div>`),
-    fuelBefore?`<div class="detail-row">${icon('food',18)}<div><b>${esc(t('brief.fuelTitle'))}</b><span>${esc(line(fuelBefore))}</span></div></div>`:''
+    rowLink('trending',t(brief.headline.key,brief.headline.params||{}),block?t('block.weekOf',{week:block.week,total:block.totalWeeks}):'',`setView('train')`),
+    wellnessLine?rowLink('moon',t('wellness.title'),wellnessLine,'openWellnessDetail()'):'',
+    ...brief.cautions.map(x=>rowLink('warning',t('brief.cautionTitle'),line(x),cautionTarget(x.key),'var(--amber)')),
+    fuelBefore?rowLink('food',t('brief.fuelTitle'),line(fuelBefore),`setView('food')`):''
   ].filter(Boolean).join('');
 
   return `<section class="card">
     <div class="eyebrow">${esc(t('home.today'))}</div>
     <div style="margin-top:6px">${rows2}</div>
   </section>`;
+}
+
+function openWellnessDetail(){
+  $('modal').classList.add('show');
+  $('modalCard').innerHTML=`
+    <div class="row"><h1>${esc(t('wellness.title'))}</h1><button class="x" onclick="closeModal()" aria-label="${esc(t('common.close'))}">${icon('close',20)}</button></div>
+    ${wellnessCardHtml()||''}`;
 }
 
 // Una fila del calendario traducida a lo que fuelPlan() espera. Antes esa entrada venía de
@@ -4497,6 +4550,23 @@ function toggleBodyView(){
 }
 
 function bodyView(){
+  const tab=state.bodyTab||'recovery';
+  const tabs=[['recovery','body.tabRecovery'],['measurements','body.tabMeasurements'],['photos','body.tabPhotos']];
+  const body=tab==='measurements'?measurementsTab():tab==='photos'?photosTab():recoveryTab();
+  return `
+    <h1>${esc(t('body.title'))}</h1>
+    <div class="seg sub" style="margin:12px 0 16px">
+      ${tabs.map(([key,label])=>`<button class="${tab===key?'active':''}" onclick="setBodyTab('${key}')">${esc(t(label))}</button>`).join('')}
+    </div>
+    ${body}`;
+}
+
+function setBodyTab(tab){
+  state.bodyTab=tab;
+  render();
+}
+
+function recoveryTab(){
   const rows=getMyRecovery();
   const scoreByName=new Map(rows.map(r=>[r.name,r.score]));
   const restedCount=rows.filter(r=>r.rested).length;
@@ -4505,7 +4575,6 @@ function bodyView(){
   const daysSince=lastCompletedAt?Math.floor((Date.now()-lastCompletedAt)/864e5):null;
   const view=state.bodyFlip==='back'?'back':'front';
   return `
-    <h1>${esc(t('body.title'))}</h1>
     <section class="grid">
       <div class="stat"><strong>${daysSince===null?'-':daysSince}</strong><small>${esc(t('body.daysSince'))}</small></div>
       <div class="stat"><strong>${restedCount}</strong><small>${esc(t('body.musclesRested'))}</small></div>
@@ -4532,6 +4601,218 @@ function bodyView(){
       <h2>${esc(t('body.recentActivities'))}</h2>
       ${(state.externalActivities||[]).slice(0,6).map(externalActivityRow).join('')||empty(t('body.noActivities'))}
     </section>`;
+}
+
+// ---- Medidas con cinta (migración 090) ----
+//
+// "A bordo no hay manera de pesarme de forma precisa" — sin báscula confiable en un barco, la
+// cinta es el método real de seguimiento. state.bodyMeasurements cae a [] si la migración 090
+// no se ha corrido (mismo patrón que programs/progressionEvents en loadAll), así que esta
+// pestaña simplemente se ve vacía en vez de romper el resto de la app.
+
+const MEASURE_FIELDS=[
+  ['measNeck','neck_cm','body.neck'],['measChest','chest_cm','body.chest'],
+  ['measWaist','waist_cm','body.waist'],['measHip','hip_cm','body.hip'],
+  ['measArm','arm_cm','body.arm'],['measThigh','thigh_cm','body.thigh'],
+  ['measCalf','calf_cm','body.calf']
+];
+
+function measurementsTab(){
+  const rows=(state.bodyMeasurements||[]).slice().sort((a,b)=>b.measured_at.localeCompare(a.measured_at));
+  const latest=rows[0]||null;
+  const prev=rows[1]||null;
+  const latestLines=latest?MEASURE_FIELDS.map(([,key,labelKey])=>{
+    const val=latest[key];
+    if(val==null) return '';
+    const prevVal=prev?prev[key]:null;
+    const delta=prevVal!=null?Math.round((val-prevVal)*10)/10:null;
+    return `<div class="row" style="margin-top:8px"><span class="muted">${esc(t(labelKey))}</span><span><strong>${val} cm</strong>${delta!=null&&delta!==0?` <small class="muted">(${delta>0?'+':''}${delta})</small>`:''}</span></div>`;
+  }).filter(Boolean).join(''):'';
+  return `
+    <section class="card">
+      <div class="row"><h2>${esc(t('body.measurements'))}</h2><button class="btn small primary" onclick="openMeasurementForm()">${icon('plus',16)} ${esc(t('body.logMeasurement'))}</button></div>
+      ${latest?`${latestLines}<p class="muted" style="margin-top:10px;font-size:12px">${esc(t('body.measuredOn',{date:new Date(latest.measured_at+'T12:00:00').toLocaleDateString(LANG,{day:'numeric',month:'long'})}))}</p>`
+        :`<p class="muted" style="margin-top:8px">${esc(t('body.noMeasurements'))}</p>`}
+    </section>
+    ${rows.length>1?`<section class="card">
+      <div class="eyebrow">${esc(t('body.history'))}</div>
+      ${rows.slice(1).map(measurementRowHtml).join('')}
+    </section>`:''}`;
+}
+
+function measurementRowHtml(m){
+  const parts=MEASURE_FIELDS.map(([,key,labelKey])=>m[key]!=null?`${t(labelKey)} ${m[key]}`:null).filter(Boolean).join(' · ');
+  return `<div class="row" style="margin-top:8px;cursor:pointer" onclick="openMeasurementForm('${m.measured_at}')">
+    <div><strong>${new Date(m.measured_at+'T12:00:00').toLocaleDateString(LANG,{day:'numeric',month:'short'})}</strong><p style="font-size:12px">${esc(parts)}</p></div>
+    ${icon('chevronRight',18)}
+  </div>`;
+}
+
+function openMeasurementForm(dateKey){
+  const day=dateKey||dayKey(new Date());
+  const existing=(state.bodyMeasurements||[]).find(m=>m.measured_at===day);
+  $('modal').classList.add('show');
+  $('modalCard').innerHTML=`
+    <div class="row"><h1>${esc(t('body.logMeasurement'))}</h1><button class="x" onclick="closeModal()" aria-label="${esc(t('common.close'))}">${icon('close',20)}</button></div>
+    <label class="eyebrow">${esc(t('common.date'))}</label>
+    <input id="measDate" class="field left" type="date" max="${dayKey(new Date())}" value="${day}">
+    <div class="grid" style="grid-template-columns:repeat(2,1fr);gap:8px;margin-top:10px">
+      ${MEASURE_FIELDS.map(([id2,key,labelKey])=>
+        `<div><label class="eyebrow">${esc(t(labelKey))}</label><input id="${id2}" class="field" type="number" min="0" max="200" step="0.5" inputmode="decimal" value="${existing?.[key]??''}" placeholder="cm"></div>`
+      ).join('')}
+    </div>
+    <textarea id="measNote" class="field" placeholder="${esc(t('common.notesOptional'))}">${esc(existing?.note||'')}</textarea>
+    ${existing?`<p class="muted" style="margin-top:6px">${esc(t('body.alreadyLogged'))}</p>`:''}
+    <button class="btn primary" style="width:100%;margin-top:10px" onclick="saveMeasurement()">${esc(t('common.save'))}</button>
+    ${existing?`<button class="btn danger" style="width:100%;margin-top:8px" onclick="deleteMeasurement('${existing.id}')">${icon('trash',16)} ${esc(t('common.delete'))}</button>`:''}`;
+}
+
+async function saveMeasurement(){
+  const day=$('measDate').value;
+  if(!day) return alert(t('body.errDate'));
+  const num=v=>v===''?null:Number(v);
+  const payload={user_id:state.user.id,measured_at:day};
+  MEASURE_FIELDS.forEach(([id2,key])=>{ payload[key]=num($(id2).value); });
+  payload.note=$('measNote').value.trim()||null;
+  if(MEASURE_FIELDS.every(([,key])=>payload[key]==null)) return alert(t('body.errEmpty'));
+  const {error}=await sb.from('skandi_body_measurements').upsert(payload,{onConflict:'user_id,measured_at'});
+  if(error) return alert(error.message);
+  closeModal();
+  await loadAll();
+  render();
+}
+
+async function deleteMeasurement(id){
+  if(!confirm(t('body.confirmDelete'))) return;
+  const {error}=await sb.from('skandi_body_measurements').delete().eq('id',id);
+  if(error) return alert(error.message);
+  closeModal();
+  await loadAll();
+  render();
+}
+
+// ---- Fotos de progreso (migración 090) ----
+//
+// La otra mitad de "no hay báscula confiable a bordo": una foto no miente aunque el número de
+// la cinta se estanque. Bucket privado (skandi-progress-photos), mismo patrón de signed URL
+// cacheada que mealPhotoUrl en Comida.
+
+const POSES=['frente','lado','espalda','otro'];
+
+function photosTab(){
+  const photos=(state.progressPhotos||[]).slice().sort((a,b)=>b.taken_at.localeCompare(a.taken_at));
+  return `<section class="card">
+    <div class="row"><h2>${esc(t('body.photos'))}</h2><button class="btn small primary" onclick="openAddProgressPhoto()">${icon('plus',16)} ${esc(t('body.addPhoto'))}</button></div>
+    ${photos.length?`<div class="photo-grid" style="margin-top:12px">${photos.map(progressPhotoThumb).join('')}</div>`:`<p class="muted" style="margin-top:8px">${esc(t('body.noPhotos'))}</p>`}
+  </section>`;
+}
+
+function progressPhotoThumb(p){
+  const url=progressPhotoUrl(p.photo_path);
+  return `<button class="photo-thumb" onclick="openProgressPhotoDetail('${p.id}')">
+    ${url?`<img data-photo="${esc(p.photo_path)}" src="${esc(url)}" alt="" loading="lazy">`:`<span class="photo-thumb-fallback">${icon('image',22)}</span>`}
+    <span>${new Date(p.taken_at+'T12:00:00').toLocaleDateString(LANG,{day:'numeric',month:'short'})}</span>
+  </button>`;
+}
+
+function progressPhotoUrl(path){
+  if(!path) return '';
+  if(progressPhotoUrl.cache[path]) return progressPhotoUrl.cache[path];
+  progressPhotoUrl.cache[path]='';
+  sb.storage.from('skandi-progress-photos').createSignedUrl(path,3600).then(({data})=>{
+    if(data?.signedUrl){
+      progressPhotoUrl.cache[path]=data.signedUrl;
+      if(state.view==='body') render();
+      document.querySelectorAll(`img[data-photo="${path}"]`).forEach(img=>{img.src=data.signedUrl;});
+    }
+  });
+  return '';
+}
+progressPhotoUrl.cache={};
+
+function pickPose(v){
+  document.querySelectorAll('.pose-chip').forEach(b=>b.classList.toggle('active',b.dataset.pose===v));
+}
+const pickedPose=()=>document.querySelector('.pose-chip.active')?.dataset.pose||'frente';
+
+function openAddProgressPhoto(){
+  state.pendingPhoto={blob:null};
+  $('modal').classList.add('show');
+  $('modalCard').innerHTML=`
+    <div class="row"><h1>${esc(t('body.addPhoto'))}</h1><button class="x" onclick="closeModal()" aria-label="${esc(t('common.close'))}">${icon('close',20)}</button></div>
+    <label class="btn" style="width:100%;margin-top:8px">${icon('image',20)} <span id="progressPhotoBtnLabel">${esc(t('food.takePhoto'))}</span>
+      <input id="progressPhotoInput" type="file" accept="image/*" style="display:none" onchange="onProgressPhotoPicked(this)">
+    </label>
+    <div id="progressPhotoPreview"></div>
+    <label class="eyebrow">${esc(t('body.pose'))}</label>
+    <div class="venue-row">${POSES.map((p,i)=>`<button type="button" class="chip pose-chip ${i===0?'active':''}" data-pose="${p}" onclick="pickPose('${p}')">${esc(t('body.pose.'+p))}</button>`).join('')}</div>
+    <label class="eyebrow">${esc(t('common.date'))}</label>
+    <input id="photoDate" class="field left" type="date" max="${dayKey(new Date())}" value="${dayKey(new Date())}">
+    <textarea id="photoNote" class="field" placeholder="${esc(t('common.notesOptional'))}"></textarea>
+    <button id="photoGo" class="btn primary" style="width:100%;margin-top:12px" onclick="submitProgressPhoto()">${esc(t('common.save'))}</button>`;
+}
+
+async function onProgressPhotoPicked(input){
+  const file=input.files&&input.files[0];
+  if(!file) return;
+  try{
+    const blob=await compressImage(file);
+    state.pendingPhoto.blob=blob;
+    const url=URL.createObjectURL(blob);
+    $('progressPhotoPreview').innerHTML=`<img src="${url}" alt="" style="width:100%;border-radius:12px;margin-top:10px;max-height:260px;object-fit:cover">`;
+    $('progressPhotoBtnLabel').textContent=`${Math.round(blob.size/1024)} KB ✓`;
+  }catch(e){
+    alert(e.message||String(e));
+  }
+}
+
+async function submitProgressPhoto(){
+  const pending=state.pendingPhoto;
+  if(!pending||!pending.blob) return alert(t('body.errNoPhoto'));
+  const day=$('photoDate').value;
+  if(!day) return alert(t('body.errDate'));
+  const btn=$('photoGo');
+  btn.disabled=true;btn.textContent=t('food.uploading');
+  try{
+    const path=`${state.user.id}/${crypto.randomUUID()}.jpg`;
+    const {error:upErr}=await sb.storage.from('skandi-progress-photos').upload(path,pending.blob,{contentType:'image/jpeg'});
+    if(upErr) throw upErr;
+    const {error}=await sb.from('skandi_progress_photos').insert({
+      user_id:state.user.id,taken_at:day,pose:pickedPose(),photo_path:path,note:$('photoNote').value.trim()||null
+    });
+    if(error) throw error;
+    closeModal();
+    state.pendingPhoto=null;
+    await loadAll();
+    render();
+  }catch(e){
+    btn.disabled=false;btn.textContent=t('common.save');
+    alert(e.message||String(e));
+  }
+}
+
+function openProgressPhotoDetail(id){
+  const p=(state.progressPhotos||[]).find(x=>x.id===id);
+  if(!p) return;
+  const url=progressPhotoUrl(p.photo_path);
+  $('modal').classList.add('show');
+  $('modalCard').innerHTML=`
+    <div class="row"><h1>${esc(t('body.pose.'+p.pose))}</h1><button class="x" onclick="closeModal()" aria-label="${esc(t('common.close'))}">${icon('close',20)}</button></div>
+    <p class="muted">${new Date(p.taken_at+'T12:00:00').toLocaleDateString(LANG,{weekday:'long',day:'numeric',month:'long'})}</p>
+    <img data-photo="${esc(p.photo_path)}" ${url?`src="${esc(url)}"`:''} alt="" style="width:100%;border-radius:12px;margin-top:10px">
+    ${p.note?`<p class="muted" style="margin-top:10px">${esc(p.note)}</p>`:''}
+    <button class="btn danger" style="width:100%;margin-top:12px" onclick="deleteProgressPhoto('${id}')">${icon('trash',16)} ${esc(t('common.delete'))}</button>`;
+}
+
+async function deleteProgressPhoto(id){
+  if(!confirm(t('body.confirmDeletePhoto'))) return;
+  const p=(state.progressPhotos||[]).find(x=>x.id===id);
+  const {error}=await sb.from('skandi_progress_photos').delete().eq('id',id);
+  if(error) return alert(error.message);
+  if(p?.photo_path) sb.storage.from('skandi-progress-photos').remove([p.photo_path]);
+  closeModal();
+  await loadAll();
+  render();
 }
 
 // ---- Muscle detail modal ----

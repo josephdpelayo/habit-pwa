@@ -168,6 +168,14 @@ and nothing else:
   ceilings catch typos, on an import they silently drop a real activity
 - `skandi_training_blocks` (N build weeks + deload, 066), `skandi_bodyweight_logs` (067),
   `skandi_progression_state` (calisthenics progressions)
+- `skandi_body_measurements` / `skandi_progress_photos` (090) — tape and photo tracking, added
+  because a normal scale is not reliable aboard a moving boat; a tape measure and a camera are.
+  Measurements are one row per day (`unique(user_id, measured_at)`, upserted, all seven cm
+  columns optional but a DB trigger requires at least one); photos allow several per day (front/
+  side/back is normal) so carry no such uniqueness. Photos live in the private
+  `skandi-progress-photos` bucket, same per-user-folder RLS as `skandi-meals` (073) and
+  `skandi-set-clips` (079). Body tab gained sub-tabs (Recovery/Measurements/Photos,
+  `state.bodyTab`) to hold this without crowding the muscle-recovery figure that was already there
 - Strava (081): `skandi_integrations` holds the OAuth tokens and has **RLS on with zero
   policies** — that denies every client read, which is the point; only the service-role in
   `api/skandi.js` touches it, and the app asks the `skandi_strava_status()` definer RPC for the
@@ -220,6 +228,12 @@ and nothing else:
 - Sugar (077) is tracked as its own macro across all five tables, but it is a **ceiling, not a
   goal** — the UI turns it red on excess and a null `sugar_g_target` means "don't track it". Its
   kcal already live inside `carbs_g`; never add it to the calorie total
+- Added sugar (089): `sugar_g` is total sugar (fruit included), `added_sugar_g` is the part a
+  person or a process added — the WHO's actual target, and what `added_sugar_g_target` caps.
+  Every client write outside the jsonb-based RPCs (`updateItemGrams`, `rememberFood`,
+  `saveTargets` in skandi.html) tolerates the columns being absent and retries without them,
+  because this migration can be live in the repo before it's run in Supabase and a raw
+  insert/update to a column that doesn't exist yet fails the whole write, not just that field
 - `SkandiNutrition.dayRecommendation()` adjusts today's target by the **difference between today's
   planned training burn and the weekly average**, never by the whole burn — the target's activity
   factor already assumes training, so adding the day's burn on top double-counts. The delta goes to
