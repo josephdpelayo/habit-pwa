@@ -8,14 +8,14 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="Skandi Fit">
 <meta name="application-name" content="Skandi Fit">
-<link rel="manifest" href="/skandi-manifest.json?v=20260822-16">
-<link rel="apple-touch-icon" sizes="180x180" href="/icons/skandi-180.png?v=20260822-16">
-<link rel="icon" type="image/png" sizes="192x192" href="/icons/skandi-192.png?v=20260822-16">
+<link rel="manifest" href="/skandi-manifest.json?v=20260822-17">
+<link rel="apple-touch-icon" sizes="180x180" href="/icons/skandi-180.png?v=20260822-17">
+<link rel="icon" type="image/png" sizes="192x192" href="/icons/skandi-192.png?v=20260822-17">
 <title>Skandi Fit</title>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="/skandi-recovery.js?v=20260822-16"></script>
-<script src="/body-figure.js?v=20260822-16"></script>
-<script src="/skandi-nutrition.js?v=20260822-16"></script>
+<script src="/skandi-recovery.js?v=20260822-17"></script>
+<script src="/body-figure.js?v=20260822-17"></script>
+<script src="/skandi-nutrition.js?v=20260822-17"></script>
 <style>
 :root{
   --bg:#eef4f8;
@@ -476,7 +476,7 @@ textarea.field{min-height:112px;text-align:left;resize:vertical}
 // Versión compartida con app.html (APP_VERSION) y sw.js (CACHE_VERSION): un solo service
 // worker sirve las dos apps, así que una sola cadena las invalida a las dos. Al cambiarla
 // hay que actualizarla también en los ?v= del <head>, en index.html y en los dos manifests.
-const SKANDI_VERSION='20260822-16';
+const SKANDI_VERSION='20260822-17';
 const SUPABASE_URL='https://pmpjteuqjusbiduevbwq.supabase.co';
 const SUPABASE_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBtcGp0ZXVxanVzYmlkdWV2YndxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc2OTI1NjUsImV4cCI6MjA5MzI2ODU2NX0.XbMzZoo2yqtrD8znLnyo_1zDfrdJAvAPj1lqGOyXnLw';
 const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
@@ -635,6 +635,8 @@ en:{
   'cal.addTitle':'Add to {date}','cal.editTitle':'Edit session','cal.save':'Save',
   'cal.moveTitle':'Move session','cal.copyTitle':'Copy session',
   'cal.needsMigration':'Run migration 080 in Supabase to turn the calendar on.',
+  'cal.status.replaced':'Replaced','cal.markSkipped':'I did not do it',
+  'cal.removeNote':'Removing takes it out of the plan, as if it had never been there. If you simply did not train it, use the other one — that is worth recording.',
   'cal.weekMenu':'This week','cal.detach':'Customize this week',
   'cal.clearWeek':'Clear the week','cal.resetWeek':'Go back to my week',
   'cal.weekFromTemplate':'{n} days still come from your week and will follow it if you change it.',
@@ -1113,6 +1115,8 @@ es:{
   'cal.addTitle':'Agregar al {date}','cal.editTitle':'Editar sesión','cal.save':'Guardar',
   'cal.moveTitle':'Mover sesión','cal.copyTitle':'Copiar sesión',
   'cal.needsMigration':'Corre la migración 080 en Supabase para encender el calendario.',
+  'cal.status.replaced':'Reemplazado','cal.markSkipped':'No lo hice',
+  'cal.removeNote':'Quitar lo saca del plan, como si nunca hubiera estado. Si simplemente no lo entrenaste, usa el otro — eso sí vale la pena registrarlo.',
   'cal.weekMenu':'Esta semana','cal.detach':'Personalizar esta semana',
   'cal.clearWeek':'Vaciar la semana','cal.resetWeek':'Volver a mi semana',
   'cal.weekFromTemplate':'{n} días todavía vienen de tu semana y la seguirán si la cambias.',
@@ -2283,8 +2287,11 @@ const keyToDate=key=>new Date(key+'T00:00:00');
 
 function plannedRows(){ return state.planned.filter(p=>p.user_id===state.user.id); }
 
+// 'replaced' se queda fuera de la vista a propósito: es la lápida que impide que la plantilla
+// vuelva a estampar esa sesión, no un día que fallaste. Mostrarla encimaba dos planes en la
+// misma celda cada vez que se reemplazaba un programa.
 function plannedOfDay(key){
-  return plannedRows().filter(p=>p.day===key)
+  return plannedRows().filter(p=>p.day===key&&p.status!=='replaced')
     .sort((a,b)=>(a.sort_order-b.sort_order)||(new Date(a.created_at)-new Date(b.created_at)));
 }
 
@@ -2566,11 +2573,14 @@ function calendarTab(){
 function weekRowHtml(monday){
   const days=Array.from({length:7},(_,i)=>dayKey(addDays(monday,i)));
   const rows=days.flatMap(k=>plannedOfDay(k));
-  const total=rows.filter(p=>p.status!=='skipped').length;
+  // El descanso no cuenta: no es algo que se complete, y metiéndolo en el denominador una
+  // semana con dos descansos nunca podía llegar a 100%.
+  const sessions=rows.filter(p=>p.discipline!=='rest');
+  const total=sessions.filter(p=>p.status!=='skipped').length;
   // La adherencia cuenta SOLO filas planeadas. Sumarle los extras daría "3 / 3" en una semana
   // donde se hizo una de tres cosas planeadas y dos improvisadas: leería como semana completa
   // justo cuando el plan se abandonó. Los extras se ven en la celda, no en el número.
-  const done=rows.filter(p=>p.status==='done').length;
+  const done=sessions.filter(p=>p.status==='done').length;
   const pct=total?Math.min(100,Math.round(done/total*100)):0;
   const isCurrent=dayKey(monday)===dayKey(mondayOf(new Date()));
   const label=`${monday.toLocaleDateString(LANG,{day:'numeric',month:'short'})} – ${addDays(monday,6).toLocaleDateString(LANG,{day:'numeric',month:'short'})}`;
@@ -2656,7 +2666,7 @@ async function clearWeek(mondayKey){
   const stamped=rows.filter(p=>p.source==='template').map(p=>p.id);
   const own=rows.filter(p=>p.source!=='template').map(p=>p.id);
   let error=null;
-  if(stamped.length) ({error}=await sb.from('skandi_planned_sessions').update({status:'skipped',is_edited:true}).in('id',stamped));
+  if(stamped.length) ({error}=await sb.from('skandi_planned_sessions').update({status:'replaced',is_edited:true}).in('id',stamped));
   if(!error&&own.length) ({error}=await sb.from('skandi_planned_sessions').delete().in('id',own));
   if(await afterPlannedWrite(error)) closeModal();
 }
@@ -2725,9 +2735,11 @@ function openPlannedItem(id){
       <button class="btn" style="width:100%" onclick="openPlannedMove('${p.id}','copy')">${icon('swap',16)} ${esc(t('cal.copy'))}</button>
       ${skipped
         ?`<button class="btn" style="width:100%" onclick="setPlannedStatus('${p.id}','planned')">${esc(t('cal.unskip'))}</button>`
-        :`<button class="btn danger" style="width:100%" onclick="removePlanned('${p.id}')">${icon('trash',16)} ${esc(t('cal.remove'))}</button>`}
+        :`<button class="btn" style="width:100%" onclick="setPlannedStatus('${p.id}','skipped')">${esc(t('cal.markSkipped'))}</button>`}
+      ${skipped?'':`<button class="btn danger" style="width:100%" onclick="removePlanned('${p.id}')">${icon('trash',16)} ${esc(t('cal.remove'))}</button>`}
       <button class="btn" style="width:100%" onclick="openPlannedDay('${p.day}')">${esc(t('cal.back'))}</button>
-    </div>`;
+    </div>
+    <p class="form-note" style="margin-top:12px">${esc(t('cal.removeNote'))}</p>`;
 }
 
 // ---- Mutaciones ---------------------------------------------------------------------------
@@ -2760,7 +2772,7 @@ async function removePlanned(id){
   if(!p) return;
   if(!confirm(t('cal.removeConfirm'))) return;
   const {error}=p.source==='template'
-    ? await sb.from('skandi_planned_sessions').update({status:'skipped',is_edited:true}).eq('id',id)
+    ? await sb.from('skandi_planned_sessions').update({status:'replaced',is_edited:true}).eq('id',id)
     : await sb.from('skandi_planned_sessions').delete().eq('id',id);
   if(await afterPlannedWrite(error)) openPlannedDay(p.day);
 }
