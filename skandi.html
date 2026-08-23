@@ -8,15 +8,16 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="Skandi Fit">
 <meta name="application-name" content="Skandi Fit">
-<link rel="manifest" href="/skandi-manifest.json?v=20260822-21">
-<link rel="apple-touch-icon" sizes="180x180" href="/icons/skandi-180.png?v=20260822-21">
-<link rel="icon" type="image/png" sizes="192x192" href="/icons/skandi-192.png?v=20260822-21">
+<link rel="manifest" href="/skandi-manifest.json?v=20260822-22">
+<link rel="apple-touch-icon" sizes="180x180" href="/icons/skandi-180.png?v=20260822-22">
+<link rel="icon" type="image/png" sizes="192x192" href="/icons/skandi-192.png?v=20260822-22">
 <title>Skandi Fit</title>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="/skandi-recovery.js?v=20260822-21"></script>
-<script src="/body-figure.js?v=20260822-21"></script>
-<script src="/skandi-nutrition.js?v=20260822-21"></script>
-<script src="/skandi-load.js?v=20260822-21"></script>
+<script src="/skandi-recovery.js?v=20260822-22"></script>
+<script src="/body-figure.js?v=20260822-22"></script>
+<script src="/skandi-nutrition.js?v=20260822-22"></script>
+<script src="/skandi-load.js?v=20260822-22"></script>
+<script src="/skandi-brief.js?v=20260822-22"></script>
 <style>
 :root{
   --bg:#eef4f8;
@@ -488,7 +489,7 @@ textarea.field{min-height:112px;text-align:left;resize:vertical}
 // Versión compartida con app.html (APP_VERSION) y sw.js (CACHE_VERSION): un solo service
 // worker sirve las dos apps, así que una sola cadena las invalida a las dos. Al cambiarla
 // hay que actualizarla también en los ?v= del <head>, en index.html y en los dos manifests.
-const SKANDI_VERSION='20260822-21';
+const SKANDI_VERSION='20260822-22';
 const SUPABASE_URL='https://pmpjteuqjusbiduevbwq.supabase.co';
 const SUPABASE_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBtcGp0ZXVxanVzYmlkdWV2YndxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc2OTI1NjUsImV4cCI6MjA5MzI2ODU2NX0.XbMzZoo2yqtrD8znLnyo_1zDfrdJAvAPj1lqGOyXnLw';
 const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
@@ -647,6 +648,43 @@ en:{
   'cal.addTitle':'Add to {date}','cal.editTitle':'Edit session','cal.save':'Save',
   'cal.moveTitle':'Move session','cal.copyTitle':'Copy session',
   'cal.needsMigration':'Run migration 080 in Supabase to turn the calendar on.',
+  'brief.title':'Why today','brief.trainingTitle':'What each session is for','brief.fuelTitle':'How to eat today','brief.cautionTitle':'Watch this today',
+  'brief.head.deload':'Deload week ({week} of {total}): you should finish feeling you had more in you. That is the point.',
+  'brief.head.rest':'No training today, and that is the plan too.',
+  'brief.head.quality':'Today is the hard day of the week. Everything else orbits this session.',
+  'brief.head.double':'Two sessions today: pace yourself, do not empty the tank on the first.',
+  'brief.head.strength':'Strength day. Execution quality before kilos.',
+  'brief.head.base':'Aerobic base day: build the engine without spending it.',
+  'brief.head.empty':'Nothing planned today.',
+  'brief.train.rest':'rest is when what you trained turns into adaptation. Do not compensate by walking more.',
+  'brief.train.mobility':'mobility to reach the rest of the week intact, not to build fatigue.',
+  'brief.train.skill':'skill session ({name}). The stimulus is the clean position, not the extra rep: when the line breaks, the set is over.',
+  'brief.train.skillDeload':'skill ({name}) on a deload. You are keeping the pattern, not testing it: stop short of your max even if you could hold longer.',
+  'brief.train.strength':'strength. Get close to failure without reaching it: leave 1-2 reps in the tank.',
+  'brief.train.strengthDeload':'strength on a deload: RIR 3, 70-80% of normal. No adding weight or reps this week.',
+  'brief.train.hiit':'{min} min of concentrated intensity. It is the only truly hard stimulus of the day: no muscular failure, no all-out sprints.',
+  'brief.train.threshold':'{min} min in Z{zone}. This is where threshold moves, which is why arriving fresh beats hanging on longer.',
+  'brief.train.tempo':'{min} min at controlled pace: comfortably hard, still able to speak in short sentences.',
+  'brief.train.base':'{min} min in the easy zone. It should feel almost boring — speed up and you stop building base and start stacking fatigue.',
+  'brief.train.easy':'{min} easy minutes, to move blood without adding fatigue.',
+  'brief.train.swimTechnique':'technique swim. Count strokes, not the clock.',
+  'brief.train.other':'supporting session.',
+  'brief.fuel.target':'Today: {kcal} kcal, {protein} g protein and {carbs} g carbs.',
+  'brief.fuel.upTraining':'That is {delta} kcal above normal because today you train more than your weekly average.',
+  'brief.fuel.upSteps':'That is {delta} kcal above normal, mostly because you are moving more than usual today.',
+  'brief.fuel.down':'That is {delta} kcal below normal: today you spend less than your weekly average.',
+  'brief.fuel.downDeload':'That is {delta} kcal less because you are deloading. Carbs come down, protein does not — protein is what protects muscle when volume drops.',
+  'brief.fuel.flat':'Spending is normal today, so the target does not move.',
+  'brief.fuel.before':'Before training: about {carbs} g of carbs {min} min ahead.',
+  'brief.fuel.noPre':'The session is short and easy: no need to load carbs beforehand.',
+  'brief.fuel.during':'During: {carbs} g of carbs per hour, since the session runs past 75 min.',
+  'brief.fuel.after':'After: {carbs} g of carbs and {protein} g of protein within 90 minutes.',
+  'brief.fuel.restDay':'With no training, carbs come down but protein stays: this is the day muscle repairs.',
+  'brief.caution.sleep':'You slept {min} less than your average. Do not cancel, but today the ceiling is the plan, not more.',
+  'brief.caution.hr':'Your resting heart rate is {n} bpm above normal, which usually shows up before you feel it. If the session also feels heavier than it should, cut it short.',
+  'brief.caution.load':'You are coming off a heavy week of accumulated load. Today is not the day for extra sets.',
+  'brief.caution.deloadWeak':'This is a deload week but volume has not dropped enough. Cut sets before you cut days.',
+  'brief.caution.muscle':'{muscle} is still at {pct}% freshness. If today trains it, drop the weight before the reps.',
   'load.title':'Training load','load.thisWeek':'this week','load.baseline':'4-week avg','load.fromStrength':'from strength',
   'load.note':'Load = minutes × effort, the same unit for strength, cardio and HIIT. It measures systemic load, not muscle damage — that one is on the Body screen.',
   'load.ok':'Your load is in range: {ratio}× your 4-week average. Keep going.',
@@ -1143,6 +1181,43 @@ es:{
   'cal.addTitle':'Agregar al {date}','cal.editTitle':'Editar sesión','cal.save':'Guardar',
   'cal.moveTitle':'Mover sesión','cal.copyTitle':'Copiar sesión',
   'cal.needsMigration':'Corre la migración 080 en Supabase para encender el calendario.',
+  'brief.title':'El porqué de hoy','brief.trainingTitle':'Qué buscas en cada sesión','brief.fuelTitle':'Cómo comer hoy','brief.cautionTitle':'Cuida esto hoy',
+  'brief.head.deload':'Semana de descarga ({week} de {total}): hoy sales sintiendo que podías más, y esa es la meta.',
+  'brief.head.rest':'Hoy no se entrena, y eso también es el plan.',
+  'brief.head.quality':'Hoy es el día duro de la semana. Todo lo demás gira alrededor de esta sesión.',
+  'brief.head.double':'Dos sesiones hoy: reparte la energía, no te acabes en la primera.',
+  'brief.head.strength':'Día de fuerza. Calidad de ejecución antes que kilos.',
+  'brief.head.base':'Día de base aeróbica: construir motor sin gastar.',
+  'brief.head.empty':'Hoy no hay nada planeado.',
+  'brief.train.rest':'el descanso es cuando se adapta lo que entrenaste. No lo compenses caminando de más.',
+  'brief.train.mobility':'movilidad para llegar entero al resto de la semana, sin buscar fatiga.',
+  'brief.train.skill':'sesión de habilidad ({name}). El estímulo es la posición limpia, no la repetición extra: si se rompe la línea, la serie terminó.',
+  'brief.train.skillDeload':'habilidad ({name}) en descarga. Mantienes el patrón, no lo pruebas: paras antes de tu máximo aunque aguantes más.',
+  'brief.train.strength':'fuerza. El objetivo es acercarte al fallo sin llegar: deja 1-2 repeticiones en el tanque.',
+  'brief.train.strengthDeload':'fuerza en descarga: RIR 3, 70-80% de lo normal. Nada de progresar peso ni repeticiones esta semana.',
+  'brief.train.hiit':'{min} min de intensidad concentrada. Es el único estímulo realmente duro del día: no busques fallo muscular ni sprint máximo.',
+  'brief.train.threshold':'{min} min en Z{zone}. Aquí se mueve el umbral, y por eso vale más entrar descansado que aguantar más.',
+  'brief.train.tempo':'{min} min a ritmo controlado: cómodo-incómodo, todavía puedes hablar en frases cortas.',
+  'brief.train.base':'{min} min en zona fácil. Debe sentirse casi aburrido — si aceleras, dejas de construir base y empiezas a acumular fatiga.',
+  'brief.train.easy':'{min} min suaves, para mover sangre sin sumar cansancio.',
+  'brief.train.swimTechnique':'nado técnico. Cuenta la brazada, no el cronómetro.',
+  'brief.train.other':'sesión complementaria.',
+  'brief.fuel.target':'Meta de hoy: {kcal} kcal, {protein} g de proteína y {carbs} g de carbohidratos.',
+  'brief.fuel.upTraining':'Son {delta} kcal más de lo normal porque hoy entrenas más que tu promedio de la semana.',
+  'brief.fuel.upSteps':'Son {delta} kcal más de lo normal, y vienen sobre todo de que hoy te estás moviendo más que de costumbre.',
+  'brief.fuel.down':'Son {delta} kcal menos de lo normal: hoy el gasto es menor que tu promedio de la semana.',
+  'brief.fuel.downDeload':'Son {delta} kcal menos porque estás descargando. Baja carbohidratos, no proteína: la proteína es lo que protege el músculo cuando el volumen baja.',
+  'brief.fuel.flat':'Es un día normal en gasto, así que la meta no se mueve.',
+  'brief.fuel.before':'Antes de entrenar: unos {carbs} g de carbohidratos {min} min antes.',
+  'brief.fuel.noPre':'La sesión es corta y suave: no necesitas cargar carbohidratos antes.',
+  'brief.fuel.during':'Durante: {carbs} g de carbohidratos por hora, que la sesión pasa de 75 min.',
+  'brief.fuel.after':'Al terminar: {carbs} g de carbohidratos y {protein} g de proteína en la primera hora y media.',
+  'brief.fuel.restDay':'Sin entrenamiento, los carbohidratos bajan pero la proteína se mantiene: es el día en que el músculo se repara.',
+  'brief.caution.sleep':'Dormiste {min} menos que tu promedio. No canceles la sesión, pero hoy el tope es lo planeado, no más.',
+  'brief.caution.hr':'Tu pulso en reposo está {n} lpm arriba de lo normal, que suele avisar antes de que lo sientas. Si además la sesión se siente pesada de más, recórtala.',
+  'brief.caution.load':'Vienes de una semana con mucha carga acumulada. Hoy no es día de añadir series extra.',
+  'brief.caution.deloadWeak':'Es semana de descarga pero el volumen no ha bajado lo suficiente. Quita series antes de quitar días.',
+  'brief.caution.muscle':'{muscle} sigue al {pct}% de frescura. Si hoy le toca, baja el peso antes que las repeticiones.',
   'load.title':'Carga de entrenamiento','load.thisWeek':'esta semana','load.baseline':'promedio 4 sem','load.fromStrength':'es fuerza',
   'load.note':'Carga = minutos × esfuerzo, la misma unidad para fuerza, cardio y HIIT. Mide carga sistémica, no daño muscular — esa está en Cuerpo.',
   'load.ok':'Tu carga va en rango: {ratio}× tu promedio de 4 semanas. Sigue así.',
@@ -2051,6 +2126,106 @@ function focusActionFor(p){
   return {label:t('cal.log'),icon:'plus',js:`openLogActivity(${p.activity_template_id?`'${p.activity_template_id}'`:'null'},'${p.id}')`};
 }
 
+// "El porqué de este día": junta lo que la app ya sabía por separado —qué toca, en qué semana
+// del bloque vas, cómo dormiste, qué músculo sigue cansado, cuánta carga llevas y cuánto
+// deberías comer— y lo explica. Las reglas viven en skandi-brief.js; aquí solo se arman los
+// datos y se pinta.
+function briefCard(){
+  const f=todayFocus();
+  const block=trainingBlockWeekInfo();
+  const isDeload=!!block?.deload;
+
+  // Sueño y pulso de hoy contra los 7 días previos: en absoluto no significan nada.
+  const rows=(state.wellness||[]).slice().sort((a,b)=>b.day.localeCompare(a.day));
+  const latest=rows[0]&&rows[0].day===f.key?rows[0]:null;
+  const prev=rows.filter(w=>w.day!==f.key).slice(0,7);
+  const mean=field=>{const v=prev.map(r=>Number(r[field])).filter(Number.isFinite);return v.length?v.reduce((a,b)=>a+b,0)/v.length:null;};
+  const sleepAvg=mean('sleep_secs'), hrAvg=mean('resting_hr');
+
+  // computeMuscleRecovery devuelve un arreglo de {name, score, ...} ya ordenado del más
+  // cansado al más fresco; `score` es la frescura en porcentaje.
+  const tiredMuscles=(getMyRecovery()||[]).map(m=>({muscle:m.name,label:muscleLabel(m.name),freshness:m.score}));
+
+  const refs={maxHeartRate:state.skandiSettings?.max_heart_rate||null,hrZones:state.skandiSettings?.hr_zone_bounds||null};
+  const load=SkandiLoad.readout({
+    series:SkandiLoad.dailySeries({sessions:state.sessions,sets:state.sets,activities:state.externalActivities,
+      userId:state.user.id,refs,days:SkandiLoad.CHRONIC_DAYS*2}),
+    isDeloadWeek:isDeload});
+
+  const weightKg=latestWeightKg();
+  const {rec,targets}=nutritionForBrief();
+
+  const brief=SkandiBrief.today({
+    sessions:f.rows,
+    isDeload, blockWeek:block?.week, blockTotal:block?.totalWeeks,
+    exercisesOf:p=>p.template_id?state.items.filter(i=>i.template_id===p.template_id).map(i=>i.exercise).filter(Boolean):[],
+    sleepGapMin:(latest?.sleep_secs&&sleepAvg)?(latest.sleep_secs-sleepAvg)/60:null,
+    restingHrJump:(latest?.resting_hr&&hrAvg)?latest.resting_hr-hrAvg:null,
+    loadLevel:load.level,
+    tiredMuscles,
+    rec, targets,
+    // Sin un peso registrado no hay cómo escalar gramos por kilo, y meter un peso inventado
+    // daría un consejo con cara de preciso. Se omite el timing y ya.
+    fuelFor:weightKg?(p=>SkandiNutrition.fuelPlan(plannedToFuelSession(p,weightKg),weightKg)):null
+  });
+
+  // El módulo razona en minutos porque es la unidad del umbral; para leerlo, hora y minutos.
+  const line=x=>{
+    const params={...(x.params||{})};
+    if(x.key==='brief.caution.sleep') params.min=formatSleep(params.min*60);
+    return `<p style="margin-top:8px">${esc(t(x.key,params))}</p>`;
+  };
+  return `<section class="card">
+    <div class="eyebrow">${esc(t('brief.title'))}</div>
+    <h2 style="margin-top:6px">${esc(t(brief.headline.key,brief.headline.params||{}))}</h2>
+    ${brief.training.length?`<div style="margin-top:12px">
+      <div class="eyebrow">${esc(t('brief.trainingTitle'))}</div>
+      ${brief.training.map(x=>`<p style="margin-top:8px"><strong>${esc(plannedTitle(x.session))}</strong> — ${esc(t(x.purpose.key,x.purpose.params||{}))}</p>`).join('')}
+    </div>`:''}
+    ${brief.fuel.length?`<div style="margin-top:14px">
+      <div class="eyebrow">${esc(t('brief.fuelTitle'))}</div>
+      ${brief.fuel.map(line).join('')}
+    </div>`:''}
+    ${brief.cautions.length?`<div style="margin-top:14px;padding-top:12px;border-top:1px solid var(--line)">
+      <div class="eyebrow" style="color:var(--amber)">${esc(t('brief.cautionTitle'))}</div>
+      ${brief.cautions.map(line).join('')}
+    </div>`:''}
+  </section>`;
+}
+
+// Una fila del calendario traducida a lo que fuelPlan() espera. Antes esa entrada venía de
+// `skandi_activity_templates` por día de la semana, que es el modelo viejo y no ve una sesión
+// planeada para una fecha concreta.
+function plannedToFuelSession(p,weightKg){
+  const minutes=Number(p.target_duration_min)||0;
+  const kind=p.discipline==='strength'?'strength':'endurance';
+  const intensity=Number(p.target_zone)?[3,5,6.5,8,9.5][Number(p.target_zone)-1]:5;
+  return {kind,activity_type:DISC_TO_ACT[p.discipline]||'other',minutes,
+    distance_km:p.target_distance_km||null,intensity,
+    kcal:kind==='strength'?SkandiNutrition.strengthKcal(minutes/3,weightKg)
+                          :SkandiNutrition.activityKcal({activity_type:DISC_TO_ACT[p.discipline]||'other',duration_min:minutes,intensity},weightKg)};
+}
+
+function nutritionForBrief(){
+  const targets=state.nutritionTargets;
+  if(!targets) return {rec:null,targets:null};
+  const weightKg=latestWeightKg();
+  const today=todayKey();
+  const loggedToday=state.externalActivities.filter(a=>dayKey(a.performed_at)===today);
+  const loggedSets=state.sets.filter(x=>x.user_id===state.user.id&&x.done&&dayKey(x.created_at)===today).length;
+  const loggedKcal=loggedToday.reduce((acc,a)=>acc+SkandiNutrition.activityKcal(a,weightKg),0)
+    +SkandiNutrition.strengthKcal(loggedSets,weightKg);
+  const rows=(state.wellness||[]).slice().sort((a,b)=>b.day.localeCompare(a.day));
+  const stepsToday=rows.find(w=>w.day===today)?.steps??null;
+  const prevSteps=rows.filter(w=>w.day!==today).slice(0,7).map(w=>w.steps).filter(n=>Number.isFinite(n));
+  const avgSteps=prevSteps.length>=3?prevSteps.reduce((a,b)=>a+b,0)/prevSteps.length:null;
+  const plan=state.activityTemplates.filter(x=>x.user_id===state.user.id);
+  return {targets,rec:SkandiNutrition.dayRecommendation({
+    targets,plan,dow:todayDow(),loggedKcal,
+    hasLoggedActivity:loggedToday.length>0||loggedSets>0,
+    steps:stepsToday,avgSteps,weightKg})};
+}
+
 function homeView(){
   const mine=state.sessions.filter(s=>s.user_id===state.user.id&&s.completed_at);
   const monday=mondayOf(new Date());
@@ -2094,6 +2269,7 @@ function homeView(){
       <div class="row"><h2>${esc(t('home.todayPlan'))}</h2><button class="btn small" onclick="setView('train')">${esc(t('home.seeWeek'))}</button></div>
       <div class="stack" style="margin-top:12px">${f.rows.map(plannedRowHtml).join('')}${f.extras.map(extraRowHtml).join('')}</div>
     </section>`:''}
+    ${briefCard()}
     ${wellnessCardHtml()}
     ${trainingBlockCardHtml()}
     ${attentionBannerHtml()}
