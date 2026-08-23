@@ -8,14 +8,15 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="Skandi Fit">
 <meta name="application-name" content="Skandi Fit">
-<link rel="manifest" href="/skandi-manifest.json?v=20260822-19">
-<link rel="apple-touch-icon" sizes="180x180" href="/icons/skandi-180.png?v=20260822-19">
-<link rel="icon" type="image/png" sizes="192x192" href="/icons/skandi-192.png?v=20260822-19">
+<link rel="manifest" href="/skandi-manifest.json?v=20260822-20">
+<link rel="apple-touch-icon" sizes="180x180" href="/icons/skandi-180.png?v=20260822-20">
+<link rel="icon" type="image/png" sizes="192x192" href="/icons/skandi-192.png?v=20260822-20">
 <title>Skandi Fit</title>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="/skandi-recovery.js?v=20260822-19"></script>
-<script src="/body-figure.js?v=20260822-19"></script>
-<script src="/skandi-nutrition.js?v=20260822-19"></script>
+<script src="/skandi-recovery.js?v=20260822-20"></script>
+<script src="/body-figure.js?v=20260822-20"></script>
+<script src="/skandi-nutrition.js?v=20260822-20"></script>
+<script src="/skandi-load.js?v=20260822-20"></script>
 <style>
 :root{
   --bg:#eef4f8;
@@ -164,6 +165,10 @@ p{color:var(--muted);line-height:1.45;margin:0}
    baje de su contenido — con etiquetas que no parten renglón, la rejilla crecía más que la
    tarjeta y el domingo se salía por la derecha. */
 .cal-nav{display:inline-flex;align-items:center;gap:6px}
+.load-bars{display:flex;align-items:flex-end;gap:6px;margin-top:14px;height:74px}
+.load-bar{flex:1;display:flex;flex-direction:column;justify-content:flex-end;align-items:center;gap:4px;min-width:0}
+.load-bar i{display:block;width:100%;border-radius:4px 4px 0 0}
+.load-bar small{font-size:9px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%}
 /* Cuatro cifras en una fila de 390 px: con `.row` (flex y espacio entre extremos) las cajas
    se encogían a su hueco y "6h35m" pedía 123 px teniendo 56, así que salía cortado. Rejilla
    de columnas iguales con minmax(0,1fr), que sí permite encoger sin desbordar. */
@@ -483,7 +488,7 @@ textarea.field{min-height:112px;text-align:left;resize:vertical}
 // Versión compartida con app.html (APP_VERSION) y sw.js (CACHE_VERSION): un solo service
 // worker sirve las dos apps, así que una sola cadena las invalida a las dos. Al cambiarla
 // hay que actualizarla también en los ?v= del <head>, en index.html y en los dos manifests.
-const SKANDI_VERSION='20260822-19';
+const SKANDI_VERSION='20260822-20';
 const SUPABASE_URL='https://pmpjteuqjusbiduevbwq.supabase.co';
 const SUPABASE_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBtcGp0ZXVxanVzYmlkdWV2YndxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc2OTI1NjUsImV4cCI6MjA5MzI2ODU2NX0.XbMzZoo2yqtrD8znLnyo_1zDfrdJAvAPj1lqGOyXnLw';
 const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
@@ -642,6 +647,14 @@ en:{
   'cal.addTitle':'Add to {date}','cal.editTitle':'Edit session','cal.save':'Save',
   'cal.moveTitle':'Move session','cal.copyTitle':'Copy session',
   'cal.needsMigration':'Run migration 080 in Supabase to turn the calendar on.',
+  'load.title':'Training load','load.thisWeek':'this week','load.baseline':'4-week avg','load.fromStrength':'from strength',
+  'load.note':'Load = minutes × effort, the same unit for strength, cardio and HIIT. It measures systemic load, not muscle damage — that one is on the Body screen.',
+  'load.ok':'Your load is in range: {ratio}× your 4-week average. Keep going.',
+  'load.high':'You are {up}% above your 4-week average. Past 1.5× is where injuries show up — cut volume this week or take a deload.',
+  'load.low':'You are {pct}% under your 4-week average. If this is not a deliberate deload, you are losing adaptation.',
+  'load.deloadOk':'The deload is working: {pct}% less than the weeks before it.',
+  'load.deloadWeak':'This is a deload week but you are only {pct}% below your average. A real deload drops 30–40%.',
+  'load.none':'Not enough history to compare yet. Log a couple of weeks.',
   'home.today':'Today','home.restDay':'Rest day','home.restBody':'Nothing scheduled, and that is the plan.',
   'home.allDone':'Done for today','home.allDoneBody':'{n} sessions finished. Enjoy it.',
   'home.nothingToday':'Nothing planned today','home.nothingTodayBody':'Open the calendar to add something.',
@@ -1129,6 +1142,14 @@ es:{
   'cal.addTitle':'Agregar al {date}','cal.editTitle':'Editar sesión','cal.save':'Guardar',
   'cal.moveTitle':'Mover sesión','cal.copyTitle':'Copiar sesión',
   'cal.needsMigration':'Corre la migración 080 en Supabase para encender el calendario.',
+  'load.title':'Carga de entrenamiento','load.thisWeek':'esta semana','load.baseline':'promedio 4 sem','load.fromStrength':'es fuerza',
+  'load.note':'Carga = minutos × esfuerzo, la misma unidad para fuerza, cardio y HIIT. Mide carga sistémica, no daño muscular — esa está en Cuerpo.',
+  'load.ok':'Tu carga va en rango: {ratio}× tu promedio de 4 semanas. Sigue así.',
+  'load.high':'Llevas {up}% arriba de tu promedio de 4 semanas. Pasando 1.5× es donde aparecen las lesiones — baja el volumen esta semana o mete una descarga.',
+  'load.low':'Vas {pct}% por debajo de tu promedio de 4 semanas. Si no es una descarga a propósito, estás perdiendo adaptación.',
+  'load.deloadOk':'La descarga está funcionando: {pct}% menos que las semanas anteriores.',
+  'load.deloadWeak':'Es semana de descarga pero llevas solo {pct}% abajo de tu promedio. Una descarga de verdad baja 30–40%.',
+  'load.none':'Todavía no hay historial suficiente para comparar. Registra un par de semanas.',
   'home.today':'Hoy','home.restDay':'Día de descanso','home.restBody':'Nada programado, y eso es el plan.',
   'home.allDone':'Listo por hoy','home.allDoneBody':'{n} sesiones terminadas. Disfrútalo.',
   'home.nothingToday':'Nada planeado hoy','home.nothingTodayBody':'Abre el calendario para agregar algo.',
@@ -3201,9 +3222,52 @@ function progressSummaryTab(){
     </section>`;
 }
 
+// La pestaña se llamaba "Carga" y no tenía ninguna métrica de carga: enseñaba tarjetas de
+// actividades y de peso corporal. Esto es lo que contesta la pregunta del título.
+//
+// Una frase primero y los números después, a propósito. Un cociente de 1.62 no le dice a nadie
+// qué hacer; "llevas 62% más que tu promedio, baja el volumen o mete descarga" sí.
+function loadCard(){
+  const refs={maxHeartRate:state.skandiSettings?.max_heart_rate||null,hrZones:state.skandiSettings?.hr_zone_bounds||null};
+  const series=SkandiLoad.dailySeries({
+    sessions:state.sessions, sets:state.sets, activities:state.externalActivities,
+    userId:state.user.id, refs, days:SkandiLoad.CHRONIC_DAYS*2
+  });
+  const info=trainingBlockWeekInfo();
+  const r=SkandiLoad.readout({series,isDeloadWeek:!!info?.deload});
+  const weeks=r.weeks.slice(-6);
+  const peak=Math.max(1,...weeks.map(w=>w.load));
+  const tone={high:'var(--pink)',low:'var(--amber)',deloadWeak:'var(--amber)',
+              deload:'var(--green)',ok:'var(--green)',none:'var(--muted)'}[r.level];
+  return `<section class="card">
+    <div class="row"><h2>${esc(t('load.title'))}</h2>
+      ${r.ratio?`<span class="pill" style="color:${tone}">${r.ratio.toFixed(2)}</span>`:''}</div>
+    <p style="margin-top:10px">${esc(t(r.key,{
+      pct:Math.abs(r.dropPct??0),
+      up:r.ratio?Math.round((r.ratio-1)*100):0,
+      ratio:r.ratio?r.ratio.toFixed(2):'—'
+    }))}</p>
+    ${weeks.length>1?`<div class="load-bars">
+      ${weeks.map((w,i)=>{
+        const last=i===weeks.length-1;
+        const h=Math.max(3,Math.round(w.load/peak*54));
+        return `<div class="load-bar" title="${w.load}">
+          <i style="height:${h}px;background:${last?tone:'var(--panel3)'}"></i>
+          <small>${esc(keyToDate(w.weekStart).toLocaleDateString(LANG,{day:'numeric',month:'short'}))}</small>
+        </div>`;
+      }).join('')}
+    </div>`:''}
+    <div class="row" style="margin-top:12px;gap:8px">
+      <div class="stat" style="flex:1;padding:10px 6px"><strong style="font-size:16px">${r.currentWeek}</strong><small style="font-size:10px">${esc(t('load.thisWeek'))}</small></div>
+      <div class="stat" style="flex:1;padding:10px 6px"><strong style="font-size:16px">${r.baselineWeek??'—'}</strong><small style="font-size:10px">${esc(t('load.baseline'))}</small></div>
+      <div class="stat" style="flex:1;padding:10px 6px"><strong style="font-size:16px">${weeks.length?Math.round(weeks[weeks.length-1].strength/Math.max(1,weeks[weeks.length-1].load)*100):0}%</strong><small style="font-size:10px">${esc(t('load.fromStrength'))}</small></div>
+    </div>
+    <p class="form-note" style="margin-top:10px">${esc(t('load.note'))}</p>
+  </section>`;
+}
 function progressLoadTab(){
   return `
-    <p class="muted" style="margin-bottom:4px">${esc(t('progress.loadIntro'))}</p>
+    ${loadCard()}
     ${crossTrainingCardHtml()}
     ${muscleLoadCard(t('recovery.title'))}
     ${bodyweightCardHtml()}
@@ -3895,12 +3959,29 @@ function weeklyRecap(){
 }
 
 // Compact "needs attention" banner for Home — full detail (marks, history) lives in Progress.
+// La carga solo llega a Inicio cuando hay algo que hacer con ella. Un cociente en rango no
+// necesita anunciarse: enseñar un número que no pide ninguna acción es lo que convierte un
+// aviso en decoración, y a la tercera semana nadie lo lee.
+function loadWarning(){
+  if(!state.sessions.length) return null;
+  const refs={maxHeartRate:state.skandiSettings?.max_heart_rate||null,hrZones:state.skandiSettings?.hr_zone_bounds||null};
+  const series=SkandiLoad.dailySeries({
+    sessions:state.sessions, sets:state.sets, activities:state.externalActivities,
+    userId:state.user.id, refs, days:SkandiLoad.CHRONIC_DAYS*2
+  });
+  const r=SkandiLoad.readout({series,isDeloadWeek:!!trainingBlockWeekInfo()?.deload});
+  if(r.level!=='high'&&r.level!=='deloadWeak') return null;
+  return t(r.key,{pct:Math.abs(r.dropPct??0),up:r.ratio?Math.round((r.ratio-1)*100):0,ratio:r.ratio?r.ratio.toFixed(2):'—'});
+}
+
 function attentionBannerHtml(){
   const stalls=progressionStallWarnings();
   const sore=repeatedSorenessWarnings();
-  if(!stalls.length&&!sore.length) return '';
+  const load=loadWarning();
+  if(!stalls.length&&!sore.length&&!load) return '';
   return `<section class="card click-card" style="border-color:rgba(212,72,84,.30);background:#fff7f7" onclick="setView('progress')">
     <div class="eyebrow" style="color:var(--pink)">${esc(t('progress.needsAttention'))}</div>
+    ${load?`<p style="margin-top:8px">${esc(load)}</p>`:''}
     ${sore.map(w=>`<p style="margin-top:8px">${t('progress.soreWarn',{area:esc(w.area),n:w.count})}</p>`).join('')}
     ${stalls.map(w=>`<p style="margin-top:8px">${t('progress.stallWarn',{name:esc(w.exercise.name),marks:esc(w.marks.map(m=>w.exercise.log_mode==='seconds'?fmtSec(m):m+' '+t('common.reps')).join(' → '))})}</p>`).join('')}
   </section>`;
