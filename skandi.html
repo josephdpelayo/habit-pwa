@@ -8,15 +8,15 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="Skandi Fit">
 <meta name="application-name" content="Skandi Fit">
-<link rel="manifest" href="/skandi-manifest.json?v=20260822-20">
-<link rel="apple-touch-icon" sizes="180x180" href="/icons/skandi-180.png?v=20260822-20">
-<link rel="icon" type="image/png" sizes="192x192" href="/icons/skandi-192.png?v=20260822-20">
+<link rel="manifest" href="/skandi-manifest.json?v=20260822-21">
+<link rel="apple-touch-icon" sizes="180x180" href="/icons/skandi-180.png?v=20260822-21">
+<link rel="icon" type="image/png" sizes="192x192" href="/icons/skandi-192.png?v=20260822-21">
 <title>Skandi Fit</title>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="/skandi-recovery.js?v=20260822-20"></script>
-<script src="/body-figure.js?v=20260822-20"></script>
-<script src="/skandi-nutrition.js?v=20260822-20"></script>
-<script src="/skandi-load.js?v=20260822-20"></script>
+<script src="/skandi-recovery.js?v=20260822-21"></script>
+<script src="/body-figure.js?v=20260822-21"></script>
+<script src="/skandi-nutrition.js?v=20260822-21"></script>
+<script src="/skandi-load.js?v=20260822-21"></script>
 <style>
 :root{
   --bg:#eef4f8;
@@ -488,7 +488,7 @@ textarea.field{min-height:112px;text-align:left;resize:vertical}
 // Versión compartida con app.html (APP_VERSION) y sw.js (CACHE_VERSION): un solo service
 // worker sirve las dos apps, así que una sola cadena las invalida a las dos. Al cambiarla
 // hay que actualizarla también en los ?v= del <head>, en index.html y en los dos manifests.
-const SKANDI_VERSION='20260822-20';
+const SKANDI_VERSION='20260822-21';
 const SUPABASE_URL='https://pmpjteuqjusbiduevbwq.supabase.co';
 const SUPABASE_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBtcGp0ZXVxanVzYmlkdWV2YndxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc2OTI1NjUsImV4cCI6MjA5MzI2ODU2NX0.XbMzZoo2yqtrD8znLnyo_1zDfrdJAvAPj1lqGOyXnLw';
 const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
@@ -655,6 +655,7 @@ en:{
   'load.deloadOk':'The deload is working: {pct}% less than the weeks before it.',
   'load.deloadWeak':'This is a deload week but you are only {pct}% below your average. A real deload drops 30–40%.',
   'load.none':'Not enough history to compare yet. Log a couple of weeks.',
+  'load.building':'{weeks} of 4 weeks logged. The acute/chronic ratio needs a month of history before it means anything — until then the bars below are the honest read.',
   'home.today':'Today','home.restDay':'Rest day','home.restBody':'Nothing scheduled, and that is the plan.',
   'home.allDone':'Done for today','home.allDoneBody':'{n} sessions finished. Enjoy it.',
   'home.nothingToday':'Nothing planned today','home.nothingTodayBody':'Open the calendar to add something.',
@@ -1150,6 +1151,7 @@ es:{
   'load.deloadOk':'La descarga está funcionando: {pct}% menos que las semanas anteriores.',
   'load.deloadWeak':'Es semana de descarga pero llevas solo {pct}% abajo de tu promedio. Una descarga de verdad baja 30–40%.',
   'load.none':'Todavía no hay historial suficiente para comparar. Registra un par de semanas.',
+  'load.building':'Llevas {weeks} de 4 semanas registradas. El cociente agudo/crónico necesita un mes de historial para significar algo — mientras tanto las barras de abajo son la lectura honesta.',
   'home.today':'Hoy','home.restDay':'Día de descanso','home.restBody':'Nada programado, y eso es el plan.',
   'home.allDone':'Listo por hoy','home.allDoneBody':'{n} sesiones terminadas. Disfrútalo.',
   'home.nothingToday':'Nada planeado hoy','home.nothingTodayBody':'Abre el calendario para agregar algo.',
@@ -3245,7 +3247,8 @@ function loadCard(){
     <p style="margin-top:10px">${esc(t(r.key,{
       pct:Math.abs(r.dropPct??0),
       up:r.ratio?Math.round((r.ratio-1)*100):0,
-      ratio:r.ratio?r.ratio.toFixed(2):'—'
+      ratio:r.ratio?r.ratio.toFixed(2):'—',
+      weeks:r.weeksLogged
     }))}</p>
     ${weeks.length>1?`<div class="load-bars">
       ${weeks.map((w,i)=>{
@@ -3259,7 +3262,7 @@ function loadCard(){
     </div>`:''}
     <div class="row" style="margin-top:12px;gap:8px">
       <div class="stat" style="flex:1;padding:10px 6px"><strong style="font-size:16px">${r.currentWeek}</strong><small style="font-size:10px">${esc(t('load.thisWeek'))}</small></div>
-      <div class="stat" style="flex:1;padding:10px 6px"><strong style="font-size:16px">${r.baselineWeek??'—'}</strong><small style="font-size:10px">${esc(t('load.baseline'))}</small></div>
+      <div class="stat" style="flex:1;padding:10px 6px"><strong style="font-size:16px">${r.level==='building'?'—':(r.baselineWeek??'—')}</strong><small style="font-size:10px">${esc(t('load.baseline'))}</small></div>
       <div class="stat" style="flex:1;padding:10px 6px"><strong style="font-size:16px">${weeks.length?Math.round(weeks[weeks.length-1].strength/Math.max(1,weeks[weeks.length-1].load)*100):0}%</strong><small style="font-size:10px">${esc(t('load.fromStrength'))}</small></div>
     </div>
     <p class="form-note" style="margin-top:10px">${esc(t('load.note'))}</p>
@@ -3971,7 +3974,7 @@ function loadWarning(){
   });
   const r=SkandiLoad.readout({series,isDeloadWeek:!!trainingBlockWeekInfo()?.deload});
   if(r.level!=='high'&&r.level!=='deloadWeak') return null;
-  return t(r.key,{pct:Math.abs(r.dropPct??0),up:r.ratio?Math.round((r.ratio-1)*100):0,ratio:r.ratio?r.ratio.toFixed(2):'—'});
+  return t(r.key,{pct:Math.abs(r.dropPct??0),up:r.ratio?Math.round((r.ratio-1)*100):0,ratio:r.ratio?r.ratio.toFixed(2):'—',weeks:r.weeksLogged});
 }
 
 function attentionBannerHtml(){

@@ -114,16 +114,35 @@ function dailySeries(opts){
 
 const sumLoad = rows => rows.reduce((a, r) => a + r.load, 0);
 
+// Días transcurridos desde el primer entrenamiento registrado. No es lo mismo que el largo de
+// la serie: la serie siempre trae 28 o 56 días, aunque el usuario lleve tres.
+function historyDays(series){
+  const first = series.findIndex(r => r.load > 0);
+  return first === -1 ? 0 : series.length - first;
+}
+
 // Aguda (7 días) contra crónica (el promedio semanal de 28 días). La crónica se expresa por
 // semana y no por día para que el cociente sea comparable con lo que publica la literatura.
+//
+// Y NO se calcula con menos de 28 días de historial. Con una sola semana registrada, esa
+// semana se reparte entre cuatro y el cociente sale 4.0: la app decía "llevas 300% arriba de
+// tu promedio" cuando no había promedio del cual estar arriba. Un número aritméticamente
+// correcto y completamente falso es peor que ningún número — manda a descargar a alguien que
+// apenas empezó.
 function acwr(series){
   const acute = sumLoad(series.slice(-ACUTE_DAYS));
+  const history = historyDays(series);
+  if (history < CHRONIC_DAYS) {
+    return { acute, chronic: null, ratio: null, history, ready: false };
+  }
   const chronicTotal = sumLoad(series.slice(-CHRONIC_DAYS));
-  const chronic = chronicTotal / (Math.min(series.length, CHRONIC_DAYS) / ACUTE_DAYS);
+  const chronic = chronicTotal / (CHRONIC_DAYS / ACUTE_DAYS);
   return {
     acute,
     chronic: Math.round(chronic),
     ratio: chronic > 0 ? Math.round((acute / chronic) * 100) / 100 : null,
+    history,
+    ready: true,
   };
 }
 
@@ -154,7 +173,10 @@ function readout(opts){
   const drop = baseline ? (baseline - (current ? current.load : 0)) / baseline : null;
 
   let level = 'ok', key = 'load.ok';
-  if (!ratios.ratio) { level = 'none'; key = 'load.none'; }
+  // Sin 4 semanas de historial no hay comparación posible, y decirlo es más útil que inventar
+  // un cociente. Las barras por semana sí sirven desde el primer día: enseñan el volumen real.
+  if (!ratios.ready) { level = 'building'; key = 'load.building'; }
+  else if (!ratios.ratio) { level = 'none'; key = 'load.none'; }
   else if (isDeloadWeek) {
     level = drop !== null && drop >= DELOAD_DROP ? 'deload' : 'deloadWeak';
     key = level === 'deload' ? 'load.deloadOk' : 'load.deloadWeak';
@@ -168,6 +190,8 @@ function readout(opts){
     currentWeek: current ? current.load : 0,
     baselineWeek: baseline === null ? null : Math.round(baseline),
     dropPct: drop === null ? null : Math.round(drop * 100),
+    historyDays: ratios.history,
+    weeksLogged: Math.ceil(ratios.history / 7),
     level,
     key,
   };
@@ -175,7 +199,7 @@ function readout(opts){
 
 const api = {
   ACUTE_DAYS, CHRONIC_DAYS, ACWR_LOW, ACWR_HIGH, DELOAD_DROP,
-  localDay, strengthRpe, sessionLoad, activityLoad, dailySeries, acwr, weeklyLoads, readout,
+  localDay, strengthRpe, sessionLoad, activityLoad, dailySeries, historyDays, acwr, weeklyLoads, readout,
 };
 
 if (typeof module !== 'undefined' && module.exports) module.exports = api;
