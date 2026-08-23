@@ -8,16 +8,16 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="Skandi Fit">
 <meta name="application-name" content="Skandi Fit">
-<link rel="manifest" href="/skandi-manifest.json?v=20260823-4">
-<link rel="apple-touch-icon" sizes="180x180" href="/icons/skandi-180.png?v=20260823-4">
-<link rel="icon" type="image/png" sizes="192x192" href="/icons/skandi-192.png?v=20260823-4">
+<link rel="manifest" href="/skandi-manifest.json?v=20260823-5">
+<link rel="apple-touch-icon" sizes="180x180" href="/icons/skandi-180.png?v=20260823-5">
+<link rel="icon" type="image/png" sizes="192x192" href="/icons/skandi-192.png?v=20260823-5">
 <title>Skandi Fit</title>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="/skandi-recovery.js?v=20260823-4"></script>
-<script src="/body-figure.js?v=20260823-4"></script>
-<script src="/skandi-nutrition.js?v=20260823-4"></script>
-<script src="/skandi-load.js?v=20260823-4"></script>
-<script src="/skandi-brief.js?v=20260823-4"></script>
+<script src="/skandi-recovery.js?v=20260823-5"></script>
+<script src="/body-figure.js?v=20260823-5"></script>
+<script src="/skandi-nutrition.js?v=20260823-5"></script>
+<script src="/skandi-load.js?v=20260823-5"></script>
+<script src="/skandi-brief.js?v=20260823-5"></script>
 <style>
 :root{
   --bg:#eef4f8;
@@ -159,12 +159,14 @@ p{color:var(--muted);line-height:1.45;margin:0}
 .pick b{font-weight:1000}
 .pick small{color:var(--muted);font-weight:900}
 .add-fab{position:fixed;right:max(14px,calc(50% - 396px));bottom:calc(84px + env(safe-area-inset-bottom));width:60px;height:60px;border-radius:50%;background:var(--dof-navy);color:#fff;display:grid;place-items:center;box-shadow:0 16px 32px rgba(1,36,86,.34);z-index:19}
-.item-row{display:grid;grid-template-columns:26px 1fr 74px;gap:9px;align-items:center;padding:9px 0;border-top:1px solid var(--line)}
+.item-row{display:grid;grid-template-columns:26px 1fr 92px;gap:9px;align-items:center;padding:9px 0;border-top:1px solid var(--line)}
 .item-row:first-of-type{border-top:0}
 .item-row .lbl{min-width:0}
 .item-row .lbl strong{display:block;font-size:14px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .item-row .lbl small{color:var(--muted);font-size:11.5px}
-.item-row input.g{width:74px;padding:8px;text-align:right;border:1px solid var(--line);border-radius:9px;background:#fff;font-weight:900}
+.item-row .g-wrap{display:flex;align-items:center;gap:5px;justify-content:flex-end}
+.item-row .g-wrap small{color:var(--muted);font-weight:800;font-size:11.5px;flex:0 0 auto}
+.item-row input.g{width:64px;padding:8px;text-align:right;border:1px solid var(--line);border-radius:9px;background:#fff;font-weight:900}
 .item-row.off{opacity:.45}
 .item-row.fat{background:rgba(240,162,46,.07);border-radius:9px;padding:9px 7px;border-top:0;margin-top:6px}
 .conf{display:inline-block;width:7px;height:7px;border-radius:50%;margin-right:5px;vertical-align:middle}
@@ -514,7 +516,7 @@ textarea.field{min-height:112px;text-align:left;resize:vertical}
 // Versión compartida con app.html (APP_VERSION) y sw.js (CACHE_VERSION): un solo service
 // worker sirve las dos apps, así que una sola cadena las invalida a las dos. Al cambiarla
 // hay que actualizarla también en los ?v= del <head>, en index.html y en los dos manifests.
-const SKANDI_VERSION='20260823-4';
+const SKANDI_VERSION='20260823-5';
 const SUPABASE_URL='https://pmpjteuqjusbiduevbwq.supabase.co';
 const SUPABASE_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBtcGp0ZXVxanVzYmlkdWV2YndxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc2OTI1NjUsImV4cCI6MjA5MzI2ODU2NX0.XbMzZoo2yqtrD8znLnyo_1zDfrdJAvAPj1lqGOyXnLw';
 const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
@@ -565,7 +567,7 @@ en:{
   'food.takePhoto':'Choose photo','food.analyze':'Analyze','food.uploading':'Uploading…',
   'food.barcodePh':'Barcode number','food.scan':'Scan','food.scanning':'Point at the barcode',
   'food.noScanner':'Your browser cannot scan. Type the number.',
-  'food.grams':'Grams','food.portion':'Portion','food.portionOf':'How much of {name}?',
+  'food.grams':'Grams','food.gramsShort':'g','food.portion':'Portion','food.portionOf':'How much of {name}?',
   'food.serving':'1 serving = {g} g','food.addToMeal':'Add',
   'food.items':'Items','food.cookingFat':'Cooking fat','food.cookingFatHint':'Uncheck it if you cooked without oil.',
   'food.saveAsDish':'Save as dish','food.dishName':'Dish name','food.dishSaved':'Saved as “{name}”',
@@ -1106,7 +1108,7 @@ es:{
   'food.takePhoto':'Elegir foto','food.analyze':'Analizar','food.uploading':'Subiendo…',
   'food.barcodePh':'Número del código','food.scan':'Escanear','food.scanning':'Apunta al código de barras',
   'food.noScanner':'Tu navegador no puede escanear. Escribe el número.',
-  'food.grams':'Gramos','food.portion':'Porción','food.portionOf':'¿Cuánto de {name}?',
+  'food.grams':'Gramos','food.gramsShort':'g','food.portion':'Porción','food.portionOf':'¿Cuánto de {name}?',
   'food.serving':'1 porción = {g} g','food.addToMeal':'Agregar',
   'food.items':'Alimentos','food.cookingFat':'Aceite de cocción','food.cookingFatHint':'Quítale la palomita si cocinaste sin aceite.',
   'food.saveAsDish':'Guardar como platillo','food.dishName':'Nombre del platillo','food.dishSaved':'Guardado como «{name}»',
@@ -7242,7 +7244,8 @@ function fuelPlanHtml(sessions,weightKg,rec){
 function suggestionCard(){
   return `<section class="card">
     <div class="row"><div><h2>${esc(t('food.suggestTitle'))}</h2><p class="muted">${esc(t('food.suggestHint'))}</p></div></div>
-    <button class="btn primary" style="width:100%;margin-top:10px" onclick="openMealSuggestion()">${esc(t('food.suggestBtn'))} · ${esc(t('food.aiLeft',{n:aiLeft()}))}</button>
+    <button class="btn primary" style="width:100%;margin-top:10px" onclick="openMealSuggestion()">${esc(t('food.suggestBtn'))}</button>
+    <p class="muted" style="font-size:11px;margin-top:8px;text-align:center">${esc(t('food.aiLeft',{n:aiLeft()}))}</p>
   </section>`;
 }
 
@@ -7789,7 +7792,7 @@ function openDishLog(dishId){
   $('modal').classList.add('show');
   $('modalCard').innerHTML=`
     <div class="row"><h1>${esc(dish.name)}</h1><button class="x" onclick="closeModal()" aria-label="${esc(t('common.close'))}">${icon('close',20)}</button></div>
-    <p class="muted">${Math.round(totals.kcal)} kcal · P ${Math.round(totals.protein_g)} · C ${Math.round(totals.carbs_g)} · G ${Math.round(totals.fat_g)}</p>
+    <p class="muted">${Math.round(totals.kcal)} kcal · P ${Math.round(totals.protein_g)}g · C ${Math.round(totals.carbs_g)}g · G ${Math.round(totals.fat_g)}g</p>
     <label class="eyebrow">${esc(t('food.mealType'))}</label>
     <select id="dishMealType" class="field left">${MEAL_TYPES.map(v=>`<option value="${v}" ${v===guessMealType()?'selected':''}>${esc(mealTypeLabel(v))}</option>`).join('')}</select>
     <label class="eyebrow">${esc(t('food.when'))}</label>
@@ -7872,7 +7875,7 @@ function openFoodPortion(foodId,mealId){
 function previewPortion(foodId){
   const food=state.foods.find(f=>f.id===foodId);
   const scaled=SkandiNutrition.scaleFood(food,Number($('portionGrams').value));
-  $('portionPreview').textContent=`${Math.round(scaled.kcal)} kcal · P ${scaled.protein_g} · C ${scaled.carbs_g} · G ${scaled.fat_g}`;
+  $('portionPreview').textContent=`${Math.round(scaled.kcal)} kcal · P ${scaled.protein_g}g · C ${scaled.carbs_g}g · G ${scaled.fat_g}g`;
 }
 
 async function addFoodPortion(foodId,mealId){
@@ -7905,13 +7908,36 @@ async function addFoodPortion(foodId,mealId){
 
 // ---- Alta: código de barras (cero tokens, datos del empaque) ----
 
-function openBarcode(){
-  const canScan=typeof window.BarcodeDetector!=='undefined';
+// Chrome/Android trae BarcodeDetector nativo; Safari/WKWebView (el iPhone de la tripulación)
+// nunca lo ha implementado. ZXing decodifica el video cuadro a cuadro en JS puro y es el único
+// camino real de cámara ahí. Se carga solo cuando hace falta — 441 KB que nadie paga si nunca
+// escanea — y se cachea para no volver a pedirlo la próxima vez.
+let zxingLoadPromise=null;
+function loadZXing(){
+  if(window.ZXingBrowser) return Promise.resolve();
+  if(zxingLoadPromise) return zxingLoadPromise;
+  zxingLoadPromise=new Promise((resolve,reject)=>{
+    const s=document.createElement('script');
+    s.src='https://cdn.jsdelivr.net/npm/@zxing/browser@0.2.1/umd/zxing-browser.min.js';
+    s.onload=()=>resolve();
+    s.onerror=()=>{zxingLoadPromise=null;reject(new Error('scanner script failed'));};
+    document.head.appendChild(s);
+  });
+  return zxingLoadPromise;
+}
+
+// mealId: si se abrió desde una comida ya iniciada ("+ Código de barras" en su detalle), lo
+// escaneado se agrega ahí en vez de crear una comida nueva — es lo que deja armar un platillo
+// escaneando varias cosas seguidas.
+function openBarcode(mealId=null){
+  bcMealId=mealId;
+  const canScan=typeof window.BarcodeDetector!=='undefined'
+    ||!!(navigator.mediaDevices&&navigator.mediaDevices.getUserMedia);
   $('modal').classList.add('show');
   $('modalCard').innerHTML=`
     <div class="row"><h1>${esc(t('food.byBarcode'))}</h1><button class="x" onclick="closeBarcode()" aria-label="${esc(t('common.close'))}">${icon('close',20)}</button></div>
     ${canScan?`<video id="bcVideo" playsinline muted style="width:100%;border-radius:12px;background:#000;max-height:260px;object-fit:cover"></video>
-      <p class="muted" style="margin-top:8px">${esc(t('food.scanning'))}</p>`
+      <p class="muted" style="margin-top:8px" id="bcScanHint">${esc(t('food.scanning'))}</p>`
       :`<p class="muted">${esc(t('food.noScanner'))}</p>`}
     <label class="eyebrow">${esc(t('food.barcodePh'))}</label>
     <input id="bcNumber" class="field" type="text" inputmode="numeric" autocomplete="off" placeholder="7501000673209">
@@ -7919,29 +7945,55 @@ function openBarcode(){
   if(canScan) startBarcodeScan();
 }
 
-let bcStream=null,bcTimer=null;
+let bcStream=null,bcTimer=null,bcMealId=null,bcZxingControls=null;
 
 async function startBarcodeScan(){
+  if(typeof window.BarcodeDetector!=='undefined'){
+    try{
+      const detector=new window.BarcodeDetector({formats:['ean_13','ean_8','upc_a','upc_e','code_128']});
+      bcStream=await navigator.mediaDevices.getUserMedia({video:{facingMode:'environment'}});
+      const video=$('bcVideo');
+      if(!video){stopBarcodeScan();return;}
+      video.srcObject=bcStream;
+      await video.play();
+      bcTimer=setInterval(async()=>{
+        if(!$('bcVideo')) return stopBarcodeScan();
+        try{
+          const codes=await detector.detect(video);
+          if(codes.length&&codes[0].rawValue){
+            $('bcNumber').value=codes[0].rawValue;
+            stopBarcodeScan();
+            lookupBarcode();
+          }
+        }catch(e){/* un frame ilegible no es un error que valga interrumpir */}
+      },600);
+    }catch(e){
+      // Sin permiso de cámara el camino manual sigue funcionando: no hay nada que avisar.
+      stopBarcodeScan();
+    }
+    return;
+  }
+  // Sin BarcodeDetector (Safari): ZXing por getUserMedia. decodeFromVideoDevice ya maneja el
+  // stream y el <video> por su cuenta, a diferencia del camino nativo de arriba.
   try{
-    const detector=new window.BarcodeDetector({formats:['ean_13','ean_8','upc_a','upc_e','code_128']});
-    bcStream=await navigator.mediaDevices.getUserMedia({video:{facingMode:'environment'}});
+    await loadZXing();
     const video=$('bcVideo');
-    if(!video){stopBarcodeScan();return;}
-    video.srcObject=bcStream;
-    await video.play();
-    bcTimer=setInterval(async()=>{
-      if(!$('bcVideo')) return stopBarcodeScan();
-      try{
-        const codes=await detector.detect(video);
-        if(codes.length&&codes[0].rawValue){
-          $('bcNumber').value=codes[0].rawValue;
-          stopBarcodeScan();
-          lookupBarcode();
-        }
-      }catch(e){/* un frame ilegible no es un error que valga interrumpir */}
-    },600);
+    if(!video||!window.ZXingBrowser) return;
+    const reader=new ZXingBrowser.BrowserMultiFormatReader();
+    reader.possibleFormats=[
+      ZXingBrowser.BarcodeFormat.EAN_13,ZXingBrowser.BarcodeFormat.EAN_8,
+      ZXingBrowser.BarcodeFormat.UPC_A,ZXingBrowser.BarcodeFormat.UPC_E,
+      ZXingBrowser.BarcodeFormat.CODE_128
+    ];
+    bcZxingControls=await reader.decodeFromVideoDevice(undefined,video,(result)=>{
+      if(!result||!$('bcVideo')) return;
+      $('bcNumber').value=result.getText();
+      stopBarcodeScan();
+      lookupBarcode();
+    });
   }catch(e){
-    // Sin permiso de cámara el camino manual sigue funcionando: no hay nada que avisar.
+    // Sin permiso de cámara, o el CDN no respondió: el número a mano sigue funcionando.
+    if($('bcScanHint')) $('bcScanHint').textContent=t('food.noScanner');
     stopBarcodeScan();
   }
 }
@@ -7949,16 +8001,19 @@ async function startBarcodeScan(){
 function stopBarcodeScan(){
   if(bcTimer){clearInterval(bcTimer);bcTimer=null;}
   if(bcStream){bcStream.getTracks().forEach(tr=>tr.stop());bcStream=null;}
+  if(bcZxingControls){ try{bcZxingControls.stop();}catch(e){} bcZxingControls=null; }
 }
 
 function closeBarcode(){
   stopBarcodeScan();
+  bcMealId=null;
   closeModal();
 }
 
 async function lookupBarcode(){
   const code=($('bcNumber').value||'').replace(/\D/g,'');
   if(code.length<8) return alert(t('food.errNoInput'));
+  const mealId=bcMealId;
   stopBarcodeScan();
   try{
     const {data:{session}}=await sb.auth.getSession();
@@ -7971,7 +8026,7 @@ async function lookupBarcode(){
     if(!res.ok||!body.food) return alert(body.message||t('food.noMatches'));
     await loadNutrition();
     // El escaneo da el producto; la porción la pones tú, que es lo único que el código no sabe.
-    if(body.food.id) openFoodPortion(body.food.id,null);
+    if(body.food.id) openFoodPortion(body.food.id,mealId);
     else alert(t('food.noMatches'));
   }catch(e){
     alert(e.message||String(e));
@@ -8018,8 +8073,9 @@ function openMealDetail(mealId){
     ${rest.map(i=>itemRowHtml(i)).join('')||empty(t('food.empty'))}
     ${fat.map(i=>itemRowHtml(i,true)).join('')}
     ${fat.length?`<p class="muted" style="font-size:12px;margin-top:6px">${esc(t('food.cookingFatHint'))}</p>`:''}
-    <p class="muted" style="margin-top:10px">P ${Math.round(totals.protein_g)} · C ${Math.round(totals.carbs_g)} · G ${Math.round(totals.fat_g)}</p>
+    <p class="muted" style="margin-top:10px">P ${Math.round(totals.protein_g)}g · C ${Math.round(totals.carbs_g)}g · G ${Math.round(totals.fat_g)}g</p>
     <button class="btn" style="width:100%;margin-top:10px" onclick="openFoodPicker('${mealId}')">${icon('plus',18)} ${esc(t('food.byFood'))}</button>
+    <button class="btn" style="width:100%;margin-top:8px" onclick="openBarcode('${mealId}')">${icon('image',18)} ${esc(t('food.byBarcode'))}</button>
     <button class="btn" style="width:100%;margin-top:8px" onclick="promptSaveAsDish('${mealId}')">${icon('check',18)} ${esc(t('food.saveAsDish'))}</button>
     <button class="btn" style="width:100%;margin-top:8px;color:var(--pink)" onclick="deleteMeal('${mealId}')">${icon('trash',18)} ${esc(t('food.delete'))}</button>`;
 }
@@ -8029,9 +8085,9 @@ function itemRowHtml(item,isFat=false){
   return `<div class="item-row ${item.included?'':'off'} ${isFat?'fat':''}">
     <input type="checkbox" ${item.included?'checked':''} onchange="toggleMealItem('${item.id}',this.checked)" aria-label="${esc(item.label)}">
     <span class="lbl"><strong>${conf}${esc(isFat?t('food.cookingFat'):item.label)}</strong>
-      <small>${Math.round(item.kcal)} kcal · P ${item.protein_g} · C ${item.carbs_g} · G ${item.fat_g}</small></span>
-    <input class="g" type="number" min="0" max="5000" inputmode="numeric" value="${item.grams==null?'':Math.round(item.grams)}"
-      onchange="updateItemGrams('${item.id}',this.value)" aria-label="${esc(t('food.grams'))}">
+      <small>${Math.round(item.kcal)} kcal · P ${item.protein_g}g · C ${item.carbs_g}g · G ${item.fat_g}g</small></span>
+    <span class="g-wrap"><input class="g" type="number" min="0" max="5000" inputmode="numeric" value="${item.grams==null?'':Math.round(item.grams)}"
+      onchange="updateItemGrams('${item.id}',this.value)" aria-label="${esc(t('food.grams'))}"><small>${esc(t('food.gramsShort'))}</small></span>
   </div>`;
 }
 
