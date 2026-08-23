@@ -8,16 +8,16 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="Skandi Fit">
 <meta name="application-name" content="Skandi Fit">
-<link rel="manifest" href="/skandi-manifest.json?v=20260822-23">
-<link rel="apple-touch-icon" sizes="180x180" href="/icons/skandi-180.png?v=20260822-23">
-<link rel="icon" type="image/png" sizes="192x192" href="/icons/skandi-192.png?v=20260822-23">
+<link rel="manifest" href="/skandi-manifest.json?v=20260823-2">
+<link rel="apple-touch-icon" sizes="180x180" href="/icons/skandi-180.png?v=20260823-2">
+<link rel="icon" type="image/png" sizes="192x192" href="/icons/skandi-192.png?v=20260823-2">
 <title>Skandi Fit</title>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="/skandi-recovery.js?v=20260822-23"></script>
-<script src="/body-figure.js?v=20260822-23"></script>
-<script src="/skandi-nutrition.js?v=20260822-23"></script>
-<script src="/skandi-load.js?v=20260822-23"></script>
-<script src="/skandi-brief.js?v=20260822-23"></script>
+<script src="/skandi-recovery.js?v=20260823-2"></script>
+<script src="/body-figure.js?v=20260823-2"></script>
+<script src="/skandi-nutrition.js?v=20260823-2"></script>
+<script src="/skandi-load.js?v=20260823-2"></script>
+<script src="/skandi-brief.js?v=20260823-2"></script>
 <style>
 :root{
   --bg:#eef4f8;
@@ -105,10 +105,33 @@ p{color:var(--muted);line-height:1.45;margin:0}
 .btn.danger{color:var(--pink)}
 .btn.small{padding:9px 12px;border-radius:10px;font-size:14px}
 .tabs{position:fixed;left:0;right:0;bottom:0;background:rgba(255,255,255,.88);backdrop-filter:blur(18px);border-top:1px solid rgba(1,36,86,.10);z-index:20;box-shadow:0 -16px 34px rgba(1,36,86,.10)}
-.tabs-inner{max-width:820px;margin:0 auto;display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:2px;padding:6px 6px calc(6px + env(safe-area-inset-bottom))}
+.tabs-inner{max-width:820px;margin:0 auto;display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:2px;padding:6px 6px calc(6px + env(safe-area-inset-bottom))}
 .tab{background:transparent;color:#727482;display:grid;gap:2px;place-items:center;font-weight:900;font-size:11px;padding:6px 1px;border-radius:8px;min-height:50px}
 .tab span{max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 @media(max-width:430px){.tab{font-size:9.5px;padding:6px 0}.tab svg{width:20px;height:20px}}
+/* ── Más (hoja de navegación secundaria) ────────────────────────────────── */
+.more-list{display:grid;gap:8px;margin-top:4px}
+.more-row{display:flex;align-items:center;gap:12px;width:100%;padding:13px 14px;background:var(--panel2);border:1px solid var(--line);border-radius:12px;color:var(--text);font-weight:900;font-size:15px;text-align:left}
+.more-row svg:first-child{color:var(--blue);flex:0 0 auto}
+.more-row span{flex:1}
+.more-row svg:last-child{color:var(--dof-steel);flex:0 0 auto}
+/* ── Inicio: semana a la vista + tarjeta de hoy consolidada ────────────────── */
+.week-strip{display:grid;grid-template-columns:repeat(7,1fr);gap:6px;align-items:end;height:78px}
+.week-day{display:flex;flex-direction:column;align-items:center;gap:6px;height:100%}
+.week-box{width:100%;height:100%;display:flex;flex-direction:column;justify-content:flex-end;border-radius:8px;padding:2px}
+.week-day.today .week-box{background:rgba(1,36,86,.06);border:1.5px solid var(--dof-navy)}
+.week-day i{display:block;width:100%;border-radius:3px 3px 0 0}
+.week-day small{font-size:10.5px;font-weight:800;color:var(--muted)}
+.week-day.today small{color:var(--dof-navy)}
+.week-stats{display:flex;justify-content:space-around;text-align:center;padding-top:12px;margin-top:12px;border-top:1px solid var(--line)}
+.week-stats strong{display:block;font-size:16px}
+.week-stats small{display:block;font-size:11px;color:var(--muted);font-weight:800;margin-top:3px}
+.week-sep{width:1px;background:var(--line)}
+.detail-row{display:flex;gap:10px;padding:10px 0;border-top:1px solid var(--line)}
+.detail-row:first-child{border-top:none;padding-top:2px}
+.detail-row svg{flex:0 0 auto;color:var(--blue);margin-top:1px}
+.detail-row b{display:block;font-size:13px;color:var(--text);font-weight:800}
+.detail-row span{display:block;font-size:12.5px;color:var(--muted);margin-top:1px}
 /* ── Comida ─────────────────────────────────────────────────────────────── */
 .kcal-ring{width:118px;height:118px;border-radius:50%;display:grid;place-items:center;flex:0 0 auto;
   background:conic-gradient(var(--lime) var(--p),rgba(1,36,86,.10) 0);position:relative}
@@ -476,10 +499,8 @@ textarea.field{min-height:112px;text-align:left;resize:vertical}
     <button class="tab active" data-view="home" onclick="setView('home')"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg><span data-i18n="tab.home">Home</span></button>
     <button class="tab" data-view="train" onclick="setView('train')"><svg viewBox="0 0 24 24"><path d="M4 14h2m12 0h2M7 10v8m10-8v8M9 12h6"/></svg><span data-i18n="tab.train">Train</span></button>
     <button class="tab" data-view="food" onclick="setView('food')"><svg viewBox="0 0 24 24"><path d="M5 3v8a3 3 0 0 0 6 0V3"/><path d="M8 11v10"/><path d="M17 3c-1.5 2-2 3.5-2 6 0 1.7.7 2.6 2 3v9"/></svg><span data-i18n="tab.food">Food</span></button>
-    <button class="tab" data-view="crew" onclick="setView('crew')"><svg viewBox="0 0 24 24"><path d="M16 11a4 4 0 1 0-8 0"/><path d="M4 21a8 8 0 0 1 16 0"/></svg><span data-i18n="tab.crew">Crew</span></button>
     <button class="tab" data-view="progress" onclick="setView('progress')"><svg viewBox="0 0 24 24"><path d="M4 19V5"/><path d="M4 19h16"/><path d="m7 15 3-3 3 2 5-7"/></svg><span data-i18n="tab.progress">Progress</span></button>
-    <button class="tab" data-view="body" onclick="setView('body')"><svg viewBox="0 0 24 24"><circle cx="12" cy="6" r="3"/><path d="M6 21v-2a6 6 0 0 1 12 0v2"/></svg><span data-i18n="tab.body">Body</span></button>
-    <button class="tab" data-view="library" onclick="setView('library')"><svg viewBox="0 0 24 24"><path d="M4 5h16M4 12h16M4 19h16"/></svg><span data-i18n="tab.library">Library</span></button>
+    <button class="tab" data-view="more" onclick="openMoreSheet()"><svg viewBox="0 0 24 24"><circle cx="5" cy="12" r="1.6"/><circle cx="12" cy="12" r="1.6"/><circle cx="19" cy="12" r="1.6"/></svg><span data-i18n="tab.more">More</span></button>
   </div>
 </nav>
 
@@ -489,7 +510,7 @@ textarea.field{min-height:112px;text-align:left;resize:vertical}
 // Versión compartida con app.html (APP_VERSION) y sw.js (CACHE_VERSION): un solo service
 // worker sirve las dos apps, así que una sola cadena las invalida a las dos. Al cambiarla
 // hay que actualizarla también en los ?v= del <head>, en index.html y en los dos manifests.
-const SKANDI_VERSION='20260822-23';
+const SKANDI_VERSION='20260823-2';
 const SUPABASE_URL='https://pmpjteuqjusbiduevbwq.supabase.co';
 const SUPABASE_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBtcGp0ZXVxanVzYmlkdWV2YndxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc2OTI1NjUsImV4cCI6MjA5MzI2ODU2NX0.XbMzZoo2yqtrD8znLnyo_1zDfrdJAvAPj1lqGOyXnLw';
 const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
@@ -518,7 +539,7 @@ en:{
   'auth.profileError':'Could not set up your profile: {msg}. Try signing out and back in.',
   'auth.sessionExpired':'Your session expired. Sign in again.',
 
-  'tab.home':'Home','tab.train':'Train','tab.crew':'Crew','tab.progress':'Progress','tab.body':'Body','tab.library':'Library',
+  'tab.home':'Home','tab.train':'Train','tab.crew':'Crew','tab.progress':'Progress','tab.body':'Body','tab.library':'Library','tab.more':'More',
   'tab.food':'Food',
 
   'food.title':'Food','food.today':'Today','food.eaten':'eaten','food.left':'left','food.over':'over',
@@ -553,14 +574,19 @@ en:{
   'food.errNoInput':'Write what you ate or pick a photo.','food.errGrams':'Enter the grams.',
   'food.errName':'The dish needs a name.','food.searchPh':'Search food…','food.noMatches':'Nothing matches.',
   'food.newFood':'New food','food.per100':'Per 100 g','food.name':'Name',
-  'food.sugar':'Sugar','food.sugarCap':'cap','food.fiber':'Fiber','food.targetSugar':'Sugar cap',
-  'food.sugarHint':'A ceiling, not a goal — it turns red when you go over. Leave it empty to ignore it.',
+  'food.sugar':'Sugar','food.addedSugar':'Added sugar','food.sugarCap':'cap','food.fiber':'Fiber','food.targetSugar':'Added sugar cap',
+  'food.sugarHint':'A ceiling, not a goal — it turns red when you go over. Whole fruit and plain dairy don\'t count against it, only added sugar does. Leave it empty to ignore it.',
   'food.trainHigh':'Hard training day','food.trainLow':'Rest day','food.trainNormal':'Average day',
   'food.trainPlanned':'{kcal} kcal planned · {delta} vs your average day',
   'food.trainLogged':'{kcal} kcal logged · {delta} vs your average day',
   'food.trainAdjust':'Today: {kcal} kcal and {carbs} g of carbs',
   'food.trainWhy':'Your target already assumes you train on an average week, so only the difference is adjusted.',
   'food.trainNoPlan':'Nothing scheduled today.',
+  'food.when':'When did you eat this?','food.whenFromPhoto':'Suggested from the photo\'s date — check it.',
+  'food.errFuture':'You can\'t log a meal in the future.','food.changeTime':'Change time',
+  'food.suggestTitle':'What should I eat?','food.suggestHint':'A cooking idea to hit today\'s macros, and examples for around your workout.',
+  'food.suggestBtn':'Suggest something','food.suggestLoading':'Thinking about what fits your day…',
+  'food.suggestCook':'To round out today','food.suggestPre':'Before training','food.suggestPost':'After training',
   'fuel.plan':'How to fuel it',
   'fuel.session':'{name} · {min} min',
   'fuel.sessionKm':'{km} km · {min} min',
@@ -612,6 +638,7 @@ en:{
   'block.confirmDelete':'Delete this block? Your workouts and sets are untouched, only the week/deload count is removed.',
 
   'home.weekRange':'Monday to Sunday','home.hey':'Hey, {name}',
+  'home.yourWeek':'Your week','home.time':'time','home.load':'load','home.sessions':'sessions',
   'home.firstRoutine':'Create your first routine','home.focusNow':'Your focus now',
   'home.startAria':'Start {name}',
   'home.weekProgress':'{done} of {total} {unit} done this week. {note}',
@@ -1051,7 +1078,7 @@ es:{
   'auth.profileError':'No se pudo crear tu perfil: {msg}. Cierra sesión y vuelve a entrar.',
   'auth.sessionExpired':'Tu sesión caducó. Vuelve a iniciar sesión.',
 
-  'tab.home':'Inicio','tab.train':'Entrenar','tab.crew':'Crew','tab.progress':'Progreso','tab.body':'Cuerpo','tab.library':'Catálogo',
+  'tab.home':'Inicio','tab.train':'Entrenar','tab.crew':'Crew','tab.progress':'Progreso','tab.body':'Cuerpo','tab.library':'Catálogo','tab.more':'Más',
   'tab.food':'Comida',
 
   'food.title':'Comida','food.today':'Hoy','food.eaten':'comidas','food.left':'restan','food.over':'de más',
@@ -1086,14 +1113,19 @@ es:{
   'food.errNoInput':'Escribe qué comiste o elige una foto.','food.errGrams':'Pon los gramos.',
   'food.errName':'El platillo necesita nombre.','food.searchPh':'Buscar alimento…','food.noMatches':'Nada coincide.',
   'food.newFood':'Alimento nuevo','food.per100':'Por 100 g','food.name':'Nombre',
-  'food.sugar':'Azúcar','food.sugarCap':'techo','food.fiber':'Fibra','food.targetSugar':'Techo de azúcar',
-  'food.sugarHint':'Es un techo, no una meta: se pone rojo al pasarte. Déjalo vacío si no lo quieres vigilar.',
+  'food.sugar':'Azúcar','food.addedSugar':'Azúcar añadida','food.sugarCap':'techo','food.fiber':'Fibra','food.targetSugar':'Techo de azúcar añadida',
+  'food.sugarHint':'Es un techo, no una meta: se pone rojo al pasarte. La fruta entera y los lácteos naturales no cuentan contra él, solo la azúcar añadida. Déjalo vacío si no lo quieres vigilar.',
   'food.trainHigh':'Día de entrenamiento fuerte','food.trainLow':'Día de descanso','food.trainNormal':'Día promedio',
   'food.trainPlanned':'{kcal} kcal planeadas · {delta} contra tu día promedio',
   'food.trainLogged':'{kcal} kcal registradas · {delta} contra tu día promedio',
   'food.trainAdjust':'Hoy: {kcal} kcal y {carbs} g de carbos',
   'food.trainWhy':'Tu meta ya supone que entrenas en una semana normal, así que solo se ajusta la diferencia.',
   'food.trainNoPlan':'Hoy no tienes nada programado.',
+  'food.when':'¿Cuándo comiste esto?','food.whenFromPhoto':'Sugerido por la fecha de la foto — revísala.',
+  'food.errFuture':'No puedes registrar una comida en el futuro.','food.changeTime':'Cambiar hora',
+  'food.suggestTitle':'¿Qué como?','food.suggestHint':'Una idea para completar tus macros de hoy, y ejemplos para antes/después de entrenar.',
+  'food.suggestBtn':'Sugerir algo','food.suggestLoading':'Pensando qué le queda bien a tu día…',
+  'food.suggestCook':'Para completar hoy','food.suggestPre':'Antes de entrenar','food.suggestPost':'Después de entrenar',
   'fuel.plan':'Cómo comerlo',
   'fuel.session':'{name} · {min} min',
   'fuel.sessionKm':'{km} km · {min} min',
@@ -1145,6 +1177,7 @@ es:{
   'block.confirmDelete':'¿Eliminar este bloque? Tus entrenamientos y series no se tocan, solo se borra el conteo de semana/descarga.',
 
   'home.weekRange':'De lunes a domingo','home.hey':'Hola, {name}',
+  'home.yourWeek':'Tu semana','home.time':'tiempo','home.load':'carga','home.sessions':'sesiones',
   'home.firstRoutine':'Crea tu primera rutina','home.focusNow':'Tu foco ahora',
   'home.startAria':'Empezar {name}',
   'home.weekProgress':'{done} de {total} {unit} esta semana. {note}',
@@ -1681,7 +1714,14 @@ const ICON_PATHS={
   trash:'<path d="M4 7h16"/><path d="M10 11v6M14 11v6"/><path d="M6 7l1 13a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2l1-13"/><path d="M9 7V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v3"/>',
   plus:'<path d="M12 5v14M5 12h14"/>',
   image:'<rect x="3" y="3" width="18" height="18" rx="3"/><circle cx="9" cy="9" r="1.75"/><path d="M21 15l-5.5-5.5L5 20"/>',
-  ellipsis:'<circle cx="5" cy="12" r="1.6"/><circle cx="12" cy="12" r="1.6"/><circle cx="19" cy="12" r="1.6"/>'
+  ellipsis:'<circle cx="5" cy="12" r="1.6"/><circle cx="12" cy="12" r="1.6"/><circle cx="19" cy="12" r="1.6"/>',
+  moon:'<path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79Z"/>',
+  trending:'<path d="M4 19V5"/><path d="M4 19h16"/><path d="m7 15 3-3 3 2 5-7"/>',
+  food:'<path d="M5 3v8a3 3 0 0 0 6 0V3"/><path d="M8 11v10"/><path d="M17 3c-1.5 2-2 3.5-2 6 0 1.7.7 2.6 2 3v9"/>',
+  warning:'<path d="M12 9v4"/><path d="M12 17h.01"/><path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0Z"/>',
+  crew:'<path d="M16 11a4 4 0 1 0-8 0"/><path d="M4 21a8 8 0 0 1 16 0"/>',
+  body:'<circle cx="12" cy="6" r="3"/><path d="M6 21v-2a6 6 0 0 1 12 0v2"/>',
+  library:'<path d="M4 5h16M4 12h16M4 19h16"/>'
 };
 const icon=(name,size=20)=>`<svg viewBox="0 0 24 24" width="${size}" height="${size}" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex:0 0 auto">${ICON_PATHS[name]||''}</svg>`;
 const THUMB_FALLBACK=icon('image',26);
@@ -1988,10 +2028,26 @@ function deloadAdjustedWeight(weightKg){
   return Math.round(weightKg*0.7*2)/2;
 }
 
+// Crew, Cuerpo y Catálogo ya no tienen su propio botón en la barra — viven detrás de "Más"
+// (openMoreSheet) para que las 4 pestañas de uso diario queden grandes y legibles. La vista
+// sigue siendo la misma (render() no cambia), solo cambia qué botón se enciende.
+const MORE_VIEWS=['crew','body','library'];
 function setView(view){
   state.view=view;
-  document.querySelectorAll('.tab').forEach(t=>t.classList.toggle('active',t.dataset.view===view));
+  const activeTab=MORE_VIEWS.includes(view)?'more':view;
+  document.querySelectorAll('.tab').forEach(t=>t.classList.toggle('active',t.dataset.view===activeTab));
   render();
+}
+
+function openMoreSheet(){
+  $('modal').classList.add('show');
+  $('modalCard').innerHTML=`
+    <div class="row"><h1>${esc(t('tab.more'))}</h1><button class="x" onclick="closeModal()" aria-label="${esc(t('common.close'))}">${icon('close',20)}</button></div>
+    <div class="more-list">
+      <button class="more-row" onclick="closeModal();setView('crew')">${icon('crew',22)}<span>${esc(t('tab.crew'))}</span>${icon('chevronRight',18)}</button>
+      <button class="more-row" onclick="closeModal();setView('body')">${icon('body',22)}<span>${esc(t('tab.body'))}</span>${icon('chevronRight',18)}</button>
+      <button class="more-row" onclick="closeModal();setView('library')">${icon('library',22)}<span>${esc(t('tab.library'))}</span>${icon('chevronRight',18)}</button>
+    </div>`;
 }
 
 function render(){
@@ -2130,7 +2186,11 @@ function focusActionFor(p){
 // del bloque vas, cómo dormiste, qué músculo sigue cansado, cuánta carga llevas y cuánto
 // deberías comer— y lo explica. Las reglas viven en skandi-brief.js; aquí solo se arman los
 // datos y se pinta.
-function briefCard(){
+// El "porqué" de hoy: antes era su propia tarjeta (briefCard) más otras dos (bienestar, bloque)
+// que Home apilaba casi igual a como ya las muestra Entrenar > Hoy. Se consolidan en una lista
+// de líneas — el detalle completo de bienestar/bloque sigue en Entrenar, y el plan de
+// combustible completo en Comida; aquí solo lo necesario para decidir si hace falta abrir algo.
+function todayDetailCard(){
   const f=todayFocus();
   const block=trainingBlockWeekInfo();
   const isDeload=!!block?.deload;
@@ -2173,23 +2233,28 @@ function briefCard(){
   const line=x=>{
     const params={...(x.params||{})};
     if(x.key==='brief.caution.sleep') params.min=formatSleep(params.min*60);
-    return `<p style="margin-top:8px">${esc(t(x.key,params))}</p>`;
+    return t(x.key,params);
   };
+
+  const wellnessLine=latest&&(latest.sleep_secs||latest.resting_hr)
+    ?[latest.sleep_secs?formatSleep(latest.sleep_secs):null,
+      latest.resting_hr?`${latest.resting_hr} ${t('wellness.restingHr')}`:null].filter(Boolean).join(' · ')
+    :null;
+
+  // Solo el ejemplo de "antes de entrenar" — el plan completo (durante, después, por sesión)
+  // ya vive en Comida, que es donde de verdad hace falta cuando llega la hora de comer.
+  const fuelBefore=brief.fuel.find(x=>x.key==='brief.fuel.before');
+
+  const rows2=[
+    `<div class="detail-row">${icon('trending',18)}<div><b>${esc(t(brief.headline.key,brief.headline.params||{}))}</b>${block?`<span>${esc(t('block.weekOf',{week:block.week,total:block.totalWeeks}))}</span>`:''}</div></div>`,
+    wellnessLine?`<div class="detail-row">${icon('moon',18)}<div><b>${esc(t('wellness.title'))}</b><span>${esc(wellnessLine)}</span></div></div>`:'',
+    ...brief.cautions.map(x=>`<div class="detail-row" style="color:var(--amber)">${icon('warning',18)}<div><b>${esc(t('brief.cautionTitle'))}</b><span>${esc(line(x))}</span></div></div>`),
+    fuelBefore?`<div class="detail-row">${icon('food',18)}<div><b>${esc(t('brief.fuelTitle'))}</b><span>${esc(line(fuelBefore))}</span></div></div>`:''
+  ].filter(Boolean).join('');
+
   return `<section class="card">
-    <div class="eyebrow">${esc(t('brief.title'))}</div>
-    <h2 style="margin-top:6px">${esc(t(brief.headline.key,brief.headline.params||{}))}</h2>
-    ${brief.training.length?`<div style="margin-top:12px">
-      <div class="eyebrow">${esc(t('brief.trainingTitle'))}</div>
-      ${brief.training.map(x=>`<p style="margin-top:8px"><strong>${esc(plannedTitle(x.session))}</strong> — ${esc(t(x.purpose.key,x.purpose.params||{}))}</p>`).join('')}
-    </div>`:''}
-    ${brief.fuel.length?`<div style="margin-top:14px">
-      <div class="eyebrow">${esc(t('brief.fuelTitle'))}</div>
-      ${brief.fuel.map(line).join('')}
-    </div>`:''}
-    ${brief.cautions.length?`<div style="margin-top:14px;padding-top:12px;border-top:1px solid var(--line)">
-      <div class="eyebrow" style="color:var(--amber)">${esc(t('brief.cautionTitle'))}</div>
-      ${brief.cautions.map(line).join('')}
-    </div>`:''}
+    <div class="eyebrow">${esc(t('home.today'))}</div>
+    <div style="margin-top:6px">${rows2}</div>
   </section>`;
 }
 
@@ -2226,6 +2291,53 @@ function nutritionForBrief(){
     steps:stepsToday,avgSteps,weightKg})};
 }
 
+// La tira de 7 días responde "¿cómo va mi semana?" antes de pedir nada — mismo lenguaje visual
+// que la tarjeta "Carga" de Progreso (load-bars), pero por día en vez de por semana. Solo el
+// día de HOY se colorea con el tono real (alto/bajo/ok); los demás son referencia neutra.
+function weekStripCard(monday){
+  const refs={maxHeartRate:state.skandiSettings?.max_heart_rate||null,hrZones:state.skandiSettings?.hr_zone_bounds||null};
+  const series=SkandiLoad.dailySeries({
+    sessions:state.sessions,sets:state.sets,activities:state.externalActivities,
+    userId:state.user.id,refs,days:14
+  });
+  const byDay=new Map(series.map(r=>[r.day,r]));
+  const today=todayKey();
+  const days=Array.from({length:7},(_,i)=>byDay.get(dayKey(addDays(monday,i)))||{day:dayKey(addDays(monday,i)),load:0});
+  const peak=Math.max(1,...days.map(d=>d.load));
+  const block=trainingBlockWeekInfo();
+  const readout=SkandiLoad.readout({series,isDeloadWeek:!!block?.deload});
+  const tone={high:'var(--pink)',low:'var(--amber)',deloadWeak:'var(--amber)',
+              deload:'var(--green)',ok:'var(--green)',none:'var(--muted)',building:'var(--muted)'}[readout.level];
+
+  const weekEnd=addDays(monday,7);
+  const weekMinutes=
+    state.sessions.filter(s=>s.user_id===state.user.id&&s.completed_at&&new Date(s.completed_at)>=monday&&new Date(s.completed_at)<weekEnd)
+      .reduce((a,s)=>a+(Number(s.duration_sec)||0)/60,0)
+    +state.externalActivities.filter(a=>a.user_id===state.user.id&&new Date(a.performed_at)>=monday&&new Date(a.performed_at)<weekEnd)
+      .reduce((a,x)=>a+(Number(x.duration_min)||0),0);
+  const {done,total}=weekAdherence(monday);
+
+  return `<section class="card">
+    <div class="week-strip">
+      ${days.map((d,i)=>{
+        const isToday=d.day===today;
+        const h=Math.max(4,Math.round(d.load/peak*54));
+        return `<div class="week-day ${isToday?'today':''}">
+          <div class="week-box"><i style="height:${h}px;background:${isToday?tone:'var(--panel3)'}"></i></div>
+          <small>${DOW[i][0]}</small>
+        </div>`;
+      }).join('')}
+    </div>
+    <div class="week-stats">
+      <div><strong>${weekMinutes?formatSleep(weekMinutes*60):'—'}</strong><small>${esc(t('home.time'))}</small></div>
+      <div class="week-sep"></div>
+      <div><strong>${readout.currentWeek||0}</strong><small>${esc(t('home.load'))}</small></div>
+      <div class="week-sep"></div>
+      <div><strong>${done}/${total}</strong><small>${esc(t('home.sessions'))}</small></div>
+    </div>
+  </section>`;
+}
+
 function homeView(){
   const mine=state.sessions.filter(s=>s.user_id===state.user.id&&s.completed_at);
   const monday=mondayOf(new Date());
@@ -2235,9 +2347,8 @@ function homeView(){
   if(!state.plannedReady) return legacyHomeView(mine,monday,myRoutineCount);
 
   const f=todayFocus();
-  const {total,done,pct}=weekAdherence(monday);
+  const {total,done}=weekAdherence(monday);
   const action=focusActionFor(f.next);
-  const dateLabel=keyToDate(f.key).toLocaleDateString(LANG,{weekday:'long',day:'numeric',month:'long'});
 
   const title=f.next?plannedTitle(f.next)
     :f.isRest?t('home.restDay')
@@ -2251,32 +2362,22 @@ function homeView(){
   return `
     ${activeWorkoutBanner()}
     <section class="hero">
-      <div class="eyebrow">${esc(dateLabel)}</div>
+      <div class="eyebrow">${esc(t('home.yourWeek'))}</div>
       <h1>${esc(t('home.hey',{name:firstName()}))}</h1>
-      <button class="focus action" onclick="${action?action.js:`setView('train')`}" aria-label="${esc(title)}">
-        <div class="row">
-          <div>
-            <div class="eyebrow">${esc(f.next?t('home.focusNow'):t('home.today'))}</div>
-            <h2>${esc(title)}</h2>
-            <p>${esc(sub)}</p>
-            <span class="focus-cta"><i>${action?icon(action.icon,17):icon('chevronRight',17)}</i>${esc(action?action.label:t('home.openCalendar'))}</span>
-          </div>
-          <div class="ring" style="--p:${pct}%"><span>${pct}%</span></div>
-        </div>
-      </button>
     </section>
+    ${weekStripCard(monday)}
+    <button class="focus action" onclick="${action?action.js:`setView('train')`}" aria-label="${esc(title)}">
+      <div class="eyebrow">${esc(f.next?t('home.focusNow'):t('home.today'))}</div>
+      <h2>${esc(title)}</h2>
+      <p>${esc(sub)}</p>
+      <span class="focus-cta"><i>${action?icon(action.icon,17):icon('chevronRight',17)}</i>${esc(action?action.label:t('home.openCalendar'))}</span>
+    </button>
     ${f.rows.length>1||f.extras.length?`<section class="card">
       <div class="row"><h2>${esc(t('home.todayPlan'))}</h2><button class="btn small" onclick="setView('train')">${esc(t('home.seeWeek'))}</button></div>
       <div class="stack" style="margin-top:12px">${f.rows.map(plannedRowHtml).join('')}${f.extras.map(extraRowHtml).join('')}</div>
     </section>`:''}
-    ${briefCard()}
-    ${wellnessCardHtml()}
-    ${trainingBlockCardHtml()}
     ${attentionBannerHtml()}
-    <section class="grid">
-      <div class="stat click-card" onclick="setView('progress')"><strong>${done}/${total}</strong><small>${esc(t('home.thisWeek'))}</small></div>
-      <div class="stat click-card" onclick="setView('train')"><strong>${myRoutineCount}</strong><small>${esc(t('home.yourRoutines'))}</small></div>
-    </section>
+    ${todayDetailCard()}
     ${miniBodyRecoveryCard()}
     <section class="card click-card" onclick="setView('crew')">
       <div class="row"><h2>${esc(t('home.latest'))}</h2><button class="btn small" onclick="setView('crew')">${esc(t('home.viewCrew'))}</button></div>
@@ -6954,6 +7055,7 @@ function foodView(){
     </section>
     ${targets?dayRingCard(totals,targets):noTargetCard()}
     ${trainingDayCard()}
+    ${targets&&isToday?suggestionCard():''}
     <section class="card">
       <div class="row"><div class="eyebrow">${esc(t('food.items'))}</div>
         <span class="chip">${meals.length}</span></div>
@@ -7065,10 +7167,73 @@ function fuelPlanHtml(sessions,weightKg,rec){
   return `${doneLine}<div class="eyebrow" style="margin-top:12px">${esc(t('fuel.plan'))}</div>${blocks}`;
 }
 
+// ---- Qué comer: sugerencia con IA ----
+//
+// fuelPlan() ya da la CANTIDAD (gramos de carbos, de proteína); esto da el EJEMPLO concreto
+// ("dos tortillas con miel"), y además "qué cocinar para llegar a tus macros del día" — una
+// tarea de creatividad acotada por números que un prompt resuelve mejor que una fórmula.
+function suggestionCard(){
+  return `<section class="card">
+    <div class="row"><div><h2>${esc(t('food.suggestTitle'))}</h2><p class="muted">${esc(t('food.suggestHint'))}</p></div></div>
+    <button class="btn primary" style="width:100%;margin-top:10px" onclick="openMealSuggestion()">${esc(t('food.suggestBtn'))} · ${esc(t('food.aiLeft',{n:aiLeft()}))}</button>
+  </section>`;
+}
+
+async function openMealSuggestion(){
+  const totals=SkandiNutrition.dayTotals(mealsOfDay(foodDay()));
+  const targets=state.nutritionTargets;
+  if(!targets) return alert(t('food.noTarget'));
+  const remaining=SkandiNutrition.remaining(targets,totals);
+  const weightKg=latestWeightKg();
+  const plan={
+    weightKg,
+    templates:state.templates.filter(x=>x.user_id===state.user.id),
+    templateItems:state.items,
+    activityTemplates:state.activityTemplates
+  };
+  // El mismo catálogo que ya se le muestra en "Rápidos": lo que de verdad prepara seguido,
+  // no una receta que un modelo se inventó. Nombre y kind nada más — sin macros, que esos ya
+  // los tiene el modelo por otro lado y no hace falta mandarlos dos veces.
+  const catalog=[
+    ...state.dishes.slice(0,10).map(d=>d.name),
+    ...state.foods.filter(f=>f.user_id).slice(0,10).map(f=>f.name)
+  ];
+  const sessions=SkandiNutrition.plannedSessions(todayDow(),plan);
+
+  $('modal').classList.add('show');
+  $('modalCard').innerHTML=`
+    <div class="row"><h1>${esc(t('food.suggestTitle'))}</h1><button class="x" onclick="closeModal()" aria-label="${esc(t('common.close'))}">${icon('close',20)}</button></div>
+    <p class="muted">${esc(t('food.suggestLoading'))}</p>`;
+
+  try{
+    const data=await skandiApi('meal-suggestion',{remaining,sessions,catalog});
+    await loadNutrition();
+    if(state.view==='food') render();
+    $('modalCard').innerHTML=`
+      <div class="row"><h1>${esc(t('food.suggestTitle'))}</h1><button class="x" onclick="closeModal()" aria-label="${esc(t('common.close'))}">${icon('close',20)}</button></div>
+      <div class="eyebrow">${esc(t('food.suggestCook'))}</div>
+      <p style="margin-top:6px">${esc(data.cook_suggestion)}</p>
+      ${data.pre_workout?`<div class="eyebrow" style="margin-top:14px">${esc(t('food.suggestPre'))}</div><p style="margin-top:6px">${esc(data.pre_workout)}</p>`:''}
+      ${data.post_workout?`<div class="eyebrow" style="margin-top:14px">${esc(t('food.suggestPost'))}</div><p style="margin-top:6px">${esc(data.post_workout)}</p>`:''}
+      <p class="muted" style="font-size:11px;margin-top:14px">${esc(t('food.aiLeft',{n:aiLeft()}))}</p>`;
+  }catch(e){
+    $('modalCard').innerHTML=`
+      <div class="row"><h1>${esc(t('food.suggestTitle'))}</h1><button class="x" onclick="closeModal()" aria-label="${esc(t('common.close'))}">${icon('close',20)}</button></div>
+      <p class="muted" style="color:var(--pink)">${esc(e.message||String(e))}</p>`;
+  }
+}
+
 function dayRingCard(totals,targets){
   const left=SkandiNutrition.remaining(targets,totals);
   const p=SkandiNutrition.pct(totals.kcal,targets.kcal_target);
   const over=left.kcal<0;
+  // Prefiere el techo de azúcar AÑADIDA (migración 089) sobre el de azúcar total en cuanto
+  // exista: es el que de verdad hay que vigilar (la fruta entera no debería llenar la barra).
+  // Si la migración no se ha corrido, added_sugar_g_target no viene en la fila y esto cae solo
+  // al comportamiento de antes — nada se rompe por adelantarse a correrla.
+  const usingAdded=targets.added_sugar_g_target!=null;
+  const sugarCap=usingAdded?targets.added_sugar_g_target:targets.sugar_g_target;
+  const sugarValue=usingAdded?totals.added_sugar_g:totals.sugar_g;
   return `<section class="card click-card" onclick="openTargets()">
     <div class="row" style="gap:16px;align-items:center">
       <div class="kcal-ring ${over?'over':''}" style="--p:${Math.min(p,100)}%">
@@ -7078,7 +7243,7 @@ function dayRingCard(totals,targets){
         ${macroRowHtml('p',t('food.protein'),totals.protein_g,targets.protein_g_target)}
         ${macroRowHtml('c',t('food.carbs'),totals.carbs_g,targets.carbs_g_target)}
         ${macroRowHtml('f',t('food.fat'),totals.fat_g,targets.fat_g_target)}
-        ${targets.sugar_g_target?sugarRowHtml(totals.sugar_g,targets.sugar_g_target):''}
+        ${sugarCap?sugarRowHtml(sugarValue,sugarCap,usingAdded):''}
       </div>
     </div>
     <p class="muted" style="margin-top:10px;font-size:12px">${Math.round(totals.kcal)} / ${targets.kcal_target} kcal · ${esc(t('food.aiLeft',{n:aiLeft()}))}</p>
@@ -7086,11 +7251,11 @@ function dayRingCard(totals,targets){
 }
 
 // El azúcar se pinta distinto porque significa otra cosa: llenar la barra es malo, no bueno.
-function sugarRowHtml(value,cap){
+function sugarRowHtml(value,cap,isAdded){
   const p=SkandiNutrition.pct(value,cap);
   const over=value>cap;
   return `<div class="macro-row s ${over?'over':''}">
-    <div class="row"><span>${esc(t('food.sugar'))}</span><span>${Math.round(value)} / ${cap} g ${esc(t('food.sugarCap'))}</span></div>
+    <div class="row"><span>${esc(isAdded?t('food.addedSugar'):t('food.sugar'))}</span><span>${Math.round(value)} / ${cap} g ${esc(t('food.sugarCap'))}</span></div>
     <div class="bar"><i style="width:${Math.min(p,100)}%"></i></div>
   </div>`;
 }
@@ -7191,7 +7356,7 @@ function openAddMeal(){
 // ---- Alta: foto y/o texto (los dos caminos que sí usan IA) ----
 
 function openMealInput(kind){
-  state.pendingMeal={kind,blob:null,dataUrl:null};
+  state.pendingMeal={kind,blob:null,dataUrl:null,photoTakenAt:null,whenTouched:false};
   $('modal').classList.add('show');
   $('modalCard').innerHTML=`
     <div class="row"><h1>${esc(kind==='photo'?t('food.byPhoto'):t('food.byText'))}</h1><button class="x" onclick="closeModal()" aria-label="${esc(t('common.close'))}">${icon('close',20)}</button></div>
@@ -7205,6 +7370,9 @@ function openMealInput(kind){
     <textarea id="mealDesc" class="field" placeholder="${esc(kind==='photo'?t('food.contextPh'):t('food.describePh'))}"></textarea>
     <label class="eyebrow">${esc(t('food.mealType'))}</label>
     <select id="mealType" class="field left">${MEAL_TYPES.map(v=>`<option value="${v}" ${v===guessMealType()?'selected':''}>${esc(mealTypeLabel(v))}</option>`).join('')}</select>
+    <label class="eyebrow">${esc(t('food.when'))}</label>
+    <input id="mealWhen" class="field" type="datetime-local" value="${toLocalDatetimeValue(new Date())}" max="${toLocalDatetimeValue(new Date())}" onchange="state.pendingMeal.whenTouched=true">
+    <p id="mealWhenHint" class="muted" style="font-size:11px;margin-top:4px"></p>
     <label class="eyebrow">${esc(t('food.venue'))}</label>
     <div class="venue-row">${VENUES.slice(0,3).map((v,i)=>
       `<button type="button" class="chip venue-chip ${i===0?'active':''}" data-venue="${v}" onclick="pickVenue('${v}')">${esc(venueLabel(v))}</button>`).join('')}</div>
@@ -7227,6 +7395,15 @@ async function onMealPhotoPicked(input){
   const file=input.files&&input.files[0];
   if(!file) return;
   try{
+    // El EXIF hay que leerlo del archivo ORIGINAL: compressImage dibuja en un canvas y el
+    // canvas no conserva metadatos, así que del blob comprimido ya no se puede sacar nada.
+    readExifDateTaken(file).then(date=>{
+      if(!date||date.getTime()>Date.now()) return; // una fecha futura es un reloj mal puesto, se ignora
+      state.pendingMeal.photoTakenAt=date.toISOString();
+      if(state.pendingMeal.whenTouched||!$('mealWhen')) return; // el usuario ya la cambió a mano: no se pisa
+      $('mealWhen').value=toLocalDatetimeValue(date);
+      if($('mealWhenHint')) $('mealWhenHint').textContent=t('food.whenFromPhoto');
+    });
     const blob=await compressImage(file);
     state.pendingMeal.blob=blob;
     const url=URL.createObjectURL(blob);
@@ -7257,6 +7434,118 @@ function compressImage(file,maxSide=MEAL_PHOTO_MAX_SIDE,quality=MEAL_PHOTO_QUALI
   });
 }
 
+// ---- Cuándo: fecha/hora de la comida ----
+//
+// Las cuatro rutas de alta guardaban eaten_at como now() siempre: registrar a las 11pm la cena
+// de las 8 quedaba bien, pero registrar en el desayuno la cena de ANOCHE la contaba como hoy, y
+// no había forma de corregirlo después. Aquí se deja elegir la fecha/hora al capturar, y se
+// puede corregir desde el detalle de la comida (updateMealEatenAt).
+
+// input[type=datetime-local] quiere "YYYY-MM-DDTHH:mm" en hora LOCAL, sin zona horaria.
+function toLocalDatetimeValue(d){
+  const x=new Date(d);
+  const pad=n=>String(n).padStart(2,'0');
+  return `${x.getFullYear()}-${pad(x.getMonth()+1)}-${pad(x.getDate())}T${pad(x.getHours())}:${pad(x.getMinutes())}`;
+}
+
+// El propio input tiene max="ahora", pero un reloj de sistema adelantado o el propio valor
+// pegado a mano puede colarse: se revalida al enviar.
+function parseWhenInput(id){
+  const raw=$(id)?.value;
+  if(!raw) return new Date();
+  const d=new Date(raw);
+  return Number.isNaN(d.getTime())?new Date():d;
+}
+
+// Best-effort: solo entiende JPEG con EXIF (lo normal en una foto de cámara/celular). HEIC,
+// capturas de pantalla o una imagen ya sin metadatos devuelven null sin quejarse, y el campo de
+// fecha se queda en "ahora", editable a mano — nunca se bloquea el registro por esto.
+async function readExifDateTaken(file){
+  try{
+    if(!file||!file.type||!/jpe?g/i.test(file.type)) return null;
+    const buf=await file.slice(0,131072).arrayBuffer();
+    const view=new DataView(buf);
+    if(view.byteLength<4||view.getUint16(0)!==0xFFD8) return null;
+    let offset=2;
+    while(offset+4<=view.byteLength){
+      const marker=view.getUint16(offset);
+      if(marker===0xFFD9||marker===0xFFDA) return null;
+      const size=view.getUint16(offset+2);
+      if(marker===0xFFE1&&size>=8&&offset+2+size<=view.byteLength){
+        const tiffStart=offset+4;
+        if(view.getUint32(tiffStart)===0x45786966&&view.getUint16(tiffStart+4)===0){
+          const date=parseExifTiff(view,tiffStart+6);
+          if(date) return date;
+        }
+      }
+      offset+=2+size;
+    }
+    return null;
+  }catch(e){ return null; }
+}
+
+function readExifIfd(view,tiffStart,ifdStart,little){
+  const out=new Map();
+  if(ifdStart+2>view.byteLength) return out;
+  const count=view.getUint16(ifdStart,little);
+  for(let i=0;i<count;i++){
+    const entry=ifdStart+2+i*12;
+    if(entry+12>view.byteLength) break;
+    const tag=view.getUint16(entry,little);
+    const type=view.getUint16(entry+2,little);
+    const n=view.getUint32(entry+4,little);
+    if(tag!==0x9003&&tag!==0x9004&&tag!==0x8769) continue;
+    if(type===2){
+      const valOffset=n<=4?entry+8:tiffStart+view.getUint32(entry+8,little);
+      if(valOffset+n<=view.byteLength){
+        let s='';
+        for(let j=0;j<n;j++){const c=view.getUint8(valOffset+j); if(c===0) break; s+=String.fromCharCode(c);}
+        out.set(tag,s);
+      }
+    }else if(type===4){
+      out.set(tag,view.getUint32(entry+8,little));
+    }
+  }
+  return out;
+}
+
+function parseExifTiff(view,tiffStart){
+  if(tiffStart+8>view.byteLength) return null;
+  const bo=view.getUint16(tiffStart);
+  const little=bo===0x4949;
+  if(!little&&bo!==0x4D4D) return null;
+  if(view.getUint16(tiffStart+2,little)!==42) return null;
+  const ifd0=readExifIfd(view,tiffStart,tiffStart+view.getUint32(tiffStart+4,little),little);
+  const exifPtr=ifd0.get(0x8769);
+  if(exifPtr==null) return null;
+  const exifIfd=readExifIfd(view,tiffStart,tiffStart+exifPtr,little);
+  const raw=exifIfd.get(0x9003)||exifIfd.get(0x9004);
+  if(!raw) return null;
+  const m=/^(\d{4}):(\d{2}):(\d{2}) (\d{2}):(\d{2}):(\d{2})/.exec(raw);
+  if(!m) return null;
+  const d=new Date(+m[1],+m[2]-1,+m[3],+m[4],+m[5],+m[6]);
+  return Number.isNaN(d.getTime())?null:d;
+}
+
+// ---- Escritura tolerante a la migración 089 (azúcar añadida) ----
+//
+// added_sugar_g / added_sugar_100g / added_sugar_g_target son columnas nuevas (migración 089,
+// todavía sin correr en producción al escribir esto). Un select('*') las omite en silencio si
+// no existen, pero un insert/update/upsert directo a una columna inexistente SÍ tira error y
+// pierde el guardado completo — a diferencia de los RPC con jsonb, que ignoran claves de más
+// sin quejarse. Por eso los tres sitios que escriben esas columnas por fuera de un RPC
+// reintentan sin ellas si Postgres se queja, y así nunca dependen de si ya se corrió la
+// migración: funcionan igual antes, y se ponen al día solos en cuanto se corra.
+function omit(obj,key){ const {[key]:_omitted,...rest}=obj; return rest; }
+
+async function writeToleratingMissingColumn(run,column){
+  let res=await run(true);
+  if(res.error&&res.error.message&&res.error.message.includes(column)){
+    res=await run(false);
+  }
+  return res;
+}
+
 async function submitMealForAnalysis(){
   const pending=state.pendingMeal;
   if(!pending) return;
@@ -7265,6 +7554,12 @@ async function submitMealForAnalysis(){
   const btn=$('mealGo');
   btn.disabled=true;btn.textContent=t('food.uploading');
 
+  const eatenAt=parseWhenInput('mealWhen');
+  if(eatenAt.getTime()>Date.now()+60000){
+    btn.disabled=false;btn.textContent=t('food.analyze');
+    return alert(t('food.errFuture'));
+  }
+
   try{
     let photoPath=null;
     if(pending.blob){
@@ -7272,17 +7567,24 @@ async function submitMealForAnalysis(){
       const {error:upErr}=await sb.storage.from('skandi-meals').upload(photoPath,pending.blob,{contentType:'image/jpeg'});
       if(upErr) throw upErr;
     }
-    // La comida se guarda ANTES de llamar al modelo: si el análisis falla o tarda, ya quedó
-    // registrada y se puede reintentar o capturar a mano.
-    const {data:meal,error}=await sb.from('skandi_meals').insert({
+    const base={
       user_id:state.user.id,
       meal_type:$('mealType').value,
       venue:pickedVenue(),
       note:desc||null,
       photo_path:photoPath,
       input_kind:photoPath?'photo':'text',
-      analysis_status:'pending'
-    }).select().single();
+      analysis_status:'pending',
+      eaten_at:eatenAt.toISOString()
+    };
+    // La comida se guarda ANTES de llamar al modelo: si el análisis falla o tarda, ya quedó
+    // registrada y se puede reintentar o capturar a mano.
+    const {data:meal,error}=await writeToleratingMissingColumn(
+      withCol=>sb.from('skandi_meals')
+        .insert(withCol&&pending.photoTakenAt?{...base,photo_taken_at:pending.photoTakenAt}:base)
+        .select().single(),
+      'photo_taken_at'
+    );
     if(error) throw error;
 
     closeModal();
@@ -7415,6 +7717,8 @@ function openDishLog(dishId){
     <p class="muted">${Math.round(totals.kcal)} kcal · P ${Math.round(totals.protein_g)} · C ${Math.round(totals.carbs_g)} · G ${Math.round(totals.fat_g)}</p>
     <label class="eyebrow">${esc(t('food.mealType'))}</label>
     <select id="dishMealType" class="field left">${MEAL_TYPES.map(v=>`<option value="${v}" ${v===guessMealType()?'selected':''}>${esc(mealTypeLabel(v))}</option>`).join('')}</select>
+    <label class="eyebrow">${esc(t('food.when'))}</label>
+    <input id="dishWhen" class="field" type="datetime-local" value="${toLocalDatetimeValue(new Date())}" max="${toLocalDatetimeValue(new Date())}">
     <label class="eyebrow">${esc(t('food.scale'))}</label>
     <div class="venue-row" style="grid-template-columns:repeat(4,1fr)">
       ${[[0.5,'scaleHalf'],[1,'scaleOne'],[1.5,'scaleOneHalf'],[2,'scaleTwo']].map(([v,k])=>
@@ -7429,8 +7733,10 @@ function pickScale(v){
 
 async function logDish(dishId){
   const scale=Number(document.querySelector('.scale-chip.active')?.dataset.scale||1);
+  const eatenAt=parseWhenInput('dishWhen');
+  if(eatenAt.getTime()>Date.now()+60000) return alert(t('food.errFuture'));
   const {data,error}=await sb.rpc('skandi_create_meal_from_dish',{
-    p_dish_id:dishId,p_meal_type:$('dishMealType').value,p_scale:scale
+    p_dish_id:dishId,p_meal_type:$('dishMealType').value,p_scale:scale,p_eaten_at:eatenAt.toISOString()
   });
   if(error) return alert(error.message);
   closeModal();
@@ -7481,7 +7787,9 @@ function openFoodPortion(foodId,mealId){
     <input id="portionGrams" class="field" type="number" min="1" max="5000" inputmode="numeric" value="${preset}" oninput="previewPortion('${foodId}')">
     <p id="portionPreview" class="muted" style="margin-top:8px"></p>
     ${mealId?'':`<label class="eyebrow">${esc(t('food.mealType'))}</label>
-    <select id="portionMealType" class="field left">${MEAL_TYPES.map(v=>`<option value="${v}" ${v===guessMealType()?'selected':''}>${esc(mealTypeLabel(v))}</option>`).join('')}</select>`}
+    <select id="portionMealType" class="field left">${MEAL_TYPES.map(v=>`<option value="${v}" ${v===guessMealType()?'selected':''}>${esc(mealTypeLabel(v))}</option>`).join('')}</select>
+    <label class="eyebrow">${esc(t('food.when'))}</label>
+    <input id="portionWhen" class="field" type="datetime-local" value="${toLocalDatetimeValue(new Date())}" max="${toLocalDatetimeValue(new Date())}">`}
     <button class="btn primary" style="width:100%;margin-top:12px" onclick="addFoodPortion('${foodId}',${mealId?`'${mealId}'`:'null'})">${esc(t('food.addToMeal'))}</button>`;
   previewPortion(foodId);
 }
@@ -7497,13 +7805,16 @@ async function addFoodPortion(foodId,mealId){
   if(!grams||grams<=0) return alert(t('food.errGrams'));
   let target=mealId;
   if(!target){
+    const eatenAt=parseWhenInput('portionWhen');
+    if(eatenAt.getTime()>Date.now()+60000) return alert(t('food.errFuture'));
     const food=state.foods.find(f=>f.id===foodId);
     const {data:meal,error}=await sb.from('skandi_meals').insert({
       user_id:state.user.id,
       meal_type:$('portionMealType').value,
       note:food?food.name:null,
       input_kind:'manual',
-      analysis_status:'manual'
+      analysis_status:'manual',
+      eaten_at:eatenAt.toISOString()
     }).select().single();
     if(error) return alert(error.message);
     target=meal.id;
@@ -7594,6 +7905,19 @@ async function lookupBarcode(){
 
 // ---- Detalle y corrección ----
 
+// Corregir cuándo se comió algo, después del hecho — el hueco original que esta ronda de
+// cambios cierra: antes no había forma de arreglar una comida que quedó en el día equivocado.
+async function updateMealEatenAt(mealId,value){
+  const d=new Date(value);
+  if(Number.isNaN(d.getTime())) return;
+  if(d.getTime()>Date.now()+60000) return alert(t('food.errFuture'));
+  const {error}=await sb.from('skandi_meals').update({eaten_at:d.toISOString()}).eq('id',mealId);
+  if(error) return alert(error.message);
+  await loadNutrition();
+  render();
+  openMealDetail(mealId);
+}
+
 function openMealDetail(mealId){
   const meal=state.meals.find(m=>m.id===mealId);
   if(!meal) return;
@@ -7607,6 +7931,8 @@ function openMealDetail(mealId){
     <div class="row"><h1>${esc(meal.note||mealTypeLabel(meal.meal_type))}</h1><button class="x" onclick="closeModal()" aria-label="${esc(t('common.close'))}">${icon('close',20)}</button></div>
     <div class="row"><span class="pill dark">${esc(mealTypeLabel(meal.meal_type))}</span><span class="pill dark">${esc(venueLabel(meal.venue))}</span>
       <span class="pill">${Math.round(totals.kcal)} kcal</span></div>
+    <label class="eyebrow" style="margin-top:10px">${esc(t('food.changeTime'))}</label>
+    <input class="field" type="datetime-local" value="${toLocalDatetimeValue(meal.eaten_at)}" max="${toLocalDatetimeValue(new Date())}" onchange="updateMealEatenAt('${mealId}',this.value)">
     ${(meal.analysis_status==='failed'||(meal.analysis_status==='pending'&&Date.now()-new Date(meal.created_at||meal.eaten_at).getTime()>STALE_PENDING_MS))?`<section class="card" style="border-color:rgba(212,72,84,.3);background:#fff7f7;margin-top:10px">
       <strong style="color:var(--pink)">${esc(t('food.failed'))}</strong>
       <p class="muted" style="margin-top:4px">${esc(meal.analysis_error||'')}</p>
@@ -7652,10 +7978,16 @@ async function updateItemGrams(itemId,value){
   const grams=Number(value);
   if(!grams||grams<=0) return alert(t('food.errGrams'));
   const next=SkandiNutrition.rescaleItem(item,grams);
-  const {error}=await sb.from('skandi_meal_items').update({
-    grams:next.grams,kcal:next.kcal,protein_g:next.protein_g,carbs_g:next.carbs_g,fat_g:next.fat_g,fiber_g:next.fiber_g,
+  const base={
+    grams:next.grams,kcal:next.kcal,protein_g:next.protein_g,carbs_g:next.carbs_g,fat_g:next.fat_g,fiber_g:next.fiber_g,sugar_g:next.sugar_g,
     source:'manual'
-  }).eq('id',itemId);
+  };
+  const {error}=await writeToleratingMissingColumn(
+    withCol=>sb.from('skandi_meal_items')
+      .update(withCol?{...base,added_sugar_g:next.added_sugar_g}:base)
+      .eq('id',itemId),
+    'added_sugar_g'
+  );
   if(error) return alert(error.message);
   await rememberFood(next);
   await loadNutrition();
@@ -7667,11 +7999,15 @@ async function rememberFood(item){
   if(item.is_cooking_fat||item.food_id) return;
   const food=SkandiNutrition.itemToFood(item);
   if(!food||!food.name) return;
+  const base={...omit(food,'added_sugar_100g'),user_id:state.user.id,source:'manual',brand:null};
   // onConflict con el índice único (usuario, nombre, marca) de la migración 073: corregir dos
   // veces el mismo alimento lo actualiza en vez de llenar el catálogo de duplicados.
-  await sb.from('skandi_foods').upsert(
-    {...food,user_id:state.user.id,source:'manual',brand:null},
-    {onConflict:'user_id,name,brand',ignoreDuplicates:false}
+  await writeToleratingMissingColumn(
+    withCol=>sb.from('skandi_foods').upsert(
+      withCol?{...base,added_sugar_100g:food.added_sugar_100g}:base,
+      {onConflict:'user_id,name,brand',ignoreDuplicates:false}
+    ),
+    'added_sugar_100g'
   );
 }
 
@@ -7726,7 +8062,7 @@ function openTargets(){
       <div><label class="eyebrow">${esc(t('food.fat'))}</label><input id="tgF" class="field" type="number" min="0" max="400" value="${tg?.fat_g_target||''}"></div>
     </div>
     <label class="eyebrow">${esc(t('food.targetSugar'))}</label>
-    <input id="tgS" class="field" type="number" min="0" max="500" inputmode="numeric" value="${tg?.sugar_g_target??''}">
+    <input id="tgS" class="field" type="number" min="0" max="500" inputmode="numeric" value="${tg?.added_sugar_g_target??tg?.sugar_g_target??''}">
     <p class="muted" style="font-size:12px;margin-top:6px">${esc(t('food.sugarHint'))}</p>
     <p class="muted" style="font-size:12px;margin-top:10px">${esc(t('food.targetHint'))}</p>
     <button class="btn primary" style="width:100%;margin-top:10px" onclick="saveTargets()">${esc(t('food.save'))}</button>`;
@@ -7751,18 +8087,26 @@ function fillSuggestedTargets(){
 async function saveTargets(){
   const kcal=Number($('tgKcal').value);
   if(!kcal||kcal<800||kcal>8000) return alert(t('food.errGrams'));
-  const {error}=await sb.from('skandi_nutrition_targets').upsert({
+  // Vacío significa "no me lo vigiles", que no es lo mismo que un techo de cero.
+  const sugarCap=$('tgS').value===''?null:Math.round(Number($('tgS').value));
+  const base={
     user_id:state.user.id,
     mode:$('tgMode').value,
     kcal_target:Math.round(kcal),
     protein_g_target:Math.round(Number($('tgP').value)||0),
     carbs_g_target:Math.round(Number($('tgC').value)||0),
     fat_g_target:Math.round(Number($('tgF').value)||0),
-    // Vacío significa "no me lo vigiles", que no es lo mismo que un techo de cero.
-    sugar_g_target:$('tgS').value===''?null:Math.round(Number($('tgS').value)),
+    sugar_g_target:sugarCap,
     activity_factor:Number($('tgActivity').value),
     updated_at:new Date().toISOString()
-  },{onConflict:'user_id'});
+  };
+  // El mismo campo de la UI escribe las dos columnas: sugar_g_target por si la migración 089
+  // no se ha corrido, added_sugar_g_target (el techo real, azúcar añadida) en cuanto exista.
+  const {error}=await writeToleratingMissingColumn(
+    withCol=>sb.from('skandi_nutrition_targets')
+      .upsert(withCol?{...base,added_sugar_g_target:sugarCap}:base,{onConflict:'user_id'}),
+    'added_sugar_g_target'
+  );
   if(error) return alert(error.message);
   closeModal();
   await loadNutrition();

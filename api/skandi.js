@@ -100,7 +100,9 @@ Catálogo: si un alimento del catálogo del usuario coincide con lo que ves o le
 
 Los macros de cada renglón van en gramos absolutos para la porción estimada, no por 100 g. Las kcal deben ser coherentes con los macros (proteína 4, carbohidratos 4, grasa 9 kcal/g).
 
-sugar_g es la parte de carbs_g que son azúcares (los del refresco, el pan dulce, la salsa BBQ, la fruta), NO un macro aparte: ya va contado dentro de carbs_g y no debe sumarse otra vez a las kcal. En algo sin azúcar añadida ni fruta, es 0.
+sugar_g es la parte de carbs_g que son azúcares TOTALES (los del refresco, el pan dulce, la salsa BBQ, Y los de la fruta entera o la lactosa del yogurt natural), NO un macro aparte: ya va contado dentro de carbs_g y no debe sumarse otra vez a las kcal. En algo sin azúcar en absoluto, es 0.
+
+added_sugar_g es la parte de sugar_g que es azúcar AÑADIDA — la que agregó una persona o un proceso industrial, no la que trae el alimento de por sí. Un plátano o una manzana enteros: sugar_g alto, added_sugar_g = 0 (es fructosa propia de la fruta, con fibra y agua). Un refresco, pan dulce, cereal azucarado, salsa BBQ, miel o azúcar de mesa agregada al café: cuenta como added_sugar_g, y nunca puede ser mayor que sugar_g de ese mismo renglón. La leche o el yogurt natural sin endulzar: su lactosa es sugar_g pero NO added_sugar_g. Cuando dudes entre 0 y un valor bajo, prefiere 0: es mejor no acusar que inventar.
 
 Si no hay comida que estimar (la foto no es comida, o el texto no describe alimentos), devuelve is_food=false con items vacío y di por qué en notes.`;
 
@@ -123,12 +125,13 @@ const MEAL_SCHEMA = {
           carbs_g: { type: 'number' },
           fat_g: { type: 'number' },
           fiber_g: { type: 'number' },
-          sugar_g: { type: 'number', description: 'azúcares del renglón, ya incluidos dentro de carbs_g' },
+          sugar_g: { type: 'number', description: 'azúcares TOTALES del renglón (incluye los de la fruta/lactosa), ya incluidos dentro de carbs_g' },
+          added_sugar_g: { type: 'number', description: 'la parte de sugar_g que es azúcar añadida, no la propia del alimento. <= sugar_g' },
           confidence: { type: 'number' },
           catalog_id: { type: 'string', description: 'id del alimento del catálogo, o cadena vacía' },
           is_cooking_fat: { type: 'boolean', description: 'true solo para el renglón de aceite/grasa de cocción' },
         },
-        required: ['label', 'grams', 'kcal', 'protein_g', 'carbs_g', 'fat_g', 'fiber_g', 'sugar_g', 'confidence', 'catalog_id', 'is_cooking_fat'],
+        required: ['label', 'grams', 'kcal', 'protein_g', 'carbs_g', 'fat_g', 'fiber_g', 'sugar_g', 'added_sugar_g', 'confidence', 'catalog_id', 'is_cooking_fat'],
         additionalProperties: false,
       },
     },
@@ -331,6 +334,10 @@ async function analyzeMeal(req, res) {
       fat_g: clamp(item.fat_g, 1000),
       fiber_g: clamp(item.fiber_g, 1000),
       sugar_g: clamp(item.sugar_g, 1000),
+      // Nunca más azúcar añadida que azúcar total: si el modelo se contradice, el total manda.
+      // Esta clave la ignora skandi_save_meal_items mientras no se haya corrido la migración
+      // 089 (jsonb con una clave de más no rompe nada); en cuanto se corra, empieza a usarse.
+      added_sugar_g: Math.min(clamp(item.added_sugar_g, 1000), clamp(item.sugar_g, 1000)),
       // Solo aceptamos un id que de verdad esté en el catálogo que le mandamos: un id
       // inventado rompería la llave foránea y tiraría el insert completo.
       food_id: catalogIds.has(item.catalog_id) ? item.catalog_id : '',
@@ -406,6 +413,161 @@ async function analyzeMeal(req, res) {
     }
     if (retryable) return res.status(502).json({ error: 'ai_connection', message: 'La conexión con la IA se interrumpió.', retryable: true });
     return fail(res, 500, 'server_error', 'No pudimos analizar la foto. Intenta de nuevo.');
+  }
+}
+
+
+// ── Sugerencia de qué comer ──────────────────────────────────────────────────
+//
+// "Qué cocinar para completar tus macros" y "ejemplos concretos antes/después de entrenar"
+// (el backlog "más adelante" original) — ambas son tareas de creatividad acotada por números,
+// justo lo que un prompt hace bien y una fórmula no. Comparte la misma cuota diaria que el
+// análisis de fotos: es texto sin imagen, más barato, no amerita un tope aparte ni una
+// migración nueva solo por esto.
+//
+// Los macros restantes, el entrenamiento del día y el catálogo frecuente ya los calculó el
+// cliente (dayRecommendation/plannedSessions en skandi-nutrition.js, sobre datos que ya tenía
+// cargados) — recalcularlos aquí sería repetir esa lógica con el riesgo de que el "hoy" del
+// servidor no coincida con el "hoy" del cliente (el barco cambia de zona horaria; el cliente
+// ya resuelve eso con su reloj local). Los números que manda el cliente solo entran a un
+// prompt de texto para ÉL MISMO, nunca se guardan ni se muestran a nadie más, así que no hay
+// nada que ganar falseándolos.
+const SUGGEST_SYSTEM_PROMPT = `Eres un nutriólogo deportivo ayudando a un atleta en Mazatlán, México, a decidir qué comer hoy.
+
+Te doy: cuánto le falta de cada macro hoy, su entrenamiento de hoy si tiene, y una lista de platillos/alimentos que él normalmente prepara o come (su catálogo personal).
+
+Reglas:
+- Da cantidades y alimentos reales ("dos tortillas con miel y un plátano"), nunca solo el número de macro ("30 g de carbos"). Un atleta no cocina gramos, cocina comida.
+- Si algo de su catálogo encaja con lo que le falta, menciónalo por nombre — es gratis e instantáneo de registrar, mejor que inventar una receta nueva. Si nada encaja bien, sugiere algo simple y común en México con ingredientes de despensa normal.
+- Piensa en comida mexicana de casa y de fonda: huevos, frijoles, arroz, pollo, atún, avena, tortillas, fruta — no en productos gourmet ni suplementos.
+- Sé breve: 1-3 frases por campo, consejo accionable, no un ensayo.
+- Si no tiene entrenamiento hoy, pre_workout y post_workout van como cadena vacía.
+- Si ya no le falta ningún macro relevante hoy, dilo en cook_suggestion en vez de inventar algo que comer.`;
+
+const SUGGEST_SCHEMA = {
+  type: 'object',
+  properties: {
+    cook_suggestion: { type: 'string', description: 'Qué preparar o comer para completar los macros que faltan hoy' },
+    pre_workout: { type: 'string', description: 'Ejemplo concreto de qué comer antes del entrenamiento de hoy, o cadena vacía si no aplica' },
+    post_workout: { type: 'string', description: 'Ejemplo concreto de qué comer después del entrenamiento de hoy, o cadena vacía si no aplica' },
+  },
+  required: ['cook_suggestion', 'pre_workout', 'post_workout'],
+  additionalProperties: false,
+};
+
+// El cliente manda números y nombres cortos, nunca prosa libre: no hay campo de texto abierto
+// en este formulario, así que no hace falta defenderse de inyección de prompt, solo de un
+// payload absurdo (arrays gigantes, strings kilométricos) que infle el costo del token.
+function clampMacro(v) {
+  const n = Number(v);
+  return Number.isFinite(n) ? Math.max(-5000, Math.min(5000, Math.round(n))) : 0;
+}
+function clampNames(list, max) {
+  return (Array.isArray(list) ? list : [])
+    .slice(0, max)
+    .map(s => String(s || '').trim().slice(0, 60))
+    .filter(Boolean);
+}
+
+async function suggestMeal(req, res) {
+  const apiKey = process.env.ANTHROPIC_API_KEY;
+  if (!apiKey) return fail(res, 500, 'missing_api_key',
+    'Falta ANTHROPIC_API_KEY en Vercel, o el deployment es anterior a haberla guardado. Revisa que esté marcada para Production y haz Redeploy.');
+  if (!process.env.SUPABASE_URL || !process.env.SUPABASE_SERVICE_ROLE_KEY) {
+    return fail(res, 500, 'missing_supabase_env', 'Falta configurar SUPABASE_URL / SUPABASE_SERVICE_ROLE_KEY.');
+  }
+
+  let userId = null;
+  let quotaSpent = false;
+
+  try {
+    userId = await requireUser(req, res);
+    if (!userId) return;
+
+    const body = req.body || {};
+    const remaining = {
+      kcal: clampMacro(body.remaining && body.remaining.kcal),
+      protein_g: clampMacro(body.remaining && body.remaining.protein_g),
+      carbs_g: clampMacro(body.remaining && body.remaining.carbs_g),
+      fat_g: clampMacro(body.remaining && body.remaining.fat_g),
+    };
+    const sessions = (Array.isArray(body.sessions) ? body.sessions : []).slice(0, 3).map(s => ({
+      kind: s && s.kind === 'strength' ? 'strength' : 'endurance',
+      name: String((s && (s.name || s.activity_type)) || '').trim().slice(0, 60),
+      minutes: clampMacro(s && s.minutes),
+      distance_km: s && s.distance_km ? clampMacro(s.distance_km) : null,
+    })).filter(s => s.minutes > 0);
+    const catalog = clampNames(body.catalog, 20);
+
+    if (remaining.kcal === 0 && remaining.protein_g === 0 && remaining.carbs_g === 0
+      && remaining.fat_g === 0 && !sessions.length) {
+      return fail(res, 400, 'no_input', 'No hay macros ni entrenamiento que considerar todavía.');
+    }
+
+    const limit = dailyLimit();
+    const { data: calls, error: quotaError } = await supabase
+      .rpc('skandi_bump_ai_usage', { p_user: userId, p_limit: limit });
+    if (quotaError) {
+      if (/function .* does not exist/i.test(quotaError.message)) {
+        return fail(res, 500, 'missing_migration', 'Falta correr la migración 074_skandi_ai_quota_rpc.sql en Supabase.');
+      }
+      throw quotaError;
+    }
+    if (calls === -1) {
+      return fail(res, 429, 'quota_exceeded', `Llegaste al tope de ${limit} análisis por día. Vuelve a intentar mañana.`);
+    }
+    quotaSpent = true;
+
+    const lines = [
+      `Le faltan hoy: ${remaining.kcal} kcal, ${remaining.protein_g} g de proteína, ${remaining.carbs_g} g de carbos, ${remaining.fat_g} g de grasa (negativo significa que ya se pasó de ese macro).`,
+      sessions.length
+        ? `Entrenamiento de hoy: ${sessions.map(s => s.kind === 'strength'
+            ? `${s.name || 'sesión de fuerza'} (${s.minutes} min)`
+            : `${s.name || 'cardio'}${s.distance_km ? ` de ${s.distance_km} km` : ''} (${s.minutes} min)`).join('; ')}.`
+        : 'Hoy no tiene entrenamiento programado ni registrado.',
+      catalog.length
+        ? `Su catálogo (platillos y alimentos que ya prepara seguido): ${catalog.join(', ')}.`
+        : 'Todavía no tiene platillos ni alimentos guardados en su catálogo.',
+    ];
+
+    const anthropic = new Anthropic({ apiKey, timeout: AI_TIMEOUT_MS, maxRetries: 0 });
+    const response = await anthropic.messages.create({
+      model: process.env.MEAL_AI_MODEL || DEFAULT_MODEL,
+      max_tokens: 800,
+      system: SUGGEST_SYSTEM_PROMPT,
+      output_config: { effort: 'low', format: { type: 'json_schema', schema: SUGGEST_SCHEMA } },
+      messages: [{ role: 'user', content: [{ type: 'text', text: lines.join(' ') }] }],
+    });
+
+    if (response.stop_reason === 'refusal') {
+      return fail(res, 422, 'refused', 'El modelo no pudo generar una sugerencia. Intenta de nuevo.');
+    }
+    const textBlock = response.content.find(b => b.type === 'text');
+    if (!textBlock) return fail(res, 502, 'empty_response', 'La sugerencia vino vacía. Intenta de nuevo.');
+    const parsed = JSON.parse(textBlock.text);
+
+    return res.status(200).json({
+      ok: true,
+      cook_suggestion: String(parsed.cook_suggestion || '').slice(0, 500),
+      pre_workout: String(parsed.pre_workout || '').slice(0, 300),
+      post_workout: String(parsed.post_workout || '').slice(0, 300),
+      quota: { used: calls, limit },
+    });
+  } catch (err) {
+    console.error('[skandi/meal-suggestion] failed', { userId, name: err && err.name, message: err && err.message });
+    if (quotaSpent && userId) {
+      try { await supabase.rpc('skandi_refund_ai_usage', { p_user: userId }); } catch { /* mejor esfuerzo */ }
+    }
+    if (err instanceof Anthropic.RateLimitError) {
+      return res.status(429).json({ error: 'ai_rate_limited', message: 'La IA está saturada ahora mismo. Intenta de nuevo en un momento.', retryable: true });
+    }
+    if (err instanceof Anthropic.AuthenticationError) {
+      return fail(res, 500, 'bad_api_key', 'La ANTHROPIC_API_KEY de Vercel no es válida.');
+    }
+    if (err instanceof Anthropic.APIError) {
+      return res.status(502).json({ error: 'ai_error', message: `La IA respondió con un error (${err.status}).` });
+    }
+    return fail(res, 500, 'server_error', 'No pudimos generar una sugerencia. Intenta de nuevo.');
   }
 }
 
@@ -1465,6 +1627,7 @@ module.exports = async function handler(req, res) {
 
   if (action === 'barcode') return lookupBarcode(req, res);
   if (action === 'analyze') return analyzeMeal(req, res);
+  if (action === 'meal-suggestion') return suggestMeal(req, res);
   if (action === 'strava-connect') return stravaConnect(req, res);
   if (action === 'strava-sync') return stravaSync(req, res);
   if (action === 'strava-disconnect') return stravaDisconnect(req, res);

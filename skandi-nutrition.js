@@ -79,7 +79,10 @@ function kcalFromMacros(protein, carbs, fat) {
 // trigger de la base, repetida aquí porque la UI suma en vivo mientras editas, antes de que
 // nada llegue al servidor.
 function itemsTotal(items) {
-  const total = { kcal: 0, protein_g: 0, carbs_g: 0, fat_g: 0, fiber_g: 0, sugar_g: 0 };
+  // added_sugar_g llega undefined en todo renglón leído antes de correr la migración 089 (la
+  // columna no existe todavía): num() lo convierte en 0, así que la suma es correcta con o sin
+  // la migración corrida, y se pone al día sola en cuanto exista la columna.
+  const total = { kcal: 0, protein_g: 0, carbs_g: 0, fat_g: 0, fiber_g: 0, sugar_g: 0, added_sugar_g: 0 };
   (items || []).forEach(it => {
     if (it && it.included === false) return;
     total.kcal += num(it.kcal);
@@ -88,6 +91,7 @@ function itemsTotal(items) {
     total.fat_g += num(it.fat_g);
     total.fiber_g += num(it.fiber_g);
     total.sugar_g += num(it.sugar_g);
+    total.added_sugar_g += num(it.added_sugar_g);
   });
   Object.keys(total).forEach(k => { total[k] = Math.round(total[k] * 10) / 10; });
   return total;
@@ -96,7 +100,7 @@ function itemsTotal(items) {
 function dayTotals(meals) {
   return itemsTotal((meals || []).map(m => ({
     kcal: m.kcal, protein_g: m.protein_g, carbs_g: m.carbs_g, fat_g: m.fat_g,
-    fiber_g: m.fiber_g, sugar_g: m.sugar_g
+    fiber_g: m.fiber_g, sugar_g: m.sugar_g, added_sugar_g: m.added_sugar_g
   })));
 }
 
@@ -111,7 +115,9 @@ function remaining(targets, totals) {
     fat_g: round(num(targets.fat_g_target) - num(totals.fat_g)),
     // El azúcar es un techo, no una meta: aquí "restante" significa cuánto te queda antes de
     // pasarte. Sin techo definido no hay nada que comparar.
-    sugar_g: targets.sugar_g_target == null ? null : round(num(targets.sugar_g_target) - num(totals.sugar_g))
+    sugar_g: targets.sugar_g_target == null ? null : round(num(targets.sugar_g_target) - num(totals.sugar_g)),
+    added_sugar_g: targets.added_sugar_g_target == null ? null
+      : round(num(targets.added_sugar_g_target) - num(totals.added_sugar_g))
   };
 }
 
@@ -136,7 +142,8 @@ function scaleFood(food, grams) {
     carbs_g: cap(food.carbs_100g, 1000),
     fat_g: cap(food.fat_100g, 1000),
     fiber_g: cap(food.fiber_100g, 1000),
-    sugar_g: cap(food.sugar_100g, 1000)
+    sugar_g: cap(food.sugar_100g, 1000),
+    added_sugar_g: cap(food.added_sugar_100g, 1000)
   };
 }
 
@@ -156,7 +163,8 @@ function rescaleItem(item, newGrams) {
     carbs_g: cap(item.carbs_g, 1000),
     fat_g: cap(item.fat_g, 1000),
     fiber_g: cap(item.fiber_g, 1000),
-    sugar_g: cap(item.sugar_g, 1000)
+    sugar_g: cap(item.sugar_g, 1000),
+    added_sugar_g: cap(item.added_sugar_g, 1000)
   });
 }
 
@@ -174,6 +182,7 @@ function itemToFood(item) {
     fat_100g: Math.min(per100(item.fat_g), 100),
     fiber_100g: Math.min(per100(item.fiber_g), 100),
     sugar_100g: Math.min(per100(item.sugar_g), 100),
+    added_sugar_100g: Math.min(per100(item.added_sugar_g), 100),
     serving_grams: Math.round(g * 10) / 10
   };
 }

@@ -84,7 +84,13 @@ Key routes:
   `skandi_meal_items`; the photo is pulled from the private bucket with service-role and the daily
   quota is enforced in the DB (`skandi_bump_ai_usage`, migration 074), never in the client. Needs
   `ANTHROPIC_API_KEY`. `{action:'barcode'}`: barcode → Open Food Facts → a `skandi_foods` row, **no
-  AI and no quota** — a packaged product ships its own macros. Both take a Supabase JWT.
+  AI and no quota** — a packaged product ships its own macros. `{action:'meal-suggestion'}`: today's
+  remaining macros, today's planned/logged training and the member's saved-dish/food catalog (all
+  already computed client-side by `skandi-nutrition.js`, never recomputed server-side — the client
+  owns "today" because the boat changes time zones) → Claude (text-only, same JSON-Schema pattern,
+  no image) → a cook-to-close-the-day suggestion plus concrete pre/post-workout food examples.
+  Shares the same daily quota as `analyze`; nothing it returns is persisted. All three take a
+  Supabase JWT.
   Then Strava (migration 081): `strava-connect` returns the authorize URL with an **HMAC-signed
   `state`** — the callback arrives with no session, so the signed state is the only thing saying
   whose `code` it is; `strava-callback` (GET, via rewrite) exchanges it and stores the tokens;
