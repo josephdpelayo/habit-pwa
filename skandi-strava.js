@@ -60,12 +60,12 @@ function mapActivityType(activity){
 //   1. perceived_exertion — el atleta lo tecleó en Strava. Nada le gana a eso.
 //   2. %FCmáx — objetivo, comparable entre personas, es la ruta normal con reloj.
 //   3. 5 y una marca de "revísalo" — nunca un número inventado que se vea como medido.
-function deriveIntensity(activity, maxHeartRate){
+function deriveIntensity(activity, maxHeartRate, zoneBounds){
   const rpe = Number(activity.perceived_exertion);
   if (rpe >= 1 && rpe <= 10) {
     return { intensity: Math.round(rpe), source: 'manual' };
   }
-  const fromHr = Recovery.heartRateIntensity(activity.average_heartrate, maxHeartRate);
+  const fromHr = Recovery.heartRateIntensity(activity.average_heartrate, maxHeartRate, zoneBounds);
   if (fromHr !== null && fromHr !== undefined) {
     return { intensity: Math.round(fromHr), source: 'heart_rate' };
   }
@@ -85,7 +85,7 @@ function clampInt(value, min, max){
 
 // Devuelve la fila lista para upsert, o null si la actividad no debe importarse.
 // `maxHeartRate` es opcional: sin ella la intensidad cae a bandas absolutas de bpm.
-function toActivityRow(activity, { userId, maxHeartRate } = {}){
+function toActivityRow(activity, { userId, maxHeartRate, hrZones } = {}){
   if (!activity || !activity.id || isSkipped(activity)) return null;
 
   // moving_time y no elapsed_time: el semáforo en el que estuviste parado no fatiga nada.
@@ -96,7 +96,7 @@ function toActivityRow(activity, { userId, maxHeartRate } = {}){
   const meters = Number(activity.distance) || 0;
   const distanceKm = meters > 0 ? Math.min(1000, round(meters / 1000, 2)) : null;
 
-  const { intensity, source } = deriveIntensity(activity, maxHeartRate);
+  const { intensity, source } = deriveIntensity(activity, maxHeartRate, hrZones);
 
   return {
     user_id: userId,

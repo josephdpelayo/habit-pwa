@@ -665,10 +665,15 @@ async function stravaGet(token, path, params) {
   return r.json();
 }
 
-async function maxHeartRateOf(userId) {
-  const { data } = await supabase
-    .from('skandi_settings').select('max_heart_rate').eq('user_id', userId).maybeSingle();
-  return (data && data.max_heart_rate) || null;
+// FC máxima + las zonas copiadas del reloj (migración 087). Van juntas porque quien traduce
+// pulsaciones a esfuerzo necesita las dos, y pedirlas por separado eran dos viajes a la base.
+async function effortRefsOf(userId) {
+  const { data } = await supabase.from('skandi_settings')
+    .select('max_heart_rate,hr_zone_bounds').eq('user_id', userId).maybeSingle();
+  return {
+    maxHeartRate: (data && data.max_heart_rate) || null,
+    hrZones: (data && data.hr_zone_bounds) || null,
+  };
 }
 
 // Guarda un lote de actividades de Strava. Devuelve el conteo de lo que hizo con cada una.
@@ -678,9 +683,9 @@ async function maxHeartRateOf(userId) {
 // ciego borraría esa corrección cada vez que Strava reenvía la misma actividad. Lo que Strava
 // sí sabe mejor —distancia, tiempo, desnivel, nombre— se actualiza siempre.
 async function importStravaActivities(userId, activities) {
-  const maxHeartRate = await maxHeartRateOf(userId);
+  const { maxHeartRate, hrZones } = await effortRefsOf(userId);
   const rows = (activities || [])
-    .map(a => SkandiStrava.toActivityRow(a, { userId, maxHeartRate }))
+    .map(a => SkandiStrava.toActivityRow(a, { userId, maxHeartRate, hrZones }))
     .filter(Boolean);
   const result = { imported: 0, updated: 0, skipped: (activities || []).length - rows.length };
   if (!rows.length) return result;
@@ -1098,9 +1103,9 @@ async function intervalsCredential(userId) {
 }
 
 async function importIntervalsActivities(userId, activities) {
-  const maxHeartRate = await maxHeartRateOf(userId);
+  const { maxHeartRate, hrZones } = await effortRefsOf(userId);
   const rows = (activities || [])
-    .map(activity => SkandiIntervals.toActivityRow(activity, { userId, maxHeartRate }))
+    .map(activity => SkandiIntervals.toActivityRow(activity, { userId, maxHeartRate, hrZones }))
     .filter(Boolean);
   const result = { imported: 0, updated: 0, skipped: (activities || []).length - rows.length };
   if (!rows.length) return result;
@@ -1147,14 +1152,49 @@ async function linkIntervalsStrengthActivities(userId, activities) {
   const from = new Date(Math.min(...starts) - 6 * 3600e3).toISOString();
   const to = new Date(Math.max(...starts) + 30 * 3600e3).toISOString();
   const { data: sessions, error } = await supabase.from('skandi_sessions')
-    .select('id,started_at,completed_at,duration_sec,duration_source,garmin_external_id')
+    .select('id,title,started_at,completed_at,duration_sec,duration_source,garmin_external_id')
     .eq('user_id', userId).not('completed_at', 'is', null)
     .gte('started_at', from).lte('started_at', to);
   if (error) throw new Error(error.message);
 
-  const maxHeartRate = await maxHeartRateOf(userId);
-  const linked = SkandiIntervals.matchStrengthActivities(strength, sessions || [], { maxHeartRate });
+  const { maxHeartRate, hrZones } = await effortRefsOf(userId);
+  const linked = SkandiIntervals.matchStrengthActivities(strength, sessions || [], { maxHeartRate, hrZones });
   for (const { session, metric } of linked.matches) {
+    await applyGarminMetric(userId, session, metric);
+  }
+  // Para cada actividad que no encontró pareja, se ofrecen las sesiones de ESE día que sigan
+  // sin datos del reloj. El emparejador exige solape o inicios cercanos, y con razón: sin esa
+  // exigencia enlazaría cosas al azar. Pero una sesión que se te olvidó cerrar y cerraste
+  // horas después es un caso legítimo que ningún umbral puede distinguir de un error — eso lo
+  // decide una persona, no un algoritmo, así que se le pregunta en vez de tirarlo.
+  const localDay = iso => new Date(iso).toLocaleDateString('en-CA', { timeZone: 'America/Mazatlan' });
+  const detail = linked.unmatched.map(metric => ({
+    external_id: metric.externalId,
+    started_at: metric.startedAt,
+    minutes: Math.round(metric.durationSec / 60),
+    name: metric.activityName,
+    candidates: (sessions || [])
+      .filter(x => !x.garmin_external_id
+        && !linked.matches.some(m => m.session.id === x.id)
+        && localDay(x.started_at) === localDay(metric.startedAt))
+      .map(x => ({
+        id: x.id,
+        title: x.title,
+        started_at: x.started_at,
+        minutes: x.duration_sec ? Math.round(x.duration_sec / 60) : null,
+      })),
+  }));
+
+  return {
+    matched_strength: linked.matches.length,
+    unmatched_strength: linked.unmatched.length,
+    unmatched_strength_detail: detail,
+  };
+}
+
+// El parche que un entrenamiento de fuerza del reloj deja sobre la sesión registrada.
+async function applyGarminMetric(userId, session, metric) {
+  {
     const patch = {
       garmin_external_id: metric.externalId,
       garmin_started_at: metric.startedAt,
@@ -1180,17 +1220,6 @@ async function linkIntervalsStrengthActivities(userId, activities) {
       .update(patch).eq('id', session.id).eq('user_id', userId);
     if (updateError) throw new Error(updateError.message);
   }
-  // El detalle viaja al cliente para que un entrenamiento que el reloj vio y Skandi no
-  // pueda nombrarse (fecha y duración), en vez de desaparecer sin dejar rastro.
-  return {
-    matched_strength: linked.matches.length,
-    unmatched_strength: linked.unmatched.length,
-    unmatched_strength_detail: linked.unmatched.map(metric => ({
-      started_at: metric.startedAt,
-      minutes: Math.round(metric.durationSec / 60),
-      name: metric.activityName,
-    })),
-  };
 }
 
 // El día completo: sueño, pulso en reposo, HRV y pasos. Va aparte de las actividades porque
@@ -1335,6 +1364,54 @@ async function intervalsSync(req, res) {
   }
 }
 
+// Enlace manual: el usuario vio que la actividad del reloj y la sesión son la misma aunque
+// los horarios no cuadren, y lo dice. No se confía en lo que manda el cliente más allá de los
+// dos ids — la actividad se vuelve a pedir a Intervals y la sesión se verifica suya, así que
+// un id ajeno no puede escribir sobre la sesión de nadie más.
+async function intervalsLinkStrength(req, res) {
+  const userId = await requireUser(req, res);
+  if (!userId) return;
+  const externalId = String((req.body && req.body.external_id) || '').trim();
+  const sessionId = String((req.body && req.body.session_id) || '').trim();
+  if (!externalId || !sessionId) return fail(res, 400, 'missing_ids', 'Faltan la actividad o la sesión.');
+
+  let credential;
+  try { credential = await intervalsCredential(userId); }
+  catch (err) { return fail(res, 500, 'read_failed', err.message); }
+  if (!credential) return fail(res, 409, 'not_connected', 'Conecta Intervals.icu primero.');
+
+  const { data: session, error: sessionError } = await supabase.from('skandi_sessions')
+    .select('id,title,started_at,completed_at,duration_sec,duration_source,garmin_external_id')
+    .eq('id', sessionId).eq('user_id', userId).maybeSingle();
+  if (sessionError) return fail(res, 500, 'read_failed', sessionError.message);
+  if (!session) return fail(res, 404, 'no_session', 'Esa sesión no existe o no es tuya.');
+
+  try {
+    const apiKey = decryptIntervalsKey(credential.api_key_ciphertext);
+    const days = Math.min(Number((req.body && req.body.days) || 0) || SYNC_DEFAULT_DAYS, SYNC_MAX_DAYS);
+    const newest = new Date();
+    const oldest = new Date(newest.getTime() - days * 864e5);
+    const date = value => value.toISOString().slice(0, 10);
+    const activities = await intervalsGet(apiKey,
+      `/athlete/${encodeURIComponent(credential.athlete_id)}/activities`, {
+        oldest: date(oldest), newest: date(newest), limit: 1000, fields: INTERVALS_FIELDS,
+      });
+    const activity = (Array.isArray(activities) ? activities : [])
+      .find(a => String(a.id) === externalId);
+    if (!activity) return fail(res, 404, 'no_activity', 'Ya no encuentro esa actividad en Intervals.');
+
+    const { maxHeartRate, hrZones } = await effortRefsOf(userId);
+    const metric = SkandiIntervals.strengthMetrics(activity, { maxHeartRate, hrZones });
+    if (!metric) return fail(res, 400, 'not_strength', 'Esa actividad no es un entrenamiento de fuerza de Garmin.');
+
+    await applyGarminMetric(userId, session, metric);
+    return res.status(200).json({ ok: true, session_id: session.id, external_id: metric.externalId });
+  } catch (err) {
+    console.error('intervals-link-strength error:', err.message);
+    return fail(res, 502, 'intervals_failed', err.message);
+  }
+}
+
 async function intervalsDisconnect(req, res) {
   const userId = await requireUser(req, res);
   if (!userId) return;
@@ -1386,6 +1463,7 @@ module.exports = async function handler(req, res) {
   if (action === 'intervals-connect') return intervalsConnect(req, res);
   if (action === 'intervals-status') return intervalsStatus(req, res);
   if (action === 'intervals-sync') return intervalsSync(req, res);
+  if (action === 'intervals-link-strength') return intervalsLinkStrength(req, res);
   if (action === 'intervals-disconnect') return intervalsDisconnect(req, res);
   return fail(res, 400, 'bad_action', `Acción desconocida: ${action}`);
 };

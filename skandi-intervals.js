@@ -29,7 +29,7 @@ function clampInt(value, min, max) {
   return Number.isFinite(number) && number >= min && number <= max ? number : null;
 }
 
-function strengthMetrics(activity, { maxHeartRate } = {}) {
+function strengthMetrics(activity, { maxHeartRate, hrZones } = {}) {
   if (!isStrengthActivity(activity) || !activity.id) return null;
   const startedAt = activity.start_date || activity.start_date_local;
   const startMs = new Date(startedAt).getTime();
@@ -41,7 +41,7 @@ function strengthMetrics(activity, { maxHeartRate } = {}) {
   const effort = Strava.deriveIntensity({
     perceived_exertion: rpeOf(activity),
     average_heartrate: activity.average_heartrate,
-  }, maxHeartRate || activity.athlete_max_hr || null);
+  }, maxHeartRate || activity.athlete_max_hr || null, hrZones);
   return {
     externalId: String(activity.id),
     startedAt: new Date(startMs).toISOString(),
@@ -59,8 +59,8 @@ function strengthMetrics(activity, { maxHeartRate } = {}) {
 // Devuelve parejas inequívocas actividad↔sesión. Una actividad ya enlazada conserva su
 // sesión; para una nueva se exige solapamiento o inicios a <= 90 minutos. Cada sesión solo
 // puede consumir una actividad Garmin.
-function matchStrengthActivities(activities, sessions, { maxHeartRate } = {}) {
-  const metrics = (activities || []).map(a => strengthMetrics(a, { maxHeartRate })).filter(Boolean);
+function matchStrengthActivities(activities, sessions, { maxHeartRate, hrZones } = {}) {
+  const metrics = (activities || []).map(a => strengthMetrics(a, { maxHeartRate, hrZones })).filter(Boolean);
   const available = (sessions || []).filter(s => s && s.id && s.completed_at);
   const used = new Set();
   const matches = [];
@@ -101,7 +101,7 @@ function matchStrengthActivities(activities, sessions, { maxHeartRate } = {}) {
   return { matches, unmatched, strengthActivities: metrics.length };
 }
 
-function toActivityRow(activity, { userId, maxHeartRate } = {}) {
+function toActivityRow(activity, { userId, maxHeartRate, hrZones } = {}) {
   if (!activity || !activity.id || !isGarminActivity(activity) || isStrengthActivity(activity)) return null;
   const start = activity.start_date || activity.start_date_local;
   if (!start || Number.isNaN(new Date(start).getTime())) return null;
@@ -115,6 +115,7 @@ function toActivityRow(activity, { userId, maxHeartRate } = {}) {
   const row = Strava.toActivityRow(normalized, {
     userId,
     maxHeartRate: maxHeartRate || activity.athlete_max_hr || null,
+    hrZones,
   });
   if (!row) return null;
   return {

@@ -72,9 +72,28 @@ const HR_BANDS = [[110, 3], [130, 5], [150, 6.5], [170, 8]];
 const HR_TOP_INTENSITY = 9.5;
 const HR_MAX_REFERENCE = 190;
 
-function heartRateIntensity(bpm, maxHeartRate){
+// Intensidad 1-10 por zona, de Z1 a Z5. Son los mismos números que ya usaban las bandas
+// relativas, así que estrenar las zonas del reloj no reescribe la historia por capricho:
+// solo corrige dónde caen las fronteras.
+const ZONE_INTENSITY = [3, 5, 6.5, 8, 9.5];
+
+// zoneBounds = pisos de Z2, Z3, Z4 y Z5 en ppm (migración 087), copiados del reloj. Cuando
+// existen mandan sobre el porcentaje de FC máxima: vienen de una prueba de umbral, no de una
+// fórmula, y la diferencia no es cosmética — con FCmáx 193 las bandas relativas metían un
+// rodaje suave de 140-150 ppm en la misma casilla que 160.
+function zoneOf(bpm, zoneBounds){
+  if (!Array.isArray(zoneBounds) || zoneBounds.length !== 4) return null;
+  const b = zoneBounds.map(Number);
+  if (!b.every(n => Number.isFinite(n) && n > 0)) return null;
+  for (let i = 0; i < 4; i++) if (bpm < b[i]) return i + 1;   // Z1..Z4
+  return 5;
+}
+
+function heartRateIntensity(bpm, maxHeartRate, zoneBounds){
   bpm = Number(bpm) || 0;
   if (!bpm) return null;
+  const zone = zoneOf(bpm, zoneBounds);
+  if (zone) return ZONE_INTENSITY[zone - 1];
   const max = Number(maxHeartRate);
   const reference = max >= 120 && max <= 230 ? max : HR_MAX_REFERENCE;
   const pct = bpm / reference;
@@ -98,17 +117,17 @@ function heartRateIntensity(bpm, maxHeartRate){
 //
 // Heart rate is still derived live rather than read from the stored column, so correcting
 // max_heart_rate repaints every past activity instead of freezing yesterday's estimate.
-function activityStimulusUnits(activity, maxHeartRate){
+function activityStimulusUnits(activity, maxHeartRate, zoneBounds){
   const duration = Number(activity.duration_min) || 0;
   const declared = activity.intensity_source === 'manual' ? Number(activity.intensity) : NaN;
   const intensity = (declared >= 1 && declared <= 10)
     ? declared
-    : (heartRateIntensity(activity.avg_heart_rate, maxHeartRate) ?? (Number(activity.intensity) || 5));
+    : (heartRateIntensity(activity.avg_heart_rate, maxHeartRate, zoneBounds) ?? (Number(activity.intensity) || 5));
   return (duration * intensity) / 150;
 }
 
 // Flatten sets+activities into per-muscle timestamped stimulus events within the lookback window.
-function buildStimulusEvents({ sets, sessions, exercises, activities, userId, now, maxHeartRate }){
+function buildStimulusEvents({ sets, sessions, exercises, activities, userId, now, maxHeartRate, hrZones }){
   const sessionById = new Map((sessions||[]).map(s => [s.id, s]));
   const exerciseById = new Map((exercises||[]).map(e => [e.id, e]));
   const since = now - RECOVERY_LOOKBACK_DAYS * 864e5;
@@ -133,7 +152,7 @@ function buildStimulusEvents({ sets, sessions, exercises, activities, userId, no
     if (userId && a.user_id !== userId) return;
     const t = new Date(a.performed_at).getTime();
     if (!t || t < since || t > now) return;
-    const su = activityStimulusUnits(a, maxHeartRate);
+    const su = activityStimulusUnits(a, maxHeartRate, hrZones);
     const map = ACTIVITY_MUSCLE_MAP[a.activity_type] || ACTIVITY_MUSCLE_MAP.other;
     Object.entries(map).forEach(([muscle, pct]) => {
       events.push({ t, muscle, su: su * pct / 100 });
@@ -174,9 +193,9 @@ function hoursUntilFresh(fatigueNow, muscleName){
 }
 
 // Public entry point: returns rows sorted ascending by score (least-fresh/most-fatigued first).
-function computeMuscleRecovery({ sets, sessions, exercises, activities, userId, now, maxHeartRate }){
+function computeMuscleRecovery({ sets, sessions, exercises, activities, userId, now, maxHeartRate, hrZones }){
   now = now || Date.now();
-  const events = buildStimulusEvents({ sets, sessions, exercises, activities, userId, now, maxHeartRate });
+  const events = buildStimulusEvents({ sets, sessions, exercises, activities, userId, now, maxHeartRate, hrZones });
   const F = muscleFatigueAt(events, now);
   return RECOVERY_MUSCLES.map(name => {
     const f = F.get(name) || 0;
@@ -194,7 +213,7 @@ function computeMuscleRecovery({ sets, sessions, exercises, activities, userId, 
 const SkandiRecovery = {
   MUSCLE_RECOVERY_HOURS, RECOVERY_MUSCLES, ACTIVITY_MUSCLE_MAP,
   RECOVERY_LOOKBACK_DAYS, FRESH_THRESHOLD, HR_MAX_REFERENCE,
-  tauHoursForMuscle, setStimulusUnits, activityStimulusUnits, heartRateIntensity,
+  tauHoursForMuscle, setStimulusUnits, activityStimulusUnits, heartRateIntensity, zoneOf, ZONE_INTENSITY,
   buildStimulusEvents, muscleFatigueAt, freshnessScore, hoursUntilFresh,
   computeMuscleRecovery
 };
