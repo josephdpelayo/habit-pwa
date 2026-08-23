@@ -240,6 +240,25 @@ and nothing else:
   carbs only. `plannedSessions()` + `fuelPlan()` turn that delta into timed advice (carbs before,
   during only for endurance over 75 min, carbs+protein after). A short easy session deliberately
   gets no pre-load — inventing one just pushes the member to eat more
+- `SkandiNutrition.suggestTargets()`'s protein target is **banded by mode**
+  (`PROTEIN_G_PER_KG_BY_MODE = {deficit: 2.0, mantenimiento: 1.6, superavit: 1.8}`), not a flat
+  2.0g/kg — a maintenance or surplus member doesn't need deficit-level protein, and flattening it
+  overstated targets for two of the three modes. Bands follow Morton et al. 2018 and the ENFAF
+  hybrid-training guide (1.4-1.6g/kg typical, up to 2.0-2.2g/kg in deficit or high training
+  volume). `isLowEnergy(kcal, weightKg)` is a separate, deliberately conservative floor
+  (`LOW_ENERGY_KCAL_PER_KG_FLOOR = 24`, referencing RED-S / Mountjoy et al. 2018) — it exists to
+  catch a **manually-typed** kcal target low enough that not even the app's own worst-case
+  deficit would suggest it (`saveTargets()` in skandi.html confirms before saving), not to flag
+  the algorithm's own deficit output. An earlier attempt folded a `lowEnergyWarning` straight into
+  `suggestTargets()`'s return using a 30kcal/kg floor; it fired on nearly every deficit-mode
+  suggestion the app itself generates (a -15% deficit off a typical activity factor already sits
+  ~29kcal/kg) and was removed before shipping
+- Bodyweight (067) is best-effort, not enforced: a normal scale doesn't work at sea, so
+  `latestWeightKg()` (used by `suggestTargets`, targets math, the "add to week" flows) can go
+  stale for weeks. `weightNudgeHtml()` on Home surfaces a low-pressure reminder once the last log
+  is 14+ days old (`WEIGHT_NUDGE_DAYS`) — never blocking, just a tap-through to
+  `openLogBodyweight()`. Tape measurements and progress photos (090) are the mechanism that keeps
+  working when the scale can't
 
 ### Time & Slots
 All time logic uses **America/Mazatlan (UTC−7)**. The constant `MAZ_UTC_OFFSET_H = 7` converts UTC midnight to Mazatlán midnight. A day has 48 slots of 30 minutes. A typical booking is `slots_used = 3` (90 min). Access windows open 10 minutes before a booking's `start_idx`.

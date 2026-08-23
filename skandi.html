@@ -8,16 +8,16 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="Skandi Fit">
 <meta name="application-name" content="Skandi Fit">
-<link rel="manifest" href="/skandi-manifest.json?v=20260823-6">
-<link rel="apple-touch-icon" sizes="180x180" href="/icons/skandi-180.png?v=20260823-6">
-<link rel="icon" type="image/png" sizes="192x192" href="/icons/skandi-192.png?v=20260823-6">
+<link rel="manifest" href="/skandi-manifest.json?v=20260823-7">
+<link rel="apple-touch-icon" sizes="180x180" href="/icons/skandi-180.png?v=20260823-7">
+<link rel="icon" type="image/png" sizes="192x192" href="/icons/skandi-192.png?v=20260823-7">
 <title>Skandi Fit</title>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="/skandi-recovery.js?v=20260823-6"></script>
-<script src="/body-figure.js?v=20260823-6"></script>
-<script src="/skandi-nutrition.js?v=20260823-6"></script>
-<script src="/skandi-load.js?v=20260823-6"></script>
-<script src="/skandi-brief.js?v=20260823-6"></script>
+<script src="/skandi-recovery.js?v=20260823-7"></script>
+<script src="/body-figure.js?v=20260823-7"></script>
+<script src="/skandi-nutrition.js?v=20260823-7"></script>
+<script src="/skandi-load.js?v=20260823-7"></script>
+<script src="/skandi-brief.js?v=20260823-7"></script>
 <style>
 :root{
   --bg:#eef4f8;
@@ -524,7 +524,7 @@ textarea.field{min-height:112px;text-align:left;resize:vertical}
 // Versión compartida con app.html (APP_VERSION) y sw.js (CACHE_VERSION): un solo service
 // worker sirve las dos apps, así que una sola cadena las invalida a las dos. Al cambiarla
 // hay que actualizarla también en los ?v= del <head>, en index.html y en los dos manifests.
-const SKANDI_VERSION='20260823-6';
+const SKANDI_VERSION='20260823-7';
 const SUPABASE_URL='https://pmpjteuqjusbiduevbwq.supabase.co';
 const SUPABASE_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBtcGp0ZXVxanVzYmlkdWV2YndxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc2OTI1NjUsImV4cCI6MjA5MzI2ODU2NX0.XbMzZoo2yqtrD8znLnyo_1zDfrdJAvAPj1lqGOyXnLw';
 const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
@@ -585,6 +585,7 @@ en:{
   'food.mode.mantenimiento':'Maintain','food.mode.superavit':'Gain','food.activity':'Activity level',
   'food.suggest':'Suggest from my weight','food.needWeight':'Log your bodyweight first (Body tab).',
   'food.targetHint':'A starting point, not a verdict: adjust it against your weight trend in 2-3 weeks.',
+  'food.lowEnergyConfirm':'That target is below what even the app\'s own hardest deficit would suggest for your weight. Save it anyway?',
   'food.errNoInput':'Write what you ate or pick a photo.','food.errGrams':'Enter the grams.',
   'food.errName':'The dish needs a name.','food.searchPh':'Search food…','food.noMatches':'Nothing matches.',
   'food.newFood':'New food','food.per100':'Per 100 g','food.name':'Name',
@@ -959,6 +960,8 @@ en:{
 
   'bw.title':'Bodyweight','bw.log':'+ Log weight','bw.vsLast':'{unit} vs last log',
   'bw.empty':'Log your weight to track it alongside strength and skill numbers.',
+  'bw.nudgeTitle':'Weigh-in time','bw.nudgeBodyNever':"You haven't logged a weight yet — tap to add one whenever you can.",
+  'bw.nudgeBody':"It's been {n} days since your last weigh-in. No pressure if the boat isn't cooperating — tap when you get a chance.",
   'bw.modalTitle':'Log bodyweight','bw.weightLabel':'Weight ({unit})','bw.weightPh':'e.g. {v}',
   'bw.alreadyToday':'You already logged today — saving replaces it.',
   'bw.errWeight':'Enter a valid weight.','bw.errDate':'Choose a date.',
@@ -1135,6 +1138,7 @@ es:{
   'food.mode.mantenimiento':'Mantener','food.mode.superavit':'Subir','food.activity':'Nivel de actividad',
   'food.suggest':'Sugerir con mi peso','food.needWeight':'Registra tu peso primero (tab Cuerpo).',
   'food.targetHint':'Es un punto de partida, no un veredicto: ajústala contra la tendencia de tu peso en 2-3 semanas.',
+  'food.lowEnergyConfirm':'Esa meta queda por debajo de lo que la app propondría incluso en su déficit más agresivo para tu peso. ¿Guardarla de todas formas?',
   'food.errNoInput':'Escribe qué comiste o elige una foto.','food.errGrams':'Pon los gramos.',
   'food.errName':'El platillo necesita nombre.','food.searchPh':'Buscar alimento…','food.noMatches':'Nada coincide.',
   'food.newFood':'Alimento nuevo','food.per100':'Por 100 g','food.name':'Nombre',
@@ -1509,6 +1513,8 @@ es:{
 
   'bw.title':'Peso corporal','bw.log':'+ Registrar peso','bw.vsLast':'{unit} vs registro anterior',
   'bw.empty':'Registra tu peso para seguirlo junto con tus números de fuerza y skill.',
+  'bw.nudgeTitle':'Hora de pesarte','bw.nudgeBodyNever':'Aún no registras tu peso — tócalo para agregarlo cuando puedas.',
+  'bw.nudgeBody':'Van {n} días desde tu último registro. Sin presión si el barco no coopera — tócalo cuando tengas chance.',
   'bw.modalTitle':'Registrar peso corporal','bw.weightLabel':'Peso ({unit})','bw.weightPh':'ej. {v}',
   'bw.alreadyToday':'Ya tienes un registro hoy — guardar lo reemplaza.',
   'bw.errWeight':'Escribe un peso válido.','bw.errDate':'Elige una fecha.',
@@ -2442,6 +2448,7 @@ function homeView(){
     ${attentionBannerHtml()}
     ${todayDetailCard()}
     ${miniBodyRecoveryCard()}
+    ${weightNudgeHtml()}
     <section class="card click-card" onclick="setView('crew')">
       <div class="row"><h2>${esc(t('home.latest'))}</h2><button class="btn small" onclick="setView('crew')">${esc(t('home.viewCrew'))}</button></div>
       ${state.sessions.filter(s=>s.completed_at&&s.visibility==='crew').slice(0,4).map(feedItem).join('')||empty(t('home.feedEmpty'))}
@@ -2472,7 +2479,8 @@ function legacyHomeView(mine,monday,myRoutineCount){
     </section>
     ${enduranceTodayCard()}
     ${trainingBlockCardHtml()}
-    ${miniBodyRecoveryCard()}`;
+    ${miniBodyRecoveryCard()}
+    ${weightNudgeHtml()}`;
 }
 
 // ---- Programs: the layer above routines (workout -> routine -> program) ------------------
@@ -5004,6 +5012,21 @@ async function deleteExternalActivity(id){
   if(error) return alert(error.message);
   await loadAll();
   render();
+}
+
+// A boat makes weighing-in unreliable, not optional (090's measurements/photos exist for exactly
+// that), but the targets math still runs off the last logged number — a nudge, not a demand,
+// since the member said outright "no siempre lo pueda poner". 14 days of silence before it shows,
+// and it never blocks anything.
+const WEIGHT_NUDGE_DAYS=14;
+function weightNudgeHtml(){
+  const latest=state.bodyweightLogs[0];
+  const days=latest?Math.floor((Date.now()-new Date(latest.logged_at+'T00:00:00').getTime())/86400000):null;
+  if(days!=null&&days<WEIGHT_NUDGE_DAYS) return '';
+  return `<section class="card click-card" onclick="openLogBodyweight()">
+    <div class="row"><h2>${esc(t('bw.nudgeTitle'))}</h2>${icon('chevronRight',17)}</div>
+    <p style="margin-top:6px">${esc(days==null?t('bw.nudgeBodyNever'):t('bw.nudgeBody',{n:days}))}</p>
+  </section>`;
 }
 
 // ---- Bodyweight (not tied to a session — logged whenever, at most once per day) ----
@@ -8499,6 +8522,10 @@ function fillSuggestedTargets(){
 async function saveTargets(){
   const kcal=Number($('tgKcal').value);
   if(!kcal||kcal<800||kcal>8000) return alert(t('food.errGrams'));
+  // Un número escrito a mano por debajo de lo que la app misma propondría en el déficit más
+  // agresivo: no es "¿tu meta es un déficit?", es "¿nadie ni el cálculo automático llegaría aquí?".
+  const weightForCheck=latestWeightKg();
+  if(weightForCheck && SkandiNutrition.isLowEnergy(kcal,weightForCheck) && !confirm(t('food.lowEnergyConfirm'))) return;
   // Vacío significa "no me lo vigiles", que no es lo mismo que un techo de cero.
   const sugarCap=$('tgS').value===''?null:Math.round(Number($('tgS').value));
   const base={

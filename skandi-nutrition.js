@@ -22,12 +22,34 @@ const KCAL_PER_KG_BASE = 22;
 // +10% es un superávit que gana músculo sin engordar de más.
 const MODE_FACTOR = { deficit: 0.85, mantenimiento: 1, superavit: 1.10 };
 
-// 2 g/kg de proteína cubre a cualquiera que levante pesas sin caer en el exceso inútil.
+// La proteína depende del objetivo, no es un número fijo. Morton 2018 (meta-análisis) y la
+// evidencia que resume la guía de nutrición híbrida sitúan la ingesta típica de un atleta
+// concurrente en 1.4-1.6 g/kg/día, y reservan la banda alta (hasta 2.0-2.2) para déficits
+// calóricos marcados o volumen de entrenamiento muy alto — no para todos los días por default,
+// que es lo que hacía un 2.0 g/kg fijo sin importar el modo.
+const PROTEIN_G_PER_KG_BY_MODE = { deficit: 2.0, mantenimiento: 1.6, superavit: 1.8 };
 // 0.9 g/kg de grasa protege la función hormonal. Los carbohidratos son el resto: son el
 // combustible, así que absorben tanto el déficit como el superávit.
-const PROTEIN_G_PER_KG = 2.0;
 const FAT_G_PER_KG = 0.9;
 const KCAL_PER_G = { protein: 4, carbs: 4, fat: 9 };
+
+// RED-S (Mountjoy et al., 2018): por debajo de ~30 kcal/kg de masa libre de grasa al día
+// empiezan a aparecer alteraciones hormonales y peor recuperación. La app no mide % de grasa,
+// así que 30 contra el peso TOTAL saldría casi siempre por debajo del umbral real — hasta el
+// déficit del -15% que la propia app sugiere arriba ronda 29 kcal/kg y lo dispararía sin que
+// haya nada raro. Por eso el piso vive más abajo: no es "¿tu meta calculada es un déficit?",
+// es "¿alguien escribió un número que ni el déficit más agresivo de la app propondría?". No
+// se usa dentro de suggestTargets (que nunca baja de esto) sino al validar un número que el
+// usuario tecleó a mano.
+const LOW_ENERGY_KCAL_PER_KG_FLOOR = 24;
+
+// ¿Este número de calorías, para este peso, es tan bajo que ni siquiera es una decisión de
+// déficit — es un dato que probablemente se tecleó mal, o que necesita supervisión aparte?
+function isLowEnergy(kcal, weightKg) {
+  const w = num(weightKg);
+  if (w <= 0) return false;
+  return num(kcal) < w * LOW_ENERGY_KCAL_PER_KG_FLOOR;
+}
 
 const ACTIVITY_FACTORS = {
   sedentario: 1.25,
@@ -51,7 +73,7 @@ function suggestTargets(opts) {
   const maintenance = weightKg * KCAL_PER_KG_BASE * activityFactor;
   const kcal = round(maintenance * MODE_FACTOR[mode], 10);
 
-  const protein = round(weightKg * PROTEIN_G_PER_KG, 5);
+  const protein = round(weightKg * PROTEIN_G_PER_KG_BY_MODE[mode], 5);
   const fat = round(weightKg * FAT_G_PER_KG, 5);
   // Los carbohidratos salen por diferencia y nunca bajan de cero: en un déficit agresivo
   // sobre alguien muy pesado, proteína + grasa solas podrían pasarse de la meta.
@@ -427,7 +449,8 @@ const api = {
   suggestTargets, kcalFromMacros, itemsTotal, dayTotals, remaining, pct,
   scaleFood, rescaleItem, itemToFood,
   activityKcal, strengthKcal, plannedDayKcal, weeklyPlan, dayRecommendation, stepsAdjustmentKcal,
-  FUEL, plannedSessions, fuelPlan
+  FUEL, plannedSessions, fuelPlan,
+  isLowEnergy, LOW_ENERGY_KCAL_PER_KG_FLOOR
 };
 
 if (typeof module !== 'undefined' && module.exports) module.exports = api;
