@@ -83,8 +83,14 @@ Key routes:
   and/or written description → Claude (vision) with a strict JSON-Schema `output_config.format` →
   `skandi_meal_items`; the photo is pulled from the private bucket with service-role and the daily
   quota is enforced in the DB (`skandi_bump_ai_usage`, migration 074), never in the client. Needs
-  `ANTHROPIC_API_KEY`. `{action:'barcode'}`: barcode → Open Food Facts → a `skandi_foods` row, **no
-  AI and no quota** — a packaged product ships its own macros. `{action:'meal-suggestion'}`: today's
+  `ANTHROPIC_API_KEY`. `{action:'analyze', append:true, photo_path, note}` (migration 092): a
+  second (or third) photo added to a meal already registered — nobody photographs the whole plate
+  in one shot on a boat — goes through `skandi_append_meal_items()` instead of
+  `skandi_save_meal_items()`, which **adds** rows instead of replacing them; a failure here never
+  marks the meal `failed` (it already has valid rows) and any uploaded-but-unsaved append photo is
+  removed from the bucket rather than left orphaned. `{action:'barcode'}`: barcode → Open Food
+  Facts → a `skandi_foods` row, **no AI and no quota** — a packaged product ships its own macros.
+  `{action:'meal-suggestion'}`: today's
   remaining macros, today's planned/logged training and the member's saved-dish/food catalog (all
   already computed client-side by `skandi-nutrition.js`, never recomputed server-side — the client
   owns "today" because the boat changes time zones) → Claude (text-only, same JSON-Schema pattern,
@@ -225,6 +231,22 @@ and nothing else:
   `skandi_add_food_to_meal` covers "180 g of chicken", which is a multiplication, not a vision
   problem. The `skandi_quick_picks` view is what the UI should show before ever opening the camera.
   Deliberately, saved dishes are NOT sent to the model: the saving is in not calling it
+- `skandi_foods.user_id is null` is, since 073, the mechanism for a **global** food (visible to
+  every crew member via the SELECT policy, no per-user seeding needed). Migration 093 uses exactly
+  that to seed ~20 generic staples (chicken, rice, oats, tuna...) so no new member's catalog starts
+  empty — `openAddMeal()`'s "Load starter catalog" button (`seedStarterCatalog()` in skandi.html,
+  shown only when both dishes and owned foods are empty) then combines a few of those globals into
+  a handful of starter `skandi_dishes` for whoever taps it, client-side, via `SkandiNutrition.
+  scaleFood()`. Deliberately generic, not any one member's actual coaching plan: `skandi_dishes.
+  user_id` has no global/shared concept (unlike `skandi_foods`), and a personal meal plan is a
+  coach's content, not something to hardcode into a shared multi-user codebase — the starter set
+  is real nutrition data any member can edit or delete like any other dish
+- `skandi_supplements` / `skandi_supplement_logs` (093) — a daily check-off, not a dose log:
+  `dose`/`timing` describe the member's own plan ("5 g", "en la noche"), and whether they actually
+  took it that day is only the log row existing for that `(supplement_id, taken_on)`, never a
+  second "how much did you really take" field. `SUPPLEMENT_PRESETS` in skandi.html offers generic,
+  commonly-cited doses (creatine, omega-3, magnesium, whey, turmeric+pepper) as one-tap starting
+  points when a member has none yet — general supplement-dosing facts, not anyone's personal stack
 - Sugar (077) is tracked as its own macro across all five tables, but it is a **ceiling, not a
   goal** — the UI turns it red on excess and a null `sugar_g_target` means "don't track it". Its
   kcal already live inside `carbs_g`; never add it to the calorie total

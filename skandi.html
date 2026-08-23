@@ -8,16 +8,16 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="Skandi Fit">
 <meta name="application-name" content="Skandi Fit">
-<link rel="manifest" href="/skandi-manifest.json?v=20260823-7">
-<link rel="apple-touch-icon" sizes="180x180" href="/icons/skandi-180.png?v=20260823-7">
-<link rel="icon" type="image/png" sizes="192x192" href="/icons/skandi-192.png?v=20260823-7">
+<link rel="manifest" href="/skandi-manifest.json?v=20260823-9">
+<link rel="apple-touch-icon" sizes="180x180" href="/icons/skandi-180.png?v=20260823-9">
+<link rel="icon" type="image/png" sizes="192x192" href="/icons/skandi-192.png?v=20260823-9">
 <title>Skandi Fit</title>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="/skandi-recovery.js?v=20260823-7"></script>
-<script src="/body-figure.js?v=20260823-7"></script>
-<script src="/skandi-nutrition.js?v=20260823-7"></script>
-<script src="/skandi-load.js?v=20260823-7"></script>
-<script src="/skandi-brief.js?v=20260823-7"></script>
+<script src="/skandi-recovery.js?v=20260823-9"></script>
+<script src="/body-figure.js?v=20260823-9"></script>
+<script src="/skandi-nutrition.js?v=20260823-9"></script>
+<script src="/skandi-load.js?v=20260823-9"></script>
+<script src="/skandi-brief.js?v=20260823-9"></script>
 <style>
 :root{
   --bg:#eef4f8;
@@ -524,7 +524,7 @@ textarea.field{min-height:112px;text-align:left;resize:vertical}
 // Versión compartida con app.html (APP_VERSION) y sw.js (CACHE_VERSION): un solo service
 // worker sirve las dos apps, así que una sola cadena las invalida a las dos. Al cambiarla
 // hay que actualizarla también en los ?v= del <head>, en index.html y en los dos manifests.
-const SKANDI_VERSION='20260823-7';
+const SKANDI_VERSION='20260823-9';
 const SUPABASE_URL='https://pmpjteuqjusbiduevbwq.supabase.co';
 const SUPABASE_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBtcGp0ZXVxanVzYmlkdWV2YndxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc2OTI1NjUsImV4cCI6MjA5MzI2ODU2NX0.XbMzZoo2yqtrD8znLnyo_1zDfrdJAvAPj1lqGOyXnLw';
 const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
@@ -567,6 +567,10 @@ en:{
   'food.byDish':'Saved dish','food.byDishHint':'Free · instant','food.byFood':'From catalog','food.byFoodHint':'Free · instant',
   'food.byPhoto':'Photo','food.byPhotoHint':'AI · ~2¢','food.byText':'Describe it','food.byTextHint':'AI · ~1¢',
   'food.byBarcode':'Barcode','food.byBarcodeHint':'Free','food.mealType':'Meal','food.venue':'Where',
+  'food.seedCatalog':'Load starter catalog','food.seedCatalogHint':'A few common dishes built from the shared food catalog, so you have something to start from.',
+  'food.seedConfirm':'Add a few starter dishes (chicken & rice, oats, tuna...) to your catalog? You can edit or delete any of them after.',
+  'food.seedNoFoods':'The shared catalog is empty — nothing to build starter dishes from yet.',
+  'food.seedDone':'Added {n} starter dishes to your catalog.','food.seedNothingNew':"Nothing new to add — you've already got them.",
   'venue.casa':'Home','venue.restaurante':'Restaurant','venue.fonda':'Diner','venue.otro':'Other',
   'meal.desayuno':'Breakfast','meal.comida':'Lunch','meal.cena':'Dinner','meal.snack':'Snack',
   'food.describe':'What did you eat?','food.describePh':'two eggs with beans and a tortilla',
@@ -968,6 +972,13 @@ en:{
   'bw.errRange':'Enter a weight between 20 and 300kg (or the lb equivalent).',
   'bw.confirmDelete':'Delete this bodyweight entry?',
 
+  'supp.title':'Supplements','supp.manage':'Manage','supp.empty':'No supplements yet.',
+  'supp.allInactive':'All your supplements are paused. Manage to turn one back on.',
+  'supp.emptyHint':'Common ones to start from — edit the dose to match yours, or add your own.',
+  'supp.situational':'as needed','supp.addCustom':'+ Add supplement',
+  'supp.namePh':'Name (e.g. Vitamin D)','supp.dosePh':'Dose (e.g. 5 g)','supp.timingPh':'When (e.g. morning)',
+  'supp.errName':'The supplement needs a name.','supp.confirmDelete':'Delete this supplement?',
+
   'plan.editTitle':'Edit endurance plan','plan.newTitle':'New endurance plan',
   'plan.targetDistance':'Target distance (km, optional)','plan.targetDistancePh':'e.g. 5',
   'plan.targetDuration':'Target duration (minutes, optional)',
@@ -1120,6 +1131,10 @@ es:{
   'food.byDish':'Platillo guardado','food.byDishHint':'Gratis · al instante','food.byFood':'Del catálogo','food.byFoodHint':'Gratis · al instante',
   'food.byPhoto':'Foto','food.byPhotoHint':'IA · ~2¢','food.byText':'Descríbelo','food.byTextHint':'IA · ~1¢',
   'food.byBarcode':'Código de barras','food.byBarcodeHint':'Gratis','food.mealType':'Comida','food.venue':'Dónde',
+  'food.seedCatalog':'Cargar catálogo inicial','food.seedCatalogHint':'Unos platillos comunes armados con el catálogo compartido, para tener de dónde partir.',
+  'food.seedConfirm':'¿Agregar unos platillos iniciales (pollo con arroz, avena, atún...) a tu catálogo? Puedes editarlos o borrarlos después.',
+  'food.seedNoFoods':'El catálogo compartido está vacío — no hay con qué armar platillos iniciales todavía.',
+  'food.seedDone':'Se agregaron {n} platillos iniciales a tu catálogo.','food.seedNothingNew':'Nada nuevo que agregar — ya los tienes.',
   'venue.casa':'Casa','venue.restaurante':'Restaurante','venue.fonda':'Fonda','venue.otro':'Otro',
   'meal.desayuno':'Desayuno','meal.comida':'Comida','meal.cena':'Cena','meal.snack':'Snack',
   'food.describe':'¿Qué comiste?','food.describePh':'dos huevos con frijoles y una tortilla',
@@ -1521,6 +1536,13 @@ es:{
   'bw.errRange':'Escribe un peso entre 20 y 300 kg (o su equivalente en lb).',
   'bw.confirmDelete':'¿Eliminar este registro de peso?',
 
+  'supp.title':'Suplementos','supp.manage':'Gestionar','supp.empty':'Aún no hay suplementos.',
+  'supp.allInactive':'Tus suplementos están pausados. Gestiona para reactivar alguno.',
+  'supp.emptyHint':'Comunes para empezar — ajusta la dosis a la tuya, o agrega los que uses.',
+  'supp.situational':'según necesidad','supp.addCustom':'+ Agregar suplemento',
+  'supp.namePh':'Nombre (ej. Vitamina D)','supp.dosePh':'Dosis (ej. 5 g)','supp.timingPh':'Cuándo (ej. mañana)',
+  'supp.errName':'El suplemento necesita nombre.','supp.confirmDelete':'¿Eliminar este suplemento?',
+
   'plan.editTitle':'Editar plan de resistencia','plan.newTitle':'Nuevo plan de resistencia',
   'plan.targetDistance':'Distancia objetivo (km, opcional)','plan.targetDistancePh':'ej. 5',
   'plan.targetDuration':'Duración objetivo (minutos, opcional)',
@@ -1729,7 +1751,7 @@ const EXERCISE_PRESETS={
 };
 
 const ACTIVE_WORKOUT_MAX_HOURS=18;
-const state={user:null,profile:null,view:'home',authMode:'login',exercises:[],templates:[],items:[],sessions:[],sets:[],externalActivities:[],activityTemplates:[],progressionState:[],progressionEvents:[],skillGoals:[],trainingBlocks:[],planned:[],plannedReady:true,ensuredWeeks:new Set(),weekSig:null,trainTab:'today',calOffset:0,calWeeks:4,dayOpen:null,bodyweightLogs:[],programs:[],programDays:[],active:null,activeItems:[],timer:null,elapsed:0,rest:0,restTotal:0,bodyFlip:'front',weightUnit:localStorage.getItem('skandi_weight_unit')||'kg',weightUnitOverrides:(()=>{try{return JSON.parse(localStorage.getItem('skandi_weight_unit_overrides')||'{}');}catch(e){return {};}})(),expandedRoutines:new Set(),progressTab:'summary',progressQuery:'',progressMetric:'best',historyFilter:{month:'all',title:'all'},crewFeedLimit:6,swapTarget:null,swapQuery:'',setOptionsId:null,skillTab:null,addExOpen:false,addExQuery:'',pausedMs:0,pausedAt:null,floatTimerOpen:false,meals:[],mealItems:[],foods:[],dishes:[],dishItems:[],nutritionTargets:null,aiCallsToday:0,foodDayOffset:0,foodPicker:{query:'',mealId:null},pendingMeal:null,wellness:[],intervalsUnmatched:[],stravaStatus:null,intervalsStatus:null,skandiSettings:null,stravaSyncing:false,intervalsSyncing:false,bodyMeasurements:[],progressPhotos:[],pendingPhoto:null,bodyTab:'recovery'};
+const state={user:null,profile:null,view:'home',authMode:'login',exercises:[],templates:[],items:[],sessions:[],sets:[],externalActivities:[],activityTemplates:[],progressionState:[],progressionEvents:[],skillGoals:[],trainingBlocks:[],planned:[],plannedReady:true,ensuredWeeks:new Set(),weekSig:null,trainTab:'today',calOffset:0,calWeeks:4,dayOpen:null,bodyweightLogs:[],programs:[],programDays:[],active:null,activeItems:[],timer:null,elapsed:0,rest:0,restTotal:0,bodyFlip:'front',weightUnit:localStorage.getItem('skandi_weight_unit')||'kg',weightUnitOverrides:(()=>{try{return JSON.parse(localStorage.getItem('skandi_weight_unit_overrides')||'{}');}catch(e){return {};}})(),expandedRoutines:new Set(),progressTab:'summary',progressQuery:'',progressMetric:'best',historyFilter:{month:'all',title:'all'},crewFeedLimit:6,swapTarget:null,swapQuery:'',setOptionsId:null,skillTab:null,addExOpen:false,addExQuery:'',pausedMs:0,pausedAt:null,floatTimerOpen:false,meals:[],mealItems:[],foods:[],dishes:[],dishItems:[],nutritionTargets:null,aiCallsToday:0,foodDayOffset:0,foodPicker:{query:'',mealId:null},pendingMeal:null,wellness:[],intervalsUnmatched:[],stravaStatus:null,intervalsStatus:null,skandiSettings:null,stravaSyncing:false,intervalsSyncing:false,bodyMeasurements:[],progressPhotos:[],pendingPhoto:null,bodyTab:'recovery',supplements:[],supplementLogs:[]};
 let builderState={selected:new Map(),group:'All'};
 
 const $=id=>document.getElementById(id);
@@ -1933,7 +1955,7 @@ async function loadAll(){
        {data:ownSessions},{data:crewSessions},{data:ownSets},{data:crewSets},
        {data:externalActivities},{data:activityTemplates},{data:progressionState},{data:trainingBlocks},{data:bodyweightLogs},
        {data:programs},{data:programDays},{data:progressionEvents},{data:skillGoals},
-       {data:bodyMeasurements},{data:progressPhotos},
+       {data:bodyMeasurements},{data:progressPhotos},{data:supplements},{data:supplementLogs},
        {data:planned,error:plannedError}]=await Promise.all([
     sb.from('profiles').select('id,name,avatar_url').eq('id',state.user.id).maybeSingle(),
     sb.from('skandi_exercises').select('*').order('name'),
@@ -1957,6 +1979,9 @@ async function loadAll(){
     // [] si la migración 090 no se ha corrido, igual que programs/progressionEvents arriba.
     sb.from('skandi_body_measurements').select('*').eq('user_id',state.user.id).order('measured_at',{ascending:false}),
     sb.from('skandi_progress_photos').select('*').eq('user_id',state.user.id).order('taken_at',{ascending:false}),
+    // [] si la migración 093 todavía no se corrió, igual que measurements/photos arriba.
+    sb.from('skandi_supplements').select('*').eq('user_id',state.user.id).order('sort_order'),
+    sb.from('skandi_supplement_logs').select('*').eq('user_id',state.user.id).gte('taken_on',dayKey(addDays(new Date(),-1))),
     // Ventana del calendario: un mes atrás (para leer adherencia reciente) y medio año
     // adelante. Traer todo el histórico de un plan no sirve para nada y crece sin techo.
     sb.from('skandi_planned_sessions').select('*')
@@ -2011,6 +2036,9 @@ async function loadAll(){
   // Igual: [] si la migración 090 (medidas y fotos) todavía no se corrió.
   state.bodyMeasurements=bodyMeasurements||[];
   state.progressPhotos=progressPhotos||[];
+  // Igual: [] si la migración 093 (suplementos) todavía no se corrió.
+  state.supplements=supplements||[];
+  state.supplementLogs=supplementLogs||[];
   // plannedReady=false = la migración 080 todavía no se corrió. La app entera sigue
   // funcionando sin calendario; Entrenar se cae a las tarjetas de siempre.
   state.plannedReady=!plannedError;
@@ -7436,6 +7464,7 @@ function foodView(){
       ${meals.length?'':`<p class="muted" style="margin-top:8px">${esc(t('food.emptyHint'))}</p>`}
     </section>
     ${quickPicksCard()}
+    ${isToday?supplementsCardHtml():''}
     <button class="add-fab" onclick="openAddMeal()" aria-label="${esc(t('food.addMeal'))}">${icon('plus',26)}</button>`;
 }
 
@@ -7692,6 +7721,118 @@ function quickPicksCard(){
   </section>`;
 }
 
+// ---- Suplementos: check-off diario, no una bitácora de dosis reales ────────
+// dose/timing describen el plan de la persona ("5 g", "en la noche"); lo que de verdad se
+// tomó ese día lo dice el propio check marcado, no un número reescrito cada vez.
+const SUPPLEMENT_PRESETS=[
+  {name:'Creatina',dose:'5 g',timing:'diario'},
+  {name:'Omega-3',dose:'2 g',timing:'diario'},
+  {name:'Magnesio',dose:'300-400 mg',timing:'en la noche'},
+  {name:'Proteína whey',dose:'1-2 scoops',timing:'cuando falte proteína del día'},
+  {name:'Cúrcuma + pimienta negra',dose:'',timing:'según necesidad'}
+];
+
+function supplementsCardHtml(){
+  const list=(state.supplements||[]).filter(s=>s.active);
+  if(!list.length&&!(state.supplements||[]).length) return supplementsEmptyCard();
+  const today=dayKey(new Date());
+  const takenIds=new Set((state.supplementLogs||[]).filter(l=>l.taken_on===today).map(l=>l.supplement_id));
+  return `<section class="card">
+    <div class="row"><h2>${esc(t('supp.title'))}</h2><button class="btn small" onclick="openManageSupplements()">${esc(t('supp.manage'))}</button></div>
+    ${list.length?`<div class="stack" style="margin-top:10px">${list.map(s=>{
+      const on=takenIds.has(s.id);
+      return `<div class="row" style="gap:12px;margin-top:8px">
+        <button class="check ${on?'done':''}" style="height:36px;width:36px;border-radius:8px;flex:none" onclick="toggleSupplementToday('${s.id}',${on})" aria-label="${esc(s.name)}">${icon('check',16)}</button>
+        <div style="flex:1"><b>${esc(s.name)}</b>${s.dose||s.timing?`<p class="muted" style="margin-top:2px">${esc([s.dose,s.timing].filter(Boolean).join(' · '))}</p>`:''}</div>
+      </div>`;
+    }).join('')}</div>`:`<p class="muted" style="margin-top:8px">${esc(t('supp.allInactive'))}</p>`}
+  </section>`;
+}
+
+// Sin ningún suplemento guardado todavía: ofrece los sugeridos (dosis genéricas de referencia,
+// no las de nadie en particular) como punto de partida en vez de un formulario vacío.
+function supplementsEmptyCard(){
+  return `<section class="card">
+    <div class="eyebrow">${esc(t('supp.title'))}</div>
+    <p class="muted" style="margin-top:6px">${esc(t('supp.emptyHint'))}</p>
+    <div class="pick-row" style="margin-top:9px">${SUPPLEMENT_PRESETS.map((p,i)=>
+      `<button class="pick" onclick="addSupplementPreset(${i})"><b>${esc(p.name)}</b><small>${esc(p.dose||t('supp.situational'))}</small></button>`
+    ).join('')}</div>
+    <button class="btn" style="width:100%;margin-top:10px" onclick="openManageSupplements()">${esc(t('supp.addCustom'))}</button>
+  </section>`;
+}
+
+async function addSupplementPreset(i){
+  const p=SUPPLEMENT_PRESETS[i];
+  if(!p) return;
+  const sortOrder=(state.supplements||[]).length;
+  const {error}=await sb.from('skandi_supplements').insert({
+    user_id:state.user.id,name:p.name,dose:p.dose||null,timing:p.timing||null,sort_order:sortOrder
+  });
+  if(error) return alert(error.message);
+  await loadAll();
+  render();
+}
+
+function openManageSupplements(){
+  $('modal').classList.add('show');
+  $('modalCard').innerHTML=`
+    <div class="row"><h1>${esc(t('supp.manage'))}</h1><button class="x" onclick="closeModal()" aria-label="${esc(t('common.close'))}">${icon('close',20)}</button></div>
+    ${state.supplements.length?state.supplements.map(s=>`<div class="row" style="margin-top:10px">
+      <div><b>${esc(s.name)}</b><p>${esc([s.dose,s.timing].filter(Boolean).join(' · ')||'—')}</p></div>
+      <button class="icon-btn tiny danger" onclick="deleteSupplement('${s.id}')" aria-label="${esc(t('common.delete'))}">${icon('trash',16)}</button>
+    </div>`).join(''):empty(t('supp.empty'))}
+    <div class="eyebrow" style="margin-top:14px">${esc(t('supp.addCustom'))}</div>
+    <input id="suppName" class="field" placeholder="${esc(t('supp.namePh'))}">
+    <div class="grid" style="grid-template-columns:1fr 1fr;gap:8px">
+      <input id="suppDose" class="field" placeholder="${esc(t('supp.dosePh'))}">
+      <input id="suppTiming" class="field" placeholder="${esc(t('supp.timingPh'))}">
+    </div>
+    <button class="btn primary" style="width:100%;margin-top:10px" onclick="saveNewSupplement()">${esc(t('common.save'))}</button>`;
+}
+
+async function saveNewSupplement(){
+  const name=$('suppName').value.trim();
+  if(!name) return alert(t('supp.errName'));
+  const sortOrder=(state.supplements||[]).length;
+  const {error}=await sb.from('skandi_supplements').insert({
+    user_id:state.user.id,name,
+    dose:$('suppDose').value.trim()||null,
+    timing:$('suppTiming').value.trim()||null,
+    sort_order:sortOrder
+  });
+  if(error) return alert(error.message);
+  await loadAll();
+  openManageSupplements();
+  render();
+}
+
+async function deleteSupplement(id){
+  if(!confirm(t('supp.confirmDelete'))) return;
+  const {error}=await sb.from('skandi_supplements').delete().eq('id',id);
+  if(error) return alert(error.message);
+  await loadAll();
+  openManageSupplements();
+  render();
+}
+
+// Toggle optimista: la fila cambia al toque, y si el guardado falla se revierte solo con el
+// loadAll() del catch — sentir el check como instantáneo importa más aquí que en casi cualquier
+// otro botón de la app, porque se toca varias veces al día.
+async function toggleSupplementToday(id,wasOn){
+  const today=dayKey(new Date());
+  if(wasOn){
+    state.supplementLogs=state.supplementLogs.filter(l=>!(l.supplement_id===id&&l.taken_on===today));
+  }else{
+    state.supplementLogs=[...state.supplementLogs,{supplement_id:id,taken_on:today,user_id:state.user.id}];
+  }
+  render();
+  const {error}=wasOn
+    ? await sb.from('skandi_supplement_logs').delete().eq('supplement_id',id).eq('taken_on',today)
+    : await sb.from('skandi_supplement_logs').insert({user_id:state.user.id,supplement_id:id,taken_on:today});
+  if(error){ alert(error.message); await loadAll(); render(); }
+}
+
 function mealPhotoUrl(path){
   // El bucket es privado, así que no hay URL pública: firmamos en el cliente y cacheamos la
   // firma en memoria mientras dure la sesión.
@@ -7732,13 +7873,71 @@ function openAddMeal(){
       <button onclick="openBarcode()">${icon('image',22)}${esc(t('food.byBarcode'))}<small>${esc(t('food.byBarcodeHint'))}</small></button>
       <button onclick="openMealInput('text')">${icon('edit',22)}${esc(t('food.byText'))}<small>${esc(t('food.byTextHint'))}</small></button>
     </div>
-    <button class="btn primary" style="width:100%;margin-top:10px" onclick="openMealInput('photo')">${icon('image',20)} ${esc(t('food.byPhoto'))} · ${esc(t('food.byPhotoHint'))}</button>`;
+    <button class="btn primary" style="width:100%;margin-top:10px" onclick="openMealInput('photo')">${icon('image',20)} ${esc(t('food.byPhoto'))} · ${esc(t('food.byPhotoHint'))}</button>
+    ${noDishes&&noFoods?`<button class="btn" style="width:100%;margin-top:10px" onclick="seedStarterCatalog()">${icon('plus',18)} ${esc(t('food.seedCatalog'))}</button>
+    <p class="muted" style="font-size:11px;margin-top:4px;text-align:center">${esc(t('food.seedCatalogHint'))}</p>`:''}`;
+}
+
+// ---- Catálogo inicial: platillos armados con el catálogo global (093) ──────
+// El escalón "platillo guardado -> catálogo -> IA" de la 076 necesita algo guardado para poder
+// arrancar ahí. En vez de copiar la dieta de una persona en particular al código compartido de
+// toda la tripulación, se combinan alimentos genéricos del catálogo global en unos cuantos
+// platillos de ejemplo — cada quien los edita, escala o borra igual que cualquier otro.
+const STARTER_DISHES=[
+  {name:'Pollo con arroz y aguacate',items:[
+    {food:'Pechuga de pollo',grams:150},{food:'Arroz blanco cocido',grams:150},{food:'Aguacate',grams:50}
+  ]},
+  {name:'Avena con proteína y plátano',items:[
+    {food:'Avena',grams:60},{food:'Proteína de suero (whey)',grams:30},{food:'Plátano',grams:100}
+  ]},
+  {name:'Atún con camote',items:[
+    {food:'Atún en agua',grams:150},{food:'Camote cocido',grams:200},{food:'Aceite de oliva',grams:10}
+  ]},
+  {name:'Huevo con frijoles y tortillas',items:[
+    {food:'Huevo entero',grams:150},{food:'Frijol negro cocido',grams:150},{food:'Tortilla de maíz',grams:50}
+  ]}
+];
+
+async function seedStarterCatalog(){
+  if(!confirm(t('food.seedConfirm'))) return;
+  const globalFoods=state.foods.filter(f=>!f.user_id);
+  if(!globalFoods.length) return alert(t('food.seedNoFoods'));
+  const existingNames=new Set(state.dishes.map(d=>d.name.toLowerCase()));
+  let created=0;
+  for(const d of STARTER_DISHES){
+    if(existingNames.has(d.name.toLowerCase())) continue;
+    const rows=d.items.map(it=>{
+      const food=globalFoods.find(f=>f.name.toLowerCase()===it.food.toLowerCase());
+      return food?{food_id:food.id,label:food.name,...SkandiNutrition.scaleFood(food,it.grams)}:null;
+    }).filter(Boolean);
+    if(!rows.length) continue;
+    const {data:dish,error:dishErr}=await sb.from('skandi_dishes').insert({user_id:state.user.id,name:d.name}).select().single();
+    if(dishErr||!dish) continue;
+    const {error:itemsErr}=await writeToleratingMissingColumn(
+      withCol=>sb.from('skandi_dish_items').insert(rows.map((r,i)=>({
+        ...(withCol?r:omit(r,'added_sugar_g')),
+        dish_id:dish.id,user_id:state.user.id,sort_order:i,included:true,is_cooking_fat:false
+      }))),
+      'added_sugar_g'
+    );
+    if(!itemsErr) created++;
+  }
+  closeModal();
+  await loadAll();
+  render();
+  if(created) alert(t('food.seedDone',{n:created}));
+  else alert(t('food.seedNothingNew'));
 }
 
 // ---- Alta: foto y/o texto (los dos caminos que sí usan IA) ----
 
-function openMealInput(kind){
-  state.pendingMeal={kind,blob:null,dataUrl:null,photoTakenAt:null,whenTouched:false};
+// mealId: si se abrió desde una comida ya iniciada ("Foto" en su detalle), esta foto se
+// analiza y se AGREGA ahí en vez de crear una comida nueva — el mismo camino que ya tenían
+// código de barras y catálogo (openBarcode/openFoodPicker), para el caso en que el plato se
+// fotografía en varias fotos porque no se tomaron todas al mismo tiempo. El tipo de comida,
+// la hora y el lugar ya quedaron fijados al crearla, así que no se vuelven a pedir.
+function openMealInput(kind,mealId=null){
+  state.pendingMeal={kind,blob:null,dataUrl:null,photoTakenAt:null,whenTouched:false,mealId};
   $('modal').classList.add('show');
   $('modalCard').innerHTML=`
     <div class="row"><h1>${esc(kind==='photo'?t('food.byPhoto'):t('food.byText'))}</h1><button class="x" onclick="closeModal()" aria-label="${esc(t('common.close'))}">${icon('close',20)}</button></div>
@@ -7750,6 +7949,7 @@ function openMealInput(kind){
       <div id="mealPhotoPreview"></div>`:''}
     <label class="eyebrow">${esc(kind==='photo'?t('food.context'):t('food.describe'))}</label>
     <textarea id="mealDesc" class="field" placeholder="${esc(kind==='photo'?t('food.contextPh'):t('food.describePh'))}"></textarea>
+    ${mealId?'':`
     <label class="eyebrow">${esc(t('food.mealType'))}</label>
     <select id="mealType" class="field left">${MEAL_TYPES.map(v=>`<option value="${v}" ${v===guessMealType()?'selected':''}>${esc(mealTypeLabel(v))}</option>`).join('')}</select>
     <label class="eyebrow">${esc(t('food.when'))}</label>
@@ -7758,8 +7958,8 @@ function openMealInput(kind){
     <label class="eyebrow">${esc(t('food.venue'))}</label>
     <div class="venue-row">${VENUES.slice(0,3).map((v,i)=>
       `<button type="button" class="chip venue-chip ${i===0?'active':''}" data-venue="${v}" onclick="pickVenue('${v}')">${esc(venueLabel(v))}</button>`).join('')}</div>
-    <p class="muted" style="font-size:12px;margin-top:8px">${esc(t('food.cookingFatHint'))}</p>
-    <button id="mealGo" class="btn primary" style="width:100%;margin-top:12px" onclick="submitMealForAnalysis()">${esc(t('food.analyze'))}</button>`;
+    <p class="muted" style="font-size:12px;margin-top:8px">${esc(t('food.cookingFatHint'))}</p>`}
+    <button id="mealGo" class="btn primary" style="width:100%;margin-top:12px" onclick="submitMealForAnalysis()">${esc(mealId?t('food.addToMeal'):t('food.analyze'))}</button>`;
 }
 
 // La hora decide el tipo de comida por default: nadie quiere elegir "desayuno" a las 8 am.
@@ -7933,6 +8133,7 @@ async function submitMealForAnalysis(){
   if(!pending) return;
   const desc=$('mealDesc').value.trim();
   if(!pending.blob&&!desc) return alert(t('food.errNoInput'));
+  if(pending.mealId) return appendMealPhoto(pending,desc);
   const btn=$('mealGo');
   btn.disabled=true;btn.textContent=t('food.uploading');
 
@@ -7976,6 +8177,40 @@ async function submitMealForAnalysis(){
     analyzeMeal(meal.id);
   }catch(e){
     btn.disabled=false;btn.textContent=t('food.analyze');
+    alert(e.message||String(e));
+  }
+}
+
+// Agregar una foto MÁS a una comida que ya existe: a diferencia de una comida nueva, aquí sí
+// esperamos la respuesta con el modal abierto (como openFoodPortion/addBarcodeResult) en vez
+// de cerrar y analizar en segundo plano — no hay una fila "pending" propia que muestre el
+// avance, así que el botón es lo único que puede contarlo.
+async function appendMealPhoto(pending,desc){
+  const btn=$('mealGo');
+  btn.disabled=true;btn.textContent=t('food.uploading');
+  try{
+    let photoPath=null;
+    if(pending.blob){
+      photoPath=`${state.user.id}/${crypto.randomUUID()}.jpg`;
+      const {error:upErr}=await sb.storage.from('skandi-meals').upload(photoPath,pending.blob,{contentType:'image/jpeg'});
+      if(upErr) throw upErr;
+    }
+    btn.textContent=t('food.analyzing');
+    const {data:{session}}=await sb.auth.getSession();
+    const res=await fetch('/api/skandi',{
+      method:'POST',
+      headers:{'Content-Type':'application/json',Authorization:`Bearer ${session.access_token}`},
+      body:JSON.stringify({action:'analyze',meal_id:pending.mealId,append:true,photo_path:photoPath,note:desc||null})
+    });
+    const body=await res.json().catch(()=>({}));
+    if(!res.ok) throw new Error(body.message||t('food.failed'));
+    closeModal();
+    state.pendingMeal=null;
+    await loadNutrition();
+    setView('food');
+    openMealDetail(pending.mealId);
+  }catch(e){
+    btn.disabled=false;btn.textContent=t('food.addToMeal');
     alert(e.message||String(e));
   }
 }
@@ -8378,7 +8613,8 @@ function openMealDetail(mealId){
     ${fat.map(i=>itemRowHtml(i,true)).join('')}
     ${fat.length?`<p class="muted" style="font-size:12px;margin-top:6px">${esc(t('food.cookingFatHint'))}</p>`:''}
     <p class="muted" style="margin-top:10px">P ${Math.round(totals.protein_g)}g · C ${Math.round(totals.carbs_g)}g · G ${Math.round(totals.fat_g)}g</p>
-    <button class="btn" style="width:100%;margin-top:10px" onclick="openFoodPicker('${mealId}')">${icon('plus',18)} ${esc(t('food.byFood'))}</button>
+    <button class="btn" style="width:100%;margin-top:10px" onclick="openMealInput('photo','${mealId}')">${icon('image',18)} ${esc(t('food.byPhoto'))}</button>
+    <button class="btn" style="width:100%;margin-top:8px" onclick="openFoodPicker('${mealId}')">${icon('plus',18)} ${esc(t('food.byFood'))}</button>
     <button class="btn" style="width:100%;margin-top:8px" onclick="openBarcode('${mealId}')">${icon('image',18)} ${esc(t('food.byBarcode'))}</button>
     <button class="btn" style="width:100%;margin-top:8px" onclick="promptSaveAsDish('${mealId}')">${icon('check',18)} ${esc(t('food.saveAsDish'))}</button>
     <button class="btn" style="width:100%;margin-top:8px;color:var(--pink)" onclick="deleteMeal('${mealId}')">${icon('trash',18)} ${esc(t('food.delete'))}</button>`;

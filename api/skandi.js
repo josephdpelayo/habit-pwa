@@ -8,6 +8,8 @@
 // entró: el nombre viejo sobrevive como rewrite en vercel.json para los clientes con caché.)
 //
 //   { action: 'analyze', meal_id }  -> foto y/o texto -> Claude (vision). Gasta cuota.
+//     append=true + photo_path/note -> agrega renglones a una comida YA registrada en vez de
+//     reemplazar los suyos (varias fotos para un mismo platillo, tomadas en momentos distintos).
 //   { action: 'barcode', barcode }  -> Open Food Facts. Sin IA y sin cuota.
 //   strava-connect / -callback / -webhook / -sync / -disconnect / -subscription
 //   intervals-connect / -status / -sync / -disconnect
@@ -188,8 +190,20 @@ async function analyzeMeal(req, res) {
   let userId = null;
   let quotaSpent = false;
   let mealId = null;
+  let append = false;
+  let appendPhotoPath = null;
   const startedAt = Date.now();
   let stage = 'auth';
+
+  // Best-effort: una foto que se sube para "agregar a esta comida" nunca se persiste por su
+  // cuenta (no hay galería, migración 090 es de progreso corporal, no de comida) — si el
+  // análisis no llega a guardarse como el nuevo photo_path de la comida, no debe quedar huérfana
+  // en el bucket privado.
+  const cleanupAppendPhoto = async () => {
+    if (append && appendPhotoPath) {
+      try { await supabase.storage.from(BUCKET).remove([appendPhotoPath]); } catch { /* mejor esfuerzo */ }
+    }
+  };
 
   try {
     userId = await requireUser(req, res);
@@ -197,6 +211,14 @@ async function analyzeMeal(req, res) {
 
     mealId = String((req.body && req.body.meal_id) || '').trim();
     if (!mealId) return fail(res, 400, 'no_meal_id', 'Falta meal_id');
+    // append=true: no es el primer análisis de la comida, es "agregar con otra foto" desde el
+    // detalle — no se toma la foto/nota de skandi_meals (que ya tiene lo del primer análisis),
+    // sino la que se acaba de subir para este renglón nuevo, y se SUMA en vez de reemplazar.
+    append = !!(req.body && req.body.append === true);
+    appendPhotoPath = append ? (String((req.body && req.body.photo_path) || '').trim() || null) : null;
+    if (append && appendPhotoPath && !appendPhotoPath.startsWith(`${userId}/`)) {
+      return fail(res, 403, 'not_your_photo', 'Esa foto no es tuya');
+    }
 
     stage = 'load_meal';
     const { data: meal, error: mealError } = await supabase
@@ -218,8 +240,12 @@ async function analyzeMeal(req, res) {
     if (meal.user_id !== userId) return fail(res, 403, 'not_your_meal', 'Esa comida no es tuya');
 
     // Foto, texto, o las dos. Lo único inaceptable es que no haya ninguna de las dos.
-    const description = String(meal.note || '').trim().slice(0, 600);
-    if (!meal.photo_path && !description) {
+    const photoPath = append ? appendPhotoPath : meal.photo_path;
+    const description = append
+      ? String((req.body && req.body.note) || '').trim().slice(0, 600)
+      : String(meal.note || '').trim().slice(0, 600);
+    if (!photoPath && !description) {
+      await cleanupAppendPhoto();
       return fail(res, 400, 'no_input', 'Necesito una foto o una descripción de lo que comiste.');
     }
 
@@ -241,23 +267,26 @@ async function analyzeMeal(req, res) {
     quotaSpent = true;
 
     let imageBlock = null;
-    if (meal.photo_path) {
+    if (photoPath) {
       stage = 'download_photo';
-      const mediaType = mediaTypeFor(meal.photo_path);
+      const mediaType = mediaTypeFor(photoPath);
       if (!mediaType) {
-        await markFailed(mealId, 'Formato de imagen no soportado');
+        if (!append) await markFailed(mealId, 'Formato de imagen no soportado');
+        await cleanupAppendPhoto();
         return fail(res, 400, 'bad_format', 'Formato de imagen no soportado. Sube JPEG o PNG.');
       }
 
-      const { data: blob, error: downloadError } = await supabase.storage.from(BUCKET).download(meal.photo_path);
+      const { data: blob, error: downloadError } = await supabase.storage.from(BUCKET).download(photoPath);
       if (downloadError || !blob) {
-        await markFailed(mealId, downloadError ? downloadError.message : 'foto no encontrada');
+        if (!append) await markFailed(mealId, downloadError ? downloadError.message : 'foto no encontrada');
+        await cleanupAppendPhoto();
         return fail(res, 404, 'photo_missing', 'No pudimos leer la foto del bucket.');
       }
 
       const bytes = Buffer.from(await blob.arrayBuffer());
       if (bytes.length > MAX_IMAGE_BYTES) {
-        await markFailed(mealId, 'imagen demasiado grande');
+        if (!append) await markFailed(mealId, 'imagen demasiado grande');
+        await cleanupAppendPhoto();
         return fail(res, 413, 'photo_too_big', 'La foto pesa demasiado. Vuelve a tomarla.');
       }
       imageBlock = { type: 'image', source: { type: 'base64', media_type: mediaType, data: bytes.toString('base64') } };
@@ -272,6 +301,9 @@ async function analyzeMeal(req, res) {
       .limit(CATALOG_SIZE);
 
     const hints = [`Comida registrada como: ${meal.meal_type}.`, `Lugar: ${VENUE_LABELS[meal.venue] || VENUE_LABELS.otro}.`];
+    if (append) {
+      hints.push('Esta foto y/o descripción es comida ADICIONAL que el usuario agrega a una comida que ya había registrado antes (no fotografió todo de un jalón). Desglosa SOLO lo que ves o lee aquí, no repitas ni asumas lo que ya se había registrado.');
+    }
     if (description) {
       hints.push(imageBlock
         ? `El usuario describió el plato así: "${description}". Esa descripción manda sobre lo que creas ver en la foto.`
@@ -305,19 +337,22 @@ async function analyzeMeal(req, res) {
     });
 
     if (response.stop_reason === 'refusal') {
-      await markFailed(mealId, 'el modelo declinó analizar la foto');
+      if (!append) await markFailed(mealId, 'el modelo declinó analizar la foto');
+      await cleanupAppendPhoto();
       return fail(res, 422, 'refused', 'El modelo no pudo analizar esta foto. Captúrala a mano.');
     }
 
     const textBlock = response.content.find(b => b.type === 'text');
     if (!textBlock) {
-      await markFailed(mealId, 'respuesta sin texto');
+      if (!append) await markFailed(mealId, 'respuesta sin texto');
+      await cleanupAppendPhoto();
       return fail(res, 502, 'empty_response', 'El análisis vino vacío. Intenta de nuevo.');
     }
     const parsed = JSON.parse(textBlock.text);
 
     if (!parsed.is_food || !Array.isArray(parsed.items) || !parsed.items.length) {
-      await markFailed(mealId, parsed.notes || 'la foto no parece comida');
+      if (!append) await markFailed(mealId, parsed.notes || 'la foto no parece comida');
+      await cleanupAppendPhoto();
       return fail(res, 422, 'not_food', parsed.notes || 'La foto no parece comida. Captúrala a mano si te la comiste.');
     }
 
@@ -349,15 +384,36 @@ async function analyzeMeal(req, res) {
     }));
 
     stage = 'save_items';
-    const { error: saveError } = await supabase.rpc('skandi_save_meal_items', {
-      p_meal_id: mealId,
-      p_items: items,
-      p_status: 'ready',
-      p_confidence: Math.max(0, Math.min(1, Number(parsed.confidence) || 0)),
-    });
-    if (saveError) {
-      await markFailed(mealId, saveError.message);
-      throw saveError;
+    if (append) {
+      const { error: saveError } = await supabase.rpc('skandi_append_meal_items', {
+        p_meal_id: mealId,
+        p_items: items,
+      });
+      if (saveError) {
+        await cleanupAppendPhoto();
+        if (/function .* does not exist/i.test(saveError.message)) {
+          return fail(res, 500, 'missing_migration', 'Falta correr la migración 092_skandi_append_meal_items.sql en Supabase.');
+        }
+        throw saveError;
+      }
+      // La comida ya tenía foto de portada (la del primer análisis): esta no se guarda en
+      // ningún lado más, así que no debe quedar huérfana en el bucket privado.
+      if (appendPhotoPath && !meal.photo_path) {
+        await supabase.from('skandi_meals').update({ photo_path: appendPhotoPath }).eq('id', mealId);
+      } else {
+        await cleanupAppendPhoto();
+      }
+    } else {
+      const { error: saveError } = await supabase.rpc('skandi_save_meal_items', {
+        p_meal_id: mealId,
+        p_items: items,
+        p_status: 'ready',
+        p_confidence: Math.max(0, Math.min(1, Number(parsed.confidence) || 0)),
+      });
+      if (saveError) {
+        await markFailed(mealId, saveError.message);
+        throw saveError;
+      }
     }
 
     const usage = response.usage || {};
@@ -399,9 +455,10 @@ async function analyzeMeal(req, res) {
     if (quotaSpent && userId) {
       try { await supabase.rpc('skandi_refund_ai_usage', { p_user: userId }); } catch { /* mejor esfuerzo */ }
     }
-    if (mealId) {
+    if (mealId && !append) {
       try { await markFailed(mealId, err.message); } catch { /* mejor esfuerzo */ }
     }
+    await cleanupAppendPhoto();
     if (err instanceof Anthropic.RateLimitError) {
       return res.status(429).json({ error: 'ai_rate_limited', message: 'La IA está saturada ahora mismo. Reintentaremos automáticamente.', retryable: true });
     }
