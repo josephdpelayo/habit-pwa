@@ -8,14 +8,14 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="Skandi Fit">
 <meta name="application-name" content="Skandi Fit">
-<link rel="manifest" href="/skandi-manifest.json?v=20260822-18">
-<link rel="apple-touch-icon" sizes="180x180" href="/icons/skandi-180.png?v=20260822-18">
-<link rel="icon" type="image/png" sizes="192x192" href="/icons/skandi-192.png?v=20260822-18">
+<link rel="manifest" href="/skandi-manifest.json?v=20260822-19">
+<link rel="apple-touch-icon" sizes="180x180" href="/icons/skandi-180.png?v=20260822-19">
+<link rel="icon" type="image/png" sizes="192x192" href="/icons/skandi-192.png?v=20260822-19">
 <title>Skandi Fit</title>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="/skandi-recovery.js?v=20260822-18"></script>
-<script src="/body-figure.js?v=20260822-18"></script>
-<script src="/skandi-nutrition.js?v=20260822-18"></script>
+<script src="/skandi-recovery.js?v=20260822-19"></script>
+<script src="/body-figure.js?v=20260822-19"></script>
+<script src="/skandi-nutrition.js?v=20260822-19"></script>
 <style>
 :root{
   --bg:#eef4f8;
@@ -164,6 +164,13 @@ p{color:var(--muted);line-height:1.45;margin:0}
    baje de su contenido — con etiquetas que no parten renglón, la rejilla crecía más que la
    tarjeta y el domingo se salía por la derecha. */
 .cal-nav{display:inline-flex;align-items:center;gap:6px}
+/* Cuatro cifras en una fila de 390 px: con `.row` (flex y espacio entre extremos) las cajas
+   se encogían a su hueco y "6h35m" pedía 123 px teniendo 56, así que salía cortado. Rejilla
+   de columnas iguales con minmax(0,1fr), que sí permite encoger sin desbordar. */
+.wellness-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:6px;margin-top:10px}
+.wellness-grid .stat{padding:10px 4px;min-width:0}
+.wellness-grid .stat strong{font-size:15px;white-space:nowrap}
+.wellness-grid .stat small{font-size:10px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:block}
 .cal-week{background:var(--panel);border:1px solid var(--line);border-radius:14px;
   padding:12px 10px 10px;margin-bottom:10px;box-shadow:0 8px 20px rgba(1,36,86,.05)}
 .cal-week.current{border-color:rgba(1,36,86,.22);box-shadow:0 14px 30px rgba(1,36,86,.10)}
@@ -476,7 +483,7 @@ textarea.field{min-height:112px;text-align:left;resize:vertical}
 // Versión compartida con app.html (APP_VERSION) y sw.js (CACHE_VERSION): un solo service
 // worker sirve las dos apps, así que una sola cadena las invalida a las dos. Al cambiarla
 // hay que actualizarla también en los ?v= del <head>, en index.html y en los dos manifests.
-const SKANDI_VERSION='20260822-18';
+const SKANDI_VERSION='20260822-19';
 const SUPABASE_URL='https://pmpjteuqjusbiduevbwq.supabase.co';
 const SUPABASE_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBtcGp0ZXVxanVzYmlkdWV2YndxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc2OTI1NjUsImV4cCI6MjA5MzI2ODU2NX0.XbMzZoo2yqtrD8znLnyo_1zDfrdJAvAPj1lqGOyXnLw';
 const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
@@ -635,6 +642,11 @@ en:{
   'cal.addTitle':'Add to {date}','cal.editTitle':'Edit session','cal.save':'Save',
   'cal.moveTitle':'Move session','cal.copyTitle':'Copy session',
   'cal.needsMigration':'Run migration 080 in Supabase to turn the calendar on.',
+  'home.today':'Today','home.restDay':'Rest day','home.restBody':'Nothing scheduled, and that is the plan.',
+  'home.allDone':'Done for today','home.allDoneBody':'{n} sessions finished. Enjoy it.',
+  'home.nothingToday':'Nothing planned today','home.nothingTodayBody':'Open the calendar to add something.',
+  'home.openCalendar':'Open the calendar','home.openDay':'See the day','home.todayPlan':'Today','home.seeWeek':'See the week',
+  'home.weekProgress2':'{done} of {total} done this week',
   'cal.status.replaced':'Replaced','cal.markSkipped':'I did not do it',
   'cal.removeNote':'Removing takes it out of the plan, as if it had never been there. If you simply did not train it, use the other one — that is worth recording.',
   'cal.weekMenu':'This week','cal.detach':'Customize this week',
@@ -1117,6 +1129,11 @@ es:{
   'cal.addTitle':'Agregar al {date}','cal.editTitle':'Editar sesión','cal.save':'Guardar',
   'cal.moveTitle':'Mover sesión','cal.copyTitle':'Copiar sesión',
   'cal.needsMigration':'Corre la migración 080 en Supabase para encender el calendario.',
+  'home.today':'Hoy','home.restDay':'Día de descanso','home.restBody':'Nada programado, y eso es el plan.',
+  'home.allDone':'Listo por hoy','home.allDoneBody':'{n} sesiones terminadas. Disfrútalo.',
+  'home.nothingToday':'Nada planeado hoy','home.nothingTodayBody':'Abre el calendario para agregar algo.',
+  'home.openCalendar':'Abrir el calendario','home.openDay':'Ver el día','home.todayPlan':'Hoy','home.seeWeek':'Ver la semana',
+  'home.weekProgress2':'{done} de {total} hechos esta semana',
   'cal.status.replaced':'Reemplazado','cal.markSkipped':'No lo hice',
   'cal.removeNote':'Quitar lo saca del plan, como si nunca hubiera estado. Si simplemente no lo entrenaste, usa el otro — eso sí vale la pena registrarlo.',
   'cal.weekMenu':'Esta semana','cal.detach':'Personalizar esta semana',
@@ -1982,60 +1999,117 @@ async function deleteTrainingBlock(blockId){
   render();
 }
 
+// Lo que toca HOY, leído del calendario. Antes Inicio preguntaba "¿qué rutina tiene asignado
+// este día de la semana?", que es otra pregunta: no veía una tirada en bici planeada para hoy,
+// y cuando el día no tenía rutina asignada caía a `state.templates.find(...)` —cualquier rutina
+// suya— y ofrecía empezar la del lunes un domingo.
+function todayFocus(){
+  const key=todayKey();
+  const rows=plannedOfDay(key);
+  const extras=extrasOfDay(key);
+  const sessions=rows.filter(p=>p.discipline!=='rest');
+  const pending=sessions.filter(p=>p.status==='planned');
+  return {
+    key, rows, extras, sessions,
+    next:pending[0]||null,
+    isRest:!sessions.length&&rows.some(p=>p.discipline==='rest'),
+    allDone:sessions.length>0&&!pending.length,
+    doneToday:sessions.filter(p=>p.status==='done').length
+  };
+}
+
+// La acción del héroe depende de la disciplina: una sesión de fuerza se empieza con el
+// cronómetro, una de resistencia se registra después de hacerla. Ofrecer "empezar" para una
+// tirada en bici sería ofrecer algo que la app no hace.
+function focusActionFor(p){
+  if(!p) return null;
+  if(p.discipline==='strength'&&p.template_id) return {label:t('cal.start'),icon:'play',js:`openWorkoutOverview('${p.template_id}')`};
+  if(p.discipline==='strength') return {label:t('home.openDay'),icon:'chevronRight',js:`openPlannedDay('${p.day}')`};
+  return {label:t('cal.log'),icon:'plus',js:`openLogActivity(${p.activity_template_id?`'${p.activity_template_id}'`:'null'},'${p.id}')`};
+}
+
 function homeView(){
   const mine=state.sessions.filter(s=>s.user_id===state.user.id&&s.completed_at);
-  // Anchor to the actual Monday of this week (todayDow() is 0-indexed Mon..Sun) instead of a
-  // rolling "last 7 days" window, to match the "Monday to Sunday" label above.
-  const startOfWeek=new Date();
-  startOfWeek.setHours(0,0,0,0);
-  startOfWeek.setDate(startOfWeek.getDate()-todayDow());
-  const weekCount=mine.filter(s=>new Date(s.completed_at).getTime()>=startOfWeek.getTime()).length;
-  // Only ever fall back to one of THIS user's own routines — falling further back to
-  // state.templates[0] (any crew member's public routine) used to silently start someone
-  // else's workout for a user who hadn't created a routine yet, and skip onboarding.
-  const todayTpl=state.templates.find(t=>t.user_id===state.user.id&&t.weekday===todayDow())||state.templates.find(t=>t.user_id===state.user.id);
-  // Denominator is the user's actual scheduled days this week, not a fixed guess — someone
-  // running a 3-day split shouldn't be stuck under 60% forever, and someone on 6 days
-  // shouldn't hit 100% after 5.
+  const monday=mondayOf(new Date());
+  const myRoutineCount=state.templates.filter(x=>x.user_id===state.user.id).length;
+
+  // Sin calendario (migración 080 sin correr) Inicio se comporta como siempre.
+  if(!state.plannedReady) return legacyHomeView(mine,monday,myRoutineCount);
+
+  const f=todayFocus();
+  const {total,done,pct}=weekAdherence(monday);
+  const action=focusActionFor(f.next);
+  const dateLabel=keyToDate(f.key).toLocaleDateString(LANG,{weekday:'long',day:'numeric',month:'long'});
+
+  const title=f.next?plannedTitle(f.next)
+    :f.isRest?t('home.restDay')
+    :f.allDone?t('home.allDone')
+    :t('home.nothingToday');
+  const sub=f.next?(plannedSub(f.next)||t('home.weekProgress2',{done,total}))
+    :f.isRest?t('home.restBody')
+    :f.allDone?t('home.allDoneBody',{n:f.doneToday})
+    :t('home.nothingTodayBody');
+
+  return `
+    ${activeWorkoutBanner()}
+    <section class="hero">
+      <div class="eyebrow">${esc(dateLabel)}</div>
+      <h1>${esc(t('home.hey',{name:firstName()}))}</h1>
+      <button class="focus action" onclick="${action?action.js:`setView('train')`}" aria-label="${esc(title)}">
+        <div class="row">
+          <div>
+            <div class="eyebrow">${esc(f.next?t('home.focusNow'):t('home.today'))}</div>
+            <h2>${esc(title)}</h2>
+            <p>${esc(sub)}</p>
+            <span class="focus-cta"><i>${action?icon(action.icon,17):icon('chevronRight',17)}</i>${esc(action?action.label:t('home.openCalendar'))}</span>
+          </div>
+          <div class="ring" style="--p:${pct}%"><span>${pct}%</span></div>
+        </div>
+      </button>
+    </section>
+    ${f.rows.length>1||f.extras.length?`<section class="card">
+      <div class="row"><h2>${esc(t('home.todayPlan'))}</h2><button class="btn small" onclick="setView('train')">${esc(t('home.seeWeek'))}</button></div>
+      <div class="stack" style="margin-top:12px">${f.rows.map(plannedRowHtml).join('')}${f.extras.map(extraRowHtml).join('')}</div>
+    </section>`:''}
+    ${wellnessCardHtml()}
+    ${trainingBlockCardHtml()}
+    ${attentionBannerHtml()}
+    <section class="grid">
+      <div class="stat click-card" onclick="setView('progress')"><strong>${done}/${total}</strong><small>${esc(t('home.thisWeek'))}</small></div>
+      <div class="stat click-card" onclick="setView('train')"><strong>${myRoutineCount}</strong><small>${esc(t('home.yourRoutines'))}</small></div>
+    </section>
+    ${miniBodyRecoveryCard()}
+    <section class="card click-card" onclick="setView('crew')">
+      <div class="row"><h2>${esc(t('home.latest'))}</h2><button class="btn small" onclick="setView('crew')">${esc(t('home.viewCrew'))}</button></div>
+      ${state.sessions.filter(s=>s.completed_at&&s.visibility==='crew').slice(0,4).map(feedItem).join('')||empty(t('home.feedEmpty'))}
+    </section>`;
+}
+
+function legacyHomeView(mine,monday,myRoutineCount){
+  const weekCount=mine.filter(s=>new Date(s.completed_at).getTime()>=monday.getTime()).length;
+  const todayTpl=state.templates.find(t=>t.user_id===state.user.id&&t.weekday===todayDow());
   const weekTotal=state.templates.filter(t=>t.user_id===state.user.id&&t.weekday!=null).length||5;
   const pct=Math.min(100,Math.round((weekCount/weekTotal)*100));
-  const remaining=weekTotal-weekCount;
-  const encouragement=weekCount===0?t('home.encStart')
-    :remaining<=0?t('home.encDone')
-    :remaining===1?t('home.encOne')
-    :t('home.encRhythm');
-  const focusAction=todayTpl?`openWorkoutOverview('${todayTpl.id}')`:`openDayPicker(${todayDow()})`;
-  const myRoutineCount=state.templates.filter(x=>x.user_id===state.user.id).length;
   return `
     ${activeWorkoutBanner()}
     <section class="hero">
       <div class="eyebrow">${esc(t('home.weekRange'))}</div>
       <h1>${esc(t('home.hey',{name:firstName()}))}</h1>
-      <button class="focus action" onclick="${focusAction}" aria-label="${esc(todayTpl?t('home.startAria',{name:todayTpl.name}):t('home.firstRoutine'))}">
+      <button class="focus action" onclick="${todayTpl?`openWorkoutOverview('${todayTpl.id}')`:`openDayPicker(${todayDow()})`}">
         <div class="row">
           <div>
             <div class="eyebrow">${esc(t('home.focusNow'))}</div>
             <h2>${esc(todayTpl?.name||t('home.firstRoutine'))}</h2>
-            <p>${esc(t('home.weekProgress',{done:weekCount,total:weekTotal,unit:tp(weekTotal,'common.workouts'),note:encouragement}))}</p>
+            <p>${esc(t('home.weekProgress',{done:weekCount,total:weekTotal,unit:tp(weekTotal,'common.workouts'),note:''}))}</p>
             <span class="focus-cta"><i>${todayTpl?icon('play',17):'+'}</i>${esc(todayTpl?t('home.startToday'):t('home.setupToday'))}</span>
           </div>
           <div class="ring" style="--p:${pct}%"><span>${pct}%</span></div>
         </div>
       </button>
     </section>
-    ${trainingBlockCardHtml()}
     ${enduranceTodayCard()}
-    ${attentionBannerHtml()}
-    <section class="grid">
-      <div class="stat click-card" onclick="setView('progress')"><strong>${weekCount}</strong><small>${esc(t('home.thisWeek'))}</small></div>
-      <div class="stat click-card" onclick="setView('train')"><strong>${myRoutineCount}</strong><small>${esc(t('home.yourRoutines'))}</small></div>
-    </section>
-    ${miniBodyRecoveryCard()}
-    ${todayTpl?`<div class="click-card" onclick="setView('train')">${workoutCard(todayTpl,true)}</div>`:empty(t('home.noRoutine'))}
-    <section class="card click-card" onclick="setView('crew')">
-      <div class="row"><h2>${esc(t('home.latest'))}</h2><button class="btn small" onclick="setView('crew')">${esc(t('home.viewCrew'))}</button></div>
-      ${state.sessions.filter(s=>s.completed_at&&s.visibility==='crew').slice(0,4).map(feedItem).join('')||empty(t('home.feedEmpty'))}
-    </section>`;
+    ${trainingBlockCardHtml()}
+    ${miniBodyRecoveryCard()}`;
 }
 
 // ---- Programs: the layer above routines (workout -> routine -> program) ------------------
@@ -2470,7 +2544,7 @@ function wellnessCardHtml(){
   const stat=(value,label)=>value==null?'':`<div class="stat"><strong>${esc(String(value))}</strong><small>${esc(label)}</small></div>`;
   return `<section class="card">
     <div class="row"><h2>${esc(t('wellness.title'))}</h2><span class="muted">${esc(whenLabel)}</span></div>
-    <div class="row" style="margin-top:10px;gap:8px">
+    <div class="wellness-grid">
       ${stat(latest.sleep_secs?formatSleep(latest.sleep_secs):null,t('wellness.sleep'))}
       ${stat(latest.resting_hr,t('wellness.restingHr'))}
       ${stat(latest.hrv,t('wellness.hrv'))}
@@ -2574,18 +2648,24 @@ function calendarTab(){
     <button class="btn" style="width:100%" onclick="calMore()">${esc(t('cal.moreWeeks'))}</button>`;
 }
 
-function weekRowHtml(monday){
+// La adherencia de una semana, en un solo lugar. Inicio la calculaba por su cuenta a partir de
+// las plantillas con weekday, así que en una semana personalizada las dos pantallas daban
+// números distintos sobre lo mismo.
+//
+// Cuenta SOLO filas planeadas: sumarle los entrenamientos extra daría "3 / 3" en una semana
+// donde se hizo una de tres cosas planeadas y dos improvisadas, y leería como semana completa
+// justo cuando el plan se abandonó. Y el descanso queda fuera — no es algo que se complete, y
+// en el denominador impedía que una semana con dos descansos llegara nunca al 100%.
+function weekAdherence(monday){
   const days=Array.from({length:7},(_,i)=>dayKey(addDays(monday,i)));
-  const rows=days.flatMap(k=>plannedOfDay(k));
-  // El descanso no cuenta: no es algo que se complete, y metiéndolo en el denominador una
-  // semana con dos descansos nunca podía llegar a 100%.
-  const sessions=rows.filter(p=>p.discipline!=='rest');
+  const sessions=days.flatMap(k=>plannedOfDay(k)).filter(p=>p.discipline!=='rest');
   const total=sessions.filter(p=>p.status!=='skipped').length;
-  // La adherencia cuenta SOLO filas planeadas. Sumarle los extras daría "3 / 3" en una semana
-  // donde se hizo una de tres cosas planeadas y dos improvisadas: leería como semana completa
-  // justo cuando el plan se abandonó. Los extras se ven en la celda, no en el número.
   const done=sessions.filter(p=>p.status==='done').length;
-  const pct=total?Math.min(100,Math.round(done/total*100)):0;
+  return {days,total,done,pct:total?Math.min(100,Math.round(done/total*100)):0};
+}
+
+function weekRowHtml(monday){
+  const {days,total,done,pct}=weekAdherence(monday);
   const isCurrent=dayKey(monday)===dayKey(mondayOf(new Date()));
   const label=`${monday.toLocaleDateString(LANG,{day:'numeric',month:'short'})} – ${addDays(monday,6).toLocaleDateString(LANG,{day:'numeric',month:'short'})}`;
   return `<section class="cal-week ${isCurrent?'current':''}">
