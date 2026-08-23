@@ -8,14 +8,14 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="Skandi Fit">
 <meta name="application-name" content="Skandi Fit">
-<link rel="manifest" href="/skandi-manifest.json?v=20260822-17">
-<link rel="apple-touch-icon" sizes="180x180" href="/icons/skandi-180.png?v=20260822-17">
-<link rel="icon" type="image/png" sizes="192x192" href="/icons/skandi-192.png?v=20260822-17">
+<link rel="manifest" href="/skandi-manifest.json?v=20260822-18">
+<link rel="apple-touch-icon" sizes="180x180" href="/icons/skandi-180.png?v=20260822-18">
+<link rel="icon" type="image/png" sizes="192x192" href="/icons/skandi-192.png?v=20260822-18">
 <title>Skandi Fit</title>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="/skandi-recovery.js?v=20260822-17"></script>
-<script src="/body-figure.js?v=20260822-17"></script>
-<script src="/skandi-nutrition.js?v=20260822-17"></script>
+<script src="/skandi-recovery.js?v=20260822-18"></script>
+<script src="/body-figure.js?v=20260822-18"></script>
+<script src="/skandi-nutrition.js?v=20260822-18"></script>
 <style>
 :root{
   --bg:#eef4f8;
@@ -476,7 +476,7 @@ textarea.field{min-height:112px;text-align:left;resize:vertical}
 // Versión compartida con app.html (APP_VERSION) y sw.js (CACHE_VERSION): un solo service
 // worker sirve las dos apps, así que una sola cadena las invalida a las dos. Al cambiarla
 // hay que actualizarla también en los ?v= del <head>, en index.html y en los dos manifests.
-const SKANDI_VERSION='20260822-17';
+const SKANDI_VERSION='20260822-18';
 const SUPABASE_URL='https://pmpjteuqjusbiduevbwq.supabase.co';
 const SUPABASE_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBtcGp0ZXVxanVzYmlkdWV2YndxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc2OTI1NjUsImV4cCI6MjA5MzI2ODU2NX0.XbMzZoo2yqtrD8znLnyo_1zDfrdJAvAPj1lqGOyXnLw';
 const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
@@ -767,6 +767,8 @@ en:{
   'activity.rowing':'Rowing','activity.walking':'Walking','activity.other':'Other','activity.fallback':'Activity',
 
   'strava.title':'Strava','strava.badge':'Strava','strava.checkEffort':'check effort',
+  'report.keepChangesTitle':'Save these changes to “{name}”?','report.added':'Added: {list}','report.removed':'Removed: {list}',
+  'report.keepChangesBody':'Leave it off and the routine stays as it was — today counts as a one-off. Set counts are never carried over: doing 2 instead of 3 is how the day went, not a change of plan.',
   'link.title':'Watch workouts with no session','link.merge':'Merge','link.ignore':'Not now',
   'link.intro':'The watch recorded these and no session in Skandi matched their time. If one of them is the same workout you logged, say so and they become one.',
   'link.noCandidates':'No session logged in Skandi that day to merge it with.',
@@ -1247,6 +1249,8 @@ es:{
   'activity.rowing':'Remo','activity.walking':'Caminar','activity.other':'Otro','activity.fallback':'Actividad',
 
   'strava.title':'Strava','strava.badge':'Strava','strava.checkEffort':'revisa el esfuerzo',
+  'report.keepChangesTitle':'¿Guardar estos cambios en «{name}»?','report.added':'Agregaste: {list}','report.removed':'Quitaste: {list}',
+  'report.keepChangesBody':'Déjala apagada y la rutina se queda como estaba — lo de hoy cuenta como algo de una vez. El número de series nunca se copia: hacer 2 en vez de 3 es cómo salió el día, no un cambio de plan.',
   'link.title':'Entrenamientos del reloj sin sesión','link.merge':'Fusionar','link.ignore':'Ahora no',
   'link.intro':'El reloj registró esto y ninguna sesión de Skandi coincidió en horario. Si alguna es el mismo entrenamiento que registraste, dilo y quedan como uno solo.',
   'link.noCandidates':'Ese día no hay ninguna sesión registrada en Skandi con la cual fusionarlo.',
@@ -4768,11 +4772,15 @@ function computeActiveItems(sessionId){
     // not-yet-done sets). Grouping by sort_order instead of exercise_id keeps that as ONE card
     // — otherwise the already-completed sets get stranded on an orphaned card under the old
     // exercise_id while the remaining sets render as a second, unrelated-looking exercise.
+    // Esta clave es la IDENTIDAD de la tarjeta, y por eso viaja hacia afuera como `slot`.
+    // Un mismo ejercicio puede ocupar dos huecos —agregar a media sesión algo que ya estaba en
+    // la rutina es normal— y entonces exercise_id deja de distinguirlos: borrar el segundo
+    // borraba el primero, y agregarle una serie se la ponía al otro.
     const key=s.sort_order!=null?`so:${s.sort_order}`:`ex:${s.exercise_id}`;
     if(!bySlot.has(key)) bySlot.set(key,[]);
     bySlot.get(key).push(s);
   });
-  return [...bySlot.values()].map(group=>{
+  return [...bySlot.entries()].map(([slot,group])=>{
     // Whichever exercise still has undone sets is the one actually being trained right now.
     // Completed sets from before a swap/step stay attributed to whatever they were actually
     // performed on — history isn't rewritten, only the card display is merged.
@@ -4794,6 +4802,7 @@ function computeActiveItems(sessionId){
     // set_idx 1 still sitting on the old exercise_id.
     const sets=group.slice().sort((a,b)=>a.done===b.done?a.set_idx-b.set_idx:(a.done?-1:1));
     return {
+      slot,
       exercise_id,
       exercise:state.exercises.find(e=>e.id===exercise_id),
       target_sets:group.length,
@@ -5209,7 +5218,7 @@ function activeExercise(item,sets){
         <span class="muted">${sets.filter(s=>s.done).length}/${sets.length}${(()=>{const q=e.track_quality?avgQuality(sets.filter(x=>x.done)):null; return q!=null?' · '+esc(t('ex.qualityAvg',{v:q})):'';})()}</span>
         <div class="ex-actions-row">
           ${undone?`<button class="icon-btn tiny" onclick="event.stopPropagation();toggleSwap('${item.exercise_id}')" aria-label="${esc(t('ex.swap'))}" title="${esc(t('ex.swap'))}">${icon('swap',14)}</button>`:''}
-          <button class="icon-btn tiny danger" onclick="event.stopPropagation();removeExerciseFromSession('${item.exercise_id}')" aria-label="${esc(t('ex.removeFromSession'))}" title="${esc(t('ex.removeShort'))}">${icon('trash',14)}</button>
+          <button class="icon-btn tiny danger" onclick="event.stopPropagation();removeExerciseFromSession('${item.slot}')" aria-label="${esc(t('ex.removeFromSession'))}" title="${esc(t('ex.removeShort'))}">${icon('trash',14)}</button>
         </div>
       </div>
     </div>
@@ -5249,7 +5258,7 @@ function activeExercise(item,sets){
         <button class="set-remove" onclick="removeSet('${s.id}')" aria-label="${esc(t('ex.removeSet'))}">${icon('close',11)}</button>
       </div>${setOptionsHtml(s,rowEx)}`;}).join('')}
     </div>
-    <button class="add-set-link" onclick="addSet('${item.exercise_id}')">${esc(t('ex.addSet'))}</button>
+    <button class="add-set-link" onclick="addSet('${item.slot}')">${esc(t('ex.addSet'))}</button>
   </article>`;
 }
 
@@ -5394,10 +5403,12 @@ async function addExerciseToSession(exerciseId){
   renderActiveWorkout();
 }
 
-async function removeExerciseFromSession(exerciseId){
+async function removeExerciseFromSession(slot){
   if(!state.active) return;
   const sessionId=state.active.id;
-  const item=state.activeItems.find(i=>i.exercise_id===exerciseId);
+  // Por hueco y no por ejercicio: con el mismo ejercicio en dos posiciones, buscar por
+  // exercise_id devolvía siempre la primera tarjeta y borraba la equivocada.
+  const item=state.activeItems.find(i=>i.slot===slot)||state.activeItems.find(i=>i.exercise_id===slot);
   if(!item) return;
   if(!confirm(t('ex.confirmRemove',{name:item.exercise?.name||t('ex.thisExercise')}))) return;
   // Delete by id, not by exercise_id: after a mid-exercise swap/progression-step this card can
@@ -5464,17 +5475,22 @@ async function toggleSet(id,rest){
   renderActiveWorkout();
 }
 
-async function addSet(exerciseId){
+async function addSet(slot){
   if(!state.active) return;
   const sessionId=state.active.id;
-  const existing=state.sets.filter(s=>s.session_id===sessionId&&s.exercise_id===exerciseId);
+  // Las series de ESTE hueco, no las de todas las apariciones del ejercicio: si el mismo
+  // ejercicio está dos veces, tomar las de ambas daba un set_idx equivocado y, peor, copiaba
+  // el sort_order de la otra tarjeta, así que la serie nueva aparecía en la de arriba.
+  const item=state.activeItems.find(i=>i.slot===slot)||state.activeItems.find(i=>i.exercise_id===slot);
+  if(!item) return;
+  const exerciseId=item.exercise_id;
+  const existing=item.sets;
   const nextIdx=(existing.length?Math.max(...existing.map(s=>s.set_idx)):0)+1;
-  const seed=existing.find(s=>s.set_idx===1)||{};
+  const seed=existing.find(s=>s.set_idx===1)||existing[0]||{};
   // Look target_reps/rest/sort up server-side-derived state rather than taking it as a caller
   // argument — target_reps is free text a user can set when building a routine, and passing it
   // through an inline onclick('...') string argument is an XSS vector (HTML-escaping a value
   // that lands inside a JS string literal in an attribute does not neutralize it).
-  const item=state.activeItems.find(i=>i.exercise_id===exerciseId);
   const {data,error}=await sb.from('skandi_sets').insert({
     session_id:sessionId,user_id:state.user.id,exercise_id:exerciseId,set_idx:nextIdx,
     target_reps:seed.target_reps||item?.target_reps||'8-12',
@@ -5526,7 +5542,52 @@ async function cancelWorkout(){
   render();
 }
 
+// ¿La sesión terminó distinta de la rutina que la originó? Se compara a nivel de EJERCICIOS,
+// no de series: hacer 2 series en vez de 3 es cómo salió el día, no un cambio de plan, y
+// preguntarlo cada vez enseñaría a ignorar la pregunta.
+function sessionTemplateDiff(){
+  const session=state.active;
+  if(!session?.template_id) return null;
+  const tpl=state.templates.find(x=>x.id===session.template_id);
+  if(!tpl||tpl.user_id!==state.user.id) return null;   // la rutina de alguien más no se toca
+  const planned=state.items.filter(i=>i.template_id===tpl.id).map(i=>i.exercise_id);
+  const done=state.activeItems.map(i=>i.exercise_id);
+  const count=list=>list.reduce((m,id)=>m.set(id,(m.get(id)||0)+1),new Map());
+  const pc=count(planned), dc=count(done);
+  const nameOf=id=>state.exercises.find(e=>e.id===id)?.name||t('common.exercise');
+  const added=[],removed=[];
+  new Set([...pc.keys(),...dc.keys()]).forEach(id=>{
+    const delta=(dc.get(id)||0)-(pc.get(id)||0);
+    for(let i=0;i<Math.abs(delta);i++) (delta>0?added:removed).push(nameOf(id));
+  });
+  if(!added.length&&!removed.length) return null;
+  return {tpl,added,removed};
+}
+
+// Guardar los cambios reescribe la rutina con lo que de verdad se entrenó. Las series
+// objetivo salen de cuántas quedaron en cada hueco, y reps/descanso/RIR de la primera serie
+// de ese hueco, que es la que llevaba el objetivo original.
+async function saveSessionIntoTemplate(templateId){
+  const items=state.activeItems.map((item,idx)=>{
+    const seed=item.sets.find(x=>x.set_idx===1)||item.sets[0]||{};
+    return {
+      exercise_id:item.exercise_id,
+      sort_order:idx,
+      target_sets:Math.max(1,Math.min(12,item.sets.length)),
+      target_reps:seed.target_reps||item.target_reps||'8-12',
+      target_rest_sec:seed.target_rest_sec??item.target_rest_sec??90,
+      target_rir:seed.target_rir??item.target_rir??null
+    };
+  });
+  if(!items.length) return;
+  // El RPC de la migración 052: borrar e insertar en una sola transacción, para que un fallo
+  // a la mitad no deje la rutina sin ejercicios.
+  const {error}=await sb.rpc('save_template_items',{p_template_id:templateId,p_items:items});
+  if(error) alert(error.message);
+}
+
 function openReport(){
+  const diff=sessionTemplateDiff();
   $('modalCard').innerHTML=`
     <div class="row"><h1>${esc(t('report.title'))}</h1><button class="x" onclick="closeModal()" aria-label="${esc(t('common.close'))}">${icon('close',20)}</button></div>
     <section class="card" style="border-color:rgba(1,36,86,.20);background:linear-gradient(135deg,#ffffff,#e8f1f8)"><h2>${esc(state.active.title)}</h2><p>${esc(t('report.logged',{time:fmtWorkoutTime(state.elapsed)}))}</p></section>
@@ -5544,6 +5605,17 @@ function openReport(){
     <input id="soreArea" class="field left" placeholder="${esc(t('report.sorePh'))}">
     <textarea id="note" class="field" placeholder="${esc(t('report.notePh'))}"></textarea>
     <label class="card row" style="margin:0 0 14px"><div><h3>${esc(t('report.shareTitle'))}</h3><p>${esc(t('report.shareBody'))}</p></div><input id="shareCrew" type="checkbox" checked></label>
+    ${diff?`<label class="card row" style="margin:0 0 14px;border-color:rgba(240,162,46,.35)">
+      <div>
+        <h3>${esc(t('report.keepChangesTitle',{name:diff.tpl.name}))}</h3>
+        <p>${esc([diff.added.length?t('report.added',{list:diff.added.join(', ')}):null,
+                  diff.removed.length?t('report.removed',{list:diff.removed.join(', ')}):null]
+                 .filter(Boolean).join(' · '))}</p>
+        <p>${esc(t('report.keepChangesBody'))}</p>
+      </div>
+      <input id="keepChanges" type="checkbox">
+    </label>`:''}
+    <input type="hidden" id="diffTemplateId" value="${diff?diff.tpl.id:''}">
     <button class="btn primary" style="width:100%" onclick="finishWorkout()">${esc(t('report.save'))}</button>`;
 }
 
@@ -5572,6 +5644,10 @@ async function finishWorkout(){
   };
   const {error}=await sb.from('skandi_sessions').update(patch).eq('id',state.active.id);
   if(error) return alert(error.message);
+  // La casilla nace apagada: conservar la rutina como estaba es lo reversible, y sobrescribirla
+  // sin querer significa perder el plan original sin manera de recuperarlo.
+  const keepTemplateId=$('keepChanges')?.checked?$('diffTemplateId')?.value:'';
+  if(keepTemplateId) await saveSessionIntoTemplate(keepTemplateId);
   // El calendario se concilia solo: la sesión que acaba de cerrarse busca su fila planeada
   // del día y la marca hecha. Si no había ninguna, la sesión aparece como extra en vez de
   // perderse — entrenar algo no planeado no es un error que haya que capturar.
