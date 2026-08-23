@@ -118,9 +118,71 @@ function toActivityRow(activity, { userId, maxHeartRate } = {}){
   };
 }
 
+// ---- Duplicados: la misma carrera capturada a mano y luego importada ----
+//
+// Esto no es de Strava, opera sobre filas de `skandi_external_activities` de cualquier
+// origen. Vive aquí porque este módulo ya es el que traduce y compara esas filas, y abrir un
+// quinto módulo para una sola función sería peor que la incomodidad del nombre.
+//
+// El caso real: registras la carrera del viernes en la app y al día siguiente el reloj la
+// manda por Intervals. Son dos renglones del mismo entrenamiento y el motor de fatiga los
+// suma dos veces. La solución NO es borrar el tuyo: puede traer una nota, el plan de cardio
+// al que pertenece (`template_id`) y, sobre todo, puede estar enlazado a un día del
+// calendario (`skandi_planned_sessions.activity_id`). Se absorbe: la fila tuya se queda con
+// su id y recibe lo que el reloj midió mejor. Es la misma decisión que ya se tomó en fuerza,
+// donde la actividad del reloj enriquece la sesión que tú registraste en vez de duplicarla.
+
+const DUPLICATE_OVERLAP_MS = 10 * 60e3;
+const DUPLICATE_START_MS = 90 * 60e3;
+
+function activitySpan(row){
+  const start = new Date(row.performed_at).getTime();
+  const minutes = Number(row.duration_min) || 0;
+  if (!Number.isFinite(start) || minutes <= 0) return null;
+  return { start, end: start + minutes * 60e3, minutes };
+}
+
+// Dos entrenamientos del mismo tipo que empiezan cerca pero duran cosas muy distintas son
+// dos entrenamientos, no uno mal capturado. Sin esta guarda, una sesión doble el mismo día
+// se comería a la otra.
+function similarDuration(a, b){
+  const gap = Math.abs(a.minutes - b.minutes);
+  return gap <= Math.max(15, Math.max(a.minutes, b.minutes) * 0.5);
+}
+
+function matchImportedToManual(rows){
+  const imported = (rows || []).filter(r => r && r.external_source);
+  const manual = (rows || []).filter(r => r && !r.external_source);
+  const used = new Set();
+  const pairs = [];
+
+  for (const row of imported) {
+    const span = activitySpan(row);
+    if (!span) continue;
+    let best = null;
+    for (const candidate of manual) {
+      if (used.has(candidate.id)) continue;
+      if (candidate.activity_type !== row.activity_type) continue;
+      const other = activitySpan(candidate);
+      if (!other || !similarDuration(span, other)) continue;
+      const overlap = Math.max(0, Math.min(span.end, other.end) - Math.max(span.start, other.start));
+      const startDelta = Math.abs(span.start - other.start);
+      if (overlap < DUPLICATE_OVERLAP_MS && startDelta > DUPLICATE_START_MS) continue;
+      const score = startDelta - overlap;
+      if (!best || score < best.score) best = { manual: candidate, score };
+    }
+    if (best) {
+      used.add(best.manual.id);
+      pairs.push({ imported: row, manual: best.manual });
+    }
+  }
+  return pairs;
+}
+
 const api = {
   SPORT_TYPE_MAP, SKIPPED_SPORT_TYPES, DEFAULT_INTENSITY,
   sportTypeOf, isSkipped, mapActivityType, deriveIntensity, toActivityRow,
+  matchImportedToManual,
 };
 
 if (typeof module !== 'undefined' && module.exports) module.exports = api;

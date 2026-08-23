@@ -8,14 +8,14 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="Skandi Fit">
 <meta name="application-name" content="Skandi Fit">
-<link rel="manifest" href="/skandi-manifest.json?v=20260822-13">
-<link rel="apple-touch-icon" sizes="180x180" href="/icons/skandi-180.png?v=20260822-13">
-<link rel="icon" type="image/png" sizes="192x192" href="/icons/skandi-192.png?v=20260822-13">
+<link rel="manifest" href="/skandi-manifest.json?v=20260822-14">
+<link rel="apple-touch-icon" sizes="180x180" href="/icons/skandi-180.png?v=20260822-14">
+<link rel="icon" type="image/png" sizes="192x192" href="/icons/skandi-192.png?v=20260822-14">
 <title>Skandi Fit</title>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="/skandi-recovery.js?v=20260822-13"></script>
-<script src="/body-figure.js?v=20260822-13"></script>
-<script src="/skandi-nutrition.js?v=20260822-13"></script>
+<script src="/skandi-recovery.js?v=20260822-14"></script>
+<script src="/body-figure.js?v=20260822-14"></script>
+<script src="/skandi-nutrition.js?v=20260822-14"></script>
 <style>
 :root{
   --bg:#eef4f8;
@@ -440,7 +440,7 @@ textarea.field{min-height:112px;text-align:left;resize:vertical}
 // Versión compartida con app.html (APP_VERSION) y sw.js (CACHE_VERSION): un solo service
 // worker sirve las dos apps, así que una sola cadena las invalida a las dos. Al cambiarla
 // hay que actualizarla también en los ?v= del <head>, en index.html y en los dos manifests.
-const SKANDI_VERSION='20260822-13';
+const SKANDI_VERSION='20260822-14';
 const SUPABASE_URL='https://pmpjteuqjusbiduevbwq.supabase.co';
 const SUPABASE_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBtcGp0ZXVxanVzYmlkdWV2YndxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc2OTI1NjUsImV4cCI6MjA5MzI2ODU2NX0.XbMzZoo2yqtrD8znLnyo_1zDfrdJAvAPj1lqGOyXnLw';
 const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
@@ -722,6 +722,14 @@ en:{
   'activity.rowing':'Rowing','activity.walking':'Walking','activity.other':'Other','activity.fallback':'Activity',
 
   'strava.title':'Strava','strava.badge':'Strava','strava.checkEffort':'check effort',
+  'food.stepsDelta':'Includes {kcal} kcal for {steps} steps today versus your usual.',
+  'sync.merged_one':'1 activity you had logged by hand was merged with the watch\u2019s — it is one row now, not two.',
+  'sync.merged_other':'{n} activities you had logged by hand were merged with the watch\u2019s — one row each, not two.',
+  'wellness.title':'Your day','wellness.sleep':'sleep','wellness.restingHr':'resting','wellness.hrv':'HRV',
+  'wellness.steps':'steps','wellness.today':'today','wellness.yesterday':'yesterday','wellness.stale':'{date}',
+  'wellness.sleepBelow':'You slept {gap} less than your 7-day average — take today\u2019s hard session with that in mind.',
+  'wellness.sleepAbove':'You slept {gap} more than your 7-day average.',
+  'wellness.hrHigh':'Resting heart rate {n} bpm above your 7-day average, which usually shows up before you feel it.',
   'strava.pitch':'Your watch already syncs to Strava. Connect it and every run, ride or swim lands here on its own — no typing, and the recovery engine sees it.',
   'strava.connect':'Connect Strava','strava.disconnect':'Disconnect',
   'strava.connectedAs':'Connected · athlete {athlete}',
@@ -754,6 +762,8 @@ en:{
   'intervals.never':'never','intervals.sync':'Sync now','intervals.syncing':'Syncing…',
   'intervals.backfill':'Import the last year','intervals.disconnect':'Disconnect',
   'intervals.syncDone':'{imported} cardio activities new, {updated} updated · {matched_strength} strength workouts linked.',
+  'intervals.unmatched_one':'1 strength workout from your watch found no Skandi session ({list}). Log it in the app so it counts — a watch-only strength session is never imported on its own, or it would fatigue the same muscle twice.',
+  'intervals.unmatched_other':'{n} strength workouts from your watch found no Skandi session ({list}). Log them in the app so they count — a watch-only strength session is never imported on its own, or it would fatigue the same muscle twice.',
   'intervals.disconnectConfirm':'Disconnect Intervals.icu? Already-imported workouts stay in your history.',
   'intervals.failed':'Intervals.icu did not answer. Try again in a moment.',
   'intervals.keyRequired':'Paste your Intervals.icu API key.',
@@ -1173,6 +1183,14 @@ es:{
   'activity.rowing':'Remo','activity.walking':'Caminar','activity.other':'Otro','activity.fallback':'Actividad',
 
   'strava.title':'Strava','strava.badge':'Strava','strava.checkEffort':'revisa el esfuerzo',
+  'food.stepsDelta':'Incluye {kcal} kcal por los {steps} pasos de hoy contra tu promedio.',
+  'sync.merged_one':'1 actividad que ya habías registrado a mano se fusionó con la del reloj — queda un solo renglón, no dos.',
+  'sync.merged_other':'{n} actividades que ya habías registrado a mano se fusionaron con las del reloj — un solo renglón cada una, no dos.',
+  'wellness.title':'Tu día','wellness.sleep':'sueño','wellness.restingHr':'reposo','wellness.hrv':'HRV',
+  'wellness.steps':'pasos','wellness.today':'hoy','wellness.yesterday':'ayer','wellness.stale':'{date}',
+  'wellness.sleepBelow':'Dormiste {gap} menos que tu promedio de 7 días — tenlo en cuenta si hoy toca sesión dura.',
+  'wellness.sleepAbove':'Dormiste {gap} más que tu promedio de 7 días.',
+  'wellness.hrHigh':'Pulso en reposo {n} lpm arriba de tu promedio de 7 días, que suele avisar antes de que lo sientas.',
   'strava.pitch':'Tu reloj ya sincroniza a Strava. Conéctalo y cada carrera, rodada o nado llega solo — sin teclear nada, y el motor de recuperación lo ve.',
   'strava.connect':'Conectar Strava','strava.disconnect':'Desconectar',
   'strava.connectedAs':'Conectado · atleta {athlete}',
@@ -1205,6 +1223,8 @@ es:{
   'intervals.never':'nunca','intervals.sync':'Sincronizar ahora','intervals.syncing':'Sincronizando…',
   'intervals.backfill':'Traer el último año','intervals.disconnect':'Desconectar',
   'intervals.syncDone':'{imported} actividades de cardio nuevas, {updated} actualizadas · {matched_strength} entrenamientos de fuerza enlazados.',
+  'intervals.unmatched_one':'1 entrenamiento de fuerza del reloj no encontró sesión en Skandi ({list}). Regístralo en la app para que cuente: la fuerza del reloj nunca se importa sola, porque fatigaría dos veces el mismo músculo.',
+  'intervals.unmatched_other':'{n} entrenamientos de fuerza del reloj no encontraron sesión en Skandi ({list}). Regístralos en la app para que cuenten: la fuerza del reloj nunca se importa sola, porque fatigaría dos veces el mismo músculo.',
   'intervals.disconnectConfirm':'¿Desconectar Intervals.icu? Los entrenamientos ya importados se quedan en tu historial.',
   'intervals.failed':'Intervals.icu no contestó. Intenta en un momento.',
   'intervals.keyRequired':'Pega tu API key de Intervals.icu.',
@@ -1433,7 +1453,7 @@ const EXERCISE_PRESETS={
 };
 
 const ACTIVE_WORKOUT_MAX_HOURS=18;
-const state={user:null,profile:null,view:'home',authMode:'login',exercises:[],templates:[],items:[],sessions:[],sets:[],externalActivities:[],activityTemplates:[],progressionState:[],progressionEvents:[],skillGoals:[],trainingBlocks:[],planned:[],plannedReady:true,ensuredWeeks:new Set(),weekSig:null,trainTab:'today',calOffset:0,calWeeks:4,dayOpen:null,bodyweightLogs:[],programs:[],programDays:[],active:null,activeItems:[],timer:null,elapsed:0,rest:0,restTotal:0,bodyFlip:'front',weightUnit:localStorage.getItem('skandi_weight_unit')||'kg',weightUnitOverrides:(()=>{try{return JSON.parse(localStorage.getItem('skandi_weight_unit_overrides')||'{}');}catch(e){return {};}})(),expandedRoutines:new Set(),progressTab:'summary',progressQuery:'',progressMetric:'best',historyFilter:{month:'all',title:'all'},crewFeedLimit:6,swapTarget:null,swapQuery:'',setOptionsId:null,skillTab:null,addExOpen:false,addExQuery:'',pausedMs:0,pausedAt:null,floatTimerOpen:false,meals:[],mealItems:[],foods:[],dishes:[],dishItems:[],nutritionTargets:null,aiCallsToday:0,foodDayOffset:0,foodPicker:{query:'',mealId:null},pendingMeal:null,stravaStatus:null,intervalsStatus:null,skandiSettings:null,stravaSyncing:false,intervalsSyncing:false};
+const state={user:null,profile:null,view:'home',authMode:'login',exercises:[],templates:[],items:[],sessions:[],sets:[],externalActivities:[],activityTemplates:[],progressionState:[],progressionEvents:[],skillGoals:[],trainingBlocks:[],planned:[],plannedReady:true,ensuredWeeks:new Set(),weekSig:null,trainTab:'today',calOffset:0,calWeeks:4,dayOpen:null,bodyweightLogs:[],programs:[],programDays:[],active:null,activeItems:[],timer:null,elapsed:0,rest:0,restTotal:0,bodyFlip:'front',weightUnit:localStorage.getItem('skandi_weight_unit')||'kg',weightUnitOverrides:(()=>{try{return JSON.parse(localStorage.getItem('skandi_weight_unit_overrides')||'{}');}catch(e){return {};}})(),expandedRoutines:new Set(),progressTab:'summary',progressQuery:'',progressMetric:'best',historyFilter:{month:'all',title:'all'},crewFeedLimit:6,swapTarget:null,swapQuery:'',setOptionsId:null,skillTab:null,addExOpen:false,addExQuery:'',pausedMs:0,pausedAt:null,floatTimerOpen:false,meals:[],mealItems:[],foods:[],dishes:[],dishItems:[],nutritionTargets:null,aiCallsToday:0,foodDayOffset:0,foodPicker:{query:'',mealId:null},pendingMeal:null,wellness:[],stravaStatus:null,intervalsStatus:null,skandiSettings:null,stravaSyncing:false,intervalsSyncing:false};
 let builderState={selected:new Map(),group:'All'};
 
 const $=id=>document.getElementById(id);
@@ -2316,6 +2336,61 @@ function trainView(){
     ${body}`;
 }
 
+// El reloj mide de noche lo que decide si el entrenamiento del día va a salir bien. La
+// tarjeta enseña cuatro números y, cuando hay algo que decir, UNA frase — no un tablero:
+// el sueño y el pulso en reposo solo significan algo contra tu propio promedio, no en
+// absoluto, así que se comparan contra los 7 días previos antes de opinar.
+// formatHours() no sirve aquí: está hecho para cuentas regresivas de recuperación, redondea
+// hacia arriba y tira los minutos, así que 6h35m de sueño saldrían como "7h".
+function formatSleep(secs){
+  const total=Math.max(0,Math.round(Number(secs)||0)/60);
+  const h=Math.floor(total/60), m=Math.round(total%60);
+  return h?`${h}h${m?String(m).padStart(2,'0')+'m':''}`:`${m}m`;
+}
+
+function wellnessCardHtml(){
+  const rows=(state.wellness||[]).slice().sort((a,b)=>b.day.localeCompare(a.day));
+  const latest=rows[0];
+  if(!latest) return '';
+  const key=todayKey();
+  const yesterday=dayKey(addDays(new Date(),-1));
+  const whenLabel=latest.day===key?t('wellness.today')
+    :latest.day===yesterday?t('wellness.yesterday')
+    :keyToDate(latest.day).toLocaleDateString(LANG,{day:'numeric',month:'short'});
+
+  const prev=rows.slice(1,8);
+  const mean=(list,field)=>{
+    const vals=list.map(r=>Number(r[field])).filter(Number.isFinite);
+    return vals.length?vals.reduce((a,b)=>a+b,0)/vals.length:null;
+  };
+  const notes=[];
+  const sleepAvg=mean(prev,'sleep_secs');
+  if(latest.sleep_secs&&sleepAvg){
+    const diff=latest.sleep_secs-sleepAvg;
+    // Menos de 45 min de diferencia es ruido de medición, no una señal.
+    if(Math.abs(diff)>=45*60){
+      const gap=formatSleep(Math.abs(diff));
+      notes.push(t(diff<0?'wellness.sleepBelow':'wellness.sleepAbove',{gap}));
+    }
+  }
+  const hrAvg=mean(prev,'resting_hr');
+  if(latest.resting_hr&&hrAvg&&latest.resting_hr-hrAvg>=3){
+    notes.push(t('wellness.hrHigh',{n:Math.round(latest.resting_hr-hrAvg)}));
+  }
+
+  const stat=(value,label)=>value==null?'':`<div class="stat"><strong>${esc(String(value))}</strong><small>${esc(label)}</small></div>`;
+  return `<section class="card">
+    <div class="row"><h2>${esc(t('wellness.title'))}</h2><span class="muted">${esc(whenLabel)}</span></div>
+    <div class="row" style="margin-top:10px;gap:8px">
+      ${stat(latest.sleep_secs?formatSleep(latest.sleep_secs):null,t('wellness.sleep'))}
+      ${stat(latest.resting_hr,t('wellness.restingHr'))}
+      ${stat(latest.hrv,t('wellness.hrv'))}
+      ${stat(latest.steps?latest.steps.toLocaleString(LANG):null,t('wellness.steps'))}
+    </div>
+    ${notes.length?`<p class="form-note" style="margin:10px 0 0">${esc(notes.join(' '))}</p>`:''}
+  </section>`;
+}
+
 function trainTodayTab(){
   if(!state.plannedReady) return legacyTodayTab();
   const key=todayKey();
@@ -2330,6 +2405,7 @@ function trainTodayTab(){
         :empty(t('cal.emptyDay'))}
       <button class="btn" style="width:100%;margin-top:12px" onclick="openPlannedForm('${key}')">${icon('plus',16)} ${esc(t('cal.addSession'))}</button>
     </section>
+    ${wellnessCardHtml()}
     ${trainingBlockCardHtml()}`;
 }
 
@@ -3891,7 +3967,14 @@ function activityGoalLine(plan){
 // templateId, when passed (from the "Endurance today" card or the plan list), pre-fills the
 // form with that plan's targets and tags the logged row with template_id so "did I do today's
 // run" can be answered later — the member still just types in what actually happened.
+// El campo de esfuerzo llega pre-llenado en 5, así que un 5 guardado no significa "declaré
+// 5": casi siempre significa "no lo toqué". Esa diferencia es la que decide si el motor de
+// fatiga le hace caso al número o al pulso (migración 084), así que se registra en vez de
+// adivinarse después.
+let actIntensityTouched=false;
+
 function openLogActivity(templateId,plannedId){
+  actIntensityTouched=false;
   const planned=plannedId?state.planned.find(x=>x.id===plannedId):null;
   const tplPlan=templateId?state.activityTemplates.find(x=>x.id===templateId):null;
   // La fila del calendario manda sobre la plantilla: es la que trae el ajuste de esta semana.
@@ -3917,7 +4000,7 @@ function openLogActivity(templateId,plannedId){
     <label class="eyebrow">${esc(t('logAct.hr'))}</label>
     <input id="actHeartRate" class="field left" type="number" min="30" max="230" inputmode="numeric" placeholder="${esc(t('logAct.hrPh'))}">
     <label class="eyebrow">${esc(t('logAct.intensity'))}</label>
-    <input id="actIntensity" class="field left" type="number" min="1" max="10" inputmode="numeric" value="5">
+    <input id="actIntensity" class="field left" type="number" min="1" max="10" inputmode="numeric" value="5" oninput="actIntensityTouched=true">
     <label class="eyebrow">${esc(t('logAct.when'))}</label>
     <input id="actWhen" class="field left" type="datetime-local" max="${localDatetimeValue(new Date())}" value="${localDatetimeValue(new Date())}">
     <textarea id="actNote" class="field" placeholder="${esc(t('common.notesOptional'))}"></textarea>
@@ -3947,6 +4030,7 @@ async function saveExternalActivity(){
     avg_heart_rate:heartRate,
     template_id:$('actTemplateId').value||null,
     intensity,
+    intensity_source:actIntensityTouched?'manual':'default',
     performed_at:performedAt.toISOString(),
     note:$('actNote').value.trim()||null
   };
@@ -3980,7 +4064,7 @@ function externalActivityRow(a){
   const badges=[
     a.external_source==='strava'?`<span class="pill tiny">${esc(t('strava.badge'))}</span>`:'',
     a.external_source==='intervals'?`<span class="pill tiny">${esc(t('intervals.badge'))}</span>`:'',
-    a.intensity_source==='default'?`<span class="pill tiny warn">${esc(t('strava.checkEffort'))}</span>`:''
+    (a.intensity_source==='default'&&!a.avg_heart_rate)?`<span class="pill tiny warn">${esc(t('strava.checkEffort'))}</span>`:''
   ].join('');
   return `<div class="row" style="margin-top:10px">
     <div><strong>${esc(activityTypeLabel(a.activity_type))}</strong> ${badges}<p>${esc(parts)}</p></div>
@@ -5952,16 +6036,22 @@ const aiLeft=()=>Math.max(0,AI_DAILY_LIMIT-state.aiCallsToday);
 // el cliente puede saber, y cero filas cuando no hay conexión.
 async function loadIntegrations(){
   if(!state.user) return;
-  const [{data:status},{data:settings},intervals]=await Promise.all([
+  const since=new Date();since.setDate(since.getDate()-45);
+  const [{data:status},{data:settings},intervals,{data:wellness}]=await Promise.all([
     sb.rpc('skandi_strava_status'),
     sb.from('skandi_settings').select('*').eq('user_id',state.user.id).maybeSingle(),
-    skandiApi('intervals-status').catch(()=>null)
+    skandiApi('intervals-status').catch(()=>null),
+    // 45 días: lo que necesita una tendencia de sueño y descanso, sin traerse el historial.
+    sb.from('skandi_daily_wellness').select('*').eq('user_id',state.user.id)
+      .gte('day',dayKey(since)).order('day',{ascending:false})
   ]);
   // Todo a null si la migración 081 no se ha corrido: el resto de la app no tiene por qué
   // dejar de funcionar porque falte Strava.
   state.stravaStatus=(status&&status[0])||null;
   state.intervalsStatus=intervals&&intervals.connected?intervals:null;
   state.skandiSettings=settings||null;
+  // [] si la migración 085 no se ha corrido: la tarjeta simplemente no se pinta.
+  state.wellness=wellness||[];
 }
 
 async function skandiApi(action,body){
@@ -5994,6 +6084,28 @@ async function connectIntervals(){
   }
 }
 
+// Lo que el reloj vio y Skandi no tiene que decirse. Antes el aviso solo contaba lo enlazado,
+// así que un entrenamiento de fuerza sin sesión en la app desaparecía sin dejar rastro: ni
+// enlazado, ni importado, ni mencionado.
+function intervalsSyncMessage(result){
+  let msg=t('intervals.syncDone',result);
+  const missing=Number(result.unmatched_strength)||0;
+  if(missing>0){
+    const list=(result.unmatched_strength_detail||[])
+      .map(d=>`${new Date(d.started_at).toLocaleDateString(LANG,{day:'numeric',month:'short'})} · ${d.minutes} min`)
+      .join(', ');
+    msg+='\n\n'+tp(missing,'intervals.unmatched',{list});
+  }
+  return withMergeNote(msg,result);
+}
+
+// Fusionar dos renglones del mismo entrenamiento cambia lo que ves en pantalla, así que se
+// dice. Un cambio silencioso en los datos es indistinguible de un bug.
+function withMergeNote(msg,result){
+  const merged=Number(result&&result.merged)||0;
+  return merged>0?msg+'\n\n'+tp(merged,'sync.merged'):msg;
+}
+
 async function syncIntervals(days,silent=false){
   if(state.intervalsSyncing) return;
   state.intervalsSyncing=true;
@@ -6003,7 +6115,7 @@ async function syncIntervals(days,silent=false){
     state.ensuredWeeks.clear();
     await loadAll();
     render();
-    if(!silent) alert(t('intervals.syncDone',result));
+    if(!silent) alert(intervalsSyncMessage(result));
   }catch(e){
     if(!silent) alert(e.message||String(e));
   }finally{
@@ -6052,7 +6164,7 @@ async function syncStrava(days){
     state.ensuredWeeks.clear();
     await loadAll(); // ya arrastra loadIntegrations(), que es de donde sale "última vez"
     render();
-    alert(t('strava.syncDone',{imported:r.imported,updated:r.updated}));
+    alert(withMergeNote(t('strava.syncDone',{imported:r.imported,updated:r.updated}),r));
   }catch(e){
     alert(e.message||String(e));
   }finally{
@@ -6182,17 +6294,29 @@ function trainingDayCard(){
   const loggedSets=state.sets.filter(x=>x.user_id===state.user.id&&x.done&&dayKey(x.created_at)===today).length;
   const loggedKcal=loggedToday.reduce((acc,a)=>acc+SkandiNutrition.activityKcal(a,weightKg),0)
     +SkandiNutrition.strengthKcal(loggedSets,weightKg);
+  // Los pasos del día contra tu propio promedio de 7 días. El promedio es lo que importa: la
+  // meta ya asume tu nivel normal de movimiento, así que solo la desviación cambia lo que
+  // toca comer. Se piden 8 días para poder comparar hoy contra los 7 anteriores.
+  const wellnessRows=(state.wellness||[]).slice().sort((a,b)=>b.day.localeCompare(a.day));
+  const stepsToday=wellnessRows.find(w=>w.day===today)?.steps??null;
+  const prevSteps=wellnessRows.filter(w=>w.day!==today).slice(0,7).map(w=>w.steps).filter(n=>Number.isFinite(n));
+  const avgSteps=prevSteps.length>=3?prevSteps.reduce((a,b)=>a+b,0)/prevSteps.length:null;
   const rec=SkandiNutrition.dayRecommendation({
     targets,plan,dow:todayDow(),loggedKcal,
-    hasLoggedActivity:loggedToday.length>0||loggedSets>0
+    hasLoggedActivity:loggedToday.length>0||loggedSets>0,
+    steps:stepsToday,avgSteps,weightKg
   });
   if(!rec||(!rec.plannedKcal&&!rec.todayKcal)) return '';
 
   const sessions=SkandiNutrition.plannedSessions(todayDow(),plan);
   const label=rec.level==='alto'?t('food.trainHigh'):rec.level==='bajo'?t('food.trainLow'):t('food.trainNormal');
   const deltaStr=(rec.delta>0?'+':'')+rec.delta+' kcal';
-  const line=rec.fromLog?t('food.trainLogged',{kcal:rec.todayKcal,delta:deltaStr})
-                        :t('food.trainPlanned',{kcal:rec.todayKcal,delta:deltaStr});
+  const line=(rec.fromLog?t('food.trainLogged',{kcal:rec.todayKcal,delta:deltaStr})
+                         :t('food.trainPlanned',{kcal:rec.todayKcal,delta:deltaStr}))
+    // Un ajuste sin explicación se lee como un número que se movió solo.
+    +(Math.abs(rec.stepsDelta||0)>=60&&stepsToday
+      ? ' '+t('food.stepsDelta',{steps:stepsToday.toLocaleString(LANG),kcal:(rec.stepsDelta>0?'+':'')+rec.stepsDelta})
+      : '');
   const tone=rec.level==='alto'?'border-color:rgba(0,168,200,.35);background:#f2fbfd'
             :rec.level==='bajo'?'border-color:rgba(240,162,46,.35);background:#fffaf2':'';
   return `<section class="card" style="${tone}">

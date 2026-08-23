@@ -85,12 +85,25 @@ function heartRateIntensity(bpm, maxHeartRate){
 }
 
 // One external activity -> stimulus units. Calibrated so 30 min @ RPE 5 == 1.0 SU (~one hard
-// set). Heart rate, when logged, replaces the manual RPE as the intensity driver — it's the
-// more objective signal of actual cardiovascular effort. Falls back to RPE when no heart rate
-// was entered, so older/unlogged activities are unaffected.
+// set).
+//
+// Precedence: an effort the athlete actually DECLARED (intensity_source 'manual') wins over
+// heart rate. Average heart rate used to win, and it is the wrong arbiter for the sessions
+// that matter most here: in an interval workout the average is dragged down by the
+// recoveries, so 45 min containing 15 min of Z4 scores the same as a steady easy hour. Heart
+// rate also measures cardiovascular strain, not muscle damage — a downhill trail run wrecks
+// quads at a moderate pulse, and swimming at 160 bpm barely touches legs. What it beats is a
+// number nobody stood behind, which is why the declaration has to be a real one:
+// intensity_source distinguishes a typed effort from the form's pre-filled 5 (migration 084).
+//
+// Heart rate is still derived live rather than read from the stored column, so correcting
+// max_heart_rate repaints every past activity instead of freezing yesterday's estimate.
 function activityStimulusUnits(activity, maxHeartRate){
   const duration = Number(activity.duration_min) || 0;
-  const intensity = heartRateIntensity(activity.avg_heart_rate, maxHeartRate) ?? (Number(activity.intensity) || 5);
+  const declared = activity.intensity_source === 'manual' ? Number(activity.intensity) : NaN;
+  const intensity = (declared >= 1 && declared <= 10)
+    ? declared
+    : (heartRateIntensity(activity.avg_heart_rate, maxHeartRate) ?? (Number(activity.intensity) || 5));
   return (duration * intensity) / 150;
 }
 

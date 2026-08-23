@@ -64,6 +64,7 @@ function matchStrengthActivities(activities, sessions, { maxHeartRate } = {}) {
   const available = (sessions || []).filter(s => s && s.id && s.completed_at);
   const used = new Set();
   const matches = [];
+  const unmatched = [];
 
   for (const metric of metrics) {
     const already = available.find(s => String(s.garmin_external_id || '') === metric.externalId);
@@ -90,9 +91,14 @@ function matchStrengthActivities(activities, sessions, { maxHeartRate } = {}) {
     if (best) {
       used.add(best.session.id);
       matches.push({ session: best.session, metric });
+    } else {
+      // Un entrenamiento de fuerza del reloj sin sesión en Skandi no se enlaza a nada y
+      // tampoco se importa como actividad (duplicaría la fatiga). Devolverlo, y no solo
+      // contarlo, es lo que permite decir CUÁL falta en vez de dejar un hueco silencioso.
+      unmatched.push(metric);
     }
   }
-  return { matches, unmatched: metrics.length - matches.length, strengthActivities: metrics.length };
+  return { matches, unmatched, strengthActivities: metrics.length };
 }
 
 function toActivityRow(activity, { userId, maxHeartRate } = {}) {
@@ -119,7 +125,53 @@ function toActivityRow(activity, { userId, maxHeartRate } = {}) {
   };
 }
 
+// ---- Bienestar diario ----
+// Un renglón de /wellness es un DÍA, no una actividad: sueño, pulso en reposo, HRV, pasos y
+// peso. Intervals devuelve el día completo aunque no haya nada medido, así que un renglón sin
+// un solo dato útil se descarta en vez de escribir una fila vacía por cada día del año.
+
+function num(value, min, max, decimals) {
+  const n = Number(value);
+  if (!Number.isFinite(n) || n < min || n > max) return null;
+  const f = Math.pow(10, decimals || 0);
+  return Math.round(n * f) / f;
+}
+
+function toWellnessRow(entry, { userId } = {}) {
+  const day = String(entry && entry.id || '').slice(0, 10);
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(day)) return null;
+  const row = {
+    user_id: userId,
+    day,
+    sleep_secs: num(entry.sleepSecs, 0, 86400),
+    sleep_score: num(entry.sleepScore, 0, 100),
+    sleep_quality: num(entry.sleepQuality, 1, 5),
+    avg_sleeping_hr: num(entry.avgSleepingHR, 20, 150),
+    resting_hr: num(entry.restingHR, 20, 150),
+    hrv: num(entry.hrv, 0, 500, 1),
+    steps: num(entry.steps, 0, 200000),
+    readiness: num(entry.readiness, 0, 100),
+    source: 'intervals',
+    synced_at: new Date().toISOString(),
+    updated_at: new Date().toISOString(),
+  };
+  const measured = ['sleep_secs','sleep_score','sleep_quality','avg_sleeping_hr','resting_hr','hrv','steps','readiness']
+    .some(key => row[key] !== null);
+  return measured ? row : null;
+}
+
+// El peso sale aparte porque su casa es skandi_bodyweight_logs (migración 067), no la tabla
+// de bienestar: ahí lo leen la tarjeta de peso, las metas de nutrición y progreso.
+function toWeightRow(entry, { userId } = {}) {
+  const day = String(entry && entry.id || '').slice(0, 10);
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(day)) return null;
+  const weight = num(entry.weight, 20, 300, 2);
+  if (weight === null) return null;
+  return { user_id: userId, logged_at: day, weight_kg: weight, source: 'intervals' };
+}
+
 module.exports = {
   STRENGTH_TYPES, isGarminActivity, rpeOf, strengthTypeOf, isStrengthActivity,
   strengthMetrics, matchStrengthActivities, toActivityRow,
+  toWellnessRow, toWeightRow,
 };

@@ -259,8 +259,30 @@ function weeklyPlan(plan) {
 
 // La recomendación del día. `loggedKcal` son las actividades YA registradas hoy: si ya
 // corriste, manda lo que hiciste sobre lo que estaba planeado — un plan no es un hecho.
+// ---- Los pasos del día ----
+//
+// Un día de 15,000 pasos y uno de 5,000 no piden la misma comida, y esa diferencia (~350 kcal
+// para 70 kg) es del tamaño de una comida entera. Pero se usa la DIFERENCIA contra tu propio
+// promedio, nunca el gasto absoluto de caminar, por dos razones que apuntan al mismo error:
+// el `activity_factor` de tus metas ya asume tu nivel normal de movimiento, y los pasos de
+// una carrera ya están contados como carrera. Restar tu promedio cancela las dos.
+//
+// El costo por paso escala con la masa (~0.0005 kcal por paso y por kg: 0.035 para 70 kg,
+// dentro del rango de 0.03-0.05 que reportan los estudios de podometría).
+const KCAL_PER_STEP_PER_KG = 0.0005;
+const STEPS_ADJUST_CAP = 400;   // un GPS loco o un día de senderismo no reescriben tu meta
+
+function stepsAdjustmentKcal(opts) {
+  const { steps, avgSteps, weightKg } = opts || {};
+  const today = num(steps), average = num(avgSteps), weight = num(weightKg);
+  if (!today || !average || !weight) return 0;
+  const kcal = (today - average) * weight * KCAL_PER_STEP_PER_KG;
+  return round(Math.max(-STEPS_ADJUST_CAP, Math.min(STEPS_ADJUST_CAP, kcal)), 10);
+}
+
 function dayRecommendation(opts) {
-  const { targets, plan, dow, loggedKcal = 0, hasLoggedActivity = false } = opts || {};
+  const { targets, plan, dow, loggedKcal = 0, hasLoggedActivity = false,
+          steps = null, avgSteps = null, weightKg = null } = opts || {};
   if (!targets) return null;
   const week = weeklyPlan(plan);
   const planned = plannedDayKcal(dow, plan);
@@ -271,7 +293,10 @@ function dayRecommendation(opts) {
   const pendingKcal = Math.max(0, planned - num(loggedKcal));
   // "Terminado" = ya se hizo el grueso de lo planeado (o no había plan y entrenó de más).
   const finished = hasLoggedActivity && pendingKcal <= planned * 0.3;
-  const delta = round(today - week.avgDaily, 10);
+  // El entrenamiento y el movimiento del día son dos desviaciones distintas del mismo
+  // promedio, así que se suman antes de decidir si el día se salió de lo normal.
+  const stepsDelta = stepsAdjustmentKcal({ steps, avgSteps, weightKg });
+  const delta = round(today - week.avgDaily + stepsDelta, 10);
   const meaningful = Math.abs(delta) >= NEUTRAL_DELTA;
 
   return {
@@ -284,6 +309,7 @@ function dayRecommendation(opts) {
     hasLog: hasLoggedActivity,
     fromLog: finished,
     delta: meaningful ? delta : 0,
+    stepsDelta,
     level: !meaningful ? 'normal' : delta > 0 ? 'alto' : 'bajo',
     // La meta ajustada: solo los carbos se mueven.
     kcalTarget: num(targets.kcal_target) + (meaningful ? delta : 0),
@@ -391,7 +417,7 @@ const api = {
   KCAL_PER_G, ACTIVITY_FACTORS, MODE_FACTOR, MET,
   suggestTargets, kcalFromMacros, itemsTotal, dayTotals, remaining, pct,
   scaleFood, rescaleItem, itemToFood,
-  activityKcal, strengthKcal, plannedDayKcal, weeklyPlan, dayRecommendation,
+  activityKcal, strengthKcal, plannedDayKcal, weeklyPlan, dayRecommendation, stepsAdjustmentKcal,
   FUEL, plannedSessions, fuelPlan
 };
 

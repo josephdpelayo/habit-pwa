@@ -428,6 +428,28 @@ Se pinta como **una sola tarjeta en Home**. El objetivo no es un dashboard más;
 
 ## 11. Bitácora
 
+**2026-08-23 — Bienestar diario (085) y los pasos como contexto de la comida.**
+
+- `skandi_daily_wellness` importa de Intervals el día completo: sueño (duración, calificación
+  y calidad), pulso en reposo, HRV y pasos. **Reemplaza a `skandi_daily_checkin`** (la 077 que
+  este documento planeaba y nunca se escribió): una sola tabla por día, venga del reloj o
+  tecleada, porque dos obligarían a resolver el empate en cada consulta.
+- El **peso no vive ahí**: se importa a `skandi_bodyweight_logs` (067), que es de donde ya leen
+  la tarjeta de peso, las metas y progreso. La columna `source` nueva evita que la báscula
+  pise un pesaje tecleado.
+- **Los pasos ajustan la meta de comida, no la fatiga muscular.** `stepsAdjustmentKcal()` usa
+  la diferencia contra el promedio de 7 días, nunca el gasto absoluto de caminar: el
+  `activity_factor` ya asume tu movimiento normal y los pasos de una carrera ya están contados
+  como carrera, así que restar el promedio cancela los dos dobles conteos. ~0.0005 kcal por
+  paso y por kg, acotado a ±400 kcal. Va a carbos, igual que el ajuste por entrenamiento.
+- **Duplicados resueltos**: una actividad capturada a mano y luego importada se fusiona en
+  una sola fila. Sobrevive la tuya (conserva id, nota, `template_id` y el enlace desde
+  `skandi_planned_sessions.activity_id`) y recibe lo que el reloj midió. Corre al final de
+  cada sincronización, así que también arregla los duplicados que ya estaban en la base.
+- **Intensidad (084)**: el pulso manda por default; tu esfuerzo declarado gana solo cuando de
+  verdad lo declaraste, distinguido del 5 pre-llenado del formulario.
+
+
 **2026-08-22 — Fase 0 cerrada y migración 073 escrita.**
 
 Fase 0:

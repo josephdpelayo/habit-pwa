@@ -722,6 +722,59 @@ async function importStravaActivities(userId, activities) {
   return result;
 }
 
+// Absorbe el renglón capturado a mano dentro del importado cuando son el mismo entrenamiento.
+// Corre al final de cada sincronización (Strava e Intervals) y también arregla los duplicados
+// que ya estaban en la base, no solo los que llegarían después.
+//
+// Quien sobrevive es EL TUYO: conserva su id, su nota, su `template_id` y el enlace desde
+// `skandi_planned_sessions.activity_id` que lo marca como hecho en el calendario. Lo que
+// recibe es lo que el reloj midió mejor. Después se borra el importado, pero su
+// `external_id` se queda en la fila superviviente, así que la próxima sincronización la
+// reconoce y la actualiza en su lugar en vez de volver a insertar el duplicado.
+async function mergeDuplicateManualActivities(userId, sinceIso) {
+  const { data: rows, error } = await supabase
+    .from('skandi_external_activities')
+    .select('id,activity_type,performed_at,duration_min,external_source,external_id,external_type,note,intensity,intensity_source')
+    .eq('user_id', userId).gte('performed_at', sinceIso);
+  if (error) throw new Error(error.message);
+
+  const pairs = SkandiStrava.matchImportedToManual(rows || []);
+  let merged = 0;
+  for (const { imported, manual } of pairs) {
+    const patch = {
+      performed_at: imported.performed_at,
+      duration_min: imported.duration_min,
+      external_source: imported.external_source,
+      external_id: imported.external_id,
+      external_type: imported.external_type,
+      // Tu nota gana: la escribiste tú. Si no hay, se queda con el nombre del reloj.
+      note: manual.note || imported.note,
+    };
+    // Y tu esfuerzo declarado también gana, que es justamente la regla del motor de fatiga.
+    if (manual.intensity_source !== 'manual') {
+      patch.intensity = imported.intensity;
+      patch.intensity_source = imported.intensity_source;
+    }
+    // Las columnas medidas se copian tal cual del importado.
+    const { data: full } = await supabase.from('skandi_external_activities')
+      .select('distance_km,avg_heart_rate,max_heart_rate,elevation_gain_m,calories')
+      .eq('id', imported.id).maybeSingle();
+    Object.assign(patch, full || {});
+
+    // El importado se borra ANTES de escribir el patch: los dos comparten
+    // (user_id, external_source, external_id), que es un índice único, y hacerlo al revés
+    // choca contra él.
+    const { error: deleteError } = await supabase.from('skandi_external_activities')
+      .delete().eq('id', imported.id).eq('user_id', userId);
+    if (deleteError) throw new Error(deleteError.message);
+    const { error: updateError } = await supabase.from('skandi_external_activities')
+      .update(patch).eq('id', manual.id).eq('user_id', userId);
+    if (updateError) throw new Error(updateError.message);
+    merged += 1;
+  }
+  return merged;
+}
+
 async function integrationFor(match) {
   const { data } = await supabase
     .from('skandi_integrations').select('*').eq('provider', 'strava').match(match).maybeSingle();
@@ -831,6 +884,7 @@ async function stravaSync(req, res) {
       if (batch.length < SYNC_PAGE) break;
     }
 
+    totals.merged = await mergeDuplicateManualActivities(userId, new Date(after * 1000).toISOString());
     await supabase.from('skandi_integrations')
       .update({ last_sync_at: new Date().toISOString(), last_error: null })
       .eq('user_id', userId).eq('provider', 'strava');
@@ -1087,9 +1141,9 @@ async function importIntervalsActivities(userId, activities) {
 
 async function linkIntervalsStrengthActivities(userId, activities) {
   const strength = (activities || []).filter(SkandiIntervals.isStrengthActivity);
-  if (!strength.length) return { matched_strength: 0, unmatched_strength: 0 };
+  if (!strength.length) return { matched_strength: 0, unmatched_strength: 0, unmatched_strength_detail: [] };
   const starts = strength.map(a => new Date(a.start_date || a.start_date_local).getTime()).filter(Number.isFinite);
-  if (!starts.length) return { matched_strength: 0, unmatched_strength: strength.length };
+  if (!starts.length) return { matched_strength: 0, unmatched_strength: strength.length, unmatched_strength_detail: [] };
   const from = new Date(Math.min(...starts) - 6 * 3600e3).toISOString();
   const to = new Date(Math.max(...starts) + 30 * 3600e3).toISOString();
   const { data: sessions, error } = await supabase.from('skandi_sessions')
@@ -1126,7 +1180,65 @@ async function linkIntervalsStrengthActivities(userId, activities) {
       .update(patch).eq('id', session.id).eq('user_id', userId);
     if (updateError) throw new Error(updateError.message);
   }
-  return { matched_strength: linked.matches.length, unmatched_strength: linked.unmatched };
+  // El detalle viaja al cliente para que un entrenamiento que el reloj vio y Skandi no
+  // pueda nombrarse (fecha y duración), en vez de desaparecer sin dejar rastro.
+  return {
+    matched_strength: linked.matches.length,
+    unmatched_strength: linked.unmatched.length,
+    unmatched_strength_detail: linked.unmatched.map(metric => ({
+      started_at: metric.startedAt,
+      minutes: Math.round(metric.durationSec / 60),
+      name: metric.activityName,
+    })),
+  };
+}
+
+// El día completo: sueño, pulso en reposo, HRV y pasos. Va aparte de las actividades porque
+// es otro endpoint y otra unidad (un día, no un entrenamiento), y porque si Intervals falla
+// aquí no tiene por qué tumbar la importación de lo entrenado.
+async function importIntervalsWellness(userId, apiKey, athleteId, oldest, newest) {
+  const entries = await intervalsGet(apiKey,
+    `/athlete/${encodeURIComponent(athleteId)}/wellness`, { oldest, newest });
+  if (!Array.isArray(entries)) throw new Error('Intervals.icu devolvió un bienestar inesperado.');
+
+  const rows = entries.map(e => SkandiIntervals.toWellnessRow(e, { userId })).filter(Boolean);
+  const weights = entries.map(e => SkandiIntervals.toWeightRow(e, { userId })).filter(Boolean);
+  const result = { wellness_days: 0, weight_days: 0 };
+
+  if (rows.length) {
+    // Un día capturado a mano no se pisa con el reloj: la persona lo escribió por algo.
+    const { data: manual, error: readError } = await supabase.from('skandi_daily_wellness')
+      .select('day').eq('user_id', userId).eq('source', 'manual')
+      .in('day', rows.map(r => r.day));
+    if (readError) throw new Error(readError.message);
+    const keepManual = new Set((manual || []).map(r => r.day));
+    const writable = rows.filter(r => !keepManual.has(r.day));
+    if (writable.length) {
+      const { error } = await supabase.from('skandi_daily_wellness')
+        .upsert(writable, { onConflict: 'user_id,day' });
+      if (error) throw new Error(error.message);
+      result.wellness_days = writable.length;
+    }
+  }
+
+  if (weights.length) {
+    // Igual con el peso: un pesaje tecleado manda sobre el de la báscula sincronizada, y el
+    // unique(user_id, logged_at) de la 067 haría que un upsert ciego lo borrara.
+    const { data: existing, error: readError } = await supabase.from('skandi_bodyweight_logs')
+      .select('logged_at,source').eq('user_id', userId)
+      .in('logged_at', weights.map(w => w.logged_at));
+    if (readError) throw new Error(readError.message);
+    const manualDays = new Set((existing || []).filter(r => r.source === 'manual').map(r => r.logged_at));
+    const writable = weights.filter(w => !manualDays.has(w.logged_at));
+    if (writable.length) {
+      const { error } = await supabase.from('skandi_bodyweight_logs')
+        .upsert(writable, { onConflict: 'user_id,logged_at' });
+      if (error) throw new Error(error.message);
+      result.weight_days = writable.length;
+    }
+  }
+
+  return result;
 }
 
 async function intervalsConnect(req, res) {
@@ -1202,9 +1314,19 @@ async function intervalsSync(req, res) {
     if (!Array.isArray(activities)) throw new Error('Intervals.icu devolvió una respuesta inesperada.');
     const totals = await importIntervalsActivities(userId, activities);
     const strengthTotals = await linkIntervalsStrengthActivities(userId, activities);
+    // El bienestar es un extra: si su endpoint falla, lo entrenado ya se guardó y la
+    // sincronización no se declara rota por eso. Se reporta el motivo y se sigue.
+    let wellness = { wellness_days: 0, weight_days: 0 };
+    try {
+      wellness = await importIntervalsWellness(userId, apiKey, credential.athlete_id, date(oldest), date(newest));
+    } catch (err) {
+      console.error('intervals-sync wellness error:', err.message);
+      wellness.wellness_error = String(err.message).slice(0, 200);
+    }
+    const mergedDuplicates = await mergeDuplicateManualActivities(userId, oldest.toISOString());
     await supabase.from('skandi_intervals_credentials')
       .update({ last_sync_at: new Date().toISOString(), last_error: null }).eq('user_id', userId);
-    return res.status(200).json({ ok: true, days, ...totals, ...strengthTotals });
+    return res.status(200).json({ ok: true, days, ...totals, ...strengthTotals, ...wellness, merged: mergedDuplicates });
   } catch (err) {
     console.error('intervals-sync error:', err.message);
     await supabase.from('skandi_intervals_credentials')
