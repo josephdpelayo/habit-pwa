@@ -8,16 +8,16 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="Skandi Fit">
 <meta name="application-name" content="Skandi Fit">
-<link rel="manifest" href="/skandi-manifest.json?v=20260823-2">
-<link rel="apple-touch-icon" sizes="180x180" href="/icons/skandi-180.png?v=20260823-2">
-<link rel="icon" type="image/png" sizes="192x192" href="/icons/skandi-192.png?v=20260823-2">
+<link rel="manifest" href="/skandi-manifest.json?v=20260823-4">
+<link rel="apple-touch-icon" sizes="180x180" href="/icons/skandi-180.png?v=20260823-4">
+<link rel="icon" type="image/png" sizes="192x192" href="/icons/skandi-192.png?v=20260823-4">
 <title>Skandi Fit</title>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="/skandi-recovery.js?v=20260823-2"></script>
-<script src="/body-figure.js?v=20260823-2"></script>
-<script src="/skandi-nutrition.js?v=20260823-2"></script>
-<script src="/skandi-load.js?v=20260823-2"></script>
-<script src="/skandi-brief.js?v=20260823-2"></script>
+<script src="/skandi-recovery.js?v=20260823-4"></script>
+<script src="/body-figure.js?v=20260823-4"></script>
+<script src="/skandi-nutrition.js?v=20260823-4"></script>
+<script src="/skandi-load.js?v=20260823-4"></script>
+<script src="/skandi-brief.js?v=20260823-4"></script>
 <style>
 :root{
   --bg:#eef4f8;
@@ -181,6 +181,10 @@ p{color:var(--muted);line-height:1.45;margin:0}
 .day.today{background:var(--dof-navy);color:#fff;box-shadow:0 14px 28px rgba(1,36,86,.16)}
 .day.today .icon-btn{background:rgba(255,255,255,.14);border-color:rgba(255,255,255,.25);color:#fff}
 .day span:nth-child(2){color:inherit;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.week-lines{display:flex;flex-direction:column;gap:5px;min-width:0}
+.week-item{display:flex;align-items:center;gap:6px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;text-align:left;background:transparent;border:0;padding:0;font:inherit;color:inherit;cursor:pointer}
+.week-item.add{opacity:.7;font-weight:800}
+.week-item .glyph{font-style:normal;opacity:.75;flex:0 0 auto}
 /* Calendario (migración 080).
    La semana es un renglón de siete celdas: a 375 px una celda de mes completo mide 50 px y
    no cabe el nombre del entrenamiento. Color solo para el estado, nunca para la disciplina.
@@ -510,7 +514,7 @@ textarea.field{min-height:112px;text-align:left;resize:vertical}
 // Versión compartida con app.html (APP_VERSION) y sw.js (CACHE_VERSION): un solo service
 // worker sirve las dos apps, así que una sola cadena las invalida a las dos. Al cambiarla
 // hay que actualizarla también en los ?v= del <head>, en index.html y en los dos manifests.
-const SKANDI_VERSION='20260823-2';
+const SKANDI_VERSION='20260823-4';
 const SUPABASE_URL='https://pmpjteuqjusbiduevbwq.supabase.co';
 const SUPABASE_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBtcGp0ZXVxanVzYmlkdWV2YndxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc2OTI1NjUsImV4cCI6MjA5MzI2ODU2NX0.XbMzZoo2yqtrD8znLnyo_1zDfrdJAvAPj1lqGOyXnLw';
 const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
@@ -587,6 +591,7 @@ en:{
   'food.suggestTitle':'What should I eat?','food.suggestHint':'A cooking idea to hit today\'s macros, and examples for around your workout.',
   'food.suggestBtn':'Suggest something','food.suggestLoading':'Thinking about what fits your day…',
   'food.suggestCook':'To round out today','food.suggestPre':'Before training','food.suggestPost':'After training',
+  'food.suggestMore':'More detail',
   'fuel.plan':'How to fuel it',
   'fuel.session':'{name} · {min} min',
   'fuel.sessionKm':'{km} km · {min} min',
@@ -793,6 +798,7 @@ en:{
   'pgm.activate':'Load this program into my week','pgm.delete':'Delete program',
   'pgm.confirmDelete':'Delete this program? Your routines stay where they are.',
   'pgm.confirmApply':'Load "{name}"? Your week gets rewritten with this program\'s days.',
+  'pgm.applyPartialError':'Something went wrong partway through: {message}. Your week may be a mix of the old and new plan now — check it before training.',
   'pgm.errName':'Give the program a name.',
   'pgm.errEmptyWeek':'Your week is empty — schedule at least one routine or endurance plan first.',
   'pgm.rest':'Rest','pgm.empty':'No programs saved yet.','pgm.missingRoutine':'Deleted routine',
@@ -1028,7 +1034,7 @@ en:{
   'exd.orPaste':'Or paste a direct GIF/video URL','exd.directUrl':'Direct GIF/video URL',
   'exd.pageUrl':'Reference page URL','exd.saveMedia':'Save media','exd.uploadError':'Upload error: {msg}',
 
-  'tpl.editTitle':'Edit routine','tpl.newTitle':'New routine','tpl.namePh':'Routine name',
+  'tpl.editTitle':'Edit routine','tpl.newTitle':'New routine','tpl.namePh':'Routine name','tpl.noDay':'No day yet',
   'tpl.notePh':'Workout note','tpl.shareTitle':'Share with crew',
   'tpl.shareBody':'Other crew members can see and fork this routine.',
   'tpl.save':'Save routine','tpl.errName':'Add a name and at least one exercise.',
@@ -1126,6 +1132,7 @@ es:{
   'food.suggestTitle':'¿Qué como?','food.suggestHint':'Una idea para completar tus macros de hoy, y ejemplos para antes/después de entrenar.',
   'food.suggestBtn':'Sugerir algo','food.suggestLoading':'Pensando qué le queda bien a tu día…',
   'food.suggestCook':'Para completar hoy','food.suggestPre':'Antes de entrenar','food.suggestPost':'Después de entrenar',
+  'food.suggestMore':'Más detalle',
   'fuel.plan':'Cómo comerlo',
   'fuel.session':'{name} · {min} min',
   'fuel.sessionKm':'{km} km · {min} min',
@@ -1332,6 +1339,7 @@ es:{
   'pgm.activate':'Cargar este programa en mi semana','pgm.delete':'Eliminar programa',
   'pgm.confirmDelete':'¿Eliminar este programa? Tus rutinas se quedan donde están.',
   'pgm.confirmApply':'¿Cargar «{name}»? Tu semana se reescribe con los días de este programa.',
+  'pgm.applyPartialError':'Algo falló a la mitad: {message}. Tu semana puede haber quedado mezclada entre el plan viejo y el nuevo — revísala antes de entrenar.',
   'pgm.errName':'Ponle nombre al programa.',
   'pgm.errEmptyWeek':'Tu semana está vacía — agenda al menos una rutina o un plan de resistencia primero.',
   'pgm.rest':'Descanso','pgm.empty':'Aún no hay programas guardados.','pgm.missingRoutine':'Rutina eliminada',
@@ -1567,7 +1575,7 @@ es:{
   'exd.orPaste':'O pega una URL directa de GIF/video','exd.directUrl':'URL directa de GIF/video',
   'exd.pageUrl':'URL de la página de referencia','exd.saveMedia':'Guardar media','exd.uploadError':'Error al subir: {msg}',
 
-  'tpl.editTitle':'Editar rutina','tpl.newTitle':'Nueva rutina','tpl.namePh':'Nombre de la rutina',
+  'tpl.editTitle':'Editar rutina','tpl.newTitle':'Nueva rutina','tpl.namePh':'Nombre de la rutina','tpl.noDay':'Sin día asignado',
   'tpl.notePh':'Nota del entrenamiento','tpl.shareTitle':'Compartir con la tripulación',
   'tpl.shareBody':'Otros tripulantes podrán ver y copiar esta rutina.',
   'tpl.save':'Guardar rutina','tpl.errName':'Agrega un nombre y al menos un ejercicio.',
@@ -2601,21 +2609,36 @@ async function applyProgram(id){
     // Every routine of mine gets rewritten, not just the ones this program names: a day the
     // program leaves empty has to actually empty out, otherwise the previous program's routine
     // would linger on it and the week would be a mix of two plans.
+    //
+    // Esto no es una transacción — son N updates uno por uno. Si el #3 de 7 falla, los dos
+    // primeros ya se movieron en la base. `failed` corta el resto en vez de seguir escribiendo
+    // sobre un estado ya inconsistente, y el loadAll() de abajo es lo que evita que el cliente
+    // se quede mostrando la semana vieja mientras la base ya tiene la mezcla.
+    let failed=null;
     for(const tpl of myTemplates()){
       const target=tplDay.has(tpl.id)?tplDay.get(tpl.id):null;
       if(tpl.weekday===target) continue;
       const {error}=await sb.from('skandi_templates').update({weekday:target,updated_at:stamp}).eq('id',tpl.id);
-      if(error) return alert(error.message);
+      if(error){ failed=error; break; }
     }
-    for(const plan of state.activityTemplates){
+    if(!failed) for(const plan of state.activityTemplates){
       const target=actDay.has(plan.id)?actDay.get(plan.id):null;
       if(plan.weekday===target) continue;
       const {error}=await sb.from('skandi_activity_templates').update({weekday:target}).eq('id',plan.id);
-      if(error) return alert(error.message);
+      if(error){ failed=error; break; }
+    }
+    if(failed){
+      await loadAll();
+      render();
+      return alert(t('pgm.applyPartialError',{message:failed.message}));
     }
     await sb.from('skandi_programs').update({is_active:false}).eq('user_id',state.user.id).eq('is_active',true);
     const {error:activateError}=await sb.from('skandi_programs').update({is_active:true,updated_at:stamp}).eq('id',id);
-    if(activateError) return alert(activateError.message);
+    if(activateError){
+      await loadAll();
+      render();
+      return alert(activateError.message);
+    }
     closeModal();
     await loadAll();
     setView('train');
@@ -3260,41 +3283,44 @@ async function savePlanned(id){
 }
 
 // ---- Rutinas (las plantillas, con nombre honesto) -----------------------------------------
+
+// Antes eran dos cuadrículas de 7 filas apiladas (fuerza, luego resistencia) — 14 filas para
+// ver una semana que en realidad es una sola. Un día puede tener las dos cosas (fuerza en la
+// mañana, cardio en la tarde), así que ahora es una sola fila por día con ambas adentro, mismo
+// glifo de disciplina que ya usa Calendario (DISC_GLYPH) para que se lea igual en las dos
+// pestañas.
+function combinedWeekCard(mine,myPlans){
+  return `<section class="card">
+    <div class="row"><h2>${esc(t('train.yourWeek'))}</h2><span class="muted">${mine.length} ${esc(tp(mine.length,'common.routines'))} · ${myPlans.length} ${esc(tp(myPlans.length,'common.plans'))}</span></div>
+    <div class="week">
+      ${DOW.map((d,i)=>{
+        const tpl=mine.find(x=>x.weekday===i);
+        const plan=myPlans.find(x=>x.weekday===i);
+        const strengthLine=tpl
+          ?`<span class="week-item" onclick="event.stopPropagation();openWorkoutOverview('${tpl.id}')"><i class="glyph">${DISC_GLYPH.strength}</i>${esc(tpl.name)}</span>`
+          :`<button type="button" class="week-item add" onclick="event.stopPropagation();openDayPicker(${i})">+ ${esc(t('train.addRoutineDay'))}</button>`;
+        const planDisc=plan?(ACT_TO_DISC[plan.activity_type]||'other'):null;
+        const planSummary=plan?[activityTypeLabel(plan.activity_type),plan.target_distance_km?`${plan.target_distance_km}km`:null].filter(Boolean).join(' · '):'';
+        const enduranceLine=plan
+          ?`<span class="week-item" onclick="event.stopPropagation();openActivityTemplateBuilder(${i},'${plan.id}')"><i class="glyph">${DISC_GLYPH[planDisc]||'◇'}</i>${esc(planSummary)}</span>`
+          :`<button type="button" class="week-item add" onclick="event.stopPropagation();openActivityTemplateBuilder(${i})">+ ${esc(t('train.addPlan'))}</button>`;
+        return `<div class="day ${i===todayDow()?'today':''}" style="grid-template-columns:64px 1fr auto;cursor:default">
+          <span>${d}</span>
+          <span class="week-lines">${strengthLine}${enduranceLine}</span>
+          <button class="icon-btn tiny" onclick="${tpl?`openDayManage('${tpl.id}',${i})`:`openDayPicker(${i})`}" aria-label="${esc(t('train.manageDay',{day:d}))}">${icon('ellipsis',16)}</button>
+        </div>`;
+      }).join('')}
+    </div>
+  </section>`;
+}
+
 function routinesTab(){
   const mine=state.templates.filter(x=>x.user_id===state.user.id);
   const community=state.templates.filter(x=>x.user_id!==state.user.id);
   const myPlans=state.activityTemplates.filter(x=>x.user_id===state.user.id);
   return `
     ${programCardHtml()}
-    <section class="card">
-      <div class="row"><h2>${esc(t('train.yourWeek'))}</h2><span class="muted">${mine.length} ${esc(tp(mine.length,'common.routines'))}</span></div>
-      <div class="week">
-        ${DOW.map((d,i)=>{
-          const tpl=mine.find(x=>x.weekday===i);
-          if(!tpl) return `<button class="day ${i===todayDow()?'today':''}" onclick="openDayPicker(${i})"><span>${d}</span><span>${esc(t('train.addRoutineDay'))}</span><span>${icon('chevronRight',18)}</span></button>`;
-          return `<div class="day ${i===todayDow()?'today':''}" style="grid-template-columns:64px 1fr auto">
-            <span>${d}</span>
-            <span style="cursor:pointer" onclick="openWorkoutOverview('${tpl.id}')">${esc(tpl.name)}</span>
-            <button class="icon-btn tiny" onclick="openDayManage('${tpl.id}',${i})" aria-label="${esc(t('train.manageDay',{day:d}))}">${icon('ellipsis',16)}</button>
-          </div>`;
-        }).join('')}
-      </div>
-    </section>
-    <section class="card">
-      <div class="row"><h2>${esc(t('train.endurance'))}</h2><span class="muted">${myPlans.length} ${esc(tp(myPlans.length,'common.plans'))}</span></div>
-      <div class="week">
-        ${DOW.map((d,i)=>{
-          const p=myPlans.find(x=>x.weekday===i);
-          if(!p) return `<button class="day ${i===todayDow()?'today':''}" onclick="openActivityTemplateBuilder(${i})"><span>${d}</span><span>${esc(t('train.addPlan'))}</span><span>${icon('chevronRight',18)}</span></button>`;
-          const summary=[activityTypeLabel(p.activity_type),p.target_distance_km?`${p.target_distance_km}km`:null].filter(Boolean).join(' · ');
-          return `<div class="day ${i===todayDow()?'today':''}" style="grid-template-columns:64px 1fr auto">
-            <span>${d}</span>
-            <span style="cursor:pointer" onclick="openActivityTemplateBuilder(${i},'${p.id}')">${esc(summary)}</span>
-            <button class="icon-btn tiny" onclick="openActivityTemplateBuilder(${i},'${p.id}')" aria-label="${esc(t('train.managePlanDay',{day:d}))}">${icon('ellipsis',16)}</button>
-          </div>`;
-        }).join('')}
-      </div>
-    </section>
+    ${combinedWeekCard(mine,myPlans)}
     <div class="row"><h2>${esc(t('train.myRoutines'))}</h2><button class="btn small" onclick="openTemplateBuilder()">${esc(t('train.newRoutine'))}</button></div>
     ${mine.length?mine.map(x=>workoutCard(x)).join(''):empty(t('train.noRoutines'))}
     <h2>${esc(t('train.communityRoutines'))}</h2>
@@ -3324,9 +3350,11 @@ function workoutCard(tpl){
     ${open?`<div class="routine-details">
       ${tpl.forked_from_name?`<p class="muted">${esc(t('card.adaptedFrom',{name:tpl.forked_from_name}))}</p>`:''}
       <div class="muscles">${names}${its.length>4?`<span class="pill dark">+${its.length-4}</span>`:''}</div>
-      <div class="row">
+      <div class="row" style="flex-wrap:wrap">
         <button class="btn primary" onclick="event.stopPropagation();openWorkoutOverview('${tpl.id}')">${icon('play',16)} ${esc(t('card.start'))}</button>
-        ${mine?`<button class="btn" onclick="event.stopPropagation();openTemplateBuilder(null,'${tpl.id}')">${esc(t('common.edit'))}</button>`:`<button class="btn" onclick="event.stopPropagation();openAddToWeek('${tpl.id}')">${esc(t('card.addToWeek'))}</button>`}
+        ${mine
+          ?`${tpl.weekday==null?`<button class="btn" onclick="event.stopPropagation();openAssignOwnRoutine('${tpl.id}')">${esc(t('card.addToWeek'))}</button>`:''}<button class="btn" onclick="event.stopPropagation();openTemplateBuilder(null,'${tpl.id}')">${esc(t('common.edit'))}</button>`
+          :`<button class="btn" onclick="event.stopPropagation();openAddToWeek('${tpl.id}')">${esc(t('card.addToWeek'))}</button>`}
       </div>
     </div>`:''}
   </article>`;
@@ -6233,7 +6261,10 @@ function openTemplateBuilder(day=null,id=null){
   $('modalCard').innerHTML=`
     <div class="row"><h1>${esc(id?t('tpl.editTitle'):t('tpl.newTitle'))}</h1><button class="x" onclick="closeModal()" aria-label="${esc(t('common.close'))}">${icon('close',20)}</button></div>
     <input id="tplName" class="field left" placeholder="${esc(t('tpl.namePh'))}" value="${esc(tpl.name)}">
-    <select id="tplDay" class="field left">${DOW.map((d,i)=>`<option value="${i}" ${tpl.weekday===i?'selected':''}>${d}</option>`).join('')}</select>
+    <select id="tplDay" class="field left">
+      <option value="" ${tpl.weekday==null?'selected':''}>${esc(t('tpl.noDay'))}</option>
+      ${DOW.map((d,i)=>`<option value="${i}" ${tpl.weekday===i?'selected':''}>${d}</option>`).join('')}
+    </select>
     <textarea id="tplNotes" class="field" placeholder="${esc(t('tpl.notePh'))}">${esc(tpl.notes||'')}</textarea>
     <label class="card row" style="margin:0 0 14px"><div><h3>${esc(t('tpl.shareTitle'))}</h3><p>${esc(t('tpl.shareBody'))}</p></div><input id="tplPublic" type="checkbox" ${tpl.is_public===false?'':'checked'}></label>
     <h2>${esc(t('workout.exercises'))}</h2>
@@ -6303,7 +6334,21 @@ async function saveTemplate(id){
   const btn=document.querySelector('#modalCard button.primary');
   if(btn){btn.disabled=true;btn.textContent=t('common.saving');}
   try{
-    const payload={user_id:state.user.id,name:$('tplName').value.trim(),weekday:Number($('tplDay').value),notes:$('tplNotes').value.trim()||null,is_public:$('tplPublic').checked,updated_at:new Date().toISOString()};
+    const dayVal=$('tplDay').value;
+    const weekday=dayVal===''?null:Number(dayVal);
+    // Igual que assignOwnRoutineToDay: si el día elegido ya tiene otra rutina tuya, se le quita
+    // antes de que esta ocupe su lugar. Sin esto el editor era el único camino de asignación
+    // que no protegía contra choques — dos rutinas terminaban reclamando el mismo día y una
+    // desaparecía de la semana sin aviso (el resto de la app se queda con la primera que
+    // encuentra al buscar por weekday).
+    if(weekday!=null){
+      const bumped=state.templates.find(x=>x.user_id===state.user.id&&x.weekday===weekday&&x.id!==id);
+      if(bumped){
+        const {error:bumpError}=await sb.from('skandi_templates').update({weekday:null,updated_at:new Date().toISOString()}).eq('id',bumped.id);
+        if(bumpError) return alert(bumpError.message);
+      }
+    }
+    const payload={user_id:state.user.id,name:$('tplName').value.trim(),weekday,notes:$('tplNotes').value.trim()||null,is_public:$('tplPublic').checked,updated_at:new Date().toISOString()};
     let templateId=id;
     if(id){
       const {error}=await sb.from('skandi_templates').update(payload).eq('id',id);
@@ -6348,6 +6393,24 @@ function openAddToWeek(templateId){
     <button class="btn primary" style="width:100%;margin-top:14px" onclick="confirmAddToWeek('${templateId}')">${esc(t('week.addTitle'))}</button>`;
 }
 
+// La versión de openAddToWeek para una rutina TUYA sin día: mueve el mismo template (via
+// assignOwnRoutineToDay), en vez de bifurcarlo como hace openAddToWeek con las de la
+// comunidad — bifurcar tu propia rutina duplicaría lo que ya tienes.
+function openAssignOwnRoutine(templateId){
+  const tpl=state.templates.find(x=>x.id===templateId);
+  if(!tpl) return;
+  const mine=state.templates.filter(x=>x.user_id===state.user.id);
+  $('modal').classList.add('show');
+  $('modalCard').innerHTML=`
+    <div class="row"><h1>${esc(t('week.addTitle'))}</h1><button class="x" onclick="closeModal()" aria-label="${esc(t('common.close'))}">${icon('close',20)}</button></div>
+    <p class="muted">${esc(tpl.name)}</p>
+    <select id="ownRoutineDay" class="field left">${DOW.map((d,i)=>{
+      const taken=mine.find(x=>x.weekday===i);
+      return `<option value="${i}" ${i===todayDow()?'selected':''}>${d}${taken?esc(t('week.alreadyHas',{name:taken.name})):''}</option>`;
+    }).join('')}</select>
+    <button class="btn primary" style="width:100%;margin-top:14px" onclick="assignOwnRoutineToDay('${templateId}',Number($('ownRoutineDay').value))">${esc(t('week.addTitle'))}</button>`;
+}
+
 // Shared by every path that assigns/forks a routine onto a weekday (confirmAddToWeek,
 // assignOwnRoutineToDay, useCommunityRoutineForDay) — these do a non-atomic bump-then-write and,
 // without a guard, a double-tap can create two templates claiming the same day.
@@ -6371,11 +6434,6 @@ async function forkTemplateToDay(templateId,weekday){
   const tpl=state.templates.find(x=>x.id===templateId);
   if(!tpl) return {error:{message:t('tpl.notFound')}};
   const sourceItems=state.items.filter(i=>i.template_id===templateId).sort((a,b)=>a.sort_order-b.sort_order);
-  const bumped=state.templates.find(x=>x.user_id===state.user.id&&x.weekday===weekday);
-  if(bumped){
-    const {error:bumpError}=await sb.from('skandi_templates').update({weekday:null,updated_at:new Date().toISOString()}).eq('id',bumped.id);
-    if(bumpError) return {error:bumpError};
-  }
   const payload={user_id:state.user.id,name:tpl.name,notes:tpl.notes,weekday,is_public:true,forked_from:tpl.id,forked_from_name:tpl.profile?.name||t('common.crewMember'),updated_at:new Date().toISOString()};
   const {data,error}=await sb.from('skandi_templates').insert(payload).select().single();
   if(error) return {error};
@@ -6383,6 +6441,15 @@ async function forkTemplateToDay(templateId,weekday){
   if(rows.length){
     const {error:itemsError}=await sb.from('skandi_template_items').insert(rows);
     if(itemsError) return {error:itemsError};
+  }
+  // El "empuje" va DESPUÉS de que el fork completo (cabecera + ejercicios) ya funcionó, no
+  // antes. Empujar primero significaba que un insert fallido dejaba el día sin la rutina nueva
+  // Y sin la que ya tenía — el peor de los dos mundos. No hay índice único en (user_id,weekday)
+  // que impida el breve instante en que las dos comparten día mientras esto corre.
+  const bumped=state.templates.find(x=>x.user_id===state.user.id&&x.weekday===weekday&&x.id!==data.id);
+  if(bumped){
+    const {error:bumpError}=await sb.from('skandi_templates').update({weekday:null,updated_at:new Date().toISOString()}).eq('id',bumped.id);
+    if(bumpError) return {error:bumpError};
   }
   return {data};
 }
@@ -7179,7 +7246,14 @@ function suggestionCard(){
   </section>`;
 }
 
-async function openMealSuggestion(){
+function openMealSuggestion(){
+  return loadMealSuggestion('brief');
+}
+
+// 'brief' es la primera llamada, siempre corta — no cuesta leerla ni de más ni de menos.
+// 'full' solo se pide con el botón "Más detalle", cuando la corta ya se vio y no bastó: un
+// segundo golpe de cuota explícito, nunca automático.
+async function loadMealSuggestion(detail){
   const totals=SkandiNutrition.dayTotals(mealsOfDay(foodDay()));
   const targets=state.nutritionTargets;
   if(!targets) return alert(t('food.noTarget'));
@@ -7206,16 +7280,17 @@ async function openMealSuggestion(){
     <p class="muted">${esc(t('food.suggestLoading'))}</p>`;
 
   try{
-    const data=await skandiApi('meal-suggestion',{remaining,sessions,catalog});
+    const data=await skandiApi('meal-suggestion',{remaining,sessions,catalog,detail});
     await loadNutrition();
     if(state.view==='food') render();
     $('modalCard').innerHTML=`
       <div class="row"><h1>${esc(t('food.suggestTitle'))}</h1><button class="x" onclick="closeModal()" aria-label="${esc(t('common.close'))}">${icon('close',20)}</button></div>
       <div class="eyebrow">${esc(t('food.suggestCook'))}</div>
-      <p style="margin-top:6px">${esc(data.cook_suggestion)}</p>
+      <p style="margin-top:6px;white-space:pre-line">${esc(data.cook_suggestion)}</p>
       ${data.pre_workout?`<div class="eyebrow" style="margin-top:14px">${esc(t('food.suggestPre'))}</div><p style="margin-top:6px">${esc(data.pre_workout)}</p>`:''}
       ${data.post_workout?`<div class="eyebrow" style="margin-top:14px">${esc(t('food.suggestPost'))}</div><p style="margin-top:6px">${esc(data.post_workout)}</p>`:''}
-      <p class="muted" style="font-size:11px;margin-top:14px">${esc(t('food.aiLeft',{n:aiLeft()}))}</p>`;
+      ${data.detail!=='full'?`<button class="btn" style="width:100%;margin-top:14px" onclick="loadMealSuggestion('full')">${icon('plus',16)} ${esc(t('food.suggestMore'))}</button>`:''}
+      <p class="muted" style="font-size:11px;margin-top:${data.detail!=='full'?'10':'14'}px">${esc(t('food.aiLeft',{n:aiLeft()}))}</p>`;
   }catch(e){
     $('modalCard').innerHTML=`
       <div class="row"><h1>${esc(t('food.suggestTitle'))}</h1><button class="x" onclick="closeModal()" aria-label="${esc(t('common.close'))}">${icon('close',20)}</button></div>

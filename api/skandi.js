@@ -440,7 +440,6 @@ Reglas:
 - Da cantidades y alimentos reales ("dos tortillas con miel y un plátano"), nunca solo el número de macro ("30 g de carbos"). Un atleta no cocina gramos, cocina comida.
 - Si algo de su catálogo encaja con lo que le falta, menciónalo por nombre — es gratis e instantáneo de registrar, mejor que inventar una receta nueva. Si nada encaja bien, sugiere algo simple y común en México con ingredientes de despensa normal.
 - Piensa en comida mexicana de casa y de fonda: huevos, frijoles, arroz, pollo, atún, avena, tortillas, fruta — no en productos gourmet ni suplementos.
-- Sé breve: 1-3 frases por campo, consejo accionable, no un ensayo.
 - Si no tiene entrenamiento hoy, pre_workout y post_workout van como cadena vacía.
 - Si ya no le falta ningún macro relevante hoy, dilo en cook_suggestion en vez de inventar algo que comer.`;
 
@@ -498,6 +497,10 @@ async function suggestMeal(req, res) {
       distance_km: s && s.distance_km ? clampMacro(s.distance_km) : null,
     })).filter(s => s.minutes > 0);
     const catalog = clampNames(body.catalog, 20);
+    // Primera llamada: la versión rápida, para no gastar de más en algo que a lo mejor no se
+    // lee. "Más detalle" es un segundo golpe de cuota explícito, que el usuario pide viendo ya
+    // la versión corta — nunca la primera respuesta por default.
+    const detail = body.detail === 'full' ? 'full' : 'brief';
 
     if (remaining.kcal === 0 && remaining.protein_g === 0 && remaining.carbs_g === 0
       && remaining.fat_g === 0 && !sessions.length) {
@@ -528,12 +531,15 @@ async function suggestMeal(req, res) {
       catalog.length
         ? `Su catálogo (platillos y alimentos que ya prepara seguido): ${catalog.join(', ')}.`
         : 'Todavía no tiene platillos ni alimentos guardados en su catálogo.',
+      detail === 'full'
+        ? 'Esta vez dame el detalle completo: en cook_suggestion, una mini receta con 3-6 ingredientes y su cantidad aproximada (gramos o piezas) más los pasos en un par de frases. En pre_workout y post_workout, dos opciones concretas separadas por " / ", no solo una.'
+        : 'Sé breve: 1-3 frases por campo, la versión rápida — ya habrá oportunidad de pedir más detalle.',
     ];
 
     const anthropic = new Anthropic({ apiKey, timeout: AI_TIMEOUT_MS, maxRetries: 0 });
     const response = await anthropic.messages.create({
       model: process.env.MEAL_AI_MODEL || DEFAULT_MODEL,
-      max_tokens: 800,
+      max_tokens: detail === 'full' ? 1400 : 800,
       system: SUGGEST_SYSTEM_PROMPT,
       output_config: { effort: 'low', format: { type: 'json_schema', schema: SUGGEST_SCHEMA } },
       messages: [{ role: 'user', content: [{ type: 'text', text: lines.join(' ') }] }],
@@ -546,11 +552,14 @@ async function suggestMeal(req, res) {
     if (!textBlock) return fail(res, 502, 'empty_response', 'La sugerencia vino vacía. Intenta de nuevo.');
     const parsed = JSON.parse(textBlock.text);
 
+    const cookCap = detail === 'full' ? 900 : 500;
+    const stepCap = detail === 'full' ? 500 : 300;
     return res.status(200).json({
       ok: true,
-      cook_suggestion: String(parsed.cook_suggestion || '').slice(0, 500),
-      pre_workout: String(parsed.pre_workout || '').slice(0, 300),
-      post_workout: String(parsed.post_workout || '').slice(0, 300),
+      detail,
+      cook_suggestion: String(parsed.cook_suggestion || '').slice(0, cookCap),
+      pre_workout: String(parsed.pre_workout || '').slice(0, stepCap),
+      post_workout: String(parsed.post_workout || '').slice(0, stepCap),
       quota: { used: calls, limit },
     });
   } catch (err) {
