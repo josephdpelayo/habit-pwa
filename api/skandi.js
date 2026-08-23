@@ -1149,8 +1149,17 @@ async function linkIntervalsStrengthActivities(userId, activities) {
   if (!strength.length) return { matched_strength: 0, unmatched_strength: 0, unmatched_strength_detail: [] };
   const starts = strength.map(a => new Date(a.start_date || a.start_date_local).getTime()).filter(Number.isFinite);
   if (!starts.length) return { matched_strength: 0, unmatched_strength: strength.length, unmatched_strength_detail: [] };
-  const from = new Date(Math.min(...starts) - 6 * 3600e3).toISOString();
-  const to = new Date(Math.max(...starts) + 30 * 3600e3).toISOString();
+  // ±36 h y no -6/+30. Esa ventana asimétrica suponía que la sesión de la app empieza como
+  // mucho 6 horas ANTES que la del reloj, y es al revés de lo que pasa: el reloj marca la hora
+  // real del entrenamiento y la app marca cuando le diste iniciar —o cuando lo cerraste horas
+  // después—. Una sesión de la mañana contra una actividad de las 19:17 quedaba fuera del
+  // rango y no la veía ni el emparejador ni la lista de candidatas para fusionar a mano: el
+  // día aparecía como "no hay ninguna sesión con la cual fusionarlo" teniéndola.
+  //
+  // Traer de más no afecta: el emparejador exige solape o inicios cercanos, y las candidatas
+  // se filtran por día local. La ventana solo tiene que no esconder nada.
+  const from = new Date(Math.min(...starts) - 36 * 3600e3).toISOString();
+  const to = new Date(Math.max(...starts) + 36 * 3600e3).toISOString();
   const { data: sessions, error } = await supabase.from('skandi_sessions')
     .select('id,title,started_at,completed_at,duration_sec,duration_source,garmin_external_id')
     .eq('user_id', userId).not('completed_at', 'is', null)
