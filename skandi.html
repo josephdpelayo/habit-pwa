@@ -8,16 +8,16 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="Skandi Fit">
 <meta name="application-name" content="Skandi Fit">
-<link rel="manifest" href="/skandi-manifest.json?v=20260824-4">
-<link rel="apple-touch-icon" sizes="180x180" href="/icons/skandi-180.png?v=20260824-4">
-<link rel="icon" type="image/png" sizes="192x192" href="/icons/skandi-192.png?v=20260824-4">
+<link rel="manifest" href="/skandi-manifest.json?v=20260824-5">
+<link rel="apple-touch-icon" sizes="180x180" href="/icons/skandi-180.png?v=20260824-5">
+<link rel="icon" type="image/png" sizes="192x192" href="/icons/skandi-192.png?v=20260824-5">
 <title>Skandi Fit</title>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="/skandi-recovery.js?v=20260824-4"></script>
-<script src="/body-figure.js?v=20260824-4"></script>
-<script src="/skandi-nutrition.js?v=20260824-4"></script>
-<script src="/skandi-load.js?v=20260824-4"></script>
-<script src="/skandi-brief.js?v=20260824-4"></script>
+<script src="/skandi-recovery.js?v=20260824-5"></script>
+<script src="/body-figure.js?v=20260824-5"></script>
+<script src="/skandi-nutrition.js?v=20260824-5"></script>
+<script src="/skandi-load.js?v=20260824-5"></script>
+<script src="/skandi-brief.js?v=20260824-5"></script>
 <style>
 :root{
   --bg:#eef4f8;
@@ -301,6 +301,7 @@ p{color:var(--muted);line-height:1.45;margin:0}
 .prog-criteria{margin-top:6px;padding:7px 10px;background:var(--panel2);border:1px solid var(--line);border-radius:8px;font-size:11.5px;line-height:1.35;color:var(--muted)}
 .prog-criteria b{color:var(--text);font-weight:800}
 .progression-ready{display:block;width:100%;text-align:left;margin-top:6px;padding:7px 10px;background:#e4f7ee;color:#1f9d5c;border:1px solid #bfe9d3;border-radius:8px;font-weight:700;font-size:12px}
+.deload-note{margin-top:6px;padding:7px 10px;background:#fff8ef;border:1px solid rgba(240,160,60,.35);border-radius:8px;font-size:11.5px;line-height:1.35;color:#8a5a12}
 .field{width:100%;background:#fff;border:1px solid var(--line);color:var(--text);border-radius:10px;padding:13px;text-align:center;box-shadow:inset 0 1px 0 rgba(1,36,86,.03)}
 .field-narrow{padding:13px 3px}
 .field.left{text-align:left}
@@ -529,7 +530,7 @@ textarea.field{min-height:112px;text-align:left;resize:vertical}
 // Versión compartida con app.html (APP_VERSION) y sw.js (CACHE_VERSION): un solo service
 // worker sirve las dos apps, así que una sola cadena las invalida a las dos. Al cambiarla
 // hay que actualizarla también en los ?v= del <head>, en index.html y en los dos manifests.
-const SKANDI_VERSION='20260824-4';
+const SKANDI_VERSION='20260824-5';
 const SUPABASE_URL='https://pmpjteuqjusbiduevbwq.supabase.co';
 const SUPABASE_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBtcGp0ZXVxanVzYmlkdWV2YndxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc2OTI1NjUsImV4cCI6MjA5MzI2ODU2NX0.XbMzZoo2yqtrD8znLnyo_1zDfrdJAvAPj1lqGOyXnLw';
 const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
@@ -1044,6 +1045,8 @@ en:{
   'fatigue.hint':'Expect a shorter set than usual. Log the quality honestly — this is fatigue, not a lost skill.',
 
   'ex.restSec':'rest {n}s','ex.qualityAvg':'quality {v}/10',
+  'ex.deloadSkill':'Deload week: keep the pattern, do not test it — stop short of your max even if you could hold longer.',
+  'ex.deloadStrength':'Deload week: RIR 3, 70-80% of normal. No adding weight or reps this week.',
   'ex.swap':'Swap exercise','ex.removeFromSession':'Remove exercise from this session',
   'ex.removeShort':'Remove from this session',
   'ex.colSec':'SEC','ex.colReps':'REPS','ex.colQuality':'QLT','ex.colRir':'RIR',
@@ -1622,6 +1625,8 @@ es:{
   'fatigue.hint':'Espera una serie más corta de lo normal. Califica la calidad con honestidad — esto es fatiga, no habilidad perdida.',
 
   'ex.restSec':'descanso {n}s','ex.qualityAvg':'calidad {v}/10',
+  'ex.deloadSkill':'Semana de descarga: mantén el patrón, no lo pruebes — para antes de tu máximo aunque aguantes más.',
+  'ex.deloadStrength':'Semana de descarga: RIR 3, 70-80% de lo normal. Nada de subir peso ni repeticiones esta semana.',
   'ex.swap':'Cambiar ejercicio','ex.removeFromSession':'Quitar el ejercicio de esta sesión',
   'ex.removeShort':'Quitar de esta sesión',
   'ex.colSec':'SEG','ex.colReps':'REPS','ex.colQuality':'CAL','ex.colRir':'RIR',
@@ -5344,6 +5349,23 @@ async function saveProgressionState(group,exerciseId){
   if(previousId!==exerciseId) await logProgressionEvent(group,previousId,exerciseId);
 }
 
+// A coach-authored day (or any session built outside the ◀▶ stepper — see migration 086's
+// deload week, which assigns a specific higher variant directly) can have the member complete
+// sets on a rank the saved state never heard about, because only stepProgression/performSwap
+// write to skandi_progression_state. Left alone, the routine's "current" slot keeps resolving to
+// the stale, lower rank forever (currentProgressionExercise) even after the member has proven
+// the harder one — which is what "it shows straddle when I can already do half-lay" actually is.
+// A completed set at a higher rank than the saved one is proof enough to catch the state up.
+// Advance-only: stepping DOWN stays a deliberate choice (demoteProgression), never inferred here.
+async function advanceProgressionIfAhead(exerciseId){
+  const e=state.exercises.find(x=>x.id===exerciseId);
+  if(!e?.progression_group) return;
+  const saved=state.progressionState.find(p=>p.progression_group===e.progression_group);
+  const savedRank=saved?state.exercises.find(x=>x.id===saved.exercise_id)?.progression_rank:null;
+  if(savedRank!=null&&(e.progression_rank??0)<=savedRank) return;
+  await saveProgressionState(e.progression_group,exerciseId);
+}
+
 // Stepping down a rank from outside a live workout (the stall warning's own button): there are
 // no session sets to move, only the saved rank to change.
 async function demoteProgression(group){
@@ -6005,6 +6027,17 @@ function progressionCriteriaHtml(e){
   return `<div class="prog-criteria" onclick="event.stopPropagation()">${lines.join('<br>')}</div>`;
 }
 
+// The deload brief (skandi-brief.js) only ever says this once, on Home, for the day as a
+// whole — but "how much load" is a per-exercise question, and by the time a member is looking
+// at the set row is exactly when they need the answer. Weight already gets a silent 30%
+// preload (deloadAdjustedWeight); bodyweight holds and reps have no equivalent number to
+// preload, so this is the visible instruction that covers all three.
+function deloadNoteHtml(e){
+  if(!e||!trainingBlockWeekInfo()?.deload) return '';
+  const key=e.progression_group?'ex.deloadSkill':'ex.deloadStrength';
+  return `<p class="deload-note" onclick="event.stopPropagation()">${esc(t(key))}</p>`;
+}
+
 // Surfaced once progressionReadiness() confirms two consecutive clean sessions at target —
 // tapping it is exactly the same step the ▶ button above already performs.
 function progressionReadinessHtml(e,exerciseId){
@@ -6148,7 +6181,7 @@ function activeExercise(item,sets){
   // up), or RIR for ordinary load work, where the plan's progression rule is RIR 1-2.
   const rowClass=showWeight?'set-row':'set-row no-weight';
   return `<article class="exercise">
-    <div class="ex-head" onclick="openExercise('${e.id}',true)">${mediaThumb(e)}<div><h3>${esc(e.name)} <span class="ex-info-hint">${icon('chevronRight',13)}</span></h3><p>${[esc(exerciseSubtitle(e)),`${item.target_sets} x ${esc(item.target_reps)}`,esc(t('ex.restSec',{n:item.target_rest_sec}))].filter(Boolean).join(' · ')}</p>${progressionStepperHtml(e,item.exercise_id)}${progressionCriteriaHtml(e)}${tempoButtonHtml(e)}${progressionReadinessHtml(e,item.exercise_id)}</div>
+    <div class="ex-head" onclick="openExercise('${e.id}',true)">${mediaThumb(e)}<div><h3>${esc(e.name)} <span class="ex-info-hint">${icon('chevronRight',13)}</span></h3><p>${[esc(exerciseSubtitle(e)),`${item.target_sets} x ${esc(item.target_reps)}`,esc(t('ex.restSec',{n:item.target_rest_sec}))].filter(Boolean).join(' · ')}</p>${deloadNoteHtml(e)}${progressionStepperHtml(e,item.exercise_id)}${progressionCriteriaHtml(e)}${tempoButtonHtml(e)}${progressionReadinessHtml(e,item.exercise_id)}</div>
       <div class="ex-actions">
         <span class="muted">${sets.filter(s=>s.done).length}/${sets.length}${(()=>{const q=e.track_quality?avgQuality(sets.filter(x=>x.done)):null; return q!=null?' · '+esc(t('ex.qualityAvg',{v:q})):'';})()}</span>
         <div class="ex-actions-row">
@@ -6407,6 +6440,7 @@ async function toggleSet(id,rest){
   s.done=done;
   state.rest=done?rest:0;
   state.restTotal=done?rest:0;
+  if(done) await advanceProgressionIfAhead(s.exercise_id);
   renderActiveWorkout();
 }
 
