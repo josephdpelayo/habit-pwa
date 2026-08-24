@@ -8,16 +8,16 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="Skandi Fit">
 <meta name="application-name" content="Skandi Fit">
-<link rel="manifest" href="/skandi-manifest.json?v=20260824-2">
-<link rel="apple-touch-icon" sizes="180x180" href="/icons/skandi-180.png?v=20260824-2">
-<link rel="icon" type="image/png" sizes="192x192" href="/icons/skandi-192.png?v=20260824-2">
+<link rel="manifest" href="/skandi-manifest.json?v=20260824-3">
+<link rel="apple-touch-icon" sizes="180x180" href="/icons/skandi-180.png?v=20260824-3">
+<link rel="icon" type="image/png" sizes="192x192" href="/icons/skandi-192.png?v=20260824-3">
 <title>Skandi Fit</title>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="/skandi-recovery.js?v=20260824-2"></script>
-<script src="/body-figure.js?v=20260824-2"></script>
-<script src="/skandi-nutrition.js?v=20260824-2"></script>
-<script src="/skandi-load.js?v=20260824-2"></script>
-<script src="/skandi-brief.js?v=20260824-2"></script>
+<script src="/skandi-recovery.js?v=20260824-3"></script>
+<script src="/body-figure.js?v=20260824-3"></script>
+<script src="/skandi-nutrition.js?v=20260824-3"></script>
+<script src="/skandi-load.js?v=20260824-3"></script>
+<script src="/skandi-brief.js?v=20260824-3"></script>
 <style>
 :root{
   --bg:#eef4f8;
@@ -524,7 +524,7 @@ textarea.field{min-height:112px;text-align:left;resize:vertical}
 // Versión compartida con app.html (APP_VERSION) y sw.js (CACHE_VERSION): un solo service
 // worker sirve las dos apps, así que una sola cadena las invalida a las dos. Al cambiarla
 // hay que actualizarla también en los ?v= del <head>, en index.html y en los dos manifests.
-const SKANDI_VERSION='20260824-2';
+const SKANDI_VERSION='20260824-3';
 const SUPABASE_URL='https://pmpjteuqjusbiduevbwq.supabase.co';
 const SUPABASE_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBtcGp0ZXVxanVzYmlkdWV2YndxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc2OTI1NjUsImV4cCI6MjA5MzI2ODU2NX0.XbMzZoo2yqtrD8znLnyo_1zDfrdJAvAPj1lqGOyXnLw';
 const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
@@ -702,6 +702,10 @@ en:{
   'cal.addTitle':'Add to {date}','cal.editTitle':'Edit session','cal.save':'Save',
   'cal.moveTitle':'Move session','cal.copyTitle':'Copy session',
   'cal.needsMigration':'Run migration 080 in Supabase to turn the calendar on.',
+  'activity.elevation':'Elevation gain','activity.plan':'Planned: {plan}',
+  'activity.analyze':'Get feedback','activity.analyzing':'Analyzing…',
+  'activity.assessment':'How it went','activity.nextStep':'For next time',
+  'activity.options':'Session options',
   'brief.title':'Why today','brief.trainingTitle':'What each session is for','brief.fuelTitle':'How to eat today','brief.cautionTitle':'Watch this today',
   'brief.head.deload':'Deload week ({week} of {total}): you should finish feeling you had more in you. That is the point.',
   'brief.head.rest':'No training today, and that is the plan too.',
@@ -1273,6 +1277,10 @@ es:{
   'cal.addTitle':'Agregar al {date}','cal.editTitle':'Editar sesión','cal.save':'Guardar',
   'cal.moveTitle':'Mover sesión','cal.copyTitle':'Copiar sesión',
   'cal.needsMigration':'Corre la migración 080 en Supabase para encender el calendario.',
+  'activity.elevation':'Desnivel','activity.plan':'Plan: {plan}',
+  'activity.analyze':'Analizar','activity.analyzing':'Analizando…',
+  'activity.assessment':'Cómo te fue','activity.nextStep':'Para la próxima',
+  'activity.options':'Opciones de la sesión',
   'brief.title':'El porqué de hoy','brief.trainingTitle':'Qué buscas en cada sesión','brief.fuelTitle':'Cómo comer hoy','brief.cautionTitle':'Cuida esto hoy',
   'brief.head.deload':'Semana de descarga ({week} de {total}): hoy sales sintiendo que podías más, y esa es la meta.',
   'brief.head.rest':'Hoy no se entrena, y eso también es el plan.',
@@ -3024,7 +3032,7 @@ function plannedRowHtml(p){
 }
 
 function extraRowHtml(x){
-  return `<div class="plan-row extra" onclick="${x.kind==='session'?`openSessionDetail('${x.id}')`:`setView('body')`}">
+  return `<div class="plan-row extra" onclick="${x.kind==='session'?`openSessionDetail('${x.id}')`:`openActivityDetail('${x.id}')`}">
     <span class="disc">${DISC_GLYPH[x.discipline]||'◇'}</span>
     <div class="plan-body">
       <strong>${esc(x.title)}</strong>
@@ -3223,7 +3231,18 @@ function plannedDayHtml(key){
     <button class="btn primary" style="width:100%;margin-top:14px" onclick="openPlannedForm('${key}')">${icon('plus',16)} ${esc(t('cal.addSession'))}</button>`;
 }
 
+// Un cardio ya hecho abría el mismo menú de mover/copiar/editar que uno todavía por hacer —
+// puro trámite sobre un plan que ya no aplica. Lo que hay que ver ahí es lo que pasó
+// (distancia, ritmo, pulso) y una lectura sobre esa sesión, no la maquinaria de planeación.
+// El menú de siempre sigue disponible desde el "···" de esa hoja.
 function openPlannedItem(id){
+  const p=plannedRows().find(x=>x.id===id);
+  if(!p) return;
+  if(p.status==='done'&&p.activity_id) return openActivityDetail(p.activity_id,p.id);
+  openPlannedItemMenu(id);
+}
+
+function openPlannedItemMenu(id){
   const p=plannedRows().find(x=>x.id===id);
   if(!p) return;
   const sub=plannedSub(p);
@@ -3252,6 +3271,94 @@ function openPlannedItem(id){
       <button class="btn" style="width:100%" onclick="openPlannedDay('${p.day}')">${esc(t('cal.back'))}</button>
     </div>
     <p class="form-note" style="margin-top:12px">${esc(t('cal.removeNote'))}</p>`;
+}
+
+// ---- La hoja de una actividad ya hecha -----------------------------------------------------
+
+function openActivityDetail(activityId,plannedId){
+  const a=state.externalActivities.find(x=>x.id===activityId);
+  if(!a) return plannedId?openPlannedItemMenu(plannedId):closeModal();
+  const p=plannedId?plannedRows().find(x=>x.id===plannedId):null;
+  $('modal').classList.add('show');
+  $('modalCard').innerHTML=activityDetailHtml(a,p);
+}
+
+function activityDetailHtml(a,p){
+  const pace=a.distance_km?Math.round((a.duration_min*60)/a.distance_km):null;
+  const badges=[
+    a.external_source==='strava'?`<span class="pill tiny">${esc(t('strava.badge'))}</span>`:'',
+    a.external_source==='intervals'?`<span class="pill tiny">${esc(t('intervals.badge'))}</span>`:'',
+    (a.intensity_source==='default'&&!a.avg_heart_rate)?`<span class="pill tiny warn">${esc(t('strava.checkEffort'))}</span>`:''
+  ].join('');
+  const stats=[
+    {v:a.duration_min,l:t('common.min')},
+    a.distance_km?{v:a.distance_km,l:'km'}:null,
+    pace?{v:fmtPace(pace),l:'/km'}:null,
+    a.avg_heart_rate?{v:a.avg_heart_rate,l:t('garmin.avgHr')+' · bpm'}:null,
+    a.max_heart_rate?{v:a.max_heart_rate,l:t('garmin.maxHr')+' · bpm'}:null,
+    a.elevation_gain_m?{v:Math.round(a.elevation_gain_m),l:t('activity.elevation')+' · m'}:null,
+    a.calories?{v:a.calories,l:t('garmin.calories')+' · kcal'}:null,
+  ].filter(Boolean);
+  const planLine=p?[p.target_distance_km?`${p.target_distance_km} km`:null,p.target_duration_min?`${p.target_duration_min} ${t('common.min')}`:null,p.target_zone?`Z${p.target_zone}`:null].filter(Boolean).join(' · '):'';
+  return `
+    <div class="row">
+      <div><p class="muted">${esc(new Date(a.performed_at).toLocaleDateString(LANG,{weekday:'long',day:'numeric',month:'long'}))}</p><h1>${esc(activityTypeLabel(a.activity_type))} ${badges}</h1></div>
+      <div class="row" style="gap:8px;flex:0 0 auto">
+        ${p?`<button class="icon-btn tiny" onclick="openPlannedItemMenu('${p.id}')" aria-label="${esc(t('activity.options'))}">${icon('ellipsis',16)}</button>`:''}
+        <button class="x" onclick="closeModal()" aria-label="${esc(t('common.close'))}">${icon('close',20)}</button>
+      </div>
+    </div>
+    <section class="grid">
+      ${stats.map(s=>`<div class="stat"><strong>${esc(s.v)}</strong><small>${esc(s.l)}</small></div>`).join('')}
+    </section>
+    <section class="card"><span class="pill dark">${esc(t('logAct.rowIntensity',{v:a.intensity}))}</span></section>
+    ${planLine?`<p class="form-note" style="margin-top:10px">${esc(t('activity.plan',{plan:planLine}))}</p>`:''}
+    ${a.note?`<section class="card" style="margin-top:10px"><div class="eyebrow">${esc(t('session.notes'))}</div><p style="margin-top:6px">${esc(a.note)}</p></section>`:''}
+    <div id="activityFeedback"></div>
+    <button id="activityAnalyzeBtn" class="btn primary" style="width:100%;margin-top:14px" onclick="loadActivityFeedback('${a.id}'${p?`,'${p.id}'`:''})">${icon('trending',16)} ${esc(t('activity.analyze'))}</button>
+    ${p?`<button class="btn" style="width:100%;margin-top:10px" onclick="openPlannedDay('${p.day}')">${esc(t('cal.back'))}</button>`:''}`;
+}
+
+// Mismo patrón que loadMealSuggestion: texto nada más (sin foto), mismo JSON-schema, misma
+// cuota compartida de IA. La retroalimentación no se guarda en ningún lado — es para leerla
+// ahí mismo, igual que la sugerencia de comida.
+async function loadActivityFeedback(activityId,plannedId){
+  const a=state.externalActivities.find(x=>x.id===activityId);
+  if(!a) return;
+  const p=plannedId?plannedRows().find(x=>x.id===plannedId):null;
+  const box=$('activityFeedback');
+  const btn=$('activityAnalyzeBtn');
+  if(btn){btn.disabled=true;btn.textContent=t('activity.analyzing');}
+  if(box) box.innerHTML=`<p class="muted" style="margin-top:14px">${esc(t('activity.analyzing'))}</p>`;
+  try{
+    const recent=(state.externalActivities||[])
+      .filter(x=>x.id!==activityId&&x.activity_type===a.activity_type)
+      .slice(0,5)
+      .map(x=>({activity_type:x.activity_type,duration_min:x.duration_min,distance_km:x.distance_km,avg_heart_rate:x.avg_heart_rate,performed_at:x.performed_at}));
+    const data=await skandiApi('activity-feedback',{
+      activity:{
+        activity_type:a.activity_type,duration_min:a.duration_min,distance_km:a.distance_km,
+        avg_heart_rate:a.avg_heart_rate,max_heart_rate:a.max_heart_rate,elevation_gain_m:a.elevation_gain_m,
+        calories:a.calories,intensity:a.intensity,intensity_source:a.intensity_source,performed_at:a.performed_at
+      },
+      target:p?{distance_km:p.target_distance_km,duration_min:p.target_duration_min,zone:p.target_zone}:null,
+      recent,
+      max_heart_rate:state.skandiSettings?.max_heart_rate||null
+    });
+    state.aiCallsToday=data.quota?.used??state.aiCallsToday;
+    if(box) box.innerHTML=`
+      <section class="card" style="margin-top:14px">
+        <div class="eyebrow">${esc(t('activity.assessment'))}</div>
+        <p style="margin-top:6px">${esc(data.assessment)}</p>
+        <div class="eyebrow" style="margin-top:14px">${esc(t('activity.nextStep'))}</div>
+        <p style="margin-top:6px">${esc(data.next_step)}</p>
+      </section>
+      <p class="muted" style="font-size:11px;margin-top:8px">${esc(t('food.aiLeft',{n:aiLeft()}))}</p>`;
+  }catch(e){
+    if(box) box.innerHTML=`<p class="muted" style="margin-top:14px;color:var(--pink)">${esc(e.message||String(e))}</p>`;
+  }finally{
+    if(btn){btn.disabled=false;btn.innerHTML=`${icon('trending',16)} ${esc(t('activity.analyze'))}`;}
+  }
 }
 
 // ---- Mutaciones ---------------------------------------------------------------------------
@@ -3298,7 +3405,7 @@ function openPlannedMove(id,mode){
     <label class="eyebrow">${esc(t('cal.dateLabel'))}</label>
     <input id="planMoveDate" class="field left" type="date" value="${p.day}">
     <button class="btn primary" style="width:100%;margin-top:14px" onclick="${mode==='copy'?`copyPlannedTo('${id}')`:`movePlannedTo('${id}')`}">${esc(t(mode==='copy'?'cal.copy':'cal.move'))}</button>
-    <button class="btn" style="width:100%;margin-top:8px" onclick="openPlannedItem('${id}')">${esc(t('cal.back'))}</button>`;
+    <button class="btn" style="width:100%;margin-top:8px" onclick="openPlannedItemMenu('${id}')">${esc(t('cal.back'))}</button>`;
 }
 
 async function movePlannedTo(id){

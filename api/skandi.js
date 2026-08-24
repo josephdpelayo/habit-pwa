@@ -11,6 +11,9 @@
 //     append=true + photo_path/note -> agrega renglones a una comida YA registrada en vez de
 //     reemplazar los suyos (varias fotos para un mismo platillo, tomadas en momentos distintos).
 //   { action: 'barcode', barcode }  -> Open Food Facts. Sin IA y sin cuota.
+//   { action: 'meal-suggestion', ... } -> texto -> Claude. Gasta cuota (misma que 'analyze').
+//   { action: 'activity-feedback', activity, target?, recent?, max_heart_rate? } -> texto ->
+//     Claude, retroalimentación de una sesión de cardio ya registrada. Gasta la misma cuota.
 //   strava-connect / -callback / -webhook / -sync / -disconnect / -subscription
 //   intervals-connect / -status / -sync / -disconnect
 //
@@ -646,6 +649,176 @@ async function suggestMeal(req, res) {
       return res.status(502).json({ error: 'ai_error', message: `La IA respondió con un error (${err.status}).` });
     }
     return fail(res, 500, 'server_error', 'No pudimos generar una sugerencia. Intenta de nuevo.');
+  }
+}
+
+
+// ── Retroalimentación de una actividad de cardio ────────────────────────────
+//
+// El detalle de una actividad (distancia, ritmo, pulso) ya vive en skandi_external_activities
+// y el cliente lo tiene cargado — este endpoint no lee la tabla, solo recibe los números que
+// ya se le muestran al atleta y les agrega una lectura de entrenador sobre ESA sesión en
+// concreto. Mismo patrón que suggestMeal: texto sin imagen, mismo JSON-schema, misma cuota
+// diaria compartida (no amerita un tope aparte). Nada de lo que devuelve se guarda.
+
+const ACTIVITY_TYPE_ES = {
+  running: 'correr', cycling: 'ciclismo', swimming: 'natación',
+  rowing: 'remo', walking: 'caminata', other: 'cardio',
+};
+
+const ACTIVITY_FEEDBACK_SYSTEM_PROMPT = `Eres un entrenador de resistencia (running, ciclismo, natación, remo, caminata) dando retroalimentación breve sobre UNA sesión de cardio que un miembro de la tripulación del Skandi Nomad acaba de terminar. Muchos de estos datos vienen importados de un reloj (Strava/Garmin), no capturados a mano.
+
+Te doy: los datos de la sesión (tipo, duración, distancia si aplica, pulso promedio y máximo, desnivel, calorías, RPE), lo que tenía planeado ese día si lo tenía, su frecuencia cardiaca máxima si la conoce, y hasta 5 sesiones recientes del mismo tipo de actividad para comparar.
+
+Reglas:
+- Habla de ESTA sesión, no de generalidades de entrenamiento. Usa los números que te dieron (ritmo, pulso, zona) en vez de repetir consejos genéricos.
+- Si hay plan (distancia/duración/zona objetivo), compara lo hecho contra lo planeado y dilo explícito: se quedó corto, se pasó, o cumplió.
+- Si hay sesiones recientes del mismo tipo, compara el ritmo o el pulso contra ellas para decir si esta fue más dura, más suave, o similar. Si no hay suficientes para comparar, no inventes una tendencia.
+- Si intensity_source es "default" (nadie midió el esfuerzo, quedó en 5 por defecto) o no hay pulso, dilo: ese RPE no es confiable y conviene corregirlo a mano.
+- No des consejos médicos ni diagnostiques. Si el pulso promedio pasa del 90% de su frecuencia máxima conocida por más de la mitad de la sesión, sugiere prestar atención a la recuperación, sin alarmar.
+- Sé concreto y breve: nada de relleno motivacional genérico.`;
+
+const ACTIVITY_FEEDBACK_SCHEMA = {
+  type: 'object',
+  properties: {
+    assessment: { type: 'string', description: 'Cómo estuvo esta sesión en concreto: ritmo/esfuerzo, comparado con el plan y con sus sesiones recientes similares. 2-4 frases.' },
+    next_step: { type: 'string', description: 'Una recomendación concreta para la próxima sesión de este tipo, o para la recuperación. 1-3 frases.' },
+  },
+  required: ['assessment', 'next_step'],
+  additionalProperties: false,
+};
+
+function clampActivityNum(v, min, max) {
+  const n = Number(v);
+  return Number.isFinite(n) ? Math.max(min, Math.min(max, n)) : null;
+}
+
+function sanitizeActivity(a) {
+  if (!a || typeof a !== 'object') return null;
+  const type = ['running', 'cycling', 'swimming', 'rowing', 'walking', 'other'].includes(a.activity_type)
+    ? a.activity_type : 'other';
+  const duration = clampActivityNum(a.duration_min, 1, 1440);
+  if (!duration) return null;
+  return {
+    activity_type: type,
+    duration_min: duration,
+    distance_km: clampActivityNum(a.distance_km, 0, 1000),
+    avg_heart_rate: clampActivityNum(a.avg_heart_rate, 30, 230),
+    max_heart_rate: clampActivityNum(a.max_heart_rate, 30, 230),
+    elevation_gain_m: clampActivityNum(a.elevation_gain_m, 0, 20000),
+    calories: clampActivityNum(a.calories, 0, 20000),
+    intensity: clampActivityNum(a.intensity, 1, 10) || 5,
+    intensity_source: ['manual', 'heart_rate', 'default'].includes(a.intensity_source) ? a.intensity_source : 'default',
+  };
+}
+
+function describeActivity(a, label) {
+  const parts = [
+    `${a.duration_min} min`,
+    a.distance_km ? `${a.distance_km} km` : null,
+    a.avg_heart_rate ? `pulso promedio ${a.avg_heart_rate} bpm` : null,
+    a.max_heart_rate ? `pulso máximo ${a.max_heart_rate} bpm` : null,
+    a.elevation_gain_m ? `${a.elevation_gain_m} m de desnivel` : null,
+    a.calories ? `${a.calories} kcal` : null,
+  ].filter(Boolean);
+  return `${label}: ${parts.join(', ')}`;
+}
+
+async function activityFeedback(req, res) {
+  const apiKey = process.env.ANTHROPIC_API_KEY;
+  if (!apiKey) return fail(res, 500, 'missing_api_key',
+    'Falta ANTHROPIC_API_KEY en Vercel, o el deployment es anterior a haberla guardado. Revisa que esté marcada para Production y haz Redeploy.');
+  if (!process.env.SUPABASE_URL || !process.env.SUPABASE_SERVICE_ROLE_KEY) {
+    return fail(res, 500, 'missing_supabase_env', 'Falta configurar SUPABASE_URL / SUPABASE_SERVICE_ROLE_KEY.');
+  }
+
+  let userId = null;
+  let quotaSpent = false;
+
+  try {
+    userId = await requireUser(req, res);
+    if (!userId) return;
+
+    const body = req.body || {};
+    const activity = sanitizeActivity(body.activity);
+    if (!activity) return fail(res, 400, 'bad_activity', 'Faltan los datos de la actividad.');
+
+    const target = body.target && typeof body.target === 'object' ? {
+      distance_km: clampActivityNum(body.target.distance_km, 0, 1000),
+      duration_min: clampActivityNum(body.target.duration_min, 1, 1440),
+      zone: clampActivityNum(body.target.zone, 1, 5),
+    } : null;
+
+    const recent = (Array.isArray(body.recent) ? body.recent : [])
+      .slice(0, 5)
+      .map(sanitizeActivity)
+      .filter(Boolean);
+
+    const maxHeartRate = clampActivityNum(body.max_heart_rate, 120, 230);
+
+    const limit = dailyLimit();
+    const { data: calls, error: quotaError } = await supabase
+      .rpc('skandi_bump_ai_usage', { p_user: userId, p_limit: limit });
+    if (quotaError) {
+      if (/function .* does not exist/i.test(quotaError.message)) {
+        return fail(res, 500, 'missing_migration', 'Falta correr la migración 074_skandi_ai_quota_rpc.sql en Supabase.');
+      }
+      throw quotaError;
+    }
+    if (calls === -1) {
+      return fail(res, 429, 'quota_exceeded', `Llegaste al tope de ${limit} análisis por día. Vuelve a intentar mañana.`);
+    }
+    quotaSpent = true;
+
+    const lines = [
+      describeActivity(activity, `Sesión de ${ACTIVITY_TYPE_ES[activity.activity_type] || 'cardio'} que acaba de terminar`),
+      `RPE reportado: ${activity.intensity}/10 (${activity.intensity_source === 'manual' ? 'lo puso el atleta o su reloj' : activity.intensity_source === 'heart_rate' ? 'derivado de su pulso' : 'no se pudo saber, valor por defecto'}).`,
+      target
+        ? `Tenía planeado: ${[target.distance_km ? `${target.distance_km} km` : null, target.duration_min ? `${target.duration_min} min` : null, target.zone ? `zona ${target.zone}` : null].filter(Boolean).join(', ') || 'sin objetivo numérico concreto'}.`
+        : 'No tenía un plan numérico para hoy, fue una sesión libre.',
+      recent.length
+        ? `Sus últimas ${recent.length} sesiones de ${ACTIVITY_TYPE_ES[activity.activity_type] || 'este tipo'} para comparar: ${recent.map((r, i) => describeActivity(r, `#${i + 1}`)).join('; ')}.`
+        : 'No hay sesiones recientes del mismo tipo para comparar.',
+      maxHeartRate ? `Su frecuencia cardiaca máxima conocida es ${maxHeartRate} bpm.` : 'No tiene registrada su frecuencia cardiaca máxima.',
+    ];
+
+    const anthropic = new Anthropic({ apiKey, timeout: AI_TIMEOUT_MS, maxRetries: 0 });
+    const response = await anthropic.messages.create({
+      model: process.env.MEAL_AI_MODEL || DEFAULT_MODEL,
+      max_tokens: 700,
+      system: ACTIVITY_FEEDBACK_SYSTEM_PROMPT,
+      output_config: { effort: 'low', format: { type: 'json_schema', schema: ACTIVITY_FEEDBACK_SCHEMA } },
+      messages: [{ role: 'user', content: [{ type: 'text', text: lines.filter(Boolean).join(' ') }] }],
+    });
+
+    if (response.stop_reason === 'refusal') {
+      return fail(res, 422, 'refused', 'El modelo no pudo generar retroalimentación. Intenta de nuevo.');
+    }
+    const textBlock = response.content.find(b => b.type === 'text');
+    if (!textBlock) return fail(res, 502, 'empty_response', 'La retroalimentación vino vacía. Intenta de nuevo.');
+    const parsed = JSON.parse(textBlock.text);
+
+    return res.status(200).json({
+      ok: true,
+      assessment: String(parsed.assessment || '').slice(0, 600),
+      next_step: String(parsed.next_step || '').slice(0, 400),
+      quota: { used: calls, limit },
+    });
+  } catch (err) {
+    console.error('[skandi/activity-feedback] failed', { userId, name: err && err.name, message: err && err.message });
+    if (quotaSpent && userId) {
+      try { await supabase.rpc('skandi_refund_ai_usage', { p_user: userId }); } catch { /* mejor esfuerzo */ }
+    }
+    if (err instanceof Anthropic.RateLimitError) {
+      return res.status(429).json({ error: 'ai_rate_limited', message: 'La IA está saturada ahora mismo. Intenta de nuevo en un momento.', retryable: true });
+    }
+    if (err instanceof Anthropic.AuthenticationError) {
+      return fail(res, 500, 'bad_api_key', 'La ANTHROPIC_API_KEY de Vercel no es válida.');
+    }
+    if (err instanceof Anthropic.APIError) {
+      return res.status(502).json({ error: 'ai_error', message: `La IA respondió con un error (${err.status}).` });
+    }
+    return fail(res, 500, 'server_error', 'No pudimos generar retroalimentación. Intenta de nuevo.');
   }
 }
 
@@ -1706,6 +1879,7 @@ module.exports = async function handler(req, res) {
   if (action === 'barcode') return lookupBarcode(req, res);
   if (action === 'analyze') return analyzeMeal(req, res);
   if (action === 'meal-suggestion') return suggestMeal(req, res);
+  if (action === 'activity-feedback') return activityFeedback(req, res);
   if (action === 'strava-connect') return stravaConnect(req, res);
   if (action === 'strava-sync') return stravaSync(req, res);
   if (action === 'strava-disconnect') return stravaDisconnect(req, res);
