@@ -8,16 +8,16 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="Skandi Fit">
 <meta name="application-name" content="Skandi Fit">
-<link rel="manifest" href="/skandi-manifest.json?v=20260824-3">
-<link rel="apple-touch-icon" sizes="180x180" href="/icons/skandi-180.png?v=20260824-3">
-<link rel="icon" type="image/png" sizes="192x192" href="/icons/skandi-192.png?v=20260824-3">
+<link rel="manifest" href="/skandi-manifest.json?v=20260824-4">
+<link rel="apple-touch-icon" sizes="180x180" href="/icons/skandi-180.png?v=20260824-4">
+<link rel="icon" type="image/png" sizes="192x192" href="/icons/skandi-192.png?v=20260824-4">
 <title>Skandi Fit</title>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="/skandi-recovery.js?v=20260824-3"></script>
-<script src="/body-figure.js?v=20260824-3"></script>
-<script src="/skandi-nutrition.js?v=20260824-3"></script>
-<script src="/skandi-load.js?v=20260824-3"></script>
-<script src="/skandi-brief.js?v=20260824-3"></script>
+<script src="/skandi-recovery.js?v=20260824-4"></script>
+<script src="/body-figure.js?v=20260824-4"></script>
+<script src="/skandi-nutrition.js?v=20260824-4"></script>
+<script src="/skandi-load.js?v=20260824-4"></script>
+<script src="/skandi-brief.js?v=20260824-4"></script>
 <style>
 :root{
   --bg:#eef4f8;
@@ -162,6 +162,11 @@ p{color:var(--muted);line-height:1.45;margin:0}
 .pick{flex:0 0 auto;background:var(--panel2);border:1px solid var(--line);border-radius:999px;padding:9px 14px;font-weight:900;font-size:13px;color:var(--text);display:flex;align-items:center;gap:7px}
 .pick b{font-weight:1000}
 .pick small{color:var(--muted);font-weight:900}
+.photostrip{display:flex;gap:8px;overflow-x:auto;padding:2px 0;-webkit-overflow-scrolling:touch}
+.photostrip:empty{display:none}
+.ph-tile{position:relative;flex:0 0 auto;width:76px;height:76px;border-radius:12px;overflow:hidden;background:var(--panel3);border:1px solid var(--line)}
+.ph-tile img{width:100%;height:100%;object-fit:cover;display:block}
+.ph-tile button{position:absolute;top:3px;right:3px;width:22px;height:22px;border-radius:50%;background:rgba(7,20,42,.72);color:#fff;display:grid;place-items:center;font-size:12px;line-height:1}
 .add-fab{position:fixed;right:max(14px,calc(50% - 396px));bottom:calc(84px + env(safe-area-inset-bottom));width:60px;height:60px;border-radius:50%;background:var(--dof-navy);color:#fff;display:grid;place-items:center;box-shadow:0 16px 32px rgba(1,36,86,.34);z-index:19}
 .item-row{display:grid;grid-template-columns:26px 1fr 92px;gap:9px;align-items:center;padding:9px 0;border-top:1px solid var(--line)}
 .item-row:first-of-type{border-top:0}
@@ -524,7 +529,7 @@ textarea.field{min-height:112px;text-align:left;resize:vertical}
 // Versión compartida con app.html (APP_VERSION) y sw.js (CACHE_VERSION): un solo service
 // worker sirve las dos apps, así que una sola cadena las invalida a las dos. Al cambiarla
 // hay que actualizarla también en los ?v= del <head>, en index.html y en los dos manifests.
-const SKANDI_VERSION='20260824-3';
+const SKANDI_VERSION='20260824-4';
 const SUPABASE_URL='https://pmpjteuqjusbiduevbwq.supabase.co';
 const SUPABASE_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBtcGp0ZXVxanVzYmlkdWV2YndxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc2OTI1NjUsImV4cCI6MjA5MzI2ODU2NX0.XbMzZoo2yqtrD8znLnyo_1zDfrdJAvAPj1lqGOyXnLw';
 const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
@@ -567,6 +572,8 @@ en:{
   'food.byDish':'Saved dish','food.byDishHint':'Free · instant','food.byFood':'From catalog','food.byFoodHint':'Free · instant',
   'food.byPhoto':'Photo','food.byPhotoHint':'AI · ~2¢','food.byText':'Describe it','food.byTextHint':'AI · ~1¢',
   'food.byBarcode':'Barcode','food.byBarcodeHint':'Free','food.mealType':'Meal','food.venue':'Where',
+  'food.addDish':'Saved dish','food.multiPhotoHint':'Each extra photo counts as one more AI analysis.',
+  'food.analyzingProgress':'Analyzing photo {i} of {n}…','food.addPhotos':'Add photos',
   'food.seedCatalog':'Load starter catalog','food.seedCatalogHint':'A few common dishes built from the shared food catalog, so you have something to start from.',
   'food.seedConfirm':'Add a few starter dishes (chicken & rice, oats, tuna...) to your catalog? You can edit or delete any of them after.',
   'food.seedNoFoods':'The shared catalog is empty — nothing to build starter dishes from yet.',
@@ -637,6 +644,7 @@ en:{
   'common.searchExercise':'Search exercise...','common.day':'Day','common.date':'Date',
   'common.reps':'reps','common.sets':'sets','common.min':'min','common.byName':'by {name}',
   'common.exercises_one':'exercise','common.exercises_other':'exercises',
+  'common.photos_one':'photo','common.photos_other':'photos',
   'common.routines_one':'routine','common.routines_other':'routines',
   'common.workouts_one':'workout','common.workouts_other':'workouts',
   'common.plans_one':'plan','common.plans_other':'plans',
@@ -1142,6 +1150,8 @@ es:{
   'food.byDish':'Platillo guardado','food.byDishHint':'Gratis · al instante','food.byFood':'Del catálogo','food.byFoodHint':'Gratis · al instante',
   'food.byPhoto':'Foto','food.byPhotoHint':'IA · ~2¢','food.byText':'Descríbelo','food.byTextHint':'IA · ~1¢',
   'food.byBarcode':'Código de barras','food.byBarcodeHint':'Gratis','food.mealType':'Comida','food.venue':'Dónde',
+  'food.addDish':'Platillo guardado','food.multiPhotoHint':'Cada foto extra cuenta como un análisis de IA más.',
+  'food.analyzingProgress':'Analizando foto {i} de {n}…','food.addPhotos':'Agregar fotos',
   'food.seedCatalog':'Cargar catálogo inicial','food.seedCatalogHint':'Unos platillos comunes armados con el catálogo compartido, para tener de dónde partir.',
   'food.seedConfirm':'¿Agregar unos platillos iniciales (pollo con arroz, avena, atún...) a tu catálogo? Puedes editarlos o borrarlos después.',
   'food.seedNoFoods':'El catálogo compartido está vacío — no hay con qué armar platillos iniciales todavía.',
@@ -1212,6 +1222,7 @@ es:{
   'common.searchExercise':'Buscar ejercicio...','common.day':'Día','common.date':'Fecha',
   'common.reps':'reps','common.sets':'series','common.min':'min','common.byName':'por {name}',
   'common.exercises_one':'ejercicio','common.exercises_other':'ejercicios',
+  'common.photos_one':'foto','common.photos_other':'fotos',
   'common.routines_one':'rutina','common.routines_other':'rutinas',
   'common.workouts_one':'entrenamiento','common.workouts_other':'entrenamientos',
   'common.plans_one':'plan','common.plans_other':'planes',
@@ -8114,16 +8125,17 @@ async function seedStarterCatalog(){
 // fotografía en varias fotos porque no se tomaron todas al mismo tiempo. El tipo de comida,
 // la hora y el lugar ya quedaron fijados al crearla, así que no se vuelven a pedir.
 function openMealInput(kind,mealId=null){
-  state.pendingMeal={kind,blob:null,dataUrl:null,photoTakenAt:null,whenTouched:false,mealId};
+  state.pendingMeal={kind,blobs:[],dataUrl:null,photoTakenAt:null,whenTouched:false,mealId};
   $('modal').classList.add('show');
   $('modalCard').innerHTML=`
     <div class="row"><h1>${esc(kind==='photo'?t('food.byPhoto'):t('food.byText'))}</h1><button class="x" onclick="closeModal()" aria-label="${esc(t('common.close'))}">${icon('close',20)}</button></div>
     ${kind==='photo'?`
       <p class="muted">${esc(t('food.photoHint'))}</p>
-      <label class="btn" style="width:100%;margin-top:8px">${icon('image',20)} <span id="photoBtnLabel">${esc(t('food.takePhoto'))}</span>
-        <input id="mealPhoto" type="file" accept="image/*" style="display:none" onchange="onMealPhotoPicked(this)">
+      <label class="btn" style="width:100%;margin-top:8px">${icon('image',20)} <span id="photoBtnLabel">${esc(t('food.addPhotos'))}</span>
+        <input id="mealPhoto" type="file" accept="image/*" multiple style="display:none" onchange="onMealPhotoPicked(this)">
       </label>
-      <div id="mealPhotoPreview"></div>`:''}
+      <div id="mealPhotoPreview" class="photostrip"></div>
+      <p id="mealPhotoHint" class="muted" style="font-size:11px;margin-top:4px"></p>`:''}
     <label class="eyebrow">${esc(kind==='photo'?t('food.context'):t('food.describe'))}</label>
     <textarea id="mealDesc" class="field" placeholder="${esc(kind==='photo'?t('food.contextPh'):t('food.describePh'))}"></textarea>
     ${mealId?'':`
@@ -8150,27 +8162,50 @@ function pickVenue(v){
 }
 const pickedVenue=()=>document.querySelector('.venue-chip.active')?.dataset.venue||'casa';
 
+// Elegir fotos AÑADE a lo que ya se había elegido en vez de reemplazarlo — así que tocar
+// "Agregar fotos" una segunda vez suma más en vez de perder las primeras, tanto si el celular
+// deja elegir varias de una vez como si solo deja una por toque.
 async function onMealPhotoPicked(input){
-  const file=input.files&&input.files[0];
-  if(!file) return;
+  const files=Array.from(input.files||[]);
+  input.value='';
+  if(!files.length) return;
   try{
     // El EXIF hay que leerlo del archivo ORIGINAL: compressImage dibuja en un canvas y el
-    // canvas no conserva metadatos, así que del blob comprimido ya no se puede sacar nada.
-    readExifDateTaken(file).then(date=>{
-      if(!date||date.getTime()>Date.now()) return; // una fecha futura es un reloj mal puesto, se ignora
-      state.pendingMeal.photoTakenAt=date.toISOString();
-      if(state.pendingMeal.whenTouched||!$('mealWhen')) return; // el usuario ya la cambió a mano: no se pisa
-      $('mealWhen').value=toLocalDatetimeValue(date);
-      if($('mealWhenHint')) $('mealWhenHint').textContent=t('food.whenFromPhoto');
-    });
-    const blob=await compressImage(file);
-    state.pendingMeal.blob=blob;
-    const url=URL.createObjectURL(blob);
-    $('mealPhotoPreview').innerHTML=`<img src="${url}" alt="" style="width:100%;border-radius:12px;margin-top:10px;max-height:220px;object-fit:cover">`;
-    $('photoBtnLabel').textContent=`${Math.round(blob.size/1024)} KB ✓`;
+    // canvas no conserva metadatos, así que del blob comprimido ya no se puede sacar nada. Solo
+    // de la primera foto del lote: es la que decide "cuándo" si el usuario no la toca a mano.
+    if(!state.pendingMeal.photoTakenAt){
+      readExifDateTaken(files[0]).then(date=>{
+        if(!date||date.getTime()>Date.now()) return; // una fecha futura es un reloj mal puesto, se ignora
+        state.pendingMeal.photoTakenAt=date.toISOString();
+        if(state.pendingMeal.whenTouched||!$('mealWhen')) return; // el usuario ya la cambió a mano: no se pisa
+        $('mealWhen').value=toLocalDatetimeValue(date);
+        if($('mealWhenHint')) $('mealWhenHint').textContent=t('food.whenFromPhoto');
+      });
+    }
+    for(const file of files){
+      const blob=await compressImage(file);
+      state.pendingMeal.blobs.push(blob);
+    }
+    renderMealPhotoStrip();
   }catch(e){
     alert(e.message||String(e));
   }
+}
+
+function renderMealPhotoStrip(){
+  const blobs=state.pendingMeal.blobs;
+  $('mealPhotoPreview').innerHTML=blobs.map((b,i)=>
+    `<div class="ph-tile"><img src="${URL.createObjectURL(b)}" alt=""><button type="button" onclick="removeMealPhoto(${i})" aria-label="${esc(t('common.close'))}">${icon('close',12)}</button></div>`
+  ).join('');
+  $('photoBtnLabel').textContent=blobs.length
+    ?`${blobs.length} ${tp(blobs.length,'common.photos')} · ${Math.round(blobs.reduce((s,b)=>s+b.size,0)/1024)} KB`
+    :t('food.addPhotos');
+  if($('mealPhotoHint')) $('mealPhotoHint').textContent=blobs.length>1?t('food.multiPhotoHint'):'';
+}
+
+function removeMealPhoto(i){
+  state.pendingMeal.blobs.splice(i,1);
+  renderMealPhotoStrip();
 }
 
 // Comprimir en el cliente no es cosmético: sube una foto de 4 MB del celular y estás pagando
@@ -8309,8 +8344,8 @@ async function submitMealForAnalysis(){
   const pending=state.pendingMeal;
   if(!pending) return;
   const desc=$('mealDesc').value.trim();
-  if(!pending.blob&&!desc) return alert(t('food.errNoInput'));
-  if(pending.mealId) return appendMealPhoto(pending,desc);
+  if(!pending.blobs.length&&!desc) return alert(t('food.errNoInput'));
+  if(pending.mealId) return appendMealPhotos(pending,desc);
   const btn=$('mealGo');
   btn.disabled=true;btn.textContent=t('food.uploading');
 
@@ -8321,10 +8356,14 @@ async function submitMealForAnalysis(){
   }
 
   try{
+    // La comida en sí solo carga UNA foto (photo_path); si se eligieron varias, las demás se
+    // analizan como "más fotos de esta comida" (mismo camino que append) una vez que la comida
+    // ya existe — ver analyzeExtraPhotos.
+    const [first,...rest]=pending.blobs;
     let photoPath=null;
-    if(pending.blob){
+    if(first){
       photoPath=`${state.user.id}/${crypto.randomUUID()}.jpg`;
-      const {error:upErr}=await sb.storage.from('skandi-meals').upload(photoPath,pending.blob,{contentType:'image/jpeg'});
+      const {error:upErr}=await sb.storage.from('skandi-meals').upload(photoPath,first,{contentType:'image/jpeg'});
       if(upErr) throw upErr;
     }
     const base={
@@ -8351,59 +8390,81 @@ async function submitMealForAnalysis(){
     state.pendingMeal=null;
     await loadNutrition();
     setView('food');
-    analyzeMeal(meal.id);
+    analyzeMeal(meal.id).then(()=>rest.length&&analyzeExtraPhotos(meal.id,rest));
   }catch(e){
     btn.disabled=false;btn.textContent=t('food.analyze');
     alert(e.message||String(e));
   }
 }
 
+// Fotos de más allá de la primera, para una comida que se está creando apenas: se procesan en
+// segundo plano una por una, igual que la primera (analyzeMeal ya se fue en background desde
+// submitMealForAnalysis) — el usuario ya vio cerrarse el modal y puede seguir usando la app
+// mientras se van sumando renglones.
+async function analyzeExtraPhotos(mealId,blobs){
+  for(const blob of blobs){
+    await appendOnePhoto(mealId,blob,null);
+    if(state.view==='food') render();
+  }
+}
+
 // Agregar una foto MÁS a una comida que ya existe: a diferencia de una comida nueva, aquí sí
 // esperamos la respuesta con el modal abierto (como openFoodPortion/addBarcodeResult) en vez
 // de cerrar y analizar en segundo plano — no hay una fila "pending" propia que muestre el
-// avance, así que el botón es lo único que puede contarlo.
-async function appendMealPhoto(pending,desc){
+// avance, así que el botón es lo único que puede contarlo. Con varias fotos elegidas a la vez
+// se analizan una por una, EN SECUENCIA (cada llamada agrega renglones sobre lo que dejó la
+// anterior) — mandarlas en paralelo arriesgaría que dos analyze() lean el mismo estado de la
+// comida a la vez y se pisen entre sí.
+async function appendMealPhotos(pending,desc){
   const btn=$('mealGo');
-  btn.disabled=true;btn.textContent=t('food.uploading');
-  // skandi_append_meal_items() AGREGA renglones (ver migración 092): si el fetch se corta
-  // ("Load failed" de Safari) después de que el servidor ya escribió, reintentar a ciegas
-  // duplicaría la comida. Por eso, antes de avisar que falló, se pregunta si en realidad sí
-  // se guardó — mismo espíritu que analyzeMeal, pero mirando los renglones, no analysis_status
-  // (que aquí no cambia: la comida ya estaba 'ready' antes de agregarle la foto).
-  const beforeCount=itemsOfMeal(pending.mealId).length;
+  const total=pending.blobs.length;
+  for(let i=0;i<total;i++){
+    btn.disabled=true;
+    btn.textContent=total>1?t('food.analyzingProgress',{i:i+1,n:total}):t('food.uploading');
+    const onUploaded=()=>{ btn.textContent=total>1?t('food.analyzingProgress',{i:i+1,n:total}):t('food.analyzing'); };
+    const {error}=await appendOnePhoto(pending.mealId,pending.blobs[i],i===0?desc:null,onUploaded);
+    if(error){
+      btn.disabled=false;btn.textContent=t('food.addToMeal');
+      return alert(error.message||String(error));
+    }
+  }
+  closeModal();
+  state.pendingMeal=null;
+  await loadNutrition();
+  setView('food');
+  openMealDetail(pending.mealId);
+}
+
+// El envío de una sola foto a skandi_append_meal_items(), con la misma tolerancia a "se cortó
+// la respuesta pero sí se guardó" que ya tenía appendMealPhoto. Devuelve {error} en vez de
+// tirar, para que quien la llama en secuencia (appendMealPhotos, analyzeExtraPhotos) decida qué
+// hacer sin un try/catch propio en cada vuelta del ciclo.
+async function appendOnePhoto(mealId,blob,note,onUploaded){
+  const beforeCount=itemsOfMeal(mealId).length;
   try{
     let photoPath=null;
-    if(pending.blob){
+    if(blob){
       photoPath=`${state.user.id}/${crypto.randomUUID()}.jpg`;
-      const {error:upErr}=await sb.storage.from('skandi-meals').upload(photoPath,pending.blob,{contentType:'image/jpeg'});
+      const {error:upErr}=await sb.storage.from('skandi-meals').upload(photoPath,blob,{contentType:'image/jpeg'});
       if(upErr) throw upErr;
     }
-    btn.textContent=t('food.analyzing');
+    if(onUploaded) onUploaded();
     const {data:{session}}=await sb.auth.getSession();
     const res=await fetch('/api/skandi',{
       method:'POST',
       headers:{'Content-Type':'application/json',Authorization:`Bearer ${session.access_token}`},
-      body:JSON.stringify({action:'analyze',meal_id:pending.mealId,append:true,photo_path:photoPath,note:desc||null})
+      body:JSON.stringify({action:'analyze',meal_id:mealId,append:true,photo_path:photoPath,note:note||null})
     });
     const body=await res.json().catch(()=>({}));
     if(!res.ok) throw new Error(body.message||t('food.failed'));
-    closeModal();
-    state.pendingMeal=null;
     await loadNutrition();
-    setView('food');
-    openMealDetail(pending.mealId);
+    return {error:null};
   }catch(e){
     if(isTransientFetchError(e)){
-      const appended=await waitForAppendedItems(pending.mealId,beforeCount);
-      if(appended){
-        closeModal();
-        state.pendingMeal=null;
-        setView('food');
-        return openMealDetail(pending.mealId);
-      }
+      const appended=await waitForAppendedItems(mealId,beforeCount);
+      if(appended) return {error:null};
     }
-    btn.disabled=false;btn.textContent=t('food.addToMeal');
-    alert(e.message||String(e));
+    return {error:e};
   }
 }
 
@@ -8514,18 +8575,89 @@ async function retryAnalysis(mealId){
 
 // ---- Alta: platillo guardado (nivel 1, cero tokens) ----
 
-function openDishPicker(){
+// mealId: si se abre desde una comida ya iniciada ("+ Platillo guardado" en su detalle), tocar
+// un platillo lo SUMA a esa comida (quickAddDish) en vez de crear una comida nueva — mismo
+// patrón que ya tenían openFoodPicker/openBarcode, para armar un plato combinando un platillo
+// guardado con lo demás que ya se agregó.
+function openDishPicker(mealId=null){
   $('modal').classList.add('show');
   $('modalCard').innerHTML=`
     <div class="row"><h1>${esc(t('food.dishes'))}</h1><button class="x" onclick="closeModal()" aria-label="${esc(t('common.close'))}">${icon('close',20)}</button></div>
     ${state.dishes.length?state.dishes.map(d=>{
       const totals=SkandiNutrition.itemsTotal(itemsOfDish(d.id));
-      return `<button class="meal-card" onclick="openDishLog('${d.id}')">
+      return `<button class="meal-card" onclick="${mealId?`quickAddDish('${d.id}','${mealId}')`:`openDishLog('${d.id}')`}">
         <span class="meal-thumb">${icon('check',20)}</span>
         <span class="lbl"><h3>${esc(d.name)}</h3><p>${itemsOfDish(d.id).length} · ${esc(venueLabel(d.venue))}${d.times_used?` · ×${d.times_used}`:''}</p></span>
         <span class="meal-kcal">${Math.round(totals.kcal)}</span>
       </button>`;
     }).join(''):empty(t('food.empty'))}`;
+}
+
+// Sumar TODOS los renglones de un platillo guardado a una comida que ya existe. A diferencia de
+// skandi_create_meal_from_dish (que siempre CREA una comida), esto inserta directo en
+// skandi_meal_items copiando los macros absolutos ya guardados en el platillo — el mismo dato
+// que usa el RPC del lado del servidor, no una relectura por food_id (que podría no existir para
+// un renglón que se corrigió a mano y ya no matchea ningún alimento del catálogo).
+async function addDishItemsToMeal(mealId,dishId){
+  const items=itemsOfDish(dishId);
+  if(!items.length) return {error:null};
+  const base=itemsOfMeal(mealId).reduce((m,i)=>Math.max(m,i.sort_order||0),0);
+  const rows=items.map((it,i)=>({
+    meal_id:mealId,user_id:state.user.id,food_id:it.food_id||null,label:it.label,
+    grams:it.grams,kcal:it.kcal,protein_g:it.protein_g,carbs_g:it.carbs_g,fat_g:it.fat_g,fiber_g:it.fiber_g,
+    added_sugar_g:it.added_sugar_g??null,source:'catalog',included:it.included,is_cooking_fat:it.is_cooking_fat,
+    sort_order:base+i+1
+  }));
+  const {error}=await writeToleratingMissingColumn(
+    withCol=>sb.from('skandi_meal_items').insert(withCol?rows:rows.map(r=>omit(r,'added_sugar_g'))),
+    'added_sugar_g'
+  );
+  if(!error){
+    const dish=state.dishes.find(d=>d.id===dishId);
+    if(dish) await sb.from('skandi_dishes').update({times_used:(dish.times_used||0)+1,last_used_at:new Date().toISOString()}).eq('id',dishId);
+  }
+  return {error};
+}
+
+async function quickAddDish(dishId,mealId){
+  const {error}=await addDishItemsToMeal(mealId,dishId);
+  if(error) return alert(error.message);
+  await loadNutrition();
+  state.foodDayOffset=0;
+  setView('food');
+  openMealDetail(mealId);
+}
+
+// Sumar un alimento del catálogo a una comida ya iniciada en un solo toque, sin pasar por el
+// modal de gramos: el mismo alimento se puede reescalar después desde el renglón ya agregado
+// (updateItemGrams), así que pedir los gramos ANTES de agregarlo es fricción que no hace falta
+// para lo que ya cargaste antes.
+async function quickAddFood(foodId,mealId){
+  const food=state.foods.find(f=>f.id===foodId);
+  if(!food) return;
+  const grams=food.serving_grams||100;
+  const {error}=await sb.rpc('skandi_add_food_to_meal',{p_meal_id:mealId,p_food_id:foodId,p_grams:grams});
+  if(error) return alert(error.message);
+  await loadNutrition();
+  state.foodDayOffset=0;
+  setView('food');
+  openMealDetail(mealId);
+}
+
+// Lo que ya cargaste antes, ordenado por uso — mismo criterio que quickPicksCard() en Inicio,
+// pero apuntado a AGREGAR a la comida que ya está abierta en vez de crear una nueva.
+function quickAddStripHtml(mealId){
+  const foods=state.foods.filter(f=>f.user_id&&f.times_used>0).slice(0,8);
+  const dishes=state.dishes.slice(0,6);
+  if(!foods.length&&!dishes.length) return '';
+  return `<div class="eyebrow" style="margin-top:14px">${esc(t('food.quickPicks'))}</div>
+    ${dishes.length?`<div class="pick-row">${dishes.map(d=>{
+      const kcal=Math.round(SkandiNutrition.itemsTotal(itemsOfDish(d.id)).kcal);
+      return `<button class="pick" onclick="quickAddDish('${d.id}','${mealId}')"><b>${esc(d.name)}</b><small>${kcal} kcal</small></button>`;
+    }).join('')}</div>`:''}
+    ${foods.length?`<div class="pick-row">${foods.map(f=>
+      `<button class="pick" onclick="quickAddFood('${f.id}','${mealId}')"><b>${esc(f.name)}</b><small>${Math.round(f.kcal_100g)}/100g</small></button>`
+    ).join('')}</div>`:''}`;
 }
 
 function openDishLog(dishId){
@@ -8864,8 +8996,11 @@ function openMealDetail(mealId){
     ${fat.map(i=>itemRowHtml(i,true)).join('')}
     ${fat.length?`<p class="muted" style="font-size:12px;margin-top:6px">${esc(t('food.cookingFatHint'))}</p>`:''}
     <p class="muted" style="margin-top:10px">P ${Math.round(totals.protein_g)}g · C ${Math.round(totals.carbs_g)}g · G ${Math.round(totals.fat_g)}g</p>
-    <button class="btn" style="width:100%;margin-top:10px" onclick="openMealInput('photo','${mealId}')">${icon('image',18)} ${esc(t('food.byPhoto'))}</button>
+    ${quickAddStripHtml(mealId)}
+    <div class="eyebrow" style="margin-top:14px">${esc(t('food.how'))}</div>
+    <button class="btn" style="width:100%;margin-top:8px" onclick="openMealInput('photo','${mealId}')">${icon('image',18)} ${esc(t('food.byPhoto'))}</button>
     <button class="btn" style="width:100%;margin-top:8px" onclick="openFoodPicker('${mealId}')">${icon('plus',18)} ${esc(t('food.byFood'))}</button>
+    <button class="btn" style="width:100%;margin-top:8px" onclick="openDishPicker('${mealId}')" ${state.dishes.length?'':'disabled'}>${icon('check',18)} ${esc(t('food.addDish'))}</button>
     <button class="btn" style="width:100%;margin-top:8px" onclick="openBarcode('${mealId}')">${icon('image',18)} ${esc(t('food.byBarcode'))}</button>
     <button class="btn" style="width:100%;margin-top:8px" onclick="promptSaveAsDish('${mealId}')">${icon('check',18)} ${esc(t('food.saveAsDish'))}</button>
     <button class="btn" style="width:100%;margin-top:8px;color:var(--pink)" onclick="deleteMeal('${mealId}')">${icon('trash',18)} ${esc(t('food.delete'))}</button>`;
