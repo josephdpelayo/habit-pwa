@@ -169,6 +169,55 @@ function scaleFood(food, grams) {
   };
 }
 
+// ---- ¿Me conviene? Verdicto informativo para UN alimento, antes de decidir si comerlo ----
+//
+// No llama a ningún modelo: es aritmética contra lo que ya sabemos (tus metas y lo que llevas
+// hoy). El caso real es escanear un código de barras sin saber si vale la pena — "informativo,
+// para decidir yo", no una regla que bloquea nada. Nunca dice "esto es malo": dice contra qué
+// techo o meta específica choca, con el número, para que la decisión siga siendo tuya. Devuelve
+// motivos como datos ({kind,...}), no texto — igual que fuelPlan(), la traducción es cosa de
+// quien llama esto.
+function evaluateFood(food, grams, remaining, targets) {
+  const scaled = scaleFood(food, grams);
+  const reasons = [];
+  let verdict = 'good';
+
+  // Azúcar (añadida si existe la columna, si no la total) es un TECHO: lo único que de verdad
+  // amerita una alerta, porque pasarse no se "compensa" comiendo menos de otra cosa hoy.
+  const sugarCap = targets && (targets.added_sugar_g_target != null ? targets.added_sugar_g_target : targets.sugar_g_target);
+  const sugarLeft = remaining && (remaining.added_sugar_g != null ? remaining.added_sugar_g : remaining.sugar_g);
+  const sugarHere = scaled.added_sugar_g || scaled.sugar_g;
+  if (sugarCap != null && sugarLeft != null && sugarHere > 0) {
+    if (sugarLeft <= 0) {
+      verdict = 'bad';
+      reasons.push({ kind: 'sugar_over', g: round(sugarHere) });
+    } else if (sugarHere > sugarLeft) {
+      verdict = 'caution';
+      reasons.push({ kind: 'sugar_tight', g: round(sugarHere), left: round(sugarLeft) });
+    }
+  }
+
+  // Una sola porción que se lleva más de la mitad de las kcal que te quedan hoy no está "mal",
+  // pero si te la comes casi no queda espacio para nada más y conviene saberlo antes, no después.
+  if (verdict !== 'bad' && remaining && remaining.kcal > 0 && scaled.kcal > remaining.kcal * 0.5) {
+    verdict = 'caution';
+    reasons.push({ kind: 'kcal_heavy', kcal: round(scaled.kcal), left: round(remaining.kcal) });
+  }
+
+  // Poca proteína por muchas kcal, cuando todavía te falta proteína del día: no es que el
+  // alimento esté mal, es que no es el que te acerca a tu meta de proteína de hoy.
+  if (verdict === 'good' && remaining && remaining.protein_g > 15 && scaled.kcal > 0) {
+    const proteinShare = (scaled.protein_g * KCAL_PER_G.protein) / scaled.kcal;
+    if (proteinShare < 0.08) {
+      verdict = 'caution';
+      reasons.push({ kind: 'low_protein', g: round(scaled.protein_g) });
+    }
+  }
+
+  if (verdict === 'good' && !reasons.length) reasons.push({ kind: 'fits' });
+  return { verdict, reasons, scaled };
+}
+
 // Reescalar un renglón ya estimado cuando corriges los gramos: mantiene la densidad que el
 // modelo (o tú) le asignaron y solo cambia la cantidad. Si el renglón no traía gramos, no hay
 // densidad que conservar y se devuelve igual.
@@ -447,7 +496,7 @@ function fuelPlan(session, weightKg) {
 const api = {
   KCAL_PER_G, ACTIVITY_FACTORS, MODE_FACTOR, MET,
   suggestTargets, kcalFromMacros, itemsTotal, dayTotals, remaining, pct,
-  scaleFood, rescaleItem, itemToFood,
+  scaleFood, rescaleItem, itemToFood, evaluateFood,
   activityKcal, strengthKcal, plannedDayKcal, weeklyPlan, dayRecommendation, stepsAdjustmentKcal,
   FUEL, plannedSessions, fuelPlan,
   isLowEnergy, LOW_ENERGY_KCAL_PER_KG_FLOOR

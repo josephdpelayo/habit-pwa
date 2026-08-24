@@ -8,16 +8,16 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="Skandi Fit">
 <meta name="application-name" content="Skandi Fit">
-<link rel="manifest" href="/skandi-manifest.json?v=20260824-5">
-<link rel="apple-touch-icon" sizes="180x180" href="/icons/skandi-180.png?v=20260824-5">
-<link rel="icon" type="image/png" sizes="192x192" href="/icons/skandi-192.png?v=20260824-5">
+<link rel="manifest" href="/skandi-manifest.json?v=20260824-6">
+<link rel="apple-touch-icon" sizes="180x180" href="/icons/skandi-180.png?v=20260824-6">
+<link rel="icon" type="image/png" sizes="192x192" href="/icons/skandi-192.png?v=20260824-6">
 <title>Skandi Fit</title>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="/skandi-recovery.js?v=20260824-5"></script>
-<script src="/body-figure.js?v=20260824-5"></script>
-<script src="/skandi-nutrition.js?v=20260824-5"></script>
-<script src="/skandi-load.js?v=20260824-5"></script>
-<script src="/skandi-brief.js?v=20260824-5"></script>
+<script src="/skandi-recovery.js?v=20260824-6"></script>
+<script src="/body-figure.js?v=20260824-6"></script>
+<script src="/skandi-nutrition.js?v=20260824-6"></script>
+<script src="/skandi-load.js?v=20260824-6"></script>
+<script src="/skandi-brief.js?v=20260824-6"></script>
 <style>
 :root{
   --bg:#eef4f8;
@@ -530,7 +530,7 @@ textarea.field{min-height:112px;text-align:left;resize:vertical}
 // Versión compartida con app.html (APP_VERSION) y sw.js (CACHE_VERSION): un solo service
 // worker sirve las dos apps, así que una sola cadena las invalida a las dos. Al cambiarla
 // hay que actualizarla también en los ?v= del <head>, en index.html y en los dos manifests.
-const SKANDI_VERSION='20260824-5';
+const SKANDI_VERSION='20260824-6';
 const SUPABASE_URL='https://pmpjteuqjusbiduevbwq.supabase.co';
 const SUPABASE_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBtcGp0ZXVxanVzYmlkdWV2YndxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc2OTI1NjUsImV4cCI6MjA5MzI2ODU2NX0.XbMzZoo2yqtrD8znLnyo_1zDfrdJAvAPj1lqGOyXnLw';
 const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
@@ -575,6 +575,16 @@ en:{
   'food.byBarcode':'Barcode','food.byBarcodeHint':'Free','food.mealType':'Meal','food.venue':'Where',
   'food.addDish':'Saved dish','food.multiPhotoHint':'Each extra photo counts as one more AI analysis.',
   'food.analyzingProgress':'Analyzing photo {i} of {n}…','food.addPhotos':'Add photos',
+  'food.addMore':'Add more','food.otherWays':'Other ways',
+  'food.inspect':'Does this work for me?','food.inspectAdd':'Add to this meal','food.inspectClose':'Just checking',
+  'food.verdict.good':'Fits fine','food.verdict.caution':'Worth knowing','food.verdict.bad':'No room left today',
+  'food.reason.fits':'Fits fine in what you have left today.',
+  'food.reason.sugar_tight':'Has {g} g of added sugar, and you only have {left} g left today.',
+  'food.reason.sugar_over':"Has {g} g of added sugar, and you're already at today's cap.",
+  'food.reason.kcal_heavy':'That\'s {kcal} of the {left} kcal you have left today — barely any room for more.',
+  'food.reason.low_protein':'Low in protein ({g} g) for how much you still need today.',
+  'food.newFoodBtn':'Type it in','food.newFoodHint':'For anything without a barcode: type the macros per 100 g yourself.',
+  'food.errFoodName':'The food needs a name.',
   'food.seedCatalog':'Load starter catalog','food.seedCatalogHint':'A few common dishes built from the shared food catalog, so you have something to start from.',
   'food.seedConfirm':'Add a few starter dishes (chicken & rice, oats, tuna...) to your catalog? You can edit or delete any of them after.',
   'food.seedNoFoods':'The shared catalog is empty — nothing to build starter dishes from yet.',
@@ -628,10 +638,10 @@ en:{
   'fuel.before':'{g} g of carbs about {min} min before — banana, oats, toast, honey.',
   'fuel.beforeEasy':'Short and easy: you do not need to carb up first.',
   'fuel.during':'{g} g of carbs per hour during it — gel, dates, sports drink.',
-  'fuel.after':'Within {min} min after: {carbs} g of carbs and {protein} g of protein.',
+  'fuel.after':'Within {min} min after: {carbs} g of carbs and {protein} g of protein — chicken with rice, or yogurt with fruit and a scoop of whey.',
   'fuel.dayUp':'And {kcal} kcal more today, on top of your usual target.',
   'fuel.dayDown':'And {kcal} kcal less today: you are not training.',
-  'fuel.done':'Done. Recovery window: {carbs} g of carbs and {protein} g of protein.',
+  'fuel.done':'Done. Recovery window: {carbs} g of carbs and {protein} g of protein — chicken with rice, or yogurt with fruit and a scoop of whey.',
   'fuel.strength':'Strength',
 
   'settings.title':'Settings','settings.language':'Language','settings.units':'Default weight unit',
@@ -1155,6 +1165,16 @@ es:{
   'food.byBarcode':'Código de barras','food.byBarcodeHint':'Gratis','food.mealType':'Comida','food.venue':'Dónde',
   'food.addDish':'Platillo guardado','food.multiPhotoHint':'Cada foto extra cuenta como un análisis de IA más.',
   'food.analyzingProgress':'Analizando foto {i} de {n}…','food.addPhotos':'Agregar fotos',
+  'food.addMore':'Agregar más','food.otherWays':'Otras formas',
+  'food.inspect':'¿Te conviene?','food.inspectAdd':'Agregar a esta comida','food.inspectClose':'Solo estaba viendo',
+  'food.verdict.good':'Cabe bien','food.verdict.caution':'Vale la pena saberlo','food.verdict.bad':'Ya no cabe hoy',
+  'food.reason.fits':'Cabe bien en lo que te queda hoy.',
+  'food.reason.sugar_tight':'Tiene {g} g de azúcar añadida, y solo te quedan {left} g hoy.',
+  'food.reason.sugar_over':'Tiene {g} g de azúcar añadida, y ya llegaste al techo de hoy.',
+  'food.reason.kcal_heavy':'Son {kcal} de las {left} kcal que te quedan hoy — casi no dejaría espacio para más.',
+  'food.reason.low_protein':'Aporta poca proteína ({g} g) para lo que todavía te falta hoy.',
+  'food.newFoodBtn':'Escribirlo','food.newFoodHint':'Para algo sin código de barras: escribe tú los macros por 100 g.',
+  'food.errFoodName':'El alimento necesita nombre.',
   'food.seedCatalog':'Cargar catálogo inicial','food.seedCatalogHint':'Unos platillos comunes armados con el catálogo compartido, para tener de dónde partir.',
   'food.seedConfirm':'¿Agregar unos platillos iniciales (pollo con arroz, avena, atún...) a tu catálogo? Puedes editarlos o borrarlos después.',
   'food.seedNoFoods':'El catálogo compartido está vacío — no hay con qué armar platillos iniciales todavía.',
@@ -1208,10 +1228,10 @@ es:{
   'fuel.before':'{g} g de carbos unos {min} min antes — plátano, avena, pan tostado, miel.',
   'fuel.beforeEasy':'Es corto y suave: no necesitas cargar antes.',
   'fuel.during':'{g} g de carbos por hora durante — gel, dátiles, bebida deportiva.',
-  'fuel.after':'En los {min} min de después: {carbs} g de carbos y {protein} g de proteína.',
+  'fuel.after':'En los {min} min de después: {carbs} g de carbos y {protein} g de proteína — pollo con arroz, o yogurt con fruta y un scoop de proteína.',
   'fuel.dayUp':'Y {kcal} kcal más hoy, encima de tu meta de siempre.',
   'fuel.dayDown':'Y {kcal} kcal menos hoy: no estás entrenando.',
-  'fuel.done':'Ya lo hiciste. Ventana de recuperación: {carbs} g de carbos y {protein} g de proteína.',
+  'fuel.done':'Ya lo hiciste. Ventana de recuperación: {carbs} g de carbos y {protein} g de proteína — pollo con arroz, o yogurt con fruta y un scoop de proteína.',
   'fuel.strength':'Fuerza',
 
   'settings.title':'Configuración','settings.language':'Idioma','settings.units':'Unidad de peso por defecto',
@@ -8082,21 +8102,27 @@ function shiftFoodDay(delta){
 
 // ---- Alta: el selector ----
 
-function openAddMeal(){
+// mealId: null arranca una comida nueva ("+" en Comida); con mealId ya es "Agregar más" a una
+// comida que ya está abierta (botón dentro de openMealDetail). Es LA MISMA pantalla en los dos
+// casos — un solo menú con un solo submenú adentro, no un menú para empezar y otro distinto para
+// seguir armando el plato, que era justo la parte confusa de la versión anterior.
+function openAddMeal(mealId=null){
   const noDishes=!state.dishes.length;
   const noFoods=!state.foods.filter(f=>f.user_id).length;
   $('modal').classList.add('show');
   $('modalCard').innerHTML=`
-    <div class="row"><h1>${esc(t('food.addMeal'))}</h1><button class="x" onclick="closeModal()" aria-label="${esc(t('common.close'))}">${icon('close',20)}</button></div>
-    <p class="muted">${esc(t('food.how'))}</p>
+    <div class="row"><h1>${esc(mealId?t('food.addMore'):t('food.addMeal'))}</h1><button class="x" onclick="closeModal()" aria-label="${esc(t('common.close'))}">${icon('close',20)}</button></div>
+    ${mealId?'':`<p class="muted">${esc(t('food.how'))}</p>`}
+    ${quickAddStripHtml(mealId)}
+    <div class="eyebrow" style="margin-top:14px">${esc(t('food.otherWays'))}</div>
     <div class="input-choice">
-      <button onclick="openDishPicker()" ${noDishes?'disabled':''}>${icon('check',22)}${esc(t('food.byDish'))}<small>${esc(t('food.byDishHint'))}</small></button>
-      <button onclick="openFoodPicker(null)" ${noFoods?'disabled':''}>${icon('plus',22)}${esc(t('food.byFood'))}<small>${esc(t('food.byFoodHint'))}</small></button>
-      <button onclick="openBarcode()">${icon('image',22)}${esc(t('food.byBarcode'))}<small>${esc(t('food.byBarcodeHint'))}</small></button>
-      <button onclick="openMealInput('text')">${icon('edit',22)}${esc(t('food.byText'))}<small>${esc(t('food.byTextHint'))}</small></button>
+      <button onclick="openDishPicker(${mealId?`'${mealId}'`:'null'})" ${noDishes?'disabled':''}>${icon('check',22)}${esc(t('food.byDish'))}<small>${esc(t('food.byDishHint'))}</small></button>
+      <button onclick="openFoodPicker(${mealId?`'${mealId}'`:'null'})" ${noFoods?'disabled':''}>${icon('plus',22)}${esc(t('food.byFood'))}<small>${esc(t('food.byFoodHint'))}</small></button>
+      <button onclick="openBarcode(${mealId?`'${mealId}'`:'null'})">${icon('image',22)}${esc(t('food.byBarcode'))}<small>${esc(t('food.byBarcodeHint'))}</small></button>
+      <button onclick="openMealInput('text',${mealId?`'${mealId}'`:'null'})">${icon('edit',22)}${esc(t('food.byText'))}<small>${esc(t('food.byTextHint'))}</small></button>
     </div>
-    <button class="btn primary" style="width:100%;margin-top:10px" onclick="openMealInput('photo')">${icon('image',20)} ${esc(t('food.byPhoto'))} · ${esc(t('food.byPhotoHint'))}</button>
-    ${noDishes&&noFoods?`<button class="btn" style="width:100%;margin-top:10px" onclick="seedStarterCatalog()">${icon('plus',18)} ${esc(t('food.seedCatalog'))}</button>
+    <button class="btn primary" style="width:100%;margin-top:10px" onclick="openMealInput('photo',${mealId?`'${mealId}'`:'null'})">${icon('image',20)} ${esc(t('food.byPhoto'))} · ${esc(t('food.byPhotoHint'))}</button>
+    ${noDishes&&noFoods&&!mealId?`<button class="btn" style="width:100%;margin-top:10px" onclick="seedStarterCatalog()">${icon('plus',18)} ${esc(t('food.seedCatalog'))}</button>
     <p class="muted" style="font-size:11px;margin-top:4px;text-align:center">${esc(t('food.seedCatalogHint'))}</p>`:''}`;
 }
 
@@ -8678,8 +8704,11 @@ async function quickAddFood(foodId,mealId){
   openMealDetail(mealId);
 }
 
-// Lo que ya cargaste antes, ordenado por uso — mismo criterio que quickPicksCard() en Inicio,
-// pero apuntado a AGREGAR a la comida que ya está abierta en vez de crear una nueva.
+// Lo que ya cargaste antes, ordenado por uso — mismo criterio que quickPicksCard() en Inicio.
+// Con mealId ya fijo (comida ya iniciada) un toque SUMA directo, sin preguntar nada más — tipo
+// de comida y hora ya quedaron decididos. Sin mealId (arrancando desde cero) un toque pasa por
+// el mismo selector de tipo/hora/porción de siempre (openFoodPortion/openDishLog): ese dato solo
+// se puede fijar al crear la comida, así que aquí sí hace falta preguntarlo.
 function quickAddStripHtml(mealId){
   const foods=state.foods.filter(f=>f.user_id&&f.times_used>0).slice(0,8);
   const dishes=state.dishes.slice(0,6);
@@ -8687,11 +8716,13 @@ function quickAddStripHtml(mealId){
   return `<div class="eyebrow" style="margin-top:14px">${esc(t('food.quickPicks'))}</div>
     ${dishes.length?`<div class="pick-row">${dishes.map(d=>{
       const kcal=Math.round(SkandiNutrition.itemsTotal(itemsOfDish(d.id)).kcal);
-      return `<button class="pick" onclick="quickAddDish('${d.id}','${mealId}')"><b>${esc(d.name)}</b><small>${kcal} kcal</small></button>`;
+      const onclick=mealId?`quickAddDish('${d.id}','${mealId}')`:`openDishLog('${d.id}')`;
+      return `<button class="pick" onclick="${onclick}"><b>${esc(d.name)}</b><small>${kcal} kcal</small></button>`;
     }).join('')}</div>`:''}
-    ${foods.length?`<div class="pick-row">${foods.map(f=>
-      `<button class="pick" onclick="quickAddFood('${f.id}','${mealId}')"><b>${esc(f.name)}</b><small>${Math.round(f.kcal_100g)}/100g</small></button>`
-    ).join('')}</div>`:''}`;
+    ${foods.length?`<div class="pick-row">${foods.map(f=>{
+      const onclick=mealId?`quickAddFood('${f.id}','${mealId}')`:`openFoodPortion('${f.id}',null)`;
+      return `<button class="pick" onclick="${onclick}"><b>${esc(f.name)}</b><small>${Math.round(f.kcal_100g)}/100g</small></button>`;
+    }).join('')}</div>`:''}`;
 }
 
 function openDishLog(dishId){
@@ -8741,7 +8772,50 @@ function openFoodPicker(mealId){
   $('modalCard').innerHTML=`
     <div class="row"><h1>${esc(t('food.byFood'))}</h1><button class="x" onclick="closeModal()" aria-label="${esc(t('common.close'))}">${icon('close',20)}</button></div>
     <input id="foodQuery" class="field left" type="search" placeholder="${esc(t('food.searchPh'))}" oninput="renderFoodList(this.value)" autocomplete="off">
-    <div id="foodList" style="margin-top:10px">${foodListHtml('')}</div>`;
+    <div id="foodList" style="margin-top:10px">${foodListHtml('')}</div>
+    <button class="btn" style="width:100%;margin-top:10px" onclick="openNewFood(${mealId?`'${mealId}'`:'null'})">${icon('edit',18)} ${esc(t('food.newFoodBtn'))}</button>`;
+}
+
+// ---- Alta: alimento tecleado a mano (sin código de barras y sin IA) ----
+//
+// El catálogo (búsqueda) y el escáner de barras cubren lo que ya existe en alguna base de
+// datos; esto es para lo que no está en ninguna — una receta casera, algo de marca local, un
+// producto que sí trae la etiqueta pero el código no escanea. Es el mismo nivel 2 de la
+// escalera de costo (gratis, sin IA) que un alimento de catálogo: tú traes el dato de la
+// etiqueta, la app solo hace la multiplicación por gramos de ahí en adelante.
+function openNewFood(mealId){
+  $('modal').classList.add('show');
+  $('modalCard').innerHTML=`
+    <div class="row"><h1>${esc(t('food.newFood'))}</h1><button class="x" onclick="closeModal()" aria-label="${esc(t('common.close'))}">${icon('close',20)}</button></div>
+    <p class="muted">${esc(t('food.newFoodHint'))}</p>
+    <label class="eyebrow">${esc(t('food.name'))}</label>
+    <input id="nfName" class="field" type="text" maxlength="120" placeholder="${esc(t('food.name'))}">
+    <label class="eyebrow" style="margin-top:10px">${esc(t('food.per100'))}</label>
+    <div class="grid" style="grid-template-columns:repeat(2,1fr);gap:8px">
+      <div><label class="eyebrow" style="font-size:10px">kcal</label><input id="nfKcal" class="field" type="number" min="0" max="900" inputmode="decimal"></div>
+      <div><label class="eyebrow" style="font-size:10px">${esc(t('food.protein'))}</label><input id="nfP" class="field" type="number" min="0" max="100" inputmode="decimal"></div>
+      <div><label class="eyebrow" style="font-size:10px">${esc(t('food.carbs'))}</label><input id="nfC" class="field" type="number" min="0" max="100" inputmode="decimal"></div>
+      <div><label class="eyebrow" style="font-size:10px">${esc(t('food.fat'))}</label><input id="nfF" class="field" type="number" min="0" max="100" inputmode="decimal"></div>
+    </div>
+    <button class="btn primary" style="width:100%;margin-top:14px" onclick="saveNewFood(${mealId?`'${mealId}'`:'null'})">${esc(t('food.save'))}</button>`;
+}
+
+async function saveNewFood(mealId){
+  const name=$('nfName').value.trim();
+  if(!name) return alert(t('food.errFoodName'));
+  const num=id=>{const v=Number($(id).value);return Number.isFinite(v)&&v>=0?v:0;};
+  const row={
+    user_id:state.user.id,name,brand:null,source:'manual',
+    kcal_100g:num('nfKcal'),protein_100g:num('nfP'),carbs_100g:num('nfC'),fat_100g:num('nfF')
+  };
+  // upsert, no insert: el mismo índice único (usuario, nombre, marca) de rememberFood — volver a
+  // "crear" un alimento que ya tecleaste antes actualiza sus macros en vez de tronar por
+  // duplicado.
+  const {data:food,error}=await sb.from('skandi_foods')
+    .upsert(row,{onConflict:'user_id,name,brand',ignoreDuplicates:false}).select().single();
+  if(error) return alert(error.message);
+  await loadNutrition();
+  openFoodPortion(food.id,mealId);
 }
 
 function renderFoodList(q){
@@ -8760,6 +8834,41 @@ function foodListHtml(q){
     <span class="lbl"><h3>${esc(f.name)}</h3><p>${esc(f.brand||'')}${f.brand?' · ':''}${Math.round(f.kcal_100g)} kcal/100 g</p></span>
     <span class="meal-kcal">${f.serving_grams?Math.round(f.serving_grams)+' g':''}</span>
   </button>`).join('');
+}
+
+// ---- ¿Me conviene? — veredicto informativo, ANTES de decidir si registrarlo ----
+//
+// Escanear un código de barras no significa "ya decidí comerlo" — muchas veces es al revés,
+// escanear PARA decidir. Antes el escaneo llevaba derecho al selector de gramos, que ya asume
+// que sí lo vas a registrar. SkandiNutrition.evaluateFood() es puro cálculo contra tus metas y
+// lo que llevas hoy — nada de IA, nada de costo — así que este paso no gasta cuota ni crea
+// ninguna comida: cerrar aquí ("Solo estaba viendo") no deja nada a medias en la base de datos.
+function openFoodInspect(foodId,mealId){
+  const food=state.foods.find(f=>f.id===foodId);
+  if(!food) return;
+  const targets=state.nutritionTargets;
+  const grams=food.serving_grams||100;
+  const scaled=SkandiNutrition.scaleFood(food,grams);
+  let verdictHtml=`<p class="muted" style="margin-top:8px">${esc(t('food.noTarget'))}</p>`;
+  if(targets){
+    const totals=SkandiNutrition.dayTotals(mealsOfDay(foodDay()));
+    const remaining=SkandiNutrition.remaining(targets,totals);
+    const {verdict,reasons}=SkandiNutrition.evaluateFood(food,grams,remaining,targets);
+    const tone=verdict==='bad'?'border-color:rgba(212,72,84,.35);background:#fff7f7'
+      :verdict==='caution'?'border-color:rgba(240,162,46,.35);background:#fffaf2'
+      :'border-color:rgba(29,154,108,.3);background:#f3fbf7';
+    verdictHtml=`<section class="card" style="${tone};margin-top:10px">
+      <strong>${esc(t('food.verdict.'+verdict))}</strong>
+      <ul style="margin:8px 0 0;padding-left:18px">${reasons.map(r=>`<li style="margin-top:4px">${esc(t('food.reason.'+r.kind,r))}</li>`).join('')}</ul>
+    </section>`;
+  }
+  $('modal').classList.add('show');
+  $('modalCard').innerHTML=`
+    <div class="row"><h1>${esc(food.name)}</h1><button class="x" onclick="closeModal()" aria-label="${esc(t('common.close'))}">${icon('close',20)}</button></div>
+    <p class="muted">${Math.round(scaled.kcal)} kcal · P ${scaled.protein_g}g · C ${scaled.carbs_g}g · G ${scaled.fat_g}g <span style="opacity:.7">(${grams} g)</span></p>
+    ${verdictHtml}
+    <button class="btn primary" style="width:100%;margin-top:14px" onclick="openFoodPortion('${foodId}',${mealId?`'${mealId}'`:'null'})">${esc(t('food.inspectAdd'))}</button>
+    <button class="btn" style="width:100%;margin-top:8px" onclick="closeModal()">${esc(t('food.inspectClose'))}</button>`;
 }
 
 function openFoodPortion(foodId,mealId){
@@ -8981,8 +9090,10 @@ async function lookupBarcode(){
     const body=await res.json().catch(()=>({}));
     if(!res.ok||!body.food) return alert(body.message||t('food.noMatches'));
     await loadNutrition();
-    // El escaneo da el producto; la porción la pones tú, que es lo único que el código no sabe.
-    if(body.food.id) openFoodPortion(body.food.id,mealId);
+    // Escaneaste algo sin saber si te conviene comerlo — eso pasa primero por el veredicto
+    // (openFoodInspect), no derecho al selector de gramos. Nada se registra todavía en este
+    // punto, así que cerrar aquí sin agregarlo no deja nada a medias.
+    if(body.food.id) openFoodInspect(body.food.id,mealId);
     else alert(t('food.noMatches'));
   }catch(e){
     alert(e.message||String(e));
@@ -9030,12 +9141,7 @@ function openMealDetail(mealId){
     ${fat.map(i=>itemRowHtml(i,true)).join('')}
     ${fat.length?`<p class="muted" style="font-size:12px;margin-top:6px">${esc(t('food.cookingFatHint'))}</p>`:''}
     <p class="muted" style="margin-top:10px">P ${Math.round(totals.protein_g)}g · C ${Math.round(totals.carbs_g)}g · G ${Math.round(totals.fat_g)}g</p>
-    ${quickAddStripHtml(mealId)}
-    <div class="eyebrow" style="margin-top:14px">${esc(t('food.how'))}</div>
-    <button class="btn" style="width:100%;margin-top:8px" onclick="openMealInput('photo','${mealId}')">${icon('image',18)} ${esc(t('food.byPhoto'))}</button>
-    <button class="btn" style="width:100%;margin-top:8px" onclick="openFoodPicker('${mealId}')">${icon('plus',18)} ${esc(t('food.byFood'))}</button>
-    <button class="btn" style="width:100%;margin-top:8px" onclick="openDishPicker('${mealId}')" ${state.dishes.length?'':'disabled'}>${icon('check',18)} ${esc(t('food.addDish'))}</button>
-    <button class="btn" style="width:100%;margin-top:8px" onclick="openBarcode('${mealId}')">${icon('image',18)} ${esc(t('food.byBarcode'))}</button>
+    <button class="btn primary" style="width:100%;margin-top:12px" onclick="openAddMeal('${mealId}')">${icon('plus',18)} ${esc(t('food.addMore'))}</button>
     <button class="btn" style="width:100%;margin-top:8px" onclick="promptSaveAsDish('${mealId}')">${icon('check',18)} ${esc(t('food.saveAsDish'))}</button>
     <button class="btn" style="width:100%;margin-top:8px;color:var(--pink)" onclick="deleteMeal('${mealId}')">${icon('trash',18)} ${esc(t('food.delete'))}</button>`;
 }
