@@ -8,16 +8,16 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="Skandi Fit">
 <meta name="application-name" content="Skandi Fit">
-<link rel="manifest" href="/skandi-manifest.json?v=20260824-11">
-<link rel="apple-touch-icon" sizes="180x180" href="/icons/skandi-180.png?v=20260824-11">
-<link rel="icon" type="image/png" sizes="192x192" href="/icons/skandi-192.png?v=20260824-11">
+<link rel="manifest" href="/skandi-manifest.json?v=20260824-12">
+<link rel="apple-touch-icon" sizes="180x180" href="/icons/skandi-180.png?v=20260824-12">
+<link rel="icon" type="image/png" sizes="192x192" href="/icons/skandi-192.png?v=20260824-12">
 <title>Skandi Fit</title>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="/skandi-recovery.js?v=20260824-11"></script>
-<script src="/body-figure.js?v=20260824-11"></script>
-<script src="/skandi-nutrition.js?v=20260824-11"></script>
-<script src="/skandi-load.js?v=20260824-11"></script>
-<script src="/skandi-brief.js?v=20260824-11"></script>
+<script src="/skandi-recovery.js?v=20260824-12"></script>
+<script src="/body-figure.js?v=20260824-12"></script>
+<script src="/skandi-nutrition.js?v=20260824-12"></script>
+<script src="/skandi-load.js?v=20260824-12"></script>
+<script src="/skandi-brief.js?v=20260824-12"></script>
 <style>
 :root{
   --bg:#eef4f8;
@@ -532,7 +532,7 @@ textarea.field{min-height:112px;text-align:left;resize:vertical}
 // Versión compartida con app.html (APP_VERSION) y sw.js (CACHE_VERSION): un solo service
 // worker sirve las dos apps, así que una sola cadena las invalida a las dos. Al cambiarla
 // hay que actualizarla también en los ?v= del <head>, en index.html y en los dos manifests.
-const SKANDI_VERSION='20260824-11';
+const SKANDI_VERSION='20260824-12';
 const SUPABASE_URL='https://pmpjteuqjusbiduevbwq.supabase.co';
 const SUPABASE_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBtcGp0ZXVxanVzYmlkdWV2YndxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc2OTI1NjUsImV4cCI6MjA5MzI2ODU2NX0.XbMzZoo2yqtrD8znLnyo_1zDfrdJAvAPj1lqGOyXnLw';
 const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
@@ -824,6 +824,7 @@ en:{
   'progress.loadIntro':'Everything that adds fatigue: endurance work, muscle load, bodyweight.',
   'chart.best':'Best mark','chart.volume':'Volume','chart.noData':'Train this exercise twice to see a trend.',
   'chart.perSession':'Session by session','chart.openExercise':'Exercise details','chart.volumeUnit':'{v} {unit} total',
+  'chart.quality':'Form quality trend',
 
   'sedit.title':'Edit workout','sedit.name':'Workout name','sedit.date':'Date','sedit.duration':'Duration (minutes)',
   'sedit.durationHint':'Forgot to hit finish? Fix the minutes here — the start time follows the duration.',
@@ -1095,6 +1096,7 @@ en:{
   'exd.backToWorkout':'Back to workout',
   'exd.noMedia':'Paste a Gymvisual GIF or another source in the library to see technique here.',
   'exd.openReference':'Open Gymvisual reference','exd.editMedia':'Edit technique media',
+  'exd.viewProgress':'View progress at this rank',
   'exd.musclesInvolved':'Muscles involved','exd.howTo':'How to do it',
   'exd.noInstructions':'No instructions added yet.','exd.coachTips':'Coach tips',
   'exd.noTips':'No coach tips added yet.',
@@ -1415,6 +1417,7 @@ es:{
   'progress.loadIntro':'Todo lo que suma fatiga: trabajo de resistencia, carga muscular y peso corporal.',
   'chart.best':'Mejor marca','chart.volume':'Volumen','chart.noData':'Entrena este ejercicio dos veces para ver la tendencia.',
   'chart.perSession':'Sesión por sesión','chart.openExercise':'Ficha del ejercicio','chart.volumeUnit':'{v} {unit} en total',
+  'chart.quality':'Tendencia de calidad de forma',
 
   'sedit.title':'Editar entrenamiento','sedit.name':'Nombre del entrenamiento','sedit.date':'Fecha','sedit.duration':'Duración (minutos)',
   'sedit.durationHint':'¿Se te olvidó terminarlo? Corrige los minutos aquí — la hora de inicio se ajusta sola.',
@@ -1686,6 +1689,7 @@ es:{
   'exd.backToWorkout':'Volver al entrenamiento',
   'exd.noMedia':'Pega un GIF de Gymvisual u otra fuente en la biblioteca para ver la técnica aquí.',
   'exd.openReference':'Abrir referencia de Gymvisual','exd.editMedia':'Editar media de técnica',
+  'exd.viewProgress':'Ver progreso en este rango',
   'exd.musclesInvolved':'Músculos implicados','exd.howTo':'Cómo hacerlo',
   'exd.noInstructions':'Aún no hay instrucciones.','exd.coachTips':'Consejos del coach',
   'exd.noTips':'Aún no hay consejos del coach.',
@@ -3853,6 +3857,9 @@ function formatMark(mode,value){
 
 // Best mark + total volume per completed session for one exercise, oldest first so the chart
 // reads left to right. Only done sets count -- an unchecked set is a plan, not a result.
+// quality (avgQuality of the session's sets) rides along for track_quality exercises: the mark
+// alone can't tell a clean 8s hold from a sloppy one, and on a skill line that's the difference
+// between real progress and the same fault getting logged for longer each week.
 function exerciseProgressSeries(exerciseId){
   const ex=state.exercises.find(e=>e.id===exerciseId);
   if(!ex) return [];
@@ -3867,7 +3874,8 @@ function exerciseProgressSeries(exerciseId){
     out.push({
       sessionId:session.id,title:session.title,date:session.completed_at,mode,best,
       volume:sets.reduce((a,x)=>a+(Number(x.weight_kg)||0)*(Number(x.reps)||0),0),
-      sets:sets.length
+      sets:sets.length,
+      quality:ex.track_quality?avgQuality(sets):null
     });
   }
   return out.sort((a,b)=>new Date(a.date)-new Date(b.date));
@@ -4063,9 +4071,11 @@ function progressChartSvg(values){
   </svg>`;
 }
 
-function openExerciseProgress(exerciseId){
+function openExerciseProgress(exerciseId,fromWorkout=false){
   const ex=state.exercises.find(e=>e.id===exerciseId);
   if(!ex) return;
+  const backToWorkout=fromWorkout&&!!state.active;
+  const closeAction=backToWorkout?'openActiveWorkout()':'closeModal()';
   const series=exerciseProgressSeries(exerciseId);
   const mode=exerciseTrackingMode(ex);
   // Volume (load x reps) only means something where load is tracked; for holds and bodyweight
@@ -4074,9 +4084,13 @@ function openExerciseProgress(exerciseId){
   const metric=canVolume&&state.progressMetric==='volume'?'volume':'best';
   const values=series.map(p=>metric==='volume'?p.volume:p.best);
   const label=v=>metric==='volume'?`${fmtWeightInput(v)} ${state.weightUnit}`:formatMark(mode,v);
+  // The mark alone can't tell a clean hold from one that broke form halfway through — a quality
+  // trend rides alongside it for anything that tracks quality, so "longer" and "cleaner" don't
+  // get confused for the same kind of progress.
+  const qualityPoints=series.filter(p=>p.quality!=null);
   $('modal').classList.add('show');
   $('modalCard').innerHTML=`
-    <div class="row"><h1>${esc(ex.name)}</h1><button class="x" onclick="closeModal()" aria-label="${esc(t('common.close'))}">${icon('close',20)}</button></div>
+    <div class="row"><h1>${esc(ex.name)}</h1><button class="x" onclick="${closeAction}" aria-label="${esc(backToWorkout?t('exd.backToWorkout'):t('common.close'))}" title="${esc(backToWorkout?t('exd.backToWorkout'):t('common.close'))}">${icon(backToWorkout?'minimize':'close',20)}</button></div>
     ${canVolume?`<div class="seg sub" style="margin-top:12px">
       <button class="${metric==='best'?'active':''}" onclick="state.progressMetric='best';openExerciseProgress('${exerciseId}')">${esc(t('chart.best'))}</button>
       <button class="${metric==='volume'?'active':''}" onclick="state.progressMetric='volume';openExerciseProgress('${exerciseId}')">${esc(t('chart.volume'))}</button>
@@ -4089,14 +4103,23 @@ function openExerciseProgress(exerciseId){
         <span>${esc(new Date(series[series.length-1].date).toLocaleDateString(LANG,{day:'numeric',month:'short'}))}</span>
       </div>`:empty(t('chart.noData'))}
     </section>
+    ${qualityPoints.length>1?`<section class="card">
+      <div class="eyebrow">${esc(t('chart.quality'))}</div>
+      ${sparklineSvg(qualityPoints.map(p=>p.quality))}
+      <div class="chart-legend" style="margin-top:2px">
+        <span>${esc(new Date(qualityPoints[0].date).toLocaleDateString(LANG,{day:'numeric',month:'short'}))}</span>
+        <span>${esc(t('ex.qualityAvg',{v:qualityPoints[0].quality}))} → ${esc(t('ex.qualityAvg',{v:qualityPoints[qualityPoints.length-1].quality}))}</span>
+        <span>${esc(new Date(qualityPoints[qualityPoints.length-1].date).toLocaleDateString(LANG,{day:'numeric',month:'short'}))}</span>
+      </div>
+    </section>`:''}
     <section class="card">
       <div class="eyebrow">${esc(t('chart.perSession'))}</div>
       ${series.slice().reverse().map(p=>`<div class="row click-card" style="margin-top:10px" onclick="openSessionDetail('${p.sessionId}')">
-        <div style="min-width:0"><strong>${esc(formatMark(p.mode,p.best))}</strong><p class="muted">${esc(new Date(p.date).toLocaleDateString(LANG,{weekday:'short',day:'numeric',month:'short'}))} · ${p.sets} ${esc(tp(p.sets,'common.setsLogged'))}</p></div>
+        <div style="min-width:0"><strong>${esc(formatMark(p.mode,p.best))}</strong><p class="muted">${esc(new Date(p.date).toLocaleDateString(LANG,{weekday:'short',day:'numeric',month:'short'}))} · ${p.sets} ${esc(tp(p.sets,'common.setsLogged'))}${p.quality!=null?' · '+esc(t('ex.qualityAvg',{v:p.quality})):''}</p></div>
         ${p.volume>0?`<span class="pill dark">${esc(t('chart.volumeUnit',{v:fmtWeightInput(p.volume),unit:state.weightUnit}))}</span>`:''}
       </div>`).join('')||empty(t('chart.noData'))}
     </section>
-    <button class="btn" style="width:100%" onclick="openExercise('${exerciseId}')">${icon('chevronRight',16)} ${esc(t('chart.openExercise'))}</button>`;
+    <button class="btn" style="width:100%" onclick="openExercise('${exerciseId}',${fromWorkout})">${icon('chevronRight',16)} ${esc(t('chart.openExercise'))}</button>`;
 }
 
 // ---- Progress > History: filter it, and fix a workout whose log came out wrong -------------
@@ -6756,6 +6779,7 @@ function openExercise(id,fromWorkout=false){
       ${e.media_url?(isVideoUrl(e.media_url)?`<video src="${esc(e.media_url)}" controls playsinline style="width:100%;border-radius:20px;max-height:520px;object-fit:cover"></video>`:`<img src="${esc(e.media_url)}" alt="${esc(e.name)}" style="width:100%;border-radius:20px;max-height:520px;object-fit:cover">`):empty(t('exd.noMedia'))}
       ${e.media_page_url?`<p style="margin-top:12px"><a class="accent" href="${esc(e.media_page_url)}" target="_blank" rel="noreferrer">${esc(t('exd.openReference'))}</a></p>`:''}
       <button class="btn" style="width:100%;margin-top:12px" onclick="openExerciseMediaEdit('${e.id}',${backToWorkout})">${icon('edit',16)} ${esc(t('exd.editMedia'))}</button>
+      ${exerciseProgressSeries(e.id).length>1?`<button class="btn" style="width:100%;margin-top:8px" onclick="openExerciseProgress('${e.id}',${backToWorkout})">${icon('trending',16)} ${esc(t('exd.viewProgress'))}</button>`:''}
     </div>
     ${progressionHistoryHtml(e)}
     <section class="card"><div class="eyebrow">${esc(t('exd.musclesInvolved'))}</div>${muscles.map(([m,p])=>`<div style="margin-top:10px"><div class="row"><strong>${esc(muscleLabel(m))}</strong><span>${p}%</span></div><div class="bar"><i style="width:${p}%"></i></div></div>`).join('')}</section>
