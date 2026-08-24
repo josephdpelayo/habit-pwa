@@ -177,8 +177,10 @@ function scaleFood(food, grams) {
 // techo o meta específica choca, con el número, para que la decisión siga siendo tuya. Devuelve
 // motivos como datos ({kind,...}), no texto — igual que fuelPlan(), la traducción es cosa de
 // quien llama esto.
-function evaluateFood(food, grams, remaining, targets) {
-  const scaled = scaleFood(food, grams);
+// scaled trae las mismas siete llaves que produce scaleFood()/itemsTotal(): kcal, protein_g,
+// carbs_g, fat_g, fiber_g, sugar_g, added_sugar_g — venga de un alimento del catálogo escalado
+// por gramos, o de la suma de varios renglones que ya vienen en absoluto (una foto analizada).
+function evaluateScaled(scaled, remaining, targets) {
   const reasons = [];
   let verdict = 'good';
 
@@ -215,7 +217,15 @@ function evaluateFood(food, grams, remaining, targets) {
   }
 
   if (verdict === 'good' && !reasons.length) reasons.push({ kind: 'fits' });
-  return { verdict, reasons, scaled };
+  return { verdict, reasons };
+}
+
+// Wrapper para un alimento del catálogo (código de barras, "del catálogo"): escala primero,
+// evalúa después. Para renglones que YA vienen en absoluto (una foto analizada, varios a la
+// vez), usa evaluateScaled() directo sobre su suma (itemsTotal()).
+function evaluateFood(food, grams, remaining, targets) {
+  const scaled = scaleFood(food, grams);
+  return Object.assign({ scaled }, evaluateScaled(scaled, remaining, targets));
 }
 
 // Reescalar un renglón ya estimado cuando corriges los gramos: mantiene la densidad que el
@@ -496,7 +506,7 @@ function fuelPlan(session, weightKg) {
 const api = {
   KCAL_PER_G, ACTIVITY_FACTORS, MODE_FACTOR, MET,
   suggestTargets, kcalFromMacros, itemsTotal, dayTotals, remaining, pct,
-  scaleFood, rescaleItem, itemToFood, evaluateFood,
+  scaleFood, rescaleItem, itemToFood, evaluateFood, evaluateScaled,
   activityKcal, strengthKcal, plannedDayKcal, weeklyPlan, dayRecommendation, stepsAdjustmentKcal,
   FUEL, plannedSessions, fuelPlan,
   isLowEnergy, LOW_ENERGY_KCAL_PER_KG_FLOOR

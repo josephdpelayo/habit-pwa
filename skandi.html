@@ -8,16 +8,16 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="Skandi Fit">
 <meta name="application-name" content="Skandi Fit">
-<link rel="manifest" href="/skandi-manifest.json?v=20260824-6">
-<link rel="apple-touch-icon" sizes="180x180" href="/icons/skandi-180.png?v=20260824-6">
-<link rel="icon" type="image/png" sizes="192x192" href="/icons/skandi-192.png?v=20260824-6">
+<link rel="manifest" href="/skandi-manifest.json?v=20260824-7">
+<link rel="apple-touch-icon" sizes="180x180" href="/icons/skandi-180.png?v=20260824-7">
+<link rel="icon" type="image/png" sizes="192x192" href="/icons/skandi-192.png?v=20260824-7">
 <title>Skandi Fit</title>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="/skandi-recovery.js?v=20260824-6"></script>
-<script src="/body-figure.js?v=20260824-6"></script>
-<script src="/skandi-nutrition.js?v=20260824-6"></script>
-<script src="/skandi-load.js?v=20260824-6"></script>
-<script src="/skandi-brief.js?v=20260824-6"></script>
+<script src="/skandi-recovery.js?v=20260824-7"></script>
+<script src="/body-figure.js?v=20260824-7"></script>
+<script src="/skandi-nutrition.js?v=20260824-7"></script>
+<script src="/skandi-load.js?v=20260824-7"></script>
+<script src="/skandi-brief.js?v=20260824-7"></script>
 <style>
 :root{
   --bg:#eef4f8;
@@ -530,7 +530,7 @@ textarea.field{min-height:112px;text-align:left;resize:vertical}
 // Versión compartida con app.html (APP_VERSION) y sw.js (CACHE_VERSION): un solo service
 // worker sirve las dos apps, así que una sola cadena las invalida a las dos. Al cambiarla
 // hay que actualizarla también en los ?v= del <head>, en index.html y en los dos manifests.
-const SKANDI_VERSION='20260824-6';
+const SKANDI_VERSION='20260824-7';
 const SUPABASE_URL='https://pmpjteuqjusbiduevbwq.supabase.co';
 const SUPABASE_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBtcGp0ZXVxanVzYmlkdWV2YndxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc2OTI1NjUsImV4cCI6MjA5MzI2ODU2NX0.XbMzZoo2yqtrD8znLnyo_1zDfrdJAvAPj1lqGOyXnLw';
 const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
@@ -585,6 +585,7 @@ en:{
   'food.reason.low_protein':'Low in protein ({g} g) for how much you still need today.',
   'food.newFoodBtn':'Type it in','food.newFoodHint':'For anything without a barcode: type the macros per 100 g yourself.',
   'food.errFoodName':'The food needs a name.',
+  'food.analyzeOnly':'Analyze','food.analyzeOnlyHint':'A photo or a description, just to see if it works for you — nothing gets logged until you say so.',
   'food.seedCatalog':'Load starter catalog','food.seedCatalogHint':'A few common dishes built from the shared food catalog, so you have something to start from.',
   'food.seedConfirm':'Add a few starter dishes (chicken & rice, oats, tuna...) to your catalog? You can edit or delete any of them after.',
   'food.seedNoFoods':'The shared catalog is empty — nothing to build starter dishes from yet.',
@@ -1175,6 +1176,7 @@ es:{
   'food.reason.low_protein':'Aporta poca proteína ({g} g) para lo que todavía te falta hoy.',
   'food.newFoodBtn':'Escribirlo','food.newFoodHint':'Para algo sin código de barras: escribe tú los macros por 100 g.',
   'food.errFoodName':'El alimento necesita nombre.',
+  'food.analyzeOnly':'Analizar','food.analyzeOnlyHint':'Una foto o una descripción, solo para ver si te conviene — no se registra nada hasta que tú lo decidas.',
   'food.seedCatalog':'Cargar catálogo inicial','food.seedCatalogHint':'Unos platillos comunes armados con el catálogo compartido, para tener de dónde partir.',
   'food.seedConfirm':'¿Agregar unos platillos iniciales (pollo con arroz, avena, atún...) a tu catálogo? Puedes editarlos o borrarlos después.',
   'food.seedNoFoods':'El catálogo compartido está vacío — no hay con qué armar platillos iniciales todavía.',
@@ -8122,6 +8124,7 @@ function openAddMeal(mealId=null){
       <button onclick="openMealInput('text',${mealId?`'${mealId}'`:'null'})">${icon('edit',22)}${esc(t('food.byText'))}<small>${esc(t('food.byTextHint'))}</small></button>
     </div>
     <button class="btn primary" style="width:100%;margin-top:10px" onclick="openMealInput('photo',${mealId?`'${mealId}'`:'null'})">${icon('image',20)} ${esc(t('food.byPhoto'))} · ${esc(t('food.byPhotoHint'))}</button>
+    <button class="btn" style="width:100%;margin-top:8px" onclick="openMealInput('inspect',${mealId?`'${mealId}'`:'null'})">${icon('trending',18)} ${esc(t('food.analyzeOnly'))} · ${esc(t('food.byPhotoHint'))}</button>
     ${noDishes&&noFoods&&!mealId?`<button class="btn" style="width:100%;margin-top:10px" onclick="seedStarterCatalog()">${icon('plus',18)} ${esc(t('food.seedCatalog'))}</button>
     <p class="muted" style="font-size:11px;margin-top:4px;text-align:center">${esc(t('food.seedCatalogHint'))}</p>`:''}`;
 }
@@ -8184,21 +8187,27 @@ async function seedStarterCatalog(){
 // código de barras y catálogo (openBarcode/openFoodPicker), para el caso en que el plato se
 // fotografía en varias fotos porque no se tomaron todas al mismo tiempo. El tipo de comida,
 // la hora y el lugar ya quedaron fijados al crearla, así que no se vuelven a pedir.
+// kind 'inspect': la misma pantalla de foto+texto que 'photo', pero nunca pide tipo/hora/lugar
+// (no se está registrando nada todavía) y el botón manda a submitInspect() en vez de
+// submitMealForAnalysis() — ver openAnalyzeOnly().
 function openMealInput(kind,mealId=null){
   state.pendingMeal={kind,blobs:[],dataUrl:null,photoTakenAt:null,whenTouched:false,mealId};
   $('modal').classList.add('show');
+  const showPhoto=kind==='photo'||kind==='inspect';
+  const showMealFields=kind!=='inspect'&&!mealId;
   $('modalCard').innerHTML=`
-    <div class="row"><h1>${esc(kind==='photo'?t('food.byPhoto'):t('food.byText'))}</h1><button class="x" onclick="closeModal()" aria-label="${esc(t('common.close'))}">${icon('close',20)}</button></div>
-    ${kind==='photo'?`
+    <div class="row"><h1>${esc(kind==='inspect'?t('food.analyzeOnly'):kind==='photo'?t('food.byPhoto'):t('food.byText'))}</h1><button class="x" onclick="closeModal()" aria-label="${esc(t('common.close'))}">${icon('close',20)}</button></div>
+    ${kind==='inspect'?`<p class="muted">${esc(t('food.analyzeOnlyHint'))}</p>`:''}
+    ${showPhoto?`
       <p class="muted">${esc(t('food.photoHint'))}</p>
       <label class="btn" style="width:100%;margin-top:8px">${icon('image',20)} <span id="photoBtnLabel">${esc(t('food.addPhotos'))}</span>
         <input id="mealPhoto" type="file" accept="image/*" multiple style="display:none" onchange="onMealPhotoPicked(this)">
       </label>
       <div id="mealPhotoPreview" class="photostrip"></div>
       <p id="mealPhotoHint" class="muted" style="font-size:11px;margin-top:4px"></p>`:''}
-    <label class="eyebrow">${esc(kind==='photo'?t('food.context'):t('food.describe'))}</label>
-    <textarea id="mealDesc" class="field" placeholder="${esc(kind==='photo'?t('food.contextPh'):t('food.describePh'))}"></textarea>
-    ${mealId?'':`
+    <label class="eyebrow">${esc(showPhoto?t('food.context'):t('food.describe'))}</label>
+    <textarea id="mealDesc" class="field" placeholder="${esc(showPhoto?t('food.contextPh'):t('food.describePh'))}"></textarea>
+    ${showMealFields?`
     <label class="eyebrow">${esc(t('food.mealType'))}</label>
     <select id="mealType" class="field left">${MEAL_TYPES.map(v=>`<option value="${v}" ${v===guessMealType()?'selected':''}>${esc(mealTypeLabel(v))}</option>`).join('')}</select>
     <label class="eyebrow">${esc(t('food.when'))}</label>
@@ -8207,8 +8216,8 @@ function openMealInput(kind,mealId=null){
     <label class="eyebrow">${esc(t('food.venue'))}</label>
     <div class="venue-row">${VENUES.slice(0,3).map((v,i)=>
       `<button type="button" class="chip venue-chip ${i===0?'active':''}" data-venue="${v}" onclick="pickVenue('${v}')">${esc(venueLabel(v))}</button>`).join('')}</div>
-    <p class="muted" style="font-size:12px;margin-top:8px">${esc(t('food.cookingFatHint'))}</p>`}
-    <button id="mealGo" class="btn primary" style="width:100%;margin-top:12px" onclick="submitMealForAnalysis()">${esc(mealId?t('food.addToMeal'):t('food.analyze'))}</button>`;
+    <p class="muted" style="font-size:12px;margin-top:8px">${esc(t('food.cookingFatHint'))}</p>`:''}
+    <button id="mealGo" class="btn primary" style="width:100%;margin-top:12px" onclick="${kind==='inspect'?'submitInspect()':'submitMealForAnalysis()'}">${esc(kind==='inspect'?t('food.analyze'):mealId?t('food.addToMeal'):t('food.analyze'))}</button>`;
 }
 
 // La hora decide el tipo de comida por default: nadie quiere elegir "desayuno" a las 8 am.
@@ -8525,6 +8534,114 @@ async function appendOnePhoto(mealId,blob,note,onUploaded){
       if(appended) return {error:null};
     }
     return {error:e};
+  }
+}
+
+// ---- Analizar sin registrar (foto y/o texto) — igual que openFoodInspect() pero para lo que
+// no tiene código de barras: una foto del plato, o describirlo, antes de decidir si comerlo ----
+//
+// A diferencia de agregar una foto a la comida que se está armando (submitMealForAnalysis /
+// appendMealPhotos), aquí NO se crea ni se toca ninguna comida en el servidor — inspect_only
+// en api/skandi.js analiza y no guarda nada. Si el usuario decide registrarlo, confirmInspectAdd
+// inserta los renglones que ya regresó esa llamada directo por RLS, sin volver a gastar cuota.
+async function submitInspect(){
+  const pending=state.pendingMeal;
+  if(!pending) return;
+  const desc=$('mealDesc').value.trim();
+  if(!pending.blobs.length&&!desc) return alert(t('food.errNoInput'));
+  const btn=$('mealGo');
+  btn.disabled=true;btn.textContent=t('food.uploading');
+  const uploaded=[];
+  try{
+    for(const blob of pending.blobs){
+      const path=`${state.user.id}/${crypto.randomUUID()}.jpg`;
+      const {error:upErr}=await sb.storage.from('skandi-meals').upload(path,blob,{contentType:'image/jpeg'});
+      if(upErr) throw upErr;
+      uploaded.push(path);
+    }
+    btn.textContent=t('food.analyzing');
+    const {data:{session}}=await sb.auth.getSession();
+    const res=await fetch('/api/skandi',{
+      method:'POST',
+      headers:{'Content-Type':'application/json',Authorization:`Bearer ${session.access_token}`},
+      body:JSON.stringify({action:'analyze',inspect_only:true,photo_paths:uploaded,note:desc||null})
+    });
+    const body=await res.json().catch(()=>({}));
+    if(!res.ok) throw new Error(body.message||t('food.failed'));
+    await loadNutrition(); // refresca "te quedan N análisis hoy"
+    const mealId=pending.mealId;
+    state.pendingMeal=null;
+    closeModal();
+    openAnalyzeResult(body,mealId);
+  }catch(e){
+    if(uploaded.length){ try{ await sb.storage.from('skandi-meals').remove(uploaded); }catch{/* mejor esfuerzo */} }
+    btn.disabled=false;btn.textContent=t('food.analyze');
+    alert(e.message||String(e));
+  }
+}
+
+function openAnalyzeResult(data,mealId){
+  const items=data.items||[];
+  const totals=SkandiNutrition.itemsTotal(items);
+  let verdictHtml=`<p class="muted" style="margin-top:8px">${esc(t('food.noTarget'))}</p>`;
+  const targets=state.nutritionTargets;
+  if(targets){
+    const dayTotals=SkandiNutrition.dayTotals(mealsOfDay(foodDay()));
+    const remaining=SkandiNutrition.remaining(targets,dayTotals);
+    const {verdict,reasons}=SkandiNutrition.evaluateScaled(totals,remaining,targets);
+    const tone=verdict==='bad'?'border-color:rgba(212,72,84,.35);background:#fff7f7'
+      :verdict==='caution'?'border-color:rgba(240,162,46,.35);background:#fffaf2'
+      :'border-color:rgba(29,154,108,.3);background:#f3fbf7';
+    verdictHtml=`<section class="card" style="${tone};margin-top:10px">
+      <strong>${esc(t('food.verdict.'+verdict))}</strong>
+      <ul style="margin:8px 0 0;padding-left:18px">${reasons.map(r=>`<li style="margin-top:4px">${esc(t('food.reason.'+r.kind,r))}</li>`).join('')}</ul>
+    </section>`;
+  }
+  state.pendingInspect={items,mealId};
+  $('modal').classList.add('show');
+  $('modalCard').innerHTML=`
+    <div class="row"><h1>${esc(data.dish_name||t('food.analyzeOnly'))}</h1><button class="x" onclick="closeModal()" aria-label="${esc(t('common.close'))}">${icon('close',20)}</button></div>
+    <p class="muted">${Math.round(totals.kcal)} kcal · P ${totals.protein_g}g · C ${totals.carbs_g}g · G ${totals.fat_g}g</p>
+    <div class="eyebrow" style="margin-top:10px">${esc(t('food.items'))}</div>
+    ${items.map(i=>`<p style="margin-top:6px"><strong>${esc(i.label)}</strong> — ${Math.round(i.grams)} g · ${Math.round(i.kcal)} kcal</p>`).join('')}
+    ${data.notes?`<p class="muted" style="font-size:12px;margin-top:8px">${esc(data.notes)}</p>`:''}
+    ${verdictHtml}
+    <button class="btn primary" style="width:100%;margin-top:14px" onclick="confirmInspectAdd()">${esc(t('food.inspectAdd'))}</button>
+    <button class="btn" style="width:100%;margin-top:8px" onclick="closeModal()">${esc(t('food.inspectClose'))}</button>`;
+}
+
+async function confirmInspectAdd(){
+  const pending=state.pendingInspect;
+  if(!pending||!pending.items.length) return;
+  let mealId=pending.mealId;
+  try{
+    if(!mealId){
+      const {data:meal,error}=await sb.from('skandi_meals').insert({
+        user_id:state.user.id,meal_type:guessMealType(),input_kind:'photo',
+        analysis_status:'ready',eaten_at:new Date().toISOString()
+      }).select().single();
+      if(error) return alert(error.message);
+      mealId=meal.id;
+    }
+    const base=itemsOfMeal(mealId).reduce((m,i)=>Math.max(m,i.sort_order||0),0);
+    const rows=pending.items.map((it,i)=>({
+      meal_id:mealId,user_id:state.user.id,food_id:it.food_id||null,label:it.label,
+      grams:it.grams,kcal:it.kcal,protein_g:it.protein_g,carbs_g:it.carbs_g,fat_g:it.fat_g,fiber_g:it.fiber_g,
+      added_sugar_g:it.added_sugar_g??null,source:'ai',ai_confidence:it.ai_confidence??null,
+      sort_order:base+i+1,is_cooking_fat:!!it.is_cooking_fat,included:it.included!==false
+    }));
+    const {error:itemsErr}=await writeToleratingMissingColumn(
+      withCol=>sb.from('skandi_meal_items').insert(withCol?rows:rows.map(r=>omit(r,'added_sugar_g'))),
+      'added_sugar_g'
+    );
+    if(itemsErr) return alert(itemsErr.message);
+    state.pendingInspect=null;
+    await loadNutrition();
+    state.foodDayOffset=0;
+    setView('food');
+    openMealDetail(mealId);
+  }catch(e){
+    alert(e.message||String(e));
   }
 }
 
