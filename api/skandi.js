@@ -58,11 +58,15 @@ const BUCKET = 'skandi-meals';
 const DEFAULT_DAILY_LIMIT = 25;
 const DEFAULT_MODEL = 'claude-opus-5';
 const MAX_IMAGE_BYTES = 4.5 * 1024 * 1024; // el límite de la API de vision es 5 MB por imagen
-// Vercel mata esta función a los 60 s. El SDK reintenta 429/5xx por default dentro de la misma
-// invocación, que es justo lo peor aquí: consume el reloj y el navegador recibe un 504. Es mejor
-// devolver el fallo transitorio a tiempo y dejar que el cliente haga UN reintento visible como la
-// misma operación. 2,000 tokens alcanzan holgadamente para el JSON de una comida normal.
-const AI_TIMEOUT_MS = 48_000;
+// Vercel mata esta función a los 60 s (vercel.json: maxDuration=60, el tope del plan Hobby). El
+// SDK reintenta 429/5xx por default dentro de la misma invocación, que es justo lo peor aquí:
+// consume el reloj y el navegador recibe un 504. Es mejor devolver el fallo transitorio a tiempo
+// y dejar que el cliente haga UN reintento visible como la misma operación. 2,000 tokens
+// alcanzan holgadamente para el JSON de una comida normal. Los ~7 s de margen que quedan hasta
+// los 60 s son para requireUser + cargar la comida + reservar cuota + bajar la(s) foto(s) +
+// cargar el catálogo + guardar — normalmente milisegundos, pero sin margen cero no queda nada
+// si alguno de esos pasos tarda más de lo normal.
+const AI_TIMEOUT_MS = 53_000;
 const AI_MAX_TOKENS = 2_000;
 const CATALOG_SIZE = 50;
 // Un producto real puede necesitar frente + tabla nutrimental para leerse bien; más que eso ya
