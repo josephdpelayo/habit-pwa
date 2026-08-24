@@ -8,16 +8,16 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="Skandi Fit">
 <meta name="application-name" content="Skandi Fit">
-<link rel="manifest" href="/skandi-manifest.json?v=20260824-7">
-<link rel="apple-touch-icon" sizes="180x180" href="/icons/skandi-180.png?v=20260824-7">
-<link rel="icon" type="image/png" sizes="192x192" href="/icons/skandi-192.png?v=20260824-7">
+<link rel="manifest" href="/skandi-manifest.json?v=20260824-8">
+<link rel="apple-touch-icon" sizes="180x180" href="/icons/skandi-180.png?v=20260824-8">
+<link rel="icon" type="image/png" sizes="192x192" href="/icons/skandi-192.png?v=20260824-8">
 <title>Skandi Fit</title>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="/skandi-recovery.js?v=20260824-7"></script>
-<script src="/body-figure.js?v=20260824-7"></script>
-<script src="/skandi-nutrition.js?v=20260824-7"></script>
-<script src="/skandi-load.js?v=20260824-7"></script>
-<script src="/skandi-brief.js?v=20260824-7"></script>
+<script src="/skandi-recovery.js?v=20260824-8"></script>
+<script src="/body-figure.js?v=20260824-8"></script>
+<script src="/skandi-nutrition.js?v=20260824-8"></script>
+<script src="/skandi-load.js?v=20260824-8"></script>
+<script src="/skandi-brief.js?v=20260824-8"></script>
 <style>
 :root{
   --bg:#eef4f8;
@@ -530,7 +530,7 @@ textarea.field{min-height:112px;text-align:left;resize:vertical}
 // Versión compartida con app.html (APP_VERSION) y sw.js (CACHE_VERSION): un solo service
 // worker sirve las dos apps, así que una sola cadena las invalida a las dos. Al cambiarla
 // hay que actualizarla también en los ?v= del <head>, en index.html y en los dos manifests.
-const SKANDI_VERSION='20260824-7';
+const SKANDI_VERSION='20260824-8';
 const SUPABASE_URL='https://pmpjteuqjusbiduevbwq.supabase.co';
 const SUPABASE_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBtcGp0ZXVxanVzYmlkdWV2YndxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc2OTI1NjUsImV4cCI6MjA5MzI2ODU2NX0.XbMzZoo2yqtrD8znLnyo_1zDfrdJAvAPj1lqGOyXnLw';
 const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
@@ -8486,12 +8486,14 @@ async function analyzeExtraPhotos(mealId,blobs){
 // comida a la vez y se pisen entre sí.
 async function appendMealPhotos(pending,desc){
   const btn=$('mealGo');
-  const total=pending.blobs.length;
+  // Sin fotos (solo texto) sigue siendo UNA llamada, no cero: total=0 haría que el ciclo nunca
+  // corriera y "Agregar" se sintiera como que no hizo nada — exactamente lo que pasaba aquí.
+  const total=pending.blobs.length||1;
   for(let i=0;i<total;i++){
     btn.disabled=true;
     btn.textContent=total>1?t('food.analyzingProgress',{i:i+1,n:total}):t('food.uploading');
     const onUploaded=()=>{ btn.textContent=total>1?t('food.analyzingProgress',{i:i+1,n:total}):t('food.analyzing'); };
-    const {error}=await appendOnePhoto(pending.mealId,pending.blobs[i],i===0?desc:null,onUploaded);
+    const {error}=await appendOnePhoto(pending.mealId,pending.blobs[i]||null,i===0?desc:null,onUploaded);
     if(error){
       btn.disabled=false;btn.textContent=t('food.addToMeal');
       return alert(error.message||String(error));
@@ -8702,11 +8704,15 @@ async function analyzeMeal(mealId,attempt=0){
   }
 }
 
-// Cuánto esperamos a que el servidor termine cuando la respuesta se perdió. El análisis
-// tarda entre 10 y 40 segundos según la foto, así que ~75 s cubre el caso normal sin dejar la
-// tarjeta girando para siempre.
+// Cuánto esperamos a que el servidor termine cuando la respuesta se perdió. El análisis en sí
+// tarda entre 10 y 40 segundos, pero en el internet del barco (satelital, a veces muy lento) la
+// SUBIDA de la foto puede tardar minutos y "Load failed" no llega hasta que la conexión
+// finalmente se cae — 75 s de espera se quedaba corto y mandaba a "reintentar" un análisis que
+// en realidad sí había terminado (y reintentar de verdad sí duplica el renglón, porque ese
+// primer intento no fue transitorio, fue lento). 3 minutos cubre eso sin dejar la tarjeta
+// girando para siempre.
 const ANALYSIS_POLL_MS=3000;
-const ANALYSIS_POLL_TRIES=25;
+const ANALYSIS_POLL_TRIES=60;
 
 async function waitForAnalysis(mealId){
   for(let i=0;i<ANALYSIS_POLL_TRIES;i++){
