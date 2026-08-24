@@ -8,16 +8,16 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="Skandi Fit">
 <meta name="application-name" content="Skandi Fit">
-<link rel="manifest" href="/skandi-manifest.json?v=20260824-10">
-<link rel="apple-touch-icon" sizes="180x180" href="/icons/skandi-180.png?v=20260824-10">
-<link rel="icon" type="image/png" sizes="192x192" href="/icons/skandi-192.png?v=20260824-10">
+<link rel="manifest" href="/skandi-manifest.json?v=20260824-11">
+<link rel="apple-touch-icon" sizes="180x180" href="/icons/skandi-180.png?v=20260824-11">
+<link rel="icon" type="image/png" sizes="192x192" href="/icons/skandi-192.png?v=20260824-11">
 <title>Skandi Fit</title>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="/skandi-recovery.js?v=20260824-10"></script>
-<script src="/body-figure.js?v=20260824-10"></script>
-<script src="/skandi-nutrition.js?v=20260824-10"></script>
-<script src="/skandi-load.js?v=20260824-10"></script>
-<script src="/skandi-brief.js?v=20260824-10"></script>
+<script src="/skandi-recovery.js?v=20260824-11"></script>
+<script src="/body-figure.js?v=20260824-11"></script>
+<script src="/skandi-nutrition.js?v=20260824-11"></script>
+<script src="/skandi-load.js?v=20260824-11"></script>
+<script src="/skandi-brief.js?v=20260824-11"></script>
 <style>
 :root{
   --bg:#eef4f8;
@@ -301,7 +301,9 @@ p{color:var(--muted);line-height:1.45;margin:0}
 .prog-criteria{margin-top:6px;padding:7px 10px;background:var(--panel2);border:1px solid var(--line);border-radius:8px;font-size:11.5px;line-height:1.35;color:var(--muted)}
 .prog-criteria b{color:var(--text);font-weight:800}
 .progression-ready{display:block;width:100%;text-align:left;margin-top:6px;padding:7px 10px;background:#e4f7ee;color:#1f9d5c;border:1px solid #bfe9d3;border-radius:8px;font-weight:700;font-size:12px}
-.deload-note{margin-top:6px;padding:7px 10px;background:#fff8ef;border:1px solid rgba(240,160,60,.35);border-radius:8px;font-size:11.5px;line-height:1.35;color:#8a5a12}
+.deload-note{margin-top:6px;padding:5px 9px 5px 8px;border-left:3px solid var(--amber);background:var(--panel2);border-radius:6px;font-size:11px;line-height:1.3;color:#8a5a12}
+.prog-info-toggle{display:inline-flex;align-items:center;gap:3px;background:transparent;border:0;padding:0;font-size:11px;font-weight:700;color:var(--muted);cursor:pointer}
+.prog-info-toggle span{font-size:9px}
 .field{width:100%;background:#fff;border:1px solid var(--line);color:var(--text);border-radius:10px;padding:13px;text-align:center;box-shadow:inset 0 1px 0 rgba(1,36,86,.03)}
 .field-narrow{padding:13px 3px}
 .field.left{text-align:left}
@@ -530,7 +532,7 @@ textarea.field{min-height:112px;text-align:left;resize:vertical}
 // Versión compartida con app.html (APP_VERSION) y sw.js (CACHE_VERSION): un solo service
 // worker sirve las dos apps, así que una sola cadena las invalida a las dos. Al cambiarla
 // hay que actualizarla también en los ?v= del <head>, en index.html y en los dos manifests.
-const SKANDI_VERSION='20260824-10';
+const SKANDI_VERSION='20260824-11';
 const SUPABASE_URL='https://pmpjteuqjusbiduevbwq.supabase.co';
 const SUPABASE_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBtcGp0ZXVxanVzYmlkdWV2YndxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc2OTI1NjUsImV4cCI6MjA5MzI2ODU2NX0.XbMzZoo2yqtrD8znLnyo_1zDfrdJAvAPj1lqGOyXnLw';
 const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
@@ -1056,8 +1058,8 @@ en:{
   'fatigue.hint':'Expect a shorter set than usual. Log the quality honestly — this is fatigue, not a lost skill.',
 
   'ex.restSec':'rest {n}s','ex.qualityAvg':'quality {v}/10',
-  'ex.deloadSkill':'Deload week: keep the pattern, do not test it — stop short of your max even if you could hold longer.',
-  'ex.deloadStrength':'Deload week: RIR 3, 70-80% of normal. No adding weight or reps this week.',
+  'ex.deloadSkill':'Deload: keep the pattern, do not test your max.',
+  'ex.deloadStrength':'Deload: RIR 3, load at 70-80% of normal.',
   'ex.swap':'Swap exercise','ex.removeFromSession':'Remove exercise from this session',
   'ex.removeShort':'Remove from this session',
   'ex.colSec':'SEC','ex.colReps':'REPS','ex.colQuality':'QLT','ex.colRir':'RIR',
@@ -1647,8 +1649,8 @@ es:{
   'fatigue.hint':'Espera una serie más corta de lo normal. Califica la calidad con honestidad — esto es fatiga, no habilidad perdida.',
 
   'ex.restSec':'descanso {n}s','ex.qualityAvg':'calidad {v}/10',
-  'ex.deloadSkill':'Semana de descarga: mantén el patrón, no lo pruebes — para antes de tu máximo aunque aguantes más.',
-  'ex.deloadStrength':'Semana de descarga: RIR 3, 70-80% de lo normal. Nada de subir peso ni repeticiones esta semana.',
+  'ex.deloadSkill':'Descarga: mantén el patrón, no pruebes tu máximo.',
+  'ex.deloadStrength':'Descarga: RIR 3, carga al 70-80% de lo normal.',
   'ex.swap':'Cambiar ejercicio','ex.removeFromSession':'Quitar el ejercicio de esta sesión',
   'ex.removeShort':'Quitar de esta sesión',
   'ex.colSec':'SEG','ex.colReps':'REPS','ex.colQuality':'CAL','ex.colRir':'RIR',
@@ -1811,7 +1813,7 @@ const EXERCISE_PRESETS={
 };
 
 const ACTIVE_WORKOUT_MAX_HOURS=18;
-const state={user:null,profile:null,view:'home',authMode:'login',exercises:[],templates:[],items:[],sessions:[],sets:[],externalActivities:[],activityTemplates:[],progressionState:[],progressionEvents:[],skillGoals:[],trainingBlocks:[],planned:[],plannedReady:true,ensuredWeeks:new Set(),weekSig:null,trainTab:'today',calOffset:0,calWeeks:4,dayOpen:null,bodyweightLogs:[],programs:[],programDays:[],active:null,activeItems:[],timer:null,elapsed:0,rest:0,restTotal:0,bodyFlip:'front',weightUnit:localStorage.getItem('skandi_weight_unit')||'kg',weightUnitOverrides:(()=>{try{return JSON.parse(localStorage.getItem('skandi_weight_unit_overrides')||'{}');}catch(e){return {};}})(),expandedRoutines:new Set(),progressTab:'summary',progressQuery:'',progressMetric:'best',historyFilter:{month:'all',title:'all'},crewFeedLimit:6,swapTarget:null,swapQuery:'',setOptionsId:null,skillTab:null,addExOpen:false,addExQuery:'',pausedMs:0,pausedAt:null,floatTimerOpen:false,meals:[],mealItems:[],foods:[],dishes:[],dishItems:[],nutritionTargets:null,nutritionTargetOverrides:[],aiCallsToday:0,foodDayOffset:0,foodPicker:{query:'',mealId:null},pendingMeal:null,wellness:[],intervalsUnmatched:[],stravaStatus:null,intervalsStatus:null,skandiSettings:null,stravaSyncing:false,intervalsSyncing:false,bodyMeasurements:[],progressPhotos:[],pendingPhoto:null,bodyTab:'recovery',supplements:[],supplementLogs:[]};
+const state={user:null,profile:null,view:'home',authMode:'login',exercises:[],templates:[],items:[],sessions:[],sets:[],externalActivities:[],activityTemplates:[],progressionState:[],progressionEvents:[],skillGoals:[],trainingBlocks:[],planned:[],plannedReady:true,ensuredWeeks:new Set(),weekSig:null,trainTab:'today',calOffset:0,calWeeks:4,dayOpen:null,bodyweightLogs:[],programs:[],programDays:[],active:null,activeItems:[],timer:null,elapsed:0,rest:0,restTotal:0,bodyFlip:'front',weightUnit:localStorage.getItem('skandi_weight_unit')||'kg',weightUnitOverrides:(()=>{try{return JSON.parse(localStorage.getItem('skandi_weight_unit_overrides')||'{}');}catch(e){return {};}})(),expandedRoutines:new Set(),progInfoOpen:new Set(),progressTab:'summary',progressQuery:'',progressMetric:'best',historyFilter:{month:'all',title:'all'},crewFeedLimit:6,swapTarget:null,swapQuery:'',setOptionsId:null,skillTab:null,addExOpen:false,addExQuery:'',pausedMs:0,pausedAt:null,floatTimerOpen:false,meals:[],mealItems:[],foods:[],dishes:[],dishItems:[],nutritionTargets:null,nutritionTargetOverrides:[],aiCallsToday:0,foodDayOffset:0,foodPicker:{query:'',mealId:null},pendingMeal:null,wellness:[],intervalsUnmatched:[],stravaStatus:null,intervalsStatus:null,skandiSettings:null,stravaSyncing:false,intervalsSyncing:false,bodyMeasurements:[],progressPhotos:[],pendingPhoto:null,bodyTab:'recovery',supplements:[],supplementLogs:[]};
 let builderState={selected:new Map(),group:'All'};
 
 const $=id=>document.getElementById(id);
@@ -6034,9 +6036,12 @@ function renderActiveWorkout(){
 }
 
 // Progression exercises (front lever, back lever, planche, handstand) get a quick
-// easier/harder stepper instead of having to open the full swap search every session.
-// Stepping persists the new variant via saveProgressionState so next week's workout
-// starts on it automatically (see startWorkout's currentProgressionExercise resolve).
+// easier/harder stepper instead of having to open the full swap search every session. The rank
+// counter doubles as the toggle for the form criteria below it (progressionCriteriaHtml) —
+// collapsed by default, because that text is only needed once you've forgotten it, not every
+// set, and stacking it open on every card of every exercise was most of the card's height.
+// Stepping persists the new variant via saveProgressionState so next week's workout starts on
+// it automatically (see resolveTemplateProgressionItems).
 function progressionStepperHtml(e,exerciseId){
   if(!e?.progression_group) return '';
   const siblings=progressionSiblings(e.progression_group);
@@ -6047,14 +6052,27 @@ function progressionStepperHtml(e,exerciseId){
     :`<button class="btn small ghost" disabled aria-label="${esc(t('prog.easiest'))}">◀</button>`;
   const nextBtn=next?`<button class="btn small ghost" onclick="event.stopPropagation();stepProgression('${exerciseId}','${next.id}')" aria-label="${esc(t('prog.harder'))}" title="${esc(t('prog.harderName',{name:next.name}))}">▶</button>`
     :`<button class="btn small ghost" disabled aria-label="${esc(t('prog.hardest'))}">▶</button>`;
-  return `<div class="row" style="margin-top:6px" onclick="event.stopPropagation()">${prevBtn}<small class="muted">${esc(t('prog.step',{i:idx+1,n:siblings.length}))}</small>${nextBtn}</div>`;
+  const step=esc(t('prog.step',{i:idx+1,n:siblings.length}));
+  const hasInfo=!!(e.progression_criteria||e.progression_target);
+  const open=state.progInfoOpen.has(exerciseId);
+  const label=hasInfo
+    ?`<button type="button" class="prog-info-toggle" onclick="event.stopPropagation();toggleProgInfo('${exerciseId}')">${step}<span>${open?'▴':'▾'}</span></button>`
+    :`<small class="muted">${step}</small>`;
+  return `<div class="row" style="margin-top:6px" onclick="event.stopPropagation()">${prevBtn}${label}${nextBtn}</div>`;
 }
 
-// The rank's own form standard and the exact bar for levelling up, shown on the card while
-// the set is being logged — the moment the standard is actually actionable. Without it the
-// 1-10 rating is a vibe: "clean" means something different on a tuck than on a straddle.
-function progressionCriteriaHtml(e){
+function toggleProgInfo(exerciseId){
+  if(state.progInfoOpen.has(exerciseId)) state.progInfoOpen.delete(exerciseId);
+  else state.progInfoOpen.add(exerciseId);
+  renderActiveWorkout();
+}
+
+// The rank's own form standard and the exact bar for levelling up — collapsed by default (see
+// progressionStepperHtml's toggle), shown only once a member taps to check it, since the whole
+// point is not to make every set-row scroll past a wall of text to reach the actual sets.
+function progressionCriteriaHtml(e,exerciseId){
   if(!e?.progression_criteria&&!e?.progression_target) return '';
+  if(!state.progInfoOpen.has(exerciseId)) return '';
   const unit=n=>e.log_mode==='seconds'?t('prog.secUnit',{n}):t('prog.repUnit',{n});
   const lines=[];
   if(e.progression_criteria) lines.push(esc(t('prog.criteria',{v:e.progression_criteria})));
@@ -6066,7 +6084,8 @@ function progressionCriteriaHtml(e){
 // whole — but "how much load" is a per-exercise question, and by the time a member is looking
 // at the set row is exactly when they need the answer. Weight already gets a silent 30%
 // preload (deloadAdjustedWeight); bodyweight holds and reps have no equivalent number to
-// preload, so this is the visible instruction that covers all three.
+// preload, so this is the visible instruction that covers all three. Kept to one short line —
+// the full reasoning already lives in the Home brief, this is just the reminder.
 function deloadNoteHtml(e){
   if(!e||!trainingBlockWeekInfo()?.deload) return '';
   const key=e.progression_group?'ex.deloadSkill':'ex.deloadStrength';
@@ -6216,7 +6235,7 @@ function activeExercise(item,sets){
   // up), or RIR for ordinary load work, where the plan's progression rule is RIR 1-2.
   const rowClass=showWeight?'set-row':'set-row no-weight';
   return `<article class="exercise">
-    <div class="ex-head" onclick="openExercise('${e.id}',true)">${mediaThumb(e)}<div><h3>${esc(e.name)} <span class="ex-info-hint">${icon('chevronRight',13)}</span></h3><p>${[esc(exerciseSubtitle(e)),`${item.target_sets} x ${esc(item.target_reps)}`,esc(t('ex.restSec',{n:item.target_rest_sec}))].filter(Boolean).join(' · ')}</p>${deloadNoteHtml(e)}${progressionStepperHtml(e,item.exercise_id)}${progressionCriteriaHtml(e)}${tempoButtonHtml(e)}${progressionReadinessHtml(e,item.exercise_id)}</div>
+    <div class="ex-head" onclick="openExercise('${e.id}',true)">${mediaThumb(e)}<div><h3>${esc(e.name)} <span class="ex-info-hint">${icon('chevronRight',13)}</span></h3><p>${[esc(exerciseSubtitle(e)),`${item.target_sets} x ${esc(item.target_reps)}`,esc(t('ex.restSec',{n:item.target_rest_sec}))].filter(Boolean).join(' · ')}</p>${deloadNoteHtml(e)}${progressionStepperHtml(e,item.exercise_id)}${progressionCriteriaHtml(e,item.exercise_id)}${tempoButtonHtml(e)}${progressionReadinessHtml(e,item.exercise_id)}</div>
       <div class="ex-actions">
         <span class="muted">${sets.filter(s=>s.done).length}/${sets.length}${(()=>{const q=e.track_quality?avgQuality(sets.filter(x=>x.done)):null; return q!=null?' · '+esc(t('ex.qualityAvg',{v:q})):'';})()}</span>
         <div class="ex-actions-row">
