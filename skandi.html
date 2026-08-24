@@ -8,16 +8,16 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="Skandi Fit">
 <meta name="application-name" content="Skandi Fit">
-<link rel="manifest" href="/skandi-manifest.json?v=20260824-9">
-<link rel="apple-touch-icon" sizes="180x180" href="/icons/skandi-180.png?v=20260824-9">
-<link rel="icon" type="image/png" sizes="192x192" href="/icons/skandi-192.png?v=20260824-9">
+<link rel="manifest" href="/skandi-manifest.json?v=20260824-10">
+<link rel="apple-touch-icon" sizes="180x180" href="/icons/skandi-180.png?v=20260824-10">
+<link rel="icon" type="image/png" sizes="192x192" href="/icons/skandi-192.png?v=20260824-10">
 <title>Skandi Fit</title>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="/skandi-recovery.js?v=20260824-9"></script>
-<script src="/body-figure.js?v=20260824-9"></script>
-<script src="/skandi-nutrition.js?v=20260824-9"></script>
-<script src="/skandi-load.js?v=20260824-9"></script>
-<script src="/skandi-brief.js?v=20260824-9"></script>
+<script src="/skandi-recovery.js?v=20260824-10"></script>
+<script src="/body-figure.js?v=20260824-10"></script>
+<script src="/skandi-nutrition.js?v=20260824-10"></script>
+<script src="/skandi-load.js?v=20260824-10"></script>
+<script src="/skandi-brief.js?v=20260824-10"></script>
 <style>
 :root{
   --bg:#eef4f8;
@@ -530,7 +530,7 @@ textarea.field{min-height:112px;text-align:left;resize:vertical}
 // Versión compartida con app.html (APP_VERSION) y sw.js (CACHE_VERSION): un solo service
 // worker sirve las dos apps, así que una sola cadena las invalida a las dos. Al cambiarla
 // hay que actualizarla también en los ?v= del <head>, en index.html y en los dos manifests.
-const SKANDI_VERSION='20260824-9';
+const SKANDI_VERSION='20260824-10';
 const SUPABASE_URL='https://pmpjteuqjusbiduevbwq.supabase.co';
 const SUPABASE_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBtcGp0ZXVxanVzYmlkdWV2YndxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc2OTI1NjUsImV4cCI6MjA5MzI2ODU2NX0.XbMzZoo2yqtrD8znLnyo_1zDfrdJAvAPj1lqGOyXnLw';
 const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
@@ -5604,6 +5604,48 @@ function bestBySide(exerciseId){
   return (out.left!=null||out.right!=null)?out:null;
 }
 
+// A routine can deliberately include more than one rung of the same progression ladder in one
+// day (e.g. Wall Handstand as a fixed technique slot before Freestanding Handstand as the main
+// set that actually progresses — see migration 060's Wednesday routine). Only the highest-rank
+// authored slot per progression_group tracks the user's saved progression state; lower authored
+// rungs stay exactly what they are regardless of how far the user has progressed.
+//
+// And that tracking only ever moves UP: a routine can also author the highest slot directly at a
+// harder variant than what's saved (a coach-built day, or a manual data load like 086's deload
+// week) — resolving down to a stale saved rank would silently undo that authored choice, which
+// is exactly the bug where a routine that says "Half Lay" trains "Straddle" instead. The saved
+// state only wins when IT is the one ahead, same direction advanceProgressionIfAhead already
+// moves things during a live workout.
+//
+// A collision guard on top of that (authored ids + ids already assigned this pass) covers any
+// resolved variant that happens to match another slot's exercise, including when it's not itself
+// one of this routine's authored exercises. Both matter: resolving every same-group slot (or
+// resolving past a target another slot already owns) would collapse two distinct exercises into
+// the same exercise_id and violate the (session_id, exercise_id, set_idx) uniqueness on
+// skandi_sets at insert time.
+function resolveTemplateProgressionItems(templateItems){
+  const highestRankByGroup=new Map();
+  templateItems.forEach(i=>{
+    const g=i.exercise?.progression_group;
+    if(!g) return;
+    const rank=i.exercise.progression_rank??0;
+    if(!highestRankByGroup.has(g)||rank>highestRankByGroup.get(g)) highestRankByGroup.set(g,rank);
+  });
+  const authoredIds=new Set(templateItems.map(i=>i.exercise_id));
+  const usedIds=new Set();
+  return templateItems.slice().sort((a,b)=>a.sort_order-b.sort_order)
+    .map(item=>{
+      const g=item.exercise?.progression_group;
+      const isHighestRankSlot=!g||item.exercise.progression_rank===highestRankByGroup.get(g);
+      const saved=isHighestRankSlot?currentProgressionExercise(item.exercise):item.exercise;
+      const resolved=(saved.progression_rank??0)>=(item.exercise.progression_rank??0)?saved:item.exercise;
+      const collides=resolved.id!==item.exercise_id&&(authoredIds.has(resolved.id)||usedIds.has(resolved.id));
+      const finalExercise=collides?item.exercise:resolved;
+      usedIds.add(finalExercise.id);
+      return finalExercise.id===item.exercise_id?item:{...item,exercise:finalExercise,exercise_id:finalExercise.id};
+    });
+}
+
 let startingWorkout=false;
 // Shown before a fresh workout is actually created, so the member sees what the routine
 // involves and taps a deliberate "Start training" rather than jumping straight into a live
@@ -5615,16 +5657,16 @@ function openWorkoutOverview(templateId){
   }
   const tpl=state.templates.find(x=>x.id===templateId);
   if(!tpl) return;
-  const its=state.items.filter(i=>i.template_id===templateId).slice().sort((a,b)=>a.sort_order-b.sort_order);
+  const templateItems=state.items.filter(i=>i.template_id===templateId);
   // The variant actually trained is the saved rank of the line, not whatever the routine slot
   // was authored with — the overview used to name the authored one and then start a different
   // exercise, which is also why the fatigue check has to run on the resolved list.
-  const resolved=its.map(i=>({...i,exercise:currentProgressionExercise(i.exercise)}));
+  const resolved=resolveTemplateProgressionItems(templateItems);
   const fatigued=skillFatigueWarnings(resolved.map(i=>i.exercise));
   $('modal').classList.add('show');
   $('modalCard').innerHTML=`
     <div class="row"><h1>${esc(tpl.name)}</h1><button class="x" onclick="closeModal()" aria-label="${esc(t('common.close'))}">${icon('close',20)}</button></div>
-    <p class="muted">${its.length} ${esc(tp(its.length,'common.exercises'))}${tpl.weekday!=null?' · '+DOW[tpl.weekday]:''}</p>
+    <p class="muted">${templateItems.length} ${esc(tp(templateItems.length,'common.exercises'))}${tpl.weekday!=null?' · '+DOW[tpl.weekday]:''}</p>
     ${fatigued.length?`<section class="card" style="margin-top:14px;border-color:rgba(212,72,84,.30);background:#fff7f7">
       <div class="eyebrow" style="color:var(--pink)">${esc(t('fatigue.title'))}</div>
       ${fatigued.map(f=>`<p style="margin-top:8px">${t('fatigue.warn',{name:esc(f.exercise.name),muscle:esc(muscleLabel(f.muscle)),score:f.score})}</p>`).join('')}
@@ -5662,36 +5704,7 @@ async function startWorkout(templateId){
   }
   const tpl=state.templates.find(x=>x.id===templateId);
   const templateItems=state.items.filter(i=>i.template_id===templateId);
-  // A routine can deliberately include more than one rung of the same progression ladder in one
-  // day (e.g. Wall Handstand as a fixed technique slot before Freestanding Handstand as the main
-  // set that actually progresses — see migration 060's Wednesday routine). Only the
-  // highest-rank authored slot per progression_group tracks the user's saved progression state;
-  // lower authored rungs stay exactly what they are regardless of how far the user has
-  // progressed. A collision guard on top of that (authored ids + ids already assigned this
-  // pass) covers any resolved variant that happens to match another slot's exercise, including
-  // when it's not itself one of this routine's authored exercises. Both matter: resolving every
-  // same-group slot (or resolving past a target another slot already owns) would collapse two
-  // distinct exercises into the same exercise_id and violate the (session_id, exercise_id,
-  // set_idx) uniqueness on skandi_sets at insert time.
-  const highestRankByGroup=new Map();
-  templateItems.forEach(i=>{
-    const g=i.exercise?.progression_group;
-    if(!g) return;
-    const rank=i.exercise.progression_rank??0;
-    if(!highestRankByGroup.has(g)||rank>highestRankByGroup.get(g)) highestRankByGroup.set(g,rank);
-  });
-  const authoredIds=new Set(templateItems.map(i=>i.exercise_id));
-  const usedIds=new Set();
-  const its=templateItems.slice().sort((a,b)=>a.sort_order-b.sort_order)
-    .map(item=>{
-      const g=item.exercise?.progression_group;
-      const isHighestRankSlot=!g||item.exercise.progression_rank===highestRankByGroup.get(g);
-      const resolved=isHighestRankSlot?currentProgressionExercise(item.exercise):item.exercise;
-      const collides=resolved.id!==item.exercise_id&&(authoredIds.has(resolved.id)||usedIds.has(resolved.id));
-      const finalExercise=collides?item.exercise:resolved;
-      usedIds.add(finalExercise.id);
-      return finalExercise.id===item.exercise_id?item:{...item,exercise:finalExercise,exercise_id:finalExercise.id};
-    });
+  const its=resolveTemplateProgressionItems(templateItems);
   if(!tpl||!its.length) return;
   startingWorkout=true;
   try{
