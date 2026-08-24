@@ -8,16 +8,16 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="Skandi Fit">
 <meta name="application-name" content="Skandi Fit">
-<link rel="manifest" href="/skandi-manifest.json?v=20260823-9">
-<link rel="apple-touch-icon" sizes="180x180" href="/icons/skandi-180.png?v=20260823-9">
-<link rel="icon" type="image/png" sizes="192x192" href="/icons/skandi-192.png?v=20260823-9">
+<link rel="manifest" href="/skandi-manifest.json?v=20260824-2">
+<link rel="apple-touch-icon" sizes="180x180" href="/icons/skandi-180.png?v=20260824-2">
+<link rel="icon" type="image/png" sizes="192x192" href="/icons/skandi-192.png?v=20260824-2">
 <title>Skandi Fit</title>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="/skandi-recovery.js?v=20260823-9"></script>
-<script src="/body-figure.js?v=20260823-9"></script>
-<script src="/skandi-nutrition.js?v=20260823-9"></script>
-<script src="/skandi-load.js?v=20260823-9"></script>
-<script src="/skandi-brief.js?v=20260823-9"></script>
+<script src="/skandi-recovery.js?v=20260824-2"></script>
+<script src="/body-figure.js?v=20260824-2"></script>
+<script src="/skandi-nutrition.js?v=20260824-2"></script>
+<script src="/skandi-load.js?v=20260824-2"></script>
+<script src="/skandi-brief.js?v=20260824-2"></script>
 <style>
 :root{
   --bg:#eef4f8;
@@ -524,7 +524,7 @@ textarea.field{min-height:112px;text-align:left;resize:vertical}
 // Versión compartida con app.html (APP_VERSION) y sw.js (CACHE_VERSION): un solo service
 // worker sirve las dos apps, así que una sola cadena las invalida a las dos. Al cambiarla
 // hay que actualizarla también en los ?v= del <head>, en index.html y en los dos manifests.
-const SKANDI_VERSION='20260823-9';
+const SKANDI_VERSION='20260824-2';
 const SUPABASE_URL='https://pmpjteuqjusbiduevbwq.supabase.co';
 const SUPABASE_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBtcGp0ZXVxanVzYmlkdWV2YndxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc2OTI1NjUsImV4cCI6MjA5MzI2ODU2NX0.XbMzZoo2yqtrD8znLnyo_1zDfrdJAvAPj1lqGOyXnLw';
 const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
@@ -573,12 +573,15 @@ en:{
   'food.seedDone':'Added {n} starter dishes to your catalog.','food.seedNothingNew':"Nothing new to add — you've already got them.",
   'venue.casa':'Home','venue.restaurante':'Restaurant','venue.fonda':'Diner','venue.otro':'Other',
   'meal.desayuno':'Breakfast','meal.comida':'Lunch','meal.cena':'Dinner','meal.snack':'Snack',
+  'meal.pre_entreno':'Pre-workout','meal.post_entreno':'Post-workout',
   'food.describe':'What did you eat?','food.describePh':'two eggs with beans and a tortilla',
   'food.context':'Context (optional)','food.contextPh':'half portion, extra cream…',
   'food.photoHint':'A photo of the plate. Adding context makes it much more accurate.',
   'food.takePhoto':'Choose photo','food.analyze':'Analyze','food.uploading':'Uploading…',
   'food.barcodePh':'Barcode number','food.scan':'Scan','food.scanning':'Point at the barcode',
   'food.noScanner':'Your browser cannot scan. Type the number.',
+  'food.scanFromPhoto':'Choose photo from library','food.scanningPhoto':'Reading the photo…',
+  'food.noBarcodeInPhoto':'No barcode found in that photo. Try another one or type the number.',
   'food.grams':'Grams','food.gramsShort':'g','food.portion':'Portion','food.portionOf':'How much of {name}?',
   'food.serving':'1 serving = {g} g','food.addToMeal':'Add',
   'food.items':'Items','food.cookingFat':'Cooking fat','food.cookingFatHint':'Uncheck it if you cooked without oil.',
@@ -595,12 +598,16 @@ en:{
   'food.newFood':'New food','food.per100':'Per 100 g','food.name':'Name',
   'food.sugar':'Sugar','food.addedSugar':'Added sugar','food.sugarCap':'cap','food.fiber':'Fiber','food.targetSugar':'Added sugar cap',
   'food.sugarHint':'A ceiling, not a goal — it turns red when you go over. Whole fruit and plain dairy don\'t count against it, only added sugar does. Leave it empty to ignore it.',
-  'food.trainHigh':'Hard training day','food.trainLow':'Rest day','food.trainNormal':'Average day',
+  'food.dietNotes':'Your diet plan (optional)',
+  'food.dietNotesPh':'Paste your coach\'s plan or your own rules: foods, portions, timing…',
+  'food.dietNotesHint':'"¿Qué como?" reads this and grounds its suggestions in it instead of generic advice. Leave it empty to keep the generic version.',
+  'food.trainHigh':'Hard training day','food.trainLow':'Rest day','food.trainLight':'Light training day','food.trainNormal':'Average day',
   'food.trainPlanned':'{kcal} kcal planned · {delta} vs your average day',
   'food.trainLogged':'{kcal} kcal logged · {delta} vs your average day',
   'food.trainAdjust':'Today: {kcal} kcal and {carbs} g of carbs',
   'food.trainWhy':'Your target already assumes you train on an average week, so only the difference is adjusted.',
   'food.trainNoPlan':'Nothing scheduled today.',
+  'food.coachTarget':'Your coach\'s target for today',
   'food.when':'When did you eat this?','food.whenFromPhoto':'Suggested from the photo\'s date — check it.',
   'food.errFuture':'You can\'t log a meal in the future.','food.changeTime':'Change time',
   'food.suggestTitle':'What should I eat?','food.suggestHint':'A cooking idea to hit today\'s macros, and examples for around your workout.',
@@ -1137,12 +1144,15 @@ es:{
   'food.seedDone':'Se agregaron {n} platillos iniciales a tu catálogo.','food.seedNothingNew':'Nada nuevo que agregar — ya los tienes.',
   'venue.casa':'Casa','venue.restaurante':'Restaurante','venue.fonda':'Fonda','venue.otro':'Otro',
   'meal.desayuno':'Desayuno','meal.comida':'Comida','meal.cena':'Cena','meal.snack':'Snack',
+  'meal.pre_entreno':'Pre-entreno','meal.post_entreno':'Post-entreno',
   'food.describe':'¿Qué comiste?','food.describePh':'dos huevos con frijoles y una tortilla',
   'food.context':'Contexto (opcional)','food.contextPh':'media porción, con crema extra…',
   'food.photoHint':'Una foto del plato. Agregar contexto la hace mucho más precisa.',
   'food.takePhoto':'Elegir foto','food.analyze':'Analizar','food.uploading':'Subiendo…',
   'food.barcodePh':'Número del código','food.scan':'Escanear','food.scanning':'Apunta al código de barras',
   'food.noScanner':'Tu navegador no puede escanear. Escribe el número.',
+  'food.scanFromPhoto':'Elegir foto de la galería','food.scanningPhoto':'Leyendo la foto…',
+  'food.noBarcodeInPhoto':'No encontramos un código de barras en esa foto. Prueba otra o escribe el número.',
   'food.grams':'Gramos','food.gramsShort':'g','food.portion':'Porción','food.portionOf':'¿Cuánto de {name}?',
   'food.serving':'1 porción = {g} g','food.addToMeal':'Agregar',
   'food.items':'Alimentos','food.cookingFat':'Aceite de cocción','food.cookingFatHint':'Quítale la palomita si cocinaste sin aceite.',
@@ -1159,12 +1169,16 @@ es:{
   'food.newFood':'Alimento nuevo','food.per100':'Por 100 g','food.name':'Nombre',
   'food.sugar':'Azúcar','food.addedSugar':'Azúcar añadida','food.sugarCap':'techo','food.fiber':'Fibra','food.targetSugar':'Techo de azúcar añadida',
   'food.sugarHint':'Es un techo, no una meta: se pone rojo al pasarte. La fruta entera y los lácteos naturales no cuentan contra él, solo la azúcar añadida. Déjalo vacío si no lo quieres vigilar.',
-  'food.trainHigh':'Día de entrenamiento fuerte','food.trainLow':'Día de descanso','food.trainNormal':'Día promedio',
+  'food.dietNotes':'Tu plan de alimentación (opcional)',
+  'food.dietNotesPh':'Pega el plan de tu coach o tus propias reglas: alimentos, porciones, timing…',
+  'food.dietNotesHint':'"¿Qué como?" lee esto y basa sus sugerencias en tu plan en vez de un consejo genérico. Déjalo vacío para seguir con la versión genérica.',
+  'food.trainHigh':'Día de entrenamiento fuerte','food.trainLow':'Día de descanso','food.trainLight':'Día de carga ligera','food.trainNormal':'Día promedio',
   'food.trainPlanned':'{kcal} kcal planeadas · {delta} contra tu día promedio',
   'food.trainLogged':'{kcal} kcal registradas · {delta} contra tu día promedio',
   'food.trainAdjust':'Hoy: {kcal} kcal y {carbs} g de carbos',
   'food.trainWhy':'Tu meta ya supone que entrenas en una semana normal, así que solo se ajusta la diferencia.',
   'food.trainNoPlan':'Hoy no tienes nada programado.',
+  'food.coachTarget':'La meta de tu coach para hoy',
   'food.when':'¿Cuándo comiste esto?','food.whenFromPhoto':'Sugerido por la fecha de la foto — revísala.',
   'food.errFuture':'No puedes registrar una comida en el futuro.','food.changeTime':'Cambiar hora',
   'food.suggestTitle':'¿Qué como?','food.suggestHint':'Una idea para completar tus macros de hoy, y ejemplos para antes/después de entrenar.',
@@ -1751,7 +1765,7 @@ const EXERCISE_PRESETS={
 };
 
 const ACTIVE_WORKOUT_MAX_HOURS=18;
-const state={user:null,profile:null,view:'home',authMode:'login',exercises:[],templates:[],items:[],sessions:[],sets:[],externalActivities:[],activityTemplates:[],progressionState:[],progressionEvents:[],skillGoals:[],trainingBlocks:[],planned:[],plannedReady:true,ensuredWeeks:new Set(),weekSig:null,trainTab:'today',calOffset:0,calWeeks:4,dayOpen:null,bodyweightLogs:[],programs:[],programDays:[],active:null,activeItems:[],timer:null,elapsed:0,rest:0,restTotal:0,bodyFlip:'front',weightUnit:localStorage.getItem('skandi_weight_unit')||'kg',weightUnitOverrides:(()=>{try{return JSON.parse(localStorage.getItem('skandi_weight_unit_overrides')||'{}');}catch(e){return {};}})(),expandedRoutines:new Set(),progressTab:'summary',progressQuery:'',progressMetric:'best',historyFilter:{month:'all',title:'all'},crewFeedLimit:6,swapTarget:null,swapQuery:'',setOptionsId:null,skillTab:null,addExOpen:false,addExQuery:'',pausedMs:0,pausedAt:null,floatTimerOpen:false,meals:[],mealItems:[],foods:[],dishes:[],dishItems:[],nutritionTargets:null,aiCallsToday:0,foodDayOffset:0,foodPicker:{query:'',mealId:null},pendingMeal:null,wellness:[],intervalsUnmatched:[],stravaStatus:null,intervalsStatus:null,skandiSettings:null,stravaSyncing:false,intervalsSyncing:false,bodyMeasurements:[],progressPhotos:[],pendingPhoto:null,bodyTab:'recovery',supplements:[],supplementLogs:[]};
+const state={user:null,profile:null,view:'home',authMode:'login',exercises:[],templates:[],items:[],sessions:[],sets:[],externalActivities:[],activityTemplates:[],progressionState:[],progressionEvents:[],skillGoals:[],trainingBlocks:[],planned:[],plannedReady:true,ensuredWeeks:new Set(),weekSig:null,trainTab:'today',calOffset:0,calWeeks:4,dayOpen:null,bodyweightLogs:[],programs:[],programDays:[],active:null,activeItems:[],timer:null,elapsed:0,rest:0,restTotal:0,bodyFlip:'front',weightUnit:localStorage.getItem('skandi_weight_unit')||'kg',weightUnitOverrides:(()=>{try{return JSON.parse(localStorage.getItem('skandi_weight_unit_overrides')||'{}');}catch(e){return {};}})(),expandedRoutines:new Set(),progressTab:'summary',progressQuery:'',progressMetric:'best',historyFilter:{month:'all',title:'all'},crewFeedLimit:6,swapTarget:null,swapQuery:'',setOptionsId:null,skillTab:null,addExOpen:false,addExQuery:'',pausedMs:0,pausedAt:null,floatTimerOpen:false,meals:[],mealItems:[],foods:[],dishes:[],dishItems:[],nutritionTargets:null,nutritionTargetOverrides:[],aiCallsToday:0,foodDayOffset:0,foodPicker:{query:'',mealId:null},pendingMeal:null,wellness:[],intervalsUnmatched:[],stravaStatus:null,intervalsStatus:null,skandiSettings:null,stravaSyncing:false,intervalsSyncing:false,bodyMeasurements:[],progressPhotos:[],pendingPhoto:null,bodyTab:'recovery',supplements:[],supplementLogs:[]};
 let builderState={selected:new Map(),group:'All'};
 
 const $=id=>document.getElementById(id);
@@ -7180,7 +7194,7 @@ function empty(msg){ return `<div class="empty">${esc(msg)}</div>`; }
 // instantáneo y funciona sin señal. Solo lo que nunca has comido pasa por el modelo.
 // ═══════════════════════════════════════════════════════════════════════════
 
-const MEAL_TYPES=['desayuno','comida','cena','snack'];
+const MEAL_TYPES=['desayuno','comida','cena','snack','pre_entreno','post_entreno'];
 const VENUES=['casa','restaurante','fonda','otro'];
 const MEAL_PHOTO_MAX_SIDE=1024;   // la API de vision no gana nada con más de ~1568 px
 const MEAL_PHOTO_QUALITY=0.8;
@@ -7221,17 +7235,30 @@ async function loadIntegrations(){
   state.wellness=wellness||[];
 }
 
+// El mismo fetch se reintenta una vez si Safari lo corta a medio viaje (ver isTransientFetchError
+// más arriba): las acciones que pasan por aquí (barcode, meal-suggestion, intervals-*, strava-*)
+// son upserts o lecturas del lado del servidor, así que repetir la llamada no duplica nada. Las
+// que sí podrían duplicar (analyze/append de una comida) no usan este helper — ver analyzeMeal.
 async function skandiApi(action,body){
   const {data:{session}}=await sb.auth.getSession();
   if(!session) throw new Error(t('auth.sessionExpired'));
-  const res=await fetch('/api/skandi',{
-    method:'POST',
-    headers:{'Content-Type':'application/json',Authorization:`Bearer ${session.access_token}`},
-    body:JSON.stringify({action,...(body||{})})
-  });
-  const data=await res.json().catch(()=>({}));
-  if(!res.ok) throw new Error(data.message||t(action.startsWith('intervals-')?'intervals.failed':'strava.failed'));
-  return data;
+  const call=async()=>{
+    const res=await fetch('/api/skandi',{
+      method:'POST',
+      headers:{'Content-Type':'application/json',Authorization:`Bearer ${session.access_token}`},
+      body:JSON.stringify({action,...(body||{})})
+    });
+    const data=await res.json().catch(()=>({}));
+    if(!res.ok) throw new Error(data.message||t(action.startsWith('intervals-')?'intervals.failed':'strava.failed'));
+    return data;
+  };
+  try{
+    return await call();
+  }catch(e){
+    if(!isTransientFetchError(e)) throw e;
+    await new Promise(r=>setTimeout(r,900));
+    return await call();
+  }
 }
 
 async function connectIntervals(){
@@ -7412,16 +7439,19 @@ async function loadNutrition(){
   if(!state.user) return;
   // 45 días: suficiente para la tira de tendencia semanal sin traerse el historial entero.
   const since=new Date();since.setDate(since.getDate()-45);
-  const [{data:meals},{data:items},{data:foods},{data:dishes},{data:dishItems},{data:targets},{data:usage}]=await Promise.all([
-    sb.from('skandi_meals').select('*').eq('user_id',state.user.id).gte('eaten_at',since.toISOString()).order('eaten_at',{ascending:false}),
-    sb.from('skandi_meal_items').select('*').eq('user_id',state.user.id).order('sort_order'),
-    sb.from('skandi_foods').select('*').or(`user_id.eq.${state.user.id},user_id.is.null`).order('times_used',{ascending:false}).limit(300),
-    sb.from('skandi_dishes').select('*').eq('user_id',state.user.id).order('times_used',{ascending:false}),
-    sb.from('skandi_dish_items').select('*').eq('user_id',state.user.id).order('sort_order'),
-    sb.from('skandi_nutrition_targets').select('*').eq('user_id',state.user.id).maybeSingle(),
-    sb.from('skandi_ai_usage').select('calls').eq('user_id',state.user.id).eq('day',dayKey(new Date())).maybeSingle()
+  const [{data:meals},{data:items},{data:foods},{data:dishes},{data:dishItems},{data:targets},{data:usage},{data:overrides}]=await Promise.all([
+    withNetworkRetry(()=>sb.from('skandi_meals').select('*').eq('user_id',state.user.id).gte('eaten_at',since.toISOString()).order('eaten_at',{ascending:false})),
+    withNetworkRetry(()=>sb.from('skandi_meal_items').select('*').eq('user_id',state.user.id).order('sort_order')),
+    withNetworkRetry(()=>sb.from('skandi_foods').select('*').or(`user_id.eq.${state.user.id},user_id.is.null`).order('times_used',{ascending:false}).limit(300)),
+    withNetworkRetry(()=>sb.from('skandi_dishes').select('*').eq('user_id',state.user.id).order('times_used',{ascending:false})),
+    withNetworkRetry(()=>sb.from('skandi_dish_items').select('*').eq('user_id',state.user.id).order('sort_order')),
+    withNetworkRetry(()=>sb.from('skandi_nutrition_targets').select('*').eq('user_id',state.user.id).maybeSingle()),
+    withNetworkRetry(()=>sb.from('skandi_ai_usage').select('calls').eq('user_id',state.user.id).eq('day',dayKey(new Date())).maybeSingle()),
+    // migración 094: metas por fecha específica (p.ej. una semana de descarga), por encima de
+    // la meta base de arriba. Últimos 45 días para atrás y todo lo que haya hacia delante.
+    withNetworkRetry(()=>sb.from('skandi_nutrition_target_overrides').select('*').eq('user_id',state.user.id).gte('target_date',dayKey(since)))
   ]);
-  // Todo cae a vacío si las migraciones 073-076 no se han corrido: el resto de la app no
+  // Todo cae a vacío si las migraciones 073-076 y 094 no se han corrido: el resto de la app no
   // tiene por qué dejar de funcionar porque falte la parte de nutrición.
   state.meals=meals||[];
   state.mealItems=items||[];
@@ -7430,6 +7460,27 @@ async function loadNutrition(){
   state.dishItems=dishItems||[];
   state.nutritionTargets=targets||null;
   state.aiCallsToday=usage?.calls||0;
+  state.nutritionTargetOverrides=overrides||[];
+}
+
+// La meta de un día concreto: la fila por fecha (migración 094) manda donde exista — pisa solo
+// los campos que trae, el resto cae a la meta base — y si no hay override, es la meta base tal
+// cual. Sin meta base no hay nada que mostrar, override o no.
+function nutritionOverrideFor(key){
+  return state.nutritionTargetOverrides.find(o=>o.target_date===key)||null;
+}
+function targetsForDay(key){
+  const base=state.nutritionTargets;
+  if(!base) return null;
+  const override=nutritionOverrideFor(key);
+  if(!override) return base;
+  const pick=(field)=>override[field]!=null?override[field]:base[field];
+  return {...base,
+    kcal_target:pick('kcal_target'),
+    protein_g_target:pick('protein_g_target'),
+    carbs_g_target:pick('carbs_g_target'),
+    fat_g_target:pick('fat_g_target')
+  };
 }
 
 // ---- Vista ----
@@ -7438,7 +7489,7 @@ function foodView(){
   const key=foodDay();
   const meals=mealsOfDay(key);
   const totals=SkandiNutrition.dayTotals(meals);
-  const targets=state.nutritionTargets;
+  const targets=targetsForDay(key);
   const isToday=state.foodDayOffset===0;
   const label=isToday?t('food.today'):new Date(key+'T12:00:00').toLocaleDateString(LANG==='es'?'es-MX':'en-US',{weekday:'long',day:'numeric',month:'short'});
   return `
@@ -7471,7 +7522,9 @@ function foodView(){
 // Lo que entrenas hoy cambia lo que deberías comer hoy — pero solo la DIFERENCIA contra tu
 // día promedio, porque la meta base ya supone que entrenas (ver skandi-nutrition.js).
 function trainingDayCard(){
-  const targets=state.nutritionTargets;
+  const today=dayKey(new Date());
+  const override=nutritionOverrideFor(today);
+  const targets=targetsForDay(today);
   if(!targets||state.foodDayOffset!==0) return '';
   const weightKg=latestWeightKg();
   if(!weightKg) return '';
@@ -7482,7 +7535,6 @@ function trainingDayCard(){
     templateItems:state.items,
     activityTemplates:state.activityTemplates
   };
-  const today=dayKey(new Date());
   const loggedToday=state.externalActivities.filter(a=>dayKey(a.performed_at)===today);
   const loggedSets=state.sets.filter(x=>x.user_id===state.user.id&&x.done&&dayKey(x.created_at)===today).length;
   const loggedKcal=loggedToday.reduce((acc,a)=>acc+SkandiNutrition.activityKcal(a,weightKg),0)
@@ -7502,7 +7554,25 @@ function trainingDayCard(){
   if(!rec||(!rec.plannedKcal&&!rec.todayKcal)) return '';
 
   const sessions=SkandiNutrition.plannedSessions(todayDow(),plan);
-  const label=rec.level==='alto'?t('food.trainHigh'):rec.level==='bajo'?t('food.trainLow'):t('food.trainNormal');
+
+  // El coach ya fijó el número exacto de hoy (migración 094, metas por fecha): no hace falta
+  // adivinar con el promedio semanal, y menos etiquear de "descanso" un día que sí entrena —
+  // aquí solo queda el consejo de timing (fuelPlanHtml), no el delta ni la etiqueta alto/bajo.
+  if(override){
+    const fuel=fuelPlanHtml(sessions,weightKg,rec);
+    if(!fuel) return '';
+    return `<section class="card">
+      <div class="eyebrow">${esc(t('food.coachTarget'))}</div>
+      ${fuel}
+    </section>`;
+  }
+
+  // "Día de descanso" solo si de verdad no hay sesión planeada hoy — si la hay pero quema
+  // menos que tu promedio semanal (p.ej. un día de skills corto), es un día ligero, no un
+  // descanso: decir lo contrario es lo que contradecía la tarjeta de "cómo comerlo" de abajo.
+  const label=rec.level==='alto'?t('food.trainHigh')
+    :rec.level==='bajo'?(sessions.length?t('food.trainLight'):t('food.trainLow'))
+    :t('food.trainNormal');
   const deltaStr=(rec.delta>0?'+':'')+rec.delta+' kcal';
   const line=(rec.fromLog?t('food.trainLogged',{kcal:rec.todayKcal,delta:deltaStr})
                          :t('food.trainPlanned',{kcal:rec.todayKcal,delta:deltaStr}))
@@ -7616,7 +7686,7 @@ async function loadMealSuggestion(detail){
     <p class="muted">${esc(t('food.suggestLoading'))}</p>`;
 
   try{
-    const data=await skandiApi('meal-suggestion',{remaining,sessions,catalog,detail});
+    const data=await skandiApi('meal-suggestion',{remaining,sessions,catalog,detail,diet_notes:targets.diet_notes||null});
     await loadNutrition();
     if(state.view==='food') render();
     $('modalCard').innerHTML=`
@@ -8188,6 +8258,12 @@ async function submitMealForAnalysis(){
 async function appendMealPhoto(pending,desc){
   const btn=$('mealGo');
   btn.disabled=true;btn.textContent=t('food.uploading');
+  // skandi_append_meal_items() AGREGA renglones (ver migración 092): si el fetch se corta
+  // ("Load failed" de Safari) después de que el servidor ya escribió, reintentar a ciegas
+  // duplicaría la comida. Por eso, antes de avisar que falló, se pregunta si en realidad sí
+  // se guardó — mismo espíritu que analyzeMeal, pero mirando los renglones, no analysis_status
+  // (que aquí no cambia: la comida ya estaba 'ready' antes de agregarle la foto).
+  const beforeCount=itemsOfMeal(pending.mealId).length;
   try{
     let photoPath=null;
     if(pending.blob){
@@ -8210,6 +8286,15 @@ async function appendMealPhoto(pending,desc){
     setView('food');
     openMealDetail(pending.mealId);
   }catch(e){
+    if(isTransientFetchError(e)){
+      const appended=await waitForAppendedItems(pending.mealId,beforeCount);
+      if(appended){
+        closeModal();
+        state.pendingMeal=null;
+        setView('food');
+        return openMealDetail(pending.mealId);
+      }
+    }
     btn.disabled=false;btn.textContent=t('food.addToMeal');
     alert(e.message||String(e));
   }
@@ -8287,6 +8372,18 @@ async function waitForAnalysis(mealId){
     if(data.analysis_status!=='pending') return data;
   }
   return null;
+}
+
+// El equivalente de waitForAnalysis para appendMealPhoto: ahí no hay un analysis_status que
+// cambie (la comida ya estaba 'ready'), así que la señal de "sí se guardó" es que aparezcan
+// renglones nuevos.
+async function waitForAppendedItems(mealId,beforeCount){
+  for(let i=0;i<ANALYSIS_POLL_TRIES;i++){
+    await new Promise(r=>setTimeout(r,ANALYSIS_POLL_MS));
+    const {count}=await sb.from('skandi_meal_items').select('id',{count:'exact',head:true}).eq('meal_id',mealId);
+    if((count||0)>beforeCount){ await loadNutrition(); return true; }
+  }
+  return false;
 }
 
 async function markMealFailed(mealId,message){
@@ -8478,7 +8575,9 @@ function openBarcode(mealId=null){
     ${canScan?`<video id="bcVideo" playsinline muted style="width:100%;border-radius:12px;background:#000;max-height:260px;object-fit:cover"></video>
       <p class="muted" style="margin-top:8px" id="bcScanHint">${esc(t('food.scanning'))}</p>`
       :`<p class="muted">${esc(t('food.noScanner'))}</p>`}
-    <label class="eyebrow">${esc(t('food.barcodePh'))}</label>
+    <input id="bcPhotoInput" type="file" accept="image/*" style="display:none" onchange="onBarcodePhotoPicked(this)">
+    <button type="button" class="btn" style="width:100%;margin-top:8px" onclick="document.getElementById('bcPhotoInput').click()">${icon('image',18)} ${esc(t('food.scanFromPhoto'))}</button>
+    <label class="eyebrow" style="margin-top:12px">${esc(t('food.barcodePh'))}</label>
     <input id="bcNumber" class="field" type="text" inputmode="numeric" autocomplete="off" placeholder="7501000673209">
     <button class="btn primary" style="width:100%;margin-top:12px" onclick="lookupBarcode()">${esc(t('food.scan'))}</button>`;
   if(canScan) startBarcodeScan();
@@ -8543,6 +8642,48 @@ function stopBarcodeScan(){
   if(bcZxingControls){ try{bcZxingControls.stop();}catch(e){} bcZxingControls=null; }
 }
 
+// Escanear de una foto ya tomada (galería o cámara del sistema), para el código chico o con
+// poca luz que la cámara en vivo no agarra bien, o cuando no hay cámara disponible. Mismos dos
+// motores que startBarcodeScan, sobre una imagen quieta en vez de un stream de video.
+async function onBarcodePhotoPicked(input){
+  const file=input.files&&input.files[0];
+  input.value='';
+  if(!file) return;
+  stopBarcodeScan();
+  if($('bcScanHint')) $('bcScanHint').textContent=t('food.scanningPhoto');
+  const code=await decodeBarcodeFromFile(file).catch(()=>null);
+  if(!code){
+    if($('bcScanHint')) $('bcScanHint').textContent=t('food.noBarcodeInPhoto');
+    return;
+  }
+  $('bcNumber').value=code;
+  lookupBarcode();
+}
+
+async function decodeBarcodeFromFile(file){
+  if(typeof window.BarcodeDetector!=='undefined'){
+    const bitmap=await createImageBitmap(file);
+    const detector=new window.BarcodeDetector({formats:['ean_13','ean_8','upc_a','upc_e','code_128']});
+    const codes=await detector.detect(bitmap);
+    return codes.length?codes[0].rawValue:null;
+  }
+  await loadZXing();
+  if(!window.ZXingBrowser) return null;
+  const reader=new ZXingBrowser.BrowserMultiFormatReader();
+  reader.possibleFormats=[
+    ZXingBrowser.BarcodeFormat.EAN_13,ZXingBrowser.BarcodeFormat.EAN_8,
+    ZXingBrowser.BarcodeFormat.UPC_A,ZXingBrowser.BarcodeFormat.UPC_E,
+    ZXingBrowser.BarcodeFormat.CODE_128
+  ];
+  const url=URL.createObjectURL(file);
+  try{
+    const result=await reader.decodeFromImageUrl(url);
+    return result?result.getText():null;
+  }finally{
+    URL.revokeObjectURL(url);
+  }
+}
+
 function closeBarcode(){
   stopBarcodeScan();
   bcMealId=null;
@@ -8556,11 +8697,14 @@ async function lookupBarcode(){
   stopBarcodeScan();
   try{
     const {data:{session}}=await sb.auth.getSession();
-    const res=await fetch('/api/skandi',{
+    const call=()=>fetch('/api/skandi',{
       method:'POST',
       headers:{'Content-Type':'application/json',Authorization:`Bearer ${session.access_token}`},
       body:JSON.stringify({action:'barcode',barcode:code})
     });
+    let res;
+    try{ res=await call(); }
+    catch(e){ if(!isTransientFetchError(e)) throw e; await new Promise(r=>setTimeout(r,900)); res=await call(); }
     const body=await res.json().catch(()=>({}));
     if(!res.ok||!body.food) return alert(body.message||t('food.noMatches'));
     await loadNutrition();
@@ -8735,6 +8879,9 @@ function openTargets(){
     <label class="eyebrow">${esc(t('food.targetSugar'))}</label>
     <input id="tgS" class="field" type="number" min="0" max="500" inputmode="numeric" value="${tg?.added_sugar_g_target??tg?.sugar_g_target??''}">
     <p class="muted" style="font-size:12px;margin-top:6px">${esc(t('food.sugarHint'))}</p>
+    <label class="eyebrow" style="margin-top:10px">${esc(t('food.dietNotes'))}</label>
+    <textarea id="tgDietNotes" class="field" style="min-height:90px" placeholder="${esc(t('food.dietNotesPh'))}">${esc(tg?.diet_notes||'')}</textarea>
+    <p class="muted" style="font-size:12px;margin-top:6px">${esc(t('food.dietNotesHint'))}</p>
     <p class="muted" style="font-size:12px;margin-top:10px">${esc(t('food.targetHint'))}</p>
     <button class="btn primary" style="width:100%;margin-top:10px" onclick="saveTargets()">${esc(t('food.save'))}</button>`;
 }
@@ -8764,6 +8911,7 @@ async function saveTargets(){
   if(weightForCheck && SkandiNutrition.isLowEnergy(kcal,weightForCheck) && !confirm(t('food.lowEnergyConfirm'))) return;
   // Vacío significa "no me lo vigiles", que no es lo mismo que un techo de cero.
   const sugarCap=$('tgS').value===''?null:Math.round(Number($('tgS').value));
+  const dietNotes=($('tgDietNotes')?.value||'').trim().slice(0,4000)||null;
   const base={
     user_id:state.user.id,
     mode:$('tgMode').value,
@@ -8775,13 +8923,20 @@ async function saveTargets(){
     activity_factor:Number($('tgActivity').value),
     updated_at:new Date().toISOString()
   };
-  // El mismo campo de la UI escribe las dos columnas: sugar_g_target por si la migración 089
-  // no se ha corrido, added_sugar_g_target (el techo real, azúcar añadida) en cuanto exista.
-  const {error}=await writeToleratingMissingColumn(
-    withCol=>sb.from('skandi_nutrition_targets')
-      .upsert(withCol?{...base,added_sugar_g_target:sugarCap}:base,{onConflict:'user_id'}),
-    'added_sugar_g_target'
-  );
+  // El mismo campo de la UI escribe added_sugar_g_target (089) y diet_notes (097) por si sus
+  // migraciones no se han corrido todavía: se sueltan una por una, la que la base rechace, en
+  // vez de fallar por completo por una columna que ni siquiera se está intentando llenar.
+  let optional={added_sugar_g_target:sugarCap,diet_notes:dietNotes};
+  let error;
+  for(let tries=0;tries<=Object.keys(optional).length;tries++){
+    ({error}=await sb.from('skandi_nutrition_targets')
+      .upsert({...base,...optional},{onConflict:'user_id'}));
+    if(!error) break;
+    const missing=Object.keys(optional).find(c=>error.message&&error.message.includes(c));
+    if(!missing) break;
+    const{[missing]:_dropped,...rest}=optional;
+    optional=rest;
+  }
   if(error) return alert(error.message);
   closeModal();
   await loadNutrition();
