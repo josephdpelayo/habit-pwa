@@ -996,7 +996,7 @@ en:{
   'cross.avgRir':'Avg RIR','cross.avgQuality':'Avg quality','cross.endurance':'Endurance',
   'cross.worse':'{linked} of the {total} times you reported performing worse than usual, there was a hard endurance session (RPE≥7) in the previous 36h.',
 
-  'library.title':'Library','library.addExercise':'+ Exercise','library.search':'Search',
+  'library.title':'Library','library.addExercise':'+ Exercise',
   'library.empty':'No exercises found.',
 
   'builder.setsPh':'sets','builder.repsPh':'reps','builder.rirPh':'RIR',
@@ -1612,7 +1612,7 @@ es:{
   'cross.avgRir':'RIR prom.','cross.avgQuality':'Calidad prom.','cross.endurance':'Resistencia',
   'cross.worse':'{linked} de {total} veces que reportaste rendir peor de lo normal, hubo una sesión de resistencia intensa (RPE≥7) en las 36h previas.',
 
-  'library.title':'Catálogo','library.addExercise':'+ Ejercicio','library.search':'Buscar',
+  'library.title':'Catálogo','library.addExercise':'+ Ejercicio',
   'library.empty':'No se encontraron ejercicios.',
 
   'builder.setsPh':'series','builder.repsPh':'reps','builder.rirPh':'RIR',
@@ -4695,7 +4695,7 @@ function renderLibraryList(){
 }
 
 function exerciseList(list){
-  return list.map(e=>exerciseCard(e,false)).join('')||empty(t('library.empty'));
+  return list.map(exerciseCard).join('')||empty(t('library.empty'));
 }
 
 function muscleGroupOf(e){
@@ -4737,7 +4737,7 @@ function templateExerciseOption(e){
   </label>`;
 }
 
-function exerciseCard(e,tracking){
+function exerciseCard(e){
   const muscles=Object.entries(e.muscles||{}).sort((a,b)=>b[1]-a[1]);
   // Dos músculos: el tercero y el cuarto de un reparto suelen ser 13% y 9%, ruido para elegir
   // un ejercicio. El reparto completo sigue estando al abrirlo.
