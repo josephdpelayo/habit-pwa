@@ -8,17 +8,17 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="Skandi Fit">
 <meta name="application-name" content="Skandi Fit">
-<link rel="manifest" href="/skandi-manifest.json?v=20260825-05">
-<link rel="apple-touch-icon" sizes="180x180" href="/icons/skandi-180.png?v=20260825-05">
-<link rel="icon" type="image/png" sizes="192x192" href="/icons/skandi-192.png?v=20260825-05">
+<link rel="manifest" href="/skandi-manifest.json?v=20260825-06">
+<link rel="apple-touch-icon" sizes="180x180" href="/icons/skandi-180.png?v=20260825-06">
+<link rel="icon" type="image/png" sizes="192x192" href="/icons/skandi-192.png?v=20260825-06">
 <title>Skandi Fit</title>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="/skandi-recovery.js?v=20260825-05"></script>
-<script src="/body-figure.js?v=20260825-05"></script>
-<script src="/skandi-nutrition.js?v=20260825-05"></script>
-<script src="/skandi-load.js?v=20260825-05"></script>
-<script src="/skandi-brief.js?v=20260825-05"></script>
-<script src="/skandi-joint-load.js?v=20260825-05"></script>
+<script src="/skandi-recovery.js?v=20260825-06"></script>
+<script src="/body-figure.js?v=20260825-06"></script>
+<script src="/skandi-nutrition.js?v=20260825-06"></script>
+<script src="/skandi-load.js?v=20260825-06"></script>
+<script src="/skandi-brief.js?v=20260825-06"></script>
+<script src="/skandi-joint-load.js?v=20260825-06"></script>
 <style>
 :root{
   --bg:#eef4f8;
@@ -200,7 +200,12 @@ p{color:var(--muted);line-height:1.45;margin:0}
 .day span:nth-child(2){color:inherit;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .day>*{min-width:0}
 .week-lines{display:flex;flex-direction:column;gap:5px;min-width:0}
-.week-item{display:flex;align-items:center;gap:6px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;text-align:left;background:transparent;border:0;padding:0;font:inherit;color:inherit;cursor:pointer}
+/* display:block, no flex: el nombre es un nodo de texto suelto y en un contenedor flex eso
+   se envuelve en un item anónimo, al que `text-overflow` no le aplica. Por eso el nombre se
+   cortaba a filo ("Front Lever A + Pul") en vez de con puntos suspensivos: el overflow:hidden
+   sí recortaba, la elipsis nunca se pintaba. */
+.week-item{display:block;width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;text-align:left;background:transparent;border:0;padding:0;font:inherit;color:inherit;cursor:pointer}
+.week-item .glyph{margin-right:6px}
 .week-item.add{opacity:.7;font-weight:800}
 .week-item .glyph{font-style:normal;opacity:.75;flex:0 0 auto}
 /* Calendario (migración 080).
@@ -330,7 +335,8 @@ p{color:var(--muted);line-height:1.45;margin:0}
 .field-narrow{padding:13px 3px}
 .field.left{text-align:left}
 textarea.field{min-height:112px;text-align:left;resize:vertical}
-.check{height:48px;border-radius:10px;background:var(--panel2);color:var(--muted);border:1px solid var(--line);display:grid;place-items:center}
+.check{position:relative;height:48px;border-radius:10px;background:var(--panel2);color:var(--muted);border:1px solid var(--line);display:grid;place-items:center}
+.check.sm::after{content:"";position:absolute;inset:-4px}
 .check.done{background:var(--dof-navy);color:#fff}
 .set-remove{width:30px;height:48px;background:transparent;border:none;color:#c7ccd3;display:grid;place-items:center}
 .add-set-link{justify-self:start;background:transparent;border:none;box-shadow:none;color:var(--muted);font-weight:800;font-size:13px;padding:8px 2px;margin-top:2px}
@@ -405,7 +411,7 @@ textarea.field{min-height:112px;text-align:left;resize:vertical}
 .dot{width:10px;height:10px;border-radius:50%;background:var(--blue)}
 .leader{display:grid;grid-template-columns:1fr auto;gap:8px;border-top:1px solid var(--line);padding-top:12px;margin-top:12px}
 .body-fig-wrap{position:relative;margin-top:14px;text-align:center}
-.body-fig-wrap svg{width:auto;height:auto;max-width:100%;max-height:56vh;display:inline-block}
+.body-fig-wrap svg{width:auto;height:auto;max-width:100%;max-height:50vh;display:inline-block}
 .mini-body-card{display:grid;grid-template-columns:112px 1fr;gap:16px;align-items:center;overflow:hidden}
 .mini-body-fig{height:170px;display:grid;place-items:center;background:linear-gradient(180deg,#f7fbfe,#edf4f9);border:1px solid var(--line);border-radius:8px}
 .mini-body-fig svg{height:152px;max-width:100%}
@@ -427,6 +433,7 @@ textarea.field{min-height:112px;text-align:left;resize:vertical}
 .muscle-legend{display:flex;align-items:center;justify-content:center;gap:14px;margin-top:12px;flex-wrap:wrap}
 .muscle-legend span{display:flex;align-items:center;gap:6px;font-size:11px;color:var(--muted);font-weight:800;text-transform:uppercase;letter-spacing:.06em}
 .muscle-legend i{width:10px;height:10px;border-radius:50%;display:inline-block}
+.muscle-legend .scale{width:min(150px,38%);height:7px;border-radius:999px}
 .auth{position:relative;z-index:1;min-height:100dvh;display:grid;place-items:center;padding:24px}
 .auth-box{width:min(460px,100%);background:rgba(255,255,255,.90);border:1px solid rgba(1,36,86,.10);border-radius:8px;padding:24px;box-shadow:0 28px 70px rgba(1,36,86,.18)}
 .auth-logo{font-size:54px;font-weight:1000;color:var(--dof-navy)}
@@ -446,6 +453,8 @@ textarea.field{min-height:112px;text-align:left;resize:vertical}
 .lib-body strong{font-size:14.5px;font-weight:900;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .lib-body small{font-size:11.5px;font-weight:800;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .lib-play{color:var(--blue);display:flex;flex:0 0 auto}
+.thumb-initial{font-weight:1000;font-size:18px;color:var(--dof-steel);line-height:1}
+.thumb .thumb-initial{font-size:22px}
 /* Píldora de skill: el nivel a la derecha y la fracción del rango como filo inferior. */
 .skill-chips{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
 .skill-chip{position:relative;overflow:hidden;display:inline-flex;align-items:center;gap:8px;min-height:44px;
@@ -561,7 +570,7 @@ textarea.field{min-height:112px;text-align:left;resize:vertical}
 .seg button{min-height:44px}
 button.chip{min-height:44px}
 .pick{min-height:44px}
-.week-item{min-height:40px}
+.week-item{min-height:44px;line-height:44px}
 /* El "•••" sigue midiendo 30 px a la vista y 44 px al dedo. El inset cabe dentro del
    `gap` de su renglón, así que no le roba el toque a lo que tiene al lado. */
 .icon-btn{position:relative}
@@ -631,7 +640,7 @@ button.chip{min-height:44px}
 // Versión compartida con app.html (APP_VERSION) y sw.js (CACHE_VERSION): un solo service
 // worker sirve las dos apps, así que una sola cadena las invalida a las dos. Al cambiarla
 // hay que actualizarla también en los ?v= del <head>, en index.html y en los dos manifests.
-const SKANDI_VERSION='20260825-05';
+const SKANDI_VERSION='20260825-06';
 const SUPABASE_URL='https://pmpjteuqjusbiduevbwq.supabase.co';
 const SUPABASE_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBtcGp0ZXVxanVzYmlkdWV2YndxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc2OTI1NjUsImV4cCI6MjA5MzI2ODU2NX0.XbMzZoo2yqtrD8znLnyo_1zDfrdJAvAPj1lqGOyXnLw';
 const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
@@ -1530,7 +1539,7 @@ es:{
   'card.exCount':'{n} ej.','card.adaptedFrom':'Adaptada de {name}',
   'card.start':'Empezar','card.addToWeek':'+ Agregar a mi semana',
 
-  'crew.title':'Tripulación','crew.refresh':'Actualizar','crew.recentPrs':'Récords recientes',
+  'crew.title':'Crew','crew.refresh':'Actualizar','crew.recentPrs':'Récords recientes',
   'crew.prsEmpty':'Registra un levantamiento, hold o serie para armar la tabla.',
   'crew.feed':'Muro de entrenamientos','crew.feedEmpty':'Aún no hay entrenamientos compartidos.',
 
@@ -1603,7 +1612,7 @@ es:{
   'cross.avgRir':'RIR prom.','cross.avgQuality':'Calidad prom.','cross.endurance':'Resistencia',
   'cross.worse':'{linked} de {total} veces que reportaste rendir peor de lo normal, hubo una sesión de resistencia intensa (RPE≥7) en las 36h previas.',
 
-  'library.title':'Biblioteca','library.addExercise':'+ Ejercicio','library.search':'Buscar',
+  'library.title':'Catálogo','library.addExercise':'+ Ejercicio','library.search':'Buscar',
   'library.empty':'No se encontraron ejercicios.',
 
   'builder.setsPh':'series','builder.repsPh':'reps','builder.rirPh':'RIR',
@@ -2007,7 +2016,6 @@ const ICON_PATHS={
   library:'<path d="M4 5h16M4 12h16M4 19h16"/>'
 };
 const icon=(name,size=20)=>`<svg viewBox="0 0 24 24" width="${size}" height="${size}" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex:0 0 auto">${ICON_PATHS[name]||''}</svg>`;
-const THUMB_FALLBACK=icon('image',26);
 const fmtSec=s=>`${String(Math.floor((s||0)/60)).padStart(2,'0')}:${String((s||0)%60).padStart(2,'0')}`;
 const kgToDisplay=(kg,unit=state.weightUnit)=>unit==='lb'?Number(kg)*2.2046226218:Number(kg);
 const displayToKg=(value,unit=state.weightUnit)=>unit==='lb'?Number(value)/2.2046226218:Number(value);
@@ -2328,12 +2336,28 @@ function deloadAdjustedWeight(weightKg){
 // (openMoreSheet) para que las 4 pestañas de uso diario queden grandes y legibles. La vista
 // sigue siendo la misma (render() no cambia), solo cambia qué botón se enciende.
 const MORE_VIEWS=['crew','body','library'];
+const MORE_TAB_ICON={crew:'crewGroup',body:'body',library:'library'};
 function setView(view){
   state.view=view;
   const activeTab=MORE_VIEWS.includes(view)?'more':view;
   document.querySelectorAll('.tab').forEach(t=>t.classList.toggle('active',t.dataset.view===activeTab));
+  syncMoreTab(view);
   render();
 }
+
+// Estando en Cuerpo, la barra de abajo decía "Más" y el encabezado decía "Cuerpo": la pestaña
+// encendida no nombraba la pantalla en la que estabas. Ahora el quinto botón toma el icono y
+// el nombre de la vista activa cuando esa vista vive detrás de "Más"; sigue abriendo la hoja
+// al tocarlo, que es lo que hace falta para cambiarse a otra de las tres.
+function syncMoreTab(view){
+  const tab=document.querySelector('.tab[data-view="more"]');
+  if(!tab) return;
+  const inMore=MORE_VIEWS.includes(view);
+  const key=inMore?MORE_TAB_ICON[view]:null;
+  tab.innerHTML=(inMore?icon(key,22):ICON_MORE_SVG)
+    +`<span>${esc(inMore?t('tab.'+view):t('tab.more'))}</span>`;
+}
+const ICON_MORE_SVG='<svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex:0 0 auto"><circle cx="5" cy="12" r="1.6" fill="currentColor" stroke="none"/><circle cx="12" cy="12" r="1.6" fill="currentColor" stroke="none"/><circle cx="19" cy="12" r="1.6" fill="currentColor" stroke="none"/></svg>';
 
 function openMoreSheet(){
   $('modal').classList.add('show');
@@ -4020,7 +4044,7 @@ async function replaceOldSessions(day){
 // pestañas.
 function combinedWeekCard(mine,myPlans){
   return `<section class="card">
-    <div class="row"><h2>${esc(t('train.yourWeek'))}</h2><span class="muted">${mine.length} ${esc(tp(mine.length,'common.routines'))} · ${myPlans.length} ${esc(tp(myPlans.length,'common.plans'))}</span></div>
+    <div class="row"><h2>${esc(t('train.yourWeek'))}</h2><span class="muted">${[`${mine.length} ${tp(mine.length,'common.routines')}`,myPlans.length?`${myPlans.length} ${tp(myPlans.length,'common.plans')}`:null].filter(Boolean).map(esc).join(' · ')}</span></div>
     <div class="week">
       ${DOW.map((d,i)=>{
         const tpl=mine.find(x=>x.weekday===i);
@@ -4734,11 +4758,20 @@ function isVideoUrl(url){
 }
 
 function mediaThumb(e,cls='thumb'){
+  const fallback=thumbInitial(e);
   if(e.media_url){
-    if(isVideoUrl(e.media_url)) return `<div class="${cls}"><video src="${esc(e.media_url)}" muted playsinline preload="metadata" onerror="this.parentElement.innerHTML=THUMB_FALLBACK"></video></div>`;
-    return `<div class="${cls}"><img src="${esc(e.media_url)}" alt="${esc(e.name)}" loading="lazy" onerror="this.parentElement.innerHTML=THUMB_FALLBACK"></div>`;
+    const esc_fb=fallback.replace(/"/g,'&quot;');
+    if(isVideoUrl(e.media_url)) return `<div class="${cls}"><video src="${esc(e.media_url)}" muted playsinline preload="metadata" onerror="this.parentElement.innerHTML='${esc_fb}'"></video></div>`;
+    return `<div class="${cls}"><img src="${esc(e.media_url)}" alt="${esc(e.name)}" loading="lazy" onerror="this.parentElement.innerHTML='${esc_fb}'"></div>`;
   }
-  return `<div class="${cls}">${THUMB_FALLBACK}</div>`;
+  return `<div class="${cls}">${fallback}</div>`;
+}
+
+// Sin foto, la inicial. Un icono de "imagen" repetido ocho veces en una pantalla se lee como
+// error de carga; una letra se lee como que ese ejercicio simplemente no tiene foto.
+function thumbInitial(e){
+  const ch=(String(e&&e.name||'?').trim()[0]||'?').toLocaleUpperCase(LANG);
+  return `<span class="thumb-initial">${esc(ch)}</span>`;
 }
 
 function feedItem(s){
@@ -5333,21 +5366,25 @@ function recoveryTab(){
   const lastCompletedAt=mine.reduce((max,s)=>Math.max(max,new Date(s.completed_at).getTime()),0);
   const daysSince=lastCompletedAt?Math.floor((Date.now()-lastCompletedAt)/864e5):null;
   const view=state.bodyFlip==='back'?'back':'front';
+  // La figura primero y las dos cifras después: con las cifras arriba (120 px que dicen poco)
+  // la leyenda —lo único que explica qué significa el verde y qué el naranja— caía por debajo
+  // del pliegue, así que el dibujo llegaba sin su clave.
   return `
-    <section class="grid">
-      <div class="stat"><strong>${daysSince===null?'—':daysSince===0?esc(t('common.today')):daysSince}</strong><small>${esc(daysSince===0?t('body.lastTraining'):t('body.daysSince'))}</small></div>
-      <div class="stat"><strong>${restedCount}</strong><small>${esc(t('body.musclesRested'))}</small></div>
-    </section>
     <section class="card">
       <div class="body-fig-wrap">
         ${bodyFigureSVG(view,scoreByName)}
         <button class="body-flip-btn" onclick="toggleBodyView()" aria-label="${esc(t('body.flip'))}">${icon('swap',18)}</button>
       </div>
       <div class="muscle-legend">
-        <span><i style="background:${freshColor(0)}"></i>${esc(t('body.recovering'))}</span>
-        <span><i style="background:${freshColor(100)}"></i>${esc(t('body.restedLegend'))}</span>
+        <span>${esc(t('body.recovering'))}</span>
+        <i class="scale" style="background:linear-gradient(90deg,${freshColor(0)},${freshColor(50)},${freshColor(100)})"></i>
+        <span>${esc(t('body.restedLegend'))}</span>
       </div>
       <p class="muted" style="text-align:center;margin-top:8px;font-size:12px">${esc(t('body.tapHint',{view:t('body.'+view)}))}</p>
+    </section>
+    <section class="grid">
+      <div class="stat"><strong>${daysSince===null?'—':daysSince===0?esc(t('common.today')):daysSince}</strong><small>${esc(daysSince===0?t('body.lastTraining'):t('body.daysSince'))}</small></div>
+      <div class="stat"><strong>${restedCount}</strong><small>${esc(t('body.musclesRested'))}</small></div>
     </section>
     <section class="card">
       <div class="row"><h2>${esc(t('body.muscleStatus'))}</h2><button class="btn small" onclick="openLogActivity()">${esc(t('progress.logActivity'))}</button></div>
@@ -8667,7 +8704,7 @@ function supplementsCardHtml(){
     ${list.length?`<div class="stack" style="margin-top:10px">${list.map(s=>{
       const on=takenIds.has(s.id);
       return `<div class="row" style="gap:12px;margin-top:8px">
-        <button class="check ${on?'done':''}" style="height:36px;width:36px;border-radius:8px;flex:none" onclick="toggleSupplementToday('${s.id}',${on})" aria-label="${esc(s.name)}">${icon('check',16)}</button>
+        <button class="check sm ${on?'done':''}" style="height:36px;width:36px;border-radius:8px;flex:none" onclick="toggleSupplementToday('${s.id}',${on})" aria-label="${esc(s.name)}">${icon('check',16)}</button>
         <div style="flex:1"><b>${esc(s.name)}</b>${s.dose||s.timing?`<p class="muted" style="margin-top:2px">${esc([s.dose,s.timing].filter(Boolean).join(' · '))}</p>`:''}</div>
       </div>`;
     }).join('')}</div>`:`<p class="muted" style="margin-top:8px">${esc(t('supp.allInactive'))}</p>`}
