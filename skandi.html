@@ -8,18 +8,18 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="Skandi Fit">
 <meta name="application-name" content="Skandi Fit">
-<link rel="manifest" href="/skandi-manifest.json?v=20260825-13">
-<link rel="apple-touch-icon" sizes="180x180" href="/icons/skandi-180.png?v=20260825-13">
-<link rel="icon" type="image/png" sizes="192x192" href="/icons/skandi-192.png?v=20260825-13">
+<link rel="manifest" href="/skandi-manifest.json?v=20260825-14">
+<link rel="apple-touch-icon" sizes="180x180" href="/icons/skandi-180.png?v=20260825-14">
+<link rel="icon" type="image/png" sizes="192x192" href="/icons/skandi-192.png?v=20260825-14">
 <title>Skandi Fit</title>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="/skandi-recovery.js?v=20260825-13"></script>
-<script src="/skandi-plan.js?v=20260825-13"></script>
-<script src="/body-figure.js?v=20260825-13"></script>
-<script src="/skandi-nutrition.js?v=20260825-13"></script>
-<script src="/skandi-load.js?v=20260825-13"></script>
-<script src="/skandi-brief.js?v=20260825-13"></script>
-<script src="/skandi-joint-load.js?v=20260825-13"></script>
+<script src="/skandi-recovery.js?v=20260825-14"></script>
+<script src="/skandi-plan.js?v=20260825-14"></script>
+<script src="/body-figure.js?v=20260825-14"></script>
+<script src="/skandi-nutrition.js?v=20260825-14"></script>
+<script src="/skandi-load.js?v=20260825-14"></script>
+<script src="/skandi-brief.js?v=20260825-14"></script>
+<script src="/skandi-joint-load.js?v=20260825-14"></script>
 <style>
 :root{
   --bg:#eef4f8;
@@ -650,7 +650,7 @@ button.chip{min-height:44px}
 // Versión compartida con app.html (APP_VERSION) y sw.js (CACHE_VERSION): un solo service
 // worker sirve las dos apps, así que una sola cadena las invalida a las dos. Al cambiarla
 // hay que actualizarla también en los ?v= del <head>, en index.html y en los dos manifests.
-const SKANDI_VERSION='20260825-13';
+const SKANDI_VERSION='20260825-14';
 const SUPABASE_URL='https://pmpjteuqjusbiduevbwq.supabase.co';
 const SUPABASE_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBtcGp0ZXVxanVzYmlkdWV2YndxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc2OTI1NjUsImV4cCI6MjA5MzI2ODU2NX0.XbMzZoo2yqtrD8znLnyo_1zDfrdJAvAPj1lqGOyXnLw';
 const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
@@ -957,6 +957,7 @@ en:{
   'progress.stepDownTo':'Step down to {name}','progress.startDeload':'Set up a deload',
   'progress.confirmDemote':'Go back down to {name}? Your history stays, only the rank you are working changes.',
   'progress.stallWarn':'<strong>{name}</strong> flat for 3 sessions ({marks}). Maybe deload or hold longer.',
+  'progress.stallDeficit':'Over those {days} days you averaged ~{deficit} kcal under your target — could be part of it.',
   'progress.allTime':'All time','progress.savedWorkouts':'saved workouts','progress.minutesTrained':'minutes trained',
   'progress.externalActivities':'External activities','progress.logActivity':'+ Log activity',
   'progress.activitiesEmpty':'Log a run, ride, or swim to factor it into recovery.',
@@ -1617,6 +1618,7 @@ es:{
   'progress.stepDownTo':'Bajar a {name}','progress.startDeload':'Programar descarga',
   'progress.confirmDemote':'¿Regresar a {name}? Tu historial se queda, solo cambia el escalón que estás trabajando.',
   'progress.stallWarn':'<strong>{name}</strong> estancado 3 sesiones ({marks}). Quizá toca descargar o aguantar más.',
+  'progress.stallDeficit':'En esos {days} días comiste en promedio ~{deficit} kcal menos de tu meta — puede ser parte de esto.',
   'progress.allTime':'Histórico','progress.savedWorkouts':'entrenamientos guardados','progress.minutesTrained':'minutos entrenados',
   'progress.externalActivities':'Actividades externas','progress.logActivity':'+ Registrar actividad',
   'progress.activitiesEmpty':'Registra una carrera, bici o natación para incluirla en la recuperación.',
@@ -4861,8 +4863,10 @@ function progressSummaryTab(){
       ${stalls.map(w=>{
         const siblings=progressionSiblings(w.group);
         const prev=siblings[siblings.findIndex(x=>x.id===w.exercise.id)-1];
+        const deficit=stallDeficitLine(w);
         return `<div style="margin-top:10px">
           <div class="row click-card" onclick="openExercise('${w.exercise.id}')"><p>${t('progress.stallWarn',{name:esc(w.exercise.name),marks:esc(w.marks.map(m=>w.exercise.log_mode==='seconds'?fmtSec(m):m+' '+t('common.reps')).join(' → '))})}</p>${icon('chevronRight',18)}</div>
+          ${deficit?`<p class="form-note" style="margin-top:4px">${esc(deficit)}</p>`:''}
           <div class="row" style="gap:6px;margin-top:6px">
             ${prev?`<button class="btn small ghost" onclick="demoteProgression('${w.group}')">${esc(t('progress.stepDownTo',{name:prev.name}))}</button>`:''}
             <button class="btn small ghost" onclick="openTrainingBlockForm()">${esc(t('progress.startDeload'))}</button>
@@ -5614,17 +5618,39 @@ function progressionStallWarnings(){
     const sessions=state.sessions.filter(s=>s.user_id===state.user.id&&s.completed_at&&s.id!==state.active?.id)
       .sort((a,b)=>new Date(b.completed_at).getTime()-new Date(a.completed_at).getTime());
     const marks=[];
+    const dates=[];
     for(const session of sessions){
       const sets=state.sets.filter(s=>s.session_id===session.id&&s.exercise_id===exercise.id&&(s.seconds!=null||s.reps!=null));
       if(!sets.length) continue;
       marks.push(exercise.log_mode==='seconds'?Math.max(...sets.map(s=>s.seconds||0)):Math.max(...sets.map(s=>s.reps||0)));
+      dates.push(session.completed_at);
       if(marks.length>=3) break;
     }
     if(marks.length<3) continue;
-    // marks is newest-first: [latest, ..., oldest]. No net gain across the window = stalled.
-    if(marks[0]<=marks[marks.length-1]) warnings.push({group,exercise,marks:marks.slice().reverse()});
+    // marks/dates son newest-first: [latest, ..., oldest]. Sin ganancia neta en la ventana =
+    // estancado. `dates` se guarda para poder cruzar la ventana con la comida de esos días
+    // (stallDeficitContext) — el estancamiento en sí no necesita las fechas, la correlación sí.
+    if(marks[0]<=marks[marks.length-1]) warnings.push({group,exercise,marks:marks.slice().reverse(),dates:dates.slice().reverse()});
   }
   return warnings;
+}
+
+// La correlación que docs/PROYECTO_SKANDI_V2.md (Fase 2/5) pedía y no existía: cruzar la
+// ventana de un estancamiento contra lo que se comió esos mismos días. Un día por fecha del
+// calendario, meta de ese día (con override si lo hay) contra lo realmente comido —
+// SkandiNutrition.deficitContext() exige cobertura mínima antes de llamarlo "significativo", así
+// que dos comidas registradas en nueve días no van a producir una nota.
+function stallDeficitContext(stall){
+  if(!state.nutritionTargets||!stall.dates||stall.dates.length<2) return null;
+  const from=new Date(stall.dates[0]);from.setHours(0,0,0,0);
+  const to=new Date(stall.dates[stall.dates.length-1]);to.setHours(0,0,0,0);
+  const days=[];
+  for(let d=new Date(from);d<=to;d.setDate(d.getDate()+1)){
+    const key=dayKey(d);
+    days.push({actual:SkandiNutrition.dayTotals(mealsOfDay(key)).kcal||0,target:targetsForDay(key)?.kcal_target||null});
+  }
+  const ctx=SkandiNutrition.deficitContext(days);
+  return ctx&&ctx.significant?ctx:null;
 }
 
 // Free-text soreness_area means this is normalized-string matching, not true zone taxonomy —
@@ -5685,6 +5711,13 @@ function loadWarning(){
   return t(r.key,{pct:Math.abs(r.dropPct??0),up:r.ratio?Math.round((r.ratio-1)*100):0,ratio:r.ratio?r.ratio.toFixed(2):'—',weeks:r.weeksLogged});
 }
 
+// Línea compartida entre el banner de Inicio y el tab de Progreso: el "por qué" del
+// estancamiento, cuando la ventana de comida tiene con qué contestarlo.
+function stallDeficitLine(w){
+  const ctx=stallDeficitContext(w);
+  return ctx?t('progress.stallDeficit',{days:ctx.daysTotal,deficit:ctx.avgDeficit}):'';
+}
+
 function attentionBannerHtml(){
   const stalls=progressionStallWarnings();
   const sore=repeatedSorenessWarnings();
@@ -5694,7 +5727,10 @@ function attentionBannerHtml(){
     <div class="eyebrow" style="color:var(--pink)">${esc(t('progress.needsAttention'))}</div>
     ${load?`<p style="margin-top:8px">${esc(load)}</p>`:''}
     ${sore.map(w=>`<p style="margin-top:8px">${t('progress.soreWarn',{area:esc(w.area),n:w.count})}</p>`).join('')}
-    ${stalls.map(w=>`<p style="margin-top:8px">${t('progress.stallWarn',{name:esc(w.exercise.name),marks:esc(w.marks.map(m=>w.exercise.log_mode==='seconds'?fmtSec(m):m+' '+t('common.reps')).join(' → '))})}</p>`).join('')}
+    ${stalls.map(w=>{
+      const deficit=stallDeficitLine(w);
+      return `<p style="margin-top:8px">${t('progress.stallWarn',{name:esc(w.exercise.name),marks:esc(w.marks.map(m=>w.exercise.log_mode==='seconds'?fmtSec(m):m+' '+t('common.reps')).join(' → '))})}${deficit?' '+esc(deficit):''}</p>`;
+    }).join('')}
   </section>`;
 }
 

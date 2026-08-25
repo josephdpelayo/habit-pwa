@@ -211,7 +211,7 @@ skandi_settings
 | **2** | ✅ **Motor de decisiones** — readiness diario, ACWR, balance energético, recomendación en Home. Absorbida por T4 de `PLAN_ENTRENAMIENTO_SKANDI.md` (`skandi-load.js` + `skandi-brief.js`) | ninguna | hecha |
 | **3** | ✅ **Cardio y HIIT de primera clase** — intervalos, splits, nado, mapa muscular correcto. Absorbida por T2 de `PLAN_ENTRENAMIENTO_SKANDI.md` (`skandi-plan.js`, migraciones 104/105) | 104 ✅ · 105 ✅ | hecha |
 | **4** | ✅ **Strava (Garmin vía Strava)** — OAuth, webhook, deduplicación, backfill | 081 ✅ | hecha |
-| **5** | **Pulido analítico** — tendencias, correlaciones, exportar CSV ✅, apertura al crew | ninguna | continuo |
+| **5** | **Pulido analítico** — tendencias, correlaciones (estancamiento × déficit ✅), exportar CSV ✅, apertura al crew | ninguna | continuo |
 
 El orden 1 → 2 no es negociable: el motor de decisiones sin datos de comida da consejos ciegos.
 El 3 puede adelantarse si te urge capturar bien un bloque de carreras antes que la comida.
@@ -427,6 +427,29 @@ Se pinta como **una sola tarjeta en Home**. El objetivo no es un dashboard más;
 ---
 
 ## 11. Bitácora
+
+**2026-08-25 — La correlación de Fase 2 que nunca se construyó: estancamiento × déficit.**
+
+- `SkandiNutrition.deficitContext(days)` (nuevo, puro): recibe un día por fecha de una ventana
+  con `{actual, target}` en kcal y dice si el promedio comido está lo bastante por debajo de la
+  meta como para ser relevante — **300 kcal de piso** (no porcentaje: 15% de una meta de 1,800 y
+  de una de 3,200 no se sienten igual) y **cobertura mínima de 50%** de días con comida
+  registrada, porque un estancamiento junto a dos comidas capturadas en nueve días es una
+  coincidencia con cara de dato, no un patrón.
+- `stallDeficitContext(stall)` en `skandi.html` arma esa ventana a partir de las fechas que
+  `progressionStallWarnings()` ahora también guarda (antes solo devolvía las tres marcas, no
+  cuándo), un día por fecha del calendario entre la sesión más vieja y la más nueva de la racha
+  estancada, con la meta de cada día vía `targetsForDay()` — así que respeta un override del
+  coach si lo hay, nunca recalcula la meta.
+- La nota aparece junto al aviso de estancamiento que ya existía (Inicio y Progreso), no como
+  tarjeta aparte: "en esos 7 días comiste en promedio ~400 kcal menos de tu meta — puede ser
+  parte de esto". Nunca afirma causalidad, solo la coincidencia — es al miembro a quien le toca
+  decidir si tiene sentido.
+- Verificado con aserciones en Node del módulo puro (cobertura baja, déficit real, déficit chico
+  bajo el piso, superávit, sin metas) y en el navegador real con una racha de front lever
+  estancada de 32→30→28 segundos cruzada con comida registrada: con déficit real y buena
+  cobertura, la nota aparece con el número correcto; bien alimentado o con comida sin registrar,
+  no aparece nada — nunca un falso positivo.
 
 **2026-08-25 — Bookkeeping y Fase 5: exportar CSV.**
 

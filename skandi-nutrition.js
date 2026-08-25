@@ -434,13 +434,43 @@ function fuelPlan(session, weightKg) {
   };
 }
 
+// La correlación que docs/PROYECTO_SKANDI_V2.md (Fase 2) pedía y nunca se construyó: "si el
+// estancamiento coincide con déficit calórico". `days` es un día por fila de la ventana de la
+// racha estancada — `{actual, target}` en kcal, uno por fecha del calendario, con `actual` null
+// o 0 si ese día no se registró comida. `target` viene de `targetsForDay()` en el cliente, así
+// que ya trae el override del coach si lo hay: esto nunca recalcula la meta, solo la compara.
+//
+// Cobertura mínima antes de decir nada: un estancamiento junto a dos comidas registradas en
+// nueve días no es un patrón, es una coincidencia con cara de dato. Y el umbral en kcal, no en
+// porcentaje, porque "15% abajo" en una meta de 1,800 y en una de 3,200 son déficits que no se
+// sienten igual — 300 kcal es aproximadamente lo que separa "un día flojo comiendo" de "llevas
+// una semana comiendo de menos", en cualquier meta.
+const DEFICIT_CONTEXT_MIN_COVERAGE = 0.5;
+const DEFICIT_CONTEXT_KCAL_THRESHOLD = 300;
+function deficitContext(days){
+  const withTarget = (days || []).filter(d => d && d.target);
+  if (!withTarget.length) return null;
+  const logged = withTarget.filter(d => d.actual > 0);
+  const coverage = logged.length / withTarget.length;
+  if (coverage < DEFICIT_CONTEXT_MIN_COVERAGE) {
+    return { significant: false, coverage, daysLogged: logged.length, daysTotal: withTarget.length };
+  }
+  const avgDeficit = logged.reduce((sum, d) => sum + (d.target - d.actual), 0) / logged.length;
+  return {
+    significant: avgDeficit >= DEFICIT_CONTEXT_KCAL_THRESHOLD,
+    avgDeficit: Math.round(avgDeficit),
+    coverage, daysLogged: logged.length, daysTotal: withTarget.length
+  };
+}
+
 const api = {
   KCAL_PER_G, ACTIVITY_FACTORS, MODE_FACTOR, MET,
   suggestTargets, kcalFromMacros, itemsTotal, dayTotals, remaining, pct,
   scaleFood, rescaleItem, itemToFood, evaluateFood, evaluateScaled,
   activityKcal, strengthKcal, dayRecommendation, stepsAdjustmentKcal,
   FUEL, fuelPlan,
-  isLowEnergy, LOW_ENERGY_KCAL_PER_KG_FLOOR
+  isLowEnergy, LOW_ENERGY_KCAL_PER_KG_FLOOR,
+  deficitContext, DEFICIT_CONTEXT_MIN_COVERAGE, DEFICIT_CONTEXT_KCAL_THRESHOLD
 };
 
 if (typeof module !== 'undefined' && module.exports) module.exports = api;
