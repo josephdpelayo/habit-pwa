@@ -55,6 +55,16 @@ exercised from Node — keep new engines to that pattern rather than growing `sk
 `skandi-strava.js` is the odd one out: it is the **only** module the browser never loads (the
 server `require`s it and nothing else consumes it), so it is absent from `sw.js`'s `SHELL`.
 
+**Entrenar → Rutinas son tres capas, de arriba abajo**: programa (`programCardHtml` →
+`openProgramSheet`) → tu semana → rutinas. El botón de la pantalla es **«+ Crear»**
+(`openCreateChooser`) con los tres verbos en orden de tamaño — programa, rutina, ejercicio — y
+no un atajo para asignar rutinas ya existentes. La hoja del programa edita sus siete días en el
+lugar (`openProgramDayEditor` → `setProgramDay`); mientras el programa esté cargado, esa
+escritura **va a los dos lados** (`skandi_program_days` y `skandi_templates.weekday`, vía
+`mirrorProgramDayToWeek`), porque la fuente de la verdad del día sigue siendo `weekday` y el
+programa es una foto de eso (migración 069). Esa segunda mitad se borra cuando el programa pase
+a ser el dueño del plan — ver `docs/CAPAS_ENTRENAR_SKANDI.md`, fase P2.
+
 The `food` view is the nutrition tab. Its ordering rule is load-bearing: the add-meal chooser lists
 saved dish and catalog food (free, instant, offline) above photo and text (AI, priced in the label).
 Editing an item's grams rescales it by density and upserts the correction into `skandi_foods` —
