@@ -8,17 +8,17 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="Skandi Fit">
 <meta name="application-name" content="Skandi Fit">
-<link rel="manifest" href="/skandi-manifest.json?v=20260825-01">
-<link rel="apple-touch-icon" sizes="180x180" href="/icons/skandi-180.png?v=20260825-01">
-<link rel="icon" type="image/png" sizes="192x192" href="/icons/skandi-192.png?v=20260825-01">
+<link rel="manifest" href="/skandi-manifest.json?v=20260825-02">
+<link rel="apple-touch-icon" sizes="180x180" href="/icons/skandi-180.png?v=20260825-02">
+<link rel="icon" type="image/png" sizes="192x192" href="/icons/skandi-192.png?v=20260825-02">
 <title>Skandi Fit</title>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="/skandi-recovery.js?v=20260825-01"></script>
-<script src="/body-figure.js?v=20260825-01"></script>
-<script src="/skandi-nutrition.js?v=20260825-01"></script>
-<script src="/skandi-load.js?v=20260825-01"></script>
-<script src="/skandi-brief.js?v=20260825-01"></script>
-<script src="/skandi-joint-load.js?v=20260825-01"></script>
+<script src="/skandi-recovery.js?v=20260825-02"></script>
+<script src="/body-figure.js?v=20260825-02"></script>
+<script src="/skandi-nutrition.js?v=20260825-02"></script>
+<script src="/skandi-load.js?v=20260825-02"></script>
+<script src="/skandi-brief.js?v=20260825-02"></script>
+<script src="/skandi-joint-load.js?v=20260825-02"></script>
 <style>
 :root{
   --bg:#eef4f8;
@@ -203,7 +203,13 @@ p{color:var(--muted);line-height:1.45;margin:0}
 
    minmax(0,1fr) y no 1fr: `1fr` es `minmax(auto,1fr)`, y ese `auto` impide que una columna
    baje de su contenido — con etiquetas que no parten renglón, la rejilla crecía más que la
-   tarjeta y el domingo se salía por la derecha. */
+   tarjeta y el domingo se salía por la derecha.
+
+   Cada marca es un chip de un solo renglón, tope de 3 por día (+N si hay más): dos o tres
+   sesiones el mismo día (una descarga reemplazando a la rutina normal, fuerza + carrera)
+   dejaban de leerse encimadas cuando el chip era glifo + hasta dos líneas de texto con
+   -webkit-line-clamp dentro de un <button> sin reset de apariencia nativa — punto débil
+   conocido de WebKit. */
 .cal-nav{display:inline-flex;align-items:center;gap:6px}
 .load-bars{display:flex;align-items:flex-end;gap:6px;margin-top:14px;height:74px}
 .load-bar{flex:1;display:flex;flex-direction:column;justify-content:flex-end;align-items:center;gap:4px;min-width:0}
@@ -221,7 +227,9 @@ p{color:var(--muted);line-height:1.45;margin:0}
 .cal-week.current{border-color:rgba(1,36,86,.22);box-shadow:0 14px 30px rgba(1,36,86,.10)}
 .cal-week-head{display:flex;align-items:baseline;justify-content:space-between;gap:10px;margin:0 2px 8px}
 .cal-week-actions{display:inline-flex;align-items:center;gap:8px;flex:0 0 auto}
-.cal-week-name{font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--dof-steel);font-weight:900}
+.cal-week-name{font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--dof-steel);font-weight:900;
+  flex:1 1 auto;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.cal-week-name b{font-weight:900;letter-spacing:normal;text-transform:none;color:var(--dof-navy)}
 .cal-score{font-size:13px;font-weight:1000;color:var(--muted);white-space:nowrap}
 .cal-score i{font-style:normal;font-weight:900;opacity:.55}
 .cal-score.full{color:var(--green)}
@@ -229,8 +237,8 @@ p{color:var(--muted);line-height:1.45;margin:0}
 .cal-bar{height:3px;background:var(--panel3);border-radius:999px;overflow:hidden;margin:0 2px 10px}
 .cal-bar i{display:block;height:100%;border-radius:999px;background:linear-gradient(90deg,var(--dof-navy),var(--blue))}
 .cal-grid{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:3px}
-.cal-day{display:flex;flex-direction:column;align-items:stretch;gap:3px;min-width:0;min-height:78px;
-  padding:6px 2px 5px;background:var(--panel2);border:1px solid transparent;border-radius:9px;text-align:center}
+.cal-day{appearance:none;-webkit-appearance:none;display:flex;flex-direction:column;align-items:stretch;gap:3px;min-width:0;min-height:78px;
+  padding:6px 2px 5px;background:var(--panel2);border:1px solid transparent;border-radius:9px;text-align:center;overflow:hidden}
 .cal-day.rest{background:transparent;border-style:dashed;border-color:var(--line)}
 .cal-day.past{opacity:.72}
 /* Hoy va con fondo, no con borde grueso: un borde de 2 px se recorta contra el filo de la
@@ -240,27 +248,28 @@ p{color:var(--muted);line-height:1.45;margin:0}
 .cal-dow{font-size:8px;letter-spacing:.06em;color:var(--dof-steel);font-weight:900;text-transform:uppercase}
 .cal-num{font-size:14px;font-weight:1000;color:var(--text);line-height:1}
 .cal-marks{display:flex;flex-direction:column;gap:2px;min-width:0}
-.cal-mark{display:flex;flex-direction:column;align-items:center;gap:1px;min-width:0;
-  background:rgba(36,95,159,.10);border-radius:6px;padding:3px 1px}
-.cal-mark .cal-dot{font-style:normal;font-size:9px;line-height:1;color:var(--dof-navy)}
-.cal-mark b{font-size:8.5px;line-height:1.15;font-weight:900;color:var(--dof-navy);
-  overflow:hidden;text-overflow:ellipsis;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;
-  /* Sin word-break: partía "Handstand" a la mitad y salía "Handst and…", que se lee como un
-     error tipográfico. Rompiendo solo en los espacios queda "Handstand / push". */
-  overflow-wrap:break-word;max-width:100%}
+.cal-mark{display:flex;align-items:center;justify-content:center;gap:3px;min-width:0;
+  background:rgba(36,95,159,.10);border-radius:6px;padding:2px 3px}
+.cal-mark .cal-dot{font-style:normal;font-size:9px;line-height:1;color:var(--dof-navy);flex:0 0 auto}
+.cal-mark b{font-size:8.5px;line-height:1.2;font-weight:900;color:var(--dof-navy);
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0}
 .cal-mark.done{background:rgba(29,154,108,.16)}
 .cal-mark.done .cal-dot,.cal-mark.done b{color:var(--green)}
 .cal-mark.partial{background:rgba(240,162,46,.18)}
 .cal-mark.partial .cal-dot,.cal-mark.partial b{color:#8a5c07}
-.cal-mark.skipped{background:transparent}
+/* Saltado ya no compite por atención con lo activo: sin relleno y atenuado, solo el
+   tachado -- es información de fondo, no un plan vigente. */
+.cal-mark.skipped{background:transparent;opacity:.6}
 .cal-mark.skipped .cal-dot,.cal-mark.skipped b{color:var(--dof-steel);text-decoration:line-through}
 /* El extra (entrenaste algo que no estaba planeado) va punteado y sin relleno: existe, se ve,
    y no se confunde con lo que sí estaba en el plan. */
 .cal-mark.extra{background:transparent;border:1px dashed #bfd0df}
 .cal-mark.extra .cal-dot,.cal-mark.extra b{color:var(--muted)}
+.cal-mark.more{background:transparent;color:var(--dof-steel);font-size:8.5px;font-weight:900;padding:2px 0}
 .cal-day.today .cal-mark{background:rgba(255,255,255,.16)}
 .cal-day.today .cal-mark .cal-dot,.cal-day.today .cal-mark b{color:#fff}
 .cal-day.today .cal-mark.extra{border-color:rgba(255,255,255,.45)}
+.cal-day.today .cal-mark.more{color:rgba(255,255,255,.75)}
 /* Renglón de sesión (hoy y hoja del día) */
 .plan-row{display:grid;grid-template-columns:26px 1fr auto;align-items:center;gap:10px;padding:11px 12px;
   background:var(--panel2);border:1px solid rgba(1,36,86,.08);border-radius:8px;text-align:left;cursor:pointer}
@@ -534,7 +543,7 @@ textarea.field{min-height:112px;text-align:left;resize:vertical}
 // Versión compartida con app.html (APP_VERSION) y sw.js (CACHE_VERSION): un solo service
 // worker sirve las dos apps, así que una sola cadena las invalida a las dos. Al cambiarla
 // hay que actualizarla también en los ?v= del <head>, en index.html y en los dos manifests.
-const SKANDI_VERSION='20260825-01';
+const SKANDI_VERSION='20260825-02';
 const SUPABASE_URL='https://pmpjteuqjusbiduevbwq.supabase.co';
 const SUPABASE_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBtcGp0ZXVxanVzYmlkdWV2YndxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc2OTI1NjUsImV4cCI6MjA5MzI2ODU2NX0.XbMzZoo2yqtrD8znLnyo_1zDfrdJAvAPj1lqGOyXnLw';
 const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
@@ -687,6 +696,7 @@ en:{
   'block.startNew':'+ Start a new block','block.delete':'Delete this block',
   'block.pickDate':'Choose a start date.',
   'block.confirmDelete':'Delete this block? Your workouts and sets are untouched, only the week/deload count is removed.',
+  'block.fromProgram':'From the program "{name}".',
 
   'home.weekRange':'Monday to Sunday','home.hey':'Hey, {name}',
   'home.yourWeek':'Your week','home.time':'time','home.load':'load','home.sessions':'sessions',
@@ -717,6 +727,8 @@ en:{
   'cal.start':'Start','cal.log':'Log it','cal.markDone':'Mark as done','cal.undone':'Mark as not done',
   'cal.unskip':'Restore','cal.move':'Move to another day','cal.copy':'Copy to…','cal.edit':'Edit',
   'cal.remove':'Remove','cal.removeConfirm':'Remove this session from the plan?',
+  'cal.replaceTitle':'Replace the old plan?','cal.replaceBody':'You already had {names} planned for that day. Did this new session replace it?',
+  'cal.replaceYes':'Yes, replace it','cal.replaceNo':'No, keep both',
   'cal.fromTemplate':'From your week. Editing it only changes this day.',
   'cal.edited':'Edited for this day — your week no longer overwrites it.',
   'cal.discipline':'Discipline','cal.routine':'Routine','cal.noRoutine':'No routine',
@@ -797,6 +809,9 @@ en:{
   'cal.clearWeek':'Clear the week','cal.resetWeek':'Go back to my week',
   'cal.weekFromTemplate':'{n} days still come from your week and will follow it if you change it.',
   'cal.weekDetached':'This week no longer follows your template — it is yours alone.',
+  'cal.weekCustom':'Custom',
+  'cal.loadProgramWeek':'Load a program for this week','cal.loadProgramWeekHint':'Fills only these 7 days. Your standard week and the rest of the calendar stay untouched.',
+  'cal.loadProgramWeekConfirm':'Load "{name}" just for this week? Anything already planned for these 7 days that is not done yet gets replaced.',
   'cal.weekHelp':'Customizing only affects these 7 days. Your routines and the rest of the weeks stay exactly as they are.',
   'cal.clearWeekConfirm':'Clear every planned session this week? What you already trained is kept.',
   'cal.resetWeekConfirm':'Rebuild this week from your template? Custom sessions for these days are lost; what you already trained is kept.',
@@ -859,7 +874,10 @@ en:{
   'pgm.activate':'Load this program into my week','pgm.delete':'Delete program',
   'pgm.confirmDelete':'Delete this program? Your routines stay where they are.',
   'pgm.confirmApply':'Load "{name}"? Your week gets rewritten with this program\'s days.',
+  'pgm.loadTitle':'Load program','pgm.loadBody':'"{name}" will fill your whole week, every week. How many weeks are you running it?',
+  'pgm.loadDeloadNote':'The last week is always your deload week.','pgm.loadConfirm':'Load it',
   'pgm.applyPartialError':'Something went wrong partway through: {message}. Your week may be a mix of the old and new plan now — check it before training.',
+  'pgm.applyBlockError':'The program loaded, but the deload timer could not be saved: {message}',
   'pgm.errName':'Give the program a name.',
   'pgm.errEmptyWeek':'Your week is empty — schedule at least one routine or endurance plan first.',
   'pgm.rest':'Rest','pgm.empty':'No programs saved yet.','pgm.missingRoutine':'Deleted routine',
@@ -1292,6 +1310,7 @@ es:{
   'block.startNew':'+ Empezar bloque nuevo','block.delete':'Eliminar este bloque',
   'block.pickDate':'Elige una fecha de inicio.',
   'block.confirmDelete':'¿Eliminar este bloque? Tus entrenamientos y series no se tocan, solo se borra el conteo de semana/descarga.',
+  'block.fromProgram':'Del programa «{name}».',
 
   'home.weekRange':'De lunes a domingo','home.hey':'Hola, {name}',
   'home.yourWeek':'Tu semana','home.time':'tiempo','home.load':'carga','home.sessions':'sesiones',
@@ -1322,6 +1341,8 @@ es:{
   'cal.start':'Empezar','cal.log':'Registrar','cal.markDone':'Marcar como hecho','cal.undone':'Marcar como no hecho',
   'cal.unskip':'Restaurar','cal.move':'Mover a otro día','cal.copy':'Copiar a…','cal.edit':'Editar',
   'cal.remove':'Quitar','cal.removeConfirm':'¿Quitar esta sesión del plan?',
+  'cal.replaceTitle':'¿Reemplazar el plan anterior?','cal.replaceBody':'Ya tenías {names} planeado para ese día. ¿Esta sesión nueva lo reemplazó?',
+  'cal.replaceYes':'Sí, reemplazar','cal.replaceNo':'No, dejar las dos',
   'cal.fromTemplate':'De tu semana. Editarla solo cambia este día.',
   'cal.edited':'Editado para este día — tu semana ya no lo pisa.',
   'cal.discipline':'Disciplina','cal.routine':'Rutina','cal.noRoutine':'Sin rutina',
@@ -1402,6 +1423,9 @@ es:{
   'cal.clearWeek':'Vaciar la semana','cal.resetWeek':'Volver a mi semana',
   'cal.weekFromTemplate':'{n} días todavía vienen de tu semana y la seguirán si la cambias.',
   'cal.weekDetached':'Esta semana ya no sigue tu plantilla — es solo tuya.',
+  'cal.weekCustom':'Personalizada',
+  'cal.loadProgramWeek':'Cargar un programa esta semana','cal.loadProgramWeekHint':'Solo llena estos 7 días. Tu semana estándar y el resto del calendario se quedan igual.',
+  'cal.loadProgramWeekConfirm':'¿Cargar «{name}» solo para esta semana? Lo que ya tenías planeado en estos 7 días y no esté hecho se reemplaza.',
   'cal.weekHelp':'Personalizar afecta solo estos 7 días. Tus rutinas y las demás semanas se quedan igual.',
   'cal.clearWeekConfirm':'¿Vaciar todas las sesiones planeadas de esta semana? Lo que ya entrenaste se conserva.',
   'cal.resetWeekConfirm':'¿Rehacer esta semana desde tu plantilla? Se pierden las sesiones personalizadas de estos días; lo que ya entrenaste se conserva.',
@@ -1464,7 +1488,10 @@ es:{
   'pgm.activate':'Cargar este programa en mi semana','pgm.delete':'Eliminar programa',
   'pgm.confirmDelete':'¿Eliminar este programa? Tus rutinas se quedan donde están.',
   'pgm.confirmApply':'¿Cargar «{name}»? Tu semana se reescribe con los días de este programa.',
+  'pgm.loadTitle':'Cargar programa','pgm.loadBody':'«{name}» va a llenar toda tu semana, cada semana. ¿Por cuántas semanas lo vas a correr?',
+  'pgm.loadDeloadNote':'La última semana siempre es tu semana de descarga.','pgm.loadConfirm':'Cargarlo',
   'pgm.applyPartialError':'Algo falló a la mitad: {message}. Tu semana puede haber quedado mezclada entre el plan viejo y el nuevo — revísala antes de entrenar.',
+  'pgm.applyBlockError':'El programa se cargó, pero no se pudo guardar el temporizador de descarga: {message}',
   'pgm.errName':'Ponle nombre al programa.',
   'pgm.errEmptyWeek':'Tu semana está vacía — agenda al menos una rutina o un plan de resistencia primero.',
   'pgm.rest':'Descanso','pgm.empty':'Aún no hay programas guardados.','pgm.missingRoutine':'Rutina eliminada',
@@ -2263,10 +2290,12 @@ function trainingBlockCardHtml(){
     <p style="margin-top:6px">${esc(t('block.endedBody'))}</p>
   </section>`;
   const deload=info.deload;
+  const program=info.block.program_id?state.programs.find(p=>p.id===info.block.program_id):null;
+  const eyebrow=(deload?t('block.deloadWeek'):t('block.buildWeek'))+(program?` · ${program.name}`:'');
   return `<section class="card click-card" style="${deload?'border-color:rgba(240,160,60,.35);background:#fff8ef':''}" onclick="openTrainingBlockForm()">
     <div class="row">
       <div>
-        <div class="eyebrow" style="${deload?'color:#c8790a':''}">${esc(deload?t('block.deloadWeek'):t('block.buildWeek'))}</div>
+        <div class="eyebrow" style="${deload?'color:#c8790a':''}">${esc(eyebrow)}</div>
         <h2 style="margin-top:4px">${esc(t('block.weekOf',{week:info.week,total:info.totalWeeks}))}</h2>
       </div>
       <span class="pill dark">${info.block.build_weeks}+1</span>
@@ -2284,9 +2313,11 @@ function openTrainingBlockForm(opts){
   opts=opts||{};
   const block=opts.forceNew?null:currentTrainingBlock();
   const isEdit=!!block;
+  const program=block?.program_id?state.programs.find(p=>p.id===block.program_id):null;
   $('modal').classList.add('show');
   $('modalCard').innerHTML=`
     <div class="row"><h1>${esc(isEdit?t('block.editTitle'):t('block.newTitle'))}</h1><button class="x" onclick="closeModal()" aria-label="${esc(t('common.close'))}">${icon('close',20)}</button></div>
+    ${program?`<p class="form-note">${esc(t('block.fromProgram',{name:program.name}))}</p>`:''}
     <label class="eyebrow">${esc(t('block.buildWeeksLabel'))}</label>
     <select id="blockWeeks" class="field left">
       ${[3,4,5,6].map(n=>`<option value="${n}" ${(block?.build_weeks??4)===n?'selected':''}>${n}</option>`).join('')}
@@ -2409,11 +2440,6 @@ function todayDetailCard(){
     return t(x.key,params);
   };
 
-  const wellnessLine=latest&&(latest.sleep_secs||latest.resting_hr)
-    ?[latest.sleep_secs?formatSleep(latest.sleep_secs):null,
-      latest.resting_hr?`${latest.resting_hr} ${t('wellness.restingHr')}`:null].filter(Boolean).join(' · ')
-    :null;
-
   // Solo el ejemplo de "antes de entrenar" — el plan completo (durante, después, por sesión)
   // ya vive en Comida, que es donde de verdad hace falta cuando llega la hora de comer.
   const fuelBefore=brief.fuel.find(x=>x.key==='brief.fuel.before');
@@ -2433,7 +2459,6 @@ function todayDetailCard(){
 
   const rows2=[
     rowLink('trending',t(brief.headline.key,brief.headline.params||{}),block?t('block.weekOf',{week:block.week,total:block.totalWeeks}):'',`setView('train')`),
-    wellnessLine?rowLink('moon',t('wellness.title'),wellnessLine,'openWellnessDetail()'):'',
     ...brief.cautions.map(x=>rowLink('warning',t('brief.cautionTitle'),line(x),cautionTarget(x.key),'var(--amber)')),
     fuelBefore?rowLink('food',t('brief.fuelTitle'),line(fuelBefore),`setView('food')`):''
   ].filter(Boolean).join('');
@@ -2571,6 +2596,7 @@ function homeView(){
     </section>`:''}
     ${attentionBannerHtml()}
     ${todayDetailCard()}
+    ${wellnessCardHtml()}
     ${miniBodyRecoveryCard()}
     ${weightNudgeHtml()}
     <section class="card click-card" onclick="setView('crew')">
@@ -2697,7 +2723,7 @@ function openProgramPicker(){
       ${state.programs.map(p=>`<div class="row card" style="margin:0">
         <div style="min-width:0"><strong>${esc(p.name)}</strong><p class="muted">${esc(programSummary(p))}</p></div>
         <div style="display:flex;align-items:center;gap:6px;flex:0 0 auto">
-          ${p.is_active?`<span class="pill">${esc(t('pgm.active'))}</span>`:`<button class="btn small primary" onclick="applyProgram('${p.id}')">${esc(t('pgm.use'))}</button>`}
+          ${p.is_active?`<span class="pill">${esc(t('pgm.active'))}</span>`:`<button class="btn small primary" onclick="openProgramLoadConfirm('${p.id}')">${esc(t('pgm.use'))}</button>`}
           <button class="icon-btn tiny" onclick="openProgramManage('${p.id}')" aria-label="${esc(t('pgm.manage'))}">${icon('ellipsis',16)}</button>
         </div>
       </div>`).join('')||empty(t('pgm.empty'))}
@@ -2713,7 +2739,7 @@ function openProgramManage(id){
     ${p.notes?`<p class="muted">${esc(p.notes)}</p>`:''}
     <div class="stack" style="margin-top:12px;gap:8px">${programDayRowsHtml(programDaysOf(id))}</div>
     <div class="stack" style="margin-top:14px">
-      ${p.is_active?'':`<button class="btn primary" style="width:100%" onclick="applyProgram('${p.id}')">${icon('calendar',16)} ${esc(t('pgm.activate'))}</button>`}
+      ${p.is_active?'':`<button class="btn primary" style="width:100%" onclick="openProgramLoadConfirm('${p.id}')">${icon('calendar',16)} ${esc(t('pgm.activate'))}</button>`}
       <button class="btn" style="width:100%" onclick="openProgramForm('${p.id}')">${icon('edit',16)} ${esc(t('pgm.rename'))}</button>
       <button class="btn" style="width:100%" onclick="updateProgramFromWeek('${p.id}')">${icon('swap',16)} ${esc(t('pgm.saveChanges'))}</button>
       <button class="btn danger" style="width:100%" onclick="deleteProgram('${p.id}')">${icon('trash',16)} ${esc(t('pgm.delete'))}</button>
@@ -2781,12 +2807,32 @@ async function updateProgramFromWeek(id){
   }
 }
 
+// Cargar un programa reescribe la semana estándar para siempre -- por eso, a diferencia de
+// aplicarlo desde el Calendario para una sola semana (applyProgramToWeek), aquí sí vale la
+// pena preguntar cuántas semanas va a correr: es lo que arranca (o reinicia) el temporizador
+// de descarga, enlazado a este programa vía skandi_training_blocks.program_id.
+function openProgramLoadConfirm(id){
+  const program=state.programs.find(p=>p.id===id);
+  if(!program) return;
+  const current=currentTrainingBlock();
+  const defaultWeeks=(current&&current.program_id===id?current.build_weeks:null)||5;
+  $('modal').classList.add('show');
+  $('modalCard').innerHTML=`
+    <div class="row"><h1>${esc(t('pgm.loadTitle'))}</h1><button class="x" onclick="closeModal()" aria-label="${esc(t('common.close'))}">${icon('close',20)}</button></div>
+    <p class="muted">${esc(t('pgm.loadBody',{name:program.name}))}</p>
+    <label class="eyebrow">${esc(t('block.buildWeeksLabel'))}</label>
+    <select id="pgmLoadWeeks" class="field left">
+      ${[3,4,5,6,7,8].map(n=>`<option value="${n}" ${defaultWeeks===n?'selected':''}>${n}</option>`).join('')}
+    </select>
+    <p class="form-note">${esc(t('pgm.loadDeloadNote'))}</p>
+    <button class="btn primary" style="width:100%;margin-top:12px" onclick="applyProgram('${id}',Number($('pgmLoadWeeks').value))">${esc(t('pgm.loadConfirm'))}</button>`;
+}
+
 let applyingProgram=false;
-async function applyProgram(id){
+async function applyProgram(id,buildWeeks){
   if(applyingProgram) return;
   const program=state.programs.find(p=>p.id===id);
   if(!program) return;
-  if(!confirm(t('pgm.confirmApply',{name:program.name}))) return;
   applyingProgram=true;
   try{
     const days=programDaysOf(id);
@@ -2825,6 +2871,15 @@ async function applyProgram(id){
       await loadAll();
       render();
       return alert(activateError.message);
+    }
+    // Cargar un programa siempre reinicia el conteo de semanas desde hoy: una fila nueva, no
+    // una actualización de la existente -- "la fila con start_date más reciente gana" es el
+    // mismo diseño que ya tenía skandi_training_blocks antes de enlazarlo a programas.
+    if(buildWeeks){
+      const {error:blockError}=await sb.from('skandi_training_blocks').insert({
+        user_id:state.user.id,start_date:todayKey(),build_weeks:buildWeeks,program_id:id,note:program.name
+      });
+      if(blockError) alert(t('pgm.applyBlockError',{message:blockError.message}));
     }
     closeModal();
     await loadAll();
@@ -2923,7 +2978,7 @@ function plannedSub(p){
 // nombre corto de la disciplina.
 function plannedShort(p){
   if(p.target_distance_km) return `${Math.round(p.target_distance_km*10)/10} km`;
-  if(p.target_duration_min) return `${p.target_duration_min} min`;
+  if(p.target_duration_min) return `${p.target_duration_min}'`;
   // El nombre completo, sin recortar a mano: el CSS lo limita a dos renglones y pone los
   // puntos suspensivos donde de verdad se acaba el espacio. Cortarlo aquí a seis caracteres
   // producía "Handst", que se ve como un error tipográfico y no como una abreviatura.
@@ -3174,13 +3229,28 @@ function weekAdherence(monday){
   return {days,total,done,pct:total?Math.min(100,Math.round(done/total*100)):0};
 }
 
+// De dónde salió esta semana, en una palabra: el nombre del programa activo si nadie tocó
+// ningún día, "Personalizada" en cuanto se editó/quitó/agregó algo a mano, o nada si no hay
+// ni programa ni ajustes (la rotación estándar de rutinas sin programa detrás). Mismo cálculo
+// que ya usaba openWeekMenu para su nota, ahora también visible sin abrir el menú -- para que
+// un día, una semana y el programa de varias semanas se lean juntos, no en tres pantallas.
+function weekOriginLabel(mondayKey){
+  const days=weekDayKeys(mondayKey);
+  const rows=plannedRows().filter(p=>days.includes(p.day));
+  if(!rows.length) return '';
+  const untouched=rows.every(p=>p.source==='template'&&!p.is_edited);
+  if(!untouched) return t('cal.weekCustom');
+  return activeProgram()?.name||'';
+}
+
 function weekRowHtml(monday){
   const {days,total,done,pct}=weekAdherence(monday);
   const isCurrent=dayKey(monday)===dayKey(mondayOf(new Date()));
   const label=`${monday.toLocaleDateString(LANG,{day:'numeric',month:'short'})} – ${addDays(monday,6).toLocaleDateString(LANG,{day:'numeric',month:'short'})}`;
+  const origin=weekOriginLabel(dayKey(monday));
   return `<section class="cal-week ${isCurrent?'current':''}">
     <div class="cal-week-head">
-      <span class="cal-week-name">${esc(isCurrent?t('cal.thisWeek'):label)}</span>
+      <span class="cal-week-name">${esc(isCurrent?t('cal.thisWeek'):label)}${origin?` · <b>${esc(origin)}</b>`:''}</span>
       <span class="cal-week-actions">
         ${total?`<span class="cal-score ${done>=total?'full':''}">${done}<i>/${total}</i></span>`:''}
         <button class="icon-btn tiny" onclick="openWeekMenu('${dayKey(monday)}')" aria-label="${esc(t('cal.weekMenu'))}">${icon('ellipsis',14)}</button>
@@ -3193,21 +3263,29 @@ function weekRowHtml(monday){
 
 // Una celda de ~46 px no da para el nombre completo de una rutina, y truncarlo a seis
 // caracteres produce "Handst", que no dice más que el punto de color. La celda enseña el
-// punto (disciplina y estado) y el nombre en dos renglones cortos; el nombre completo, la
-// distancia y la zona viven un tap adentro, en la hoja del día.
+// punto (disciplina y estado) y un nombre corto de un solo renglón; el nombre completo, la
+// distancia y la zona viven un tap adentro, en la hoja del día. Tope de 3 marcas por día: un
+// cuarto lugar entero para "hay más" es mejor que una cuarta fila apretándose contra las
+// otras tres.
+const CAL_MAX_MARKS=3;
 function dayCellHtml(key,i){
   const rows=plannedOfDay(key);
   const extras=extrasOfDay(key);
   const isToday=key===todayKey();
   const isPast=key<todayKey();
-  const marks=[
-    ...rows.map(p=>`<span class="cal-mark ${p.status}"><i class="cal-dot">${DISC_GLYPH[p.discipline]||'◇'}</i><b>${esc(plannedShort(p))}</b></span>`),
-    ...extras.map(x=>`<span class="cal-mark extra"><i class="cal-dot">${DISC_GLYPH[x.discipline]||'◇'}</i><b>${esc(disciplineShort(x.discipline))}</b></span>`)
+  const items=[
+    ...rows.map(p=>({cls:p.status,glyph:DISC_GLYPH[p.discipline]||'◇',label:plannedShort(p)})),
+    ...extras.map(x=>({cls:'extra',glyph:DISC_GLYPH[x.discipline]||'◇',label:disciplineShort(x.discipline)}))
   ];
-  return `<button class="cal-day ${isToday?'today':''} ${!marks.length?'rest':''} ${isPast?'past':''}" onclick="openPlannedDay('${key}')">
+  const hidden=Math.max(0,items.length-CAL_MAX_MARKS);
+  const marks=[
+    ...items.slice(0,CAL_MAX_MARKS).map(m=>`<span class="cal-mark ${m.cls}"><i class="cal-dot">${m.glyph}</i><b>${esc(m.label)}</b></span>`),
+    hidden?`<span class="cal-mark more">+${hidden}</span>`:''
+  ].join('');
+  return `<button class="cal-day ${isToday?'today':''} ${!items.length?'rest':''} ${isPast?'past':''}" onclick="openPlannedDay('${key}')">
     <span class="cal-dow">${esc(DOW_MINI[i])}</span>
     <span class="cal-num">${keyToDate(key).getDate()}</span>
-    <span class="cal-marks">${marks.join('')}</span>
+    <span class="cal-marks">${marks}</span>
   </button>`;
 }
 
@@ -3234,11 +3312,87 @@ function openWeekMenu(mondayKey){
     <p class="muted">${esc(label)}</p>
     <p class="form-note">${esc(fromTemplate?t('cal.weekFromTemplate',{n:fromTemplate}):t('cal.weekDetached'))}</p>
     <div class="stack" style="margin-top:14px">
+      ${state.programs.length?`<button class="btn" style="width:100%" onclick="openWeekProgramPicker('${mondayKey}')">${icon('calendar',16)} ${esc(t('cal.loadProgramWeek'))}</button>`:''}
       <button class="btn" style="width:100%" onclick="detachWeek('${mondayKey}')">${icon('edit',16)} ${esc(t('cal.detach'))}</button>
       <button class="btn" style="width:100%" onclick="clearWeek('${mondayKey}')">${icon('trash',16)} ${esc(t('cal.clearWeek'))}</button>
       <button class="btn" style="width:100%" onclick="resetWeek('${mondayKey}')">${icon('swap',16)} ${esc(t('cal.resetWeek'))}</button>
     </div>
     <p class="form-note" style="margin-top:12px">${esc(t('cal.weekHelp'))}</p>`;
+}
+
+// Cargar un programa para una sola semana no toca skandi_programs.is_active ni el bloque de
+// descarga (ver applyProgram) -- es un reemplazo puntual de 7 días, no "cargar" el programa
+// como plan estándar. Por eso tiene su propio picker en vez de reusar openProgramPicker.
+function openWeekProgramPicker(mondayKey){
+  $('modal').classList.add('show');
+  $('modalCard').innerHTML=`
+    <div class="row"><h1>${esc(t('cal.loadProgramWeek'))}</h1><button class="x" onclick="openWeekMenu('${mondayKey}')" aria-label="${esc(t('common.close'))}">${icon('close',20)}</button></div>
+    <p class="muted">${esc(t('cal.loadProgramWeekHint'))}</p>
+    <div class="stack" style="margin-top:14px">
+      ${state.programs.map(p=>`<div class="row card" style="margin:0">
+        <div style="min-width:0"><strong>${esc(p.name)}</strong><p class="muted">${esc(programSummary(p))}</p></div>
+        <button class="btn small primary" onclick="applyProgramToWeek('${p.id}','${mondayKey}')">${esc(t('pgm.use'))}</button>
+      </div>`).join('')||empty(t('pgm.empty'))}
+    </div>`;
+}
+
+let applyingProgramWeek=false;
+async function applyProgramToWeek(programId,mondayKey){
+  if(applyingProgramWeek) return;
+  const program=state.programs.find(p=>p.id===programId);
+  if(!program) return;
+  if(!confirm(t('cal.loadProgramWeekConfirm',{name:program.name}))) return;
+  applyingProgramWeek=true;
+  try{
+    const days=weekDayKeys(mondayKey);
+
+    // 1) Igual que detachWeek: congela lo estampado por plantilla que nadie tocó, para que la
+    // rotación estándar de esta semana no se vuelva a estampar encima de lo que se cargue aquí.
+    const templateIds=plannedRows().filter(p=>days.includes(p.day)&&p.source==='template'&&!p.is_edited).map(p=>p.id);
+    if(templateIds.length){
+      const {error}=await sb.from('skandi_planned_sessions').update({is_edited:true}).in('id',templateIds);
+      if(error) return alert(error.message);
+    }
+
+    // 2) Igual que clearWeek: lo que no vaya a quedar en el set nuevo y no esté ya hecho se
+    // marca 'replaced' -- mismo mecanismo que la Parte A, aplicado a la semana completa en vez
+    // de una sola sesión, así ningún día se queda tachado por accidente.
+    const current=plannedRows().filter(p=>days.includes(p.day)&&p.status!=='done'&&!p.session_id&&!p.activity_id);
+    if(current.length){
+      const {error}=await sb.from('skandi_planned_sessions').update({status:'replaced',is_edited:true}).in('id',current.map(p=>p.id));
+      if(error) return alert(error.message);
+    }
+
+    // 3) Una fila por cada día que el programa sí llena -- mismo patrón manual que ya usó a
+    // mano la migración 086 para esta semana. source:'program' (permitido desde la 080, sin
+    // usar hasta ahora) en vez de 'manual': dice de dónde salió sin inventar una columna nueva.
+    const inserts=[];
+    for(const d of programDaysOf(programId)){
+      const day=days[d.weekday];
+      if(!day) continue;
+      if(d.template_id){
+        const tpl=state.templates.find(x=>x.id===d.template_id);
+        inserts.push({user_id:state.user.id,day,sort_order:0,discipline:'strength',source:'program',is_edited:true,
+          template_id:d.template_id,title:tpl?.name||null});
+      }
+      if(d.activity_template_id){
+        const act=state.activityTemplates.find(x=>x.id===d.activity_template_id);
+        inserts.push({user_id:state.user.id,day,sort_order:d.template_id?1:0,
+          discipline:act?(ACT_TO_DISC[act.activity_type]||'other'):'other',
+          source:'program',is_edited:true,activity_template_id:d.activity_template_id,
+          target_distance_km:act?.target_distance_km||null,target_duration_min:act?.target_duration_min||null,
+          target_zone:act?.target_zone||null,title:act?activityTypeLabel(act.activity_type):null});
+      }
+    }
+    if(inserts.length){
+      const {error}=await sb.from('skandi_planned_sessions').insert(inserts);
+      if(error) return alert(error.message);
+    }
+    if(!(await afterPlannedWrite(null))) return;
+    closeModal();
+  } finally {
+    applyingProgramWeek=false;
+  }
 }
 
 // Congela la semana frente al estampado sin tocarla: los días siguen ahí, pero la plantilla
@@ -3567,9 +3721,43 @@ async function savePlanned(id){
     notes:$('planNotes').value.trim()||null,
     is_edited:true
   };
-  const {error}=id
-    ? await sb.from('skandi_planned_sessions').update(payload).eq('id',id)
-    : await sb.from('skandi_planned_sessions').insert({...payload,user_id:state.user.id,source:'manual',sort_order:discipline==='strength'?0:1});
+  const isNew=!id;
+  const {data,error}=id
+    ? await sb.from('skandi_planned_sessions').update(payload).eq('id',id).select().single()
+    : await sb.from('skandi_planned_sessions').insert({...payload,user_id:state.user.id,source:'manual',sort_order:discipline==='strength'?0:1}).select().single();
+  if(!(await afterPlannedWrite(error))) return;
+  if(isNew&&data){
+    const others=plannedRows().filter(p=>p.day===day&&p.status==='planned'&&p.id!==data.id);
+    if(others.length) return openReplaceOldSessionsConfirm(day,others);
+  }
+  openPlannedDay(day);
+}
+
+// Guardar una sesión nueva el mismo día que ya tenía otra activa suele ser un reemplazo (cambio
+// de programa, semana de descarga), no un plan de dos sesiones. Preguntar aquí evita que la
+// vieja se quede marcada "Saltado" (tachada para siempre) en vez de "Quitar" -- el mismo
+// problema que la migración 088 resolvió a nivel de datos, pero que la UI nunca preguntaba.
+function openReplaceOldSessionsConfirm(day,others){
+  const names=others.map(plannedTitle).join(', ');
+  $('modal').classList.add('show');
+  $('modalCard').innerHTML=`
+    <div class="row"><h1>${esc(t('cal.replaceTitle'))}</h1><button class="x" onclick="closeModal()" aria-label="${esc(t('common.close'))}">${icon('close',20)}</button></div>
+    <p class="muted">${esc(t('cal.replaceBody',{names}))}</p>
+    <div class="stack" style="margin-top:14px">
+      <button class="btn primary" style="width:100%" onclick="replaceOldSessions('${day}')">${esc(t('cal.replaceYes'))}</button>
+      <button class="btn" style="width:100%" onclick="openPlannedDay('${day}')">${esc(t('cal.replaceNo'))}</button>
+    </div>`;
+}
+
+// No recibe los ids por el onclick (se escaparían mal con comillas anidadas): recalcula sobre
+// `plannedRows()` y descarta la más reciente de las 'planned' de ese día -- es la que se acaba
+// de crear, entre abrir este confirm y tocar el botón nada más pudo cambiar ese estado.
+async function replaceOldSessions(day){
+  const rows=plannedRows().filter(p=>p.day===day&&p.status==='planned')
+    .sort((a,b)=>new Date(b.created_at)-new Date(a.created_at));
+  const ids=rows.slice(1).map(p=>p.id);
+  if(!ids.length) return openPlannedDay(day);
+  const {error}=await sb.from('skandi_planned_sessions').update({status:'replaced',is_edited:true}).in('id',ids);
   if(await afterPlannedWrite(error)) openPlannedDay(day);
 }
 
