@@ -136,7 +136,8 @@ duración, semanas distintas entre sí, y descarga con contenido propio (`week_i
 orden**:
 
 1. si hay un programa activo con `start_date`, la semana que le toca a esa fecha
-   (`floor((lunes - start_date)/7) + 1`, ciclando cada `weeks + (deload_week ? 1 : 0)`);
+   (`floor((lunes - start_date)/7) + 1`, hasta `weeks + (deload_week ? 1 : 0)`; al terminar,
+   se detiene y pide arrancar el ciclo siguiente, no se repite solo);
 2. si no, `weekday` — exactamente como hoy.
 
 Así, quien nunca hizo un programa sigue funcionando igual, y "inyectar el programa al calendario"
@@ -233,6 +234,31 @@ propiedad, esa segunda escritura se borra y la pantalla no cambia.
 ---
 
 ## 11. Bitácora
+
+**2026-08-25 — P2 implementada y migración 102 ejecutada en Supabase.**
+
+- `skandi_programs` ya contiene `weeks`, `deload_week` y `start_date`; `skandi_program_days`
+  contiene `week_index` y `sort_order`, y la unicidad ahora es por ranura de semana/día/orden.
+- `skandi_week_slots()` concentra la resolución de una semana: una excepción de la semana N
+  reemplaza el día base completo. `skandi_ensure_week()` usa el programa activo y conserva
+  `weekday` como respaldo cuando no hay uno.
+- El ciclo no se repite solo. Al pasar su última semana, tanto el cliente como el RPC dejan de
+  estampar sesiones; esto conserva la decisión que ya existía desde la migración 066.
+- Cargar un programa ya no recorre ni reescribe las rutinas. Activa el programa, guarda su
+  duración y fecha de inicio, y el calendario se actualiza desde ese plan.
+- La duración y la descarga se pueden definir al crear, editar o reiniciar un programa. El
+  cálculo compartido de semana/descarga prefiere el programa activo; los bloques sueltos siguen
+  funcionando para quien no tenga programa.
+- Todos los caminos de asignación de una rutina o un plan de resistencia escriben la ranura del
+  programa activo. `weekday` queda intacto como día sugerido y camino de compatibilidad.
+- Verificado con el parser de PostgreSQL 17.7, sintaxis del JavaScript inline y 20 aserciones del
+  motor de resolución para semana base, excepción semanal, descarga y ciclo terminado. En la
+  base remota quedaron las cinco columnas, el índice y las dos funciones; la función devuelve
+  6 ranuras para la semana base y 0 para un ciclo terminado.
+
+El programa que ya estaba activo quedó sin `start_date` a propósito (no tenía bloque enlazado del
+que recuperar una fecha): conserva la semana anterior hasta que el miembro toque «Iniciar ciclo».
+Después sigue **P3** (editor de semanas distintas y descarga con contenido propio).
 
 **2026-08-25 — P1 implementada (solo interfaz, sin migración).** En `skandi.html`:
 

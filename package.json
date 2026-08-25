@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "private": true,
   "scripts": {
-    "check": "for f in api/*.js lib/*.js sw.js; do node --check \"$f\" || exit 1; done",
+    "check": "for f in api/*.js lib/*.js sw.js; do node --check \"$f\" || exit 1; done && node scripts/check-p2-program.js",
     "check:sql": "python3 scripts/check-sql.py",
     "lint": "eslint api/*.js sw.js"
   },
