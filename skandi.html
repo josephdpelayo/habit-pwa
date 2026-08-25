@@ -8,17 +8,17 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="Skandi Fit">
 <meta name="application-name" content="Skandi Fit">
-<link rel="manifest" href="/skandi-manifest.json?v=20260825-04">
-<link rel="apple-touch-icon" sizes="180x180" href="/icons/skandi-180.png?v=20260825-04">
-<link rel="icon" type="image/png" sizes="192x192" href="/icons/skandi-192.png?v=20260825-04">
+<link rel="manifest" href="/skandi-manifest.json?v=20260825-05">
+<link rel="apple-touch-icon" sizes="180x180" href="/icons/skandi-180.png?v=20260825-05">
+<link rel="icon" type="image/png" sizes="192x192" href="/icons/skandi-192.png?v=20260825-05">
 <title>Skandi Fit</title>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="/skandi-recovery.js?v=20260825-04"></script>
-<script src="/body-figure.js?v=20260825-04"></script>
-<script src="/skandi-nutrition.js?v=20260825-04"></script>
-<script src="/skandi-load.js?v=20260825-04"></script>
-<script src="/skandi-brief.js?v=20260825-04"></script>
-<script src="/skandi-joint-load.js?v=20260825-04"></script>
+<script src="/skandi-recovery.js?v=20260825-05"></script>
+<script src="/body-figure.js?v=20260825-05"></script>
+<script src="/skandi-nutrition.js?v=20260825-05"></script>
+<script src="/skandi-load.js?v=20260825-05"></script>
+<script src="/skandi-brief.js?v=20260825-05"></script>
+<script src="/skandi-joint-load.js?v=20260825-05"></script>
 <style>
 :root{
   --bg:#eef4f8;
@@ -72,6 +72,7 @@ button:focus-visible,input:focus-visible,textarea:focus-visible,select:focus-vis
 .eyebrow{letter-spacing:.16em;text-transform:uppercase;color:var(--dof-steel);font-weight:900;font-size:12px}
 h1{font-size:clamp(32px,7.8vw,52px);line-height:.98;margin:0;letter-spacing:0;overflow-wrap:anywhere}
 h2{font-size:24px;margin:0 0 10px;line-height:1.05}
+h1.compact{font-size:26px;line-height:1.12;letter-spacing:-.015em}
 h3{font-size:19px;margin:0;line-height:1.1}
 p{color:var(--muted);line-height:1.45;margin:0}
 .focus{position:relative;overflow:hidden;background:linear-gradient(135deg,var(--dof-navy),#183d68 64%,#55708b);color:#fff;border-radius:14px;padding:18px;box-shadow:0 22px 52px rgba(1,36,86,.22)}
@@ -185,6 +186,10 @@ p{color:var(--muted);line-height:1.45;margin:0}
 .input-choice button{background:var(--panel2);border:1px solid var(--line);border-radius:12px;padding:15px 11px;display:grid;gap:5px;place-items:center;font-weight:1000;color:var(--text);text-align:center;font-size:13px}
 .input-choice button small{color:var(--muted);font-weight:900;font-size:10.5px;letter-spacing:.03em}
 .input-choice button:disabled{opacity:.5}
+/* La opción gratis e instantánea es la que lleva el peso visual: la escalera de costo
+   (platillo -> catálogo -> IA) tiene que verse, no solo leerse en la etiqueta. */
+.input-choice button.on{background:var(--dof-navy);color:#fff;border-color:var(--dof-navy);box-shadow:0 14px 26px rgba(1,36,86,.22)}
+.input-choice button.on small{color:rgba(255,255,255,.74)}
 .venue-row{display:grid;grid-template-columns:repeat(3,1fr);gap:7px;margin-top:6px}
 .tab svg{width:22px;height:22px;stroke:currentColor;stroke-width:2.4;fill:none}
 .tab.active{color:var(--dof-navy);background:rgba(1,36,86,.08)}
@@ -192,7 +197,8 @@ p{color:var(--muted);line-height:1.45;margin:0}
 .day{display:grid;grid-template-columns:64px 1fr auto;align-items:center;gap:10px;background:var(--panel2);border-radius:8px;padding:13px 14px;color:var(--muted);font-weight:900;border:1px solid rgba(1,36,86,.08)}
 .day.today{background:var(--dof-navy);color:#fff;box-shadow:0 14px 28px rgba(1,36,86,.16)}
 .day.today .icon-btn{background:rgba(255,255,255,.14);border-color:rgba(255,255,255,.25);color:#fff}
-.day span:nth-child(2){color:inherit;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.day span:nth-child(2){color:inherit;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.day>*{min-width:0}
 .week-lines{display:flex;flex-direction:column;gap:5px;min-width:0}
 .week-item{display:flex;align-items:center;gap:6px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;text-align:left;background:transparent;border:0;padding:0;font:inherit;color:inherit;cursor:pointer}
 .week-item.add{opacity:.7;font-weight:800}
@@ -211,6 +217,11 @@ p{color:var(--muted);line-height:1.45;margin:0}
    -webkit-line-clamp dentro de un <button> sin reset de apariencia nativa — punto débil
    conocido de WebKit. */
 .cal-nav{display:inline-flex;align-items:center;gap:6px}
+.cal-empty{display:flex;align-items:center;gap:10px;width:100%;min-height:52px;margin-bottom:10px;padding:12px 14px;
+  background:transparent;border:1px dashed var(--line);border-radius:14px;color:var(--muted);text-align:left}
+.cal-empty span{font-weight:900;font-size:13px;color:var(--dof-steel)}
+.cal-empty small{flex:1;font-size:12px;font-weight:800;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.cal-empty i{font-style:normal;font-weight:900;font-size:12px;color:var(--blue);flex:0 0 auto}
 .load-bars{display:flex;align-items:flex-end;gap:6px;margin-top:14px;height:74px}
 .load-bar{flex:1;display:flex;flex-direction:column;justify-content:flex-end;align-items:center;gap:4px;min-width:0}
 .load-bar i{display:block;width:100%;border-radius:4px 4px 0 0}
@@ -279,7 +290,7 @@ p{color:var(--muted);line-height:1.45;margin:0}
 .plan-row.extra{background:transparent;border-style:dashed}
 .plan-row .disc{font-size:15px;color:var(--dof-navy);text-align:center}
 .plan-body strong{display:block;font-size:15px}
-.plan-body p{margin:2px 0 0;font-size:12px;color:var(--muted)}
+.plan-body p{margin:2px 0 0;font-size:12px;color:var(--muted);display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
 .plan-status{font-size:10px;font-weight:1000;letter-spacing:.06em;text-transform:uppercase;color:var(--dof-steel)}
 .plan-status.done{color:var(--green)}
 .plan-status.extra{color:var(--muted)}
@@ -371,7 +382,7 @@ textarea.field{min-height:112px;text-align:left;resize:vertical}
 .workout-footer .danger-action{color:var(--pink);border-color:rgba(212,72,84,.32);background:#fff}
 /* Sticks "Save routine" to the bottom of the modal-card's own scroll area (mirrors the
    sticky-top .workout-bar trick) so it stays reachable without scrolling past ~100 exercises. */
-.tpl-save-bar{position:sticky;bottom:-20px;z-index:5;margin:14px -20px -20px;padding:12px 20px calc(12px + 20px);background:linear-gradient(0deg,rgba(247,251,254,.98),rgba(247,251,254,.85) 70%,rgba(247,251,254,0));backdrop-filter:blur(18px)}
+.sheet-cta{position:sticky;bottom:calc(-20px - env(safe-area-inset-bottom));z-index:5;margin:14px -20px calc(-20px - env(safe-area-inset-bottom));padding:12px 20px calc(12px + 20px + env(safe-area-inset-bottom));background:linear-gradient(0deg,rgba(247,251,254,.98),rgba(247,251,254,.85) 70%,rgba(247,251,254,0));backdrop-filter:blur(18px)}
 .modal-card .exercise{box-shadow:0 10px 26px rgba(1,36,86,.08);background:rgba(255,255,255,.92)}
 .modal-card .exercise h3{font-size:18px}
 .modal-card .field{box-shadow:none}
@@ -421,9 +432,27 @@ textarea.field{min-height:112px;text-align:left;resize:vertical}
 .auth-logo{font-size:54px;font-weight:1000;color:var(--dof-navy)}
 .modal{position:fixed;inset:0;background:rgba(0,0,0,.72);z-index:40;display:none;align-items:flex-end;justify-content:center;overflow:hidden}
 .modal.show{display:flex}
-.modal-card{width:min(820px,calc(100vw - 16px));max-width:calc(100vw - 16px);max-height:88dvh;overflow:auto;overflow-x:hidden;overscroll-behavior:contain;border-radius:8px 8px 0 0;padding:20px;margin:0 auto}
+.modal-card{width:min(820px,calc(100vw - 16px));max-width:calc(100vw - 16px);max-height:88dvh;overflow:auto;overflow-x:hidden;overscroll-behavior:contain;border-radius:16px 16px 0 0;padding:20px;padding-bottom:calc(20px + env(safe-area-inset-bottom));margin:0 auto}
 .x{width:44px;height:44px;border-radius:12px;background:var(--panel2);color:var(--text);display:grid;place-items:center;flex:0 0 auto}
 .search{display:grid;grid-template-columns:1fr auto;gap:10px;margin:12px 0}
+.search.one{grid-template-columns:1fr}
+/* Fila de catálogo: 66 px en vez de 370, y el nombre es lo que manda. */
+.lib-row{display:grid;grid-template-columns:46px 1fr auto;align-items:center;gap:12px;width:100%;
+  padding:9px 12px;margin-top:8px;background:var(--panel);border:1px solid var(--line);border-radius:12px;text-align:left}
+.lib-thumb{width:46px;height:46px;border-radius:9px;overflow:hidden;background:var(--panel3);
+  display:grid;place-items:center;color:var(--muted)}
+.lib-thumb img,.lib-thumb video{width:100%;height:100%;object-fit:cover;display:block}
+.lib-body{min-width:0;display:grid;gap:2px}
+.lib-body strong{font-size:14.5px;font-weight:900;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.lib-body small{font-size:11.5px;font-weight:800;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.lib-play{color:var(--blue);display:flex;flex:0 0 auto}
+/* Píldora de skill: el nivel a la derecha y la fracción del rango como filo inferior. */
+.skill-chips{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
+.skill-chip{position:relative;overflow:hidden;display:inline-flex;align-items:center;gap:8px;min-height:44px;
+  padding:8px 13px;background:var(--panel2);border:1px solid var(--line);border-radius:999px;text-align:left}
+.skill-chip b{font-size:13px;font-weight:900;color:var(--text)}
+.skill-chip em{font-style:normal;font-size:13px;font-weight:1000;color:var(--blue);font-variant-numeric:tabular-nums}
+.skill-chip i{position:absolute;left:0;bottom:0;height:3px;background:var(--blue);border-radius:0 999px 999px 0;opacity:.75}
 .signup-names{display:grid;grid-template-columns:1fr 1fr;gap:10px}
 .auth-lang{background:transparent;color:var(--muted);font-weight:900;font-size:13px;padding:6px;text-decoration:underline;text-underline-offset:3px}
 .seg{display:grid;grid-auto-flow:column;grid-auto-columns:1fr;gap:4px;background:var(--panel2);border:1px solid var(--line);border-radius:12px;padding:4px}
@@ -472,8 +501,8 @@ textarea.field{min-height:112px;text-align:left;resize:vertical}
   .float-timer{top:calc(env(safe-area-inset-top,0px) + 10px);right:10px}
   .float-timer-chip{padding:8px 10px}
   .float-timer-panel{padding:12px}
-  .modal-card{width:calc(100vw - 16px);max-width:calc(100vw - 16px);padding:16px}
-  .tpl-save-bar{margin:14px -16px -16px;padding:10px 16px calc(10px + 16px)}
+  .modal-card{width:calc(100vw - 16px);max-width:calc(100vw - 16px);padding:16px;padding-bottom:calc(16px + env(safe-area-inset-bottom))}
+  .sheet-cta{bottom:calc(-16px - env(safe-area-inset-bottom));margin:14px -16px calc(-16px - env(safe-area-inset-bottom));padding:10px 16px calc(10px + 16px + env(safe-area-inset-bottom))}
   .workout-content{margin:14px -16px -16px;padding:16px}
   .workout-section-head{margin-bottom:10px}
   .workout-footer{grid-template-columns:1fr 1fr;margin:12px 0 0;padding:0}
@@ -484,6 +513,65 @@ textarea.field{min-height:112px;text-align:left;resize:vertical}
   .mini-body-fig{height:142px}
   .mini-body-fig svg{height:128px}
   .muscle-builder-row{grid-template-columns:78px 1fr 56px;gap:7px;padding:9px}
+}
+/* ── Movimiento y tacto ──────────────────────────────────────────────────────
+   Toda la app vive en hojas modales —51 sitios las abren— y hasta aquí entraban con
+   `display:flex`, sin transición: tocabas y la pantalla ya había cambiado, sin que nada
+   acusara el toque. Las transiciones que había eran todas de `:hover`, un gesto que un
+   teléfono no tiene, así que en el dispositivo real donde se usa la app (un iPhone, a
+   bordo) no se movía absolutamente nada.
+
+   La regla de aquí en adelante: el acuse del toque es `:active` y es inmediato (90 ms);
+   la entrada de una hoja es corta (220 ms) y se hace con `transform`/`opacity`, que la
+   GPU compone sin repintar; y todo esto se apaga si el sistema pide menos movimiento.
+
+   Los tamaños: 44 px es el mínimo táctil de Apple, y en una cubierta que se mueve no es
+   una recomendación de estilo. Donde el dibujo del control sí debe seguir siendo chico
+   (el "•••" de un renglón), se agranda solo el ÁREA con un ::after, no el botón. */
+
+@keyframes sheet-in{from{transform:translateY(16px);opacity:0}to{transform:none;opacity:1}}
+@keyframes veil-in{from{opacity:0}to{opacity:1}}
+.modal.show{animation:veil-in .16s ease-out}
+.modal.show>.modal-card{animation:sheet-in .22s cubic-bezier(.22,.61,.36,1)}
+
+/* El cambio de pantalla, cuando el navegador trae View Transitions (ver render()). Se le pone
+   nombre solo al contenedor del contenido: si se anima la raíz, el encabezado y la barra de
+   pestañas —que no cambian— se desvanecen con él y la app entera parpadea. Lo que cambia es
+   la pantalla; el cromo se queda quieto, que es justo lo que hace que se lea como una app y
+   no como una página que se recarga. */
+#screen{view-transition-name:screen}
+::view-transition-old(root),::view-transition-new(root){animation:none}
+::view-transition-old(screen){animation:vt-out .12s ease-out both}
+::view-transition-new(screen){animation:vt-in .20s cubic-bezier(.22,.61,.36,1) both}
+@keyframes vt-in{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+@keyframes vt-out{to{opacity:0}}
+
+.btn:active,button.chip:active,.pill:active,.seg button:active,.icon-btn:active,
+.plan-row:active,.meal-card:active,.pick:active,.more-row:active,.day:active,
+.week-item:active,.cal-day:active,.member:active,.click-card:active,
+.focus.action:active,.add-fab:active,.auth-tab:active,.x:active,
+.input-choice button:active,.lib-row:active,.skill-chip:active,.cal-empty:active{
+  transform:scale(.97);
+  transition:transform .09s ease-out
+}
+.tab:active{transform:scale(.93);transition:transform .09s ease-out}
+
+/* Piso táctil de 44 px. */
+.btn.small{min-height:44px}
+.seg button{min-height:44px}
+button.chip{min-height:44px}
+.pick{min-height:44px}
+.week-item{min-height:40px}
+/* El "•••" sigue midiendo 30 px a la vista y 44 px al dedo. El inset cabe dentro del
+   `gap` de su renglón, así que no le roba el toque a lo que tiene al lado. */
+.icon-btn{position:relative}
+.icon-btn.tiny::after{content:"";position:absolute;inset:-7px}
+
+@media (prefers-reduced-motion:reduce){
+  *,*::before,*::after{
+    animation-duration:.001ms!important;animation-iteration-count:1!important;
+    transition-duration:.001ms!important;scroll-behavior:auto!important
+  }
 }
 </style>
 </head>
@@ -543,7 +631,7 @@ textarea.field{min-height:112px;text-align:left;resize:vertical}
 // Versión compartida con app.html (APP_VERSION) y sw.js (CACHE_VERSION): un solo service
 // worker sirve las dos apps, así que una sola cadena las invalida a las dos. Al cambiarla
 // hay que actualizarla también en los ?v= del <head>, en index.html y en los dos manifests.
-const SKANDI_VERSION='20260825-04';
+const SKANDI_VERSION='20260825-05';
 const SUPABASE_URL='https://pmpjteuqjusbiduevbwq.supabase.co';
 const SUPABASE_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBtcGp0ZXVxanVzYmlkdWV2YndxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc2OTI1NjUsImV4cCI6MjA5MzI2ODU2NX0.XbMzZoo2yqtrD8znLnyo_1zDfrdJAvAPj1lqGOyXnLw';
 const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
@@ -598,7 +686,7 @@ en:{
   'food.reason.low_protein':'Low in protein ({g} g) for how much you still need today.',
   'food.newFoodBtn':'Type it in','food.newFoodHint':'For anything without a barcode: type the macros per 100 g yourself.',
   'food.errFoodName':'The food needs a name.',
-  'food.analyzeOnly':'Analyze','food.analyzeOnlyHint':'A photo or a description, just to see if it works for you — nothing gets logged until you say so.',
+  'food.analyzeOnly':'Analyze','food.analyzeOnlyBtn':'Analyze without logging','food.analyzeOnlyHint':'A photo or a description, just to see if it works for you — nothing gets logged until you say so.',
   'food.seedCatalog':'Load starter catalog','food.seedCatalogHint':'A few common dishes built from the shared food catalog, so you have something to start from.',
   'food.seedConfirm':'Add a few starter dishes (chicken & rice, oats, tuna...) to your catalog? You can edit or delete any of them after.',
   'food.seedNoFoods':'The shared catalog is empty — nothing to build starter dishes from yet.',
@@ -666,7 +754,7 @@ en:{
   'common.close':'Close','common.save':'Save','common.delete':'Delete','common.edit':'Edit','common.cancel':'Cancel',
   'common.saving':'Saving...','common.optional':'Optional','common.notesOptional':'Notes (optional)',
   'common.crewMember':'Crew member','common.exercise':'Exercise','common.noMatches':'No matches.',
-  'common.searchExercise':'Search exercise...','common.day':'Day','common.date':'Date',
+  'common.searchExercise':'Search exercise...','common.day':'Day','common.date':'Date','common.and':'and','common.today':'Today',
   'common.reps':'reps','common.sets':'sets','common.min':'min','common.byName':'by {name}',
   'common.exercises_one':'exercise','common.exercises_other':'exercises',
   'common.photos_one':'photo','common.photos_other':'photos',
@@ -721,6 +809,7 @@ en:{
   'train.tabToday':'Today','train.tabCalendar':'Calendar','train.tabRoutines':'Routines',
   'cal.today':'Today','cal.thisWeek':'This week','cal.prev':'Previous weeks','cal.next':'Next weeks',
   'cal.moreWeeks':'Show more weeks','cal.emptyDay':'Nothing planned for this day.',
+  'cal.emptyWeeks_one':'1 week with no plan','cal.emptyWeeks_other':'{n} weeks with no plan','cal.emptyWeeksShow':'Show',
   'cal.addSession':'Add session','cal.back':'Back',
   'cal.status.planned':'Planned','cal.status.done':'Done','cal.status.partial':'Partial',
   'cal.status.skipped':'Skipped','cal.status.moved':'Moved','cal.status.extra':'Unplanned',
@@ -924,7 +1013,7 @@ en:{
   'recovery.bodyReady':'Body is ready','recovery.mRested':'{n} {unit} rested',
   'recovery.readySuffix':' · ready in {time}',
 
-  'body.title':'Body','body.daysSince':'days since last training','body.musclesRested':'muscles rested',
+  'body.title':'Body','body.daysSince':'days since last training','body.lastTraining':'last training','body.musclesRested':'muscles rested',
   'body.flip':'Flip front and back','body.recovering':'Recovering','body.restedLegend':'Rested',
   'body.tapHint':'Tap a muscle for details · showing {view}','body.front':'front','body.back':'back',
   'body.muscleStatus':'Muscle status','body.readyNow':'Ready now','body.readyIn':'Ready in {time}',
@@ -1088,6 +1177,7 @@ en:{
   'skill.ladder':'The ladder','skill.rankTarget':'{sets} × {v}','skill.finalRank':'final rank',
   'tempo.hold':'Tempo {n}s','tempo.rep':'Tempo {n}s',
   'fatigue.title':'Skill work on a tired muscle','fatigue.warn':'<strong>{name}</strong> leans on {muscle}, at {score}% recovered.',
+  'fatigue.warnMany':'<strong>{names}</strong> lean on {muscle}, at {score}% recovered.',
   'fatigue.hint':'Expect a shorter set than usual. Log the quality honestly — this is fatigue, not a lost skill.',
 
   'ex.restSec':'rest {n}s','ex.qualityAvg':'quality {v}/10',
@@ -1169,7 +1259,7 @@ en:{
   'm.Forearms':'Forearms','m.Quads':'Quads','m.Hamstrings':'Hamstrings','m.Glutes':'Glutes',
   'm.Calves':'Calves','m.Core':'Core','m.Hip Flexors':'Hip Flexors',
   'cat.Strength':'Strength','cat.Cardio':'Cardio','cat.Mobility':'Mobility','cat.Core':'Core',
-  'cat.Conditioning':'Conditioning','cat.Rehab':'Rehab',
+  'cat.Conditioning':'Conditioning','cat.Rehab':'Rehab','cat.Calisthenics':'Calisthenics','cat.Plyometrics':'Plyometrics','cat.Skill':'Skill',
   'preset.Push':'Push','preset.Pull':'Pull','preset.Legs':'Legs','preset.Core':'Core',
   'diff.normal':'Normal','diff.facil':'Easy','diff.pesado':'Heavy'
 },
@@ -1212,7 +1302,7 @@ es:{
   'food.reason.low_protein':'Aporta poca proteína ({g} g) para lo que todavía te falta hoy.',
   'food.newFoodBtn':'Escribirlo','food.newFoodHint':'Para algo sin código de barras: escribe tú los macros por 100 g.',
   'food.errFoodName':'El alimento necesita nombre.',
-  'food.analyzeOnly':'Analizar','food.analyzeOnlyHint':'Una foto o una descripción, solo para ver si te conviene — no se registra nada hasta que tú lo decidas.',
+  'food.analyzeOnly':'Analizar','food.analyzeOnlyBtn':'Analizar sin registrar','food.analyzeOnlyHint':'Una foto o una descripción, solo para ver si te conviene — no se registra nada hasta que tú lo decidas.',
   'food.seedCatalog':'Cargar catálogo inicial','food.seedCatalogHint':'Unos platillos comunes armados con el catálogo compartido, para tener de dónde partir.',
   'food.seedConfirm':'¿Agregar unos platillos iniciales (pollo con arroz, avena, atún...) a tu catálogo? Puedes editarlos o borrarlos después.',
   'food.seedNoFoods':'El catálogo compartido está vacío — no hay con qué armar platillos iniciales todavía.',
@@ -1280,7 +1370,7 @@ es:{
   'common.close':'Cerrar','common.save':'Guardar','common.delete':'Eliminar','common.edit':'Editar','common.cancel':'Cancelar',
   'common.saving':'Guardando...','common.optional':'Opcional','common.notesOptional':'Notas (opcional)',
   'common.crewMember':'Tripulante','common.exercise':'Ejercicio','common.noMatches':'Sin resultados.',
-  'common.searchExercise':'Buscar ejercicio...','common.day':'Día','common.date':'Fecha',
+  'common.searchExercise':'Buscar ejercicio...','common.day':'Día','common.date':'Fecha','common.and':'y','common.today':'Hoy',
   'common.reps':'reps','common.sets':'series','common.min':'min','common.byName':'por {name}',
   'common.exercises_one':'ejercicio','common.exercises_other':'ejercicios',
   'common.photos_one':'foto','common.photos_other':'fotos',
@@ -1335,6 +1425,7 @@ es:{
   'train.tabToday':'Hoy','train.tabCalendar':'Calendario','train.tabRoutines':'Rutinas',
   'cal.today':'Hoy','cal.thisWeek':'Esta semana','cal.prev':'Semanas anteriores','cal.next':'Semanas siguientes',
   'cal.moreWeeks':'Ver más semanas','cal.emptyDay':'Nada planeado para este día.',
+  'cal.emptyWeeks_one':'1 semana sin plan','cal.emptyWeeks_other':'{n} semanas sin plan','cal.emptyWeeksShow':'Ver',
   'cal.addSession':'Agregar sesión','cal.back':'Volver',
   'cal.status.planned':'Planeado','cal.status.done':'Hecho','cal.status.partial':'Parcial',
   'cal.status.skipped':'Saltado','cal.status.moved':'Movido','cal.status.extra':'Sin planear',
@@ -1538,7 +1629,7 @@ es:{
   'recovery.bodyReady':'El cuerpo está listo','recovery.mRested':'{n} {unit} descansados',
   'recovery.readySuffix':' · listo en {time}',
 
-  'body.title':'Cuerpo','body.daysSince':'días desde el último entrenamiento','body.musclesRested':'músculos descansados',
+  'body.title':'Cuerpo','body.daysSince':'días desde el último entrenamiento','body.lastTraining':'último entrenamiento','body.musclesRested':'músculos descansados',
   'body.flip':'Girar frente y espalda','body.recovering':'Recuperando','body.restedLegend':'Descansado',
   'body.tapHint':'Toca un músculo para ver detalles · mostrando {view}','body.front':'frente','body.back':'espalda',
   'body.muscleStatus':'Estado muscular','body.readyNow':'Listo ya','body.readyIn':'Listo en {time}',
@@ -1702,6 +1793,7 @@ es:{
   'skill.ladder':'La escalera','skill.rankTarget':'{sets} × {v}','skill.finalRank':'último escalón',
   'tempo.hold':'Tempo {n}s','tempo.rep':'Tempo {n}s',
   'fatigue.title':'Habilidad con el músculo cansado','fatigue.warn':'<strong>{name}</strong> carga sobre {muscle}, al {score}% de recuperación.',
+  'fatigue.warnMany':'<strong>{names}</strong> cargan sobre {muscle}, al {score}% de recuperación.',
   'fatigue.hint':'Espera una serie más corta de lo normal. Califica la calidad con honestidad — esto es fatiga, no habilidad perdida.',
 
   'ex.restSec':'descanso {n}s','ex.qualityAvg':'calidad {v}/10',
@@ -1783,7 +1875,7 @@ es:{
   'm.Forearms':'Antebrazos','m.Quads':'Cuádriceps','m.Hamstrings':'Isquios','m.Glutes':'Glúteos',
   'm.Calves':'Pantorrillas','m.Core':'Core','m.Hip Flexors':'Flexores de cadera',
   'cat.Strength':'Fuerza','cat.Cardio':'Cardio','cat.Mobility':'Movilidad','cat.Core':'Core',
-  'cat.Conditioning':'Acondicionamiento','cat.Rehab':'Rehabilitación',
+  'cat.Conditioning':'Acondicionamiento','cat.Rehab':'Rehabilitación','cat.Calisthenics':'Calistenia','cat.Plyometrics':'Pliometría','cat.Skill':'Habilidad',
   'preset.Push':'Empuje','preset.Pull':'Jalón','preset.Legs':'Piernas','preset.Core':'Core',
   'diff.normal':'Normal','diff.facil':'Fácil','diff.pesado':'Pesado'
 }
@@ -1870,7 +1962,7 @@ const EXERCISE_PRESETS={
 };
 
 const ACTIVE_WORKOUT_MAX_HOURS=18;
-const state={user:null,profile:null,view:'home',authMode:'login',exercises:[],templates:[],items:[],sessions:[],sets:[],externalActivities:[],activityTemplates:[],progressionState:[],progressionEvents:[],skillGoals:[],trainingBlocks:[],planned:[],plannedReady:true,ensuredWeeks:new Set(),weekSig:null,trainTab:'today',calOffset:0,calWeeks:4,dayOpen:null,bodyweightLogs:[],programs:[],programDays:[],active:null,activeItems:[],timer:null,elapsed:0,rest:0,restTotal:0,bodyFlip:'front',weightUnit:localStorage.getItem('skandi_weight_unit')||'kg',weightUnitOverrides:(()=>{try{return JSON.parse(localStorage.getItem('skandi_weight_unit_overrides')||'{}');}catch(e){return {};}})(),expandedRoutines:new Set(),progInfoOpen:new Set(),progressTab:'summary',progressQuery:'',progressMetric:'best',historyFilter:{month:'all',title:'all'},crewFeedLimit:6,swapTarget:null,swapQuery:'',setOptionsId:null,skillTab:null,addExOpen:false,addExQuery:'',pausedMs:0,pausedAt:null,floatTimerOpen:false,meals:[],mealItems:[],foods:[],dishes:[],dishItems:[],nutritionTargets:null,nutritionTargetOverrides:[],aiCallsToday:0,foodDayOffset:0,foodPicker:{query:'',mealId:null},pendingMeal:null,wellness:[],intervalsUnmatched:[],stravaStatus:null,intervalsStatus:null,skandiSettings:null,stravaSyncing:false,intervalsSyncing:false,bodyMeasurements:[],progressPhotos:[],pendingPhoto:null,bodyTab:'recovery',supplements:[],supplementLogs:[]};
+const state={user:null,profile:null,view:'home',authMode:'login',exercises:[],templates:[],items:[],sessions:[],sets:[],externalActivities:[],activityTemplates:[],progressionState:[],progressionEvents:[],skillGoals:[],trainingBlocks:[],planned:[],plannedReady:true,ensuredWeeks:new Set(),weekSig:null,trainTab:'today',calOffset:0,calWeeks:4,calExpanded:new Set(),dayOpen:null,bodyweightLogs:[],programs:[],programDays:[],active:null,activeItems:[],timer:null,elapsed:0,rest:0,restTotal:0,bodyFlip:'front',weightUnit:localStorage.getItem('skandi_weight_unit')||'kg',weightUnitOverrides:(()=>{try{return JSON.parse(localStorage.getItem('skandi_weight_unit_overrides')||'{}');}catch(e){return {};}})(),expandedRoutines:new Set(),progInfoOpen:new Set(),progressTab:'summary',progressQuery:'',progressMetric:'best',historyFilter:{month:'all',title:'all'},crewFeedLimit:6,swapTarget:null,swapQuery:'',setOptionsId:null,skillTab:null,addExOpen:false,addExQuery:'',pausedMs:0,pausedAt:null,floatTimerOpen:false,meals:[],mealItems:[],foods:[],dishes:[],dishItems:[],nutritionTargets:null,nutritionTargetOverrides:[],aiCallsToday:0,foodDayOffset:0,foodPicker:{query:'',mealId:null},pendingMeal:null,wellness:[],intervalsUnmatched:[],stravaStatus:null,intervalsStatus:null,skandiSettings:null,stravaSyncing:false,intervalsSyncing:false,bodyMeasurements:[],progressPhotos:[],pendingPhoto:null,bodyTab:'recovery',supplements:[],supplementLogs:[]};
 let builderState={selected:new Map(),group:'All'};
 
 const $=id=>document.getElementById(id);
@@ -1884,6 +1976,9 @@ const exerciseSubtitle=e=>{
   return en&&en.toLowerCase()!==(e?.name||'').trim().toLowerCase()?en:'';
 };
 const initials=name=>(name||'SF').split(/\s+/).slice(0,2).map(x=>x[0]).join('').toUpperCase();
+// Mayúscula inicial y nada más: `text-transform:capitalize` la pone en cada palabra y
+// convierte "martes, 25 de agosto" en "Martes, 25 De Agosto".
+const capFirst=str=>{const v=String(str||'');return v?v[0].toLocaleUpperCase(LANG)+v.slice(1):v;};
 const ICON_PATHS={
   play:'<path d="M6 4l14 8-14 8V4z"/>',
   pause:'<path d="M8 4h3v16H8zM13 4h3v16h-3z"/>',
@@ -1898,6 +1993,11 @@ const ICON_PATHS={
   plus:'<path d="M12 5v14M5 12h14"/>',
   image:'<rect x="3" y="3" width="18" height="18" rx="3"/><circle cx="9" cy="9" r="1.75"/><path d="M21 15l-5.5-5.5L5 20"/>',
   ellipsis:'<circle cx="5" cy="12" r="1.6"/><circle cx="12" cy="12" r="1.6"/><circle cx="19" cy="12" r="1.6"/>',
+  // El código de barras usaba el icono de foto, que es justo la otra opción de la misma
+  // rejilla: dos formas distintas de registrar con el mismo dibujo.
+  barcode:'<path d="M4 6v12M7.5 6v12M11 6v8M14 6v12M17 6v8M20 6v12"/>',
+  // Crew y Cuerpo compartían una silueta de persona casi idéntica en la hoja "Más".
+  crewGroup:'<circle cx="9" cy="8" r="3"/><path d="M3.5 20a5.5 5.5 0 0 1 11 0"/><path d="M16 5.5a3 3 0 0 1 0 5.6"/><path d="M17.5 14.2a5.5 5.5 0 0 1 3 4.8"/>',
   moon:'<path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79Z"/>',
   trending:'<path d="M4 19V5"/><path d="M4 19h16"/><path d="m7 15 3-3 3 2 5-7"/>',
   food:'<path d="M5 3v8a3 3 0 0 0 6 0V3"/><path d="M8 11v10"/><path d="M17 3c-1.5 2-2 3.5-2 6 0 1.7.7 2.6 2 3v9"/>',
@@ -2240,7 +2340,7 @@ function openMoreSheet(){
   $('modalCard').innerHTML=`
     <div class="row"><h1>${esc(t('tab.more'))}</h1><button class="x" onclick="closeModal()" aria-label="${esc(t('common.close'))}">${icon('close',20)}</button></div>
     <div class="more-list">
-      <button class="more-row" onclick="closeModal();setView('crew')">${icon('crew',22)}<span>${esc(t('tab.crew'))}</span>${icon('chevronRight',18)}</button>
+      <button class="more-row" onclick="closeModal();setView('crew')">${icon('crewGroup',22)}<span>${esc(t('tab.crew'))}</span>${icon('chevronRight',18)}</button>
       <button class="more-row" onclick="closeModal();setView('body')">${icon('body',22)}<span>${esc(t('tab.body'))}</span>${icon('chevronRight',18)}</button>
       <button class="more-row" onclick="closeModal();setView('library')">${icon('library',22)}<span>${esc(t('tab.library'))}</span>${icon('chevronRight',18)}</button>
     </div>`;
@@ -2248,8 +2348,31 @@ function openMoreSheet(){
 
 function render(){
   const map={home:homeView,train:trainView,food:foodView,crew:crewView,progress:progressView,body:bodyView,library:libraryView};
-  $('screen').innerHTML=map[state.view]();
+  const paint=()=>{ $('screen').innerHTML=map[state.view](); };
+  // Un re-render dentro de la misma vista (marcar una serie, abrir una semana del calendario)
+  // no debería mandarte al principio de la pantalla: eso es lo que hacía que la app se
+  // sintiera como si se reiniciara a cada toque. Al CAMBIAR de vista sí se vuelve arriba,
+  // que es lo que se espera al entrar a otra pantalla.
+  const sameView=state.view===lastRenderedView;
+  const y=window.scrollY;
+  lastRenderedView=state.view;
+  if(!document.startViewTransition||prefersReducedMotion()){
+    paint();
+    if(sameView) window.scrollTo(0,y);
+    return;
+  }
+  // Un render nuevo mientras otro está en vuelo (marcar dos series seguidas) cancela el
+  // anterior, y esa cancelación rechaza `ready`/`finished`. Es el funcionamiento normal, no
+  // un fallo: sin capturarlo, la consola se llena de "Transition was skipped".
+  const vt=document.startViewTransition(()=>{
+    paint();
+    if(sameView) window.scrollTo(0,y);
+  });
+  vt.ready.catch(()=>{});
+  vt.finished.catch(()=>{});
 }
+let lastRenderedView=null;
+const prefersReducedMotion=()=>window.matchMedia&&matchMedia('(prefers-reduced-motion: reduce)').matches;
 
 function activeWorkoutBanner(){
   if(!state.active) return '';
@@ -3017,14 +3140,29 @@ function plannedSub(p){
   return parts.join(' · ');
 }
 
+// La misma línea, pero para un renglón: sin la nota, que es lo único que no tiene largo
+// acotado. El detalle completo vive en la hoja del día.
+function plannedSubShort(p){
+  const full=plannedSub(p);
+  if(!p.notes) return full;
+  const tail=' · '+p.notes;
+  return full.endsWith(tail)?full.slice(0,-tail.length):full;
+}
+
 // Lo que cabe en una celda de calendario: distancia si la hay, si no duración, si no el
 // nombre corto de la disciplina.
+//
+// Se intentó poner el nombre primero —la queja legítima es que una semana de fuerza muestra
+// 55' / 40' / 40' y no distingue "Front Lever B" de "Full Body"— y en pantalla es peor: la
+// celda mide 46 px y todas las rutinas de un mismo programa comparten prefijo, así que los
+// siete días quedaban en "D…". En una rejilla de mes lo que se lee es densidad y estado, no
+// nombres; el nombre vive un tap adentro, en la hoja del día, y en la pestaña Hoy.
 function plannedShort(p){
+  // El descanso ya se distingue por la celda punteada y sin relleno. Escribir "Descanso" en
+  // 46 px solo producía "— D…", que es ruido con forma de dato.
+  if(p.discipline==='rest') return '';
   if(p.target_distance_km) return `${Math.round(p.target_distance_km*10)/10} km`;
   if(p.target_duration_min) return `${p.target_duration_min}'`;
-  // El nombre completo, sin recortar a mano: el CSS lo limita a dos renglones y pone los
-  // puntos suspensivos donde de verdad se acaba el espacio. Cortarlo aquí a seis caracteres
-  // producía "Handst", que se ve como un error tipográfico y no como una abreviatura.
   if(p.discipline==='strength') return plannedTitle(p);
   return disciplineShort(p.discipline);
 }
@@ -3115,7 +3253,7 @@ function trainView(){
   const body=tab==='calendar'?calendarTab():tab==='routines'?routinesTab():trainTodayTab();
   return `
     ${activeWorkoutBanner()}
-    <div class="row"><h1>${esc(t('train.title'))}</h1>${tab==='routines'?`<button class="btn primary" onclick="openDayPicker(todayDow())">${esc(t('train.addRoutine'))}</button>`:''}</div>
+    <div class="row"><h1 class="compact">${esc(t('train.title'))}</h1>${tab==='routines'?`<button class="btn primary" onclick="openDayPicker(todayDow())">${esc(t('train.addRoutine'))}</button>`:''}</div>
     <div class="seg sub" style="margin:12px 0 16px">
       ${tabs.map(([key,label])=>`<button class="${tab===key?'active':''}" onclick="setTrainTab('${key}')">${esc(t(label))}</button>`).join('')}
     </div>
@@ -3164,7 +3302,7 @@ function wellnessCardHtml(){
     notes.push(t('wellness.hrHigh',{n:Math.round(latest.resting_hr-hrAvg)}));
   }
 
-  const stat=(value,label)=>value==null?'':`<div class="stat"><strong>${esc(String(value))}</strong><small>${esc(label)}</small></div>`;
+  const stat=(value,label)=>(value==null||value===0)?'':`<div class="stat"><strong>${esc(String(value))}</strong><small>${esc(label)}</small></div>`;
   return `<section class="card">
     <div class="row"><h2>${esc(t('wellness.title'))}</h2><span class="muted">${esc(whenLabel)}</span></div>
     <div class="wellness-grid">
@@ -3185,7 +3323,7 @@ function trainTodayTab(){
   const dateLabel=keyToDate(key).toLocaleDateString(LANG,{weekday:'long',day:'numeric',month:'long'});
   return `
     <section class="card">
-      <div class="row"><h2>${esc(t('cal.today'))}</h2><span class="muted">${esc(dateLabel)}</span></div>
+      <div class="row"><h2>${esc(capFirst(dateLabel))}</h2></div>
       ${rows.length||extras.length
         ?`<div class="stack" style="margin-top:12px">${rows.map(plannedRowHtml).join('')}${extras.map(extraRowHtml).join('')}</div>`
         :empty(t('cal.emptyDay'))}
@@ -3207,7 +3345,7 @@ function legacyTodayTab(){
 }
 
 function plannedRowHtml(p){
-  const sub=plannedSub(p);
+  const sub=plannedSubShort(p);
   return `<div class="plan-row ${p.status}" onclick="openPlannedItem('${p.id}')">
     <span class="disc">${DISC_GLYPH[p.discipline]||'◇'}</span>
     <div class="plan-body">
@@ -3267,8 +3405,62 @@ function calendarTab(){
         <button class="icon-btn tiny" onclick="calShift(1)" aria-label="${esc(t('cal.next'))}">›</button>
       </span>
     </div>
-    ${weeks.map(weekRowHtml).join('')}
+    ${calendarWeeksHtml(weeks)}
     <button class="btn" style="width:100%" onclick="calMore()">${esc(t('cal.moreWeeks'))}</button>`;
+}
+
+// Una semana sin nada planeado ocupaba una tarjeta entera con siete celdas punteadas vacías.
+// Cuatro seguidas —lo normal en cuanto miras un mes hacia adelante— empujaban fuera de
+// pantalla lo único accionable. Las vacías consecutivas se juntan en un renglón que se abre
+// al tocarlo; la semana actual nunca se colapsa, aunque esté vacía, porque es la que se
+// consulta.
+function calendarWeeksHtml(weeks){
+  const currentKey=dayKey(mondayOf(new Date()));
+  const out=[];
+  let run=[];
+  const flush=()=>{
+    if(!run.length) return;
+    // Una sola semana vacía no gana nada por colapsarse: el renglón ocuparía casi lo mismo
+    // y escondería el día al que igual se puede tocar para planear algo.
+    if(run.length===1) out.push(weekRowHtml(run[0]));
+    else{
+      const from=dayKey(run[0]), to=dayKey(run[run.length-1]);
+      out.push(`<button type="button" class="cal-empty" onclick="calExpandRange('${from}')">
+        <span>${esc(tp(run.length,'cal.emptyWeeks'))}</span>
+        <small>${esc(new Date(from+'T12:00:00').toLocaleDateString(LANG,{day:'numeric',month:'short'}))} – ${esc(new Date(to+'T12:00:00').toLocaleDateString(LANG,{day:'numeric',month:'short'}))}</small>
+        <i>${esc(t('cal.emptyWeeksShow'))}</i>
+      </button>`);
+    }
+    run=[];
+  };
+  weeks.forEach(monday=>{
+    const key=dayKey(monday);
+    const empty=key!==currentKey&&!state.calExpanded.has(key)&&weekIsEmpty(monday);
+    if(empty) run.push(monday);
+    else { flush(); out.push(weekRowHtml(monday)); }
+  });
+  flush();
+  return out.join('');
+}
+
+// Vacía = ni plan ni nada entrenado. Un extra (algo que hiciste sin planearlo) cuenta: esa
+// semana sí tiene contenido que mirar.
+function weekIsEmpty(monday){
+  for(let i=0;i<7;i++){
+    const k=dayKey(addDays(monday,i));
+    if(plannedOfDay(k).length||extrasOfDay(k).length) return false;
+  }
+  return true;
+}
+
+function calExpandRange(fromKey){
+  const start=keyToDate(fromKey);
+  for(let i=0;i<state.calWeeks;i++){
+    const monday=addDays(start,i*7);
+    if(!weekIsEmpty(monday)) break;
+    state.calExpanded.add(dayKey(monday));
+  }
+  render();
 }
 
 // La adherencia de una semana, en un solo lugar. Inicio la calculaba por su cuenta a partir de
@@ -3510,7 +3702,7 @@ function plannedDayHtml(key){
   const extras=extrasOfDay(key);
   const dateLabel=keyToDate(key).toLocaleDateString(LANG,{weekday:'long',day:'numeric',month:'long'});
   return `
-    <div class="row"><h1 style="text-transform:capitalize">${esc(dateLabel)}</h1><button class="x" onclick="closeModal()" aria-label="${esc(t('common.close'))}">${icon('close',20)}</button></div>
+    <div class="row"><h1>${esc(capFirst(dateLabel))}</h1><button class="x" onclick="closeModal()" aria-label="${esc(t('common.close'))}">${icon('close',20)}</button></div>
     ${rows.length||extras.length
       ?`<div class="stack" style="margin-top:14px">${rows.map(plannedRowHtml).join('')}${extras.map(extraRowHtml).join('')}</div>`
       :empty(t('cal.emptyDay'))}
@@ -3840,6 +4032,7 @@ function combinedWeekCard(mine,myPlans){
         const planSummary=plan?[activityTypeLabel(plan.activity_type),plan.target_distance_km?`${plan.target_distance_km}km`:null].filter(Boolean).join(' · '):'';
         const enduranceLine=plan
           ?`<span class="week-item" onclick="event.stopPropagation();openActivityTemplateBuilder(${i},'${plan.id}')"><i class="glyph">${DISC_GLYPH[planDisc]||'◇'}</i>${esc(planSummary)}</span>`
+          :tpl?''
           :`<button type="button" class="week-item add" onclick="event.stopPropagation();openActivityTemplateBuilder(${i})">+ ${esc(t('train.addPlan'))}</button>`;
         return `<div class="day ${i===todayDow()?'today':''}" style="grid-template-columns:64px 1fr auto;cursor:default">
           <span>${d}</span>
@@ -4025,7 +4218,7 @@ function progressView(){
   const tabs=[['summary','progress.tabSummary'],['exercises','progress.tabExercises'],['history','progress.tabHistory'],['load','progress.tabLoad']];
   const body=tab==='exercises'?progressExercisesTab():tab==='history'?progressHistoryTab():tab==='load'?progressLoadTab():progressSummaryTab();
   return `
-    <h1>${esc(t('progress.title'))}</h1>
+    <h1 class="compact">${esc(t('progress.title'))}</h1>
     <div class="seg sub" style="margin:12px 0 16px">
       ${tabs.map(([key,label])=>`<button class="${tab===key?'active':''}" onclick="setProgressTab('${key}')">${esc(t(label))}</button>`).join('')}
     </div>
@@ -4467,7 +4660,7 @@ function historyRowHtml(s){
 function libraryView(){
   return `
     <div class="row"><h1>${esc(t('library.title'))}</h1><button class="btn primary" onclick="openExerciseBuilder()">${esc(t('library.addExercise'))}</button></div>
-    <div class="search"><input id="q" class="field left" placeholder="${esc(t('common.searchExercise'))}" oninput="renderLibraryList()"><button class="btn" onclick="renderLibraryList()">${esc(t('library.search'))}</button></div>
+    <div class="search one"><input id="q" class="field left" type="search" placeholder="${esc(t('common.searchExercise'))}" oninput="renderLibraryList()" autocomplete="off"></div>
     <div id="libraryList">${exerciseList(state.exercises)}</div>`;
 }
 
@@ -4522,26 +4715,30 @@ function templateExerciseOption(e){
 
 function exerciseCard(e,tracking){
   const muscles=Object.entries(e.muscles||{}).sort((a,b)=>b[1]-a[1]);
-  return `<article class="exercise">
-    <div class="ex-head" onclick="openExercise('${e.id}')">
-      ${mediaThumb(e)}
-      <div><h3>${esc(e.name)}</h3><p>${esc(exerciseSubtitle(e)||categoryLabel(e.category)||'')}</p></div>
-      <div class="play">${icon('play',18)}</div>
-    </div>
-    <div class="muscles">${muscles.map(([m,p])=>`<span class="pill dark">${esc(muscleLabel(m))} ${p}%</span>`).join('')}</div>
-  </article>`;
+  // Dos músculos: el tercero y el cuarto de un reparto suelen ser 13% y 9%, ruido para elegir
+  // un ejercicio. El reparto completo sigue estando al abrirlo.
+  const top=muscles.slice(0,2).map(([m])=>muscleLabel(m)).join(' · ');
+  const sub=[categoryLabel(e.category),top].filter(Boolean).join(' · ');
+  return `<button type="button" class="lib-row" onclick="openExercise('${e.id}')">
+    ${mediaThumb(e,'lib-thumb')}
+    <span class="lib-body">
+      <strong>${esc(e.name)}</strong>
+      <small>${esc(sub)}</small>
+    </span>
+    ${e.media_url?`<i class="lib-play">${icon('play',16)}</i>`:''}
+  </button>`;
 }
 
 function isVideoUrl(url){
   return /\.(mp4|mov|webm|m4v)(\?|#|$)/i.test(url||'');
 }
 
-function mediaThumb(e){
+function mediaThumb(e,cls='thumb'){
   if(e.media_url){
-    if(isVideoUrl(e.media_url)) return `<div class="thumb"><video src="${esc(e.media_url)}" muted playsinline preload="metadata" onerror="this.parentElement.innerHTML=THUMB_FALLBACK"></video></div>`;
-    return `<div class="thumb"><img src="${esc(e.media_url)}" alt="${esc(e.name)}" loading="lazy" onerror="this.parentElement.innerHTML=THUMB_FALLBACK"></div>`;
+    if(isVideoUrl(e.media_url)) return `<div class="${cls}"><video src="${esc(e.media_url)}" muted playsinline preload="metadata" onerror="this.parentElement.innerHTML=THUMB_FALLBACK"></video></div>`;
+    return `<div class="${cls}"><img src="${esc(e.media_url)}" alt="${esc(e.name)}" loading="lazy" onerror="this.parentElement.innerHTML=THUMB_FALLBACK"></div>`;
   }
-  return `<div class="thumb">${THUMB_FALLBACK}</div>`;
+  return `<div class="${cls}">${THUMB_FALLBACK}</div>`;
 }
 
 function feedItem(s){
@@ -4879,8 +5076,22 @@ function weeklyRecapCard(){
     </div>
     ${r.avgEnergy!=null?`<p style="margin-top:10px">${esc(t('recap.avgEnergy',{v:r.avgEnergy}))}${esc(energyTrend!=null?(energyTrend>0?t('recap.energyUp',{v:r.lastAvgEnergy}):energyTrend<0?t('recap.energyDown',{v:r.lastAvgEnergy}):''):'')}.</p>`:''}
     ${r.soreCount?`<p style="margin-top:6px;color:var(--pink)">${esc(t('recap.soreness',{n:r.soreCount,unit:tp(r.soreCount,'common.sessions')}))}</p>`:''}
-    ${r.progressions.length?`<div class="muscles" style="margin-top:10px">${r.progressions.map(e=>`<span class="pill dark">${esc(e.name)}</span>`).join('')}</div>`:''}
+    ${r.progressions.length?`<div class="skill-chips">${r.progressions.map(skillChipHtml).join('')}</div>`:''}
   </section>`;
+}
+
+// Una línea de skill en una píldora: nombre, nivel y cuánto lleva dentro del rango actual.
+// El nivel no se guarda en ninguna columna — es rango + fracción del objetivo, derivado — así
+// que la barra es exactamente esa parte fraccionaria, sin inventar una escala aparte.
+function skillChipHtml(e){
+  const series=e.progression_group?skillLevelSeries(e.progression_group):[];
+  const level=series.length?series[series.length-1].level:null;
+  const pct=level==null?0:Math.round((level-Math.floor(level))*100);
+  return `<button type="button" class="skill-chip" onclick="openExercise('${e.id}')">
+    <b>${esc(e.name)}</b>
+    ${level==null?'':`<em>${level.toFixed(1)}</em>`}
+    <i style="width:${pct}%"></i>
+  </button>`;
 }
 
 // ---- Cross-training analysis: strength/skill vs running/bike/swim, per week ----
@@ -5102,7 +5313,7 @@ function bodyView(){
   const tabs=[['recovery','body.tabRecovery'],['measurements','body.tabMeasurements'],['photos','body.tabPhotos']];
   const body=tab==='measurements'?measurementsTab():tab==='photos'?photosTab():recoveryTab();
   return `
-    <h1>${esc(t('body.title'))}</h1>
+    <h1 class="compact">${esc(t('body.title'))}</h1>
     <div class="seg sub" style="margin:12px 0 16px">
       ${tabs.map(([key,label])=>`<button class="${tab===key?'active':''}" onclick="setBodyTab('${key}')">${esc(t(label))}</button>`).join('')}
     </div>
@@ -5124,7 +5335,7 @@ function recoveryTab(){
   const view=state.bodyFlip==='back'?'back':'front';
   return `
     <section class="grid">
-      <div class="stat"><strong>${daysSince===null?'-':daysSince}</strong><small>${esc(t('body.daysSince'))}</small></div>
+      <div class="stat"><strong>${daysSince===null?'—':daysSince===0?esc(t('common.today')):daysSince}</strong><small>${esc(daysSince===0?t('body.lastTraining'):t('body.daysSince'))}</small></div>
       <div class="stat"><strong>${restedCount}</strong><small>${esc(t('body.musclesRested'))}</small></div>
     </section>
     <section class="card">
@@ -6034,18 +6245,46 @@ function openWorkoutOverview(templateId){
   const resolved=resolveTemplateProgressionItems(templateItems);
   const fatigued=skillFatigueWarnings(resolved.map(i=>i.exercise));
   $('modal').classList.add('show');
+  // El aviso de fatiga va DEBAJO de la lista y la lista debajo del título: con el aviso
+  // arriba, empujaba "Empezar a entrenar" fuera de la pantalla (816 px en un alto de 812).
+  // Y se agrupa por músculo: dos variantes de la misma línea de skill cargan el mismo
+  // músculo y repetir la frase entera cambiando el nombre no informa dos veces.
   $('modalCard').innerHTML=`
     <div class="row"><h1>${esc(tpl.name)}</h1><button class="x" onclick="closeModal()" aria-label="${esc(t('common.close'))}">${icon('close',20)}</button></div>
     <p class="muted">${templateItems.length} ${esc(tp(templateItems.length,'common.exercises'))}${tpl.weekday!=null?' · '+DOW[tpl.weekday]:''}</p>
-    ${fatigued.length?`<section class="card" style="margin-top:14px;border-color:rgba(212,72,84,.30);background:#fff7f7">
-      <div class="eyebrow" style="color:var(--pink)">${esc(t('fatigue.title'))}</div>
-      ${fatigued.map(f=>`<p style="margin-top:8px">${t('fatigue.warn',{name:esc(f.exercise.name),muscle:esc(muscleLabel(f.muscle)),score:f.score})}</p>`).join('')}
-      <p class="muted" style="margin-top:8px">${esc(t('fatigue.hint'))}</p>
-    </section>`:''}
     <div class="stack" style="margin-top:14px">
       ${resolved.map(i=>`<div class="row"><span>${esc(i.exercise?.name||t('common.exercise'))}</span><span class="muted">${i.target_sets}×${esc(i.target_reps||'')}</span></div>`).join('')}
     </div>
-    <button class="btn primary" style="width:100%;margin-top:18px" onclick="startWorkout('${tpl.id}')">${icon('play',16)} ${esc(t('workout.startTraining'))}</button>`;
+    ${fatigueCardHtml(fatigued)}
+    <div class="sheet-cta"><button class="btn primary" style="width:100%" onclick="startWorkout('${tpl.id}')">${icon('play',16)} ${esc(t('workout.startTraining'))}</button></div>`;
+}
+
+// Un renglón por músculo cansado, no uno por ejercicio.
+function fatigueCardHtml(fatigued){
+  if(!fatigued.length) return '';
+  const byMuscle=new Map();
+  fatigued.forEach(f=>{
+    const g=byMuscle.get(f.muscle);
+    if(g){ g.names.push(f.exercise.name); g.score=Math.min(g.score,f.score); }
+    else byMuscle.set(f.muscle,{names:[f.exercise.name],score:f.score});
+  });
+  const lines=[...byMuscle.entries()].map(([muscle,g])=>{
+    const params={muscle:esc(muscleLabel(muscle)),score:g.score};
+    return `<p style="margin-top:8px">${g.names.length===1
+      ? t('fatigue.warn',{...params,name:esc(g.names[0])})
+      : t('fatigue.warnMany',{...params,names:esc(listJoin(g.names))})}</p>`;
+  }).join('');
+  return `<section class="card" style="margin-top:14px;border-color:rgba(212,72,84,.30);background:#fff7f7">
+    <div class="eyebrow" style="color:var(--pink)">${esc(t('fatigue.title'))}</div>
+    ${lines}
+    <p class="muted" style="margin-top:8px">${esc(t('fatigue.hint'))}</p>
+  </section>`;
+}
+
+// "A, B y C" — la coma en todos menos el último, que lleva la conjunción del idioma.
+function listJoin(names){
+  if(names.length<2) return names[0]||'';
+  return names.slice(0,-1).join(', ')+' '+t('common.and')+' '+names[names.length-1];
 }
 
 // supabase-js resolves (rather than throws) on a fetch failure, surfacing it as
@@ -7227,7 +7466,7 @@ function openTemplateBuilder(day=null,id=null){
     <h2>${esc(t('workout.exercises'))}</h2>
     <input id="tplExSearch" class="field left" placeholder="${esc(t('common.searchExercise'))}" oninput="renderTemplateExercisePicker()">
     <div id="tplExPicker"></div>
-    <div class="tpl-save-bar"><button class="btn primary" style="width:100%" onclick="saveTemplate('${id||''}')">${esc(t('tpl.save'))}</button></div>`;
+    <div class="sheet-cta"><button class="btn primary" style="width:100%" onclick="saveTemplate('${id||''}')">${esc(t('tpl.save'))}</button></div>`;
   renderTemplateExercisePicker();
 }
 
@@ -7489,6 +7728,7 @@ function openDayManage(templateId,day){
       <button class="btn" style="width:100%" onclick="openDayPicker(${day})">${icon('swap',16)} ${esc(t('week.replaceRoutine'))}</button>
       <button class="btn" style="width:100%" onclick="openTemplateBuilder(null,'${tpl.id}')">${icon('edit',16)} ${esc(t('week.editRoutine'))}</button>
       <button class="btn" style="width:100%" onclick="openMoveRoutine('${tpl.id}',${day})">${icon('calendar',16)} ${esc(t('week.moveToDay'))}</button>
+      <button class="btn" style="width:100%" onclick="openActivityTemplateBuilder(${day})">${icon('plus',16)} ${esc(t('train.addPlan'))}</button>
       <button class="btn danger" style="width:100%" onclick="removeRoutineFromDay('${tpl.id}')">${icon('trash',16)} ${esc(t('week.removeFrom',{day:DOW[day]}))}</button>
     </div>`;
 }
@@ -8106,7 +8346,7 @@ function foodView(){
       <div class="row">
         <div>
           <div class="eyebrow">${esc(t('food.title'))}</div>
-          <h1 style="text-transform:capitalize">${esc(label)}</h1>
+          <h1>${esc(capFirst(label))}</h1>
         </div>
         <div class="row" style="gap:6px">
           <button class="chip" onclick="shiftFoodDay(-1)" aria-label="←">←</button>
@@ -8559,14 +8799,14 @@ function openAddMeal(mealId=null){
     ${quickAddStripHtml(mealId)}
     <div class="eyebrow" style="margin-top:14px">${esc(t('food.otherWays'))}</div>
     <div class="input-choice">
-      <button onclick="openDishPicker(${mealId?`'${mealId}'`:'null'})" ${noDishes?'disabled':''}>${icon('check',22)}${esc(t('food.byDish'))}<small>${esc(t('food.byDishHint'))}</small></button>
-      <button onclick="openFoodPicker(${mealId?`'${mealId}'`:'null'})" ${noFoods?'disabled':''}>${icon('plus',22)}${esc(t('food.byFood'))}<small>${esc(t('food.byFoodHint'))}</small></button>
-      <button onclick="openBarcode(${mealId?`'${mealId}'`:'null'})">${icon('image',22)}${esc(t('food.byBarcode'))}<small>${esc(t('food.byBarcodeHint'))}</small></button>
+      <button class="${noDishes?'':'on'}" onclick="openDishPicker(${mealId?`'${mealId}'`:'null'})" ${noDishes?'disabled':''}>${icon('check',22)}${esc(t('food.byDish'))}<small>${esc(t('food.byDishHint'))}</small></button>
+      <button class="${noDishes&&!noFoods?'on':''}" onclick="openFoodPicker(${mealId?`'${mealId}'`:'null'})" ${noFoods?'disabled':''}>${icon('plus',22)}${esc(t('food.byFood'))}<small>${esc(t('food.byFoodHint'))}</small></button>
+      <button onclick="openBarcode(${mealId?`'${mealId}'`:'null'})">${icon('barcode',22)}${esc(t('food.byBarcode'))}<small>${esc(t('food.byBarcodeHint'))}</small></button>
       <button onclick="openMealInput('text',${mealId?`'${mealId}'`:'null'})">${icon('edit',22)}${esc(t('food.byText'))}<small>${esc(t('food.byTextHint'))}</small></button>
     </div>
-    <button class="btn primary" style="width:100%;margin-top:10px" onclick="openMealInput('photo',${mealId?`'${mealId}'`:'null'})">${icon('image',20)} ${esc(t('food.byPhoto'))} · ${esc(t('food.byPhotoHint'))}</button>
-    <button class="btn" style="width:100%;margin-top:8px" onclick="openMealInput('inspect',${mealId?`'${mealId}'`:'null'})">${icon('trending',18)} ${esc(t('food.analyzeOnly'))} · ${esc(t('food.byPhotoHint'))}</button>
-    ${noDishes&&noFoods&&!mealId?`<button class="btn" style="width:100%;margin-top:10px" onclick="seedStarterCatalog()">${icon('plus',18)} ${esc(t('food.seedCatalog'))}</button>
+    <button class="btn" style="width:100%;margin-top:10px" onclick="openMealInput('photo',${mealId?`'${mealId}'`:'null'})">${icon('image',20)} ${esc(t('food.byPhoto'))} · ${esc(t('food.byPhotoHint'))}</button>
+    <button class="btn" style="width:100%;margin-top:8px" onclick="openMealInput('inspect',${mealId?`'${mealId}'`:'null'})">${icon('trending',18)} ${esc(t('food.analyzeOnlyBtn'))} · ${esc(t('food.byPhotoHint'))}</button>
+    ${noDishes&&noFoods&&!mealId?`<button class="btn primary" style="width:100%;margin-top:10px" onclick="seedStarterCatalog()">${icon('plus',18)} ${esc(t('food.seedCatalog'))}</button>
     <p class="muted" style="font-size:11px;margin-top:4px;text-align:center">${esc(t('food.seedCatalogHint'))}</p>`:''}`;
 }
 
