@@ -8,17 +8,17 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="Skandi Fit">
 <meta name="application-name" content="Skandi Fit">
-<link rel="manifest" href="/skandi-manifest.json?v=20260825-09">
-<link rel="apple-touch-icon" sizes="180x180" href="/icons/skandi-180.png?v=20260825-09">
-<link rel="icon" type="image/png" sizes="192x192" href="/icons/skandi-192.png?v=20260825-09">
+<link rel="manifest" href="/skandi-manifest.json?v=20260825-10">
+<link rel="apple-touch-icon" sizes="180x180" href="/icons/skandi-180.png?v=20260825-10">
+<link rel="icon" type="image/png" sizes="192x192" href="/icons/skandi-192.png?v=20260825-10">
 <title>Skandi Fit</title>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="/skandi-recovery.js?v=20260825-09"></script>
-<script src="/body-figure.js?v=20260825-09"></script>
-<script src="/skandi-nutrition.js?v=20260825-09"></script>
-<script src="/skandi-load.js?v=20260825-09"></script>
-<script src="/skandi-brief.js?v=20260825-09"></script>
-<script src="/skandi-joint-load.js?v=20260825-09"></script>
+<script src="/skandi-recovery.js?v=20260825-10"></script>
+<script src="/body-figure.js?v=20260825-10"></script>
+<script src="/skandi-nutrition.js?v=20260825-10"></script>
+<script src="/skandi-load.js?v=20260825-10"></script>
+<script src="/skandi-brief.js?v=20260825-10"></script>
+<script src="/skandi-joint-load.js?v=20260825-10"></script>
 <style>
 :root{
   --bg:#eef4f8;
@@ -484,6 +484,10 @@ textarea.field{min-height:112px;text-align:left;resize:vertical}
 .pgm-day.rest>span:nth-child(2){color:var(--muted);font-weight:700}
 .pgm-day.editable{grid-template-columns:52px 1fr auto;width:100%;text-align:left;font-family:inherit;cursor:pointer;color:inherit}
 .pgm-day.editable svg{color:var(--muted);flex:0 0 auto}
+.pgm-weeks{display:flex;gap:6px;overflow-x:auto;padding:2px 0 6px;scrollbar-width:none}
+.pgm-weeks::-webkit-scrollbar{display:none}
+.pgm-weeks button{flex:0 0 auto;min-width:46px;padding:9px 12px;border:1px solid var(--line);border-radius:999px;background:var(--panel2);color:var(--muted);font-weight:1000}
+.pgm-weeks button.active{background:var(--dof-navy);border-color:var(--dof-navy);color:#fff}
 .pick-row{display:flex;align-items:center;justify-content:space-between;gap:10px;font-family:inherit;color:inherit;cursor:pointer;text-align:left}
 .pick-row.selected{border-color:var(--dof-navy)}
 .hidden{display:none!important}
@@ -644,7 +648,7 @@ button.chip{min-height:44px}
 // Versión compartida con app.html (APP_VERSION) y sw.js (CACHE_VERSION): un solo service
 // worker sirve las dos apps, así que una sola cadena las invalida a las dos. Al cambiarla
 // hay que actualizarla también en los ?v= del <head>, en index.html y en los dos manifests.
-const SKANDI_VERSION='20260825-09';
+const SKANDI_VERSION='20260825-10';
 const SUPABASE_URL='https://pmpjteuqjusbiduevbwq.supabase.co';
 const SUPABASE_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBtcGp0ZXVxanVzYmlkdWV2YndxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc2OTI1NjUsImV4cCI6MjA5MzI2ODU2NX0.XbMzZoo2yqtrD8znLnyo_1zDfrdJAvAPj1lqGOyXnLw';
 const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
@@ -1002,6 +1006,12 @@ en:{
   'pgm.cycleWeek':'Week {week} of {total}','pgm.cycleDeload':'Week {week} of {total} · deload week',
   'pgm.cycleEnded':'Cycle finished — review it and start the next one',
   'pgm.untilDeload_one':'deload next week','pgm.untilDeload_other':'deload in {n} weeks',
+  'pgm.customizeWeeks':'Make weeks different','pgm.customizeWeeksHint':'Start from the base week, then change only the weeks that need a different plan.',
+  'pgm.baseWeek':'Base','pgm.weekLabel':'Week {n}','pgm.deloadShort':'D','pgm.resetWeek':'Reset this week to base',
+  'pgm.resetWeekConfirm':'Remove this week’s changes and make it follow the base week again?',
+  'pgm.phase':'Phase','pgm.phase.build':'Build','pgm.phase.peak':'Peak','pgm.phase.taper':'Taper','pgm.phase.race':'Race','pgm.phase.recovery':'Recovery',
+  'pgm.cycleAdherence':'Cycle adherence: {done}/{total} · {pct}%','pgm.cycleAdherenceEmpty':'Cycle adherence starts when planned sessions reach their date.',
+  'cal.phase':'{phase}',
 
   'crew.onboard':'On board','crew.you':'You','crew.seeAllPrs':'See all','crew.allPrs':'Crew records',
   'crew.loadMore':'Show more','crew.lastTrained':'last {date}','crew.neverTrained':'no workouts yet',
@@ -1637,6 +1647,12 @@ es:{
   'pgm.cycleWeek':'Semana {week} de {total}','pgm.cycleDeload':'Semana {week} de {total} · semana de descarga',
   'pgm.cycleEnded':'Ciclo terminado — revísalo y arranca el siguiente',
   'pgm.untilDeload_one':'descarga la próxima semana','pgm.untilDeload_other':'descarga en {n} semanas',
+  'pgm.customizeWeeks':'Hacer semanas distintas','pgm.customizeWeeksHint':'Parte de la semana base y cambia solo las semanas que necesiten otro plan.',
+  'pgm.baseWeek':'Base','pgm.weekLabel':'Semana {n}','pgm.deloadShort':'D','pgm.resetWeek':'Volver esta semana a la base',
+  'pgm.resetWeekConfirm':'¿Quitar los cambios de esta semana y hacer que vuelva a seguir la semana base?',
+  'pgm.phase':'Fase','pgm.phase.build':'Carga','pgm.phase.peak':'Pico','pgm.phase.taper':'Taper','pgm.phase.race':'Competencia','pgm.phase.recovery':'Recuperación',
+  'pgm.cycleAdherence':'Adherencia del ciclo: {done}/{total} · {pct}%','pgm.cycleAdherenceEmpty':'La adherencia empieza cuando las sesiones planeadas llegan a su fecha.',
+  'cal.phase':'{phase}',
 
   'crew.onboard':'A bordo','crew.you':'Tú','crew.seeAllPrs':'Ver todos','crew.allPrs':'Récords de la tripulación',
   'crew.loadMore':'Ver más','crew.lastTrained':'último {date}','crew.neverTrained':'aún sin entrenamientos',
@@ -2013,7 +2029,7 @@ const EXERCISE_PRESETS={
 };
 
 const ACTIVE_WORKOUT_MAX_HOURS=18;
-const state={user:null,profile:null,view:'home',authMode:'login',exercises:[],templates:[],items:[],sessions:[],sets:[],externalActivities:[],activityTemplates:[],progressionState:[],progressionEvents:[],skillGoals:[],trainingBlocks:[],planned:[],plannedReady:true,ensuredWeeks:new Set(),weekSig:null,trainTab:'today',calOffset:0,calWeeks:4,calExpanded:new Set(),dayOpen:null,bodyweightLogs:[],programs:[],programDays:[],active:null,activeItems:[],timer:null,elapsed:0,rest:0,restTotal:0,bodyFlip:'front',weightUnit:localStorage.getItem('skandi_weight_unit')||'kg',weightUnitOverrides:(()=>{try{return JSON.parse(localStorage.getItem('skandi_weight_unit_overrides')||'{}');}catch(e){return {};}})(),expandedRoutines:new Set(),progInfoOpen:new Set(),progressTab:'summary',progressQuery:'',progressMetric:'best',historyFilter:{month:'all',title:'all'},crewFeedLimit:6,swapTarget:null,swapQuery:'',setOptionsId:null,skillTab:null,addExOpen:false,addExQuery:'',pausedMs:0,pausedAt:null,floatTimerOpen:false,meals:[],mealItems:[],foods:[],dishes:[],dishItems:[],nutritionTargets:null,nutritionTargetOverrides:[],aiCallsToday:0,foodDayOffset:0,foodPicker:{query:'',mealId:null},pendingMeal:null,wellness:[],intervalsUnmatched:[],stravaStatus:null,intervalsStatus:null,skandiSettings:null,stravaSyncing:false,intervalsSyncing:false,bodyMeasurements:[],progressPhotos:[],pendingPhoto:null,bodyTab:'recovery',supplements:[],supplementLogs:[]};
+const state={user:null,profile:null,view:'home',authMode:'login',exercises:[],templates:[],items:[],sessions:[],sets:[],externalActivities:[],activityTemplates:[],progressionState:[],progressionEvents:[],skillGoals:[],trainingBlocks:[],planned:[],plannedReady:true,ensuredWeeks:new Set(),weekSig:null,trainTab:'today',calOffset:0,calWeeks:4,calExpanded:new Set(),dayOpen:null,bodyweightLogs:[],programs:[],programDays:[],programWeeks:[],active:null,activeItems:[],timer:null,elapsed:0,rest:0,restTotal:0,bodyFlip:'front',weightUnit:localStorage.getItem('skandi_weight_unit')||'kg',weightUnitOverrides:(()=>{try{return JSON.parse(localStorage.getItem('skandi_weight_unit_overrides')||'{}');}catch(e){return {};}})(),expandedRoutines:new Set(),progInfoOpen:new Set(),progressTab:'summary',progressQuery:'',progressMetric:'best',historyFilter:{month:'all',title:'all'},crewFeedLimit:6,swapTarget:null,swapQuery:'',setOptionsId:null,skillTab:null,addExOpen:false,addExQuery:'',pausedMs:0,pausedAt:null,floatTimerOpen:false,meals:[],mealItems:[],foods:[],dishes:[],dishItems:[],nutritionTargets:null,nutritionTargetOverrides:[],aiCallsToday:0,foodDayOffset:0,foodPicker:{query:'',mealId:null},pendingMeal:null,wellness:[],intervalsUnmatched:[],stravaStatus:null,intervalsStatus:null,skandiSettings:null,stravaSyncing:false,intervalsSyncing:false,bodyMeasurements:[],progressPhotos:[],pendingPhoto:null,bodyTab:'recovery',supplements:[],supplementLogs:[]};
 let builderState={selected:new Map(),group:'All'};
 
 const $=id=>document.getElementById(id);
@@ -2223,7 +2239,7 @@ async function loadAll(){
   let [{data:profile},{data:exercises},{data:templates},{data:items},
        {data:ownSessions},{data:crewSessions},{data:ownSets},{data:crewSets},
        {data:externalActivities},{data:activityTemplates},{data:progressionState},{data:trainingBlocks},{data:bodyweightLogs},
-       {data:programs},{data:programDays},{data:progressionEvents},{data:skillGoals},
+       {data:programs},{data:programDays},{data:programWeeks},{data:progressionEvents},{data:skillGoals},
        {data:bodyMeasurements},{data:progressPhotos},{data:supplements},{data:supplementLogs},
        {data:planned,error:plannedError}]=await Promise.all([
     sb.from('profiles').select('id,name,avatar_url').eq('id',state.user.id).maybeSingle(),
@@ -2243,6 +2259,9 @@ async function loadAll(){
     // No user_id filter: skandi_program_days has no user_id column of its own, its RLS policy
     // resolves ownership through the parent program (migration 069).
     sb.from('skandi_program_days').select('*'),
+    // Metadatos de P3 (fase y nota) viven aparte de los días: no compiten con week_index,
+    // solo describen cada semana del mismo programa.
+    sb.from('skandi_program_weeks').select('*'),
     sb.from('skandi_progression_events').select('*').eq('user_id',state.user.id).order('created_at',{ascending:false}),
     sb.from('skandi_skill_goals').select('*').eq('user_id',state.user.id),
     // [] si la migración 090 no se ha corrido, igual que programs/progressionEvents arriba.
@@ -2255,7 +2274,7 @@ async function loadAll(){
     // adelante. Traer todo el histórico de un plan no sirve para nada y crece sin techo.
     sb.from('skandi_planned_sessions').select('*')
       .eq('user_id',state.user.id)
-      .gte('day',dayKey(addDays(mondayOf(new Date()),-28)))
+      .gte('day',dayKey(addDays(mondayOf(new Date()),-126)))
       .lte('day',dayKey(addDays(mondayOf(new Date()),182)))
       .order('day')
   ]);
@@ -2299,6 +2318,7 @@ async function loadAll(){
   // of the app (and the week itself) works fine without programs.
   state.programs=programs||[];
   state.programDays=programDays||[];
+  state.programWeeks=programWeeks||[];
   // Igual que programs: [] en vez de reventar si la migración 079 todavía no se corrió.
   state.progressionEvents=progressionEvents||[];
   state.skillGoals=skillGoals||[];
@@ -2886,6 +2906,31 @@ const myTemplates=()=>state.templates.filter(x=>x.user_id===state.user.id);
 const activeProgram=()=>state.programs.find(p=>p.is_active)||null;
 const programDaysOf=id=>state.programDays.filter(d=>d.program_id===id)
   .sort((a,b)=>(a.weekday-b.weekday)||((a.week_index||0)-(b.week_index||0))||((a.sort_order||0)-(b.sort_order||0)));
+const programWeeksOf=id=>state.programWeeks.filter(w=>w.program_id===id).sort((a,b)=>a.week_index-b.week_index);
+
+// Resuelve cualquier programa guardado, no solo el activo. Una fila vacía de la semana N es
+// intencional: significa descanso y bloquea el respaldo de la semana base.
+function programPlan(programId,weekIndex=0){
+  const rows=programDaysOf(programId);
+  return Array.from({length:7},(_,weekday)=>{
+    const override=weekIndex>0?rows.filter(d=>d.weekday===weekday&&d.week_index===weekIndex):[];
+    const chosen=override.length?override:rows.filter(d=>d.weekday===weekday&&!(d.week_index||0));
+    const out={weekday,template_id:null,activity_template_id:null};
+    chosen.forEach(d=>{
+      if(d.template_id) out.template_id=d.template_id;
+      if(d.activity_template_id) out.activity_template_id=d.activity_template_id;
+    });
+    return out;
+  });
+}
+
+const PHASES=['build','peak','taper','race','recovery'];
+const defaultProgramPhase=(program,weekIndex)=>program?.deload_week!==false&&weekIndex===programCycleLength(program)?'recovery':'build';
+function programWeekMeta(program,weekIndex){
+  const saved=programWeeksOf(program.id).find(w=>w.week_index===weekIndex);
+  return {phase:saved?.phase||defaultProgramPhase(program,weekIndex),note:saved?.note||null};
+}
+const phaseLabel=phase=>t(`pgm.phase.${PHASES.includes(phase)?phase:'build'}`);
 
 // ── La semana efectiva (migración 102) ──────────────────────────────────────────────────────
 // Desde la 102 el dueño del día es el PROGRAMA, no la rutina. weekPlan() es el único lugar del
@@ -2921,16 +2966,7 @@ function weekPlan(weekIndex){
       return out;
     }
     if(idx>programCycleLength(program)) return out;
-    const days=programDaysOf(program.id);
-    for(let i=0;i<7;i++){
-      // Reemplazo, no mezcla: si la semana N define ese día, esas filas SON el día completo.
-      const override=days.filter(d=>d.weekday===i&&d.week_index===idx);
-      (override.length?override:days.filter(d=>d.weekday===i&&!d.week_index)).forEach(r=>{
-        if(r.template_id) out[i].template_id=r.template_id;
-        if(r.activity_template_id) out[i].activity_template_id=r.activity_template_id;
-      });
-    }
-    return out;
+    return programPlan(program.id,idx).map(({template_id,activity_template_id})=>({template_id,activity_template_id}));
   }
   myTemplates().forEach(x=>{ if(x.weekday!=null) out[x.weekday].template_id=x.id; });
   state.activityTemplates.filter(x=>x.user_id===state.user.id).forEach(x=>{ if(x.weekday!=null) out[x.weekday].activity_template_id=x.id; });
@@ -2976,7 +3012,7 @@ const programDurationLine=program=>t(program?.deload_week===false?'pgm.durationN
 // form (live days) -- same shape either way, so the member sees exactly what they're saving.
 // Con programId las filas son editables (la hoja del programa); sin él son de solo lectura (la
 // vista previa de "copiar mi semana", donde todavía no hay programa al que escribirle).
-function programDayRowsHtml(days,programId){
+function programDayRowsHtml(days,programId,weekIndex=0){
   return DOW.map((label,i)=>{
     const day=days.find(x=>x.weekday===i);
     const tpl=day?.template_id?state.templates.find(x=>x.id===day.template_id):null;
@@ -2985,7 +3021,7 @@ function programDayRowsHtml(days,programId){
     const rest=!parts.length;
     const body=`<span>${label}</span><span>${esc(rest?t('pgm.rest'):parts.join(' + '))}</span>`;
     return programId
-      ?`<button type="button" class="pgm-day editable ${rest?'rest':''}" onclick="openProgramDayEditor('${programId}',${i})">${body}${icon('chevronRight',16)}</button>`
+      ?`<button type="button" class="pgm-day editable ${rest?'rest':''}" onclick="openProgramDayEditor('${programId}',${i},${weekIndex})">${body}${icon('chevronRight',16)}</button>`
       :`<div class="pgm-day ${rest?'rest':''}">${body}</div>`;
   }).join('');
 }
@@ -3073,19 +3109,60 @@ function openProgramPicker(){
 // los días eran <span> de solo lectura y la única forma de cambiar el martes del programa era
 // mover la rutina en la semana real y volver a guardar el programa encima de ella: editar el
 // mundo para editar el plan.
+const programWeekView={};
+const programHasWeekDetails=id=>programDaysOf(id).some(d=>(d.week_index||0)>0)||programWeeksOf(id).length>0;
+
+function selectProgramWeek(id,weekIndex){
+  programWeekView[id]=weekIndex;
+  openProgramSheet(id);
+}
+
+function customizeProgramWeeks(id){
+  const p=state.programs.find(x=>x.id===id);
+  if(!p) return;
+  const current=p.is_active?programWeekIndex(p):null;
+  programWeekView[id]=Math.min(programCycleLength(p),Math.max(1,current||1));
+  openProgramSheet(id);
+}
+
+function programCycleAdherence(program){
+  const rows=plannedRows().filter(p=>p.program_id===program.id&&p.program_week_index>0&&p.day<=todayKey()&&p.discipline!=='rest'&&p.status!=='replaced');
+  const total=rows.length;
+  const done=rows.filter(p=>p.status==='done'||p.status==='partial').length;
+  return {total,done,pct:total?Math.min(100,Math.round(done/total*100)):0};
+}
+
 function openProgramSheet(id){
   const p=state.programs.find(x=>x.id===id);
   if(!p) return;
   const cycle=programCycleLine(p);
+  const detailed=programHasWeekDetails(id)||programWeekView[id]>0;
+  const max=programCycleLength(p);
+  const selected=detailed?Math.min(max,Math.max(0,programWeekView[id]??1)):0;
+  programWeekView[id]=selected;
+  const adherence=programCycleAdherence(p);
+  const weekButtons=detailed?`<div class="pgm-weeks" style="margin-top:10px">
+    <button class="${selected===0?'active':''}" onclick="selectProgramWeek('${id}',0)">${esc(t('pgm.baseWeek'))}</button>
+    ${Array.from({length:max},(_,i)=>i+1).map(n=>`<button class="${selected===n?'active':''}" onclick="selectProgramWeek('${id}',${n})">${p.deload_week!==false&&n===max?esc(t('pgm.deloadShort')):`S${n}`}</button>`).join('')}
+  </div>`:'';
+  const meta=selected>0?programWeekMeta(p,selected):null;
   $('modal').classList.add('show');
   $('modalCard').innerHTML=`
     <div class="row"><h1 style="min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${esc(p.name)}</h1><button class="x" onclick="closeModal()" aria-label="${esc(t('common.close'))}">${icon('close',20)}</button></div>
     <p class="muted">${esc(programSummary(p))} · ${esc(programDurationLine(p))}${p.is_active?' · '+esc(t('pgm.active')):''}</p>
     ${cycle?`<p class="muted">${esc(cycle)}</p>`:''}
+    ${p.start_date?`<p class="form-note" style="margin-top:8px">${esc(adherence.total?t('pgm.cycleAdherence',adherence):t('pgm.cycleAdherenceEmpty'))}</p>`:''}
     ${p.notes?`<p class="form-note" style="margin-top:8px">${esc(p.notes)}</p>`:''}
     <div class="eyebrow" style="margin-top:16px">${esc(t('pgm.daysTitle'))}</div>
     <p class="form-note">${esc(p.is_active?t('pgm.daysHintActive'):t('pgm.daysHint'))}</p>
-    <div class="stack" style="margin-top:10px;gap:8px">${programDayRowsHtml(programDaysOf(id).filter(d=>(d.week_index||0)===0),id)}</div>
+    ${weekButtons}
+    ${!detailed?`<button class="btn" style="width:100%;margin-top:10px" onclick="customizeProgramWeeks('${id}')">${esc(t('pgm.customizeWeeks'))}</button><p class="form-note">${esc(t('pgm.customizeWeeksHint'))}</p>`:''}
+    ${meta?`<label class="eyebrow" style="margin-top:12px">${esc(t('pgm.phase'))}</label>
+      <select class="field left" onchange="setProgramWeekPhase('${id}',${selected},this.value)">
+        ${PHASES.map(phase=>`<option value="${phase}" ${meta.phase===phase?'selected':''}>${esc(phaseLabel(phase))}</option>`).join('')}
+      </select>`:''}
+    <div class="stack" style="margin-top:10px;gap:8px">${programDayRowsHtml(programPlan(id,selected),id,selected)}</div>
+    ${selected>0?`<button class="btn" style="width:100%;margin-top:10px" onclick="resetProgramWeek('${id}',${selected})">${icon('swap',16)} ${esc(t('pgm.resetWeek'))}</button>`:''}
     <div class="stack" style="margin-top:16px">
       ${p.is_active&&p.start_date?'':`<button class="btn primary" style="width:100%" onclick="openProgramLoadConfirm('${p.id}')">${icon('calendar',16)} ${esc(t(p.is_active?'pgm.startCycle':'pgm.activate'))}</button>`}
       <button class="btn" style="width:100%" onclick="openProgramForm('${p.id}')">${icon('edit',16)} ${esc(t('pgm.rename'))}</button>
@@ -3095,10 +3172,10 @@ function openProgramSheet(id){
     </div>`;
 }
 
-function openProgramDayEditor(programId,weekday){
+function openProgramDayEditor(programId,weekday,weekIndex=0){
   const p=state.programs.find(x=>x.id===programId);
   if(!p) return;
-  const day=programDaysOf(programId).find(x=>x.weekday===weekday&&(x.week_index||0)===0);
+  const day=programPlan(programId,weekIndex)[weekday];
   const plans=state.activityTemplates.filter(x=>x.user_id===state.user.id);
   const row=(label,sub,selected,onclick)=>`<button type="button" class="card pick-row ${selected?'selected':''}" style="margin:0 0 8px;width:100%" onclick="${onclick}">
     <span style="min-width:0"><strong>${esc(label)}</strong>${sub?`<p class="muted">${esc(sub)}</p>`:''}</span>
@@ -3107,20 +3184,20 @@ function openProgramDayEditor(programId,weekday){
   $('modal').classList.add('show');
   $('modalCard').innerHTML=`
     <div class="row"><h1>${esc(DOW[weekday])}</h1><button class="x" onclick="openProgramSheet('${programId}')" aria-label="${esc(t('common.close'))}">${icon('close',20)}</button></div>
-    <p class="muted">${esc(p.name)}</p>
+    <p class="muted">${esc(p.name)} · ${esc(weekIndex?t('pgm.weekLabel',{n:weekIndex}):t('pgm.baseWeek'))}</p>
     <h2 style="margin-top:16px">${esc(t('pgm.dayStrength'))}</h2>
-    ${row(t('pgm.rest'),null,!day?.template_id,`setProgramDay('${programId}',${weekday},'template',null)`)}
+    ${row(t('pgm.rest'),null,!day?.template_id,`setProgramDay('${programId}',${weekday},'template',null,${weekIndex})`)}
     ${myTemplates().map(tpl=>{
       const n=state.items.filter(i=>i.template_id===tpl.id).length;
-      return row(tpl.name,`${n} ${tp(n,'common.exercises')}`,day?.template_id===tpl.id,`setProgramDay('${programId}',${weekday},'template','${tpl.id}')`);
+      return row(tpl.name,`${n} ${tp(n,'common.exercises')}`,day?.template_id===tpl.id,`setProgramDay('${programId}',${weekday},'template','${tpl.id}',${weekIndex})`);
     }).join('')}
-    <button class="btn" style="width:100%;margin-top:4px" onclick="createRoutineForProgramDay('${programId}',${weekday})">${esc(t('pgm.newRoutineForDay'))}</button>
+    <button class="btn" style="width:100%;margin-top:4px" onclick="createRoutineForProgramDay('${programId}',${weekday},${weekIndex})">${esc(t('pgm.newRoutineForDay'))}</button>
     <h2 style="margin-top:20px">${esc(t('train.endurance'))}</h2>
-    ${row(t('pgm.noPlan'),null,!day?.activity_template_id,`setProgramDay('${programId}',${weekday},'activity',null)`)}
+    ${row(t('pgm.noPlan'),null,!day?.activity_template_id,`setProgramDay('${programId}',${weekday},'activity',null,${weekIndex})`)}
     ${plans.map(pl=>row(activityTypeLabel(pl.activity_type),
         [pl.target_distance_km?pl.target_distance_km+' km':null,pl.target_duration_min?pl.target_duration_min+' min':null].filter(Boolean).join(' · ')||null,
         day?.activity_template_id===pl.id,
-        `setProgramDay('${programId}',${weekday},'activity','${pl.id}')`)).join('')||empty(t('pgm.noPlans'))}`;
+        `setProgramDay('${programId}',${weekday},'activity','${pl.id}',${weekIndex})`)).join('')||empty(t('pgm.noPlans'))}`;
 }
 
 // Editar un día escribe skandi_program_days. El espejo a skandi_templates.weekday solo corre
@@ -3128,20 +3205,20 @@ function openProgramDayEditor(programId,weekday){
 // start_date (guardado antes de la 102, o nunca cargado). En cuanto el programa tiene fecha,
 // él es el plan y escribir el weekday además solo crearía una segunda verdad que mantener.
 let savingProgramDay=false;
-async function setProgramDay(programId,weekday,kind,valueId){
+async function setProgramDay(programId,weekday,kind,valueId,weekIndex=0){
   if(savingProgramDay) return;
   const p=state.programs.find(x=>x.id===programId);
   if(!p) return;
   savingProgramDay=true;
   try{
-    const error=await writeProgramDay(programId,0,weekday,kind,valueId);
+    const error=await writeProgramDay(programId,weekIndex,weekday,kind,valueId);
     if(error) return alert(error.message);
-    if(p.is_active&&!programOwnsWeek()){
+    if(weekIndex===0&&p.is_active&&!programOwnsWeek()){
       const mirrorError=await writeWeekdayColumn(kind,weekday,valueId);
       if(mirrorError) return alert(mirrorError.message);
     }
     await loadAll();
-    openProgramDayEditor(programId,weekday);
+    openProgramDayEditor(programId,weekday,weekIndex);
     render();
   } finally {
     savingProgramDay=false;
@@ -3153,13 +3230,24 @@ async function setProgramDay(programId,weekday,kind,valueId){
 // una sola semana es cosa del calendario, no del programa.
 async function writeProgramDay(programId,weekIndex,weekday,kind,valueId){
   const col=kind==='template'?'template_id':'activity_template_id';
-  const existing=programDaysOf(programId).find(x=>x.weekday===weekday&&(x.week_index||0)===weekIndex);
+  let existing=programDaysOf(programId).find(x=>x.weekday===weekday&&(x.week_index||0)===weekIndex);
+  // La primera edición de S2 debe partir del día efectivo completo. Si solo insertáramos la
+  // ranura tocada, la presencia del override bloquearía la base y borraría la otra disciplina.
+  if(!existing&&weekIndex>0){
+    const inherited=programPlan(programId,weekIndex)[weekday];
+    const error=await insertProgramDays([{program_id:programId,week_index:weekIndex,weekday,
+      template_id:inherited.template_id,activity_template_id:inherited.activity_template_id}]);
+    if(error) return error;
+    existing=programDaysOf(programId).find(x=>x.weekday===weekday&&(x.week_index||0)===weekIndex)||
+      {program_id:programId,week_index:weekIndex,weekday,template_id:inherited.template_id,activity_template_id:inherited.activity_template_id};
+  }
   const other=existing?(kind==='template'?existing.activity_template_id:existing.template_id):null;
   if(existing){
     // La fila se borra solo cuando el día queda completamente vacío: si el otro lado sigue
     // ocupado (fuerza sin resistencia, o al revés), borrarla se llevaría también eso.
-    if(!valueId&&!other) return (await sb.from('skandi_program_days').delete().eq('id',existing.id)).error;
-    return (await sb.from('skandi_program_days').update({[col]:valueId}).eq('id',existing.id)).error;
+    if(!valueId&&!other&&weekIndex===0) return (await sb.from('skandi_program_days').delete().eq('id',existing.id)).error;
+    const query=sb.from('skandi_program_days').update({[col]:valueId});
+    return (await (existing.id?query.eq('id',existing.id):query.eq('program_id',programId).eq('week_index',weekIndex).eq('weekday',weekday))).error;
   }
   if(!valueId) return null;
   return await insertProgramDays([{program_id:programId,week_index:weekIndex,weekday,[col]:valueId}]);
@@ -3174,6 +3262,27 @@ async function insertProgramDays(rows){
     ({error}=await sb.from('skandi_program_days').insert(rows.map(({week_index,...rest})=>rest)));
   }
   return error;
+}
+
+async function setProgramWeekPhase(programId,weekIndex,phase){
+  if(!PHASES.includes(phase)||weekIndex<1) return;
+  const {error}=await sb.from('skandi_program_weeks').upsert({program_id:programId,week_index:weekIndex,phase},{onConflict:'program_id,week_index'});
+  if(error) return alert(error.message);
+  await loadAll();
+  openProgramSheet(programId);
+  render();
+}
+
+async function resetProgramWeek(programId,weekIndex){
+  if(!confirm(t('pgm.resetWeekConfirm'))) return;
+  const [{error:daysError},{error:metaError}]=await Promise.all([
+    sb.from('skandi_program_days').delete().eq('program_id',programId).eq('week_index',weekIndex),
+    sb.from('skandi_program_weeks').delete().eq('program_id',programId).eq('week_index',weekIndex)
+  ]);
+  if(daysError||metaError) return alert((daysError||metaError).message);
+  await loadAll();
+  openProgramSheet(programId);
+  render();
 }
 
 // El camino de antes de la 102: el día es una columna de la rutina. Un día solo puede tener una,
@@ -3218,9 +3327,9 @@ async function assignToDay(kind,weekday,id){
   return await write(weekday,id);
 }
 let pendingProgramSlot=null;
-function createRoutineForProgramDay(programId,weekday){
+function createRoutineForProgramDay(programId,weekday,weekIndex=0){
   closeModal();
-  pendingProgramSlot={programId,weekday};
+  pendingProgramSlot={programId,weekday,weekIndex};
   openTemplateBuilder(weekday);
 }
 
@@ -3239,6 +3348,14 @@ async function duplicateProgram(id){
     if(daysError){
       await sb.from('skandi_programs').delete().eq('id',data.id);
       return alert(daysError.message);
+    }
+  }
+  const weeks=programWeeksOf(id).map(w=>({program_id:data.id,week_index:w.week_index,phase:w.phase,note:w.note}));
+  if(weeks.length){
+    const {error:weeksError}=await sb.from('skandi_program_weeks').insert(weeks);
+    if(weeksError){
+      await sb.from('skandi_programs').delete().eq('id',data.id);
+      return alert(weeksError.message);
     }
   }
   await loadAll();
@@ -3549,7 +3666,7 @@ async function ensureWeek(monday){
 }
 
 async function reloadPlanned(){
-  const from=dayKey(addDays(mondayOf(new Date()),-28));
+  const from=dayKey(addDays(mondayOf(new Date()),-126));
   const to=dayKey(addDays(mondayOf(new Date()),182));
   const {data,error}=await sb.from('skandi_planned_sessions').select('*')
     .eq('user_id',state.user.id).gte('day',from).lte('day',to).order('day');
@@ -3564,7 +3681,9 @@ async function reloadPlanned(){
 function weekTemplateSignature(){
   const p=activeProgram();
   const cycle=p&&p.start_date?`p${p.id}:${p.start_date}:${p.weeks}:${p.deload_week===false?0:1}`:'w';
-  return [cycle,...weekPlan().map((d,i)=>`${i}:${d.template_id||'-'}:${d.activity_template_id||'-'}`)].join('|');
+  const slots=p?programDaysOf(p.id).map(d=>`${d.week_index||0}:${d.weekday}:${d.sort_order||0}:${d.template_id||'-'}:${d.activity_template_id||'-'}`):
+    weekPlan().map((d,i)=>`${i}:${d.template_id||'-'}:${d.activity_template_id||'-'}`);
+  return [cycle,...slots].join('|');
 }
 
 async function ensureCalendarWeeks(weeks=1,offset=0){
@@ -3826,8 +3945,8 @@ function calExpandRange(fromKey){
 function weekAdherence(monday){
   const days=Array.from({length:7},(_,i)=>dayKey(addDays(monday,i)));
   const sessions=days.flatMap(k=>plannedOfDay(k)).filter(p=>p.discipline!=='rest');
-  const total=sessions.filter(p=>p.status!=='skipped').length;
-  const done=sessions.filter(p=>p.status==='done').length;
+  const total=sessions.length;
+  const done=sessions.filter(p=>p.status==='done'||p.status==='partial').length;
   return {days,total,done,pct:total?Math.min(100,Math.round(done/total*100)):0};
 }
 
@@ -3840,9 +3959,17 @@ function weekOriginLabel(mondayKey){
   const days=weekDayKeys(mondayKey);
   const rows=plannedRows().filter(p=>days.includes(p.day));
   if(!rows.length) return '';
-  const untouched=rows.every(p=>p.source==='template'&&!p.is_edited);
+  const untouched=rows.every(p=>['template','program'].includes(p.source)&&!p.is_edited);
   if(!untouched) return t('cal.weekCustom');
-  return activeProgram()?.name||'';
+  const programId=rows.find(p=>p.program_id)?.program_id;
+  return state.programs.find(p=>p.id===programId)?.name||(rows.some(p=>p.source==='program')?activeProgram()?.name||'':'');
+}
+
+function calendarWeekPhase(monday){
+  const program=activeProgram();
+  const weekIndex=programWeekIndex(program,monday);
+  if(!program||weekIndex==null||weekIndex>programCycleLength(program)) return '';
+  return phaseLabel(programWeekMeta(program,weekIndex).phase);
 }
 
 function weekRowHtml(monday){
@@ -3850,9 +3977,10 @@ function weekRowHtml(monday){
   const isCurrent=dayKey(monday)===dayKey(mondayOf(new Date()));
   const label=`${monday.toLocaleDateString(LANG,{day:'numeric',month:'short'})} – ${addDays(monday,6).toLocaleDateString(LANG,{day:'numeric',month:'short'})}`;
   const origin=weekOriginLabel(dayKey(monday));
+  const phase=calendarWeekPhase(monday);
   return `<section class="cal-week ${isCurrent?'current':''}">
     <div class="cal-week-head">
-      <span class="cal-week-name">${esc(isCurrent?t('cal.thisWeek'):label)}${origin?` · <b>${esc(origin)}</b>`:''}</span>
+      <span class="cal-week-name">${esc(isCurrent?t('cal.thisWeek'):label)}${origin?` · <b>${esc(origin)}</b>`:''}${phase?` · ${esc(phase)}`:''}</span>
       <span class="cal-week-actions">
         ${total?`<span class="cal-score ${done>=total?'full':''}">${done}<i>/${total}</i></span>`:''}
         <button class="icon-btn tiny" onclick="openWeekMenu('${dayKey(monday)}')" aria-label="${esc(t('cal.weekMenu'))}">${icon('ellipsis',14)}</button>
@@ -3906,7 +4034,7 @@ function weekDayKeys(mondayKey){
 function openWeekMenu(mondayKey){
   const days=weekDayKeys(mondayKey);
   const rows=plannedRows().filter(p=>days.includes(p.day));
-  const fromTemplate=rows.filter(p=>p.source==='template'&&!p.is_edited).length;
+  const fromTemplate=rows.filter(p=>['template','program'].includes(p.source)&&!p.is_edited).length;
   const label=`${keyToDate(mondayKey).toLocaleDateString(LANG,{day:'numeric',month:'short'})} – ${keyToDate(days[6]).toLocaleDateString(LANG,{day:'numeric',month:'short'})}`;
   $('modal').classList.add('show');
   $('modalCard').innerHTML=`
@@ -3969,19 +4097,19 @@ async function applyProgramToWeek(programId,mondayKey){
     // mano la migración 086 para esta semana. source:'program' (permitido desde la 080, sin
     // usar hasta ahora) en vez de 'manual': dice de dónde salió sin inventar una columna nueva.
     const inserts=[];
-    for(const d of programDaysOf(programId).filter(d=>(d.week_index||0)===0)){
+    for(const d of programPlan(programId,0).filter(d=>d.template_id||d.activity_template_id)){
       const day=days[d.weekday];
       if(!day) continue;
       if(d.template_id){
         const tpl=state.templates.find(x=>x.id===d.template_id);
-        inserts.push({user_id:state.user.id,day,sort_order:(d.sort_order||0)*2,discipline:'strength',source:'program',is_edited:true,
-          template_id:d.template_id,title:tpl?.name||null});
+        inserts.push({user_id:state.user.id,day,sort_order:0,discipline:'strength',source:'program',is_edited:true,
+          program_id:programId,program_week_index:0,template_id:d.template_id,title:tpl?.name||null});
       }
       if(d.activity_template_id){
         const act=state.activityTemplates.find(x=>x.id===d.activity_template_id);
-        inserts.push({user_id:state.user.id,day,sort_order:(d.sort_order||0)*2+(d.template_id?1:0),
+        inserts.push({user_id:state.user.id,day,sort_order:d.template_id?1:0,
           discipline:act?(ACT_TO_DISC[act.activity_type]||'other'):'other',
-          source:'program',is_edited:true,activity_template_id:d.activity_template_id,
+          source:'program',is_edited:true,program_id:programId,program_week_index:0,activity_template_id:d.activity_template_id,
           target_distance_km:act?.target_distance_km||null,target_duration_min:act?.target_duration_min||null,
           target_zone:act?.target_zone||null,title:act?activityTypeLabel(act.activity_type):null});
       }
@@ -7949,9 +8077,9 @@ async function saveTemplate(id){
     const slot=pendingProgramSlot;
     pendingProgramSlot=null;
     if(!id&&slot){
-      const slotError=await writeProgramDay(slot.programId,0,slot.weekday,'template',templateId);
+      const slotError=await writeProgramDay(slot.programId,slot.weekIndex||0,slot.weekday,'template',templateId);
       if(slotError) alert(slotError.message);
-      else if(!programOwnsWeek()&&activeProgram()?.id===slot.programId){
+      else if(!(slot.weekIndex||0)&&!programOwnsWeek()&&activeProgram()?.id===slot.programId){
         const mirrorError=await writeWeekdayColumn('template',slot.weekday,templateId);
         if(mirrorError) alert(mirrorError.message);
       }

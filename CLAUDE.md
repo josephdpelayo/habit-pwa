@@ -168,8 +168,10 @@ and nothing else:
 - `skandi_exercises` — Skandi's own exercise catalog, separate from HABIT's `exercise_catalog`.
   `muscles` is a jsonb split (`{"Chest":60,"Triceps":25}`) summing to ~100, in the recovery engine's
   muscle names — that split is what `skandi-recovery.js` consumes
-- `skandi_templates` / `skandi_template_items` — routines; `weekday` is the single source of truth
-  for "my week" (`skandi_programs` / `skandi_program_days` just re-stamp it, migration 069)
+- `skandi_templates` / `skandi_template_items` — routines; `weekday` is only a suggested day and
+  the fallback when no dated program is active. Since 102, `skandi_programs` +
+  `skandi_program_days.week_index` own the cycle; 103 adds `skandi_program_weeks` phase metadata
+  and stamps `program_id` / `program_week_index` onto calendar rows for cycle adherence
 - `skandi_sessions` / `skandi_sets` — logged workouts, with `rir` per set and `report_*` recovery
   fields on the session (064)
 - `skandi_external_activities` / `skandi_activity_templates` — cardio: running, cycling, swimming,

@@ -3,6 +3,7 @@ const fs = require('node:fs');
 
 const html = fs.readFileSync('skandi.html', 'utf8');
 const migration = fs.readFileSync('migrations/102_skandi_program_owns_the_week.sql', 'utf8');
+const p3Migration = fs.readFileSync('migrations/103_skandi_program_periodization.sql', 'utf8');
 const cycleStart = html.indexOf('function currentTrainingBlock()');
 const cycleEnd = html.indexOf('// Deload-week load suggestion');
 const programStart = html.indexOf('const myTemplates=');
@@ -20,6 +21,11 @@ assert.doesNotMatch(applySource, /from\('skandi_activity_templates'\)/, 'activat
 assert.match(applySource, /start_date:todayKey\(\)/, 'activation starts the program cycle');
 assert.match(migration, /and p_week_index >= 0/, 'ended cycles resolve to no program slots');
 assert.match(migration, /case when v_program is null then 'template' else 'program' end/, 'calendar records its source');
+assert.match(p3Migration, /create table if not exists public\.skandi_program_weeks/, 'P3 stores week metadata');
+assert.match(p3Migration, /program_week_index/, 'P3 records cycle week on calendar rows');
+assert.match(p3Migration, /source <> 'program'/, 'non-program rows cannot keep a stale program link');
+assert.match(html, /if\(!valueId&&!other&&weekIndex===0\)/, 'an empty override remains as an explicit rest day');
+assert.match(html, /program_id:programId,program_week_index:0/, 'one-off program weeks keep explicit provenance');
 
 const source = `
 let state;
@@ -34,7 +40,7 @@ const baseState=()=>({
   user:{id:'u1'},trainingBlocks:[],
   templates:[{id:'t1',user_id:'u1',weekday:0},{id:'t2',user_id:'u1',weekday:2}],
   activityTemplates:[{id:'a1',user_id:'u1',weekday:1}],
-  programs:[],programDays:[]
+  programs:[],programDays:[],programWeeks:[]
 });
 
 state=baseState();
@@ -50,6 +56,8 @@ state.programDays=[
 ];
 assert.deepEqual(weekPlan(1)[0],{template_id:'t2',activity_template_id:'a1'});
 assert.deepEqual(weekPlan(2)[0],{template_id:null,activity_template_id:'a2'});
+assert.deepEqual(programPlan('p1',2)[0],{weekday:0,template_id:null,activity_template_id:'a2'});
+assert.deepEqual(programPlan('p1',1)[0],{weekday:0,template_id:'t2',activity_template_id:'a1'});
 assert.equal(currentWeekSnapshot().length,2);
 assert.equal(weekMatchesProgram(state.programs[0]),true);
 let info=trainingBlockWeekInfo();
@@ -68,7 +76,15 @@ state.programs[0].start_date=key(ended);
 assert.ok(programWeekIndex(state.programs[0])>programCycleLength(state.programs[0]));
 assert.ok(weekPlan().every(d=>!d.template_id&&!d.activity_template_id));
 
-console.log('P2 program resolver: 20 assertions OK');
+state.programs[0].start_date=key(monday);
+state.programs[0].weeks=2;
+state.programs[0].deload_week=true;
+assert.equal(programWeekMeta(state.programs[0],1).phase,'build');
+assert.equal(programWeekMeta(state.programs[0],3).phase,'recovery');
+state.programWeeks=[{program_id:'p1',week_index:2,phase:'peak',note:null}];
+assert.equal(programWeekMeta(state.programs[0],2).phase,'peak');
+
+console.log('P2/P3 program resolver: 30 assertions OK');
 `;
 
 new Function('assert', source)(assert);

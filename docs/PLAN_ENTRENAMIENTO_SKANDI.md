@@ -154,35 +154,24 @@ activity_type: agregar 'hiit', 'hyrox', 'strength_class'   -- amplía el check e
 figura corporal: en realidad es cuádriceps, glúteos, espalda y hombros a partes casi iguales, con
 carga excéntrica de piernas que tarda 72 h en irse.
 
-### Migración 082 — La temporada (periodización)
+### Migración 103 — Periodización dentro del programa
 
 ```
-skandi_seasons
-  id, user_id, name, goal_event text, goal_date date,
-  sport text ('triathlon_sprint','triathlon_olympic','running','hybrid','general'),
-  weekly_hours numeric, is_active boolean,       -- índice único parcial: una activa por usuario
-  created_at
+skandi_program_days.week_index                  -- 102: contiene la prescripción de S1…Sn y D
 
-skandi_plan_weeks
-  id, user_id, season_id (nullable), week_start date,      -- lunes
-  phase text check in ('base','build','peak','taper','race','recovery','offseason'),
-  is_deload boolean default false,
-  target_hours numeric, target_load int,
-  target_by_discipline jsonb,                    -- {"run":2.5,"bike":3,"swim":1.5,"strength":2}
-  note text,
-  unique(user_id, week_start)
+skandi_program_weeks
+  id, program_id, week_index,
+  phase text ('build','peak','taper','race','recovery'), note text,
+  unique(program_id, week_index)
+
+skandi_planned_sessions
+  + program_id, program_week_index              -- instancia fechada e historia de adherencia
 ```
 
-**Esto absorbe a `skandi_training_blocks` (066).** Hoy esa tabla dice "4 semanas de carga + 1 de
-descarga" y `deloadAdjustedWeight()` baja los kilos en la semana de descarga. Mantener dos
-conceptos de periodización —bloques para fuerza, fases para triatlón— es garantía de que un día se
-contradigan. Camino de migración:
-
-1. La 082 **backfillea** `skandi_plan_weeks` desde el bloque activo (build_weeks semanas
-   `phase='build'` + una `is_deload=true`).
-2. `trainingBlockWeekInfo()` y `deloadAdjustedWeight()` pasan a leer `skandi_plan_weeks`.
-3. `skandi_training_blocks` se queda como historia de sólo lectura y se retira en una migración
-   posterior, cuando nada la lea. No se borra en la misma migración que cambia quién la lee.
+La prescripción no se duplica en una temporada separada: programa + `week_index` ya es el ciclo.
+`skandi_training_blocks` permanece como compatibilidad para bloques sin programa; cuando hay un
+programa activo, duración, descarga y fase se leen del programa. Una futura carrera puede sumar
+fecha/meta a estos mismos metadatos sin crear otra colección de semanas que pueda contradecirlos.
 
 ---
 
@@ -406,7 +395,7 @@ que cualquier sesión de fuerza — si no se cuenta, el ACWR de esa semana es fi
 |---|---|---|---|
 | **T1** | **Calendario fechado.** `skandi_planned_sessions`, RPC `skandi_ensure_week`, subtabs de Entrenar, vista de 4 semanas, hoja del día, conciliación automática | 080 | 3 sesiones |
 | **T2** | **Resistencia estructurada.** `structure` jsonb, `skandi-plan.js`, zonas y umbrales, disciplinas nuevas (hiit/hyrox), captura rica de actividad (splits, piscina, intervalos) | 081 | 2–3 sesiones |
-| **T3** | **Temporada y periodización.** `skandi_seasons` + `skandi_plan_weeks`, `buildSeason()`, taper, adherencia semanal, absorción de `skandi_training_blocks` | 082 | 2–3 sesiones |
+| **T3 / P3** | **Periodización del programa.** Semanas distintas, descarga propia, fase y adherencia por ciclo, sin temporada paralela | 103 | terminada |
 | **T4** | **Carga unificada.** `skandi-load.js`, sRPE en todo, ACWR, planeado vs hecho en la tarjeta de Home. Es la Fase 2 del otro documento, que aquí ya tiene todos sus insumos | 083 | 2 sesiones |
 
 **El orden no es negociable.** T1 sin T2 ya sirve (un calendario con lo que hoy existe). T2 sin T1
@@ -453,9 +442,9 @@ proyecto sigue en 12 de 12 en el plan Hobby, que es un límite duro.
 - [ ] Un HIIT registrado mueve la figura muscular de forma creíble
 
 **T3**
-- [ ] Generar una temporada de sprint a 12 semanas produce un plan con taper y sin dos días duros seguidos
-- [ ] Regenerarla conserva lo editado y lo hecho
-- [ ] La semana de descarga de fuerza y la de recuperación de resistencia son la misma semana
+- [x] Una semana puede apartarse de la base sin alterar las demás
+- [x] La descarga tiene contenido propio y fase de recuperación por defecto
+- [x] El calendario conserva programa/semana y calcula adherencia histórica del ciclo
 
 **T4**
 - [ ] ACWR calculado con fuerza + cardio + HIIT en la misma unidad

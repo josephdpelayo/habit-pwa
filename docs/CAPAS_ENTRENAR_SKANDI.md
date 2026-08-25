@@ -164,12 +164,10 @@ programa detrás) y para la historia; `trainingBlockWeekInfo()` prefiere el prog
 tiene `start_date`. Esto además le quita a la migración 100 su rareza: el enlace deja de ser un
 parche y el bloque pasa a ser lo que siempre fue, un ciclo sin plan.
 
-> **Decisión pendiente:** `PLAN_ENTRENAMIENTO_SKANDI.md` §3 reserva la fase T3 para
-> `skandi_seasons` + `skandi_plan_weeks`, que también modela semanas con fase. `week_index` en el
-> programa es la **plantilla** del ciclo; `skandi_plan_weeks` sería la **instancia fechada** con
-> fase y horas objetivo. Construir las dos es garantía de que un día se contradigan. Recomendación:
-> construir la del programa, y que T3 —si algún día llega una carrera con fecha— lea estas mismas
-> filas en vez de duplicarlas.
+> **Decisión tomada en P3:** no se construye `skandi_seasons` + `skandi_plan_weeks` como un plan
+> paralelo. `week_index` contiene la prescripción; `skandi_program_weeks` solo agrega metadatos
+> (fase/nota), y el calendario conserva `program_id` + `program_week_index` como instancia
+> fechada. Una futura carrera puede ampliar esos mismos metadatos sin duplicar días ni fases.
 
 ---
 
@@ -235,6 +233,29 @@ propiedad, esa segunda escritura se borra y la pantalla no cambia.
 
 ## 11. Bitácora
 
+**2026-08-25 — P3 implementada y migración 103 ejecutada en Supabase.**
+
+- La hoja del programa empieza simple con una semana base. «Hacer semanas distintas» abre el
+  selector `Base · S1…Sn · D`; cada semana hereda la base y solo guarda los días que cambia.
+- Una excepción reemplaza el día completo. Una fila vacía de S3 es un descanso explícito, no la
+  ausencia de una excepción; al editar una sola disciplina primero se copia el día efectivo para
+  no perder la otra.
+- La descarga ya tiene contenido propio y puede restablecerse a la base con una sola acción.
+- `skandi_program_weeks` guarda fase (`build`, `peak`, `taper`, `race`, `recovery`) sin crear una
+  segunda fuente del plan. La fase aparece en el encabezado de cada semana del calendario.
+- `skandi_planned_sessions.program_id/program_week_index` conserva la procedencia histórica. Un
+  trigger completa el vínculo en todo estampado del RPC 102 y lo limpia si la fila deja de venir
+  de un programa. La hoja muestra adherencia del ciclo hasta el día actual.
+- La ventana histórica del cliente creció a 18 semanas para cubrir completo el ciclo máximo de
+  16 semanas + descarga. Saltar una sesión permanece en el denominador; `partial` sí cuenta como
+  adherida.
+- La migración remota quedó con 2 columnas, 1 tabla, 2 triggers y 1 política RLS; `db lint` no
+  reportó errores. Validado además con el parser PostgreSQL 17.7, sintaxis del JavaScript inline y
+  30 aserciones del motor P2/P3.
+
+El programa activo heredado sigue sin `start_date`; por eso todavía no existen filas históricas
+que backfillear. Al tocar «Iniciar ciclo», el trigger empieza a enlazar cada semana sin otra acción.
+
 **2026-08-25 — P2 implementada y migración 102 ejecutada en Supabase.**
 
 - `skandi_programs` ya contiene `weeks`, `deload_week` y `start_date`; `skandi_program_days`
@@ -258,7 +279,6 @@ propiedad, esa segunda escritura se borra y la pantalla no cambia.
 
 El programa que ya estaba activo quedó sin `start_date` a propósito (no tenía bloque enlazado del
 que recuperar una fecha): conserva la semana anterior hasta que el miembro toque «Iniciar ciclo».
-Después sigue **P3** (editor de semanas distintas y descarga con contenido propio).
 
 **2026-08-25 — P1 implementada (solo interfaz, sin migración).** En `skandi.html`:
 
@@ -288,13 +308,12 @@ Después sigue **P3** (editor de semanas distintas y descarga con contenido prop
   Supabase falsos (mismo patrón que T1), más una revisión visual a 375 px de la pestaña, la hoja
   del programa, el editor de día, el selector de crear y el formulario nuevo.
 
-Pendiente: **P2** (migración 102, invertir la propiedad) y la decisión sobre `week_index` vs
-`skandi_plan_weeks` del §7.4.
+Este registro corresponde al estado al cerrar P1; P2 y P3 ya quedaron implementadas arriba.
 
 
 **2026-08-25 — Auditoría de Entrenar / Rutinas.** El programa existe como tabla desde la 069 pero
 nunca fue el dueño del plan: es una fotografía de `skandi_templates.weekday`. De ahí salen los seis
 síntomas del §2 (tarjeta muerta, sin crear, sin editar, sin duración, una sola semana, rutinas que
 se caen del día). Propuesta: invertir la propiedad en la 102 y, antes de eso, una fase de interfaz
-sin migración que ya haga tocable y editable lo que hay. Pendiente de decidir contigo: si
-`week_index` sustituye a `skandi_plan_weeks` de la fase T3 del otro documento.
+sin migración que ya haga tocable y editable lo que hay. La decisión final fue que `week_index`
+contenga el plan y `skandi_program_weeks` solo sus metadatos, sin duplicar la prescripción.
