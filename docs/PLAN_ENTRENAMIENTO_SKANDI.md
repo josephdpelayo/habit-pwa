@@ -396,7 +396,7 @@ que cualquier sesión de fuerza — si no se cuenta, el ACWR de esa semana es fi
 | **T1** | **Calendario fechado.** `skandi_planned_sessions`, RPC `skandi_ensure_week`, subtabs de Entrenar, vista de 4 semanas, hoja del día, conciliación automática | 080 | 3 sesiones |
 | **T2** | **Resistencia estructurada.** `structure` jsonb, `skandi-plan.js`, zonas y umbrales, disciplinas nuevas (hiit/hyrox), captura rica de actividad (piscina, intervalos) | 104 | hecha (splits pendiente) |
 | **T3 / P3** | **Periodización del programa.** Semanas distintas, descarga propia, fase y adherencia por ciclo, sin temporada paralela | 103 | terminada |
-| **T4** | **Carga unificada.** `skandi-load.js`, sRPE en todo, ACWR, planeado vs hecho en la tarjeta de Home. Es la Fase 2 del otro documento, que aquí ya tiene todos sus insumos | 083 | 2 sesiones |
+| **T4** | **Carga unificada.** `skandi-load.js`, sRPE en todo, ACWR, planeado vs hecho en la tarjeta de Home. Es la Fase 2 del otro documento, que aquí ya tiene todos sus insumos | ninguna (todo cliente + RPC ya existentes) | hecha |
 
 **El orden no es negociable.** T1 sin T2 ya sirve (un calendario con lo que hoy existe). T2 sin T1
 no tiene dónde vivir. T3 sin T2 genera semanas que no saben describir un entrenamiento. T4 sin T3
@@ -447,12 +447,25 @@ proyecto sigue en 12 de 12 en el plan Hobby, que es un límite duro.
 - [x] El calendario conserva programa/semana y calcula adherencia histórica del ciclo
 
 **T4**
-- [ ] ACWR calculado con fuerza + cardio + HIIT en la misma unidad
-- [ ] Home muestra una frase, no un tablero
+- [x] ACWR calculado con fuerza + cardio + HIIT en la misma unidad
+- [x] Home muestra una frase, no un tablero
 
 ---
 
 ## 12. Bitácora
+
+**2026-08-25 — Bookkeeping: T4 ya estaba hecha, este documento no se había actualizado.**
+
+Al revisar qué seguía después de T2 se encontró que T4 (carga unificada) ya vivía en el repo
+desde antes de esta sesión: `skandi-load.js` (`f858b4f`, "la pestaña Carga por fin mide la
+carga") calcula ACWR con fuerza + cardio en la misma moneda de sRPE, y `skandi-brief.js`
+(`6da0c58`, "el porqué de este día en Inicio") lo consume junto con carga articular
+(`skandi-joint-load.js`) y nutrición para la frase de `todayDetailCard()` en Home. El encabezado
+de semana del calendario (`weekAdherence`/`weekRowHtml`) ya cuenta planeado vs hecho. No hizo
+falta ninguna migración — el documento la listaba como 083, que en realidad es
+`083_skandi_garmin_strength.sql`, sin relación. Se marcan las dos fases y se corrige la tabla de
+§9; ninguna de las dos necesitó trabajo nuevo, solo que el documento nunca se puso al día con lo
+que ya se había construido.
 
 **2026-08-25 — T2 implementada (migración 104 + `skandi-plan.js`).**
 
