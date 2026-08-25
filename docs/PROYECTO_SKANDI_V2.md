@@ -207,11 +207,11 @@ skandi_settings
 | Fase | Qué entrega | Migraciones | Tamaño |
 |---|---|---|---|
 | **0** | ✅ **Hecha** (2026-08-22) — `CLAUDE.md` documenta Skandi, `SKANDI_VERSION` + manifest + iconos + service worker: instalable y con shell offline propio | — | — |
-| **1** | **Nutrición: foto, texto, código de barras** — registrar, analizar, corregir, metas, resumen del día | 073 ✅ · 074 ✅ · 075 | 3–4 sesiones |
-| **2** | **Motor de decisiones** — readiness diario, ACWR, balance energético, recomendación en Home | 077 | 2–3 sesiones |
-| **3** | **Cardio y HIIT de primera clase** — intervalos, splits, nado, mapa muscular correcto | 076 | 2 sesiones |
+| **1** | ✅ **Nutrición: foto, texto, código de barras** — registrar, analizar, corregir, metas, resumen del día | 073 ✅ · 074 ✅ · 075 ✅ | hecha |
+| **2** | ✅ **Motor de decisiones** — readiness diario, ACWR, balance energético, recomendación en Home. Absorbida por T4 de `PLAN_ENTRENAMIENTO_SKANDI.md` (`skandi-load.js` + `skandi-brief.js`) | ninguna | hecha |
+| **3** | ✅ **Cardio y HIIT de primera clase** — intervalos, splits, nado, mapa muscular correcto. Absorbida por T2 de `PLAN_ENTRENAMIENTO_SKANDI.md` (`skandi-plan.js`, migraciones 104/105) | 104 ✅ · 105 ✅ | hecha |
 | **4** | ✅ **Strava (Garmin vía Strava)** — OAuth, webhook, deduplicación, backfill | 081 ✅ | hecha |
-| **5** | **Pulido analítico** — tendencias, correlaciones, exportar CSV, apertura al crew | 079+ | continuo |
+| **5** | **Pulido analítico** — tendencias, correlaciones, exportar CSV ✅, apertura al crew | ninguna | continuo |
 
 El orden 1 → 2 no es negociable: el motor de decisiones sin datos de comida da consejos ciegos.
 El 3 puede adelantarse si te urge capturar bien un bloque de carreras antes que la comida.
@@ -427,6 +427,32 @@ Se pinta como **una sola tarjeta en Home**. El objetivo no es un dashboard más;
 ---
 
 ## 11. Bitácora
+
+**2026-08-25 — Bookkeeping y Fase 5: exportar CSV.**
+
+- Auditoría contra `PLAN_ENTRENAMIENTO_SKANDI.md`: sus fases T1-T4 ya estaban hechas (T2 y los
+  splits de Strava se cerraron hoy mismo; T4 — carga unificada — ya vivía en el repo desde antes
+  sin que este documento se hubiera enterado). Eso deja las Fases 2, 3 y 4 de este documento
+  cerradas también, por la misma razón: son la misma pieza vista desde el otro documento. Se
+  corrige la tabla de §6 sin tocar código.
+- **Exportar CSV** (dentro de Fase 5, "pulido analítico"): tarjeta nueva en Ajustes con cuatro
+  descargas — series de fuerza, cardio, comidas, peso — cada una en un archivo `.csv` con BOM
+  UTF-8 (para que Excel en Windows no rompa los acentos). Deliberadamente **no** lee del estado ya
+  cargado en el cliente: `state.meals` solo trae 45 días (la ventana que usa la tira de tendencia)
+  y `state.externalActivities` está topado a 200 filas — un export que se sirviera de eso
+  recortaría el historial sin avisar. Cada botón pide su propia consulta completa a Supabase al
+  tocarse, sin límite ni ventana, igual que "ver parciales" de Strava (105): el costo se paga solo
+  cuando de verdad se quiere el archivo, no de antemano. Peso corporal es la excepción — esa tabla
+  ya se carga completa en `loadAll()`, así que no hace falta una segunda consulta.
+- Verificado en el navegador real con el cliente de Supabase parchado (no sustituido — `sb` es
+  `const`, así que hay que mutar `sb.from`, no reasignar `window.sb`) para las cuatro descargas:
+  el escapado CSV de comas y comillas, el nombre de archivo, el tipo MIME y los tres bytes del BOM
+  salieron correctos.
+- **Lo que sigue abierto en Fase 5**: tendencias/correlaciones (cruzar déficit calórico con
+  estancamiento de fuerza, por ejemplo) y apertura al crew (hoy nutrición y carga son privadas por
+  RLS, "Solo Joseph primero" — decisión tomada en §3). Ninguna de las dos se tocó: la primera
+  necesita diseño propio, la segunda es una decisión de privacidad que no es mía tomar sin
+  preguntar.
 
 **2026-08-23 — Bienestar diario (085) y los pasos como contexto de la comida.**
 

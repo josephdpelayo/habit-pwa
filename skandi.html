@@ -8,18 +8,18 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="Skandi Fit">
 <meta name="application-name" content="Skandi Fit">
-<link rel="manifest" href="/skandi-manifest.json?v=20260825-12">
-<link rel="apple-touch-icon" sizes="180x180" href="/icons/skandi-180.png?v=20260825-12">
-<link rel="icon" type="image/png" sizes="192x192" href="/icons/skandi-192.png?v=20260825-12">
+<link rel="manifest" href="/skandi-manifest.json?v=20260825-13">
+<link rel="apple-touch-icon" sizes="180x180" href="/icons/skandi-180.png?v=20260825-13">
+<link rel="icon" type="image/png" sizes="192x192" href="/icons/skandi-192.png?v=20260825-13">
 <title>Skandi Fit</title>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="/skandi-recovery.js?v=20260825-12"></script>
-<script src="/skandi-plan.js?v=20260825-12"></script>
-<script src="/body-figure.js?v=20260825-12"></script>
-<script src="/skandi-nutrition.js?v=20260825-12"></script>
-<script src="/skandi-load.js?v=20260825-12"></script>
-<script src="/skandi-brief.js?v=20260825-12"></script>
-<script src="/skandi-joint-load.js?v=20260825-12"></script>
+<script src="/skandi-recovery.js?v=20260825-13"></script>
+<script src="/skandi-plan.js?v=20260825-13"></script>
+<script src="/body-figure.js?v=20260825-13"></script>
+<script src="/skandi-nutrition.js?v=20260825-13"></script>
+<script src="/skandi-load.js?v=20260825-13"></script>
+<script src="/skandi-brief.js?v=20260825-13"></script>
+<script src="/skandi-joint-load.js?v=20260825-13"></script>
 <style>
 :root{
   --bg:#eef4f8;
@@ -650,7 +650,7 @@ button.chip{min-height:44px}
 // Versión compartida con app.html (APP_VERSION) y sw.js (CACHE_VERSION): un solo service
 // worker sirve las dos apps, así que una sola cadena las invalida a las dos. Al cambiarla
 // hay que actualizarla también en los ?v= del <head>, en index.html y en los dos manifests.
-const SKANDI_VERSION='20260825-12';
+const SKANDI_VERSION='20260825-13';
 const SUPABASE_URL='https://pmpjteuqjusbiduevbwq.supabase.co';
 const SUPABASE_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBtcGp0ZXVxanVzYmlkdWV2YndxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc2OTI1NjUsImV4cCI6MjA5MzI2ODU2NX0.XbMzZoo2yqtrD8znLnyo_1zDfrdJAvAPj1lqGOyXnLw';
 const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
@@ -767,6 +767,9 @@ en:{
 
   'settings.title':'Settings','settings.language':'Language','settings.units':'Default weight unit',
   'settings.account':'Account','settings.signedInAs':'Signed in as','settings.signOut':'Sign out',
+  'export.title':'Export your data','export.intro':'Download your full history as a CSV file — no date window, no cap.',
+  'export.sets':'Strength sets','export.activities':'Cardio activities','export.meals':'Meals','export.bodyweight':'Bodyweight log',
+  'export.download':'Download CSV','export.working':'Preparing…',
   'settings.langNote':'Changing the language translates the whole app. Your routines, exercises and history are not affected.',
   'settings.close':'Close',
 
@@ -1424,6 +1427,9 @@ es:{
 
   'settings.title':'Configuración','settings.language':'Idioma','settings.units':'Unidad de peso por defecto',
   'settings.account':'Cuenta','settings.signedInAs':'Sesión iniciada como','settings.signOut':'Cerrar sesión',
+  'export.title':'Exporta tus datos','export.intro':'Descarga tu historial completo como CSV — sin ventana de fecha, sin tope.',
+  'export.sets':'Series de fuerza','export.activities':'Actividades de cardio','export.meals':'Comidas','export.bodyweight':'Registro de peso',
+  'export.download':'Descargar CSV','export.working':'Preparando…',
   'settings.langNote':'Cambiar el idioma traduce toda la app. Tus rutinas, ejercicios e historial no se ven afectados.',
   'settings.close':'Cerrar',
 
@@ -8538,11 +8544,90 @@ function openSettings(){
     ${intervalsSettingsCard()}
     ${unmatchedStrengthCard()}
     ${effortSettingsCard()}
+    ${exportSettingsCard()}
     <section class="card">
       <div class="eyebrow">${esc(t('settings.account'))}</div>
       <p style="margin-top:8px">${esc(t('settings.signedInAs'))}: <strong>${esc(state.user?.email||displayName())}</strong></p>
       <button class="btn danger" style="width:100%;margin-top:12px" onclick="signOut()">${esc(t('settings.signOut'))}</button>
     </section>`;
+}
+
+// ---- Exportar CSV (Fase 5, "pulido analítico") --------------------------------------------
+//
+// Los datos que el estado ya tiene cargado no alcanzan para un export honesto: las comidas solo
+// traen los últimos 45 días (loadNutrition, para la tira de tendencia) y las actividades externas
+// vienen topadas a las 200 más recientes (loadAll). Un botón de "exportar mis datos" que en
+// silencio recorta tu historial sería peor que no tenerlo. Por eso cada tipo pide su propia
+// consulta completa al tocar el botón, sin límite ni ventana — igual que "ver parciales" (105):
+// se paga el viaje a la base solo cuando de verdad se quiere, no de antemano.
+const CSV_EXPORTS = ['sets','activities','meals','bodyweight'];
+
+function csvEscape(v){
+  const s=v==null?'':String(v);
+  return /[",\n]/.test(s) ? '"'+s.replace(/"/g,'""')+'"' : s;
+}
+
+function downloadCsv(name,headers,rows){
+  const lines=[headers.join(','),...rows.map(r=>r.map(csvEscape).join(','))];
+  // BOM: Excel en Windows no adivina UTF-8 sin él y "Front Lever Á" sale con acentos rotos.
+  const blob=new Blob(['﻿'+lines.join('\r\n')],{type:'text/csv;charset=utf-8'});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement('a');
+  a.href=url; a.download=`skandi-${name}-${todayKey()}.csv`;
+  document.body.appendChild(a); a.click(); a.remove();
+  URL.revokeObjectURL(url);
+}
+
+async function exportCsv(dataset){
+  const btn=$('exportCsvBtn');
+  if(btn){btn.disabled=true;btn.textContent=t('export.working');}
+  try{
+    if(dataset==='sets'){
+      const {data,error}=await sb.from('skandi_sets')
+        .select('sort_order,weight_kg,reps,rir,form_quality,side,done,session:skandi_sessions(title,completed_at),exercise:skandi_exercises(name)')
+        .eq('user_id',state.user.id).eq('done',true).order('created_at');
+      if(error) throw error;
+      downloadCsv('series',['fecha','rutina','ejercicio','serie','peso_kg','reps','rir','calidad','lado'],
+        (data||[]).filter(s=>s.session?.completed_at).map(s=>[
+          s.session.completed_at.slice(0,10),s.session.title||'',s.exercise?.name||'',
+          s.sort_order??'',s.weight_kg??'',s.reps??'',s.rir??'',s.form_quality??'',s.side||''
+        ]));
+    }else if(dataset==='activities'){
+      const {data,error}=await sb.from('skandi_external_activities').select('*')
+        .eq('user_id',state.user.id).order('performed_at');
+      if(error) throw error;
+      downloadCsv('cardio',['fecha','tipo','duracion_min','distancia_km','fc_prom','fc_max','intensidad','fuente'],
+        (data||[]).map(a=>[
+          a.performed_at.slice(0,10),a.activity_type,a.duration_min,a.distance_km??'',
+          a.avg_heart_rate??'',a.max_heart_rate??'',a.intensity,a.external_source||'manual'
+        ]));
+    }else if(dataset==='meals'){
+      const {data,error}=await sb.from('skandi_meals').select('*')
+        .eq('user_id',state.user.id).order('eaten_at');
+      if(error) throw error;
+      downloadCsv('comidas',['fecha','tipo','kcal','proteina_g','carbos_g','grasa_g','azucar_g','lugar'],
+        (data||[]).map(m=>[
+          m.eaten_at.slice(0,10),m.meal_type||'',m.kcal??'',m.protein_g??'',m.carbs_g??'',
+          m.fat_g??'',m.sugar_g??'',m.venue||''
+        ]));
+    }else if(dataset==='bodyweight'){
+      // Esta ya vive completa en el estado (loadAll no la topa), no hace falta una consulta nueva.
+      downloadCsv('peso',['fecha','peso_kg','nota'],
+        state.bodyweightLogs.map(l=>[l.logged_at,l.weight_kg,l.note||'']));
+    }
+  }catch(e){ alert(e.message||String(e)); }
+  finally{ if(btn){btn.disabled=false;btn.textContent=t('export.download');} }
+}
+
+function exportSettingsCard(){
+  return `<section class="card">
+    <div class="eyebrow">${esc(t('export.title'))}</div>
+    <p class="form-note" style="margin-top:8px">${esc(t('export.intro'))}</p>
+    <select id="exportType" class="field left" style="margin-top:10px">
+      ${CSV_EXPORTS.map(k=>`<option value="${k}">${esc(t('export.'+k))}</option>`).join('')}
+    </select>
+    <button id="exportCsvBtn" class="btn" style="width:100%;margin-top:10px" onclick="exportCsv($('exportType').value)">${esc(t('export.download'))}</button>
+  </section>`;
 }
 
 // La tarjeta de Strava vive en Ajustes y no en Entrenar a propósito: conectar un reloj se

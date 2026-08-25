@@ -3,7 +3,7 @@
   "short_name": "Skandi Fit",
   "description": "Entrenamiento del crew del Skandi Nomad",
   "id": "/skandi.html",
-  "start_url": "/skandi.html?v=20260825-12",
+  "start_url": "/skandi.html?v=20260825-13",
   "scope": "/",
   "display": "standalone",
   "orientation": "portrait",
