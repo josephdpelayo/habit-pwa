@@ -542,8 +542,8 @@ async function analyzeMeal(req, res) {
 // migración nueva solo por esto.
 //
 // Los macros restantes, el entrenamiento del día y el catálogo frecuente ya los calculó el
-// cliente (dayRecommendation/plannedSessions en skandi-nutrition.js, sobre datos que ya tenía
-// cargados) — recalcularlos aquí sería repetir esa lógica con el riesgo de que el "hoy" del
+// cliente (dayRecommendation en skandi-nutrition.js y sessionsForFuel en skandi.html, sobre
+// datos que ya tenía cargados) — recalcularlos aquí sería repetir esa lógica con el riesgo de que el "hoy" del
 // servidor no coincida con el "hoy" del cliente (el barco cambia de zona horaria; el cliente
 // ya resuelve eso con su reloj local). Los números que manda el cliente solo entran a un
 // prompt de texto para ÉL MISMO, nunca se guardan ni se muestran a nadie más, así que no hay

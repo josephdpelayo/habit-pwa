@@ -259,9 +259,18 @@ and nothing else:
 - `SkandiNutrition.dayRecommendation()` adjusts today's target by the **difference between today's
   planned training burn and the weekly average**, never by the whole burn — the target's activity
   factor already assumes training, so adding the day's burn on top double-counts. The delta goes to
-  carbs only. `plannedSessions()` + `fuelPlan()` turn that delta into timed advice (carbs before,
-  during only for endurance over 75 min, carbs+protein after). A short easy session deliberately
-  gets no pre-load — inventing one just pushes the member to eat more
+  carbs only. What counts as planned is **not** its business: the caller passes `plannedKcal` /
+  `avgDaily`, and the one place they come from is the calendar — `sessionsForFuel(key, weightKg)`
+  and `weeklyPlannedFromCalendar(weightKg)` in skandi.html, over `skandi_planned_sessions` (080).
+  Asking `skandi_templates.weekday` instead (the old `plannedSessions`/`weeklyPlan`, removed) is
+  blind to a special week: a deload or a trip lives only in the calendar, with `weekday = NULL` on
+  its routines (086), which is exactly when the day's food should change. `fuelPlan()` turns the
+  delta into timed advice (carbs before, during only for endurance over 75 min, carbs+protein
+  after). A short easy session deliberately gets no pre-load — inventing one just pushes the
+  member to eat more. The three consumers (`trainingDayCard`, `nutritionForBrief`,
+  `loadMealSuggestion`) all read `targetsForDay(key)`, never `state.nutritionTargets`: with a
+  per-date override (094) the coach already fixed the number, so `rec.delta` is forced to 0 rather
+  than stacked on top, and `override.note` is the short why shown on the card
 - `SkandiNutrition.suggestTargets()`'s protein target is **banded by mode**
   (`PROTEIN_G_PER_KG_BY_MODE = {deficit: 2.0, mantenimiento: 1.6, superavit: 1.8}`), not a flat
   2.0g/kg — a maintenance or surplus member doesn't need deficit-level protein, and flattening it

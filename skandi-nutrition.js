@@ -281,6 +281,12 @@ function itemToFood(item) {
 //
 // El ajuste va a carbohidratos. La proteína es por kilo de peso y no cambia porque hoy
 // corras, y la grasa tiene un piso hormonal que no conviene mover día con día.
+//
+// Qué cuenta como "planeado" hoy y en la semana no es cosa de esta función: se lo pasa
+// quien llama (plannedKcal, avgDaily), calculado a partir del calendario real
+// (skandi_planned_sessions), que es la única fuente que ve tanto la semana recurrente
+// normal como una semana especial (descarga, viaje) con rutinas fuera del día de la
+// semana de siempre.
 
 const MET = {
   running: 9.8, cycling: 7.5, swimming: 7.0, rowing: 7.0,
@@ -311,42 +317,6 @@ function strengthKcal(sets, weightKg) {
   return Math.round(STRENGTH_MET * w * ((n * MIN_PER_SET) / 60));
 }
 
-// Lo que un día de la semana tiene PLANEADO quemar, según la rutina y el plan de cardio
-// asignados a ese día. dow: 0 = lunes, como en todo el resto de la app.
-function plannedDayKcal(dow, plan) {
-  const { templates = [], templateItems = [], activityTemplates = [], weightKg } = plan || {};
-  let kcal = 0;
-  templates.filter(tp => tp.weekday === dow).forEach(tp => {
-    const sets = templateItems
-      .filter(it => it.template_id === tp.id)
-      .reduce((acc, it) => acc + (num(it.target_sets) || 3), 0);
-    kcal += strengthKcal(sets, weightKg);
-  });
-  activityTemplates.filter(at => at.weekday === dow).forEach(at => {
-    kcal += activityKcal({
-      activity_type: at.activity_type,
-      duration_min: at.target_duration_min || estimateMinutesFromDistance(at),
-      // Sin RPE en un plan, la zona de FC es la mejor pista: zona 2 es suave, zona 4-5 es dura.
-      intensity: at.target_zone ? at.target_zone * 2 : 5
-    }, weightKg);
-  });
-  return kcal;
-}
-
-// Un plan que solo dice "5 km" sí tiene duración: la del ritmo objetivo, o un ritmo típico.
-function estimateMinutesFromDistance(at) {
-  const km = num(at && at.target_distance_km);
-  if (km <= 0) return 0;
-  const pace = num(at.target_pace_sec_per_km) || 330; // 5:30/km por defecto
-  return Math.round((km * pace) / 60);
-}
-
-function weeklyPlan(plan) {
-  const byDow = [0, 1, 2, 3, 4, 5, 6].map(d => plannedDayKcal(d, plan));
-  const total = byDow.reduce((a, b) => a + b, 0);
-  return { byDow, total, avgDaily: Math.round(total / 7) };
-}
-
 // La recomendación del día. `loggedKcal` son las actividades YA registradas hoy: si ya
 // corriste, manda lo que hiciste sobre lo que estaba planeado — un plan no es un hecho.
 // ---- Los pasos del día ----
@@ -371,11 +341,11 @@ function stepsAdjustmentKcal(opts) {
 }
 
 function dayRecommendation(opts) {
-  const { targets, plan, dow, loggedKcal = 0, hasLoggedActivity = false,
+  const { targets, plannedKcal = 0, avgDaily = 0, loggedKcal = 0, hasLoggedActivity = false,
           steps = null, avgSteps = null, weightKg = null } = opts || {};
   if (!targets) return null;
-  const week = weeklyPlan(plan);
-  const planned = plannedDayKcal(dow, plan);
+  const average = num(avgDaily);
+  const planned = num(plannedKcal);
   // Haber registrado algo no significa haber terminado el día: si todavía falta la mitad de
   // lo planeado, la meta del día no debe encogerse ni deben desaparecer los consejos de la
   // sesión que falta. Por eso el día vale lo MAYOR entre lo hecho y lo planeado.
@@ -386,7 +356,7 @@ function dayRecommendation(opts) {
   // El entrenamiento y el movimiento del día son dos desviaciones distintas del mismo
   // promedio, así que se suman antes de decidir si el día se salió de lo normal.
   const stepsDelta = stepsAdjustmentKcal({ steps, avgSteps, weightKg });
-  const delta = round(today - week.avgDaily + stepsDelta, 10);
+  const delta = round(today - average + stepsDelta, 10);
   const meaningful = Math.abs(delta) >= NEUTRAL_DELTA;
 
   return {
@@ -394,8 +364,7 @@ function dayRecommendation(opts) {
     todayKcal: today,
     loggedKcal: num(loggedKcal),
     pendingKcal,
-    avgDaily: week.avgDaily,
-    weeklyKcal: week.total,
+    avgDaily: average,
     hasLog: hasLoggedActivity,
     fromLog: finished,
     delta: meaningful ? delta : 0,
@@ -434,44 +403,6 @@ const FUEL = {
   EASY_RPE: 6
 };
 
-// Las sesiones que un día de la semana tiene PLANEADAS, ya normalizadas a un formato común.
-function plannedSessions(dow, plan) {
-  const { templates = [], templateItems = [], activityTemplates = [], weightKg } = plan || {};
-  const out = [];
-
-  templates.filter(tp => tp.weekday === dow).forEach(tp => {
-    const sets = templateItems
-      .filter(it => it.template_id === tp.id)
-      .reduce((acc, it) => acc + (num(it.target_sets) || 3), 0);
-    if (!sets) return;
-    out.push({
-      kind: 'strength',
-      name: tp.name || '',
-      activity_type: 'strength',
-      minutes: Math.round(sets * MIN_PER_SET),
-      intensity: 7,
-      kcal: strengthKcal(sets, weightKg)
-    });
-  });
-
-  activityTemplates.filter(at => at.weekday === dow).forEach(at => {
-    const minutes = at.target_duration_min || estimateMinutesFromDistance(at);
-    if (!minutes) return;
-    const intensity = at.target_zone ? at.target_zone * 2 : 5;
-    out.push({
-      kind: 'endurance',
-      name: '',
-      activity_type: at.activity_type,
-      distance_km: num(at.target_distance_km) || null,
-      minutes,
-      intensity,
-      kcal: activityKcal({ activity_type: at.activity_type, duration_min: minutes, intensity }, weightKg)
-    });
-  });
-
-  return out;
-}
-
 function fuelPlan(session, weightKg) {
   const w = num(weightKg);
   const minutes = num(session && session.minutes);
@@ -507,8 +438,8 @@ const api = {
   KCAL_PER_G, ACTIVITY_FACTORS, MODE_FACTOR, MET,
   suggestTargets, kcalFromMacros, itemsTotal, dayTotals, remaining, pct,
   scaleFood, rescaleItem, itemToFood, evaluateFood, evaluateScaled,
-  activityKcal, strengthKcal, plannedDayKcal, weeklyPlan, dayRecommendation, stepsAdjustmentKcal,
-  FUEL, plannedSessions, fuelPlan,
+  activityKcal, strengthKcal, dayRecommendation, stepsAdjustmentKcal,
+  FUEL, fuelPlan,
   isLowEnergy, LOW_ENERGY_KCAL_PER_KG_FLOOR
 };
 

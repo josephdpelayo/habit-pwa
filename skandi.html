@@ -8,17 +8,17 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="Skandi Fit">
 <meta name="application-name" content="Skandi Fit">
-<link rel="manifest" href="/skandi-manifest.json?v=20260825-03">
-<link rel="apple-touch-icon" sizes="180x180" href="/icons/skandi-180.png?v=20260825-03">
-<link rel="icon" type="image/png" sizes="192x192" href="/icons/skandi-192.png?v=20260825-03">
+<link rel="manifest" href="/skandi-manifest.json?v=20260825-04">
+<link rel="apple-touch-icon" sizes="180x180" href="/icons/skandi-180.png?v=20260825-04">
+<link rel="icon" type="image/png" sizes="192x192" href="/icons/skandi-192.png?v=20260825-04">
 <title>Skandi Fit</title>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="/skandi-recovery.js?v=20260825-03"></script>
-<script src="/body-figure.js?v=20260825-03"></script>
-<script src="/skandi-nutrition.js?v=20260825-03"></script>
-<script src="/skandi-load.js?v=20260825-03"></script>
-<script src="/skandi-brief.js?v=20260825-03"></script>
-<script src="/skandi-joint-load.js?v=20260825-03"></script>
+<script src="/skandi-recovery.js?v=20260825-04"></script>
+<script src="/body-figure.js?v=20260825-04"></script>
+<script src="/skandi-nutrition.js?v=20260825-04"></script>
+<script src="/skandi-load.js?v=20260825-04"></script>
+<script src="/skandi-brief.js?v=20260825-04"></script>
+<script src="/skandi-joint-load.js?v=20260825-04"></script>
 <style>
 :root{
   --bg:#eef4f8;
@@ -543,7 +543,7 @@ textarea.field{min-height:112px;text-align:left;resize:vertical}
 // Versión compartida con app.html (APP_VERSION) y sw.js (CACHE_VERSION): un solo service
 // worker sirve las dos apps, así que una sola cadena las invalida a las dos. Al cambiarla
 // hay que actualizarla también en los ?v= del <head>, en index.html y en los dos manifests.
-const SKANDI_VERSION='20260825-03';
+const SKANDI_VERSION='20260825-04';
 const SUPABASE_URL='https://pmpjteuqjusbiduevbwq.supabase.co';
 const SUPABASE_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBtcGp0ZXVxanVzYmlkdWV2YndxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc2OTI1NjUsImV4cCI6MjA5MzI2ODU2NX0.XbMzZoo2yqtrD8znLnyo_1zDfrdJAvAPj1lqGOyXnLw';
 const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
@@ -2484,16 +2484,48 @@ function plannedToFuelSession(p,weightKg){
   const kind=p.discipline==='strength'?'strength':'endurance';
   const intensity=Number(p.target_zone)?[3,5,6.5,8,9.5][Number(p.target_zone)-1]:5;
   return {kind,activity_type:DISC_TO_ACT[p.discipline]||'other',minutes,
+    // El mismo nombre que ve en el calendario ("Descarga · Front Lever A + Pull"), no el
+    // genérico "Fuerza": el consejo de timing habla de la sesión que tiene enfrente.
+    name:plannedTitle(p),
     distance_km:p.target_distance_km||null,intensity,
     kcal:kind==='strength'?SkandiNutrition.strengthKcal(minutes/3,weightKg)
                           :SkandiNutrition.activityKcal({activity_type:DISC_TO_ACT[p.discipline]||'other',duration_min:minutes,intensity},weightKg)};
 }
 
+// Lo que se entrena un día concreto, en el formato que fuelPlan() consume. El calendario
+// (skandi_planned_sessions) es la única fuente que ve tanto la semana recurrente de siempre
+// como una semana especial: una descarga o un viaje viven SOLO ahí, con weekday NULL en sus
+// rutinas (migración 086), así que preguntarle al día de la semana devolvía [] justo en las
+// semanas donde más importa lo que toca comer.
+function sessionsForFuel(key,weightKg){
+  return plannedOfDay(key).filter(p=>p.discipline!=='rest')
+    .map(p=>plannedToFuelSession(p,weightKg));
+}
+
+// El promedio contra el que se mide "hoy": los 7 días de ESTA semana del calendario. Es el
+// denominador del ajuste, no un dato de adorno — si sale de otra fuente que las sesiones del
+// día, el delta compara dos cosas distintas.
+function weeklyPlannedFromCalendar(weightKg){
+  const monday=mondayOf(new Date());
+  const byDay={};
+  let total=0;
+  for(let i=0;i<7;i++){
+    const key=dayKey(addDays(monday,i));
+    const kcal=sessionsForFuel(key,weightKg).reduce((a,x)=>a+(x.kcal||0),0);
+    byDay[key]=kcal;
+    total+=kcal;
+  }
+  return {byDay,total,avgDaily:Math.round(total/7)};
+}
+
 function nutritionForBrief(){
-  const targets=state.nutritionTargets;
+  const today=todayKey();
+  // La meta del día, no la base: si el coach fijó un número para hoy (migración 094), es ese
+  // el que tiene que ver en Inicio — leer la base aquí y la del día en Comida hacía que las
+  // dos tarjetas mostraran kcal distintas el mismo día.
+  const targets=targetsForDay(today);
   if(!targets) return {rec:null,targets:null};
   const weightKg=latestWeightKg();
-  const today=todayKey();
   const loggedToday=state.externalActivities.filter(a=>dayKey(a.performed_at)===today);
   const loggedSets=state.sets.filter(x=>x.user_id===state.user.id&&x.done&&dayKey(x.created_at)===today).length;
   const loggedKcal=loggedToday.reduce((acc,a)=>acc+SkandiNutrition.activityKcal(a,weightKg),0)
@@ -2502,11 +2534,22 @@ function nutritionForBrief(){
   const stepsToday=rows.find(w=>w.day===today)?.steps??null;
   const prevSteps=rows.filter(w=>w.day!==today).slice(0,7).map(w=>w.steps).filter(n=>Number.isFinite(n));
   const avgSteps=prevSteps.length>=3?prevSteps.reduce((a,b)=>a+b,0)/prevSteps.length:null;
-  const plan=state.activityTemplates.filter(x=>x.user_id===state.user.id);
-  return {targets,rec:SkandiNutrition.dayRecommendation({
-    targets,plan,dow:todayDow(),loggedKcal,
+  const sessions=sessionsForFuel(today,weightKg);
+  const rec=SkandiNutrition.dayRecommendation({
+    targets,
+    plannedKcal:sessions.reduce((a,x)=>a+(x.kcal||0),0),
+    avgDaily:weeklyPlannedFromCalendar(weightKg).avgDaily,
+    loggedKcal,
     hasLoggedActivity:loggedToday.length>0||loggedSets>0,
-    steps:stepsToday,avgSteps,weightKg})};
+    steps:stepsToday,avgSteps,weightKg});
+  // Mismo criterio que trainingDayCard(): con un número fijado por el coach no hay nada que
+  // ajustar encima — el delta ya está dentro de ese número.
+  if(rec&&nutritionOverrideFor(today)){
+    rec.kcalTarget=targets.kcal_target;
+    rec.carbsTarget=targets.carbs_g_target;
+    rec.delta=0;
+  }
+  return {targets,rec};
 }
 
 // La tira de 7 días responde "¿cómo va mi semana?" antes de pedir nada — mismo lenguaje visual
@@ -8095,12 +8138,7 @@ function trainingDayCard(){
   const weightKg=latestWeightKg();
   if(!weightKg) return '';
 
-  const plan={
-    weightKg,
-    templates:state.templates.filter(x=>x.user_id===state.user.id),
-    templateItems:state.items,
-    activityTemplates:state.activityTemplates
-  };
+  const sessions=sessionsForFuel(today,weightKg);
   const loggedToday=state.externalActivities.filter(a=>dayKey(a.performed_at)===today);
   const loggedSets=state.sets.filter(x=>x.user_id===state.user.id&&x.done&&dayKey(x.created_at)===today).length;
   const loggedKcal=loggedToday.reduce((acc,a)=>acc+SkandiNutrition.activityKcal(a,weightKg),0)
@@ -8113,25 +8151,34 @@ function trainingDayCard(){
   const prevSteps=wellnessRows.filter(w=>w.day!==today).slice(0,7).map(w=>w.steps).filter(n=>Number.isFinite(n));
   const avgSteps=prevSteps.length>=3?prevSteps.reduce((a,b)=>a+b,0)/prevSteps.length:null;
   const rec=SkandiNutrition.dayRecommendation({
-    targets,plan,dow:todayDow(),loggedKcal,
+    targets,
+    plannedKcal:sessions.reduce((a,x)=>a+(x.kcal||0),0),
+    avgDaily:weeklyPlannedFromCalendar(weightKg).avgDaily,
+    loggedKcal,
     hasLoggedActivity:loggedToday.length>0||loggedSets>0,
     steps:stepsToday,avgSteps,weightKg
   });
-  if(!rec||(!rec.plannedKcal&&!rec.todayKcal)) return '';
-
-  const sessions=SkandiNutrition.plannedSessions(todayDow(),plan);
+  if(!rec) return '';
 
   // El coach ya fijó el número exacto de hoy (migración 094, metas por fecha): no hace falta
-  // adivinar con el promedio semanal, y menos etiquear de "descanso" un día que sí entrena —
+  // adivinar con el promedio semanal, y menos etiquetar de "descanso" un día que sí entrena —
   // aquí solo queda el consejo de timing (fuelPlanHtml), no el delta ni la etiqueta alto/bajo.
+  // Va antes del corte por "hoy no se quema nada": un día de descanso de la semana de descarga
+  // no tiene timing que dar, pero sí tiene un número fijado y la razón por la que bajó.
   if(override){
     const fuel=fuelPlanHtml(sessions,weightKg,rec);
-    if(!fuel) return '';
+    // El "por qué" corto que el coach ya escribió al fijar el día ("Descarga · Martes ·
+    // Handstand + Push + Pierna + Z2"): estaba en la base desde la 094 y no se veía en
+    // ningún lado. Sin nota y sin timing no queda tarjeta que pintar.
+    const note=(override.note||'').trim();
+    if(!fuel&&!note) return '';
     return `<section class="card">
       <div class="eyebrow">${esc(t('food.coachTarget'))}</div>
+      ${note?`<p class="muted" style="margin-top:6px">${esc(note)}</p>`:''}
       ${fuel}
     </section>`;
   }
+  if(!rec.plannedKcal&&!rec.todayKcal) return '';
 
   // "Día de descanso" solo si de verdad no hay sesión planeada hoy — si la hay pero quema
   // menos que tu promedio semanal (p.ej. un día de skills corto), es un día ligero, no un
@@ -8187,11 +8234,16 @@ function fuelPlanHtml(sessions,weightKg,rec){
   const blocks=sessions.slice(0,2).map(session=>{
     const fuel=SkandiNutrition.fuelPlan(session,weightKg);
     if(!fuel) return '';
+    // El nombre que la sesión tiene en el calendario ("Descarga · Z2 suave") gana sobre la
+    // etiqueta genérica del tipo de actividad ("Correr"): es el mismo renglón que ve en
+    // Entrenar, y la sesión de fuerza de arriba ya se nombra así. Sin nombre —una sesión que
+    // venga de otro lado— cae a la etiqueta de siempre.
+    const label=session.name||ACTIVITY_LABELS[session.activity_type]||session.activity_type;
     const title=session.kind==='strength'
       ? t('fuel.session',{name:session.name||t('fuel.strength'),min:session.minutes})
       : session.distance_km
-        ? `${(ACTIVITY_LABELS[session.activity_type]||session.activity_type)} · ${t('fuel.sessionKm',{km:session.distance_km,min:session.minutes})}`
-        : t('fuel.session',{name:(ACTIVITY_LABELS[session.activity_type]||session.activity_type),min:session.minutes});
+        ? `${label} · ${t('fuel.sessionKm',{km:session.distance_km,min:session.minutes})}`
+        : t('fuel.session',{name:label,min:session.minutes});
     const lines=[
       fuel.before?t('fuel.before',{g:fuel.before.carbs_g,min:fuel.before.minutes_before}):t('fuel.beforeEasy'),
       fuel.during?t('fuel.during',{g:fuel.during.carbs_g_per_hour}):'',
@@ -8226,17 +8278,14 @@ function openMealSuggestion(){
 // 'full' solo se pide con el botón "Más detalle", cuando la corta ya se vio y no bastó: un
 // segundo golpe de cuota explícito, nunca automático.
 async function loadMealSuggestion(detail){
-  const totals=SkandiNutrition.dayTotals(mealsOfDay(foodDay()));
-  const targets=state.nutritionTargets;
+  const key=foodDay();
+  const totals=SkandiNutrition.dayTotals(mealsOfDay(key));
+  // La meta de ESE día, override del coach incluido: "cuánto te falta hoy" es la mitad del
+  // prompt, y calcularlo contra la meta base manda un número que no es el del día.
+  const targets=targetsForDay(key);
   if(!targets) return alert(t('food.noTarget'));
   const remaining=SkandiNutrition.remaining(targets,totals);
   const weightKg=latestWeightKg();
-  const plan={
-    weightKg,
-    templates:state.templates.filter(x=>x.user_id===state.user.id),
-    templateItems:state.items,
-    activityTemplates:state.activityTemplates
-  };
   // El mismo catálogo que ya se le muestra en "Rápidos": lo que de verdad prepara seguido,
   // no una receta que un modelo se inventó. Nombre y kind nada más — sin macros, que esos ya
   // los tiene el modelo por otro lado y no hace falta mandarlos dos veces.
@@ -8244,7 +8293,7 @@ async function loadMealSuggestion(detail){
     ...state.dishes.slice(0,10).map(d=>d.name),
     ...state.foods.filter(f=>f.user_id).slice(0,10).map(f=>f.name)
   ];
-  const sessions=SkandiNutrition.plannedSessions(todayDow(),plan);
+  const sessions=sessionsForFuel(key,weightKg);
 
   $('modal').classList.add('show');
   $('modalCard').innerHTML=`
