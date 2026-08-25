@@ -8,17 +8,18 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="Skandi Fit">
 <meta name="application-name" content="Skandi Fit">
-<link rel="manifest" href="/skandi-manifest.json?v=20260825-10">
-<link rel="apple-touch-icon" sizes="180x180" href="/icons/skandi-180.png?v=20260825-10">
-<link rel="icon" type="image/png" sizes="192x192" href="/icons/skandi-192.png?v=20260825-10">
+<link rel="manifest" href="/skandi-manifest.json?v=20260825-11">
+<link rel="apple-touch-icon" sizes="180x180" href="/icons/skandi-180.png?v=20260825-11">
+<link rel="icon" type="image/png" sizes="192x192" href="/icons/skandi-192.png?v=20260825-11">
 <title>Skandi Fit</title>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="/skandi-recovery.js?v=20260825-10"></script>
-<script src="/body-figure.js?v=20260825-10"></script>
-<script src="/skandi-nutrition.js?v=20260825-10"></script>
-<script src="/skandi-load.js?v=20260825-10"></script>
-<script src="/skandi-brief.js?v=20260825-10"></script>
-<script src="/skandi-joint-load.js?v=20260825-10"></script>
+<script src="/skandi-recovery.js?v=20260825-11"></script>
+<script src="/skandi-plan.js?v=20260825-11"></script>
+<script src="/body-figure.js?v=20260825-11"></script>
+<script src="/skandi-nutrition.js?v=20260825-11"></script>
+<script src="/skandi-load.js?v=20260825-11"></script>
+<script src="/skandi-brief.js?v=20260825-11"></script>
+<script src="/skandi-joint-load.js?v=20260825-11"></script>
 <style>
 :root{
   --bg:#eef4f8;
@@ -335,6 +336,7 @@ p{color:var(--muted);line-height:1.45;margin:0}
 .field-narrow{padding:13px 3px}
 .field.left{text-align:left}
 textarea.field{min-height:112px;text-align:left;resize:vertical}
+.field.mono{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:13px}
 .check{position:relative;height:48px;border-radius:10px;background:var(--panel2);color:var(--muted);border:1px solid var(--line);display:grid;place-items:center}
 .check.sm::after{content:"";position:absolute;inset:-4px}
 .check.done{background:var(--dof-navy);color:#fff}
@@ -648,7 +650,7 @@ button.chip{min-height:44px}
 // Versión compartida con app.html (APP_VERSION) y sw.js (CACHE_VERSION): un solo service
 // worker sirve las dos apps, así que una sola cadena las invalida a las dos. Al cambiarla
 // hay que actualizarla también en los ?v= del <head>, en index.html y en los dos manifests.
-const SKANDI_VERSION='20260825-10';
+const SKANDI_VERSION='20260825-11';
 const SUPABASE_URL='https://pmpjteuqjusbiduevbwq.supabase.co';
 const SUPABASE_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBtcGp0ZXVxanVzYmlkdWV2YndxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc2OTI1NjUsImV4cCI6MjA5MzI2ODU2NX0.XbMzZoo2yqtrD8znLnyo_1zDfrdJAvAPj1lqGOyXnLw';
 const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
@@ -848,6 +850,9 @@ en:{
   'cal.titleLabel':'Title','cal.titlePh':'e.g. 6×400 intervals',
   'cal.durationLabel':'Duration (min)','cal.distanceLabel':'Distance (km)',
   'cal.zoneLabel':'Zone','cal.zoneNone':'No zone','cal.dateLabel':'Date',
+  'cal.structure':'Structured session (optional)',
+  'cal.structureNote':'One step per line: warmup 10min Z1 / interval 6x400m Z4 rest 90s Z1 / cooldown 10min Z1. Leave blank for a simple duration/distance/zone target.',
+  'cal.structurePh':'warmup 10min Z1\ninterval 6x400m Z4 rest 90s Z1\ncooldown 10min Z1',
   'cal.addTitle':'Add to {date}','cal.editTitle':'Edit session','cal.save':'Save',
   'cal.moveTitle':'Move session','cal.copyTitle':'Copy session',
   'cal.needsMigration':'Run migration 080 in Supabase to turn the calendar on.',
@@ -1080,7 +1085,18 @@ en:{
   'muscle.noExercises':'No exercises target this muscle yet.',
 
   'activity.running':'Running','activity.cycling':'Cycling','activity.swimming':'Swimming',
-  'activity.rowing':'Rowing','activity.walking':'Walking','activity.other':'Other','activity.fallback':'Activity',
+  'activity.rowing':'Rowing','activity.walking':'Walking','activity.hiit':'HIIT','activity.hyrox':'Hyrox',
+  'activity.other':'Other','activity.fallback':'Activity',
+
+  'logAct.rounds':'Rounds','logAct.workSec':'Work (seconds)','logAct.restSec':'Rest (seconds)',
+  'logAct.poolLength':'Pool length','logAct.poolOpen':'Open water / unknown',
+  'logAct.stroke':'Stroke','logAct.strokeFree':'Freestyle','logAct.strokeBack':'Backstroke',
+  'logAct.strokeBreast':'Breaststroke','logAct.strokeFly':'Butterfly','logAct.strokeMixed':'Mixed / IM',
+  'logAct.elevation':'Elevation gain (m, optional)',
+
+  'zones.runPace':'Threshold pace (min:sec/km)','zones.runPacePh':'e.g. 4:20',
+  'zones.swimCss':'Critical swim speed (min:sec/100m)','zones.swimCssPh':'e.g. 1:35',
+  'zones.bikeFtp':'FTP (watts)','zones.errPace':'{label} must be in min:sec format, like 4:20.',
 
   'strava.title':'Strava','strava.badge':'Strava','strava.checkEffort':'check effort',
   'report.keepChangesTitle':'Save these changes to “{name}”?','report.added':'Added: {list}','report.removed':'Removed: {list}',
@@ -1489,6 +1505,9 @@ es:{
   'cal.titleLabel':'Título','cal.titlePh':'ej. series 6×400',
   'cal.durationLabel':'Duración (min)','cal.distanceLabel':'Distancia (km)',
   'cal.zoneLabel':'Zona','cal.zoneNone':'Sin zona','cal.dateLabel':'Fecha',
+  'cal.structure':'Sesión estructurada (opcional)',
+  'cal.structureNote':'Un paso por línea: calentamiento 10min Z1 / series 6x400m Z4 rest 90s Z1 / enfriamiento 10min Z1. Déjalo vacío para un objetivo simple de duración/distancia/zona.',
+  'cal.structurePh':'calentamiento 10min Z1\nseries 6x400m Z4 rest 90s Z1\nenfriamiento 10min Z1',
   'cal.addTitle':'Agregar al {date}','cal.editTitle':'Editar sesión','cal.save':'Guardar',
   'cal.moveTitle':'Mover sesión','cal.copyTitle':'Copiar sesión',
   'cal.needsMigration':'Corre la migración 080 en Supabase para encender el calendario.',
@@ -1721,7 +1740,18 @@ es:{
   'muscle.noExercises':'Todavía no hay ejercicios para este músculo.',
 
   'activity.running':'Correr','activity.cycling':'Ciclismo','activity.swimming':'Natación',
-  'activity.rowing':'Remo','activity.walking':'Caminar','activity.other':'Otro','activity.fallback':'Actividad',
+  'activity.rowing':'Remo','activity.walking':'Caminar','activity.hiit':'HIIT','activity.hyrox':'Hyrox',
+  'activity.other':'Otro','activity.fallback':'Actividad',
+
+  'logAct.rounds':'Rondas','logAct.workSec':'Trabajo (segundos)','logAct.restSec':'Descanso (segundos)',
+  'logAct.poolLength':'Largo de alberca','logAct.poolOpen':'Aguas abiertas / no sé',
+  'logAct.stroke':'Estilo','logAct.strokeFree':'Libre','logAct.strokeBack':'Dorso',
+  'logAct.strokeBreast':'Pecho','logAct.strokeFly':'Mariposa','logAct.strokeMixed':'Combinado',
+  'logAct.elevation':'Desnivel acumulado (m, opcional)',
+
+  'zones.runPace':'Ritmo umbral (min:seg/km)','zones.runPacePh':'ej. 4:20',
+  'zones.swimCss':'Ritmo crítico de nado (min:seg/100m)','zones.swimCssPh':'ej. 1:35',
+  'zones.bikeFtp':'FTP (watts)','zones.errPace':'{label} debe tener formato min:seg, como 4:20.',
 
   'strava.title':'Strava','strava.badge':'Strava','strava.checkEffort':'revisa el esfuerzo',
   'report.keepChangesTitle':'¿Guardar estos cambios en «{name}»?','report.added':'Agregaste: {list}','report.removed':'Quitaste: {list}',
@@ -1975,7 +2005,7 @@ const DOW_MINI_BY_LANG={
 };
 let DOW_MINI=DOW_MINI_BY_LANG[LANG]||DOW_MINI_BY_LANG.en;
 // Stored DB values on the left, translated labels on the right (rebuilt on language change).
-const ACTIVITY_TYPES=['running','cycling','swimming','rowing','walking','other'];
+const ACTIVITY_TYPES=['running','cycling','swimming','rowing','walking','hiit','hyrox','other'];
 let ACTIVITY_LABELS={};
 function rebuildActivityLabels(){
   ACTIVITY_LABELS=Object.fromEntries(ACTIVITY_TYPES.map(k=>[k,t('activity.'+k)]));
@@ -2491,7 +2521,7 @@ function enduranceTodayCard(){
     plan.target_distance_km?`${plan.target_distance_km} km`:null,
     plan.target_duration_min?`${plan.target_duration_min} min`:null,
     plan.target_pace_sec_per_km?`${fmtPace(plan.target_pace_sec_per_km)}/km`:null,
-    plan.target_zone?t('endurance.zone',{z:plan.target_zone}):null
+    plan.target_zone?(zonePace(plan.target_zone,ACT_TO_DISC[plan.activity_type])||t('endurance.zone',{z:plan.target_zone})):null
   ].filter(Boolean).join(' · ')||t('endurance.noTarget');
   return `<section class="card click-card" onclick="openLogActivity('${plan.id}')">
     <div class="row">
@@ -3551,10 +3581,19 @@ const DISCIPLINES=['strength','run','bike','swim','row','walk','hiit','hyrox','m
 // Un glifo por disciplina en vez de iconos a color: en una celda de ~48 px un icono de 24
 // no deja lugar para el texto, y el color se reserva para el estado (hecho / saltado).
 const DISC_GLYPH={strength:'●',run:'▲',bike:'◆',swim:'≈',row:'■',walk:'·',hiit:'✦',hyrox:'✦',mobility:'○',rest:'—',other:'◇'};
-const ACT_TO_DISC={running:'run',cycling:'bike',swimming:'swim',rowing:'row',walking:'walk',other:'other'};
-const DISC_TO_ACT={run:'running',bike:'cycling',swim:'swimming',row:'rowing',walk:'walking',hiit:'other',hyrox:'other',mobility:'other',other:'other'};
+const ACT_TO_DISC={running:'run',cycling:'bike',swimming:'swim',rowing:'row',walking:'walk',hiit:'hiit',hyrox:'hyrox',other:'other'};
+const DISC_TO_ACT={run:'running',bike:'cycling',swim:'swimming',row:'rowing',walk:'walking',hiit:'hiit',hyrox:'hyrox',mobility:'other',other:'other'};
 const disciplineLabel=d=>tOr('disc.'+d,d);
 const disciplineShort=d=>tOr('disc.short.'+d,d);
+// Umbrales del atleta en el formato que espera SkandiPlan.paceFor. Sin umbral cargado devuelve
+// null y quien llama se cae a "Z4" a secas — el mismo comportamiento que había antes de esto.
+function planZones(){
+  const st=state.skandiSettings||{};
+  return {runThresholdSecKm:st.run_threshold_sec_km||null,swimCssSec100m:st.swim_css_sec_100m||null,bikeFtpW:st.bike_ftp_w||null};
+}
+// Ritmo/potencia real cuando hay umbral cargado ("4:35/km"), o null para que quien llama se
+// caiga a su propio formato de "Z4" (corto en el calendario, "Zona 4" en la hoja del día).
+const zonePace=(zone,discipline)=>zone?SkandiPlan.paceFor(zone,discipline,planZones()):null;
 
 const mondayOf=date=>{const d=new Date(date);d.setHours(0,0,0,0);d.setDate(d.getDate()-((d.getDay()+6)%7));return d;};
 const addDays=(date,n)=>{const d=new Date(date);d.setDate(d.getDate()+n);return d;};
@@ -3602,9 +3641,16 @@ function plannedSub(p){
     const n=state.items.filter(i=>i.template_id===p.template_id).length;
     if(n) parts.push(`${n} ${tp(n,'common.exercises')}`);
   }
-  if(p.target_distance_km) parts.push(`${p.target_distance_km} km`);
-  if(p.target_duration_min) parts.push(`${p.target_duration_min} ${t('common.min')}`);
-  if(p.target_zone) parts.push(`Z${p.target_zone}`);
+  // Un entrenamiento estructurado (structure jsonb) manda sobre los campos planos: el mismo
+  // dato no se muestra dos veces en dos formatos, y "6×400 Z4 · 45 min" ya trae su propio total.
+  if(Array.isArray(p.structure)&&p.structure.length){
+    const lbl=SkandiPlan.label(p.structure);
+    if(lbl) parts.push(lbl);
+  }else{
+    if(p.target_distance_km) parts.push(`${p.target_distance_km} km`);
+    if(p.target_duration_min) parts.push(`${p.target_duration_min} ${t('common.min')}`);
+    if(p.target_zone) parts.push(zonePace(p.target_zone,p.discipline)||`Z${p.target_zone}`);
+  }
   if(p.notes) parts.push(p.notes);
   return parts.join(' · ');
 }
@@ -4259,10 +4305,14 @@ function activityDetailHtml(a,p){
     pace?{v:fmtPace(pace),l:'/km'}:null,
     a.avg_heart_rate?{v:a.avg_heart_rate,l:t('garmin.avgHr')+' · bpm'}:null,
     a.max_heart_rate?{v:a.max_heart_rate,l:t('garmin.maxHr')+' · bpm'}:null,
-    a.elevation_gain_m?{v:Math.round(a.elevation_gain_m),l:t('activity.elevation')+' · m'}:null,
+    (a.elevation_gain_m||a.elevation_m)?{v:Math.round(a.elevation_gain_m||a.elevation_m),l:t('activity.elevation')+' · m'}:null,
     a.calories?{v:a.calories,l:t('garmin.calories')+' · kcal'}:null,
+    a.rounds?{v:a.rounds,l:t('logAct.rounds').toLowerCase()}:null,
+    a.work_sec?{v:`${a.work_sec}/${a.rest_sec||0}`,l:'s'}:null,
+    a.pool_length_m?{v:a.pool_length_m,l:'m'}:null,
+    a.stroke?{v:t('logAct.stroke'+a.stroke[0].toUpperCase()+a.stroke.slice(1)),l:''}:null,
   ].filter(Boolean);
-  const planLine=p?[p.target_distance_km?`${p.target_distance_km} km`:null,p.target_duration_min?`${p.target_duration_min} ${t('common.min')}`:null,p.target_zone?`Z${p.target_zone}`:null].filter(Boolean).join(' · '):'';
+  const planLine=p?[p.target_distance_km?`${p.target_distance_km} km`:null,p.target_duration_min?`${p.target_duration_min} ${t('common.min')}`:null,p.target_zone?(zonePace(p.target_zone,p.discipline)||`Z${p.target_zone}`):null].filter(Boolean).join(' · '):'';
   return `
     <div class="row">
       <div><p class="muted">${esc(new Date(a.performed_at).toLocaleDateString(LANG,{weekday:'long',day:'numeric',month:'long'}))}</p><h1>${esc(activityTypeLabel(a.activity_type))} ${badges}</h1></div>
@@ -4425,26 +4475,49 @@ function openPlannedForm(key,id=null){
     <label class="eyebrow">${esc(t('cal.zoneLabel'))}</label>
     <select id="planZone" class="field left">
       <option value="">${esc(t('cal.zoneNone'))}</option>
-      ${[1,2,3,4,5].map(z=>`<option value="${z}" ${p?.target_zone===z?'selected':''}>Z${z}</option>`).join('')}
+      ${[1,2,3,4,5].map(z=>`<option value="${z}" ${p?.target_zone===z?'selected':''}>Z${z}${zonePace(z,disc)?' · '+zonePace(z,disc):''}</option>`).join('')}
     </select>
+    <div id="planStructureWrap" style="display:${disc!=='strength'&&disc!=='rest'?'block':'none'}">
+      <label class="eyebrow" style="display:block;margin-top:6px">${esc(t('cal.structure'))}</label>
+      <p class="form-note">${esc(t('cal.structureNote'))}</p>
+      <textarea id="planStructure" class="field mono" rows="4" placeholder="${esc(t('cal.structurePh'))}">${esc(p?.structure?SkandiPlan.toText(p.structure):'')}</textarea>
+    </div>
     <textarea id="planNotes" class="field" placeholder="${esc(t('common.notesOptional'))}">${esc(p?.notes||'')}</textarea>
     <button class="btn primary" style="width:100%" onclick="savePlanned(${id?`'${id}'`:'null'})">${esc(t('cal.save'))}</button>`;
 }
 
 function togglePlannedRoutine(){
-  $('planRoutineWrap').style.display=$('planDiscipline').value==='strength'?'block':'none';
+  const disc=$('planDiscipline').value;
+  $('planRoutineWrap').style.display=disc==='strength'?'block':'none';
+  $('planStructureWrap').style.display=(disc!=='strength'&&disc!=='rest')?'block':'none';
 }
 
 async function savePlanned(id){
   const day=$('planDay').value;
   const discipline=$('planDiscipline').value;
-  const duration=$('planDuration').value?Number($('planDuration').value):null;
-  const distance=$('planDistance').value?Number($('planDistance').value):null;
+  let duration=$('planDuration').value?Number($('planDuration').value):null;
+  let distance=$('planDistance').value?Number($('planDistance').value):null;
   if(duration!==null&&(!Number.isFinite(duration)||duration<1||duration>600)) return alert(t('logAct.errDuration'));
+  // Un entrenamiento estructurado manda sobre los campos planos de duración/distancia: son el
+  // total que el propio structure ya describe, y guardar los dos por separado es donde se
+  // desincroniza uno de otro la próxima vez que se edite solo el otro.
+  let structure=null;
+  const structureText=$('planStructureWrap')?.style.display!=='none'?$('planStructure').value.trim():'';
+  if(structureText){
+    const parsed=SkandiPlan.parse(structureText);
+    if(parsed.errors.length) return alert(parsed.errors.map(e=>`L${e.line}: ${e.message}`).join('\n'));
+    if(parsed.steps.length){
+      structure=parsed.steps;
+      const totals=SkandiPlan.expand(structure,{discipline,zones:planZones()});
+      duration=totals.duration_min||duration;
+      distance=totals.distance_km||distance;
+    }
+  }
   const payload={
     day,discipline,
     template_id:discipline==='strength'?($('planTemplate').value||null):null,
     title:$('planTitle').value.trim()||null,
+    structure,
     target_duration_min:duration,
     target_distance_km:distance,
     target_zone:$('planZone').value?Number($('planZone').value):null,
@@ -6152,11 +6225,12 @@ function localDatetimeValue(d){
 }
 
 function activityGoalLine(plan){
+  const zone=plan.target_zone?(zonePace(plan.target_zone,ACT_TO_DISC[plan.activity_type])||t('endurance.zone',{z:plan.target_zone})):null;
   return [
     plan.target_distance_km?`${plan.target_distance_km} km`:null,
     plan.target_duration_min?`${plan.target_duration_min} ${t('common.min')}`:null,
     plan.target_pace_sec_per_km?`${fmtPace(plan.target_pace_sec_per_km)}/km`:null,
-    plan.target_zone?t('endurance.zone',{z:plan.target_zone}):null
+    zone
   ].filter(Boolean).join(' · ');
 }
 
@@ -6168,6 +6242,50 @@ function activityGoalLine(plan){
 // fatiga le hace caso al número o al pulso (migración 084), así que se registra en vez de
 // adivinarse después.
 let actIntensityTouched=false;
+
+// Campos que solo tienen sentido para ciertos tipos: rondas/trabajo/descanso en HIIT y Hyrox
+// (Hyrox no usa work_sec — sus estaciones no son a tiempo fijo), alberca/estilo en nado,
+// desnivel en lo que se hace en tierra. Se regeneran al cambiar el tipo (renderActExtra) en
+// vez de listar los siete tipos con display:none, porque un HIIT no necesita ver el selector
+// de estilo de nado ni al revés.
+function activityExtraFieldsHtml(type){
+  if(type==='hiit'||type==='hyrox'){
+    return `
+    <div class="row" style="gap:8px">
+      <div style="flex:1"><label class="eyebrow">${esc(t('logAct.rounds'))}</label>
+        <input id="actRounds" class="field left" type="number" min="1" max="50" inputmode="numeric"></div>
+      ${type==='hiit'?`<div style="flex:1"><label class="eyebrow">${esc(t('logAct.workSec'))}</label>
+        <input id="actWorkSec" class="field left" type="number" min="1" max="3600" inputmode="numeric"></div>
+      <div style="flex:1"><label class="eyebrow">${esc(t('logAct.restSec'))}</label>
+        <input id="actRestSec" class="field left" type="number" min="0" max="1800" inputmode="numeric"></div>`:''}
+    </div>`;
+  }
+  if(type==='swimming'){
+    return `
+    <label class="eyebrow">${esc(t('logAct.poolLength'))}</label>
+    <select id="actPoolLength" class="field left">
+      <option value="">${esc(t('logAct.poolOpen'))}</option>
+      <option value="25">25 m</option>
+      <option value="50">50 m</option>
+    </select>
+    <label class="eyebrow">${esc(t('logAct.stroke'))}</label>
+    <select id="actStroke" class="field left">
+      <option value="">—</option>
+      <option value="free">${esc(t('logAct.strokeFree'))}</option>
+      <option value="back">${esc(t('logAct.strokeBack'))}</option>
+      <option value="breast">${esc(t('logAct.strokeBreast'))}</option>
+      <option value="fly">${esc(t('logAct.strokeFly'))}</option>
+      <option value="mixed">${esc(t('logAct.strokeMixed'))}</option>
+    </select>`;
+  }
+  if(type==='running'||type==='cycling'||type==='walking'){
+    return `
+    <label class="eyebrow">${esc(t('logAct.elevation'))}</label>
+    <input id="actElevation" class="field left" type="number" min="0" max="20000" inputmode="numeric">`;
+  }
+  return '';
+}
+function renderActExtra(){ $('actExtra').innerHTML=activityExtraFieldsHtml($('actType').value); }
 
 function openLogActivity(templateId,plannedId){
   actIntensityTouched=false;
@@ -6181,6 +6299,7 @@ function openLogActivity(templateId,plannedId){
     target_distance_km:planned.target_distance_km??tplPlan?.target_distance_km??null,
     target_zone:planned.target_zone??tplPlan?.target_zone??null
   }:tplPlan;
+  const initialType=plan?.activity_type||'running';
   $('modal').classList.add('show');
   $('modalCard').innerHTML=`
     <div class="row"><h1>${esc(t('logAct.title'))}</h1><button class="x" onclick="closeModal()" aria-label="${esc(t('common.close'))}">${icon('close',20)}</button></div>
@@ -6188,11 +6307,12 @@ function openLogActivity(templateId,plannedId){
     <input type="hidden" id="actTemplateId" value="${plan?plan.id:''}">
     <input type="hidden" id="actPlannedId" value="${plannedId||''}">
     <label class="eyebrow">${esc(t('logAct.type'))}</label>
-    <select id="actType" class="field left">${Object.entries(ACTIVITY_LABELS).map(([v,l])=>`<option value="${v}" ${(plan?.activity_type||'running')===v?'selected':''}>${esc(l)}</option>`).join('')}</select>
+    <select id="actType" class="field left" onchange="renderActExtra()">${Object.entries(ACTIVITY_LABELS).map(([v,l])=>`<option value="${v}" ${initialType===v?'selected':''}>${esc(l)}</option>`).join('')}</select>
     <label class="eyebrow">${esc(t('logAct.duration'))}</label>
     <input id="actDuration" class="field left" type="number" min="1" max="600" inputmode="numeric" placeholder="${esc(t('logAct.durationPh'))}" value="${plan?.target_duration_min??''}">
     <label class="eyebrow">${esc(t('logAct.distance'))}</label>
     <input id="actDistance" class="field left" type="number" min="0" step="0.1" inputmode="decimal" placeholder="${esc(t('logAct.distancePh'))}" value="${plan?.target_distance_km??''}">
+    <div id="actExtra">${activityExtraFieldsHtml(initialType)}</div>
     <label class="eyebrow">${esc(t('logAct.hr'))}</label>
     <input id="actHeartRate" class="field left" type="number" min="30" max="230" inputmode="numeric" placeholder="${esc(t('logAct.hrPh'))}">
     <label class="eyebrow">${esc(t('logAct.intensity'))}</label>
@@ -6218,9 +6338,13 @@ async function saveExternalActivity(){
   const heartRateStr=$('actHeartRate').value;
   const heartRate=heartRateStr?Number(heartRateStr):null;
   if(heartRate!==null&&(heartRate<30||heartRate>230)) return alert(t('logAct.errHr'));
+  const type=$('actType').value;
+  // Los campos extra solo existen en el DOM cuando el tipo los mostró (renderActExtra): $(id)
+  // devuelve null para los que no aplican a este tipo, así que se leen con optional chaining y
+  // se guardan null cuando no hay nodo o el campo se dejó vacío.
   const payload={
     user_id:state.user.id,
-    activity_type:$('actType').value,
+    activity_type:type,
     duration_min:duration,
     distance_km:$('actDistance').value?Number($('actDistance').value):null,
     avg_heart_rate:heartRate,
@@ -6228,7 +6352,13 @@ async function saveExternalActivity(){
     intensity,
     intensity_source:actIntensityTouched?'manual':'default',
     performed_at:performedAt.toISOString(),
-    note:$('actNote').value.trim()||null
+    note:$('actNote').value.trim()||null,
+    rounds:$('actRounds')?.value?Number($('actRounds').value):null,
+    work_sec:$('actWorkSec')?.value?Number($('actWorkSec').value):null,
+    rest_sec:$('actRestSec')?.value?Number($('actRestSec').value):null,
+    pool_length_m:$('actPoolLength')?.value?Number($('actPoolLength').value):null,
+    stroke:$('actStroke')?.value||null,
+    elevation_m:$('actElevation')?.value?Number($('actElevation').value):null
   };
   const {data:inserted,error}=await sb.from('skandi_external_activities').insert(payload).select('id').single();
   if(error) return alert(error.message);
@@ -6251,6 +6381,10 @@ function externalActivityRow(a){
     `${a.duration_min} ${t('common.min')}`,t('logAct.rowIntensity',{v:a.intensity}),
     a.distance_km?`${a.distance_km} km`:null,
     pace?`${fmtPace(pace)}/km`:null,
+    a.rounds?`${a.rounds}×${a.work_sec?`${a.work_sec}s/${a.rest_sec||0}s`:t('logAct.rounds').toLowerCase()}`:null,
+    a.pool_length_m?`${a.pool_length_m}m`:null,
+    a.stroke?t('logAct.stroke'+a.stroke[0].toUpperCase()+a.stroke.slice(1)):null,
+    a.elevation_m?`+${a.elevation_m}m`:null,
     a.avg_heart_rate?`${a.avg_heart_rate} bpm`:null,
     new Date(a.performed_at).toLocaleDateString(LANG)
   ].filter(Boolean).join(' · ');
@@ -6372,7 +6506,7 @@ function openActivityTemplateBuilder(day=null,id=null){
     <label class="eyebrow">${esc(t('plan.targetZone'))}</label>
     <select id="tplActZone" class="field left">
       <option value="">${esc(t('plan.noZone'))}</option>
-      ${[1,2,3,4,5].map(z=>`<option value="${z}" ${plan.target_zone===z?'selected':''}>${esc(t('endurance.zone',{z}))}</option>`).join('')}
+      ${[1,2,3,4,5].map(z=>`<option value="${z}" ${plan.target_zone===z?'selected':''}>${esc(t('endurance.zone',{z}))}${zonePace(z,ACT_TO_DISC[plan.activity_type])?' · '+zonePace(z,ACT_TO_DISC[plan.activity_type]):''}</option>`).join('')}
     </select>
     <textarea id="tplActNotes" class="field" placeholder="${esc(t('common.notesOptional'))}">${esc(plan.notes||'')}</textarea>
     <div class="row" style="margin-top:14px">
@@ -8442,6 +8576,14 @@ function effortSettingsCard(){
     </div>
     <label class="eyebrow" style="display:block;margin-top:10px">${esc(t('zones.lthr'))}</label>
     ${num('setLthr',st.lthr,90,220,'170')}
+    <div class="row" style="gap:8px;margin-top:10px">
+      <div style="flex:1"><label class="eyebrow">${esc(t('zones.runPace'))}</label>
+        <input id="setRunPace" class="field left" placeholder="${esc(t('zones.runPacePh'))}" value="${st.run_threshold_sec_km?fmtPace(st.run_threshold_sec_km):''}"></div>
+      <div style="flex:1"><label class="eyebrow">${esc(t('zones.swimCss'))}</label>
+        <input id="setSwimCss" class="field left" placeholder="${esc(t('zones.swimCssPh'))}" value="${st.swim_css_sec_100m?fmtPace(st.swim_css_sec_100m):''}"></div>
+    </div>
+    <label class="eyebrow" style="display:block;margin-top:10px">${esc(t('zones.bikeFtp'))}</label>
+    ${num('setBikeFtp',st.bike_ftp_w,40,500,'220')}
     <label class="eyebrow" style="display:block;margin-top:12px">${esc(t('zones.bounds'))}</label>
     <p class="form-note">${esc(t('zones.boundsNote'))}</p>
     <div class="row" style="gap:6px">
@@ -8756,7 +8898,14 @@ async function saveEffortSettings(){
     if(!Number.isFinite(n)||n<min||n>max) throw new Error(t('zones.errRange',{label,min,max}));
     return Math.round(n);
   };
-  let maxHr,rest,lthr,bounds;
+  const readPace=(id,label)=>{
+    const raw=$(id).value.trim();
+    if(raw==='') return null;
+    const sec=parsePaceToSec(raw);
+    if(sec===null) throw new Error(t('zones.errPace',{label}));
+    return sec;
+  };
+  let maxHr,rest,lthr,bounds,runPace,swimCss,bikeFtp;
   try{
     maxHr=read('setMaxHr',120,230,t('zones.maxHr'));
     rest=read('setRestHr',25,120,t('zones.restingHr'));
@@ -8768,6 +8917,9 @@ async function saveEffortSettings(){
     if(filled!==0&&filled!==4) throw new Error(t('zones.errAllFour'));
     if(filled===4&&!(z[0]<z[1]&&z[1]<z[2]&&z[2]<z[3])) throw new Error(t('zones.errOrder'));
     bounds=filled===4?z:null;
+    runPace=readPace('setRunPace',t('zones.runPace'));
+    swimCss=readPace('setSwimCss',t('zones.swimCss'));
+    bikeFtp=read('setBikeFtp',40,500,t('zones.bikeFtp'));
   }catch(e){ return alert(e.message); }
 
   const {error}=await sb.from('skandi_settings').upsert({
@@ -8776,6 +8928,9 @@ async function saveEffortSettings(){
     resting_hr:rest,
     lthr,
     hr_zone_bounds:bounds,
+    run_threshold_sec_km:runPace,
+    swim_css_sec_100m:swimCss,
+    bike_ftp_w:bikeFtp,
     updated_at:new Date().toISOString()
   },{onConflict:'user_id'});
   if(error) return alert(error.message);

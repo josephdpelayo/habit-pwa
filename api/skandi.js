@@ -719,7 +719,7 @@ async function suggestMeal(req, res) {
 
 const ACTIVITY_TYPE_ES = {
   running: 'correr', cycling: 'ciclismo', swimming: 'natación',
-  rowing: 'remo', walking: 'caminata', other: 'cardio',
+  rowing: 'remo', walking: 'caminata', hiit: 'HIIT', hyrox: 'Hyrox', other: 'cardio',
 };
 
 const ACTIVITY_FEEDBACK_SYSTEM_PROMPT = `Eres un entrenador de resistencia (running, ciclismo, natación, remo, caminata) dando retroalimentación breve sobre UNA sesión de cardio que un miembro de la tripulación del Skandi Nomad acaba de terminar. Muchos de estos datos vienen importados de un reloj (Strava/Garmin), no capturados a mano.
@@ -751,7 +751,7 @@ function clampActivityNum(v, min, max) {
 
 function sanitizeActivity(a) {
   if (!a || typeof a !== 'object') return null;
-  const type = ['running', 'cycling', 'swimming', 'rowing', 'walking', 'other'].includes(a.activity_type)
+  const type = ['running', 'cycling', 'swimming', 'rowing', 'walking', 'hiit', 'hyrox', 'other'].includes(a.activity_type)
     ? a.activity_type : 'other';
   const duration = clampActivityNum(a.duration_min, 1, 1440);
   if (!duration) return null;

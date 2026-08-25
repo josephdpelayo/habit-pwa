@@ -394,7 +394,7 @@ que cualquier sesión de fuerza — si no se cuenta, el ACWR de esa semana es fi
 | Fase | Qué entrega | Migración | Tamaño |
 |---|---|---|---|
 | **T1** | **Calendario fechado.** `skandi_planned_sessions`, RPC `skandi_ensure_week`, subtabs de Entrenar, vista de 4 semanas, hoja del día, conciliación automática | 080 | 3 sesiones |
-| **T2** | **Resistencia estructurada.** `structure` jsonb, `skandi-plan.js`, zonas y umbrales, disciplinas nuevas (hiit/hyrox), captura rica de actividad (splits, piscina, intervalos) | 081 | 2–3 sesiones |
+| **T2** | **Resistencia estructurada.** `structure` jsonb, `skandi-plan.js`, zonas y umbrales, disciplinas nuevas (hiit/hyrox), captura rica de actividad (piscina, intervalos) | 104 | hecha (splits pendiente) |
 | **T3 / P3** | **Periodización del programa.** Semanas distintas, descarga propia, fase y adherencia por ciclo, sin temporada paralela | 103 | terminada |
 | **T4** | **Carga unificada.** `skandi-load.js`, sRPE en todo, ACWR, planeado vs hecho en la tarjeta de Home. Es la Fase 2 del otro documento, que aquí ya tiene todos sus insumos | 083 | 2 sesiones |
 
@@ -437,9 +437,9 @@ proyecto sigue en 12 de 12 en el plan Hobby, que es un límite duro.
 - [ ] El calendario carga en una sola consulta por rango de fechas
 
 **T2**
-- [ ] `SkandiPlan.expand()` y `label()` probados desde Node, sin navegador
-- [ ] "Z4" se muestra como ritmo real cuando hay umbrales, y como "Z4" cuando no
-- [ ] Un HIIT registrado mueve la figura muscular de forma creíble
+- [x] `SkandiPlan.expand()` y `label()` probados desde Node, sin navegador
+- [x] "Z4" se muestra como ritmo real cuando hay umbrales, y como "Z4" cuando no
+- [x] Un HIIT registrado mueve la figura muscular de forma creíble
 
 **T3**
 - [x] Una semana puede apartarse de la base sin alterar las demás
@@ -453,6 +453,64 @@ proyecto sigue en 12 de 12 en el plan Hobby, que es un límite duro.
 ---
 
 ## 12. Bitácora
+
+**2026-08-25 — T2 implementada (migración 104 + `skandi-plan.js`).**
+
+- **HIIT y Hyrox como `activity_type` real**, no `'other'`. El calendario ya sabía dibujarlos
+  (`DISC_GLYPH`, desde la 080); lo que faltaba era que `skandi_external_activities` y
+  `skandi_activity_templates` los aceptaran. `ACTIVITY_MUSCLE_MAP` gana `hiit` y `hyrox` en
+  `skandi-recovery.js` con su propio reparto (Hyrox carga piernas/espalda por las cargadas y
+  trineos; HIIT reparte más parejo core/hombros/piernas por los circuitos de peso corporal) —
+  antes de esto un Hyrox de 60 min entrenaba "Core 40/Shoulders 20/Quads 20/Chest 20" en la
+  figura, que es el reparto genérico de `other`. `skandi_ensure_week` (el RPC del estampado, 080)
+  tenía el mismo CASE hardcodeado a seis tipos: se corrigió para no caer a `other` con hiit/hyrox.
+- **`skandi-plan.js`** (módulo nuevo, sin DOM ni Supabase, como sus hermanos): `expand()` suma
+  duración/distancia/carga de una lista de pasos, `label()` arma "6×400 · Z4 · 45 min" para una
+  celda, `paceFor(zona, disciplina, umbrales)` convierte una zona a ritmo/potencia real cuando hay
+  umbral cargado. `parse(texto)`/`toText()` son un extra sobre lo que pedía el documento: un
+  mini-DSL de una línea por paso ("series 6x400m Z4 rest 90s Z1") en vez de un editor de pasos
+  campo por campo — construir esa pantalla es justo lo que el documento §5.3 ya había descartado
+  para el calendario completo, y aplica igual aquí. Probado con 15+ aserciones en Node
+  (`node -e "require('./skandi-plan.js')..."`) y confirmado en el navegador real cargando
+  `skandi.html` con estado falso.
+- **Umbrales de ritmo/potencia** en `skandi_settings` (no en una tabla `skandi_athlete_zones`
+  aparte — esa tabla nunca se creó porque la 087 ya había resuelto el mismo problema para pulso
+  ahí mismo): `run_threshold_sec_km`, `swim_css_sec_100m`, `bike_ftp_w`, editables en Ajustes
+  junto a las zonas de pulso que ya existían. Con umbral cargado, "Z4" se vuelve "4:00/km" (o
+  vatios en bici) en cada lugar donde antes se mostraba la zona a secas: la tarjeta de hoy, el
+  detalle de una actividad, el selector de zona al planear un día, y las plantillas de cardio
+  recurrente. Sin umbral, sigue mostrando "Z4" exactamente como antes — cero regresión para quien
+  no lo llena.
+- **El editor de un día del calendario** (`openPlannedForm`) gana una casilla de texto opcional
+  "Sesión estructurada": una línea por paso, parseada con `SkandiPlan.parse()` al guardar. Si
+  parsea limpio, `structure` se guarda y **manda sobre los campos planos** de duración/distancia
+  (se recalculan de `expand()`) para que no queden desincronizados la próxima vez que se edite
+  solo uno de los dos. Una línea que no calza no se descarta en silencio: se avisa con su número
+  de línea y no se guarda nada, para no perder lo que sí se entendió a medio teclear. Vacío se
+  comporta exactamente igual que antes de esta migración.
+- **Captura rica de actividad**: rondas/trabajo/descanso para HIIT (Hyrox no usa trabajo/descanso
+  — sus estaciones no son a tiempo fijo), largo de alberca y estilo para nado, desnivel para
+  correr/bici/caminar. El formulario de registro (`openLogActivity`) muestra solo los campos que
+  aplican al tipo elegido (`renderActExtra()`), no los nueve campos posibles a la vez.
+- **Lo que se dejó afuera a propósito:**
+  - `splits jsonb` (parciales por km) — la columna existe en el documento pero no se agregó:
+    sin una fuente real que la llene (Strava sí trae splits, la app manual no) hubiera sido una
+    columna sin escritor. Se agrega junto con el importador de splits de Strava, no antes.
+  - `strength_class` como `activity_type` — el documento lo lista para clases de CrossFit
+    importadas de Strava, pero `skandi-strava.js` sigue saltándose `Crossfit` a propósito (evita
+    contar dos veces lo que ya vive en `skandi_sessions`). Sin productor, agregarlo era una
+    opción de menú que nadie iba a usar.
+  - `SkandiPlan.buildSeason()` (generador de temporada de triatlón, §7) — es una pieza aparte
+    del tamaño de todo lo demás de T2 junto; se deja para cuando haya una fecha de carrera real
+    que planear, como ya preguntaba la bitácora original del documento.
+  - Verificado además: `HighIntensityIntervalTraining` (sport_type real de Strava) ahora mapea a
+    `hiit` en `skandi-strava.js` en vez de cadenar a `other`; el endpoint de retroalimentación de
+    IA (`api/skandi.js`) reconoce hiit/hyrox en vez de degradarlos silenciosamente en su lista
+    blanca. De paso se corrigió que `skandi-load.js`, `skandi-brief.js` y `skandi-joint-load.js`
+    estaban en el `SHELL` del service worker desde que se escribieron pero nunca entraban por la
+    rama cache-first del fetch handler — siempre salían por red aunque ya estuvieran
+    precacheados. `npm run check`, `npm run check:sql` y la sintaxis del `<script>` inline de
+    `skandi.html` pasan limpio.
 
 **2026-08-22 — Costura con Strava (081).**
 

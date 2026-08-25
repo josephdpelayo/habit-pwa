@@ -1,7 +1,7 @@
 // HABIT Training Hub — Service Worker
 // Push notifications + app shell caching
 
-const CACHE_VERSION = '20260825-10'; // keep in sync with APP_VERSION in app.html
+const CACHE_VERSION = '20260825-11'; // keep in sync with APP_VERSION in app.html
 const CACHE = `habit-${CACHE_VERSION}`;
 
 // Librerías compartidas con Skandi Fit: la app no arranca sin ellas, así que
@@ -9,7 +9,7 @@ const CACHE = `habit-${CACHE_VERSION}`;
 // nueva invalide la vieja.
 // Skandi Fit vive en el mismo origen y bajo el mismo alcance ('/'), así que este
 // service worker sirve las dos apps: cada una tiene su propio shell offline.
-const SHELL = ['/app.html', '/skandi.html', `/skandi-recovery.js?v=${CACHE_VERSION}`, `/body-figure.js?v=${CACHE_VERSION}`, `/skandi-nutrition.js?v=${CACHE_VERSION}`, `/skandi-load.js?v=${CACHE_VERSION}`, `/skandi-brief.js?v=${CACHE_VERSION}`, `/skandi-joint-load.js?v=${CACHE_VERSION}`];
+const SHELL = ['/app.html', '/skandi.html', `/skandi-recovery.js?v=${CACHE_VERSION}`, `/skandi-plan.js?v=${CACHE_VERSION}`, `/body-figure.js?v=${CACHE_VERSION}`, `/skandi-nutrition.js?v=${CACHE_VERSION}`, `/skandi-load.js?v=${CACHE_VERSION}`, `/skandi-brief.js?v=${CACHE_VERSION}`, `/skandi-joint-load.js?v=${CACHE_VERSION}`];
 
 // Qué shell le toca a una navegación. Sin esto, abrir /skandi sin señal servía el
 // fallback de HABIT: la app equivocada, con la sesión equivocada.
@@ -38,11 +38,18 @@ self.addEventListener('fetch', e => {
   if (url.origin !== self.location.origin || url.pathname.startsWith('/api/')) return;
 
   // Icons y librerías del shell: cache-first (van con URL versionada, así que
-  // una entrada vieja caduca sola al subir la versión)
+  // una entrada vieja caduca sola al subir la versión). skandi-load/brief/joint-load ya
+  // estaban en SHELL desde que se escribieron pero nunca entraron aquí, así que siempre
+  // salían por red aunque ya estuvieran precacheadas — se corrige de paso, junto con
+  // skandi-plan.js, que es el que sí necesitaba esta migración.
   if (url.pathname.startsWith('/icons/')
       || url.pathname === '/skandi-recovery.js'
+      || url.pathname === '/skandi-plan.js'
       || url.pathname === '/body-figure.js'
-      || url.pathname === '/skandi-nutrition.js') {
+      || url.pathname === '/skandi-nutrition.js'
+      || url.pathname === '/skandi-load.js'
+      || url.pathname === '/skandi-brief.js'
+      || url.pathname === '/skandi-joint-load.js') {
     e.respondWith(
       caches.match(request).then(cached => {
         if (cached) return cached;

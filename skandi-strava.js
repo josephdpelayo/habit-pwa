@@ -33,6 +33,11 @@ const SPORT_TYPE_MAP = {
   Kayaking: 'rowing', Canoeing: 'rowing', StandUpPaddling: 'rowing',
 
   Walk: 'walking', Hike: 'walking', Snowshoe: 'walking',
+
+  // hiit/hyrox son tipos reales desde la 104 (docs/PLAN_ENTRENAMIENTO_SKANDI.md, fase T2): antes
+  // caían en 'other' y le mentían a la figura muscular con el reparto genérico. 'Crossfit' se
+  // queda fuera a propósito: sigue en SKIPPED_SPORT_TYPES más abajo, no se reclasifica aquí.
+  HighIntensityIntervalTraining: 'hiit',
 };
 
 // Lo que NO se importa. No es que no cuente: es que Skandi ya lo cuenta mejor. Una sesión de

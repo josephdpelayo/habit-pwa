@@ -28,12 +28,20 @@ const FRESHNESS_K = 1;              // steepness of fatigue -> freshness mapping
 const FRESH_THRESHOLD = 70;         // freshness score >= this = "rested"
 
 // ---- External activity -> muscle % split ----
+// hiit/hyrox get their own split instead of falling into `other`: a Hyrox class is
+// leg-dominant with real back/shoulder carry work (sled, farmer's carry), and lumping it into
+// other's Core/Shoulders/Quads/Chest split understates exactly the muscles that take 72h to
+// recover from the eccentric loading (sled pulls, lunges). HIIT skews lighter on legs and
+// heavier on core/shoulders because bodyweight circuits (burpees, mountain climbers) dominate
+// over loaded carries.
 const ACTIVITY_MUSCLE_MAP = {
   running:  {Quads:30, Hamstrings:25, Glutes:20, Calves:20, Core:5},
   cycling:  {Quads:45, Hamstrings:15, Glutes:20, Calves:15, Core:5},
   swimming: {Shoulders:30, Back:25, Chest:15, Core:20, Triceps:10},
   rowing:   {Back:35, Shoulders:15, Hamstrings:15, Quads:10, Biceps:10, Core:15},
   walking:  {Quads:25, Hamstrings:20, Glutes:20, Calves:30, Core:5},
+  hiit:     {Core:25, Shoulders:20, Quads:20, Glutes:15, Hamstrings:10, Chest:10},
+  hyrox:    {Quads:25, Glutes:20, Back:20, Shoulders:15, Hamstrings:10, Core:10},
   other:    {Core:40, Shoulders:20, Quads:20, Chest:20}
 };
 
