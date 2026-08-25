@@ -8,16 +8,17 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="Skandi Fit">
 <meta name="application-name" content="Skandi Fit">
-<link rel="manifest" href="/skandi-manifest.json?v=20260824-12">
-<link rel="apple-touch-icon" sizes="180x180" href="/icons/skandi-180.png?v=20260824-12">
-<link rel="icon" type="image/png" sizes="192x192" href="/icons/skandi-192.png?v=20260824-12">
+<link rel="manifest" href="/skandi-manifest.json?v=20260824-13">
+<link rel="apple-touch-icon" sizes="180x180" href="/icons/skandi-180.png?v=20260824-13">
+<link rel="icon" type="image/png" sizes="192x192" href="/icons/skandi-192.png?v=20260824-13">
 <title>Skandi Fit</title>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="/skandi-recovery.js?v=20260824-12"></script>
-<script src="/body-figure.js?v=20260824-12"></script>
-<script src="/skandi-nutrition.js?v=20260824-12"></script>
-<script src="/skandi-load.js?v=20260824-12"></script>
-<script src="/skandi-brief.js?v=20260824-12"></script>
+<script src="/skandi-recovery.js?v=20260824-13"></script>
+<script src="/body-figure.js?v=20260824-13"></script>
+<script src="/skandi-nutrition.js?v=20260824-13"></script>
+<script src="/skandi-load.js?v=20260824-13"></script>
+<script src="/skandi-brief.js?v=20260824-13"></script>
+<script src="/skandi-joint-load.js?v=20260824-13"></script>
 <style>
 :root{
   --bg:#eef4f8;
@@ -304,6 +305,7 @@ p{color:var(--muted);line-height:1.45;margin:0}
 .deload-note{margin-top:6px;padding:5px 9px 5px 8px;border-left:3px solid var(--amber);background:var(--panel2);border-radius:6px;font-size:11px;line-height:1.3;color:#8a5a12}
 .prog-info-toggle{display:inline-flex;align-items:center;gap:3px;background:transparent;border:0;padding:0;font-size:11px;font-weight:700;color:var(--muted);cursor:pointer}
 .prog-info-toggle span{font-size:9px}
+.prog-live-progress{margin-top:6px;font-size:11px;font-weight:700;color:var(--blue)}
 .field{width:100%;background:#fff;border:1px solid var(--line);color:var(--text);border-radius:10px;padding:13px;text-align:center;box-shadow:inset 0 1px 0 rgba(1,36,86,.03)}
 .field-narrow{padding:13px 3px}
 .field.left{text-align:left}
@@ -532,7 +534,7 @@ textarea.field{min-height:112px;text-align:left;resize:vertical}
 // Versión compartida con app.html (APP_VERSION) y sw.js (CACHE_VERSION): un solo service
 // worker sirve las dos apps, así que una sola cadena las invalida a las dos. Al cambiarla
 // hay que actualizarla también en los ?v= del <head>, en index.html y en los dos manifests.
-const SKANDI_VERSION='20260824-12';
+const SKANDI_VERSION='20260824-13';
 const SUPABASE_URL='https://pmpjteuqjusbiduevbwq.supabase.co';
 const SUPABASE_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBtcGp0ZXVxanVzYmlkdWV2YndxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc2OTI1NjUsImV4cCI6MjA5MzI2ODU2NX0.XbMzZoo2yqtrD8znLnyo_1zDfrdJAvAPj1lqGOyXnLw';
 const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
@@ -774,6 +776,16 @@ en:{
   'load.deloadWeak':'This is a deload week but you are only {pct}% below your average. A real deload drops 30–40%.',
   'load.none':'Not enough history to compare yet. Log a couple of weeks.',
   'load.building':'{weeks} of 4 weeks logged. The acute/chronic ratio needs a month of history before it means anything — until then the bars below are the honest read.',
+  'joint.title':'Tendon & joint load','joint.wrist':'Wrist','joint.elbow':'Elbow','joint.shoulder':'Shoulder',
+  'joint.warnHint':'{name} is ramping faster than it should — the classic overuse pattern.',
+  'joint.okHint':'Wrist, elbow and shoulder load is in range for the skill work you’re logging.',
+  'joint.ok':'In range: {ratio}× the 4-week average.',
+  'joint.high':'{up}% above the 4-week average. This is how tendinopathy starts, not how muscle soreness starts — ease the ramp before it hurts, not after.',
+  'joint.low':'{pct}% under the 4-week average — fine if deliberate, but this joint is detraining if it is not.',
+  'joint.building':'Building history — needs 4 weeks of skill work logged before the ratio means anything.',
+  'joint.none':'No skill work logged for this joint yet.',
+  'joint.note':'Different question from training load and muscle recovery above: not "tired right now" but "did wrist/elbow/shoulder volume ramp faster than the connective tissue adapts". Estimated from what you log — wrist/elbow/shoulder loading is inferred by exercise, not measured.',
+  'brief.caution.joint':'{name} load is {pct}% above your 4-week average — the overuse pattern, ease the ramp this week.',
   'home.today':'Today','home.restDay':'Rest day','home.restBody':'Nothing scheduled, and that is the plan.',
   'home.allDone':'Done for today','home.allDoneBody':'{n} sessions finished. Enjoy it.',
   'home.nothingToday':'Nothing planned today','home.nothingTodayBody':'Open the calendar to add something.',
@@ -1043,6 +1055,8 @@ en:{
   'prog.criteria':'Clean = {v}','prog.target':'Level up: {sets} × {v} at 8+/10, two sessions in a row',
   'prog.secUnit':'{n}s','prog.repUnit':'{n} reps',
   'prog.history':'Progression history','prog.trend':'trend over the last {n} sessions',
+  'prog.liveQualifying':'{q}/{n} clean sets today','prog.liveWouldLevelUp':'— finish like this and you level up.',
+  'prog.liveBest':'Best today: {v}, target {target}',
   'skill.title':'Skills','skill.intro':'One curve per skill line, across every rank. Tap for the ladder, the weekly time under tension and the history.',
   'skill.level':'level {v} / {n}','skill.noData':'Not trained yet',
   'skill.currentAt':'{name} — level {v} of {n}',
@@ -1367,6 +1381,16 @@ es:{
   'load.deloadWeak':'Es semana de descarga pero llevas solo {pct}% abajo de tu promedio. Una descarga de verdad baja 30–40%.',
   'load.none':'Todavía no hay historial suficiente para comparar. Registra un par de semanas.',
   'load.building':'Llevas {weeks} de 4 semanas registradas. El cociente agudo/crónico necesita un mes de historial para significar algo — mientras tanto las barras de abajo son la lectura honesta.',
+  'joint.title':'Carga de tendón y articulación','joint.wrist':'Muñeca','joint.elbow':'Codo','joint.shoulder':'Hombro',
+  'joint.warnHint':'{name} está subiendo más rápido de lo que debería — el patrón clásico de sobreuso.',
+  'joint.okHint':'La carga en muñeca, codo y hombro está en rango para el trabajo de habilidad que estás registrando.',
+  'joint.ok':'En rango: {ratio}× tu promedio de 4 semanas.',
+  'joint.high':'{up}% arriba de tu promedio de 4 semanas. Así empieza una tendinopatía, no un dolor muscular normal — bájale al ritmo antes de que duela, no después.',
+  'joint.low':'{pct}% abajo de tu promedio de 4 semanas — normal si es deliberado, pero esta articulación se está destrenando si no lo es.',
+  'joint.building':'Construyendo historial — necesita 4 semanas de trabajo de habilidad registrado para que el cociente signifique algo.',
+  'joint.none':'Todavía no hay trabajo de habilidad registrado para esta articulación.',
+  'joint.note':'Es una pregunta distinta a la carga de entrenamiento y la recuperación muscular de arriba: no "está cansado ahora" sino "¿el volumen de muñeca/codo/hombro subió más rápido de lo que el tejido conectivo se adapta?". Se estima según lo que registras — la carga de muñeca/codo/hombro se infiere por ejercicio, no se mide.',
+  'brief.caution.joint':'La carga de {name} va {pct}% arriba de tu promedio de 4 semanas — el patrón de sobreuso, bájale al ritmo esta semana.',
   'home.today':'Hoy','home.restDay':'Día de descanso','home.restBody':'Nada programado, y eso es el plan.',
   'home.allDone':'Listo por hoy','home.allDoneBody':'{n} sesiones terminadas. Disfrútalo.',
   'home.nothingToday':'Nada planeado hoy','home.nothingTodayBody':'Abre el calendario para agregar algo.',
@@ -1636,6 +1660,8 @@ es:{
   'prog.criteria':'Limpio = {v}','prog.target':'Subir de nivel: {sets} × {v} a 8+/10, dos sesiones seguidas',
   'prog.secUnit':'{n}s','prog.repUnit':'{n} reps',
   'prog.history':'Historial de progresión','prog.trend':'evolución de las últimas {n} sesiones',
+  'prog.liveQualifying':'{q}/{n} series limpias hoy','prog.liveWouldLevelUp':'— termina así y subes de nivel.',
+  'prog.liveBest':'Mejor de hoy: {v}, objetivo {target}',
   'skill.title':'Habilidades','skill.intro':'Una sola curva por habilidad, a través de todos los escalones. Toca para ver la escalera, el tiempo bajo tensión semanal y el historial.',
   'skill.level':'nivel {v} / {n}','skill.noData':'Aún sin entrenar',
   'skill.currentAt':'{name} — nivel {v} de {n}',
@@ -2354,6 +2380,9 @@ function todayDetailCard(){
     series:SkandiLoad.dailySeries({sessions:state.sessions,sets:state.sets,activities:state.externalActivities,
       userId:state.user.id,refs,days:SkandiLoad.CHRONIC_DAYS*2}),
     isDeloadWeek:isDeload});
+  const jointWorst=SkandiJointLoad.allJointsReadout({sets:state.sets,sessions:state.sessions,exercises:state.exercises,userId:state.user.id})
+    .find(r=>r.level==='high');
+  const jointHigh=jointWorst?{name:jointLabel(jointWorst.joint),pct:Math.round((jointWorst.ratio-1)*100)}:null;
 
   const weightKg=latestWeightKg();
   const {rec,targets}=nutritionForBrief();
@@ -2365,6 +2394,7 @@ function todayDetailCard(){
     sleepGapMin:(latest?.sleep_secs&&sleepAvg)?(latest.sleep_secs-sleepAvg)/60:null,
     restingHrJump:(latest?.resting_hr&&hrAvg)?latest.resting_hr-hrAvg:null,
     loadLevel:load.level,
+    jointHigh,
     tiredMuscles,
     rec, targets,
     // Sin un peso registrado no hay cómo escalar gramos por kilo, y meter un peso inventado
@@ -2395,7 +2425,7 @@ function todayDetailCard(){
   // Cuerpo; la carga en Progreso.
   const cautionTarget=key=>
     (key==='brief.caution.sleep'||key==='brief.caution.hr')?'openWellnessDetail()'
-    :(key==='brief.caution.load'||key==='brief.caution.deloadWeak')?`setView('progress')`
+    :(key==='brief.caution.load'||key==='brief.caution.deloadWeak'||key==='brief.caution.joint')?`setView('progress')`
     :key==='brief.caution.muscle'?`setView('body')`
     :`setView('train')`;
   const rowLink=(name,title,sub,action,tone)=>
@@ -3834,6 +3864,7 @@ function progressLoadTab(){
     ${loadCard()}
     ${crossTrainingCardHtml()}
     ${muscleLoadCard(t('recovery.title'))}
+    ${jointLoadCard()}
     ${bodyweightCardHtml()}
     <section class="card">
       <div class="row"><h2>${esc(t('progress.externalActivities'))}</h2><button class="btn small" onclick="openLogActivity()">${esc(t('progress.logActivity'))}</button></div>
@@ -4715,6 +4746,36 @@ function formatHours(h){
 // score 0 (still fatigued) -> muted grey, score 100 (rested & ready) -> bright accent.
 // Stops are the app's own --dof-steel/--amber/--green tokens (converted to rgb triples) so the
 // recovery heatmap reads as part of the navy/steel brand system instead of an unrelated palette.
+
+// Tendon/joint overuse risk (wrist, elbow, shoulder) — a different question from muscle
+// freshness above: not "sore right now", but "did this joint's volume ramp faster than the 4
+// weeks before it", the same acute:chronic pattern skandi-load.js already uses for the whole
+// body, just concentrated on the 2-3 joints calisthenics skill work actually loads hard.
+const jointLabel=j=>t('joint.'+j);
+function jointLoadCard(){
+  const rows=SkandiJointLoad.allJointsReadout({sets:state.sets,sessions:state.sessions,exercises:state.exercises,userId:state.user.id});
+  const trained=rows.filter(r=>r.level!=='none');
+  if(!trained.length) return ''; // no skill work logged yet — nothing this card can say
+  const tone={high:'var(--pink)',low:'var(--amber)',ok:'var(--green)',building:'var(--muted)'};
+  const worst=rows.find(r=>r.level==='high');
+  return `<section class="card">
+    <div class="row"><h2>${esc(t('joint.title'))}</h2></div>
+    <p class="muted">${esc(worst?t('joint.warnHint',{name:jointLabel(worst.joint)}):t('joint.okHint'))}</p>
+    <div class="stack" style="margin-top:12px">
+      ${trained.map((r,i)=>`<div class="row"${i?' style="margin-top:10px"':''}>
+        <div style="min-width:0"><strong>${esc(jointLabel(r.joint))}</strong>
+          <p class="muted" style="margin-top:2px">${esc(t(r.key,{
+            up:r.ratio?Math.round((r.ratio-1)*100):0,
+            pct:r.ratio?Math.round((1-r.ratio)*100):0
+          }))}</p>
+        </div>
+        ${r.ratio?`<span class="pill" style="color:${tone[r.level]};flex:0 0 auto">${r.ratio.toFixed(2)}</span>`:''}
+      </div>`).join('')}
+    </div>
+    <p class="form-note" style="margin-top:10px">${esc(t('joint.note'))}</p>
+  </section>`;
+}
+
 function muscleLoadCard(title){
   const rows=getMyRecovery();
   const needsWork=rows[0];
@@ -5495,6 +5556,23 @@ function progressionReadiness(exercise){
   return false;
 }
 
+// Whether the LAST completed session this exercise was trained in already met the full
+// standard — i.e. whether today, if it also qualifies, would be the second consecutive
+// qualifying session that progressionReadiness() requires. Used only to tell a member mid-set
+// "finish like this and you level up" instead of leaving them to find out at the start of their
+// next workout.
+function progressionMostRecentQualified(exercise){
+  const needed=exercise.progression_target_sets||1;
+  const completed=state.sessions
+    .filter(s=>s.user_id===state.user.id&&s.completed_at&&s.id!==state.active?.id)
+    .sort((a,b)=>new Date(b.completed_at).getTime()-new Date(a.completed_at).getTime());
+  for(const session of completed){
+    if(!trainedInSession(exercise.id,session.id)) continue;
+    return qualifyingSetCount(exercise,session.id)>=needed;
+  }
+  return false;
+}
+
 // ---- Skill lines: one continuous curve per progression group -------------------------------
 
 // A skill rep is worth about three seconds under tension (pull in, one second at the position,
@@ -6125,6 +6203,40 @@ function progressionReadinessHtml(e,exerciseId){
   return `<button type="button" class="progression-ready" onclick="event.stopPropagation();stepProgression('${exerciseId}','${next.id}')">${esc(t('prog.readyFor',{name:next.name}))}</button>`;
 }
 
+// progressionReadiness() only ever looks at COMPLETED sessions, so a member who just nailed
+// every set of the standard mid-workout sees nothing until they start their NEXT session —
+// the level-up banner above would only light up then. This reads today's live, in-progress
+// sets instead: how many already meet the rank's full standard (mark + quality), and whether
+// today completing it would actually be enough (only if the last trained session already
+// qualified — otherwise today is just the first of the two required). Hidden once
+// progressionReadinessHtml already covers the case, and hidden entirely on the line's last
+// rank, which has nothing left to level up into.
+function progressionLiveProgressHtml(e,sets){
+  if(!e?.progression_group||!e.progression_target) return '';
+  const siblings=progressionSiblings(e.progression_group);
+  if(siblings.findIndex(x=>x.id===e.id)===siblings.length-1) return '';
+  if(progressionReadiness(e)) return '';
+  const doneSets=sets.filter(s=>s.done);
+  if(!doneSets.length) return '';
+  const seconds=e.log_mode==='seconds';
+  const mark=s=>seconds?(Number(s.seconds)||0):(Number(s.reps)||0);
+  const needed=e.progression_target_sets||1;
+  const qualifying=doneSets.filter(s=>{
+    if(mark(s)<e.progression_target) return false;
+    if(!e.track_quality) return true;
+    const q=setQuality(s);
+    return q!=null&&q>=QUALITY_CLEAN;
+  }).length;
+  const unit=n=>seconds?t('prog.secUnit',{n}):t('prog.repUnit',{n});
+  if(qualifying>0){
+    const wouldLevelUp=qualifying>=needed&&progressionMostRecentQualified(e);
+    return `<p class="prog-live-progress">${esc(t('prog.liveQualifying',{q:qualifying,n:needed}))}${wouldLevelUp?' '+esc(t('prog.liveWouldLevelUp')):''}</p>`;
+  }
+  const best=Math.max(...doneSets.map(mark));
+  if(best>0&&best<e.progression_target) return `<p class="prog-live-progress">${esc(t('prog.liveBest',{v:unit(best),target:unit(e.progression_target)}))}</p>`;
+  return '';
+}
+
 // A set row has six columns at 375px and no room for a seventh, so the two things that only
 // SOME sets need — which side it was, and the form clip — live behind the row number instead of
 // each claiming a column nobody else uses. Same inline-panel pattern as the swap search.
@@ -6258,7 +6370,7 @@ function activeExercise(item,sets){
   // up), or RIR for ordinary load work, where the plan's progression rule is RIR 1-2.
   const rowClass=showWeight?'set-row':'set-row no-weight';
   return `<article class="exercise">
-    <div class="ex-head" onclick="openExercise('${e.id}',true)">${mediaThumb(e)}<div><h3>${esc(e.name)} <span class="ex-info-hint">${icon('chevronRight',13)}</span></h3><p>${[esc(exerciseSubtitle(e)),`${item.target_sets} x ${esc(item.target_reps)}`,esc(t('ex.restSec',{n:item.target_rest_sec}))].filter(Boolean).join(' · ')}</p>${deloadNoteHtml(e)}${progressionStepperHtml(e,item.exercise_id)}${progressionCriteriaHtml(e,item.exercise_id)}${tempoButtonHtml(e)}${progressionReadinessHtml(e,item.exercise_id)}</div>
+    <div class="ex-head" onclick="openExercise('${e.id}',true)">${mediaThumb(e)}<div><h3>${esc(e.name)} <span class="ex-info-hint">${icon('chevronRight',13)}</span></h3><p>${[esc(exerciseSubtitle(e)),`${item.target_sets} x ${esc(item.target_reps)}`,esc(t('ex.restSec',{n:item.target_rest_sec}))].filter(Boolean).join(' · ')}</p>${deloadNoteHtml(e)}${progressionStepperHtml(e,item.exercise_id)}${progressionCriteriaHtml(e,item.exercise_id)}${progressionLiveProgressHtml(e,sets)}${tempoButtonHtml(e)}${progressionReadinessHtml(e,item.exercise_id)}</div>
       <div class="ex-actions">
         <span class="muted">${sets.filter(s=>s.done).length}/${sets.length}${(()=>{const q=e.track_quality?avgQuality(sets.filter(x=>x.done)):null; return q!=null?' · '+esc(t('ex.qualityAvg',{v:q})):'';})()}</span>
         <div class="ex-actions-row">

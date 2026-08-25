@@ -91,6 +91,11 @@ function cautions(sessions, ctx){
   if (loadLevel === 'high') out.push({ key: 'brief.caution.load' });
   if (loadLevel === 'deloadWeak') out.push({ key: 'brief.caution.deloadWeak' });
 
+  // A joint (wrist/elbow/shoulder) whose recent load is ramping faster than its 4-week average
+  // is the overuse-injury pattern, not the muscle-soreness one — worth its own line since it
+  // reads and means something different from the whole-body load caution above.
+  if (ctx.jointHigh) out.push({ key: 'brief.caution.joint', params: { name: ctx.jointHigh.name, pct: ctx.jointHigh.pct } });
+
   // Un músculo cansado solo importa si HOY se entrena.
   const trainsStrength = sessions.some(p => p.discipline === 'strength');
   if (trainsStrength && tiredMuscles.length) {
