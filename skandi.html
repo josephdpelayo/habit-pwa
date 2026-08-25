@@ -8,18 +8,18 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="Skandi Fit">
 <meta name="application-name" content="Skandi Fit">
-<link rel="manifest" href="/skandi-manifest.json?v=20260825-11">
-<link rel="apple-touch-icon" sizes="180x180" href="/icons/skandi-180.png?v=20260825-11">
-<link rel="icon" type="image/png" sizes="192x192" href="/icons/skandi-192.png?v=20260825-11">
+<link rel="manifest" href="/skandi-manifest.json?v=20260825-12">
+<link rel="apple-touch-icon" sizes="180x180" href="/icons/skandi-180.png?v=20260825-12">
+<link rel="icon" type="image/png" sizes="192x192" href="/icons/skandi-192.png?v=20260825-12">
 <title>Skandi Fit</title>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="/skandi-recovery.js?v=20260825-11"></script>
-<script src="/skandi-plan.js?v=20260825-11"></script>
-<script src="/body-figure.js?v=20260825-11"></script>
-<script src="/skandi-nutrition.js?v=20260825-11"></script>
-<script src="/skandi-load.js?v=20260825-11"></script>
-<script src="/skandi-brief.js?v=20260825-11"></script>
-<script src="/skandi-joint-load.js?v=20260825-11"></script>
+<script src="/skandi-recovery.js?v=20260825-12"></script>
+<script src="/skandi-plan.js?v=20260825-12"></script>
+<script src="/body-figure.js?v=20260825-12"></script>
+<script src="/skandi-nutrition.js?v=20260825-12"></script>
+<script src="/skandi-load.js?v=20260825-12"></script>
+<script src="/skandi-brief.js?v=20260825-12"></script>
+<script src="/skandi-joint-load.js?v=20260825-12"></script>
 <style>
 :root{
   --bg:#eef4f8;
@@ -650,7 +650,7 @@ button.chip{min-height:44px}
 // Versión compartida con app.html (APP_VERSION) y sw.js (CACHE_VERSION): un solo service
 // worker sirve las dos apps, así que una sola cadena las invalida a las dos. Al cambiarla
 // hay que actualizarla también en los ?v= del <head>, en index.html y en los dos manifests.
-const SKANDI_VERSION='20260825-11';
+const SKANDI_VERSION='20260825-12';
 const SUPABASE_URL='https://pmpjteuqjusbiduevbwq.supabase.co';
 const SUPABASE_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBtcGp0ZXVxanVzYmlkdWV2YndxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc2OTI1NjUsImV4cCI6MjA5MzI2ODU2NX0.XbMzZoo2yqtrD8znLnyo_1zDfrdJAvAPj1lqGOyXnLw';
 const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
@@ -857,6 +857,8 @@ en:{
   'cal.moveTitle':'Move session','cal.copyTitle':'Copy session',
   'cal.needsMigration':'Run migration 080 in Supabase to turn the calendar on.',
   'activity.elevation':'Elevation gain','activity.plan':'Planned: {plan}',
+  'activity.splits':'Km splits','activity.loadSplits':'Load km splits',
+  'activity.loadingSplits':'Loading splits…','activity.noSplits':'No splits available for this activity.',
   'activity.analyze':'Get feedback','activity.analyzing':'Analyzing…',
   'activity.assessment':'How it went','activity.nextStep':'For next time',
   'activity.options':'Session options',
@@ -1512,6 +1514,8 @@ es:{
   'cal.moveTitle':'Mover sesión','cal.copyTitle':'Copiar sesión',
   'cal.needsMigration':'Corre la migración 080 en Supabase para encender el calendario.',
   'activity.elevation':'Desnivel','activity.plan':'Plan: {plan}',
+  'activity.splits':'Parciales por km','activity.loadSplits':'Ver parciales por km',
+  'activity.loadingSplits':'Cargando parciales…','activity.noSplits':'Esta actividad no tiene parciales disponibles.',
   'activity.analyze':'Analizar','activity.analyzing':'Analizando…',
   'activity.assessment':'Cómo te fue','activity.nextStep':'Para la próxima',
   'activity.options':'Opciones de la sesión',
@@ -4327,9 +4331,52 @@ function activityDetailHtml(a,p){
     <section class="card"><span class="pill dark">${esc(t('logAct.rowIntensity',{v:a.intensity}))}</span></section>
     ${planLine?`<p class="form-note" style="margin-top:10px">${esc(t('activity.plan',{plan:planLine}))}</p>`:''}
     ${a.note?`<section class="card" style="margin-top:10px"><div class="eyebrow">${esc(t('session.notes'))}</div><p style="margin-top:6px">${esc(a.note)}</p></section>`:''}
+    <div id="splitsBox">${splitsSectionHtml(a,p)}</div>
     <div id="activityFeedback"></div>
     <button id="activityAnalyzeBtn" class="btn primary" style="width:100%;margin-top:14px" onclick="loadActivityFeedback('${a.id}'${p?`,'${p.id}'`:''})">${icon('trending',16)} ${esc(t('activity.analyze'))}</button>
     ${p?`<button class="btn" style="width:100%;margin-top:10px" onclick="openPlannedDay('${p.day}')">${esc(t('cal.back'))}</button>`:''}`;
+}
+
+// Solo Strava trae splits_metric, y solo cuando alguien pidió el detalle (webhook o esta misma
+// acción) — el backfill masivo nunca los trae (migración 105). Con distancia y sin splits
+// todavía, se ofrece el botón; sin distancia (HIIT, fuerza importada) no hay parcial que pedir.
+function splitsSectionHtml(a,p){
+  if(a.external_source!=='strava') return '';
+  if(Array.isArray(a.splits)&&a.splits.length){
+    const rows=a.splits.map((s,i)=>{
+      const paceSec=s.km>0?Math.round(s.sec/s.km):null;
+      return `<div class="row" style="margin-top:4px">
+        <span>${i+1}${s.km!==1?` (${s.km}km)`:''}</span>
+        <span>${paceSec?fmtPace(paceSec)+'/km':'—'}</span>
+        <span class="muted">${s.hr?`${s.hr} bpm`:''}${s.elev_m?` · ${s.elev_m>0?'+':''}${s.elev_m}m`:''}</span>
+      </div>`;
+    }).join('');
+    return `<section class="card" style="margin-top:10px">
+      <div class="eyebrow">${esc(t('activity.splits'))}</div>
+      <div class="stack" style="margin-top:8px">${rows}</div>
+    </section>`;
+  }
+  if(a.distance_km){
+    return `<button class="btn" style="width:100%;margin-top:10px" onclick="loadActivitySplits('${a.id}'${p?`,'${p.id}'`:''})">${esc(t('activity.loadSplits'))}</button>`;
+  }
+  return '';
+}
+
+async function loadActivitySplits(activityId,plannedId){
+  const box=$('splitsBox');
+  if(box) box.innerHTML=`<p class="muted" style="margin-top:10px">${esc(t('activity.loadingSplits'))}</p>`;
+  try{
+    const data=await skandiApi('strava-splits',{activity_id:activityId});
+    const a=state.externalActivities.find(x=>x.id===activityId);
+    if(a) a.splits=data.splits||null;
+    if(!data.splits&&box) box.innerHTML=`<p class="muted" style="margin-top:10px">${esc(t('activity.noSplits'))}</p>`;
+    else if(box){
+      const p=plannedId?plannedRows().find(x=>x.id===plannedId):null;
+      box.innerHTML=splitsSectionHtml(a,p);
+    }
+  }catch(e){
+    if(box) box.innerHTML=`<p class="muted" style="margin-top:10px">${esc(e.message||String(e))}</p>`;
+  }
 }
 
 // Mismo patrón que loadMealSuggestion: texto nada más (sin foto), mismo JSON-schema, misma

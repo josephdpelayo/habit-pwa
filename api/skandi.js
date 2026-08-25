@@ -1187,6 +1187,12 @@ async function importStravaActivities(userId, activities) {
       delete patch.intensity;
       delete patch.intensity_source;
     }
+    // Un re-sync masivo viene de /athlete/activities (SummaryActivity), que nunca trae
+    // splits_metric — toActivityRow() siempre devuelve splits:null en este camino. Sin este
+    // guard, sincronizar de nuevo borraría los splits que el webhook o "ver parciales" ya
+    // habían guardado con una llamada al detalle. null aquí significa "este camino no sabe",
+    // no "bórralos".
+    if (patch.splits == null) delete patch.splits;
     const { error } = await supabase
       .from('skandi_external_activities').update(patch).eq('id', prev.id);
     if (error) throw new Error(error.message);
@@ -1369,6 +1375,47 @@ async function stravaSync(req, res) {
     await supabase.from('skandi_integrations')
       .update({ last_error: String(err.message).slice(0, 300) })
       .eq('user_id', userId).eq('provider', 'strava');
+    return fail(res, 502, 'strava_failed', err.message);
+  }
+}
+
+// Parciales por km bajo demanda: el backfill masivo (stravaSync, arriba) no los trae porque
+// vendrían de N llamadas extra al detalle de cada actividad — esto es esa llamada, pero UNA
+// sola vez, para UNA actividad, cuando alguien de verdad abre su detalle y los quiere ver.
+async function stravaFetchSplits(req, res) {
+  if (!stravaEnvOk()) {
+    return fail(res, 500, 'missing_strava_env', 'Faltan STRAVA_CLIENT_ID / STRAVA_CLIENT_SECRET en el servidor.');
+  }
+  const userId = await requireUser(req, res);
+  if (!userId) return;
+
+  const activityId = String((req.body && req.body.activity_id) || '');
+  if (!activityId) return fail(res, 400, 'missing_activity_id', 'Falta activity_id.');
+
+  const { data: row } = await supabase.from('skandi_external_activities')
+    .select('id,external_id,external_source,splits')
+    .eq('id', activityId).eq('user_id', userId).maybeSingle();
+  if (!row) return fail(res, 404, 'not_found', 'Actividad no encontrada.');
+  if (row.external_source !== 'strava') {
+    return fail(res, 400, 'not_strava', 'Esta actividad no vino de Strava.');
+  }
+  // Ya los tiene: no hay razón para gastar otra llamada a Strava por lo mismo.
+  if (row.splits) return res.status(200).json({ ok: true, splits: row.splits });
+
+  const integration = await integrationFor({ user_id: userId });
+  if (!integration) return fail(res, 409, 'not_connected', 'Conecta Strava primero.');
+
+  try {
+    const token = await freshAccessToken(integration);
+    const detail = await stravaGet(token, `/activities/${row.external_id}`, {});
+    const splits = SkandiStrava.normalizeSplits(detail);
+    if (!splits) return res.status(200).json({ ok: true, splits: null });
+    const { error } = await supabase.from('skandi_external_activities')
+      .update({ splits }).eq('id', row.id);
+    if (error) return fail(res, 500, 'save_failed', error.message);
+    return res.status(200).json({ ok: true, splits });
+  } catch (err) {
+    console.error('strava-splits error:', err);
     return fail(res, 502, 'strava_failed', err.message);
   }
 }
@@ -1938,6 +1985,7 @@ module.exports = async function handler(req, res) {
   if (action === 'activity-feedback') return activityFeedback(req, res);
   if (action === 'strava-connect') return stravaConnect(req, res);
   if (action === 'strava-sync') return stravaSync(req, res);
+  if (action === 'strava-splits') return stravaFetchSplits(req, res);
   if (action === 'strava-disconnect') return stravaDisconnect(req, res);
   if (action === 'strava-subscription') return stravaSubscription(req, res);
   if (action === 'intervals-connect') return intervalsConnect(req, res);

@@ -454,6 +454,33 @@ proyecto sigue en 12 de 12 en el plan Hobby, que es un límite duro.
 
 ## 12. Bitácora
 
+**2026-08-25 — Splits de Strava (migración 105): lo que T2 dejó a propósito sin llenar.**
+
+- `skandi_external_activities.splits` (jsonb) — `[{km, sec, elev_m, hr}, ...]`.
+- Strava solo manda `splits_metric` en el detalle de UNA actividad (`GET /activities/{id}`), no
+  en la lista que usa el backfill masivo (`GET /athlete/activities`). El webhook YA pedía ese
+  detalle para todo lo demás, así que sus splits llegan gratis vía `SkandiStrava.normalizeSplits()`
+  (nuevo, en `skandi-strava.js`) sin tocar `api/skandi.js`. Para lo que llegó por backfill o antes
+  de esta migración, acción nueva `strava-splits`: pide el detalle de UNA actividad, solo cuando
+  alguien de verdad abre su ficha y toca "Ver parciales" — nunca de todo el historial de una vez,
+  mismo principio que ya regía `structure`.
+- **Bug real atrapado antes de salir**: `importStravaActivities()` arma el patch de actualización
+  a partir de `toActivityRow()`, que en el camino de backfill (SummaryActivity, sin
+  `splits_metric`) siempre devuelve `splits:null`. Sin guardarlo, cada `strava-sync` manual habría
+  borrado los splits que el webhook o "Ver parciales" ya habían guardado. Se corrigió con
+  `if (patch.splits == null) delete patch.splits` — null en ese camino significa "no sé", no
+  "bórralos".
+- Otro bug atrapado en la propia verificación: `normalizeSplits` no estaba en el `api` exportado
+  de `skandi-strava.js` — `SkandiStrava.normalizeSplits is not a function` en cuanto se probó
+  desde Node. Ese es justo el tipo de error que no aparece leyendo el diff y sí corriendo el
+  código.
+- UI: la ficha de una actividad de Strava con distancia y sin splits ofrece "Ver parciales por
+  km"; con splits ya guardados, pinta la tabla directo. Sin el botón para actividades manuales o
+  de Intervals — ninguna de las dos trae esta granularidad.
+- Verificado con aserciones en Node (SummaryActivity → null, DetailedActivity → parciales
+  correctos, `splits_metric` vacío/basura → null, no `[]`) y en el navegador real con estado
+  falso, incluidas las dos ramas (con y sin splits) del detalle de actividad.
+
 **2026-08-25 — Bookkeeping: T4 ya estaba hecha, este documento no se había actualizado.**
 
 Al revisar qué seguía después de T2 se encontró que T4 (carga unificada) ya vivía en el repo

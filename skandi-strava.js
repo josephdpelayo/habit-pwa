@@ -88,6 +88,24 @@ function clampInt(value, min, max){
   return n;
 }
 
+// Strava solo manda `splits_metric` en el detalle de UNA actividad (GET /activities/{id}), no
+// en la lista que usa el backfill masivo — por eso esto es opcional y solo se llena cuando
+// quien llama ya tiene ese detalle a mano (el webhook, o la acción strava-splits bajo demanda).
+// Un maratón son ~42 splits; 60 deja margen sin dejar crecer el jsonb sin límite si Strava
+// alguna vez manda algo raro.
+const MAX_SPLITS = 60;
+function normalizeSplits(activity){
+  const raw = activity && Array.isArray(activity.splits_metric) ? activity.splits_metric : null;
+  if (!raw || !raw.length) return null;
+  const splits = raw.slice(0, MAX_SPLITS).map(s => ({
+    km: round((Number(s.distance) || 0) / 1000, 3),
+    sec: Math.round(Number(s.moving_time) || Number(s.elapsed_time) || 0),
+    elev_m: Number.isFinite(Number(s.elevation_difference)) ? round(Number(s.elevation_difference), 1) : null,
+    hr: clampInt(s.average_heartrate, 30, 230),
+  })).filter(s => s.km > 0 && s.sec > 0);
+  return splits.length ? splits : null;
+}
+
 // Devuelve la fila lista para upsert, o null si la actividad no debe importarse.
 // `maxHeartRate` es opcional: sin ella la intensidad cae a bandas absolutas de bpm.
 function toActivityRow(activity, { userId, maxHeartRate, hrZones } = {}){
@@ -120,6 +138,7 @@ function toActivityRow(activity, { userId, maxHeartRate, hrZones } = {}){
     external_source: 'strava',
     external_id: String(activity.id),
     external_type: sportTypeOf(activity) || null,
+    splits: normalizeSplits(activity),
   };
 }
 
@@ -186,7 +205,7 @@ function matchImportedToManual(rows){
 
 const api = {
   SPORT_TYPE_MAP, SKIPPED_SPORT_TYPES, DEFAULT_INTENSITY,
-  sportTypeOf, isSkipped, mapActivityType, deriveIntensity, toActivityRow,
+  sportTypeOf, isSkipped, mapActivityType, deriveIntensity, toActivityRow, normalizeSplits,
   matchImportedToManual,
 };
 
