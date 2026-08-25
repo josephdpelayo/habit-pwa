@@ -8,17 +8,17 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="Skandi Fit">
 <meta name="application-name" content="Skandi Fit">
-<link rel="manifest" href="/skandi-manifest.json?v=20260824-14">
-<link rel="apple-touch-icon" sizes="180x180" href="/icons/skandi-180.png?v=20260824-14">
-<link rel="icon" type="image/png" sizes="192x192" href="/icons/skandi-192.png?v=20260824-14">
+<link rel="manifest" href="/skandi-manifest.json?v=20260825-01">
+<link rel="apple-touch-icon" sizes="180x180" href="/icons/skandi-180.png?v=20260825-01">
+<link rel="icon" type="image/png" sizes="192x192" href="/icons/skandi-192.png?v=20260825-01">
 <title>Skandi Fit</title>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="/skandi-recovery.js?v=20260824-14"></script>
-<script src="/body-figure.js?v=20260824-14"></script>
-<script src="/skandi-nutrition.js?v=20260824-14"></script>
-<script src="/skandi-load.js?v=20260824-14"></script>
-<script src="/skandi-brief.js?v=20260824-14"></script>
-<script src="/skandi-joint-load.js?v=20260824-14"></script>
+<script src="/skandi-recovery.js?v=20260825-01"></script>
+<script src="/body-figure.js?v=20260825-01"></script>
+<script src="/skandi-nutrition.js?v=20260825-01"></script>
+<script src="/skandi-load.js?v=20260825-01"></script>
+<script src="/skandi-brief.js?v=20260825-01"></script>
+<script src="/skandi-joint-load.js?v=20260825-01"></script>
 <style>
 :root{
   --bg:#eef4f8;
@@ -534,7 +534,7 @@ textarea.field{min-height:112px;text-align:left;resize:vertical}
 // Versión compartida con app.html (APP_VERSION) y sw.js (CACHE_VERSION): un solo service
 // worker sirve las dos apps, así que una sola cadena las invalida a las dos. Al cambiarla
 // hay que actualizarla también en los ?v= del <head>, en index.html y en los dos manifests.
-const SKANDI_VERSION='20260824-14';
+const SKANDI_VERSION='20260825-01';
 const SUPABASE_URL='https://pmpjteuqjusbiduevbwq.supabase.co';
 const SUPABASE_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBtcGp0ZXVxanVzYmlkdWV2YndxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc2OTI1NjUsImV4cCI6MjA5MzI2ODU2NX0.XbMzZoo2yqtrD8znLnyo_1zDfrdJAvAPj1lqGOyXnLw';
 const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
@@ -891,7 +891,7 @@ en:{
 
   'session.minutes':'minutes','session.energy':'Energy {v}/5','session.sleep':'Sleep {h}h',
   'session.feltWorse':'Performed worse','session.soreness':'Soreness','session.notSpecified':'Not specified',
-  'session.notes':'Notes','session.exercises':'Exercises','session.set':'Set {n}',
+  'session.focus':'Focus','session.notes':'Notes','session.exercises':'Exercises','session.set':'Set {n}',
   'session.quality':'quality {v}/10','session.notLogged':'not logged','session.sideLeft':'left','session.sideRight':'right',
   'session.noSets':'No sets logged.','session.delete':'Delete this workout',
   'session.confirmDelete':'Delete this workout? This cannot be undone.',
@@ -1496,7 +1496,7 @@ es:{
 
   'session.minutes':'minutos','session.energy':'Energía {v}/5','session.sleep':'Sueño {h}h',
   'session.feltWorse':'Rindió peor','session.soreness':'Dolor','session.notSpecified':'Sin especificar',
-  'session.notes':'Notas','session.exercises':'Ejercicios','session.set':'Serie {n}',
+  'session.focus':'Enfoque','session.notes':'Notas','session.exercises':'Ejercicios','session.set':'Serie {n}',
   'session.quality':'calidad {v}/10','session.notLogged':'sin registrar','session.sideLeft':'izq','session.sideRight':'der',
   'session.noSets':'No hay series registradas.','session.delete':'Eliminar este entrenamiento',
   'session.confirmDelete':'¿Eliminar este entrenamiento? No se puede deshacer.',
@@ -3313,6 +3313,7 @@ function openPlannedItem(id){
   const p=plannedRows().find(x=>x.id===id);
   if(!p) return;
   if(p.status==='done'&&p.activity_id) return openActivityDetail(p.activity_id,p.id);
+  if(p.status==='done'&&p.session_id) return openSessionDetail(p.session_id,p.id);
   openPlannedItemMenu(id);
 }
 
@@ -4307,9 +4308,10 @@ function feedItem(s){
   </article>`;
 }
 
-function openSessionDetail(sessionId){
+function openSessionDetail(sessionId,plannedId){
   const s=state.sessions.find(x=>x.id===sessionId);
-  if(!s) return;
+  if(!s) return plannedId?openPlannedItemMenu(plannedId):closeModal();
+  const p=plannedId?plannedRows().find(x=>x.id===plannedId):null;
   const sets=state.sets.filter(x=>x.session_id===sessionId).sort((a,b)=>a.set_idx-b.set_idx);
   const byExercise=new Map();
   sets.forEach(x=>{
@@ -4321,17 +4323,32 @@ function openSessionDetail(sessionId){
   });
   const mine=s.user_id===state.user.id;
   const when=new Date(s.completed_at||s.started_at);
+  // La "carga de esta semana" es la misma lectura que Progreso/Inicio (mismo `readout()`,
+  // mismo día de referencia: hoy) — no la carga que había el día de esta sesión. Es la respuesta
+  // a "¿cómo sigo?", no una foto histórica, y solo tiene sentido para el dueño de la sesión.
+  let loadText=null;
+  if(mine){
+    const refs={maxHeartRate:state.skandiSettings?.max_heart_rate||null,hrZones:state.skandiSettings?.hr_zone_bounds||null};
+    const series=SkandiLoad.dailySeries({sessions:state.sessions,sets:state.sets,activities:state.externalActivities,userId:state.user.id,refs,days:SkandiLoad.CHRONIC_DAYS*2});
+    const load=SkandiLoad.readout({series,isDeloadWeek:!!trainingBlockWeekInfo()?.deload});
+    loadText=t(load.key,{pct:Math.abs(load.dropPct??0),up:load.ratio?Math.round((load.ratio-1)*100):0,ratio:load.ratio?load.ratio.toFixed(2):'—',weeks:load.weeksLogged});
+  }
   $('modal').classList.add('show');
   $('modalCard').innerHTML=`
     <div class="row">
       <div><p class="muted">${when.toLocaleDateString(LANG,{weekday:'long',month:'short',day:'numeric'})}${mine?'':' · '+esc(t('common.byName',{name:s.profile?.name||t('common.crewMember')}))}</p><h1>${esc(s.title)}</h1></div>
-      <button class="x" onclick="closeModal()" aria-label="${esc(t('common.close'))}">${icon('close',20)}</button>
+      <div class="row" style="gap:8px;flex:0 0 auto">
+        ${p?`<button class="icon-btn tiny" onclick="openPlannedItemMenu('${p.id}')" aria-label="${esc(t('activity.options'))}">${icon('ellipsis',16)}</button>`:''}
+        <button class="x" onclick="closeModal()" aria-label="${esc(t('common.close'))}">${icon('close',20)}</button>
+      </div>
     </div>
+    ${p?.notes?`<p class="form-note">${esc(t('session.focus'))}: ${esc(p.notes)}</p>`:''}
     <section class="grid">
       <div class="stat"><strong>${Math.round((s.duration_sec||0)/60)}</strong><small>${esc(t('session.minutes'))}${s.duration_source==='garmin'?' · '+esc(t('garmin.durationSource')):''}</small></div>
       <div class="stat"><strong>${sets.filter(x=>x.done).length}</strong><small>${esc(tp(sets.filter(x=>x.done).length,'common.setsLogged'))}</small></div>
     </section>
     ${s.report_difficulty||s.report_energy?`<section class="card"><div class="row"><span class="pill dark">${esc(difficultyLabel(s.report_difficulty))}</span><span class="pill dark">${esc(t('session.energy',{v:s.report_energy||'-'}))}</span>${s.report_sleep_hours!=null?`<span class="pill dark">${esc(t('session.sleep',{h:s.report_sleep_hours}))}</span>`:''}${s.report_felt_worse?`<span class="pill dark" style="color:var(--pink)">${esc(t('session.feltWorse'))}</span>`:''}</div></section>`:''}
+    ${loadText?`<section class="card click-card" onclick="closeModal();setView('progress')"><div class="eyebrow">${esc(t('load.title'))}</div><p style="margin-top:6px">${esc(loadText)}</p></section>`:''}
     ${s.garmin_external_id?`<section class="card">
       <div class="row"><div class="eyebrow">${esc(t('garmin.title'))}</div><span class="pill tiny">${esc(t('intervals.badge'))}</span></div>
       <div class="grid" style="margin-top:10px">
