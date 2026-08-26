@@ -8,18 +8,18 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="Skandi Fit">
 <meta name="application-name" content="Skandi Fit">
-<link rel="manifest" href="/skandi-manifest.json?v=20260826-1">
-<link rel="apple-touch-icon" sizes="180x180" href="/icons/skandi-180.png?v=20260826-1">
-<link rel="icon" type="image/png" sizes="192x192" href="/icons/skandi-192.png?v=20260826-1">
+<link rel="manifest" href="/skandi-manifest.json?v=20260826-4">
+<link rel="apple-touch-icon" sizes="180x180" href="/icons/skandi-180.png?v=20260826-4">
+<link rel="icon" type="image/png" sizes="192x192" href="/icons/skandi-192.png?v=20260826-4">
 <title>Skandi Fit</title>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="/skandi-recovery.js?v=20260826-1"></script>
-<script src="/skandi-plan.js?v=20260826-1"></script>
-<script src="/body-figure.js?v=20260826-1"></script>
-<script src="/skandi-nutrition.js?v=20260826-1"></script>
-<script src="/skandi-load.js?v=20260826-1"></script>
-<script src="/skandi-brief.js?v=20260826-1"></script>
-<script src="/skandi-joint-load.js?v=20260826-1"></script>
+<script src="/skandi-recovery.js?v=20260826-4"></script>
+<script src="/skandi-plan.js?v=20260826-4"></script>
+<script src="/body-figure.js?v=20260826-4"></script>
+<script src="/skandi-nutrition.js?v=20260826-4"></script>
+<script src="/skandi-load.js?v=20260826-4"></script>
+<script src="/skandi-brief.js?v=20260826-4"></script>
+<script src="/skandi-joint-load.js?v=20260826-4"></script>
 <style>
 :root{
   --bg:#eef4f8;
@@ -650,7 +650,7 @@ button.chip{min-height:44px}
 // Versión compartida con app.html (APP_VERSION) y sw.js (CACHE_VERSION): un solo service
 // worker sirve las dos apps, así que una sola cadena las invalida a las dos. Al cambiarla
 // hay que actualizarla también en los ?v= del <head>, en index.html y en los dos manifests.
-const SKANDI_VERSION='20260826-1';
+const SKANDI_VERSION='20260826-4';
 const SUPABASE_URL='https://pmpjteuqjusbiduevbwq.supabase.co';
 const SUPABASE_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBtcGp0ZXVxanVzYmlkdWV2YndxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc2OTI1NjUsImV4cCI6MjA5MzI2ODU2NX0.XbMzZoo2yqtrD8znLnyo_1zDfrdJAvAPj1lqGOyXnLw';
 const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
@@ -960,6 +960,7 @@ en:{
   'progress.stepDownTo':'Step down to {name}','progress.startDeload':'Set up a deload',
   'progress.confirmDemote':'Go back down to {name}? Your history stays, only the rank you are working changes.',
   'progress.stallWarn':'<strong>{name}</strong> flat for 3 sessions ({marks}). Maybe deload or hold longer.',
+  'progress.stallWarnDeload':'<strong>{name}</strong> held at {marks} — your latest session was a deload week, so no progress there is expected. If it is still flat next normal week, that is worth a look.',
   'progress.stallDeficit':'Over those {days} days you averaged ~{deficit} kcal under your target — could be part of it.',
   'progress.allTime':'All time','progress.savedWorkouts':'saved workouts','progress.minutesTrained':'minutes trained',
   'progress.externalActivities':'External activities','progress.logActivity':'+ Log activity',
@@ -1253,6 +1254,8 @@ en:{
   'ex.deloadSkill':'Deload: keep the pattern, do not test your max.',
   'ex.deloadStrength':'Deload: RIR 3, load at 70-80% of normal.',
   'ex.swap':'Swap exercise','ex.removeFromSession':'Remove exercise from this session',
+  'ex.confirmSwapTemplate':'Also save this swap to your routine? From now on every session of "{routine}" will start with {exercise} in this slot, not just this one.',
+  'ex.confirmAddTemplate':'Add {exercise} to your routine too? From now on "{routine}" will include it every session, not just this one.',
   'ex.removeShort':'Remove from this session',
   'ex.colSec':'SEC','ex.colReps':'REPS','ex.colQuality':'QLT','ex.colRir':'RIR',
   'ex.switchToLb':'Switch this exercise to pounds','ex.switchToKg':'Switch this exercise to kilograms',
@@ -1626,6 +1629,7 @@ es:{
   'progress.stepDownTo':'Bajar a {name}','progress.startDeload':'Programar descarga',
   'progress.confirmDemote':'¿Regresar a {name}? Tu historial se queda, solo cambia el escalón que estás trabajando.',
   'progress.stallWarn':'<strong>{name}</strong> estancado 3 sesiones ({marks}). Quizá toca descargar o aguantar más.',
+  'progress.stallWarnDeload':'<strong>{name}</strong> se mantuvo en {marks} — tu sesión más reciente fue en semana de descarga, así que no progresar ahí es lo esperado. Si sigue igual la próxima semana normal, ahí sí vale la pena revisar.',
   'progress.stallDeficit':'En esos {days} días comiste en promedio ~{deficit} kcal menos de tu meta — puede ser parte de esto.',
   'progress.allTime':'Histórico','progress.savedWorkouts':'entrenamientos guardados','progress.minutesTrained':'minutos entrenados',
   'progress.externalActivities':'Actividades externas','progress.logActivity':'+ Registrar actividad',
@@ -1919,6 +1923,8 @@ es:{
   'ex.deloadSkill':'Descarga: mantén el patrón, no pruebes tu máximo.',
   'ex.deloadStrength':'Descarga: RIR 3, carga al 70-80% de lo normal.',
   'ex.swap':'Cambiar ejercicio','ex.removeFromSession':'Quitar el ejercicio de esta sesión',
+  'ex.confirmSwapTemplate':'¿Guardar este cambio también en tu rutina? Desde ahora cada sesión de "{routine}" va a empezar con {exercise} en este lugar, no solo hoy.',
+  'ex.confirmAddTemplate':'¿Agregar {exercise} también a tu rutina? Desde ahora "{routine}" lo va a incluir en cada sesión, no solo hoy.',
   'ex.removeShort':'Quitar de esta sesión',
   'ex.colSec':'SEG','ex.colReps':'REPS','ex.colQuality':'CAL','ex.colRir':'RIR',
   'ex.switchToLb':'Cambiar este ejercicio a libras','ex.switchToKg':'Cambiar este ejercicio a kilos',
@@ -2425,28 +2431,32 @@ function currentTrainingBlock(){
   return state.trainingBlocks.reduce((a,b)=>new Date(b.start_date)>new Date(a.start_date)?b:a);
 }
 
-function cycleWeekInfo(source,startDate,buildWeeks,hasDeload=true){
+function cycleWeekInfo(source,startDate,buildWeeks,hasDeload=true,refDate=Date.now()){
   if(!source||!startDate) return null;
   const start=new Date(startDate+'T00:00:00');
   const totalWeeks=Math.max(1,Number(buildWeeks)||1)+(hasDeload?1:0);
-  const days=Math.floor((Date.now()-start.getTime())/86400000);
+  const days=Math.floor((new Date(refDate).getTime()-start.getTime())/86400000);
   if(days<0) return {block:source,week:0,totalWeeks,deload:false,ended:false,notStarted:true};
   const week=Math.floor(days/7)+1;
   return {block:source,week:Math.min(week,totalWeeks+1),totalWeeks,
     deload:hasDeload&&week===totalWeeks,ended:week>totalWeeks,notStarted:false};
 }
 
-function trainingBlockWeekInfo(block){
+// refDate lets a caller ask "was <some past date> inside a deload week?" (e.g. progression-stall
+// detection checking a session's completed_at) instead of only ever answering for right now.
+// Assumes today's block/program was also the one active on refDate — fine for a date within the
+// current cycle, wrong if the member has since switched blocks, which is an acceptable miss here.
+function trainingBlockWeekInfo(block,refDate=Date.now()){
   if(!block){
     const program=typeof activeProgram==='function'?activeProgram():null;
     if(program?.start_date){
       const source={start_date:program.start_date,build_weeks:program.weeks||4,program_id:program.id};
-      return {...cycleWeekInfo(source,program.start_date,program.weeks||4,program.deload_week!==false),program};
+      return {...cycleWeekInfo(source,program.start_date,program.weeks||4,program.deload_week!==false,refDate),program};
     }
     block=currentTrainingBlock();
   }
   if(!block) return null;
-  return cycleWeekInfo(block,block.start_date,block.build_weeks,true);
+  return cycleWeekInfo(block,block.start_date,block.build_weeks,true,refDate);
 }
 
 // Deload-week load suggestion: ~30% lighter than last time, rounded to a plate-friendly
@@ -4958,12 +4968,13 @@ function progressSummaryTab(){
         const siblings=progressionSiblings(w.group);
         const prev=siblings[siblings.findIndex(x=>x.id===w.exercise.id)-1];
         const deficit=stallDeficitLine(w);
+        const warnKey=w.deloadLatest?'progress.stallWarnDeload':'progress.stallWarn';
         return `<div style="margin-top:10px">
-          <div class="row click-card" onclick="openExercise('${w.exercise.id}')"><p>${t('progress.stallWarn',{name:esc(w.exercise.name),marks:esc(w.marks.map(m=>w.exercise.log_mode==='seconds'?fmtSec(m):m+' '+t('common.reps')).join(' → '))})}</p>${icon('chevronRight',18)}</div>
+          <div class="row click-card" onclick="openExercise('${w.exercise.id}')"><p>${t(warnKey,{name:esc(w.exercise.name),marks:esc(w.marks.map(m=>w.exercise.log_mode==='seconds'?fmtSec(m):m+' '+t('common.reps')).join(' → '))})}</p>${icon('chevronRight',18)}</div>
           ${deficit?`<p class="form-note" style="margin-top:4px">${esc(deficit)}</p>`:''}
           <div class="row" style="gap:6px;margin-top:6px">
             ${prev?`<button class="btn small ghost" onclick="demoteProgression('${w.group}')">${esc(t('progress.stepDownTo',{name:prev.name}))}</button>`:''}
-            <button class="btn small ghost" onclick="openTrainingBlockForm()">${esc(t('progress.startDeload'))}</button>
+            ${w.deloadLatest?'':`<button class="btn small ghost" onclick="openTrainingBlockForm()">${esc(t('progress.startDeload'))}</button>`}
           </div>
         </div>`;}).join('')}
     </section>`:''}
@@ -5724,7 +5735,13 @@ function progressionStallWarnings(){
     // marks/dates son newest-first: [latest, ..., oldest]. Sin ganancia neta en la ventana =
     // estancado. `dates` se guarda para poder cruzar la ventana con la comida de esos días
     // (stallDeficitContext) — el estancamiento en sí no necesita las fechas, la correlación sí.
-    if(marks[0]<=marks[marks.length-1]) warnings.push({group,exercise,marks:marks.slice().reverse(),dates:dates.slice().reverse()});
+    if(marks[0]<=marks[marks.length-1]){
+      // Si la sesión más reciente de la ventana cayó en semana de descarga, no progresar ahí es
+      // el punto, no una señal de estancamiento real — el aviso cambia de tono en vez de
+      // desaparecer, porque si el estancamiento sigue en la semana normal siguiente sí importa.
+      const deloadLatest=!!trainingBlockWeekInfo(null,dates[0])?.deload;
+      warnings.push({group,exercise,marks:marks.slice().reverse(),dates:dates.slice().reverse(),deloadLatest});
+    }
   }
   return warnings;
 }
@@ -5823,7 +5840,8 @@ function attentionBannerHtml(){
     ${sore.map(w=>`<p style="margin-top:8px">${t('progress.soreWarn',{area:esc(w.area),n:w.count})}</p>`).join('')}
     ${stalls.map(w=>{
       const deficit=stallDeficitLine(w);
-      return `<p style="margin-top:8px">${t('progress.stallWarn',{name:esc(w.exercise.name),marks:esc(w.marks.map(m=>w.exercise.log_mode==='seconds'?fmtSec(m):m+' '+t('common.reps')).join(' → '))})}${deficit?' '+esc(deficit):''}</p>`;
+      const warnKey=w.deloadLatest?'progress.stallWarnDeload':'progress.stallWarn';
+      return `<p style="margin-top:8px">${t(warnKey,{name:esc(w.exercise.name),marks:esc(w.marks.map(m=>w.exercise.log_mode==='seconds'?fmtSec(m):m+' '+t('common.reps')).join(' → '))})}${deficit?' '+esc(deficit):''}</p>`;
     }).join('')}
   </section>`;
 }
@@ -7758,9 +7776,9 @@ function activeExercise(item,sets){
   </article>`;
 }
 
-// Swapping only ever touches this exercise's not-yet-done sets in the current session
-// (skandi_sets.exercise_id), never skandi_template_items — the weekly routine is
-// untouched, this session just plays out with a substitute for whatever's left.
+// Swapping always moves this exercise's not-yet-done sets in the current session
+// (skandi_sets.exercise_id); the routine itself (skandi_template_items) is only touched if the
+// member confirms it should be — see maybePersistSwapToTemplate, called from performSwap.
 function toggleSwap(exerciseId){
   state.swapTarget=state.swapTarget===exerciseId?null:exerciseId;
   state.swapQuery='';
@@ -7835,9 +7853,37 @@ async function moveActiveSetsToExercise(oldExerciseId,newExerciseId){
 
 async function performSwap(oldExerciseId,newExerciseId){
   if(!state.active||oldExerciseId===newExerciseId){ toggleSwap(oldExerciseId); return; }
+  const item=state.activeItems.find(i=>i.exercise_id===oldExerciseId);
   const moved=await moveActiveSetsToExercise(oldExerciseId,newExerciseId);
-  if(moved){ state.swapTarget=null; state.swapQuery=''; }
+  if(moved){
+    state.swapTarget=null; state.swapQuery='';
+    await maybePersistSwapToTemplate(item,newExerciseId);
+  }
   renderActiveWorkout();
+}
+
+// A plain swap only ever lasts this session (moveActiveSetsToExercise). A progression-line
+// replacement already survives on its own — currentProgressionExercise() re-resolves the slot
+// from skandi_progression_state every time the routine loads, skandi_template_items untouched —
+// so asking here too would be a redundant second prompt for something that's already permanent.
+// For everything else (swapping to an unrelated exercise the member has decided is just better),
+// there was no path to make it stick, which is exactly the gap: offer to write the replacement
+// into the template slot itself, matched by sort_order (the same "slot identity" computeActiveItems
+// already keys on), so every future session built from this routine starts with the swap already
+// in place. Silently no-ops for an ad-hoc session (no template_id) or a slot that isn't a real
+// template item (added mid-session, or a legacy session with no sort_order) — nothing to persist to.
+async function maybePersistSwapToTemplate(item,newExerciseId){
+  const templateId=state.active?.template_id;
+  if(!templateId||!item||item.sort_order==null) return;
+  const newExercise=state.exercises.find(e=>e.id===newExerciseId);
+  if(newExercise?.progression_group) return;
+  const templateItem=state.items.find(i=>i.template_id===templateId&&i.sort_order===item.sort_order);
+  if(!templateItem||templateItem.exercise_id===newExerciseId) return;
+  const tpl=state.templates.find(x=>x.id===templateId);
+  if(!confirm(t('ex.confirmSwapTemplate',{exercise:newExercise?.name||'',routine:tpl?.name||''}))) return;
+  const {error}=await sb.from('skandi_template_items').update({exercise_id:newExerciseId}).eq('id',templateItem.id);
+  if(error){ alert(error.message); return; }
+  templateItem.exercise_id=newExerciseId;
 }
 
 async function stepProgression(oldExerciseId,newExerciseId){
@@ -7846,8 +7892,9 @@ async function stepProgression(oldExerciseId,newExerciseId){
   renderActiveWorkout();
 }
 
-// Adding/removing an exercise here only ever touches this session's skandi_sets rows,
-// same as performSwap above — skandi_template_items (the weekly routine) is never touched.
+// Adding an exercise here can also be offered forward, same confirm-to-persist shape as a swap
+// (maybePersistAddToTemplate, called from addExerciseToSession below). Removing a slot has no
+// such path — dropping something from one session isn't a signal to drop it from the routine too.
 function toggleAddExercise(){
   state.addExOpen=!state.addExOpen;
   state.addExQuery='';
@@ -7896,7 +7943,30 @@ async function addExerciseToSession(exerciseId){
   state.activeItems=computeActiveItems(sessionId);
   state.addExOpen=false;
   state.addExQuery='';
+  await maybePersistAddToTemplate(exerciseId,targetSets,rows[0]);
   renderActiveWorkout();
+}
+
+// Mirrors maybePersistSwapToTemplate for the other way a session can diverge from its routine:
+// adding an exercise mid-session instead of swapping one out. Unlike a swap, there's no existing
+// auto-persist path to skip even for a progression-line exercise — currentProgressionExercise()
+// only re-resolves a slot the routine already has, it never adds a new one — so this always
+// offers, appending past whatever sort_order the routine's own items already use (not the
+// session's, which can run ahead after other adds/swaps) with the same targets
+// addExerciseToSession just derived from history.
+async function maybePersistAddToTemplate(exerciseId,targetSets,firstRow){
+  const templateId=state.active?.template_id;
+  if(!templateId) return;
+  const exercise=state.exercises.find(e=>e.id===exerciseId);
+  const tpl=state.templates.find(x=>x.id===templateId);
+  if(!confirm(t('ex.confirmAddTemplate',{exercise:exercise?.name||'',routine:tpl?.name||''}))) return;
+  const templateItems=state.items.filter(i=>i.template_id===templateId);
+  const sortOrder=templateItems.length?Math.max(...templateItems.map(i=>i.sort_order))+1:0;
+  const row={template_id:templateId,exercise_id:exerciseId,sort_order:sortOrder,target_sets:targetSets,
+    target_reps:firstRow.target_reps,target_rest_sec:firstRow.target_rest_sec,target_rir:firstRow.target_rir};
+  const {data,error}=await sb.from('skandi_template_items').insert(row).select().single();
+  if(error){ alert(error.message); return; }
+  state.items.push({...data,exercise});
 }
 
 async function removeExerciseFromSession(slot){
