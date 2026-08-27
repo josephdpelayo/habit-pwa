@@ -8,19 +8,19 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="Skandi Fit">
 <meta name="application-name" content="Skandi Fit">
-<link rel="manifest" href="/skandi-manifest.json?v=20260826-6">
-<link rel="apple-touch-icon" sizes="180x180" href="/icons/skandi-180.png?v=20260826-6">
-<link rel="icon" type="image/png" sizes="192x192" href="/icons/skandi-192.png?v=20260826-6">
+<link rel="manifest" href="/skandi-manifest.json?v=20260826-7">
+<link rel="apple-touch-icon" sizes="180x180" href="/icons/skandi-180.png?v=20260826-7">
+<link rel="icon" type="image/png" sizes="192x192" href="/icons/skandi-192.png?v=20260826-7">
 <title>Skandi Fit</title>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="/skandi-recovery.js?v=20260826-6"></script>
-<script src="/skandi-plan.js?v=20260826-6"></script>
-<script src="/body-figure.js?v=20260826-6"></script>
-<script src="/skandi-nutrition.js?v=20260826-6"></script>
-<script src="/skandi-load.js?v=20260826-6"></script>
-<script src="/skandi-brief.js?v=20260826-6"></script>
-<script src="/skandi-joint-load.js?v=20260826-6"></script>
-<script src="/skandi-outbox.js?v=20260826-6"></script>
+<script src="/skandi-recovery.js?v=20260826-7"></script>
+<script src="/skandi-plan.js?v=20260826-7"></script>
+<script src="/body-figure.js?v=20260826-7"></script>
+<script src="/skandi-nutrition.js?v=20260826-7"></script>
+<script src="/skandi-load.js?v=20260826-7"></script>
+<script src="/skandi-brief.js?v=20260826-7"></script>
+<script src="/skandi-joint-load.js?v=20260826-7"></script>
+<script src="/skandi-outbox.js?v=20260826-7"></script>
 <style>
 :root{
   --bg:#eef4f8;
@@ -672,7 +672,7 @@ button.chip{min-height:44px}
 // Versión compartida con app.html (APP_VERSION) y sw.js (CACHE_VERSION): un solo service
 // worker sirve las dos apps, así que una sola cadena las invalida a las dos. Al cambiarla
 // hay que actualizarla también en los ?v= del <head>, en index.html y en los dos manifests.
-const SKANDI_VERSION='20260826-6';
+const SKANDI_VERSION='20260826-7';
 const SUPABASE_URL='https://pmpjteuqjusbiduevbwq.supabase.co';
 const SUPABASE_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBtcGp0ZXVxanVzYmlkdWV2YndxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc2OTI1NjUsImV4cCI6MjA5MzI2ODU2NX0.XbMzZoo2yqtrD8znLnyo_1zDfrdJAvAPj1lqGOyXnLw';
 const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
@@ -2666,9 +2666,9 @@ async function saveTrainingBlock(blockId){
 }
 
 async function deleteTrainingBlock(blockId){
-  if(!confirm(t('block.confirmDelete'))) return;
+  if(!await confirmSheet(t('block.confirmDelete'),{danger:true})) return;
   const {error}=await sb.from('skandi_training_blocks').delete().eq('id',blockId);
-  if(error) return alert(error.message);
+  if(error) return alertSheet(error.message);
   closeModal();
   await loadAll();
   render();
@@ -2678,13 +2678,17 @@ async function deleteTrainingBlock(blockId){
 // skips openTrainingBlockForm's build-weeks picker entirely. build_weeks=0 + 1 deload week
 // covers exactly Monday–Sunday of the current week and expires on its own the week after
 // (currentTrainingBlock/beyondActiveBlock stop picking it up), so there is nothing to clean up.
+// confirmSheet/alertSheet, not confirm()/alert(): this button lives on the Home banner and in
+// Progreso, both reachable from inside the installed (standalone) PWA, where native dialogs
+// are exactly the ones already replaced elsewhere in this file (see confirmSheet's own comment)
+// for silently doing nothing — a tap that looked like a no-op instead of a real cancel.
 async function startAdHocDeload(){
   if(trainingBlockWeekInfo()?.deload) return;
-  if(!confirm(t('block.confirmAdHocDeload'))) return;
+  if(!await confirmSheet(t('block.confirmAdHocDeload'))) return;
   const startDate=dayKey(mondayOf(new Date()));
   const {error}=await sb.from('skandi_training_blocks')
     .insert({user_id:state.user.id,start_date:startDate,build_weeks:0,note:t('block.adHocNote')});
-  if(error) return alert(error.message);
+  if(error) return alertSheet(error.message);
   await loadAll();
   render();
 }
@@ -5024,7 +5028,7 @@ function progressSummaryTab(){
         return `<div style="margin-top:10px">
           <div class="row click-card" onclick="openExercise('${w.exercise.id}')"><p>${t(warnKey,{name:esc(w.exercise.name),marks:esc(w.marks.map(m=>w.exercise.log_mode==='seconds'?fmtSec(m):m+' '+t('common.reps')).join(' → '))})}</p>${icon('chevronRight',18)}</div>
           ${deficit?`<p class="form-note" style="margin-top:4px">${esc(deficit)}</p>`:''}
-          <div class="row" style="gap:6px;margin-top:6px">
+          <div class="row" style="gap:6px;margin-top:6px;flex-wrap:wrap;justify-content:flex-start">
             ${prev?`<button class="btn small ghost" onclick="demoteProgression('${w.group}')">${esc(t('progress.stepDownTo',{name:prev.name}))}</button>`:''}
             ${w.deloadLatest?'':`<button class="btn small ghost" onclick="startAdHocDeload()">${esc(t('progress.markDeload'))}</button>
             <button class="btn small ghost" onclick="openTrainingBlockForm()">${esc(t('progress.startDeload'))}</button>`}
