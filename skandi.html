@@ -8,19 +8,19 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="Skandi Fit">
 <meta name="application-name" content="Skandi Fit">
-<link rel="manifest" href="/skandi-manifest.json?v=20260826-8">
-<link rel="apple-touch-icon" sizes="180x180" href="/icons/skandi-180.png?v=20260826-8">
-<link rel="icon" type="image/png" sizes="192x192" href="/icons/skandi-192.png?v=20260826-8">
+<link rel="manifest" href="/skandi-manifest.json?v=20260826-9">
+<link rel="apple-touch-icon" sizes="180x180" href="/icons/skandi-180.png?v=20260826-9">
+<link rel="icon" type="image/png" sizes="192x192" href="/icons/skandi-192.png?v=20260826-9">
 <title>Skandi Fit</title>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="/skandi-recovery.js?v=20260826-8"></script>
-<script src="/skandi-plan.js?v=20260826-8"></script>
-<script src="/body-figure.js?v=20260826-8"></script>
-<script src="/skandi-nutrition.js?v=20260826-8"></script>
-<script src="/skandi-load.js?v=20260826-8"></script>
-<script src="/skandi-brief.js?v=20260826-8"></script>
-<script src="/skandi-joint-load.js?v=20260826-8"></script>
-<script src="/skandi-outbox.js?v=20260826-8"></script>
+<script src="/skandi-recovery.js?v=20260826-9"></script>
+<script src="/skandi-plan.js?v=20260826-9"></script>
+<script src="/body-figure.js?v=20260826-9"></script>
+<script src="/skandi-nutrition.js?v=20260826-9"></script>
+<script src="/skandi-load.js?v=20260826-9"></script>
+<script src="/skandi-brief.js?v=20260826-9"></script>
+<script src="/skandi-joint-load.js?v=20260826-9"></script>
+<script src="/skandi-outbox.js?v=20260826-9"></script>
 <style>
 :root{
   --bg:#eef4f8;
@@ -185,13 +185,10 @@ p{color:var(--muted);line-height:1.45;margin:0}
 .conf{display:inline-block;width:7px;height:7px;border-radius:50%;margin-right:5px;vertical-align:middle}
 .conf.hi{background:var(--green)}.conf.mid{background:var(--amber)}.conf.lo{background:var(--pink)}
 .input-choice{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-top:6px}
+.input-choice.cols-3{grid-template-columns:repeat(3,1fr)}
 .input-choice button{background:var(--panel2);border:1px solid var(--line);border-radius:12px;padding:15px 11px;display:grid;gap:5px;place-items:center;font-weight:1000;color:var(--text);text-align:center;font-size:13px}
 .input-choice button small{color:var(--muted);font-weight:900;font-size:10.5px;letter-spacing:.03em}
 .input-choice button:disabled{opacity:.5}
-/* La opción gratis e instantánea es la que lleva el peso visual: la escalera de costo
-   (platillo -> catálogo -> IA) tiene que verse, no solo leerse en la etiqueta. */
-.input-choice button.on{background:var(--dof-navy);color:#fff;border-color:var(--dof-navy);box-shadow:0 14px 26px rgba(1,36,86,.22)}
-.input-choice button.on small{color:rgba(255,255,255,.74)}
 .venue-row{display:grid;grid-template-columns:repeat(3,1fr);gap:7px;margin-top:6px}
 .tab svg{width:22px;height:22px;stroke:currentColor;stroke-width:2.4;fill:none}
 .tab.active{color:var(--dof-navy);background:rgba(1,36,86,.08)}
@@ -672,7 +669,7 @@ button.chip{min-height:44px}
 // Versión compartida con app.html (APP_VERSION) y sw.js (CACHE_VERSION): un solo service
 // worker sirve las dos apps, así que una sola cadena las invalida a las dos. Al cambiarla
 // hay que actualizarla también en los ?v= del <head>, en index.html y en los dos manifests.
-const SKANDI_VERSION='20260826-8';
+const SKANDI_VERSION='20260826-9';
 const SUPABASE_URL='https://pmpjteuqjusbiduevbwq.supabase.co';
 const SUPABASE_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBtcGp0ZXVxanVzYmlkdWV2YndxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc2OTI1NjUsImV4cCI6MjA5MzI2ODU2NX0.XbMzZoo2yqtrD8znLnyo_1zDfrdJAvAPj1lqGOyXnLw';
 const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
@@ -710,6 +707,7 @@ en:{
   'food.addMeal':'Add food','food.empty':'Nothing logged today.','food.emptyHint':'Start with a photo, or a saved dish.',
   'food.quickPicks':'Repeat something','food.dishes':'Saved dishes','food.recent':'Recent foods',
   'food.pantry':'Pantry','food.pantryManage':'Edit','food.pantryEmptyHint':'Mark what you have on board right now — the AI suggestion prioritizes it.',
+  'food.quickPicksEmptyHint':'Log something once and it shows up here to repeat with one tap.',
   'food.pantryHint':'What you actually have available right now. The "what should I eat" suggestion checks this list before inventing a recipe.',
   'food.pantryAdd':'Add food','food.pantryEmpty':'Nothing marked yet.','food.pantryRemove':'remove',
   'food.analyzing':'Analyzing…','food.failed':'Analysis failed','food.retry':'Retry','food.tapToFix':'Tap to review',
@@ -720,7 +718,7 @@ en:{
   'food.byBarcode':'Barcode','food.byBarcodeHint':'Free','food.mealType':'Meal','food.venue':'Where',
   'food.addDish':'Saved dish','food.multiPhotoHint':'Each extra photo counts as one more AI analysis.',
   'food.analyzingProgress':'Analyzing photo {i} of {n}…','food.addPhotos':'Add photos',
-  'food.addMore':'Add more','food.otherWays':'Other ways',
+  'food.addMore':'Add more','food.searchExisting':'Search what you already have','food.captureNew':'Log something new',
   'food.inspect':'Does this work for me?','food.inspectAdd':'Add to this meal','food.inspectClose':'Just checking',
   'food.verdict.good':'Fits fine','food.verdict.caution':'Worth knowing','food.verdict.bad':'No room left today',
   'food.reason.fits':'Fits fine in what you have left today.',
@@ -1384,6 +1382,7 @@ es:{
   'food.addMeal':'Agregar comida','food.empty':'Nada registrado hoy.','food.emptyHint':'Empieza con una foto, o con un platillo guardado.',
   'food.quickPicks':'Repetir algo','food.dishes':'Platillos guardados','food.recent':'Alimentos recientes',
   'food.pantry':'Alacena','food.pantryManage':'Editar','food.pantryEmptyHint':'Marca lo que tienes a bordo ahorita — la sugerencia de la IA le da prioridad.',
+  'food.quickPicksEmptyHint':'Registra algo una vez y aparece aquí para repetirlo con un toque.',
   'food.pantryHint':'Lo que de verdad tienes disponible ahora mismo. La sugerencia de "qué comer" revisa esta lista antes de inventarse una receta.',
   'food.pantryAdd':'Agregar alimento','food.pantryEmpty':'Nada marcado todavía.','food.pantryRemove':'quitar',
   'food.analyzing':'Analizando…','food.failed':'Falló el análisis','food.retry':'Reintentar','food.tapToFix':'Toca para revisar',
@@ -1394,7 +1393,7 @@ es:{
   'food.byBarcode':'Código de barras','food.byBarcodeHint':'Gratis','food.mealType':'Comida','food.venue':'Dónde',
   'food.addDish':'Platillo guardado','food.multiPhotoHint':'Cada foto extra cuenta como un análisis de IA más.',
   'food.analyzingProgress':'Analizando foto {i} de {n}…','food.addPhotos':'Agregar fotos',
-  'food.addMore':'Agregar más','food.otherWays':'Otras formas',
+  'food.addMore':'Agregar más','food.searchExisting':'Buscar en lo que ya tienes','food.captureNew':'Registrar algo nuevo',
   'food.inspect':'¿Te conviene?','food.inspectAdd':'Agregar a esta comida','food.inspectClose':'Solo estaba viendo',
   'food.verdict.good':'Cabe bien','food.verdict.caution':'Vale la pena saberlo','food.verdict.bad':'Ya no cabe hoy',
   'food.reason.fits':'Cabe bien en lo que te queda hoy.',
@@ -2119,7 +2118,7 @@ const EXERCISE_PRESETS={
 };
 
 const ACTIVE_WORKOUT_MAX_HOURS=18;
-const state={user:null,profile:null,view:'home',authMode:'login',exercises:[],templates:[],items:[],sessions:[],sets:[],externalActivities:[],activityTemplates:[],progressionState:[],progressionEvents:[],skillGoals:[],trainingBlocks:[],planned:[],plannedReady:true,ensuredWeeks:new Set(),weekSig:null,trainTab:'today',calOffset:0,calWeeks:4,calExpanded:new Set(),dayOpen:null,bodyweightLogs:[],programs:[],programDays:[],programWeeks:[],active:null,activeItems:[],timer:null,elapsed:0,rest:0,restTotal:0,bodyFlip:'front',weightUnit:localStorage.getItem('skandi_weight_unit')||'kg',weightUnitOverrides:(()=>{try{return JSON.parse(localStorage.getItem('skandi_weight_unit_overrides')||'{}');}catch(e){return {};}})(),expandedRoutines:new Set(),progInfoOpen:new Set(),progressTab:'summary',progressQuery:'',progressMetric:'best',historyFilter:{month:'all',title:'all'},crewFeedLimit:6,swapTarget:null,swapQuery:'',setOptionsId:null,skillTab:null,addExOpen:false,addExQuery:'',pausedMs:0,pausedAt:null,floatTimerOpen:false,meals:[],mealItems:[],foods:[],dishes:[],dishItems:[],nutritionTargets:null,nutritionTargetOverrides:[],aiCallsToday:0,foodDayOffset:0,foodPicker:{query:'',mealId:null},pendingMeal:null,wellness:[],intervalsUnmatched:[],stravaStatus:null,intervalsStatus:null,skandiSettings:null,stravaSyncing:false,intervalsSyncing:false,bodyMeasurements:[],progressPhotos:[],pendingPhoto:null,bodyTab:'recovery',supplements:[],supplementLogs:[],pantry:[],pantryPicker:{query:''},outbox:(()=>{try{return SkandiOutbox.parse(localStorage.getItem('skandi_outbox_v1'));}catch(e){return [];}})()};
+const state={user:null,profile:null,view:'home',authMode:'login',exercises:[],templates:[],items:[],sessions:[],sets:[],externalActivities:[],activityTemplates:[],progressionState:[],progressionEvents:[],skillGoals:[],trainingBlocks:[],planned:[],plannedReady:true,ensuredWeeks:new Set(),weekSig:null,trainTab:'today',calOffset:0,calWeeks:4,calExpanded:new Set(),dayOpen:null,bodyweightLogs:[],programs:[],programDays:[],programWeeks:[],active:null,activeItems:[],timer:null,elapsed:0,rest:0,restTotal:0,bodyFlip:'front',weightUnit:localStorage.getItem('skandi_weight_unit')||'kg',weightUnitOverrides:(()=>{try{return JSON.parse(localStorage.getItem('skandi_weight_unit_overrides')||'{}');}catch(e){return {};}})(),expandedRoutines:new Set(),progInfoOpen:new Set(),progressTab:'summary',progressQuery:'',progressMetric:'best',historyFilter:{month:'all',title:'all'},crewFeedLimit:6,swapTarget:null,swapQuery:'',setOptionsId:null,skillTab:null,addExOpen:false,addExQuery:'',pausedMs:0,pausedAt:null,floatTimerOpen:false,meals:[],mealItems:[],foods:[],dishes:[],dishItems:[],nutritionTargets:null,nutritionTargetOverrides:[],aiCallsToday:0,foodDayOffset:0,foodPicker:{query:'',mealId:null},pendingMeal:null,wellness:[],intervalsUnmatched:[],stravaStatus:null,intervalsStatus:null,skandiSettings:null,stravaSyncing:false,intervalsSyncing:false,bodyMeasurements:[],progressPhotos:[],pendingPhoto:null,bodyTab:'recovery',supplements:[],supplementLogs:[],pantry:[],pantryPicker:{query:''},foodQuickTab:'frequent',outbox:(()=>{try{return SkandiOutbox.parse(localStorage.getItem('skandi_outbox_v1'));}catch(e){return [];}})()};
 let builderState={selected:new Map(),group:'All'};
 
 const $=id=>document.getElementById(id);
@@ -2882,8 +2881,8 @@ function nutritionForBrief(){
     loggedKcal,
     hasLoggedActivity:loggedToday.length>0||loggedSets>0,
     steps:stepsToday,avgSteps,weightKg});
-  // Mismo criterio que trainingDayCard(): con un número fijado por el coach no hay nada que
-  // ajustar encima — el delta ya está dentro de ese número.
+  // Mismo criterio que trainingDayInnerHtml(): con un número fijado por el coach no hay nada
+  // que ajustar encima — el delta ya está dentro de ese número.
   if(rec&&nutritionOverrideFor(today)){
     rec.kcalTarget=targets.kcal_target;
     rec.carbsTarget=targets.carbs_g_target;
@@ -9601,29 +9600,32 @@ function foodView(){
       </div>
     </section>
     ${targets?dayRingCard(totals,targets):noTargetCard()}
-    ${trainingDayCard()}
-    ${pantryCardHtml()}
-    ${targets&&isToday?suggestionCard():''}
     <section class="card">
       <div class="row"><div class="eyebrow">${esc(t('food.items'))}</div>
         <span class="chip">${meals.length}</span></div>
       ${meals.length?meals.map(mealCardHtml).join(''):empty(t('food.empty'))}
       ${meals.length?'':`<p class="muted" style="margin-top:8px">${esc(t('food.emptyHint'))}</p>`}
     </section>
-    ${quickPicksCard()}
+    ${targets&&isToday?todaysPlanCard():''}
+    ${quickAddCard()}
     ${isToday?supplementsCardHtml():''}
     <button class="add-fab" onclick="openAddMeal()" aria-label="${esc(t('food.addMeal'))}">${icon('plus',26)}</button>`;
 }
 
 // Lo que entrenas hoy cambia lo que deberías comer hoy — pero solo la DIFERENCIA contra tu
 // día promedio, porque la meta base ya supone que entrenas (ver skandi-nutrition.js).
-function trainingDayCard(){
+// Devuelve el CONTENIDO (sin el <section class="card">), no la tarjeta completa: desde que
+// esta tarjeta y la de sugerencia IA (ver todaysPlanCard) comparten exactamente la misma
+// condición de aparición (hoy, con metas), viven en un solo <section> — este consejo gratis
+// arriba, el botón de IA abajo — en vez de dos tarjetas apiladas diciendo "qué comer hoy" por
+// separado. `tone` es el color de fondo/borde que antes vivía en el <section> mismo.
+function trainingDayInnerHtml(){
   const today=dayKey(new Date());
   const override=nutritionOverrideFor(today);
   const targets=targetsForDay(today);
-  if(!targets||state.foodDayOffset!==0) return '';
+  if(!targets||state.foodDayOffset!==0) return {tone:'',html:''};
   const weightKg=latestWeightKg();
-  if(!weightKg) return '';
+  if(!weightKg) return {tone:'',html:''};
 
   const sessions=sessionsForFuel(today,weightKg);
   const loggedToday=state.externalActivities.filter(a=>dayKey(a.performed_at)===today);
@@ -9645,7 +9647,7 @@ function trainingDayCard(){
     hasLoggedActivity:loggedToday.length>0||loggedSets>0,
     steps:stepsToday,avgSteps,weightKg
   });
-  if(!rec) return '';
+  if(!rec) return {tone:'',html:''};
 
   // El coach ya fijó el número exacto de hoy (migración 094, metas por fecha): no hace falta
   // adivinar con el promedio semanal, y menos etiquetar de "descanso" un día que sí entrena —
@@ -9658,14 +9660,12 @@ function trainingDayCard(){
     // Handstand + Push + Pierna + Z2"): estaba en la base desde la 094 y no se veía en
     // ningún lado. Sin nota y sin timing no queda tarjeta que pintar.
     const note=(override.note||'').trim();
-    if(!fuel&&!note) return '';
-    return `<section class="card">
-      <div class="eyebrow">${esc(t('food.coachTarget'))}</div>
+    if(!fuel&&!note) return {tone:'',html:''};
+    return {tone:'',html:`<div class="eyebrow">${esc(t('food.coachTarget'))}</div>
       ${note?`<p class="muted" style="margin-top:6px">${esc(note)}</p>`:''}
-      ${fuel}
-    </section>`;
+      ${fuel}`};
   }
-  if(!rec.plannedKcal&&!rec.todayKcal) return '';
+  if(!rec.plannedKcal&&!rec.todayKcal) return {tone:'',html:''};
 
   // "Día de descanso" solo si de verdad no hay sesión planeada hoy — si la hay pero quema
   // menos que tu promedio semanal (p.ej. un día de skills corto), es un día ligero, no un
@@ -9682,13 +9682,11 @@ function trainingDayCard(){
       : '');
   const tone=rec.level==='alto'?'border-color:rgba(0,168,200,.35);background:#f2fbfd'
             :rec.level==='bajo'?'border-color:rgba(240,162,46,.35);background:#fffaf2':'';
-  return `<section class="card" style="${tone}">
-    <div class="eyebrow">${esc(label)}</div>
+  return {tone,html:`<div class="eyebrow">${esc(label)}</div>
     <p style="margin-top:6px">${esc(line)}</p>
     ${rec.delta?`<p style="margin-top:6px"><strong>${esc(t('food.trainAdjust',{kcal:rec.kcalTarget,carbs:rec.carbsTarget}))}</strong></p>`:''}
     ${fuelPlanHtml(sessions,weightKg,rec)}
-    ${rec.delta?`<p class="muted" style="font-size:11.5px;margin-top:8px">${esc(t('food.trainWhy'))}</p>`:''}
-  </section>`;
+    ${rec.delta?`<p class="muted" style="font-size:11.5px;margin-top:8px">${esc(t('food.trainWhy'))}</p>`:''}`};
 }
 
 // El consejo accionable: cuándo comer, no solo cuánto. Un número no le dice a nadie qué hacer;
@@ -9744,15 +9742,21 @@ function fuelPlanHtml(sessions,weightKg,rec){
   return `${doneLine}<div class="eyebrow" style="margin-top:12px">${esc(t('fuel.plan'))}</div>${blocks}`;
 }
 
-// ---- Qué comer: sugerencia con IA ----
+// ---- Qué comer hoy: consejo gratis + sugerencia con IA, una sola tarjeta ----
 //
-// fuelPlan() ya da la CANTIDAD (gramos de carbos, de proteína); esto da el EJEMPLO concreto
-// ("dos tortillas con miel"), y además "qué cocinar para llegar a tus macros del día" — una
-// tarea de creatividad acotada por números que un prompt resuelve mejor que una fórmula.
-function suggestionCard(){
-  return `<section class="card">
-    <div class="row"><div><h2>${esc(t('food.suggestTitle'))}</h2><p class="muted">${esc(t('food.suggestHint'))}</p></div></div>
-    <button class="btn primary" style="width:100%;margin-top:10px" onclick="openMealSuggestion()">${esc(t('food.suggestBtn'))}</button>
+// trainingDayInnerHtml() ya calcula el ajuste algorítmico (gratis, instantáneo); esto añade el
+// EJEMPLO concreto con IA ("dos tortillas con miel") y "qué cocinar para llegar a tus macros
+// del día" — una tarea de creatividad acotada por números que un prompt resuelve mejor que una
+// fórmula. Antes eran dos <section class="card"> con exactamente la misma condición de
+// aparición (hoy, con metas) — se fusionan en una: el consejo gratis primero si lo hay, el
+// botón de IA siempre al final, nunca como su propia tarjeta aparte diciendo lo mismo dos veces.
+function todaysPlanCard(){
+  const day=trainingDayInnerHtml();
+  const heading=day.html?'':`<div class="row"><div><h2>${esc(t('food.suggestTitle'))}</h2><p class="muted">${esc(t('food.suggestHint'))}</p></div></div>`;
+  return `<section class="card" style="${day.tone}">
+    ${day.html}
+    ${heading}
+    <button class="btn ${day.html?'':'primary'}" style="width:100%;margin-top:${day.html?'12':'10'}px" onclick="openMealSuggestion()">${esc(t('food.suggestBtn'))}</button>
     <p class="muted" style="font-size:11px;margin-top:8px;text-align:center">${esc(t('food.aiLeft',{n:aiLeft()}))}</p>
   </section>`;
 }
@@ -9880,38 +9884,46 @@ function mealCardHtml(m){
   </button>`;
 }
 
-function quickPicksCard(){
-  const dishes=state.dishes.slice(0,10);
-  const foods=state.foods.filter(f=>f.user_id&&f.times_used>0).slice(0,12);
-  if(!dishes.length&&!foods.length) return '';
-  return `<section class="card">
-    <div class="eyebrow">${esc(t('food.quickPicks'))}</div>
-    ${dishes.length?`<div class="pick-row" style="margin-top:9px">${dishes.map(d=>{
-      const kcal=Math.round(SkandiNutrition.itemsTotal(itemsOfDish(d.id)).kcal);
-      return `<button class="pick" onclick="openDishLog('${d.id}')"><b>${esc(d.name)}</b><small>${kcal} kcal</small></button>`;
-    }).join('')}</div>`:''}
-    ${foods.length?`<div class="pick-row">${foods.map(f=>
-      `<button class="pick" onclick="openFoodPortion('${f.id}',null)"><b>${esc(f.name)}</b><small>${Math.round(f.kcal_100g)}/100g</small></button>`
-    ).join('')}</div>`:''}
-  </section>`;
+// ---- Agregar rápido: repetir algo (por frecuencia) o lo que hay a bordo (alacena, migración
+// 111) ────────────────────────────────────────────────────────────────────────────────────
+//
+// Antes eran dos <section class="card"> separadas con el mismo patrón visual (una tira de
+// chips que se toca una vez para registrar) — solo cambiaba de dónde salía la lista: la de
+// arriba por frecuencia de uso, la de abajo por lo que de verdad está marcado a bordo ahorita.
+// Esa diferencia real de fuente se conserva (loadMealSuggestion() sigue mandando `pantry` aparte
+// de `catalog` al servidor), pero la presentación se fusiona en una sola tarjeta con pestañas
+// — mismo componente `.seg.sub` que ya usa Progreso — en vez de dos tarjetas apiladas
+// diciendo básicamente "toca esto para registrarlo" dos veces seguidas.
+function setFoodQuickTab(tab){
+  state.foodQuickTab=tab;
+  render();
 }
 
-// ---- Alacena: lo que hay a bordo AHORA MISMO (migración 111) ───────────────
-//
-// No es un conteo de existencias, es un check-off — un alimento del catálogo (propio o
-// global) está marcado o no. loadMealSuggestion() manda esta misma lista al servidor como
-// `pantry`, aparte del `catalog` de siempre, para que la sugerencia de qué comer priorice lo
-// que de verdad hay a bordo sobre inventar una receta con ingredientes que probablemente no
-// están.
-
-function pantryCardHtml(){
-  const items=pantryFoods();
+function quickAddCard(){
+  const dishes=state.dishes.slice(0,10);
+  const foods=state.foods.filter(f=>f.user_id&&f.times_used>0).slice(0,12);
+  const pantryItems=pantryFoods();
+  const tab=state.foodQuickTab==='pantry'?'pantry':'frequent';
+  const rows=tab==='pantry'
+    ?(pantryItems.length?`<div class="pick-row" style="margin-top:9px">${pantryItems.map(f=>
+        `<button class="pick" onclick="openFoodPortion('${f.id}',null)"><b>${esc(f.name)}</b><small>${Math.round(f.kcal_100g)}/100g</small></button>`
+      ).join('')}</div>`:`<p class="muted" style="margin-top:8px">${esc(t('food.pantryEmptyHint'))}</p>`)
+    :((dishes.length||foods.length)?`${dishes.length?`<div class="pick-row" style="margin-top:9px">${dishes.map(d=>{
+        const kcal=Math.round(SkandiNutrition.itemsTotal(itemsOfDish(d.id)).kcal);
+        return `<button class="pick" onclick="openDishLog('${d.id}')"><b>${esc(d.name)}</b><small>${kcal} kcal</small></button>`;
+      }).join('')}</div>`:''}
+      ${foods.length?`<div class="pick-row" style="${dishes.length?'':'margin-top:9px'}">${foods.map(f=>
+        `<button class="pick" onclick="openFoodPortion('${f.id}',null)"><b>${esc(f.name)}</b><small>${Math.round(f.kcal_100g)}/100g</small></button>`
+      ).join('')}</div>`:''}`:`<p class="muted" style="margin-top:8px">${esc(t('food.quickPicksEmptyHint'))}</p>`);
   return `<section class="card">
-    <div class="row"><div class="eyebrow">${esc(t('food.pantry'))}</div>
-      <button class="chip" onclick="openManagePantry()">${esc(t('food.pantryManage'))}</button></div>
-    ${items.length?`<div class="pick-row" style="margin-top:9px">${items.map(f=>
-      `<button class="pick" onclick="openFoodPortion('${f.id}',null)"><b>${esc(f.name)}</b><small>${Math.round(f.kcal_100g)}/100g</small></button>`
-    ).join('')}</div>`:`<p class="muted" style="margin-top:6px">${esc(t('food.pantryEmptyHint'))}</p>`}
+    <div class="row">
+      <div class="seg sub" style="flex:1">
+        <button class="${tab==='frequent'?'active':''}" onclick="setFoodQuickTab('frequent')">${esc(t('food.quickPicks'))}</button>
+        <button class="${tab==='pantry'?'active':''}" onclick="setFoodQuickTab('pantry')">${esc(t('food.pantry'))}</button>
+      </div>
+      ${tab==='pantry'?`<button class="chip" style="margin-left:8px" onclick="openManagePantry()">${esc(t('food.pantryManage'))}</button>`:''}
+    </div>
+    ${rows}
   </section>`;
 }
 
@@ -10123,17 +10135,28 @@ function openAddMeal(mealId=null){
     <div class="row"><h1>${esc(mealId?t('food.addMore'):t('food.addMeal'))}</h1><button class="x" onclick="closeModal()" aria-label="${esc(t('common.close'))}">${icon('close',20)}</button></div>
     ${mealId?'':`<p class="muted">${esc(t('food.how'))}</p>`}
     ${quickAddStripHtml(mealId)}
-    <div class="eyebrow" style="margin-top:14px">${esc(t('food.otherWays'))}</div>
+    <!-- Antes: una rejilla de 4 botones mezclando "buscar en lo que ya tienes" (platillo/
+    catálogo) con "capturar algo nuevo" (código de barras/foto/texto), con "Platillo guardado"
+    pintado en navy sólido con una palomita — que se leía como "ya seleccionado" sin que nada se
+    hubiera tocado todavía. Ahora son dos grupos separados por lo que en verdad hacen: uno abre
+    una lista de lo que ya guardaste (gratis, instantáneo), el otro crea un registro nuevo. -->
+    <div class="eyebrow" style="margin-top:14px">${esc(t('food.searchExisting'))}</div>
     <div class="input-choice">
-      <button class="${noDishes?'':'on'}" onclick="openDishPicker(${mealId?`'${mealId}'`:'null'})" ${noDishes?'disabled':''}>${icon('check',22)}${esc(t('food.byDish'))}<small>${esc(t('food.byDishHint'))}</small></button>
-      <button class="${noDishes&&!noFoods?'on':''}" onclick="openFoodPicker(${mealId?`'${mealId}'`:'null'})" ${noFoods?'disabled':''}>${icon('plus',22)}${esc(t('food.byFood'))}<small>${esc(t('food.byFoodHint'))}</small></button>
+      <button onclick="openDishPicker(${mealId?`'${mealId}'`:'null'})" ${noDishes?'disabled':''}>${icon('food',22)}${esc(t('food.byDish'))}<small>${esc(t('food.byDishHint'))}</small></button>
+      <button onclick="openFoodPicker(${mealId?`'${mealId}'`:'null'})" ${noFoods?'disabled':''}>${icon('library',22)}${esc(t('food.byFood'))}<small>${esc(t('food.byFoodHint'))}</small></button>
+    </div>
+    <div class="eyebrow" style="margin-top:14px">${esc(t('food.captureNew'))}</div>
+    <div class="input-choice cols-3">
       <button onclick="openBarcode(${mealId?`'${mealId}'`:'null'})">${icon('barcode',22)}${esc(t('food.byBarcode'))}<small>${esc(t('food.byBarcodeHint'))}</small></button>
+      <button onclick="openMealInput('photo',${mealId?`'${mealId}'`:'null'})">${icon('image',22)}${esc(t('food.byPhoto'))}<small>${esc(t('food.byPhotoHint'))}</small></button>
       <button onclick="openMealInput('text',${mealId?`'${mealId}'`:'null'})">${icon('edit',22)}${esc(t('food.byText'))}<small>${esc(t('food.byTextHint'))}</small></button>
     </div>
-    <button class="btn" style="width:100%;margin-top:10px" onclick="openMealInput('photo',${mealId?`'${mealId}'`:'null'})">${icon('image',20)} ${esc(t('food.byPhoto'))} · ${esc(t('food.byPhotoHint'))}</button>
-    <button class="btn" style="width:100%;margin-top:8px" onclick="openMealInput('inspect',${mealId?`'${mealId}'`:'null'})">${icon('trending',18)} ${esc(t('food.analyzeOnlyBtn'))} · ${esc(t('food.byPhotoHint'))}</button>
-    ${noDishes&&noFoods&&!mealId?`<button class="btn primary" style="width:100%;margin-top:10px" onclick="seedStarterCatalog()">${icon('plus',18)} ${esc(t('food.seedCatalog'))}</button>
-    <p class="muted" style="font-size:11px;margin-top:4px;text-align:center">${esc(t('food.seedCatalogHint'))}</p>`:''}`;
+    ${noDishes&&noFoods&&!mealId?`<button class="btn primary" style="width:100%;margin-top:14px" onclick="seedStarterCatalog()">${icon('plus',18)} ${esc(t('food.seedCatalog'))}</button>
+    <p class="muted" style="font-size:11px;margin-top:4px;text-align:center">${esc(t('food.seedCatalogHint'))}</p>`:''}
+    <!-- "Analizar sin registrar" es una intención distinta a las de arriba (ver macros sin
+    guardar nada) — antes era un botón .btn de ancho completo igual de pesado que las acciones
+    de registrar de verdad; baja a enlace de texto para no competir con ellas. -->
+    <button type="button" style="display:block;width:100%;margin-top:14px;background:transparent;border:0;color:var(--muted);font-weight:900;font-size:13px;padding:6px;text-decoration:underline;text-underline-offset:3px;text-align:center" onclick="openMealInput('inspect',${mealId?`'${mealId}'`:'null'})">${esc(t('food.analyzeOnlyBtn'))}</button>`;
 }
 
 // ---- Catálogo inicial: platillos armados con el catálogo global (093) ──────
@@ -10833,7 +10856,7 @@ async function quickAddFood(foodId,mealId){
   openMealDetail(mealId);
 }
 
-// Lo que ya cargaste antes, ordenado por uso — mismo criterio que quickPicksCard() en Inicio.
+// Lo que ya cargaste antes, ordenado por uso — mismo criterio que la pestaña "Repetir algo" de quickAddCard().
 // Con mealId ya fijo (comida ya iniciada) un toque SUMA directo, sin preguntar nada más — tipo
 // de comida y hora ya quedaron decididos. Sin mealId (arrancando desde cero) un toque pasa por
 // el mismo selector de tipo/hora/porción de siempre (openFoodPortion/openDishLog): ese dato solo
