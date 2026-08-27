@@ -2343,7 +2343,7 @@ async function loadAll(){
     sb.from('skandi_external_activities').select('*').eq('user_id',state.user.id).order('performed_at',{ascending:false}).limit(200),
     sb.from('skandi_activity_templates').select('*').eq('user_id',state.user.id).order('weekday',{nullsFirst:false}),
     sb.from('skandi_progression_state').select('*').eq('user_id',state.user.id),
-    sb.from('skandi_training_blocks').select('*').eq('user_id',state.user.id).order('start_date',{ascending:false}),
+    sb.from('skandi_training_blocks').select('*').eq('user_id',state.user.id).order('start_date',{ascending:false}).order('created_at',{ascending:false}),
     sb.from('skandi_bodyweight_logs').select('*').eq('user_id',state.user.id).order('logged_at',{ascending:false}),
     sb.from('skandi_programs').select('*').eq('user_id',state.user.id).order('created_at',{ascending:false}),
     // No user_id filter: skandi_program_days has no user_id column of its own, its RLS policy
@@ -2458,9 +2458,19 @@ function hydrateActiveWorkout(){
 // on, and once it runs past its last week the UI asks the member to review and explicitly
 // start the next one (build_weeks can change block to block, e.g. 4+1 vs 5+1).
 
+// Empate en start_date: pasaba solo el flujo normal, un bloque por semana. startAdHocDeload()
+// puede insertar un bloque puntual que arranca el mismo lunes que un bloque de varias semanas
+// ya en curso — sin desempate, el ganador dependía del orden en que Postgres devolviera filas
+// iguales, así que a veces "ganaba" el bloque viejo (build_weeks>0, no en descarga) y el botón
+// de descarga puntual parecía no hacer nada aunque la fila sí se hubiera guardado. Ante empate,
+// gana el creado más recientemente: es la declaración más deliberada sobre esta semana.
 function currentTrainingBlock(){
   if(!state.trainingBlocks.length) return null;
-  return state.trainingBlocks.reduce((a,b)=>new Date(b.start_date)>new Date(a.start_date)?b:a);
+  return state.trainingBlocks.reduce((a,b)=>{
+    const byStart=new Date(b.start_date)-new Date(a.start_date);
+    if(byStart!==0) return byStart>0?b:a;
+    return new Date(b.created_at)>new Date(a.created_at)?b:a;
+  });
 }
 
 function cycleWeekInfo(source,startDate,buildWeeks,hasDeload=true,refDate=Date.now()){
