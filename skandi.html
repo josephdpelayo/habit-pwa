@@ -8,18 +8,18 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="Skandi Fit">
 <meta name="application-name" content="Skandi Fit">
-<link rel="manifest" href="/skandi-manifest.json?v=20260826-4">
-<link rel="apple-touch-icon" sizes="180x180" href="/icons/skandi-180.png?v=20260826-4">
-<link rel="icon" type="image/png" sizes="192x192" href="/icons/skandi-192.png?v=20260826-4">
+<link rel="manifest" href="/skandi-manifest.json?v=20260826-5">
+<link rel="apple-touch-icon" sizes="180x180" href="/icons/skandi-180.png?v=20260826-5">
+<link rel="icon" type="image/png" sizes="192x192" href="/icons/skandi-192.png?v=20260826-5">
 <title>Skandi Fit</title>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="/skandi-recovery.js?v=20260826-4"></script>
-<script src="/skandi-plan.js?v=20260826-4"></script>
-<script src="/body-figure.js?v=20260826-4"></script>
-<script src="/skandi-nutrition.js?v=20260826-4"></script>
-<script src="/skandi-load.js?v=20260826-4"></script>
-<script src="/skandi-brief.js?v=20260826-4"></script>
-<script src="/skandi-joint-load.js?v=20260826-4"></script>
+<script src="/skandi-recovery.js?v=20260826-5"></script>
+<script src="/skandi-plan.js?v=20260826-5"></script>
+<script src="/body-figure.js?v=20260826-5"></script>
+<script src="/skandi-nutrition.js?v=20260826-5"></script>
+<script src="/skandi-load.js?v=20260826-5"></script>
+<script src="/skandi-brief.js?v=20260826-5"></script>
+<script src="/skandi-joint-load.js?v=20260826-5"></script>
 <style>
 :root{
   --bg:#eef4f8;
@@ -650,7 +650,7 @@ button.chip{min-height:44px}
 // Versión compartida con app.html (APP_VERSION) y sw.js (CACHE_VERSION): un solo service
 // worker sirve las dos apps, así que una sola cadena las invalida a las dos. Al cambiarla
 // hay que actualizarla también en los ?v= del <head>, en index.html y en los dos manifests.
-const SKANDI_VERSION='20260826-4';
+const SKANDI_VERSION='20260826-5';
 const SUPABASE_URL='https://pmpjteuqjusbiduevbwq.supabase.co';
 const SUPABASE_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBtcGp0ZXVxanVzYmlkdWV2YndxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc2OTI1NjUsImV4cCI6MjA5MzI2ODU2NX0.XbMzZoo2yqtrD8znLnyo_1zDfrdJAvAPj1lqGOyXnLw';
 const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
@@ -809,6 +809,9 @@ en:{
   'block.pickDate':'Choose a start date.',
   'block.confirmDelete':'Delete this block? Your workouts and sets are untouched, only the week/deload count is removed.',
   'block.fromProgram':'From the program "{name}".',
+  'block.confirmAdHocDeload':'Mark this whole week (Monday–Sunday) as a deload week? Suggested weights drop ~30%, load messaging adjusts, and this stops counting as a stall.',
+  'block.adHocNote':'One-off deload',
+  'progress.markDeload':'This is my deload week',
 
   'home.weekRange':'Monday to Sunday','home.hey':'Hey, {name}',
   'home.yourWeek':'Your week','home.time':'time','home.load':'load','home.sessions':'sessions',
@@ -1478,6 +1481,9 @@ es:{
   'block.pickDate':'Elige una fecha de inicio.',
   'block.confirmDelete':'¿Eliminar este bloque? Tus entrenamientos y series no se tocan, solo se borra el conteo de semana/descarga.',
   'block.fromProgram':'Del programa «{name}».',
+  'block.confirmAdHocDeload':'¿Marcar esta semana entera (lunes a domingo) como semana de descarga? Baja el peso sugerido ~30%, ajusta los mensajes de carga y deja de contar como estancamiento.',
+  'block.adHocNote':'Descarga puntual',
+  'progress.markDeload':'Es mi semana de descarga',
 
   'home.weekRange':'De lunes a domingo','home.hey':'Hola, {name}',
   'home.yourWeek':'Tu semana','home.time':'tiempo','home.load':'carga','home.sessions':'sesiones',
@@ -2434,7 +2440,11 @@ function currentTrainingBlock(){
 function cycleWeekInfo(source,startDate,buildWeeks,hasDeload=true,refDate=Date.now()){
   if(!source||!startDate) return null;
   const start=new Date(startDate+'T00:00:00');
-  const totalWeeks=Math.max(1,Number(buildWeeks)||1)+(hasDeload?1:0);
+  // buildWeeks=0 is a real, deliberate value (an ad-hoc single deload week, see
+  // startAdHocDeload) — Number(0)||1 would silently coerce it back to 1, so 0 needs its own
+  // branch instead of just falling through the || default meant for missing/invalid input.
+  const bw=Number.isFinite(Number(buildWeeks))?Math.max(0,Number(buildWeeks)):1;
+  const totalWeeks=bw+(hasDeload?1:0);
   const days=Math.floor((new Date(refDate).getTime()-start.getTime())/86400000);
   if(days<0) return {block:source,week:0,totalWeeks,deload:false,ended:false,notStarted:true};
   const week=Math.floor(days/7)+1;
@@ -2633,6 +2643,21 @@ async function deleteTrainingBlock(blockId){
   const {error}=await sb.from('skandi_training_blocks').delete().eq('id',blockId);
   if(error) return alert(error.message);
   closeModal();
+  await loadAll();
+  render();
+}
+
+// One tap from the stall warning: "this specific week, no plan behind it, is a deload" —
+// skips openTrainingBlockForm's build-weeks picker entirely. build_weeks=0 + 1 deload week
+// covers exactly Monday–Sunday of the current week and expires on its own the week after
+// (currentTrainingBlock/beyondActiveBlock stop picking it up), so there is nothing to clean up.
+async function startAdHocDeload(){
+  if(trainingBlockWeekInfo()?.deload) return;
+  if(!confirm(t('block.confirmAdHocDeload'))) return;
+  const startDate=dayKey(mondayOf(new Date()));
+  const {error}=await sb.from('skandi_training_blocks')
+    .insert({user_id:state.user.id,start_date:startDate,build_weeks:0,note:t('block.adHocNote')});
+  if(error) return alert(error.message);
   await loadAll();
   render();
 }
@@ -4974,7 +4999,8 @@ function progressSummaryTab(){
           ${deficit?`<p class="form-note" style="margin-top:4px">${esc(deficit)}</p>`:''}
           <div class="row" style="gap:6px;margin-top:6px">
             ${prev?`<button class="btn small ghost" onclick="demoteProgression('${w.group}')">${esc(t('progress.stepDownTo',{name:prev.name}))}</button>`:''}
-            ${w.deloadLatest?'':`<button class="btn small ghost" onclick="openTrainingBlockForm()">${esc(t('progress.startDeload'))}</button>`}
+            ${w.deloadLatest?'':`<button class="btn small ghost" onclick="startAdHocDeload()">${esc(t('progress.markDeload'))}</button>
+            <button class="btn small ghost" onclick="openTrainingBlockForm()">${esc(t('progress.startDeload'))}</button>`}
           </div>
         </div>`;}).join('')}
     </section>`:''}
@@ -5834,6 +5860,10 @@ function attentionBannerHtml(){
   const sore=repeatedSorenessWarnings();
   const load=loadWarning();
   if(!stalls.length&&!sore.length&&!load) return '';
+  // One "es mi semana de descarga" button for the whole card, not one per stalled exercise —
+  // it is a fact about the week, not about any single lift. Only offered while at least one
+  // stall's own message hasn't already switched to the deload-aware copy.
+  const showMarkDeload=stalls.some(w=>!w.deloadLatest);
   return `<section class="card click-card" style="border-color:rgba(212,72,84,.30);background:#fff7f7" onclick="setView('progress')">
     <div class="eyebrow" style="color:var(--pink)">${esc(t('progress.needsAttention'))}</div>
     ${load?`<p style="margin-top:8px">${esc(load)}</p>`:''}
@@ -5843,6 +5873,7 @@ function attentionBannerHtml(){
       const warnKey=w.deloadLatest?'progress.stallWarnDeload':'progress.stallWarn';
       return `<p style="margin-top:8px">${t(warnKey,{name:esc(w.exercise.name),marks:esc(w.marks.map(m=>w.exercise.log_mode==='seconds'?fmtSec(m):m+' '+t('common.reps')).join(' → '))})}${deficit?' '+esc(deficit):''}</p>`;
     }).join('')}
+    ${showMarkDeload?`<button class="btn small ghost" style="margin-top:8px" onclick="event.stopPropagation();startAdHocDeload()">${esc(t('progress.markDeload'))}</button>`:''}
   </section>`;
 }
 

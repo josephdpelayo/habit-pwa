@@ -56,7 +56,11 @@ async function requireUser(req, res) {
 
 const BUCKET = 'skandi-meals';
 const DEFAULT_DAILY_LIMIT = 25;
-const DEFAULT_MODEL = 'claude-opus-5';
+// Sonnet 5, no Opus 5: en vision + JSON schema, Opus con thinking adaptativo se acerca demasiado
+// seguido al límite de 53s (AI_TIMEOUT_MS) dentro del tope de 60s de Vercel Hobby, y el timeout
+// se veía como un análisis que "tarda mucho y casi siempre falla". Sonnet es notablemente más
+// rápido en esta tarea (estimar macros de una foto) sin pérdida perceptible de precisión.
+const DEFAULT_MODEL = 'claude-sonnet-5';
 const MAX_IMAGE_BYTES = 4.5 * 1024 * 1024; // el límite de la API de vision es 5 MB por imagen
 // Vercel mata esta función a los 60 s (vercel.json: maxDuration=60, el tope del plan Hobby). El
 // SDK reintenta 429/5xx por default dentro de la misma invocación, que es justo lo peor aquí:
