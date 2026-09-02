@@ -8,19 +8,19 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="Skandi Fit">
 <meta name="application-name" content="Skandi Fit">
-<link rel="manifest" href="/skandi-manifest.json?v=20260902-1">
-<link rel="apple-touch-icon" sizes="180x180" href="/icons/skandi-180.png?v=20260902-1">
-<link rel="icon" type="image/png" sizes="192x192" href="/icons/skandi-192.png?v=20260902-1">
+<link rel="manifest" href="/skandi-manifest.json?v=20260902-2">
+<link rel="apple-touch-icon" sizes="180x180" href="/icons/skandi-180.png?v=20260902-2">
+<link rel="icon" type="image/png" sizes="192x192" href="/icons/skandi-192.png?v=20260902-2">
 <title>Skandi Fit</title>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="/skandi-recovery.js?v=20260902-1"></script>
-<script src="/skandi-plan.js?v=20260902-1"></script>
-<script src="/body-figure.js?v=20260902-1"></script>
-<script src="/skandi-nutrition.js?v=20260902-1"></script>
-<script src="/skandi-load.js?v=20260902-1"></script>
-<script src="/skandi-brief.js?v=20260902-1"></script>
-<script src="/skandi-joint-load.js?v=20260902-1"></script>
-<script src="/skandi-outbox.js?v=20260902-1"></script>
+<script src="/skandi-recovery.js?v=20260902-2"></script>
+<script src="/skandi-plan.js?v=20260902-2"></script>
+<script src="/body-figure.js?v=20260902-2"></script>
+<script src="/skandi-nutrition.js?v=20260902-2"></script>
+<script src="/skandi-load.js?v=20260902-2"></script>
+<script src="/skandi-brief.js?v=20260902-2"></script>
+<script src="/skandi-joint-load.js?v=20260902-2"></script>
+<script src="/skandi-outbox.js?v=20260902-2"></script>
 <style>
 :root{
   --bg:#eef4f8;
@@ -669,7 +669,7 @@ button.chip{min-height:44px}
 // Versión compartida con app.html (APP_VERSION) y sw.js (CACHE_VERSION): un solo service
 // worker sirve las dos apps, así que una sola cadena las invalida a las dos. Al cambiarla
 // hay que actualizarla también en los ?v= del <head>, en index.html y en los dos manifests.
-const SKANDI_VERSION='20260902-1';
+const SKANDI_VERSION='20260902-2';
 const SUPABASE_URL='https://pmpjteuqjusbiduevbwq.supabase.co';
 const SUPABASE_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBtcGp0ZXVxanVzYmlkdWV2YndxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc2OTI1NjUsImV4cCI6MjA5MzI2ODU2NX0.XbMzZoo2yqtrD8znLnyo_1zDfrdJAvAPj1lqGOyXnLw';
 const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
@@ -11102,9 +11102,53 @@ async function saveNewFood(mealId){
   openFoodPortion(food.id,mealId);
 }
 
+// state.foods (loadNutrition) trae como mucho 300 filas, ordenadas por times_used desc -- lo
+// suficiente para navegar sin escribir nada, instantáneo, sin red. Pero filtrar la BÚSQUEDA
+// sobre esa misma copia local dejaba invisible cualquier alimento fuera de esos 300: todo lo
+// que rememberMealItems() y backfillFoodsFromMealHistory() guardan entra con times_used=0, así
+// que se va justo al fondo de ese orden -- lo contrario de lo que se buscaba al construir esas
+// dos funciones. Escribir algo dispara, con un pequeño debounce, una búsqueda real al servidor
+// (ilike, sin el límite de 300) en vez de seguir filtrando la copia local capada; mientras esa
+// búsqueda resuelve se sigue mostrando el filtro local, para que la lista no se quede vacía en
+// lo que responde la red.
+let foodSearchDebounce=null;
+let foodSearchToken=0;
 function renderFoodList(q){
   state.foodPicker.query=q;
   $('foodList').innerHTML=foodListHtml(q);
+  clearTimeout(foodSearchDebounce);
+  const needle=(q||'').trim();
+  if(!needle) return;
+  const token=++foodSearchToken;
+  foodSearchDebounce=setTimeout(async()=>{
+    const results=await searchFoodsServer(needle);
+    if(token!==foodSearchToken) return; // una búsqueda más nueva ya está en curso o resuelta
+    const list=$('foodList');
+    if(list) list.innerHTML=foodRowsHtml(results);
+  },250);
+}
+
+async function searchFoodsServer(q){
+  // ',' y '(' rompen la sintaxis del filtro or= de PostgREST -- no es una vulnerabilidad (no es
+  // SQL crudo), pero sí tumbaría la búsqueda con un error si alguien las escribe.
+  const safe=q.replace(/[,()]/g,' ').trim();
+  if(!safe) return [];
+  const {data,error}=await sb.from('skandi_foods').select('*')
+    .or(`user_id.eq.${state.user.id},user_id.is.null`)
+    .or(`name.ilike.%${safe}%,brand.ilike.%${safe}%`)
+    .order('times_used',{ascending:false})
+    .limit(40);
+  if(error) return [];
+  return data||[];
+}
+
+function foodRowsHtml(list){
+  if(!list.length) return empty(t('food.noMatches'));
+  return list.map(f=>`<button class="meal-card" onclick="openFoodPortion('${f.id}',${state.foodPicker.mealId?`'${state.foodPicker.mealId}'`:'null'})">
+    <span class="meal-thumb">${icon('plus',20)}</span>
+    <span class="lbl"><h3>${esc(f.name)}</h3><p>${esc(f.brand||'')}${f.brand?' · ':''}${Math.round(f.kcal_100g)} kcal/100 g</p></span>
+    <span class="meal-kcal">${f.serving_grams?Math.round(f.serving_grams)+' g':''}</span>
+  </button>`).join('');
 }
 
 function foodListHtml(q){
@@ -11112,12 +11156,7 @@ function foodListHtml(q){
   const list=state.foods
     .filter(f=>!needle||`${f.name} ${f.brand||''}`.toLowerCase().includes(needle))
     .slice(0,40);
-  if(!list.length) return empty(t('food.noMatches'));
-  return list.map(f=>`<button class="meal-card" onclick="openFoodPortion('${f.id}',${state.foodPicker.mealId?`'${state.foodPicker.mealId}'`:'null'})">
-    <span class="meal-thumb">${icon('plus',20)}</span>
-    <span class="lbl"><h3>${esc(f.name)}</h3><p>${esc(f.brand||'')}${f.brand?' · ':''}${Math.round(f.kcal_100g)} kcal/100 g</p></span>
-    <span class="meal-kcal">${f.serving_grams?Math.round(f.serving_grams)+' g':''}</span>
-  </button>`).join('');
+  return foodRowsHtml(list);
 }
 
 // ---- ¿Me conviene? — veredicto informativo, ANTES de decidir si registrarlo ----
