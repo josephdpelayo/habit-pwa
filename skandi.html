@@ -8,19 +8,19 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="Skandi Fit">
 <meta name="application-name" content="Skandi Fit">
-<link rel="manifest" href="/skandi-manifest.json?v=20260902-2">
-<link rel="apple-touch-icon" sizes="180x180" href="/icons/skandi-180.png?v=20260902-2">
-<link rel="icon" type="image/png" sizes="192x192" href="/icons/skandi-192.png?v=20260902-2">
+<link rel="manifest" href="/skandi-manifest.json?v=20260902-3">
+<link rel="apple-touch-icon" sizes="180x180" href="/icons/skandi-180.png?v=20260902-3">
+<link rel="icon" type="image/png" sizes="192x192" href="/icons/skandi-192.png?v=20260902-3">
 <title>Skandi Fit</title>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="/skandi-recovery.js?v=20260902-2"></script>
-<script src="/skandi-plan.js?v=20260902-2"></script>
-<script src="/body-figure.js?v=20260902-2"></script>
-<script src="/skandi-nutrition.js?v=20260902-2"></script>
-<script src="/skandi-load.js?v=20260902-2"></script>
-<script src="/skandi-brief.js?v=20260902-2"></script>
-<script src="/skandi-joint-load.js?v=20260902-2"></script>
-<script src="/skandi-outbox.js?v=20260902-2"></script>
+<script src="/skandi-recovery.js?v=20260902-3"></script>
+<script src="/skandi-plan.js?v=20260902-3"></script>
+<script src="/body-figure.js?v=20260902-3"></script>
+<script src="/skandi-nutrition.js?v=20260902-3"></script>
+<script src="/skandi-load.js?v=20260902-3"></script>
+<script src="/skandi-brief.js?v=20260902-3"></script>
+<script src="/skandi-joint-load.js?v=20260902-3"></script>
+<script src="/skandi-outbox.js?v=20260902-3"></script>
 <style>
 :root{
   --bg:#eef4f8;
@@ -669,7 +669,7 @@ button.chip{min-height:44px}
 // Versión compartida con app.html (APP_VERSION) y sw.js (CACHE_VERSION): un solo service
 // worker sirve las dos apps, así que una sola cadena las invalida a las dos. Al cambiarla
 // hay que actualizarla también en los ?v= del <head>, en index.html y en los dos manifests.
-const SKANDI_VERSION='20260902-2';
+const SKANDI_VERSION='20260902-3';
 const SUPABASE_URL='https://pmpjteuqjusbiduevbwq.supabase.co';
 const SUPABASE_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBtcGp0ZXVxanVzYmlkdWV2YndxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc2OTI1NjUsImV4cCI6MjA5MzI2ODU2NX0.XbMzZoo2yqtrD8znLnyo_1zDfrdJAvAPj1lqGOyXnLw';
 const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
@@ -3460,7 +3460,7 @@ async function setProgramWeekPhase(programId,weekIndex,phase){
 }
 
 async function resetProgramWeek(programId,weekIndex){
-  if(!confirm(t('pgm.resetWeekConfirm'))) return;
+  if(!await confirmSheet(t('pgm.resetWeekConfirm'))) return;
   const [{error:daysError},{error:metaError}]=await Promise.all([
     sb.from('skandi_program_days').delete().eq('program_id',programId).eq('week_index',weekIndex),
     sb.from('skandi_program_weeks').delete().eq('program_id',programId).eq('week_index',weekIndex)
@@ -3737,7 +3737,7 @@ async function applyProgram(id,weeks,deloadWeek){
 }
 
 async function deleteProgram(id){
-  if(!confirm(t('pgm.confirmDelete'))) return;
+  if(!await confirmSheet(t('pgm.confirmDelete'))) return;
   const {error}=await sb.from('skandi_programs').delete().eq('id',id).eq('user_id',state.user.id);
   if(error) return alert(error.message);
   closeModal();
@@ -4320,7 +4320,7 @@ async function applyProgramToWeek(programId,mondayKey){
   if(applyingProgramWeek) return;
   const program=state.programs.find(p=>p.id===programId);
   if(!program) return;
-  if(!confirm(t('cal.loadProgramWeekConfirm',{name:program.name}))) return;
+  if(!await confirmSheet(t('cal.loadProgramWeekConfirm',{name:program.name}))) return;
   applyingProgramWeek=true;
   try{
     const days=weekDayKeys(mondayKey);
@@ -4387,7 +4387,7 @@ async function detachWeek(mondayKey){
 // Deja la semana en blanco para construirla desde cero. Lo estampado se marca 'skipped' en vez
 // de borrarse: esa lápida es lo que impide que el RPC lo vuelva a poner al abrir la semana.
 async function clearWeek(mondayKey){
-  if(!confirm(t('cal.clearWeekConfirm'))) return;
+  if(!await confirmSheet(t('cal.clearWeekConfirm'))) return;
   const days=weekDayKeys(mondayKey);
   const rows=plannedRows().filter(p=>days.includes(p.day)&&p.status!=='done'&&!p.session_id&&!p.activity_id);
   const stamped=rows.filter(p=>p.source==='template').map(p=>p.id);
@@ -4401,7 +4401,7 @@ async function clearWeek(mondayKey){
 // Vuelve a la plantilla: se borra lo estampado que no se hizo y se estampa de nuevo. Lo que ya
 // entrenaste nunca se toca — el historial no es del programa, es tuyo.
 async function resetWeek(mondayKey){
-  if(!confirm(t('cal.resetWeekConfirm'))) return;
+  if(!await confirmSheet(t('cal.resetWeekConfirm'))) return;
   const days=weekDayKeys(mondayKey);
   const ids=plannedRows().filter(p=>days.includes(p.day)&&p.status!=='done'&&!p.session_id&&!p.activity_id).map(p=>p.id);
   let error=null;
@@ -4648,7 +4648,7 @@ async function setPlannedStatus(id,status){
 async function removePlanned(id){
   const p=plannedRows().find(x=>x.id===id);
   if(!p) return;
-  if(!confirm(t('cal.removeConfirm'))) return;
+  if(!await confirmSheet(t('cal.removeConfirm'))) return;
   const {error}=p.source==='template'
     ? await sb.from('skandi_planned_sessions').update({status:'replaced',is_edited:true}).eq('id',id)
     : await sb.from('skandi_planned_sessions').delete().eq('id',id);
@@ -5732,7 +5732,7 @@ async function saveSessionEdit(sessionId){
 }
 
 async function deleteSession(sessionId){
-  if(!confirm(t('session.confirmDelete'))) return;
+  if(!await confirmSheet(t('session.confirmDelete'))) return;
   const {error}=await sb.from('skandi_sessions').delete().eq('id',sessionId).eq('user_id',state.user.id);
   if(error) return alert(error.message);
   closeModal();
@@ -6328,7 +6328,7 @@ async function saveMeasurement(){
 }
 
 async function deleteMeasurement(id){
-  if(!confirm(t('body.confirmDelete'))) return;
+  if(!await confirmSheet(t('body.confirmDelete'))) return;
   const {error}=await sb.from('skandi_body_measurements').delete().eq('id',id);
   if(error) return alert(error.message);
   closeModal();
@@ -6450,7 +6450,7 @@ function openProgressPhotoDetail(id){
 }
 
 async function deleteProgressPhoto(id){
-  if(!confirm(t('body.confirmDeletePhoto'))) return;
+  if(!await confirmSheet(t('body.confirmDeletePhoto'))) return;
   const p=(state.progressPhotos||[]).find(x=>x.id===id);
   const {error}=await sb.from('skandi_progress_photos').delete().eq('id',id);
   if(error) return alert(error.message);
@@ -6705,7 +6705,7 @@ function externalActivityRow(a){
 }
 
 async function deleteExternalActivity(id){
-  if(!confirm(t('logAct.confirmDelete'))) return;
+  if(!await confirmSheet(t('logAct.confirmDelete'))) return;
   const {error}=await sb.from('skandi_external_activities').delete().eq('id',id);
   if(error) return alert(error.message);
   await loadAll();
@@ -6780,7 +6780,7 @@ async function saveBodyweight(){
 }
 
 async function deleteBodyweightLog(id){
-  if(!confirm(t('bw.confirmDelete'))) return;
+  if(!await confirmSheet(t('bw.confirmDelete'))) return;
   const {error}=await sb.from('skandi_bodyweight_logs').delete().eq('id',id);
   if(error) return alert(error.message);
   await loadAll();
@@ -6846,7 +6846,7 @@ async function saveActivityTemplate(id){
 }
 
 async function deleteActivityTemplate(id){
-  if(!confirm(t('plan.confirmDelete'))) return;
+  if(!await confirmSheet(t('plan.confirmDelete'))) return;
   const {error}=await sb.from('skandi_activity_templates').delete().eq('id',id);
   if(error) return alert(error.message);
   closeModal();
@@ -6912,7 +6912,7 @@ async function demoteProgression(group){
   const idx=siblings.findIndex(x=>x.id===currentId);
   const prev=idx>0?siblings[idx-1]:null;
   if(!prev) return;
-  if(!confirm(t('progress.confirmDemote',{name:prev.name}))) return;
+  if(!await confirmSheet(t('progress.confirmDemote',{name:prev.name}))) return;
   await saveProgressionState(group,prev.id);
   render();
 }
@@ -8843,7 +8843,7 @@ async function assignOwnRoutineToDay(templateId,weekday){
 }
 
 async function removeRoutineFromDay(templateId){
-  if(!confirm(t('week.confirmRemove'))) return;
+  if(!await confirmSheet(t('week.confirmRemove'))) return;
   const error=await assignToDay('template',null,templateId);
   if(error) return alert(error.message);
   closeModal();
@@ -9331,6 +9331,36 @@ function alertSheet(body,opts){
   });
 }
 
+// El único prompt() nativo que quedaba en el archivo (promptSaveAsDish) -- mismo overlay y
+// mismo patrón de Promise que confirmSheet/alertSheet. Resuelve null en cancelar (como el
+// prompt() nativo), string en aceptar (incluyendo '' si se borró todo, también como el nativo).
+function promptSheet(body,opts){
+  const {title='',defaultValue='',placeholder='',confirmLabel=t('common.ok'),cancelLabel=t('common.cancel')}=opts||{};
+  return new Promise(resolve=>{
+    const overlay=$('confirmOverlay');
+    const settle=result=>{ closeConfirmSheet(); resolve(result); };
+    overlay.innerHTML=`
+      <div class="confirm-card" onclick="event.stopPropagation()">
+        ${title?`<h3>${esc(title)}</h3>`:''}
+        <p>${esc(body)}</p>
+        <input id="promptSheetInput" class="field" style="margin-top:12px" type="text" value="${esc(defaultValue)}" placeholder="${esc(placeholder)}">
+        <div class="confirm-actions">
+          <button type="button" class="btn ghost">${esc(cancelLabel)}</button>
+          <button type="button" class="btn primary">${esc(confirmLabel)}</button>
+        </div>
+      </div>`;
+    overlay.classList.add('show');
+    const input=$('promptSheetInput');
+    overlay.onclick=()=>settle(null);
+    const [cancelBtn,okBtn]=overlay.querySelectorAll('.confirm-actions button');
+    cancelBtn.onclick=()=>settle(null);
+    okBtn.onclick=()=>settle(input.value);
+    input.onkeydown=e=>{ if(e.key==='Enter'){ e.preventDefault(); settle(input.value); } };
+    input.focus();
+    input.select();
+  });
+}
+
 // iOS Safari lets a touch-scroll "leak" from the modal card's own overflow:auto content
 // through to the page underneath once the inner scroll hits its end — plain overflow:hidden
 // on body doesn't stop that on iOS, only actually freezing the body's scroll position does.
@@ -9494,7 +9524,7 @@ async function syncIntervals(days,silent=false){
 }
 
 async function disconnectIntervals(){
-  if(!confirm(t('intervals.disconnectConfirm'))) return;
+  if(!await confirmSheet(t('intervals.disconnectConfirm'))) return;
   try{
     await skandiApi('intervals-disconnect');
     await loadIntegrations();
@@ -9543,7 +9573,7 @@ async function syncStrava(days){
 }
 
 async function disconnectStrava(){
-  if(!confirm(t('strava.disconnectConfirm'))) return;
+  if(!await confirmSheet(t('strava.disconnectConfirm'))) return;
   try{
     await skandiApi('strava-disconnect');
     await loadIntegrations();
@@ -10172,7 +10202,7 @@ async function saveNewSupplement(){
 }
 
 async function deleteSupplement(id){
-  if(!confirm(t('supp.confirmDelete'))) return;
+  if(!await confirmSheet(t('supp.confirmDelete'))) return;
   const {error}=await sb.from('skandi_supplements').delete().eq('id',id);
   if(error) return alert(error.message);
   await loadAll();
@@ -10281,7 +10311,7 @@ const STARTER_DISHES=[
 ];
 
 async function seedStarterCatalog(){
-  if(!confirm(t('food.seedConfirm'))) return;
+  if(!await confirmSheet(t('food.seedConfirm'))) return;
   const globalFoods=state.foods.filter(f=>!f.user_id);
   if(!globalFoods.length) return alert(t('food.seedNoFoods'));
   const existingNames=new Set(state.dishes.map(d=>d.name.toLowerCase()));
@@ -11541,11 +11571,11 @@ async function rememberMealItems(mealId){
   for(const item of items) await rememberFood(item);
 }
 
-function promptSaveAsDish(mealId){
+async function promptSaveAsDish(mealId){
   const meal=state.meals.find(m=>m.id===mealId);
-  const name=prompt(t('food.dishName'),meal?.note||mealTypeLabel(meal?.meal_type||'snack'));
+  const name=await promptSheet(t('food.dishName'),{defaultValue:meal?.note||mealTypeLabel(meal?.meal_type||'snack')});
   if(name===null) return;
-  if(!name.trim()) return alert(t('food.errName'));
+  if(!name.trim()) return alertSheet(t('food.errName'));
   saveMealAsDish(mealId,name.trim());
 }
 
@@ -11558,7 +11588,7 @@ async function saveMealAsDish(mealId,name){
 }
 
 async function deleteMeal(mealId){
-  if(!confirm(t('food.deleteConfirm'))) return;
+  if(!await confirmSheet(t('food.deleteConfirm'))) return;
   const meal=state.meals.find(m=>m.id===mealId);
   const {error}=await sb.from('skandi_meals').delete().eq('id',mealId);
   if(error) return alert(error.message);
@@ -11684,7 +11714,7 @@ async function saveTargets(){
   // Un número escrito a mano por debajo de lo que la app misma propondría en el déficit más
   // agresivo: no es "¿tu meta es un déficit?", es "¿nadie ni el cálculo automático llegaría aquí?".
   const weightForCheck=latestWeightKg();
-  if(weightForCheck && SkandiNutrition.isLowEnergy(kcal,weightForCheck) && !confirm(t('food.lowEnergyConfirm'))) return;
+  if(weightForCheck && SkandiNutrition.isLowEnergy(kcal,weightForCheck) && !await confirmSheet(t('food.lowEnergyConfirm'))) return;
   // Vacío significa "no me lo vigiles", que no es lo mismo que un techo de cero.
   const sugarCap=$('tgS').value===''?null:Math.round(Number($('tgS').value));
   const dietNotes=($('tgDietNotes')?.value||'').trim().slice(0,4000)||null;
