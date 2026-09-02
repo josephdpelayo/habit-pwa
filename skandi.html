@@ -8,19 +8,19 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="Skandi Fit">
 <meta name="application-name" content="Skandi Fit">
-<link rel="manifest" href="/skandi-manifest.json?v=20260826-9">
-<link rel="apple-touch-icon" sizes="180x180" href="/icons/skandi-180.png?v=20260826-9">
-<link rel="icon" type="image/png" sizes="192x192" href="/icons/skandi-192.png?v=20260826-9">
+<link rel="manifest" href="/skandi-manifest.json?v=20260902-1">
+<link rel="apple-touch-icon" sizes="180x180" href="/icons/skandi-180.png?v=20260902-1">
+<link rel="icon" type="image/png" sizes="192x192" href="/icons/skandi-192.png?v=20260902-1">
 <title>Skandi Fit</title>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="/skandi-recovery.js?v=20260826-9"></script>
-<script src="/skandi-plan.js?v=20260826-9"></script>
-<script src="/body-figure.js?v=20260826-9"></script>
-<script src="/skandi-nutrition.js?v=20260826-9"></script>
-<script src="/skandi-load.js?v=20260826-9"></script>
-<script src="/skandi-brief.js?v=20260826-9"></script>
-<script src="/skandi-joint-load.js?v=20260826-9"></script>
-<script src="/skandi-outbox.js?v=20260826-9"></script>
+<script src="/skandi-recovery.js?v=20260902-1"></script>
+<script src="/skandi-plan.js?v=20260902-1"></script>
+<script src="/body-figure.js?v=20260902-1"></script>
+<script src="/skandi-nutrition.js?v=20260902-1"></script>
+<script src="/skandi-load.js?v=20260902-1"></script>
+<script src="/skandi-brief.js?v=20260902-1"></script>
+<script src="/skandi-joint-load.js?v=20260902-1"></script>
+<script src="/skandi-outbox.js?v=20260902-1"></script>
 <style>
 :root{
   --bg:#eef4f8;
@@ -669,7 +669,7 @@ button.chip{min-height:44px}
 // Versión compartida con app.html (APP_VERSION) y sw.js (CACHE_VERSION): un solo service
 // worker sirve las dos apps, así que una sola cadena las invalida a las dos. Al cambiarla
 // hay que actualizarla también en los ?v= del <head>, en index.html y en los dos manifests.
-const SKANDI_VERSION='20260826-9';
+const SKANDI_VERSION='20260902-1';
 const SUPABASE_URL='https://pmpjteuqjusbiduevbwq.supabase.co';
 const SUPABASE_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBtcGp0ZXVxanVzYmlkdWV2YndxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc2OTI1NjUsImV4cCI6MjA5MzI2ODU2NX0.XbMzZoo2yqtrD8znLnyo_1zDfrdJAvAPj1lqGOyXnLw';
 const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
@@ -704,6 +704,8 @@ en:{
   'food.title':'Food','food.today':'Today','food.eaten':'eaten','food.left':'left','food.over':'over',
   'food.noTarget':'Set a daily target','food.noTargetHint':'Log your bodyweight and we suggest one.',
   'food.setTarget':'Daily target','food.protein':'Protein','food.carbs':'Carbs','food.fat':'Fat',
+  'food.adjustDay':'Adjust','food.adjustDayTitle':'Adjust targets for {day}','food.adjustDayHint':'A suggestion for today, not a rule — change it just for this day and the rest of your target stays the same. Leave a field empty to use your normal target.',
+  'food.dayNote':'Why (optional)','food.dayNotePh':'e.g. Deload week','food.resetToBase':'Back to my normal target','food.resetToBaseConfirm':'Remove this day\'s adjustment and go back to your normal target?',
   'food.addMeal':'Add food','food.empty':'Nothing logged today.','food.emptyHint':'Start with a photo, or a saved dish.',
   'food.quickPicks':'Repeat something','food.dishes':'Saved dishes','food.recent':'Recent foods',
   'food.pantry':'Pantry','food.pantryManage':'Edit','food.pantryEmptyHint':'Mark what you have on board right now — the AI suggestion prioritizes it.',
@@ -727,6 +729,8 @@ en:{
   'food.reason.kcal_heavy':'That\'s {kcal} of the {left} kcal you have left today — barely any room for more.',
   'food.reason.low_protein':'Low in protein ({g} g) for how much you still need today.',
   'food.newFoodBtn':'Type it in','food.newFoodHint':'For anything without a barcode: type the macros per 100 g yourself.',
+  'food.backfillBtn':'Add my analyzed history to the catalog','food.backfillConfirm':'Go through everything AI has already analyzed for you and add it to your food catalog, so next time it comes up you can just search for it?',
+  'food.backfillDone':'{n} foods added to your catalog.',
   'food.errFoodName':'The food needs a name.',
   'food.analyzeOnly':'Analyze','food.analyzeOnlyBtn':'Analyze without logging','food.analyzeOnlyHint':'A photo or a description, just to see if it works for you — nothing gets logged until you say so.',
   'food.seedCatalog':'Load starter catalog','food.seedCatalogHint':'A few common dishes built from the shared food catalog, so you have something to start from.',
@@ -1136,6 +1140,8 @@ en:{
   'strava.title':'Strava','strava.badge':'Strava','strava.checkEffort':'check effort',
   'report.keepChangesTitle':'Save these changes to “{name}”?','report.added':'Added: {list}','report.removed':'Removed: {list}',
   'report.keepChangesBody':'Leave it off and the routine stays as it was — today counts as a one-off. Set counts are never carried over: doing 2 instead of 3 is how the day went, not a change of plan.',
+  'report.saveAsRoutineTitle':'Save as a new routine?','report.saveAsRoutineBody':'You trained free, with no routine behind it. Turn on to save what you did as a routine you can pick again later.',
+  'report.newRoutineNamePh':'Routine name','report.errRoutineName':'Add a name for the routine.',
   'link.title':'Watch workouts with no session','link.merge':'Merge','link.ignore':'Not now',
   'link.intro':'The watch recorded these and no session in Skandi matched their time. If one of them is the same workout you logged, say so and they become one.',
   'link.noCandidates':'No session logged in Skandi that day to merge it with.',
@@ -1235,6 +1241,8 @@ en:{
 
   'workout.busy':'Finish or cancel your current workout before starting another.',
   'workout.startTraining':'Start training',
+  'workout.freeTitle':'Free workout','workout.startFree':'Free workout',
+  'workout.emptyFinish':'Add at least one exercise before finishing.',
   'workout.netHiccup':'Connection hiccup starting the workout — check your signal and try again.',
   'workout.confirmFinish':'Finish this workout and prepare the final report?',
   'workout.todayLabel':'Today workout','workout.blockLabel':'Today workout · Week {week}/{total}',
@@ -1379,6 +1387,8 @@ es:{
   'food.title':'Comida','food.today':'Hoy','food.eaten':'comidas','food.left':'restan','food.over':'de más',
   'food.noTarget':'Pon tu meta diaria','food.noTargetHint':'Registra tu peso y te sugerimos una.',
   'food.setTarget':'Meta diaria','food.protein':'Proteína','food.carbs':'Carbos','food.fat':'Grasa',
+  'food.adjustDay':'Ajustar','food.adjustDayTitle':'Ajustar metas de {day}','food.adjustDayHint':'Es una sugerencia para hoy, no una regla — cámbiala solo para este día y el resto de tu meta se queda igual. Deja un campo vacío para usar tu meta normal.',
+  'food.dayNote':'Por qué (opcional)','food.dayNotePh':'ej. Semana de descarga','food.resetToBase':'Volver a mi meta normal','food.resetToBaseConfirm':'¿Quitar el ajuste de este día y volver a tu meta normal?',
   'food.addMeal':'Agregar comida','food.empty':'Nada registrado hoy.','food.emptyHint':'Empieza con una foto, o con un platillo guardado.',
   'food.quickPicks':'Repetir algo','food.dishes':'Platillos guardados','food.recent':'Alimentos recientes',
   'food.pantry':'Alacena','food.pantryManage':'Editar','food.pantryEmptyHint':'Marca lo que tienes a bordo ahorita — la sugerencia de la IA le da prioridad.',
@@ -1402,6 +1412,8 @@ es:{
   'food.reason.kcal_heavy':'Son {kcal} de las {left} kcal que te quedan hoy — casi no dejaría espacio para más.',
   'food.reason.low_protein':'Aporta poca proteína ({g} g) para lo que todavía te falta hoy.',
   'food.newFoodBtn':'Escribirlo','food.newFoodHint':'Para algo sin código de barras: escribe tú los macros por 100 g.',
+  'food.backfillBtn':'Agregar mi historial analizado al catálogo','food.backfillConfirm':'¿Repasar todo lo que la IA ya te ha analizado y agregarlo a tu catálogo de alimentos, para que la próxima vez solo lo busques?',
+  'food.backfillDone':'{n} alimentos agregados a tu catálogo.',
   'food.errFoodName':'El alimento necesita nombre.',
   'food.analyzeOnly':'Analizar','food.analyzeOnlyBtn':'Analizar sin registrar','food.analyzeOnlyHint':'Una foto o una descripción, solo para ver si te conviene — no se registra nada hasta que tú lo decidas.',
   'food.seedCatalog':'Cargar catálogo inicial','food.seedCatalogHint':'Unos platillos comunes armados con el catálogo compartido, para tener de dónde partir.',
@@ -1811,6 +1823,8 @@ es:{
   'strava.title':'Strava','strava.badge':'Strava','strava.checkEffort':'revisa el esfuerzo',
   'report.keepChangesTitle':'¿Guardar estos cambios en «{name}»?','report.added':'Agregaste: {list}','report.removed':'Quitaste: {list}',
   'report.keepChangesBody':'Déjala apagada y la rutina se queda como estaba — lo de hoy cuenta como algo de una vez. El número de series nunca se copia: hacer 2 en vez de 3 es cómo salió el día, no un cambio de plan.',
+  'report.saveAsRoutineTitle':'¿Guardar como rutina nueva?','report.saveAsRoutineBody':'Entrenaste libre, sin una rutina detrás. Actívalo para guardar lo que hiciste como una rutina que puedas volver a escoger después.',
+  'report.newRoutineNamePh':'Nombre de la rutina','report.errRoutineName':'Agrega un nombre para la rutina.',
   'link.title':'Entrenamientos del reloj sin sesión','link.merge':'Fusionar','link.ignore':'Ahora no',
   'link.intro':'El reloj registró esto y ninguna sesión de Skandi coincidió en horario. Si alguna es el mismo entrenamiento que registraste, dilo y quedan como uno solo.',
   'link.noCandidates':'Ese día no hay ninguna sesión registrada en Skandi con la cual fusionarlo.',
@@ -1910,6 +1924,8 @@ es:{
 
   'workout.busy':'Termina o cancela tu entrenamiento actual antes de empezar otro.',
   'workout.startTraining':'Empezar a entrenar',
+  'workout.freeTitle':'Entrenamiento libre','workout.startFree':'Entrenar libre',
+  'workout.emptyFinish':'Agrega al menos un ejercicio antes de terminar.',
   'workout.netHiccup':'Falló la conexión al iniciar el entrenamiento — revisa tu señal e inténtalo de nuevo.',
   'workout.confirmFinish':'¿Terminar este entrenamiento y preparar el reporte final?',
   'workout.todayLabel':'Entrenamiento de hoy','workout.blockLabel':'Entrenamiento de hoy · Semana {week}/{total}',
@@ -2494,6 +2510,15 @@ function cycleWeekInfo(source,startDate,buildWeeks,hasDeload=true,refDate=Date.n
 // current cycle, wrong if the member has since switched blocks, which is an acceptable miss here.
 function trainingBlockWeekInfo(block,refDate=Date.now()){
   if(!block){
+    // Un bloque puntual (build_weeks===0, ver startAdHocDeload) es la declaración más
+    // deliberada sobre ESTA semana en concreto -- gana incluso sobre un programa activo. Sin
+    // esto, quien tiene un programa cargado (start_date propio, ciclo propio) nunca llegaba a
+    // leer skandi_training_blocks aquí: el botón "Es mi semana de descarga" guardaba la fila
+    // pero trainingBlockWeekInfo() seguía calculando la semana desde el programa, así que el
+    // aviso de estancamiento no cambiaba y deloadAdjustedWeight() no bajaba el peso sugerido.
+    const adHoc=(state.trainingBlocks||[]).find(b=>Number(b.build_weeks)===0
+      &&cycleWeekInfo(b,b.start_date,0,true,refDate)?.deload);
+    if(adHoc) return cycleWeekInfo(adHoc,adHoc.start_date,0,true,refDate);
     const program=typeof activeProgram==='function'?activeProgram():null;
     if(program?.start_date){
       const source={start_date:program.start_date,build_weeks:program.weeks||4,program_id:program.id};
@@ -4015,6 +4040,7 @@ function trainTodayTab(){
         :empty(t('cal.emptyDay'))}
       <button class="btn" style="width:100%;margin-top:12px" onclick="openPlannedForm('${key}')">${icon('plus',16)} ${esc(t('cal.addSession'))}</button>
     </section>
+    <button class="btn small ghost" style="width:100%" onclick="startFreeWorkout()">${icon('play',16)} ${esc(t('workout.startFree'))}</button>
     ${wellnessCardHtml()}
     ${trainingBlockCardHtml()}`;
 }
@@ -7362,6 +7388,36 @@ async function startWorkout(templateId){
   }
 }
 
+// "Voy a entrenar y decido sobre la marcha" — sin plantilla, sin ejercicios de arranque. No
+// hace falta tocar renderActiveWorkout(): ya pinta state.activeItems vacío sin quejarse, ya
+// tiene el botón "Agregar ejercicio" siempre visible, y addExerciseToSession() ya funciona sin
+// mirar template_id. Lo único que faltaba era una forma de crear la sesión sin pasar por el
+// tpl/its que startWorkout() exige.
+async function startFreeWorkout(){
+  if(startingWorkout) return;
+  if(state.active){
+    if(!state.active.template_id){ openActiveWorkout(); return; }
+    return alertSheet(t('workout.busy'));
+  }
+  startingWorkout=true;
+  try{
+    const {data:session,error}=await withNetworkRetry(()=>sb.from('skandi_sessions').insert({user_id:state.user.id,template_id:null,title:t('workout.freeTitle')}).select().single());
+    if(error) return alertSheet(isTransientFetchError(error)?t('workout.netHiccup'):error.message);
+    state.active=session;
+    state.activeItems=computeActiveItems(session.id);
+    state.elapsed=0;
+    state.rest=0;
+    state.restTotal=0;
+    state.pausedMs=0;
+    state.pausedAt=null;
+    resumeWorkoutTimer();
+    openActiveWorkout();
+    loadAll().catch(()=>{});
+  } finally {
+    startingWorkout=false;
+  }
+}
+
 // An active workout's exercise list is derived from the session's own sets (each set
 // carries its own target_reps/target_rest_sec/sort_order), not from skandi_template_items.
 // That's what lets performSwap() below replace one exercise with another mid-workout
@@ -7560,6 +7616,7 @@ function adjustRest(delta){
 
 async function confirmFinishWorkout(){
   if(!state.active) return;
+  if(!state.activeItems.length) return alertSheet(t('workout.emptyFinish'));
   if(!await confirmSheet(t('workout.confirmFinish'),{confirmLabel:t('workout.finish')})) return;
   openReport();
 }
@@ -8313,11 +8370,13 @@ function sessionTemplateDiff(){
   return {tpl,added,removed};
 }
 
-// Guardar los cambios reescribe la rutina con lo que de verdad se entrenó. Las series
-// objetivo salen de cuántas quedaron en cada hueco, y reps/descanso/RIR de la primera serie
-// de ese hueco, que es la que llevaba el objetivo original.
-async function saveSessionIntoTemplate(templateId){
-  const items=state.activeItems.map((item,idx)=>{
+// Las series objetivo salen de cuántas quedaron en cada hueco, y reps/descanso/RIR de la
+// primera serie de ese hueco, que es la que llevaba el objetivo original. Compartida por
+// saveSessionIntoTemplate (reescribir una rutina existente) y finishWorkout (crear una rutina
+// nueva desde un entrenamiento libre) — el mapeo de "lo que se entrenó" a "filas de
+// skandi_template_items" es el mismo en los dos casos, solo cambia el destino.
+function templateItemsFromActiveItems(){
+  return state.activeItems.map((item,idx)=>{
     const seed=item.sets.find(x=>x.set_idx===1)||item.sets[0]||{};
     return {
       exercise_id:item.exercise_id,
@@ -8328,6 +8387,11 @@ async function saveSessionIntoTemplate(templateId){
       target_rir:seed.target_rir??item.target_rir??null
     };
   });
+}
+
+// Guardar los cambios reescribe la rutina con lo que de verdad se entrenó.
+async function saveSessionIntoTemplate(templateId){
+  const items=templateItemsFromActiveItems();
   if(!items.length) return;
   // El RPC de la migración 052: borrar e insertar en una sola transacción, para que un fallo
   // a la mitad no deje la rutina sin ejercicios.
@@ -8335,8 +8399,23 @@ async function saveSessionIntoTemplate(templateId){
   if(error) await alertSheet(error.message);
 }
 
+// Un entrenamiento libre (sin template_id) no tiene con qué comparar sessionTemplateDiff(), así
+// que en vez de "guardar cambios" ofrece crear una rutina nueva desde cero con lo que se
+// entrenó — mismo mapeo (templateItemsFromActiveItems), mismo RPC, solo que primero inserta la
+// fila de skandi_templates en vez de reescribir una que ya existía.
+async function saveActiveWorkoutAsNewTemplate(name){
+  const items=templateItemsFromActiveItems();
+  if(!items.length) return;
+  const {data:tpl,error:tplError}=await sb.from('skandi_templates')
+    .insert({user_id:state.user.id,name,notes:null,is_public:true,weekday:null}).select().single();
+  if(tplError){ await alertSheet(tplError.message); return; }
+  const {error}=await sb.rpc('save_template_items',{p_template_id:tpl.id,p_items:items});
+  if(error) await alertSheet(error.message);
+}
+
 function openReport(){
   const diff=sessionTemplateDiff();
+  const offerSaveAsRoutine=!state.active.template_id&&state.activeItems.length>0;
   $('modalCard').innerHTML=`
     <div class="row"><h1>${esc(t('report.title'))}</h1><button class="x" onclick="closeModal()" aria-label="${esc(t('common.close'))}">${icon('close',20)}</button></div>
     <section class="card" style="border-color:rgba(1,36,86,.20);background:linear-gradient(135deg,#ffffff,#e8f1f8)"><h2>${esc(state.active.title)}</h2><p>${esc(t('report.logged',{time:fmtWorkoutTime(state.elapsed)}))}</p></section>
@@ -8365,6 +8444,14 @@ function openReport(){
       <input id="keepChanges" type="checkbox">
     </label>`:''}
     <input type="hidden" id="diffTemplateId" value="${diff?diff.tpl.id:''}">
+    ${offerSaveAsRoutine?`<label class="card row" style="margin:0 0 14px;border-color:rgba(0,168,200,.30)">
+      <div>
+        <h3>${esc(t('report.saveAsRoutineTitle'))}</h3>
+        <p>${esc(t('report.saveAsRoutineBody'))}</p>
+        <input id="newRoutineName" class="field" style="margin-top:8px" value="${esc(state.active.title)}" placeholder="${esc(t('report.newRoutineNamePh'))}" onclick="event.stopPropagation()">
+      </div>
+      <input id="saveAsRoutine" type="checkbox">
+    </label>`:''}
     <button class="btn primary" style="width:100%" onclick="finishWorkout()">${esc(t('report.save'))}</button>`;
 }
 
@@ -8374,6 +8461,8 @@ async function finishWorkout(){
   if(sleepHours!==null&&(!Number.isFinite(sleepHours)||sleepHours<0||sleepHours>24)) return alertSheet(t('report.errSleep'));
   const minutes=Number($('repDuration').value);
   if(!Number.isFinite(minutes)||minutes<1||minutes>600) return alertSheet(t('sedit.errDuration'));
+  const newRoutineName=$('saveAsRoutine')?.checked?($('newRoutineName')?.value||'').trim():'';
+  if($('saveAsRoutine')?.checked&&!newRoutineName) return alertSheet(t('report.errRoutineName'));
   const durationSec=Math.round(minutes*60);
   // A workout nobody remembered to finish gets closed out hours later, so "now" is the wrong
   // completion time: once the duration is corrected, the session ended when it ended
@@ -8397,6 +8486,7 @@ async function finishWorkout(){
   // sin querer significa perder el plan original sin manera de recuperarlo.
   const keepTemplateId=$('keepChanges')?.checked?$('diffTemplateId')?.value:'';
   if(keepTemplateId) await saveSessionIntoTemplate(keepTemplateId);
+  if(newRoutineName) await saveActiveWorkoutAsNewTemplate(newRoutineName);
   // El calendario se concilia solo: la sesión que acaba de cerrarse busca su fila planeada
   // del día y la marca hecha. Si no había ninguna, la sesión aparece como extra en vez de
   // perderse — entrenar algo no planeado no es un error que haya que capturar.
@@ -9604,6 +9694,7 @@ function foodView(){
           <h1>${esc(capFirst(label))}</h1>
         </div>
         <div class="row" style="gap:6px">
+          ${targets?`<button class="chip" onclick="openDayTargetOverride()">${esc(t('food.adjustDay'))}</button>`:''}
           <button class="chip" onclick="shiftFoodDay(-1)" aria-label="←">←</button>
           <button class="chip" onclick="shiftFoodDay(1)" ${isToday?'disabled style="opacity:.4"':''} aria-label="→">→</button>
         </div>
@@ -10220,6 +10311,31 @@ async function seedStarterCatalog(){
   else alert(t('food.seedNothingNew'));
 }
 
+// Lo mismo que rememberMealItems, pero para TODO el historial en vez de una comida recién
+// analizada — para quien ya traía meses de comidas analizadas antes de que esto existiera.
+// state.mealItems no tiene límite de fecha (loadNutrition la carga completa), así que no hace
+// falta ninguna consulta nueva. Un renglón por nombre: el upsert de rememberFood ya reconcilia
+// el mismo alimento exacto, esto solo evita cientos de writes redundantes en un historial largo.
+// Se deja siempre visible en vez de esconderse tras un "ya corrí esto" — no hay dónde guardar
+// esa marca sin una columna nueva, y volver a correrlo es barato.
+async function backfillFoodsFromMealHistory(){
+  if(!await confirmSheet(t('food.backfillConfirm'))) return;
+  const seen=new Set();
+  let created=0;
+  for(const item of state.mealItems){
+    if(item.source!=='ai'||item.is_cooking_fat||item.food_id) continue;
+    const key=(item.label||'').trim().toLowerCase();
+    if(!key||seen.has(key)) continue;
+    seen.add(key);
+    await rememberFood(item);
+    created++;
+  }
+  closeModal();
+  await loadNutrition();
+  render();
+  alertSheet(t('food.backfillDone',{n:created}));
+}
+
 // ---- Alta: foto y/o texto (los dos caminos que sí usan IA) ----
 
 // mealId: si se abrió desde una comida ya iniciada ("Foto" en su detalle), esta foto se
@@ -10542,6 +10658,7 @@ async function appendMealPhotos(pending,desc){
   closeModal();
   state.pendingMeal=null;
   await loadNutrition();
+  await rememberMealItems(pending.mealId);
   setView('food');
   openMealDetail(pending.mealId);
 }
@@ -10679,6 +10796,7 @@ async function confirmInspectAdd(){
     if(itemsErr) return alert(itemsErr.message);
     state.pendingInspect=null;
     await loadNutrition();
+    await rememberMealItems(mealId);
     state.foodDayOffset=0;
     setView('food');
     openMealDetail(mealId);
@@ -10705,6 +10823,7 @@ async function analyzeMeal(mealId,attempt=0){
         const settled=await waitForAnalysis(mealId);
         if(settled&&settled.analysis_status==='ready'){
           await loadNutrition();
+          await rememberMealItems(mealId);
           if(state.view==='food') render();
           return openMealDetail(mealId);
         }
@@ -10722,6 +10841,7 @@ async function analyzeMeal(mealId,attempt=0){
       return;
     }
     await loadNutrition();
+    await rememberMealItems(mealId);
     if(state.view==='food') render();
     openMealDetail(mealId);
   }catch(e){
@@ -10731,6 +10851,7 @@ async function analyzeMeal(mealId,attempt=0){
     // preguntamos por la comida unos segundos más antes de decidir.
     const settled=await waitForAnalysis(mealId);
     await loadNutrition();
+    if(settled&&settled.analysis_status==='ready') await rememberMealItems(mealId);
     if(state.view==='food') render();
     if(settled&&settled.analysis_status==='ready') return openMealDetail(mealId);
     if(attempt<1){
@@ -10935,7 +11056,8 @@ function openFoodPicker(mealId){
     <div class="row"><h1>${esc(t('food.byFood'))}</h1><button class="x" onclick="closeModal()" aria-label="${esc(t('common.close'))}">${icon('close',20)}</button></div>
     <input id="foodQuery" class="field left" type="search" placeholder="${esc(t('food.searchPh'))}" oninput="renderFoodList(this.value)" autocomplete="off">
     <div id="foodList" style="margin-top:10px">${foodListHtml('')}</div>
-    <button class="btn" style="width:100%;margin-top:10px" onclick="openNewFood(${mealId?`'${mealId}'`:'null'})">${icon('edit',18)} ${esc(t('food.newFoodBtn'))}</button>`;
+    <button class="btn" style="width:100%;margin-top:10px" onclick="openNewFood(${mealId?`'${mealId}'`:'null'})">${icon('edit',18)} ${esc(t('food.newFoodBtn'))}</button>
+    <button type="button" style="display:block;width:100%;margin-top:14px;background:transparent;border:0;color:var(--muted);font-weight:900;font-size:13px;padding:6px;text-decoration:underline;text-underline-offset:3px;text-align:center" onclick="backfillFoodsFromMealHistory()">${esc(t('food.backfillBtn'))}</button>`;
 }
 
 // ---- Alta: alimento tecleado a mano (sin código de barras y sin IA) ----
@@ -11370,6 +11492,16 @@ async function rememberFood(item){
   );
 }
 
+// Un renglón que la IA analizó bien a la primera vale como alimento del catálogo tanto como uno
+// que corregiste a mano — rememberFood ya hace ese trabajo (upsert por nombre, descarta grasa
+// de cocción y lo ya ligado a un food_id), solo hacía falta llamarlo también aquí, no nada más
+// desde updateItemGrams. Así la próxima vez que se coma lo mismo, buscarlo en el catálogo es
+// gratis e instantáneo en vez de gastar otra llamada a Claude.
+async function rememberMealItems(mealId){
+  const items=state.mealItems.filter(i=>i.meal_id===mealId&&i.source==='ai');
+  for(const item of items) await rememberFood(item);
+}
+
 function promptSaveAsDish(mealId){
   const meal=state.meals.find(m=>m.id===mealId);
   const name=prompt(t('food.dishName'),meal?.note||mealTypeLabel(meal?.meal_type||'snack'));
@@ -11399,6 +11531,67 @@ async function deleteMeal(mealId){
 }
 
 // ---- Metas ----
+
+// El override por fecha (migración 094) ya existía y ya se LEÍA (targetsForDay/
+// nutritionOverrideFor) — lo único que faltaba era que la app alguna vez lo escribiera; antes
+// solo se podía llenar a mano en el SQL Editor. value = el campo del override (vacío si no hay
+// uno), no el valor efectivo -- vacío sigue significando "no fuerces nada, cae a mi meta
+// normal", mismo criterio que ya usa el techo de azúcar de openTargets. placeholder muestra ese
+// valor efectivo para que quede claro a qué se cae si se deja vacío.
+function openDayTargetOverride(){
+  const key=foodDay();
+  const base=state.nutritionTargets;
+  if(!base) return;
+  const override=nutritionOverrideFor(key);
+  const eff=targetsForDay(key);
+  const dayLabel=state.foodDayOffset===0?t('food.today'):new Date(key+'T12:00:00').toLocaleDateString(LANG==='es'?'es-MX':'en-US',{weekday:'long',day:'numeric',month:'short'});
+  $('modal').classList.add('show');
+  $('modalCard').innerHTML=`
+    <div class="row"><h1>${esc(t('food.adjustDayTitle',{day:capFirst(dayLabel)}))}</h1><button class="x" onclick="closeModal()" aria-label="${esc(t('common.close'))}">${icon('close',20)}</button></div>
+    <p class="muted">${esc(t('food.adjustDayHint'))}</p>
+    <label class="eyebrow">${esc(t('food.targetKcal'))}</label>
+    <input id="dtoKcal" class="field" type="number" min="800" max="8000" inputmode="numeric" value="${override?.kcal_target??''}" placeholder="${eff.kcal_target||''}">
+    <div class="grid" style="grid-template-columns:repeat(3,1fr);gap:8px">
+      <div><label class="eyebrow">${esc(t('food.protein'))}</label><input id="dtoP" class="field" type="number" min="0" max="500" value="${override?.protein_g_target??''}" placeholder="${eff.protein_g_target||''}"></div>
+      <div><label class="eyebrow">${esc(t('food.carbs'))}</label><input id="dtoC" class="field" type="number" min="0" max="1200" value="${override?.carbs_g_target??''}" placeholder="${eff.carbs_g_target||''}"></div>
+      <div><label class="eyebrow">${esc(t('food.fat'))}</label><input id="dtoF" class="field" type="number" min="0" max="400" value="${override?.fat_g_target??''}" placeholder="${eff.fat_g_target||''}"></div>
+    </div>
+    <label class="eyebrow" style="margin-top:10px">${esc(t('food.dayNote'))}</label>
+    <input id="dtoNote" class="field" type="text" maxlength="500" value="${esc(override?.note||'')}" placeholder="${esc(t('food.dayNotePh'))}">
+    <button class="btn primary" style="width:100%;margin-top:10px" onclick="saveDayTargetOverride('${key}')">${esc(t('food.save'))}</button>
+    ${override?`<button class="btn" style="width:100%;margin-top:8px" onclick="clearDayTargetOverride('${key}','${override.id}')">${esc(t('food.resetToBase'))}</button>`:''}`;
+}
+
+async function saveDayTargetOverride(key){
+  const field=(id,min,max)=>{
+    const raw=$(id).value;
+    if(raw==='') return {value:null};
+    const v=Math.round(Number(raw));
+    if(!Number.isFinite(v)||v<min||v>max) return {error:true};
+    return {value:v};
+  };
+  const kcal=field('dtoKcal',800,8000),protein=field('dtoP',0,500),carbs=field('dtoC',0,1200),fat=field('dtoF',0,400);
+  if(kcal.error||protein.error||carbs.error||fat.error) return alertSheet(t('food.errGrams'));
+  const row={
+    user_id:state.user.id,target_date:key,
+    kcal_target:kcal.value,protein_g_target:protein.value,carbs_g_target:carbs.value,fat_g_target:fat.value,
+    note:($('dtoNote').value||'').trim().slice(0,500)||null
+  };
+  const {error}=await sb.from('skandi_nutrition_target_overrides').upsert(row,{onConflict:'user_id,target_date'});
+  if(error) return alertSheet(error.message);
+  closeModal();
+  await loadNutrition();
+  render();
+}
+
+async function clearDayTargetOverride(key,id){
+  if(!await confirmSheet(t('food.resetToBaseConfirm'))) return;
+  const {error}=await sb.from('skandi_nutrition_target_overrides').delete().eq('id',id);
+  if(error) return alertSheet(error.message);
+  closeModal();
+  await loadNutrition();
+  render();
+}
 
 function openTargets(){
   const tg=state.nutritionTargets;
