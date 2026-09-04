@@ -6,18 +6,18 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="HABIT">
 <meta name="application-name" content="HABIT">
-<link rel="manifest" href="/manifest.json?v=20260902-3">
-<link rel="apple-touch-icon" sizes="120x120" href="/icons/icon-120.png?v=20260902-3">
-<link rel="apple-touch-icon" sizes="152x152" href="/icons/icon-152.png?v=20260902-3">
-<link rel="apple-touch-icon" sizes="167x167" href="/icons/icon-167.png?v=20260902-3">
-<link rel="apple-touch-icon" sizes="180x180" href="/icons/icon-180.png?v=20260902-3">
-<link rel="icon" type="image/png" sizes="32x32" href="/icons/icon-32.png?v=20260902-3">
+<link rel="manifest" href="/manifest.json?v=20260904-1">
+<link rel="apple-touch-icon" sizes="120x120" href="/icons/icon-120.png?v=20260904-1">
+<link rel="apple-touch-icon" sizes="152x152" href="/icons/icon-152.png?v=20260904-1">
+<link rel="apple-touch-icon" sizes="167x167" href="/icons/icon-167.png?v=20260904-1">
+<link rel="apple-touch-icon" sizes="180x180" href="/icons/icon-180.png?v=20260904-1">
+<link rel="icon" type="image/png" sizes="32x32" href="/icons/icon-32.png?v=20260904-1">
 <title>HABIT</title>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Share+Tech+Mono&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="/skandi-recovery.js?v=20260902-3"></script>
-<script src="/body-figure.js?v=20260902-3"></script>
+<script src="/skandi-recovery.js?v=20260904-1"></script>
+<script src="/body-figure.js?v=20260904-1"></script>
 <style>
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
 :root{
@@ -3058,7 +3058,7 @@ body.admin-mode #courtesy-modal label{border-radius:14px!important;border-color:
 // ── CONFIG & SUPABASE ───────────────────────────────────────
 const SUPABASE_URL='https://pmpjteuqjusbiduevbwq.supabase.co';
 const SUPABASE_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBtcGp0ZXVxanVzYmlkdWV2YndxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc2OTI1NjUsImV4cCI6MjA5MzI2ODU2NX0.XbMzZoo2yqtrD8znLnyo_1zDfrdJAvAPj1lqGOyXnLw';
-const APP_VERSION='20260902-3';
+const APP_VERSION='20260904-1';
 // La pierna va separada en cuádriceps, femorales y pantorrillas: la figura
 // corporal pinta esas tres regiones por separado y el motor de recuperación les
 // da ventanas de descanso distintas. 'Piernas' sigue reconociéndose al leer
@@ -5050,6 +5050,7 @@ function admTab(t){
   if(t==='comunidad')renderAdminFeed();
   if(t==='notifs')renderAdmNotifsSb();
   if(t==='gaia')renderGaiaTab();
+  if(t==='reports')initReport();
 }
 
 function toggleAdminMobileMenu(force){
@@ -6832,6 +6833,140 @@ let addingExBoards=new Set();
 let assigningBoards=new Set();
 let expandedBoardExercises=new Set();
 let newBoardFormOpen=false;
+// El picker de catálogo es el modo por defecto al agregar ejercicios (como el
+// builder de rutinas de Skandi): buscar/filtrar, marcar varios y guardarlos de
+// un jalón, en vez del formulario completo campo por campo. boardExCustomMode
+// guarda qué pizarrones optaron por el formulario detallado (ejercicio fuera
+// del catálogo, con video/descripcion propios) en vez del picker.
+let boardExCustomMode=new Set();
+let boardPicker={bid:null,query:'',group:'Todos',selected:new Map()};
+function toggleBoardAddPanel(bid){
+  if(addingExBoards.has(bid)){
+    addingExBoards.delete(bid);
+    boardExCustomMode.delete(bid);
+  }else{
+    addingExBoards.add(bid);
+    boardExCustomMode.delete(bid);
+    boardPicker={bid,query:'',group:'Todos',selected:new Map()};
+  }
+  renderBoardsAdmin();
+}
+function switchToBoardCustomMode(bid){boardExCustomMode.add(bid);renderBoardsAdmin();}
+function switchToBoardPickerMode(bid){
+  boardExCustomMode.delete(bid);
+  if(!boardPicker||boardPicker.bid!==bid)boardPicker={bid,query:'',group:'Todos',selected:new Map()};
+  renderBoardsAdmin();
+}
+function boardPickerSetQuery(bid,v){if(boardPicker.bid!==bid)return;boardPicker.query=v;renderBoardPickerBody(bid);}
+function boardPickerSetGroup(bid,g){if(boardPicker.bid!==bid)return;boardPicker.group=g;renderBoardPickerBody(bid);}
+function toggleBoardPickerPick(bid,slug,checked){
+  if(boardPicker.bid!==bid)return;
+  if(checked){
+    const ex=exerciseCatalogRows().find(x=>x.slug===slug);
+    boardPicker.selected.set(slug,{sets:3,reps:ex&&ex.default_tracking==='time'?'30':'10',rest:'90',rir:2});
+  }else boardPicker.selected.delete(slug);
+  renderBoardPickerBody(bid);
+}
+function updateBoardPickerCfg(bid,slug,key,value){
+  if(boardPicker.bid!==bid)return;
+  const cfg=boardPicker.selected.get(slug);
+  if(!cfg)return;
+  cfg[key]=value;
+}
+function renderBoardPickerBody(bid){
+  const el=document.getElementById('board-picker-body-'+bid);
+  const board=boards.find(b=>b.id===bid);
+  if(!el||!board)return;
+  el.innerHTML=boardPickerBodyHtml(bid,board);
+}
+function boardPickerBodyHtml(bid,board){
+  const q=boardPicker.query.trim().toLowerCase();
+  const group=boardPicker.group;
+  const already=new Set(board.exercises.map(e=>e.exerciseKey).filter(Boolean));
+  const rows=exerciseCatalogRows().filter(ex=>{
+    if(!ex.slug)return false;
+    if(already.has(ex.slug))return false;
+    if(group!=='Todos'&&ex.primary_muscle!==group)return false;
+    if(q&&!(ex.name+' '+(ex.primary_muscle||'')).toLowerCase().includes(q))return false;
+    return true;
+  });
+  const shown=rows.slice(0,120);
+  const filters=['Todos',...MUSCLE_GROUPS].map(g=>
+    '<button type="button" class="btn-sm" style="margin:0 6px 6px 0;'+(group===g?'background:var(--blue);border-color:var(--blue);color:#fff':'background:transparent;border:1px solid var(--border);color:var(--gray)')+'" onclick="boardPickerSetGroup(&quot;'+bid+'&quot;,&quot;'+g+'&quot;)">'+esc(g)+'</button>'
+  ).join('');
+  const rowsHtml=shown.length?shown.map(ex=>{
+    const picked=boardPicker.selected.has(ex.slug);
+    const cfg=boardPicker.selected.get(ex.slug)||{};
+    return '<div style="border-bottom:1px solid var(--border);padding:8px 0">'
+      +'<label style="display:flex;align-items:center;gap:9px;cursor:pointer">'
+      +'<input type="checkbox" '+(picked?'checked':'')+' onchange="toggleBoardPickerPick(&quot;'+bid+'&quot;,&quot;'+esc(ex.slug)+'&quot;,this.checked)" style="width:18px;height:18px;flex-shrink:0;accent-color:var(--blue)">'
+      +'<div style="flex:1;min-width:0"><div style="font-size:13px;font-weight:700;color:var(--white)">'+esc(ex.name)+'</div><div style="font-size:11px;color:var(--gray)">'+esc(ex.primary_muscle||'')+'</div></div>'
+      +'</label>'
+      +(picked?'<div style="display:flex;gap:6px;margin:6px 0 0 27px">'
+        +'<input class="exercise-form-control small" style="width:56px" type="number" min="1" step="1" inputmode="numeric" value="'+esc(cfg.sets)+'" placeholder="Series" onchange="updateBoardPickerCfg(&quot;'+bid+'&quot;,&quot;'+esc(ex.slug)+'&quot;,&quot;sets&quot;,this.value)">'
+        +'<input class="exercise-form-control small" style="width:64px" type="text" inputmode="numeric" value="'+esc(cfg.reps)+'" placeholder="'+(ex.default_tracking==='time'?'Seg.':'Reps')+'" onchange="updateBoardPickerCfg(&quot;'+bid+'&quot;,&quot;'+esc(ex.slug)+'&quot;,&quot;reps&quot;,this.value)">'
+        +'<input class="exercise-form-control small" style="width:56px" type="text" inputmode="numeric" value="'+esc(cfg.rest)+'" placeholder="Desc." onchange="updateBoardPickerCfg(&quot;'+bid+'&quot;,&quot;'+esc(ex.slug)+'&quot;,&quot;rest&quot;,this.value)">'
+        +'<input class="exercise-form-control small" style="width:48px" type="number" min="0" max="10" step="1" inputmode="numeric" value="'+esc(cfg.rir)+'" placeholder="RIR" onchange="updateBoardPickerCfg(&quot;'+bid+'&quot;,&quot;'+esc(ex.slug)+'&quot;,&quot;rir&quot;,this.value)">'
+        +'</div>':'')
+      +'</div>';
+  }).join(''):'<div style="padding:10px 0;font-size:12px;color:var(--gray)">Sin resultados.</div>';
+  const more=rows.length>shown.length?'<div style="padding:6px 0;font-size:11px;color:var(--gray)">+'+(rows.length-shown.length)+' más — sigue escribiendo para filtrar.</div>':'';
+  const selCount=boardPicker.selected.size;
+  return '<div style="margin-bottom:4px">'+filters+'</div>'
+    +'<div style="max-height:320px;overflow-y:auto">'+rowsHtml+more+'</div>'
+    +'<div class="routine-deep-actions" style="margin-top:10px">'
+    +'<button class="btn-sm bblue" style="flex:1" '+(selCount?'':'disabled')+' onclick="addBoardPickerSelectionsSb(&quot;'+bid+'&quot;)">Agregar seleccionados'+(selCount?' ('+selCount+')':'')+'</button>'
+    +'<button class="btn-sm" style="background:transparent;border:1px solid var(--border);color:var(--gray)" onclick="toggleBoardAddPanel(&quot;'+bid+'&quot;)">Cancelar</button>'
+    +'</div>'
+    +'<button type="button" class="btn-sm" style="width:100%;margin-top:8px;background:transparent;border:1px dashed var(--border);color:var(--gray)" onclick="switchToBoardCustomMode(&quot;'+bid+'&quot;)">¿No está en el catálogo? Crear ejercicio personalizado</button>';
+}
+function boardPickerPanelHtml(board){
+  const bid=board.id;
+  return '<div class="routine-deep-panel">'
+    +'<div class="routine-deep-title">Agregar del catálogo</div>'
+    +'<input class="adm-search" placeholder="Buscar ejercicio..." value="'+esc(boardPicker.query)+'" oninput="boardPickerSetQuery(&quot;'+bid+'&quot;,this.value)" style="margin-bottom:8px">'
+    +'<div id="board-picker-body-'+bid+'">'+boardPickerBodyHtml(bid,board)+'</div>'
+    +'</div>';
+}
+async function addBoardPickerSelectionsSb(bid){
+  const b=boards.find(x=>x.id===bid);
+  if(!b||!boardPicker||boardPicker.bid!==bid)return;
+  const picks=[...boardPicker.selected.entries()];
+  if(!picks.length)return;
+  showLoading('Agregando...');
+  try{
+    picks.forEach(([slug,cfg])=>{
+      const ex=exerciseCatalogRows().find(x=>x.slug===slug);
+      if(!ex)return;
+      const repsType=ex.default_tracking==='time'?'time':'reps';
+      const sets=/^\d+$/.test(String(cfg.sets||'').trim())?String(parseInt(cfg.sets,10)):'3';
+      const reps=repsType==='reps'
+        ?(/^\d+$/.test(String(cfg.reps||'').trim())?String(parseInt(cfg.reps,10)):'10')
+        :(normalizeTimeText(cfg.reps)||'30s');
+      const rest=normalizeTimeText(cfg.rest)||'90s';
+      const rirRaw=String(cfg.rir??'').trim();
+      const targetRir=rirRaw===''?null:Math.min(10,Math.max(0,parseInt(rirRaw,10)||0));
+      b.exercises.push({
+        id:crypto.randomUUID(),catalogId:ex.id,name:ex.name,canonicalName:ex.name,
+        exerciseKey:ex.slug,exerciseType:ex.category,sets,reps,repsType,rest,restNext:rest,
+        targetRir,supersetGroup:'',block:'',isSuperset:false,
+        muscleGroup:ex.primary_muscle||'',secondaryMuscleGroups:ex.secondary_muscles||[],
+        muscles:{primary:ex.primary_muscle||null,secondary:ex.secondary_muscles||[]},
+        equipment:ex.equipment||[],movementPattern:ex.movement_pattern||'',difficulty:ex.difficulty||'basico',
+        note:'',description:'',video:ex.video_url||'',videoTitle:ex.video_url?ex.name:'',
+        videos:ex.video_url?[{url:ex.video_url,title:ex.name}]:[]
+      });
+    });
+    const{error}=await sb.from('boards').update({exercises:b.exercises}).eq('id',bid);
+    if(error)throw error;
+    addingExBoards.delete(bid);
+    boardExCustomMode.delete(bid);
+    boardPicker={bid:null,query:'',group:'Todos',selected:new Map()};
+    hideLoading();
+    toast(picks.length+' ejercicio'+(picks.length===1?'':'s')+' agregado'+(picks.length===1?'':'s'),'ok');
+    renderBoardsAdmin();
+  }catch(e){hideLoading();toast('Error: '+e.message,'err');}
+}
 function toggleBoardEx(bid){if(expandedBoards.has(bid))expandedBoards.delete(bid);else expandedBoards.add(bid);renderBoardsAdmin();}
 function toggleNewBoardForm(){newBoardFormOpen=!newBoardFormOpen;renderBoardCreatePanel();}
 let _boardOriginalNames={};
@@ -6843,6 +6978,7 @@ function toggleBoardEdit(bid){
     editingBoards.delete(bid);
     addingExBoards.delete(bid);
     assigningBoards.delete(bid);
+    boardExCustomMode.delete(bid);
     delete _boardOriginalNames[bid];
   } else {
     // Store original values before editing
@@ -6862,6 +6998,7 @@ function cancelBoardEdit(bid){
   editingBoards.delete(bid);
   addingExBoards.delete(bid);
   assigningBoards.delete(bid);
+  boardExCustomMode.delete(bid);
   renderBoardsAdmin();
 }
 function toggleNewSocioForm(){const f=document.getElementById('new-socio-form');if(!f)return;const open=f.style.display!=='none';f.style.display=open?'none':'block';}
@@ -8279,7 +8416,10 @@ function renderRutHoy(){
       +'</div></div>';
   });
 
-  html+='<button class="btn-sm coach-add-workout" onclick="openAddWorkoutModal()">Entrenar otra rutina</button>';
+  html+='<div class="coach-hoy-actions" style="display:flex;gap:8px">'
+    +'<button class="btn-sm coach-add-workout" style="flex:1" onclick="openAddWorkoutModal()">Entrenar otra rutina</button>'
+    +'<button class="btn-sm coach-add-workout" style="flex:1" onclick="startFreeWorkoutSb()">+ Entrenar libre</button>'
+    +'</div>';
   html+=bodyCardHtml();
   el.innerHTML=html;
 }
@@ -8922,6 +9062,25 @@ async function startWorkoutFromBoardSb(boardId,boardName,boardColor){
     }
     await startCoachingSessionSb(todayRow.id);
     toast('¡Entreno iniciado! 💪','ok');
+  }catch(e){toast('Error al iniciar: '+e.message,'err');}
+}
+
+// Arranca una sesión sin rutina detrás: board_id queda null y la hoja de
+// trabajo abre vacía. A partir de ahí es el mismo motor de "agregar ejercicio
+// en vivo" (wsAddExercise, session_exercises) el que la va llenando — no hace
+// falta ningún camino especial más allá de este insert.
+async function startFreeWorkoutSb(){
+  if(activeCoachingSession){
+    toast('Ya tienes un entreno en curso: '+activeCoachingSession.board_name+'. Termínalo o cancélalo primero.','warn');
+    return;
+  }
+  const today=mazToday();
+  try{
+    const{data,error}=await sb.from('coaching_schedule').insert({user_id:sbUser.id,board_id:null,board_name:'Entreno libre',board_color:'#0ea5e9',ds:today,created_by:sbUser.id}).select().single();
+    if(error)throw error;
+    coachSchedule.push(data);
+    await startCoachingSessionSb(data.id);
+    toast('¡Entreno libre iniciado! 💪','ok');
   }catch(e){toast('Error al iniciar: '+e.message,'err');}
 }
 
@@ -9906,7 +10065,9 @@ async function seedSessionSetsSb(scheduleRow){
   await ensureBoardLoadedSb(scheduleRow.board_id);
   const exercises=sessionExerciseList(scheduleRow);
   if(!exercises.length){
-    toast('Esta rutina no tiene ejercicios configurados','warn');
+    // Un entreno libre nace sin ejercicios a propósito (se van agregando en
+    // vivo); solo es una rutina rota si venía de un board y quedó vacío.
+    if(scheduleRow.board_id)toast('Esta rutina no tiene ejercicios configurados','warn');
     return;
   }
   const exKeys=exercises.map((ex,i)=>exerciseKeyForSession(scheduleRow.board_id,ex,i));
@@ -10533,7 +10694,9 @@ function renderWorkoutSheet(){
     +'<span class="ws-progress-pill">'+done+' de '+allSets.length+' series</span></div>'
     +'<div class="ws-progress-track"><i style="width:'+progressPct+'%"></i></div></div>';
   html+=exercises.map((ex,i)=>wsExerciseHtml(ex,i)).join('')
-    ||'<div class="empty">Esta rutina no tiene ejercicios. Agrega uno abajo.</div>';
+    ||(activeCoachingSession.board_id
+      ?'<div class="empty">Esta rutina no tiene ejercicios. Agrega uno abajo.</div>'
+      :'<div class="empty">Agrega tu primer ejercicio abajo para empezar.</div>');
   html+='<button class="ws-add-ex" onclick="wsToggleAdd()">+ Agregar ejercicio</button>';
   html+=wsAddPanelHtml();
   html+='<div class="ws-foot">'
@@ -11821,6 +11984,30 @@ function renderBoardCreatePanel(){
   setTimeout(()=>document.getElementById('board-name-in')?.focus(),0);
 }
 
+function customExerciseFormHtml(board){
+  return '<div class="routine-deep-panel">'
+    +'<button type="button" class="btn-sm" style="background:transparent;border:none;color:var(--bl);padding:0;margin-bottom:8px" onclick="switchToBoardPickerMode(&quot;'+board.id+'&quot;)">‹ Volver al catálogo</button>'
+    +'<div class="routine-deep-title">Nuevo ejercicio</div>'
+    +'<input type="text" list="catalog-'+board.id+'" placeholder="Buscar o crear ejercicio *" id="exn-'+board.id+'" oninput="applyExerciseCatalogPick(&quot;'+board.id+'&quot;,this.value)" style="width:100%;background:var(--card);border:1px solid var(--border);border-radius:4px;padding:9px;font-size:13px;color:var(--white);outline:none;margin-bottom:6px;box-sizing:border-box">'
+    +exerciseCatalogOptionsHtml('catalog-'+board.id)
+    +exerciseTypeSelectHtml('extype-'+board.id,'')
+    +'<div class="exercise-field-label">Series</div><input class="exercise-form-control small" type="number" min="1" step="1" inputmode="numeric" placeholder="Solo números" id="exs-'+board.id+'">'
+    +'<div class="exercise-field-label">Objetivo</div><div class="exercise-target-row"><select class="exercise-form-control small" id="exrt-'+board.id+'" onchange="syncExerciseTargetInput(&quot;'+board.id+'&quot;)"><option value="reps">Reps</option><option value="time">Tiempo</option></select><input class="exercise-form-control small" type="text" inputmode="numeric" data-target-type="reps" oninput="cleanExerciseInput(this)" placeholder="Repeticiones" id="exr-'+board.id+'"></div>'
+    +'<div class="exercise-field-label">Descanso entre series</div><input class="exercise-form-control small" type="text" inputmode="numeric" oninput="this.value=this.value.replace(/[^\\d:ms\\s]/gi,\'\')" placeholder="Solo segundos o mm:ss. Ej: 90 o 1:30" id="exrest-'+board.id+'">'
+    +'<div class="exercise-field-label">RIR objetivo</div><input class="exercise-form-control small" type="number" min="0" max="10" step="1" inputmode="numeric" placeholder="Reps en reserva (0-10). Vacío = sin objetivo" id="exrir-'+board.id+'">'
+    +supersetSelectHtml('exgroup-'+board.id,'',board)
+    +musclePrimarySelectHtml('exmg-'+board.id,'')
+    +muscleSecondaryPickerHtml('exsecondary-'+board.id,[])
+    +'<textarea placeholder="Indicaciones (opcional)" id="exd-'+board.id+'" style="width:100%;background:var(--card);border:1px solid var(--border);border-radius:4px;padding:8px;font-size:12px;color:var(--white);outline:none;resize:none;min-height:44px;margin-bottom:6px;box-sizing:border-box"></textarea>'
+    +'<input type="url" placeholder="Video 1 URL" id="exv-'+board.id+'" style="width:100%;background:var(--card);border:1px solid var(--border);border-radius:4px;padding:8px;font-size:12px;color:var(--white);outline:none;margin-bottom:4px;box-sizing:border-box">'
+    +'<input type="text" placeholder="Nombre video 1" id="ext-'+board.id+'" style="width:100%;background:var(--card);border:1px solid var(--border);border-radius:4px;padding:8px;font-size:12px;color:var(--white);outline:none;margin-bottom:4px;box-sizing:border-box">'
+    +'<input type="url" placeholder="Video 2 URL (opcional)" id="exv2-'+board.id+'" style="width:100%;background:var(--card);border:1px solid var(--border);border-radius:4px;padding:8px;font-size:12px;color:var(--white);outline:none;margin-bottom:4px;box-sizing:border-box">'
+    +'<input type="text" placeholder="Nombre video 2" id="ext2-'+board.id+'" style="width:100%;background:var(--card);border:1px solid var(--border);border-radius:4px;padding:8px;font-size:12px;color:var(--white);outline:none;margin-bottom:8px;box-sizing:border-box">'
+    +'<div class="routine-deep-actions">'
+    +'<button class="btn-sm bblue" style="flex:1" data-bid="'+board.id+'" onclick="addExerciseSb(this.dataset.bid)">Agregar</button>'
+    +'<button class="btn-sm" style="background:transparent;border:1px solid var(--border);color:var(--gray)" onclick="addingExBoards.delete(&quot;'+board.id+'&quot;);boardExCustomMode.delete(&quot;'+board.id+'&quot;);renderBoardsAdmin()">Cancelar</button>'
+    +'</div></div>';
+}
 async function renderBoardsAdmin(){
   renderBoardCreatePanel();
   await loadBoardsSb();
@@ -11888,29 +12075,7 @@ async function renderBoardsAdmin(){
     }).join('');
 
     // ── Add exercise form ──────────────────────────
-    const addExForm=isAddingEx?
-      '<div class="routine-deep-panel">'
-      +'<div class="routine-deep-title">Nuevo ejercicio</div>'
-      +'<input type="text" list="catalog-'+board.id+'" placeholder="Buscar o crear ejercicio *" id="exn-'+board.id+'" oninput="applyExerciseCatalogPick(&quot;'+board.id+'&quot;,this.value)" style="width:100%;background:var(--card);border:1px solid var(--border);border-radius:4px;padding:9px;font-size:13px;color:var(--white);outline:none;margin-bottom:6px;box-sizing:border-box">'
-      +exerciseCatalogOptionsHtml('catalog-'+board.id)
-      +exerciseTypeSelectHtml('extype-'+board.id,'')
-      +'<div class="exercise-field-label">Series</div><input class="exercise-form-control small" type="number" min="1" step="1" inputmode="numeric" placeholder="Solo números" id="exs-'+board.id+'">'
-      +'<div class="exercise-field-label">Objetivo</div><div class="exercise-target-row"><select class="exercise-form-control small" id="exrt-'+board.id+'" onchange="syncExerciseTargetInput(&quot;'+board.id+'&quot;)"><option value="reps">Reps</option><option value="time">Tiempo</option></select><input class="exercise-form-control small" type="text" inputmode="numeric" data-target-type="reps" oninput="cleanExerciseInput(this)" placeholder="Repeticiones" id="exr-'+board.id+'"></div>'
-      +'<div class="exercise-field-label">Descanso entre series</div><input class="exercise-form-control small" type="text" inputmode="numeric" oninput="this.value=this.value.replace(/[^\\d:ms\\s]/gi,\'\')" placeholder="Solo segundos o mm:ss. Ej: 90 o 1:30" id="exrest-'+board.id+'">'
-      +'<div class="exercise-field-label">RIR objetivo</div><input class="exercise-form-control small" type="number" min="0" max="10" step="1" inputmode="numeric" placeholder="Reps en reserva (0-10). Vacío = sin objetivo" id="exrir-'+board.id+'">'
-      +supersetSelectHtml('exgroup-'+board.id,'',board)
-      +musclePrimarySelectHtml('exmg-'+board.id,'')
-      +muscleSecondaryPickerHtml('exsecondary-'+board.id,[])
-      +'<textarea placeholder="Indicaciones (opcional)" id="exd-'+board.id+'" style="width:100%;background:var(--card);border:1px solid var(--border);border-radius:4px;padding:8px;font-size:12px;color:var(--white);outline:none;resize:none;min-height:44px;margin-bottom:6px;box-sizing:border-box"></textarea>'
-      +'<input type="url" placeholder="Video 1 URL" id="exv-'+board.id+'" style="width:100%;background:var(--card);border:1px solid var(--border);border-radius:4px;padding:8px;font-size:12px;color:var(--white);outline:none;margin-bottom:4px;box-sizing:border-box">'
-      +'<input type="text" placeholder="Nombre video 1" id="ext-'+board.id+'" style="width:100%;background:var(--card);border:1px solid var(--border);border-radius:4px;padding:8px;font-size:12px;color:var(--white);outline:none;margin-bottom:4px;box-sizing:border-box">'
-      +'<input type="url" placeholder="Video 2 URL (opcional)" id="exv2-'+board.id+'" style="width:100%;background:var(--card);border:1px solid var(--border);border-radius:4px;padding:8px;font-size:12px;color:var(--white);outline:none;margin-bottom:4px;box-sizing:border-box">'
-      +'<input type="text" placeholder="Nombre video 2" id="ext2-'+board.id+'" style="width:100%;background:var(--card);border:1px solid var(--border);border-radius:4px;padding:8px;font-size:12px;color:var(--white);outline:none;margin-bottom:8px;box-sizing:border-box">'
-      +'<div class="routine-deep-actions">'
-      +'<button class="btn-sm bblue" style="flex:1" data-bid="'+board.id+'" onclick="addExerciseSb(this.dataset.bid)">Agregar</button>'
-      +'<button class="btn-sm" style="background:transparent;border:1px solid var(--border);color:var(--gray)" onclick="addingExBoards.delete(&quot;'+board.id+'&quot;);renderBoardsAdmin()">Cancelar</button>'
-      +'</div></div>'
-      :'';
+    const addExForm=isAddingEx?(boardExCustomMode.has(board.id)?customExerciseFormHtml(board):boardPickerPanelHtml(board)):'';
 
     // ── Assign panel ───────────────────────────────
     const assignPanel=isAssigning?
@@ -11949,7 +12114,7 @@ async function renderBoardsAdmin(){
         +'<div class="routine-board-section-label">Ejercicios · '+board.exercises.length+'</div>'
         +(exHtml||'<div class="member-routine-empty">Esta rutina todavía no tiene ejercicios.</div>')
         +'<div class="routine-board-tools">'
-        +'<button class="routine-board-tool" onclick="addingExBoards.has(&quot;'+board.id+'&quot;)?addingExBoards.delete(&quot;'+board.id+'&quot;):addingExBoards.add(&quot;'+board.id+'&quot;);renderBoardsAdmin()" style="background:rgba(37,99,235,.12);border:1px solid var(--blue);color:var(--bl)">+ Agregar ejercicio</button>'
+        +'<button class="routine-board-tool" onclick="toggleBoardAddPanel(&quot;'+board.id+'&quot;)" style="background:rgba(37,99,235,.12);border:1px solid var(--blue);color:var(--bl)">+ Agregar ejercicio</button>'
         +'<button class="routine-board-tool" onclick="assigningBoards.has(&quot;'+board.id+'&quot;)?assigningBoards.delete(&quot;'+board.id+'&quot;):assigningBoards.add(&quot;'+board.id+'&quot;);renderBoardsAdmin()" style="background:rgba(16,185,129,.1);border:1px solid var(--green);color:var(--green)">Asignar socios ('+assignedUsers.length+')</button>'
         +'</div>'
         +addExForm
@@ -12245,7 +12410,7 @@ async function renderDashboard(){
     const monthStart=today.slice(0,7);
     const cutoff14=addDaysDS(today,-14);
     const[{data:allU},{data:pays},{data:bks},{data:logs},{data:recentBks}]=await Promise.all([
-      sb.from('profiles').select('id,credits,plan_expiry,plan_id,plan_is_courtesy,coaching_beta,role,name,phone').neq('role','admin').neq('source','skandi'),
+      sb.from('profiles').select('id,credits,plan_expiry,plan_id,plan_is_courtesy,coaching_beta,role,name,phone').neq('role','admin').neq('role','reception').neq('source','skandi'),
       sb.from('payments').select('amount,created_at,plan_name,user_id,payment_method,net_amount').order('created_at',{ascending:false}).limit(2000),
       sb.from('bookings').select('ds,status').eq('status','active'),
       sb.from('access_log').select('id'),
@@ -12506,6 +12671,7 @@ async function generateReport(){
   const type=document.getElementById('rpt-type').value;
   const date=document.getElementById('rpt-date').value;
   const out=document.getElementById('rpt-output');
+  if(!date){out.innerHTML='<div class="empty">Selecciona una fecha.</div>';return;}
   out.innerHTML='<div class="empty">Cargando...</div>';
   const allPlans=[...PLANS.individual,...PLANS.grupal];
   function isActiveProfile(u){
@@ -12735,10 +12901,16 @@ function adminUserState(u){
   return{plan,expired,days,unlimited,credits,noPlan,noVisits,active,expiring};
 }
 function updateAdminUserOverview(rows,realPayerIds){
-  const stats={todos:rows.length,activo:0,'por-vencer':0,'sin-visitas':0,vencido:0,'sin-plan':0,'nunca-compro':0,coaching:0};
+  const stats={todos:rows.length,activo:0,'activo-real':0,'por-vencer':0,'sin-visitas':0,vencido:0,'sin-plan':0,'nunca-compro':0,coaching:0};
   rows.forEach(u=>{
     const s=adminUserState(u);
     if(s.active)stats.activo++;
+    // "Activos" en la tarjeta de arriba usa el mismo criterio que Inicio (plan
+    // vigente Y pago real, sin cortesía/prueba) para que ambas pantallas
+    // muestren el mismo número. El chip "Activos" de la barra de filtros de
+    // abajo sigue usando el criterio amplio (stats.activo): ese es para
+    // operar — "quién puede entrenar hoy" — y una cortesía sí puede.
+    if(s.active&&!u.plan_is_courtesy&&u.plan_id!=='prueba'&&realPayerIds.has(u.id))stats['activo-real']++;
     if(s.expiring)stats['por-vencer']++;
     if(s.noVisits)stats['sin-visitas']++;
     if(s.expired)stats.vencido++;
@@ -12749,7 +12921,7 @@ function updateAdminUserOverview(rows,realPayerIds){
   document.querySelectorAll('[data-user-filter-count]').forEach(el=>{el.textContent=stats[el.dataset.userFilterCount]??0;});
   const overview=document.getElementById('user-overview');
   if(overview)overview.innerHTML=
-    '<button onclick="openAdminUserFilter(\'activo\')"><span>Activos</span><strong>'+stats.activo+'</strong></button>'
+    '<button onclick="openAdminUserFilter(\'activo-real\')"><span>Activos</span><strong>'+stats['activo-real']+'</strong></button>'
     +'<button class="attention" onclick="openAdminUserFilter(\'por-vencer\')"><span>Por renovar</span><strong>'+stats['por-vencer']+'</strong></button>'
     +'<button class="danger" onclick="openAdminUserFilter(\'sin-visitas\')"><span>Sin visitas</span><strong>'+stats['sin-visitas']+'</strong></button>';
 }
@@ -12782,6 +12954,7 @@ async function renderUsersSb(){
     filtered=filtered.filter(u=>{
       const s=adminUserState(u);
       if(_userFilter==='activo') return s.active;
+      if(_userFilter==='activo-real') return s.active&&!u.plan_is_courtesy&&u.plan_id!=='prueba'&&realPayerIds.has(u.id);
       if(_userFilter==='vencido') return s.expired;
       if(_userFilter==='por-vencer') return s.expiring;
       if(_userFilter==='sin-visitas') return s.noVisits;
@@ -15166,7 +15339,7 @@ function renderCoachingDetail(){
     +'<p class="slbl" style="margin-bottom:8px">Notas del cliente</p>'
     +'<div id="coach-admin-notes"><div class="empty">Cargando...</div></div>'
     +'</div>'
-    +'<button onclick="adminToggleCoachingBetaSb(&quot;'+selectedCoachClientId+'&quot;,false)" style="background:none;border:none;color:var(--gray);font-size:11px;text-decoration:underline;cursor:pointer;padding:0;text-align:left">Desactivar coaching para este socio</button>'
+    +'<button class="btn-sm" style="width:100%;margin-top:6px;background:rgba(239,68,68,.12);border-color:var(--red);color:var(--red)" onclick="if(confirm(&quot;¿Desactivar coaching para '+esc(client.name||'este socio')+'?&quot;))adminToggleCoachingBetaSb(&quot;'+selectedCoachClientId+'&quot;,false)">Desactivar coaching para este socio</button>'
     +'</div>';
 
   toggleCoachTaskDueVisibility();
