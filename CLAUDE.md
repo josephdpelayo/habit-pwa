@@ -138,6 +138,26 @@ Core tables:
   `SELECT` policy is `owner_id is null or owner_id = auth.uid()`. Member routines always carry
   `MEMBER_ROUTINE_COLOR`; the color is what tells a member's routine apart from the coach's, so
   it is not theirs to pick and `routineColor()` resolves it at render time
+**La pestaña Plan del coach son tres capas, de arriba abajo**: programa
+(`coachProgramSectionHtml` → `openCoachProgramManage`) → semana → rutinas del
+cliente. Elegir la rutina de un día abre `openCoachBoardPicker(mode, dow, ds)`,
+una hoja con buscador —que entra también en los nombres de los ejercicios— vista
+previa del contenido y filtros; el `<select>` con el catálogo entero que había
+antes no decía qué trae cada rutina, que es justo lo que hay que ver antes de
+asignarla. La misma hoja sirve para un día de la semana y para un día del
+programa: lo único que cambia es a dónde va la elección (`coachPicker.mode`).
+`coachWeekDayState(i)` resuelve todo lo que se sabe de un día y la consumen el
+render y el guardado — el guardado ya no lee el DOM, así que no depende de que
+el panel esté pintado.
+
+**El editor de semana del coach guarda dos cosas distintas** (`saveCoachingWeekSb(mode)` en
+`app.html`): `'week'` toca solo los siete días en pantalla, `'base'` reescribe la plantilla que
+se repite. Eran un solo botón, y por eso ajustar el miércoles de la semana que viene cambiaba el
+miércoles del cliente para siempre. Un descanso de una sola semana se marca `status='skipped'`
+conservando `base_template_dow`, no se borra: borrar la fila solo hace que el RPC la vuelva a
+sembrar. Y solo se escribe lo que el coach movió — `coachAdminWeekDraft` guarda esos días en
+memoria porque el panel se repinta entero por causas ajenas al editor.
+
 **Entrenar vs Coaching.** The `rutinas` view (labelled "Entrenar") owns everything about
 training and is open to every member: today's session, the weekly grid, the member's routines,
 the muscle-fatigue body and the Progreso screen. The `coaching` view is only for David's clients
@@ -148,10 +168,26 @@ what lets Entrenar mark a day as "de tu coach" and the coach's panel mark one as
 member; both sides rewrite the whole week on save, so that marking is the only thing preventing
 a silent overwrite.
 
-- `coaching_week_templates` / `coaching_programs` / `coaching_program_days` — the member's weekly
-  plan (`dow` 0 = Monday) and named programs that overwrite it. Activating a program rewrites
-  every `coaching_week_templates` row, then re-materializes the week via the
-  `ensure_coaching_week_from_template` RPC
+- `coaching_week_templates` / `coaching_programs` / `coaching_program_days` /
+  `coaching_program_weeks` — the member's weekly plan (`dow` 0 = Monday) and the programs that
+  own it. Migration 114 opened programs to the coach (admin RLS was `select`-only), added
+  `created_by`, and made `user_id` nullable: **a program with `user_id` null is a gym template**
+  — nobody follows it, it gets copied onto a client (a CHECK forbids a template being active),
+  the same trick as `boards.owner_id` null. Migration 115 turns a program into a dated cycle:
+  `start_date` + `weeks`, `coaching_program_days.week_index` (0 = every week, N = that week only)
+  and `coaching_program_weeks.phase`. **`start_date` is the switch** — without it a program is
+  still one repeating week and everything behaves as before.
+  With it, `ensure_coaching_week_from_template` stamps the calendar from the program, week by
+  week, and `coaching_schedule.program_id` / `program_week_index` record which cycle each day
+  came from. The resolution rule lives in exactly one place, `coaching_week_slots()`, and is
+  **replacement, not merge**: if week N has a row for that day, it is the whole day. A
+  `coaching_program_days` row with `board_id` null is a **rest-day marker**, not a half-written
+  row — it is the only way to say "week 5 rests on Friday", since deleting the row would make
+  that day inherit from the week-0 rows again; the stamping ignores those rows.
+  A cycle **never repeats itself by calendar alone** (past the last week the index goes -1 and
+  stamping stops) — finishing a block is when the coach re-evaluates. Applying a program goes
+  through the `apply_coaching_program` RPC, not loose client writes: it is four writes that must
+  land together, and half of them leaves the member with no week at all
 - `coaching_schedule.session_exercises` — JSONB overlay of exercises swapped in or added during a
   live session. `boards.exercises` is never mutated by a workout; `sessionExerciseList()` in
   `app.html` merges the two and is the single source of the effective exercise list
