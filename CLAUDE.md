@@ -138,6 +138,18 @@ Core tables:
   `SELECT` policy is `owner_id is null or owner_id = auth.uid()`. Member routines always carry
   `MEMBER_ROUTINE_COLOR`; the color is what tells a member's routine apart from the coach's, so
   it is not theirs to pick and `routineColor()` resolves it at render time
+- **Una serie en pirámide** (10-9-8-7-6-5-4-3-2-1) no es un campo nuevo: es un objetivo por
+  serie, guardado en el mismo `boards.exercises[].reps` con `repsType:'pyramid'`, y las series
+  se derivan de los escalones — `exerciseSetCount()` manda sobre el campo `sets`, que se guarda
+  sincronizado solo para que lo lea quien no sepa de pirámides. `coaching_session_sets.
+  reps_target` ya era `text` y siempre fue por fila, así que la siembra solo pasó de repetir la
+  misma cifra a repartir `repsTargetForSet(ex, i)`; una serie agregada de más al final repite el
+  último escalón. Adivinar una pirámide en un dato que nadie marcó pide **3+ escalones**
+  (`sniffPyramidReps`): "8-10" es el rango de toda la vida, no una pirámide de dos series — por
+  eso el builder del socio y el alta masiva del catálogo la reconocen con solo escribirla,
+  mientras que el formulario del coach la elige explícita en Objetivo → Pirámide (y ahí sí
+  admite dos escalones). El consejo de progresión compara escalón contra escalón, no contra un
+  rango, porque una pirámide no tiene mínimo ni máximo
 **La pestaña Plan del coach son tres capas, de arriba abajo**: programa
 (`coachProgramSectionHtml` → `openCoachProgramManage`) → semana → rutinas del
 cliente. Elegir la rutina de un día abre `openCoachBoardPicker(mode, dow, ds)`,
