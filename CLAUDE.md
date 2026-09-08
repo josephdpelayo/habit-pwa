@@ -162,6 +162,20 @@ programa: lo único que cambia es a dónde va la elección (`coachPicker.mode`).
 render y el guardado — el guardado ya no lee el DOM, así que no depende de que
 el panel esté pintado.
 
+**Una sola hoja para elegir rutina, cinco destinos** (`openCoachBoardPicker(mode, dow, ds,
+programId)`): `week` / `program` son el coach sobre su cliente, `my-week` / `my-program` el socio
+sobre lo suyo, y `start` es el socio entrenando algo ahora — ahí la primera fila deja de ser
+«Descanso» y pasa a ser «Entreno libre», que es lo que funde los dos botones que había en Hoy.
+`coachPickerIsMember()` decide de dónde salen las rutinas (`myRoutines` o `coachAssignableBoards()`),
+qué filtros se ofrecen y con qué vocabulario se etiqueta cada una — el coach necesita saber si ya
+se la asignó, el socio si es suya o del gym. Elegir una rutina es el mismo acto lo haga quien lo
+haga, así que es el mismo componente; `openDayPicker` del socio quedó reducido a una llamada.
+
+**El chooser del socio (`openCreateChooser`) tiene tres verbos, no cuatro**: entrenar ahora, una
+rutina, un programa. No hay «crear ejercicio» a propósito — en HABIT el ejercicio se elige del
+`exercise_catalog` y no se escribe, porque escribirlo a mano deja fichas sin músculo, sin
+indicaciones y sin video, que son los datos de los que vive la ficha de técnica.
+
 **El editor de semana del coach guarda dos cosas distintas** (`saveCoachingWeekSb(mode)` en
 `app.html`): `'week'` toca solo los siete días en pantalla, `'base'` reescribe la plantilla que
 se repite. Eran un solo botón, y por eso ajustar el miércoles de la semana que viene cambiaba el
@@ -207,6 +221,41 @@ a silent overwrite.
   Skandi Fit's `skandi_exercises` into it (names translated to Spanish, English name kept as an
   alias); its `video_url` values are GIFs and MP4s, not embeds, so `mediaKind()` in `app.html`
   decides between `<img>`, `<video>` and an iframe
+- `boards.is_starter` (migration 116) — a **rutina básica**: a gym board every member sees
+  without anyone assigning it. Not `board_assignments`, which is one row per member per board:
+  seeding those leaves thousands of rows to maintain and covers nobody who registers tomorrow.
+  A starter board is the gym's, like a `user_id`-null program template (114), so it is marked
+  once on the board. RLS didn't change — `boards` already lets any authenticated user read
+  everything with `owner_id` null; what was missing was the app knowing which ones to show.
+  116 seeds it from the blue (`#2563eb`) gym boards that have exercises, printing the list as
+  NOTICEs first: blue was only the seed heuristic (it is the editor's default colour), and from
+  then on the column is what counts — the "Rutina básica" toggle in Admin → Rutinas moves it.
+  **116 replaces migration 057**, which did this with assignments (`assign_default_member_boards`
+  + an after-insert trigger on `profiles`): one row per member per board, only created at
+  registration so yesterday's members never got a newly-added starter, and indistinguishable in
+  the coach's panel from what he assigned on purpose. 116 drops that trigger and deletes the
+  assignments pointing at a starter board, which gives `board_assignments` back its single
+  meaning — "his coach gave this person this board".
+  `loadMyRoutinesSb` asks for the three origins separately (own / assigned / starter) and tags
+  `_starterOnly` on the ones nobody assigned, which is what splits the member's list into
+  "De tu entrenador" and "Rutinas básicas"
+**No queda un `confirm()` ni un `prompt()` nativo en `app.html`**: los sustituyen `confirmSheet()`
+y `promptSheet()` (mismo patrón que Skandi en `a6ea2cb`, sin su i18n), que devuelven promesas —
+`if(!confirm(x))` pasó a `if(!await confirmSheet(x))`, y las cinco funciones que no eran `async`
+lo son ahora. `promptSheet` imita al nativo a propósito: `null` al cancelar, string al aceptar,
+`''` si se borró todo. Tocar el fondo cancela, nunca confirma. Las acciones destructivas pasan
+`{danger:true}` y un verbo propio ("Eliminar", "Cancelar entreno") en vez de un "Aceptar" genérico.
+
+**`withScrollKept(el, paint)`** envuelve los repintados de una pieza (`innerHTML` entero) para
+devolver el scroll del contenedor. Marcar un día o asignar una rutina devolvía al usuario arriba
+del todo, que es lo que hacía sentir que la página se recargaba en vez de que cambiara lo tocado.
+
+**Coaching → Seguimiento** (tab id still `programa`) shows how the week went — day states,
+feedback, habits, fasting — and links out to Entrenar to change anything. It was called "Plan",
+which was the only reason it looked like it duplicated Entrenar's week; nothing is edited in both
+places. PRs live in **Progreso** only: Historial used to render them too, with its own
+`user_scores` query, and now keeps what its name promises (reservas y pagos) plus a link.
+
 - `posts` / `post_reactions` / `post_comments` — community feed
 - `booking_guest_passes` — group session guest passes (from `group-guest-passes.sql`)
 - `admin_notifs` — in-app notifications for admin

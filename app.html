@@ -6,18 +6,18 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="HABIT">
 <meta name="application-name" content="HABIT">
-<link rel="manifest" href="/manifest.json?v=20260907-2">
-<link rel="apple-touch-icon" sizes="120x120" href="/icons/icon-120.png?v=20260907-2">
-<link rel="apple-touch-icon" sizes="152x152" href="/icons/icon-152.png?v=20260907-2">
-<link rel="apple-touch-icon" sizes="167x167" href="/icons/icon-167.png?v=20260907-2">
-<link rel="apple-touch-icon" sizes="180x180" href="/icons/icon-180.png?v=20260907-2">
-<link rel="icon" type="image/png" sizes="32x32" href="/icons/icon-32.png?v=20260907-2">
+<link rel="manifest" href="/manifest.json?v=20260908-1">
+<link rel="apple-touch-icon" sizes="120x120" href="/icons/icon-120.png?v=20260908-1">
+<link rel="apple-touch-icon" sizes="152x152" href="/icons/icon-152.png?v=20260908-1">
+<link rel="apple-touch-icon" sizes="167x167" href="/icons/icon-167.png?v=20260908-1">
+<link rel="apple-touch-icon" sizes="180x180" href="/icons/icon-180.png?v=20260908-1">
+<link rel="icon" type="image/png" sizes="32x32" href="/icons/icon-32.png?v=20260908-1">
 <title>HABIT</title>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Share+Tech+Mono&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="/skandi-recovery.js?v=20260907-2"></script>
-<script src="/body-figure.js?v=20260907-2"></script>
+<script src="/skandi-recovery.js?v=20260908-1"></script>
+<script src="/body-figure.js?v=20260908-1"></script>
 <style>
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
 :root{
@@ -597,6 +597,47 @@ input,select,button,textarea{font-family:'Inter',sans-serif}
 .coach-program-hint{font-size:11px;color:#8f97a3;line-height:1.45;margin:6px 0 10px}
 .coach-program-check{display:flex;gap:8px;align-items:flex-start;font-size:11.5px;color:#c7d2e1;line-height:1.4;margin-bottom:6px}
 .coach-program-check input{margin-top:2px;flex-shrink:0}
+.program-cycle-line{font-size:11.5px;font-weight:700;color:#93c5fd;background:rgba(37,99,235,.1);
+  border:1px solid rgba(59,130,246,.2);border-radius:9px;padding:6px 9px;margin-top:9px}
+.program-cycle-line.is-ended{color:#fca5a5;background:rgba(239,68,68,.09);border-color:rgba(239,68,68,.2)}
+.program-cycle-note{font-size:11px;color:#8f97a3;line-height:1.45;margin:-6px 0 12px}
+.rut-section-note{font-size:11.5px;color:var(--gray);line-height:1.45;margin:-4px 0 10px}
+.create-opt{display:flex;align-items:center;gap:12px;width:100%;text-align:left;cursor:pointer;color:var(--white);
+  border:1px solid var(--border);background:var(--card);border-radius:12px;padding:13px;margin-bottom:8px}
+.create-opt:active{background:var(--card2)}
+.create-opt-icon{width:34px;height:34px;flex-shrink:0;border-radius:10px;background:rgba(37,99,235,.14);color:#93c5fd;
+  display:flex;align-items:center;justify-content:center;font-size:14px}
+.create-opt strong{display:block;font-size:14px;font-weight:750}
+.create-opt span span{display:block;font-size:11.5px;color:var(--gray);margin-top:2px;line-height:1.35}
+.create-opt-go{color:var(--gray);font-size:18px;line-height:1;flex-shrink:0}
+.hist-progress-link{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;
+  border:1px solid var(--border);background:var(--card);border-radius:12px;padding:11px 13px;margin-top:12px}
+.hist-progress-link span{font-size:12px;color:var(--gray)}
+.confirm-overlay{position:fixed;inset:0;z-index:2600;display:none;align-items:center;justify-content:center;
+  padding:22px;background:rgba(0,0,0,.62);backdrop-filter:blur(3px)}
+.confirm-overlay.show{display:flex}
+.confirm-card{width:100%;max-width:340px;background:var(--card);border:1px solid var(--border);border-radius:16px;
+  padding:18px;box-shadow:0 24px 60px rgba(0,0,0,.5)}
+.confirm-card h3{font-size:15px;font-weight:750;color:var(--white);margin-bottom:6px}
+.confirm-card p{font-size:13px;color:var(--gl);line-height:1.5}
+.confirm-card input{width:100%;margin-top:12px;background:var(--card2);border:1px solid var(--border);border-radius:10px;
+  padding:11px;font-size:14px;color:var(--white);outline:none;font-family:inherit;box-sizing:border-box}
+.confirm-actions{display:flex;gap:8px;margin-top:16px}
+.confirm-actions button{flex:1;min-height:42px}
+.confirm-card .confirm-ghost{background:transparent;border:1px solid var(--border);color:var(--gray)}
+.confirm-card .confirm-ok{background:var(--white);border-color:var(--white);color:#050505;font-weight:750}
+.confirm-card .confirm-danger{background:rgba(239,68,68,.14);border-color:rgba(239,68,68,.4);color:#fca5a5;font-weight:750}
+.is-reloading{opacity:.45;transition:opacity .15s ease;pointer-events:none}
+.starter-toggle{display:flex;align-items:flex-start;gap:9px;width:100%;text-align:left;cursor:pointer;color:var(--white);
+  border:1px solid rgba(255,255,255,.1);background:rgba(255,255,255,.035);border-radius:11px;padding:10px}
+.starter-toggle.on{border-color:rgba(16,185,129,.35);background:rgba(16,185,129,.08)}
+.starter-toggle-box{width:19px;height:19px;flex-shrink:0;border-radius:6px;border:1px solid rgba(255,255,255,.22);
+  display:flex;align-items:center;justify-content:center;font-size:12px;color:#03120d;margin-top:1px}
+.starter-toggle.on .starter-toggle-box{background:var(--green);border-color:var(--green)}
+.starter-toggle strong{display:block;font-size:12.5px;font-weight:700}
+.starter-toggle span span{display:block;font-size:10.5px;color:#8f97a3;margin-top:2px;line-height:1.35}
+.board-starter-tag{font-size:9px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;padding:3px 7px;border-radius:999px;
+  background:rgba(16,185,129,.13);color:var(--green);margin-left:7px;vertical-align:middle}
 .coach-program-cycle{font-size:11.5px;font-weight:700;color:#93c5fd;background:rgba(37,99,235,.1);border:1px solid rgba(59,130,246,.2);border-radius:9px;padding:6px 9px;margin-top:9px}
 .coach-program-cycle.is-ended{color:#fca5a5;background:rgba(239,68,68,.09);border-color:rgba(239,68,68,.2)}
 .coach-cycle-box{border:1px solid rgba(255,255,255,.08);border-radius:14px;background:rgba(255,255,255,.03);padding:11px;margin-bottom:14px}
@@ -2315,7 +2356,6 @@ body.admin-mode #courtesy-modal label{border-radius:14px!important;border-color:
     </div>
     <div id="rut-panel-rutinas" class="rut-panel">
       <div class="scroll-area">
-        <div id="scores-top"></div>
         <div id="rut-content"></div>
       </div>
     </div>
@@ -2327,7 +2367,7 @@ body.admin-mode #courtesy-modal label{border-radius:14px!important;border-color:
       <button class="coach-hub-tab active" data-tab="hoy" onclick="coachHubTab('hoy',this)">
         <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>Hoy</button>
       <button class="coach-hub-tab" data-tab="programa" onclick="coachHubTab('programa',this)">
-        <svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M3 10h18M8 2v4M16 2v4M8 15l2 2 4-4"/></svg>Plan</button>
+        <svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M3 10h18M8 2v4M16 2v4M8 15l2 2 4-4"/></svg>Seguimiento</button>
       <button class="coach-hub-tab" data-tab="mensajes" onclick="coachHubTab('mensajes',this)">
         <span id="coach-hub-mensajes-badge" class="bnb-badge" data-mensajes-nav-count></span>
         <svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>Mensajes</button>
@@ -2359,9 +2399,6 @@ body.admin-mode #courtesy-modal label{border-radius:14px!important;border-color:
     </div>
 
   </div>
-
-  <!-- SCORES -->
-
 
   <!-- COMUNIDAD -->
   <div id="v-comunidad" class="view">
@@ -2396,9 +2433,6 @@ body.admin-mode #courtesy-modal label{border-radius:14px!important;border-color:
   <!-- HISTORIAL -->
   <div id="v-historial" class="view">
     <div class="scroll-area">
-      <p class="slbl">Mis PRs</p>
-      <div id="h-scores"></div>
-      <div class="divider"></div>
       <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:2px">
         <p class="slbl" style="margin:0">Mis reservas y pagos</p>
         <select id="hist-range" onchange="setHistorialRange(this.value)" style="background:var(--card);color:var(--white);border:1px solid var(--border);border-radius:4px;padding:8px 10px;font-size:13px;font-family:inherit">
@@ -2410,6 +2444,7 @@ body.admin-mode #courtesy-modal label{border-radius:14px!important;border-color:
       </div>
       <p class="slbl">Mis reservas</p>
       <div id="hb"></div>
+      <div class="hist-progress-link"><span>¿Buscabas tus PRs y tu progreso de fuerza?</span><button class="btn-sm" onclick="sv('progreso')">Ver mi progreso</button></div>
       <div class="divider"></div>
       <p class="slbl">Mis pagos</p>
       <div id="hp"></div>
@@ -3009,6 +3044,9 @@ body.admin-mode #courtesy-modal label{border-radius:14px!important;border-color:
   </div>
 </div>
 
+<!-- CONFIRMACIONES Y PREGUNTAS (sustituyen a await confirmSheet()/await promptSheet() del navegador) -->
+<div class="confirm-overlay" id="confirm-overlay"></div>
+
 <!-- ELEGIR RUTINA PARA UN DÍA (panel de admin) -->
 <div id="coach-board-picker" class="terms-modal" style="display:none">
   <div class="terms-box" style="max-height:88vh">
@@ -3048,14 +3086,6 @@ body.admin-mode #courtesy-modal label{border-radius:14px!important;border-color:
 </div>
 
 <!-- AGREGAR OTRO ENTRENO HOY -->
-<div id="add-workout-modal" class="terms-modal" style="display:none">
-  <div class="terms-box">
-    <div class="terms-hdr">
-      <h2>Agregar entreno</h2>
-      <button class="video-modal-close" onclick="closeAddWorkoutModal()">Cerrar</button>
-    </div>
-    <div class="terms-body" id="add-workout-modal-body" style="padding:6px"></div>
-  </div>
 </div>
 
 <!-- EDITAR/ELIMINAR UN ENTRENO YA COMPLETADO -->
@@ -3172,7 +3202,7 @@ body.admin-mode #courtesy-modal label{border-radius:14px!important;border-color:
 // ── CONFIG & SUPABASE ───────────────────────────────────────
 const SUPABASE_URL='https://pmpjteuqjusbiduevbwq.supabase.co';
 const SUPABASE_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBtcGp0ZXVxanVzYmlkdWV2YndxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc2OTI1NjUsImV4cCI6MjA5MzI2ODU2NX0.XbMzZoo2yqtrD8znLnyo_1zDfrdJAvAPj1lqGOyXnLw';
-const APP_VERSION='20260907-2';
+const APP_VERSION='20260908-1';
 // La pierna va separada en cuádriceps, femorales y pantorrillas: la figura
 // corporal pinta esas tres regiones por separado y el motor de recuperación les
 // da ventanas de descanso distintas. 'Piernas' sigue reconociéndose al leer
@@ -4028,6 +4058,70 @@ function closeVideoModal(){
   if(modal)modal.remove();
 }
 
+// ── CONFIRMAR Y PREGUNTAR ─────────────────────────────────────────────────
+// confirm() y prompt() del navegador bloquean el hilo, no se pueden estilar y
+// en iOS instalado como PWA salen con el dominio encima: nada delata más rápido
+// que esto es una web. Skandi ya los reemplazó (commit a6ea2cb); esto es el
+// mismo patrón, sin su i18n. Devuelven promesas, así que cada llamada pasa de
+// `if(!confirm(x))` a `if(!await confirmSheet(x))`.
+function closeConfirmSheet(){
+  const o=document.getElementById('confirm-overlay');
+  if(o){o.classList.remove('show');o.innerHTML='';o.onclick=null;}
+}
+function confirmSheet(body,opts){
+  const{title='',confirmLabel='Aceptar',cancelLabel='Cancelar',danger=false}=opts||{};
+  return new Promise(resolve=>{
+    const overlay=document.getElementById('confirm-overlay');
+    if(!overlay){resolve(window.confirm(body));return;}
+    const settle=r=>{closeConfirmSheet();resolve(r);};
+    overlay.innerHTML='<div class="confirm-card" onclick="event.stopPropagation()">'
+      +(title?'<h3>'+esc(title)+'</h3>':'')
+      +'<p>'+esc(body).replace(/\n/g,'<br>')+'</p>'
+      +'<div class="confirm-actions">'
+      +'<button type="button" class="btn-sm confirm-ghost">'+esc(cancelLabel)+'</button>'
+      +'<button type="button" class="btn-sm '+(danger?'confirm-danger':'confirm-ok')+'">'+esc(confirmLabel)+'</button>'
+      +'</div></div>';
+    overlay.classList.add('show');
+    // Tocar el fondo cuenta como cancelar, nunca como confirmar: el default seguro.
+    overlay.onclick=()=>settle(false);
+    const btns=overlay.querySelectorAll('.confirm-actions button');
+    btns[0].onclick=()=>settle(false);
+    btns[1].onclick=()=>settle(true);
+    btns[1].focus();
+  });
+}
+// Resuelve null al cancelar y string al aceptar (incluido '' si se borró todo),
+// igual que el prompt() nativo, para que quien lo llame no cambie de lógica.
+function promptSheet(body,opts){
+  const{title='',defaultValue='',placeholder='',confirmLabel='Aceptar',cancelLabel='Cancelar'}=opts||{};
+  return new Promise(resolve=>{
+    const overlay=document.getElementById('confirm-overlay');
+    if(!overlay){resolve(window.prompt(body,defaultValue));return;}
+    const settle=r=>{closeConfirmSheet();resolve(r);};
+    overlay.innerHTML='<div class="confirm-card" onclick="event.stopPropagation()">'
+      +(title?'<h3>'+esc(title)+'</h3>':'')
+      +'<p>'+esc(body).replace(/\n/g,'<br>')+'</p>'
+      +'<input id="prompt-sheet-input" type="text" value="'+esc(defaultValue)+'" placeholder="'+esc(placeholder)+'">'
+      +'<div class="confirm-actions">'
+      +'<button type="button" class="btn-sm confirm-ghost">'+esc(cancelLabel)+'</button>'
+      +'<button type="button" class="btn-sm confirm-ok">'+esc(confirmLabel)+'</button>'
+      +'</div></div>';
+    overlay.classList.add('show');
+    const input=document.getElementById('prompt-sheet-input');
+    overlay.onclick=()=>settle(null);
+    const btns=overlay.querySelectorAll('.confirm-actions button');
+    btns[0].onclick=()=>settle(null);
+    btns[1].onclick=()=>settle(input.value);
+    input.onkeydown=e=>{if(e.key==='Enter'){e.preventDefault();settle(input.value);}};
+    input.focus();input.select();
+  });
+}
+function withScrollKept(el,paint){
+  const box=el&&el.closest?el.closest('.scroll-area,.adm-section,.terms-body'):null;
+  const y=box?box.scrollTop:0;
+  paint();
+  if(box&&y)box.scrollTop=y;
+}
 function toast(msg,t){const el=document.getElementById('toast');el.textContent=msg;el.className='toast show'+(t?' '+t:'');setTimeout(()=>el.className='toast',3200);}
 
 // Auto-insert slash in MM/AA expiry field
@@ -4745,7 +4839,7 @@ async function doLogin(){
 }
 async function forgotPassword(){
   const email=(document.getElementById('le')?.value||'').trim();
-  const target=email||prompt('Correo para reestablecer contraseña');
+  const target=email||await promptSheet('Correo para reestablecer contraseña');
   if(!target){toast('Escribe tu correo','err');return;}
   try{
     const redirectTo=PUBLIC_APP_URL+'?reset_password=1';
@@ -4860,7 +4954,7 @@ async function doRegister(){
 }
 async function ensureProfile(reg){
   const{data:existing}=await sb.from('profiles').select('id').eq('id',sbUser.id).maybeSingle();
-  if(existing){await assignDefaultMemberBoardsSb(sbUser.id);return;}
+  if(existing)return;
   let code;
   for(let attempts=0;attempts<20;attempts++){
     code=String(Math.floor(1000+Math.random()*9000));
@@ -4869,18 +4963,9 @@ async function ensureProfile(reg){
   }
   const{error}=await sb.from('profiles').insert({id:sbUser.id,name:reg.name,phone:reg.phone||null,role:'user',access_code:code});
   if(error)throw error;
-  await assignDefaultMemberBoardsSb(sbUser.id);
-}
-async function assignDefaultMemberBoardsSb(userId){
-  if(!userId)return 0;
-  try{
-    const{data,error}=await sb.rpc('assign_default_member_boards',{p_user_id:userId});
-    if(error)throw error;
-    return Number(data)||0;
-  }catch(e){
-    console.warn('assignDefaultMemberBoardsSb:',e.message||e);
-    return 0;
-  }
+  // Las rutinas básicas ya no se copian al socio al registrarse: son del gym y
+  // las ve por `boards.is_starter` (migración 116). Copiarlas dejaba una fila
+  // por socio y por rutina, y solo alcanzaba a quien se registrara después.
 }
 async function completeRegister(reg){
   showLoading('Creando cuenta...');
@@ -5194,7 +5279,7 @@ function updateTopActions(v){
 function supportWhatsappUrl(){
   let context='mi rutina';
   if(document.getElementById('v-coaching')?.classList.contains('active')){
-    context=coachHubActiveTab==='programa'?'mi calendario de coaching':(coachHubActiveTab==='hoy'?'mi entrenamiento de hoy':'coaching');
+    context=coachHubActiveTab==='programa'?'mi seguimiento de coaching':(coachHubActiveTab==='hoy'?'mi entrenamiento de hoy':'coaching');
   }else if(document.getElementById('v-rutinas')?.classList.contains('active')){
     const visibleTitle=document.querySelector('#v-rutinas .board-title')?.textContent?.trim();
     if(visibleTitle)context='mi rutina "'+visibleTitle+'"';
@@ -6956,19 +7041,22 @@ function updateScoreUnitToggleUI(){
 // músculo y buscador de ejercicio encima. Coaching se queda con lo que solo
 // pasa ahí — ayuno, hábitos, adherencia y el feedback que lee el coach.
 // ── HISTORIAL ────────────────────────────────────────────────
-const _prCharts={};
+// Reservas y pagos, que es lo que promete el nombre. Los PRs vivían aquí
+// además de en Progreso, cada uno con su propia consulta a user_scores: se
+// quedan en Progreso, que es donde están las estadísticas y el volumen.
 let _historialRange='90'; // '30' | '90' | '365' | 'all'
 function setHistorialRange(v){_historialRange=v;renderHistorial();}
 async function renderHistorial(){
   const hbEl=document.getElementById('hb');
   const hpEl=document.getElementById('hp');
-  const hsEl=document.getElementById('h-scores');
   const rangeEl=document.getElementById('hist-range');
   if(!hbEl||!sbUser)return;
   if(rangeEl)rangeEl.value=_historialRange;
-  hbEl.innerHTML='<div class="empty">Cargando...</div>';
-  if(hpEl)hpEl.innerHTML='';
-  if(hsEl)hsEl.innerHTML='<div class="empty">Cargando...</div>';
+  // Poner "Cargando..." encima de una lista que ya se leía es un parpadeo
+  // gratis: si ya hay contenido, se atenúa y se queda quieto hasta que llega
+  // lo nuevo.
+  if(hbEl.children.length)hbEl.classList.add('is-reloading');
+  else hbEl.innerHTML='<div class="empty">Cargando...</div>';
   try{
     const isAll=_historialRange==='all';
     const cutoffDs=isAll?null:addDaysDS(mazToday(),-Number(_historialRange));
@@ -6979,19 +7067,15 @@ async function renderHistorial(){
       bkQuery=bkQuery.gte('ds',cutoffDs);
       payQuery=payQuery.gte('created_at',cutoffIso);
     }
-    const[bkRes,payRes,scRes]=await Promise.allSettled([
+    const[bkRes,payRes]=await Promise.allSettled([
       bkQuery.order('ds',{ascending:false}).order('start_idx',{ascending:false}).limit(isAll?30:200),
-      payQuery.order('created_at',{ascending:false}).limit(isAll?20:200),
-      sb.from('user_scores').select('*').eq('user_id',sbUser.id)
-        .order('logged_at',{ascending:true}).limit(200)
+      payQuery.order('created_at',{ascending:false}).limit(isAll?20:200)
     ]);
     const bks=bkRes.status==='fulfilled'?(bkRes.value.data||[]):[];
     const pays=payRes.status==='fulfilled'?(payRes.value.data||[]):[];
-    const userScoreRows=scRes.status==='fulfilled'?(scRes.value.data||[]):[];
 
-    // Render PRs
-    if(hsEl)renderPrCardsInto(hsEl,_prCharts,userScoreRows,scoreWeightUnit,'h');
-
+    hbEl.classList.remove('is-reloading');
+    if(hpEl)hpEl.innerHTML='';
     // Render bookings
     if(bks.length){
       hbEl.innerHTML='';
@@ -7895,7 +7979,7 @@ async function addSetSb(scheduleId,exKey,defaultReps){
 async function deleteSetSb(setId,exKey){
   const arr=coachSessionSets[exKey]||[];
   if(arr.length<=1){toast('Debe quedar al menos una serie','warn');return;}
-  if(!confirm('¿Eliminar esta serie?'))return;
+  if(!await confirmSheet('¿Eliminar esta serie?',{confirmLabel:'Eliminar',danger:true}))return;
   try{
     const{error}=await sb.from('coaching_session_sets').delete().eq('id',setId);
     if(error)throw error;
@@ -8047,6 +8131,7 @@ const DOW_SHORT=['Lun','Mar','Mié','Jue','Vie','Sáb','Dom'];
 let rutActiveTab='hoy';
 let myRoutines=[];            // boards propios + asignados
 let myRoutinesLoadedAt=0;
+let myProgramWeeks=[];        // fases del ciclo (coaching_program_weeks, 115)
 let weekTemplate=[];          // coaching_week_templates del socio
 let myPrograms=[];
 let myProgramDays=[];
@@ -8083,10 +8168,11 @@ async function renderRutHub(){
   if(rutActiveTab==='rutinas')renderRutRutinas();
 }
 
-// Las rutinas del gym llegan por board_assignments; las propias por owner_id.
-// Se piden por separado porque son dos condiciones distintas sobre la misma
-// tabla y PostgREST no permite un OR entre una lista `in` y una igualdad sin
-// traerse todo el catálogo de pizarrones.
+// Un socio tiene tres orígenes de rutina: las suyas (owner_id), las que le
+// asignó el coach (board_assignments) y las básicas del gym (is_starter, 116),
+// que no se asignan a nadie porque son de todos. Son tres condiciones distintas
+// sobre la misma tabla y PostgREST no permite un OR entre una lista `in` y una
+// igualdad sin traerse el catálogo entero, así que se piden por separado.
 async function loadMyRoutinesSb(force){
   if(!sbUser)return myRoutines;
   if(!force&&myRoutinesLoadedAt&&Date.now()-myRoutinesLoadedAt<30000){
@@ -8097,25 +8183,32 @@ async function loadMyRoutinesSb(force){
   }
   const{data:assignments}=await sb.from('board_assignments').select('board_id').eq('user_id',sbUser.id);
   const boardIds=(assignments||[]).map(a=>a.board_id).filter(Boolean);
-  const[gymRes,mineRes]=await Promise.all([
+  const[gymRes,mineRes,starterRes]=await Promise.all([
     boardIds.length?sb.from('boards').select('*').in('id',boardIds):Promise.resolve({data:[]}),
-    sb.from('boards').select('*').eq('owner_id',sbUser.id)
+    sb.from('boards').select('*').eq('owner_id',sbUser.id),
+    // La 116 puede no estar corrida todavía: sin la columna, el socio se queda
+    // con lo de siempre en vez de quedarse sin rutinas.
+    sb.from('boards').select('*').eq('is_starter',true).then(r=>r,()=>({data:[]}))
   ]);
   if(gymRes.error)throw gymRes.error;
   if(mineRes.error)throw mineRes.error;
+  if(starterRes.error)console.warn('boards.is_starter no disponible:',starterRes.error.message);
   const seen=new Set();
   myRoutines=[];
   // Las propias primero: si el coach le asignó al socio una rutina que además
   // es suya, se queda la versión que puede editar.
-  [...(mineRes.data||[]),...(gymRes.data||[])].forEach(b=>{
+  [...(mineRes.data||[]),...(gymRes.data||[]),...(starterRes.error?[]:(starterRes.data||[]))].forEach(b=>{
     if(seen.has(b.id))return;
     seen.add(b.id);
+    b._starterOnly=!!b.is_starter;
     myRoutines.push(b);
     if(!coachBoardsById[b.id])coachBoardsById[b.id]=b;
   });
+  // Tuyas → las que te puso el coach → las básicas del gym.
   myRoutines.sort((a,b)=>{
-    const am=a.owner_id===sbUser.id?0:1, bm=b.owner_id===sbUser.id?0:1;
-    return am!==bm?am-bm:String(a.name||'').localeCompare(String(b.name||''));
+    const rank=x=>x.owner_id===sbUser.id?0:(x._starterOnly?2:1);
+    const ra=rank(a), rb=rank(b);
+    return ra!==rb?ra-rb:String(a.name||'').localeCompare(String(b.name||''));
   });
   myRoutinesLoadedAt=Date.now();
   return myRoutines;
@@ -8134,14 +8227,20 @@ async function loadWeekPlanSb(force){
   // migración 070; en ese caso la semana sigue funcionando sola.
   if(pgmRes.error){
     console.warn('coaching_programs no disponible:',pgmRes.error.message);
-    myPrograms=[];myProgramDays=[];
+    myPrograms=[];myProgramDays=[];myProgramWeeks=[];
   }else{
     myPrograms=pgmRes.data||[];
     const ids=myPrograms.map(p=>p.id);
     if(ids.length){
-      const{data}=await sb.from('coaching_program_days').select('*').in('program_id',ids).order('dow');
-      myProgramDays=data||[];
-    }else myProgramDays=[];
+      const[dRes,wRes]=await Promise.allSettled([
+        sb.from('coaching_program_days').select('*').in('program_id',ids).order('dow'),
+        sb.from('coaching_program_weeks').select('*').in('program_id',ids).order('week_index')
+      ]);
+      myProgramDays=(dRes.status==='fulfilled'&&!dRes.value.error)?(dRes.value.data||[]):[];
+      // Las fases llegan con la 115; sin ella el programa sigue siendo una
+      // semana que se repite y el socio no ve ciclo, que es como estaba antes.
+      myProgramWeeks=(wRes.status==='fulfilled'&&!wRes.value.error)?(wRes.value.data||[]):[];
+    }else{myProgramDays=[];myProgramWeeks=[];}
   }
   weekPlanLoadedAt=Date.now();
 }
@@ -8156,6 +8255,12 @@ function isMyRoutine(b){return !!(b&&sbUser&&b.owner_id===sbUser.id);}
 function routineColor(b){return isMyRoutine(b)?MEMBER_ROUTINE_COLOR:((b&&b.color)||'#2563eb');}
 function routineExercises(b){return (b&&Array.isArray(b.exercises)?b.exercises:[]);}
 function programDaysOf(id){return myProgramDays.filter(d=>d.program_id===id).sort((a,b)=>a.dow-b.dow);}
+// Los días que rigen una semana concreta del ciclo. Misma regla de reemplazo
+// que coaching_week_slots en SQL: la semana N manda sobre la de respaldo (0),
+// día por día. Sin ciclo, o pidiendo la 0, salen las de respaldo tal cual.
+function programSlotsOf(id,weekIndex){return coachProgramSlotsFor(id,weekIndex||0,myProgramDays);}
+function myProgramCycleIndex(p){return coachProgramWeekIndexFor(p,mazWeekStart(mazToday()));}
+function programHasWeekVariants(id){return myProgramDays.some(d=>d.program_id===id&&d.week_index>0);}
 // created_by distingue quién puso cada día de la semana: si no fue el socio,
 // fue su coach desde el panel de admin. El socio puede moverlo igual —esa es la
 // regla— pero verlo marcado antes de tocarlo evita deshacer el plan sin querer.
@@ -8652,10 +8757,9 @@ function renderRutHoy(){
       +'</div></div>';
   });
 
-  html+='<div class="coach-hoy-actions" style="display:flex;gap:8px">'
-    +'<button class="btn-sm coach-add-workout" style="flex:1" onclick="openAddWorkoutModal()">Entrenar otra rutina</button>'
-    +'<button class="btn-sm coach-add-workout" style="flex:1" onclick="startFreeWorkoutSb()">+ Entrenar libre</button>'
-    +'</div>';
+  // Un solo botón: "entrenar otra rutina" y "entrenar libre" eran dos caminos
+  // al mismo sitio, y el segundo vive ahora como primera opción de la hoja.
+  html+='<button class="btn-sm coach-add-workout" style="width:100%" onclick="openCoachBoardPicker(&quot;start&quot;)">Entrenar otra cosa hoy</button>';
   html+=bodyCardHtml();
   el.innerHTML=html;
 }
@@ -8666,11 +8770,17 @@ function renderRutSemana(){
   if(!el)return;
   const todayDow=(dateObjFromDS(mazToday()).getUTCDay()+6)%7;  // 0 = lunes
   const pgm=activeProgram();
+  // Un programa con fechas no es "un programa": es un bloque que va por su
+  // semana N y que puede tener una descarga. El socio lo estaba siguiendo sin
+  // que nada se lo dijera.
+  const cycleIdx=pgm?myProgramCycleIndex(pgm):0;
+  const cycleLine=(pgm&&pgm.start_date)?coachProgramCycleLine(pgm,mazWeekStart(mazToday()),myProgramWeeks):'';
   let html='<div class="program-card">'
     +'<div style="display:flex;align-items:center;justify-content:space-between;gap:10px">'
     +'<div style="min-width:0"><div class="ws-bar-k">Programa</div>'
     +'<div style="font-size:14.5px;font-weight:750;margin-top:3px">'+esc(pgm?pgm.name:'Semana libre')+'</div></div>'
     +'<button class="btn-sm" onclick="openProgramPicker()">Programas</button></div>'
+    +(cycleLine?'<div class="program-cycle-line'+(cycleIdx===-1?' is-ended':'')+'">'+esc(cycleLine)+'</div>':'')
     +(pgm&&pgm.notes?'<div style="font-size:11.5px;color:var(--gray);margin-top:8px">'+esc(pgm.notes)+'</div>':'')
     +'</div>';
 
@@ -8699,34 +8809,20 @@ function renderRutSemana(){
   }
   html+='</div>';
   html+='<button class="btn-sm" style="width:100%;margin-top:12px" onclick="openProgramForm()">Guardar esta semana como programa</button>';
+  html+='<button class="btn-sm" style="width:100%;margin-top:8px" onclick="openCreateChooser()">+ Crear</button>';
   html+='<div style="font-size:11.5px;color:var(--gray);margin-top:10px;line-height:1.5">'
-    +'La semana se aplica sola cada lunes. Mover o saltarte un día suelto no cambia el programa.'
+    +(cycleIdx===-1
+      ? 'Tu bloque terminó. Elige otro programa o arma la semana a mano: no se repite solo.'
+      : 'La semana se aplica sola cada lunes. Mover o saltarte un día suelto no cambia el programa.')
     +(coachSetDays().length?' Los días marcados los puso tu coach; puedes cambiarlos y él lo verá.':'')
     +'</div>';
-  el.innerHTML=html;
+  withScrollKept(el,()=>{el.innerHTML=html;});
 }
 
-function openDayPicker(dow){
-  _dayPickerDow=dow;
-  const title=document.getElementById('day-picker-title');
-  if(title)title.textContent='Rutina del '+['lunes','martes','miércoles','jueves','viernes','sábado','domingo'][dow];
-  const body=document.getElementById('day-picker-modal-body');
-  const tpl=weekTemplate.find(t=>t.dow===dow);
-  let html='';
-  if(!myRoutines.length){
-    html='<div class="empty">Todavía no tienes rutinas. Crea una en “Mis rutinas”.</div>';
-  }else{
-    html=myRoutines.map(b=>'<button class="ex-menu-item" onclick="setWeekDay('+dow+',&quot;'+esc(b.id)+'&quot;)">'
-      +'<span class="week-dot" style="background:'+esc(routineColor(b))+'"></span>'
-      +'<span style="flex:1;min-width:0">'+esc(b.name)+'<span style="display:block;font-size:11px;color:var(--gray)">'
-      +routineExercises(b).length+' ejercicios · '+(isMyRoutine(b)?'Tuya':'Del gym')+'</span></span>'
-      +(tpl&&tpl.board_id===b.id?'<span style="color:var(--green)">✓</span>':'')
-      +'</button>').join('');
-  }
-  if(tpl)html+='<button class="ex-menu-item" style="color:#ef4444" onclick="clearWeekDay('+dow+')">Dejar el día libre</button>';
-  if(body)body.innerHTML=html;
-  document.getElementById('day-picker-modal').style.display='flex';
-}
+// Elegir la rutina de un día es la misma hoja que usa el coach: con buscador,
+// filtros y los ejercicios a la vista. La lista plana que había aquí antes no
+// dejaba ver qué traía cada rutina, que es lo único que hace falta para decidir.
+function openDayPicker(dow){openCoachBoardPicker('my-week',dow);}
 let _dayPickerDow=null;
 function closeDayPickerModal(){
   document.getElementById('day-picker-modal').style.display='none';
@@ -8780,9 +8876,11 @@ async function refreshWeekAndSchedule(){
 
 // ── PROGRAMAS ─────────────────────────────────────────────────────────────
 function programSummary(id){
-  const days=programDaysOf(id);
+  const days=programSlotsOf(id,0).filter(d=>d.board_id);
   if(!days.length)return 'Semana vacía';
-  return days.length+' día'+(days.length===1?'':'s')+' · '+days.map(d=>DOW_SHORT[d.dow]).join(' ');
+  const p=myPrograms.find(x=>x.id===id);
+  const cycle=(p&&p.start_date)?' · '+Math.max(1,p.weeks||4)+' semanas':'';
+  return days.length+' día'+(days.length===1?'':'s')+' · '+days.map(d=>DOW_SHORT[d.dow]).join(' ')+cycle;
 }
 
 function openProgramPicker(){
@@ -8806,25 +8904,60 @@ function openProgramPicker(){
 }
 function closeProgramModal(){document.getElementById('program-modal').style.display='none';}
 
+// Los tres verbos del socio, en un solo sitio y en orden de frecuencia. No hay
+// un cuarto para "ejercicio": en HABIT el ejercicio se elige del catálogo y no
+// se escribe (ver el builder de rutina), porque escribirlo a mano deja fichas
+// sin músculo, sin indicaciones y sin video.
+function openCreateChooser(){
+  const title=document.getElementById('program-modal-title');
+  if(title)title.textContent='Crear';
+  const emptyWeek=!weekTemplate.length;
+  const opt=(icon,name,sub,action)=>'<button class="create-opt" onclick="closeProgramModal();'+action+'">'
+    +'<span class="create-opt-icon">'+icon+'</span>'
+    +'<span style="min-width:0"><strong>'+name+'</strong><span>'+sub+'</span></span>'
+    +'<span class="create-opt-go">›</span></button>';
+  const body=document.getElementById('program-modal-body');
+  if(body)body.innerHTML=
+    opt('▶','Entrenar ahora','Una rutina cualquiera, o por libre sin rutina.','openCoachBoardPicker(&quot;start&quot;)')
+    +opt('☰','Una rutina','Tu lista de ejercicios, para usarla cuando quieras.','openRoutineBuilder()')
+    +opt('▦','Un programa',emptyWeek
+        ?'Necesitas armar tu semana primero.'
+        :'Guarda tu semana con nombre para volver a ella.',
+      emptyWeek?'rutTab(&quot;semana&quot;)':'openProgramForm()');
+  document.getElementById('program-modal').style.display='flex';
+}
+
 function openProgramManage(id){
   const p=myPrograms.find(x=>x.id===id);
   if(!p)return;
   const title=document.getElementById('program-modal-title');
   if(title)title.textContent=p.name;
-  const days=programDaysOf(id);
+  // Con un ciclo se enseña la semana que toca ahora, no todas mezcladas: los
+  // días de la semana 5 y los de respaldo en la misma rejilla no describen
+  // ninguna semana real.
+  const idx=myProgramCycleIndex(p);
+  const days=programSlotsOf(id,idx>0?idx:0);
+  const cycleLine=p.start_date?coachProgramCycleLine(p,mazWeekStart(mazToday()),myProgramWeeks):'';
   const body=document.getElementById('program-modal-body');
   if(body){
-    body.innerHTML='<div class="week-grid" style="margin-bottom:14px">'
+    body.innerHTML=(cycleLine?'<div class="program-cycle-line'+(idx===-1?' is-ended':'')+'">'+esc(cycleLine)+'</div>':'')
+      +'<div class="week-grid" style="margin-bottom:14px">'
       +Array.from({length:7},(_,d)=>{
-        const day=days.find(x=>x.dow===d);
-        return '<div class="week-day"><span class="week-day-dow">'+DOW_SHORT[d]+'</span>'
+        const day=days.find(x=>x.dow===d&&x.board_id);
+        // Un ciclo con semanas propias solo se edita desde su semana base: lo
+        // que se ve aquí puede ser la semana 5 del coach, y tocarla escribiría
+        // en la base sin que el socio entienda por qué no cambia nada.
+        const editable=idx<=1||!programHasWeekVariants(id);
+        return '<button class="week-day"'+(editable?' onclick="openCoachBoardPicker(&quot;my-program&quot;,'+d+',&quot;&quot;,&quot;'+esc(id)+'&quot;)"':' disabled')+'>'
+          +'<span class="week-day-dow">'+DOW_SHORT[d]+'</span>'
           +(day?'<span class="week-day-name"><span class="week-dot" style="background:'+esc(day.board_color||'#2563eb')+'"></span>'+esc(day.board_name)+'</span>'
               :'<span class="week-day-empty">Libre</span>')
-          +'<span></span></div>';
+          +(editable?'<span class="week-day-go">›</span>':'<span></span>')+'</button>';
       }).join('')+'</div>'
+      +(programHasWeekVariants(id)?'<div class="program-cycle-note">Este programa cambia en algunas semanas: lo que ves es la que toca ahora y la arma tu coach. Puedes cambiar la semana base desde «Reemplazar la semana base con la mía».</div>':'')
       +(p.is_active?'':'<button class="btn" style="margin-bottom:8px" onclick="applyProgramSb(&quot;'+p.id+'&quot;)">Usar este programa</button>')
       +'<button class="btn-sm" style="width:100%;margin-bottom:8px" onclick="openProgramForm(&quot;'+p.id+'&quot;)">Renombrar</button>'
-      +'<button class="btn-sm" style="width:100%;margin-bottom:8px" onclick="updateProgramFromWeekSb(&quot;'+p.id+'&quot;)">Actualizar con mi semana actual</button>'
+      +'<button class="btn-sm" style="width:100%;margin-bottom:8px" onclick="updateProgramFromWeekSb(&quot;'+p.id+'&quot;)">Reemplazar la semana base con la mía</button>'
       +'<button class="btn-sm bred" style="width:100%" onclick="deleteProgramSb(&quot;'+p.id+'&quot;)">Eliminar programa</button>'
       +'<button class="btn-sm" style="width:100%;margin-top:14px" onclick="openProgramPicker()">Volver</button>';
   }
@@ -8868,7 +9001,7 @@ async function saveProgramSb(id){
         ({data,error}=await sb.from('coaching_programs').insert({user_id:sbUser.id,name,notes,is_active:true}).select().single());
       }
       if(error)throw error;
-      const days=weekTemplate.map(t=>({program_id:data.id,dow:t.dow,board_id:t.board_id,board_name:t.board_name,board_color:t.board_color||'#2563eb'}));
+      const days=weekTemplate.map(t=>({program_id:data.id,week_index:0,dow:t.dow,board_id:t.board_id,board_name:t.board_name,board_color:t.board_color||'#2563eb'}));
       if(days.length){
         const{error:dErr}=await sb.from('coaching_program_days').insert(days);
         if(dErr)throw dErr;
@@ -8885,11 +9018,16 @@ async function saveProgramSb(id){
 
 async function updateProgramFromWeekSb(id){
   if(!weekTemplate.length){toast('Tu semana está vacía','warn');return;}
-  if(!confirm('¿Reemplazar los días de este programa con tu semana actual?'))return;
+  // Solo la semana de respaldo. Borrar todo el programa se llevaba por delante
+  // las semanas propias del ciclo (una descarga en la 5, por ejemplo), que es
+  // justo lo que distingue un bloque de una semana suelta.
+  const variants=programHasWeekVariants(id);
+  if(!await confirmSheet('¿Reemplazar la semana base de este programa con tu semana actual?'
+    +(variants?'\n\nLas semanas que tienen su propia versión no se tocan.':'')))return;
   try{
-    const{error:dErr}=await sb.from('coaching_program_days').delete().eq('program_id',id);
+    const{error:dErr}=await sb.from('coaching_program_days').delete().eq('program_id',id).eq('week_index',0);
     if(dErr)throw dErr;
-    const days=weekTemplate.map(t=>({program_id:id,dow:t.dow,board_id:t.board_id,board_name:t.board_name,board_color:t.board_color||'#2563eb'}));
+    const days=weekTemplate.map(t=>({program_id:id,week_index:0,dow:t.dow,board_id:t.board_id,board_name:t.board_name,board_color:t.board_color||'#2563eb'}));
     if(days.length){
       const{error}=await sb.from('coaching_program_days').insert(days);
       if(error)throw error;
@@ -8903,6 +9041,30 @@ async function updateProgramFromWeekSb(id){
   }catch(e){toast('Error: '+e.message,'err');}
 }
 
+// El socio edita la semana base de su programa (week_index 0). Las semanas
+// propias de un ciclo —una descarga en la 5— las pone el coach: son suyas y la
+// hoja del socio lo dice en vez de dejarle pisarlas sin saberlo.
+async function setMyProgramDaySb(programId,dow,boardId){
+  if(!programId)return;
+  const b=boardId?routineById(boardId):null;
+  try{
+    const{error:delErr}=await sb.from('coaching_program_days').delete()
+      .eq('program_id',programId).eq('week_index',0).eq('dow',dow);
+    if(delErr)throw delErr;
+    if(b){
+      const{error}=await sb.from('coaching_program_days').insert({
+        program_id:programId,week_index:0,dow,
+        board_id:b.id,board_name:b.name,board_color:routineColor(b)
+      });
+      if(error)throw error;
+    }
+    weekPlanLoadedAt=0;
+    await loadWeekPlanSb(true);
+    openProgramManage(programId);
+    renderRutSemana();
+    toast(b?DOW_SHORT[dow]+': '+b.name:DOW_SHORT[dow]+' libre','ok');
+  }catch(e){toast('Error: '+e.message,'err');}
+}
 let _applyingProgram=false;
 async function applyProgramSb(id){
   if(_applyingProgram)return;
@@ -8913,37 +9075,45 @@ async function applyProgramSb(id){
     ? '¿Cambiar tu semana a "'+p.name+'"?\n\nOjo: tu coach había puesto '+coachDays.length+' día'+(coachDays.length===1?'':'s')
       +' ('+coachDays.map(d=>DOW_SHORT[d.dow]).join(', ')+') y este programa los reemplaza.'
     : '¿Cambiar tu semana a "'+p.name+'"?';
-  if(!confirm(aviso))return;
+  if(!await confirmSheet(aviso))return;
+  // Un programa de varias semanas necesita saber desde cuándo cuenta la semana
+  // 1; uno de una sola no, y preguntarlo sería ruido.
+  const total=Math.max(1,p.weeks||4);
+  let startDs=null;   // null = el RPC no toca la fecha que ya tenga
+  if(!p.start_date&&(total>1||programHasWeekVariants(id))){
+    startDs=await confirmSheet('"'+p.name+'" dura '+total+' semanas. ¿Empezarlo esta semana?\n\nSi cancelas, se usa igual pero repitiendo la misma semana siempre.')
+      ? mazWeekStart(mazToday()) : null;
+  }
   _applyingProgram=true;
   showLoading('Aplicando programa...');
   try{
-    const days=programDaysOf(id);
-    // Se reescribe la semana completa, no solo los días que el programa nombra:
-    // un día que el programa deja libre tiene que quedar libre de verdad, si no
-    // la semana quedaría mezclada con lo que había del programa anterior.
-    const{error:delErr}=await sb.from('coaching_week_templates').delete().eq('user_id',sbUser.id);
-    if(delErr)throw delErr;
-    if(days.length){
-      const{error}=await sb.from('coaching_week_templates').insert(days.map(d=>({
-        user_id:sbUser.id,dow:d.dow,board_id:d.board_id,board_name:d.board_name,
-        board_color:d.board_color||'#2563eb',created_by:sbUser.id
-      })));
-      if(error)throw error;
-    }
-    await sb.from('coaching_programs').update({is_active:false}).eq('user_id',sbUser.id).eq('is_active',true);
-    const{error:actErr}=await sb.from('coaching_programs').update({is_active:true,updated_at:new Date().toISOString()}).eq('id',id);
-    if(actErr)throw actErr;
+    // Aplicar un programa son cuatro escrituras que tienen que pasar juntas
+    // (borrar la semana, escribir la del programa, desactivar el anterior,
+    // activar este). Sueltas desde aquí, un fallo a media dejaba al socio sin
+    // semana — y desde la 115 ni siquiera funcionaban: metían los días de todas
+    // las semanas del ciclo en una tabla con unique(user_id, dow). El RPC
+    // resuelve la semana que toca y hace las cuatro de una pieza.
+    const{error}=await sb.rpc('apply_coaching_program',{
+      p_user_id:sbUser.id,p_program_id:id,
+      p_week_start:mazWeekStart(mazToday()),p_today:mazToday(),
+      p_start_date:startDs
+    });
+    if(error)throw error;
     closeProgramModal();
     await refreshWeekAndSchedule();
     hideLoading();
     if(coachDays.length)addAdminNotif((sbProfile?.name||'Un socio')+' cambió su semana al programa "'+p.name+'"').catch(()=>{});
     toast('Semana cambiada a '+p.name,'ok');
-  }catch(e){hideLoading();toast('Error: '+e.message,'err');}
+  }catch(e){
+    hideLoading();
+    toast(/apply_coaching_program|function|does not exist/i.test(e.message||'')
+      ? 'Falta correr la migración 114 en Supabase' : 'Error: '+e.message,'err');
+  }
   finally{_applyingProgram=false;}
 }
 
 async function deleteProgramSb(id){
-  if(!confirm('¿Eliminar este programa? Tu semana actual no cambia.'))return;
+  if(!await confirmSheet('¿Eliminar este programa? Tu semana actual no cambia.',{confirmLabel:'Eliminar',danger:true}))return;
   try{
     const{error}=await sb.from('coaching_programs').delete().eq('id',id).eq('user_id',sbUser.id);
     if(error)throw error;
@@ -8996,13 +9166,27 @@ function renderRutRutinas(){
   const el=document.getElementById('rut-content');
   if(!el)return;
   const mine=myRoutines.filter(isMyRoutine);
-  const gym=myRoutines.filter(b=>!isMyRoutine(b));
-  let html='<button class="btn" style="margin-bottom:14px" onclick="openRoutineBuilder()">+ Crear rutina</button>';
+  // Las que puso el coach a propósito van aparte de las básicas del gym: no
+  // son lo mismo y mezclarlas esconde lo que de verdad es tuyo.
+  const coachBoards=myRoutines.filter(b=>!isMyRoutine(b)&&!b._starterOnly);
+  const starter=myRoutines.filter(b=>b._starterOnly);
+  let html='<button class="btn" style="margin-bottom:14px" onclick="openCreateChooser()">+ Crear</button>';
   html+='<p class="slbl">Mis rutinas</p>';
-  html+=mine.length?mine.map(routineCardHtml).join(''):'<div class="empty">Todavía no creas ninguna. Empieza de cero o duplica una del gym.</div>';
-  html+='<div class="divider"></div><p class="slbl">Rutinas del gym</p>';
-  html+=gym.length?gym.map(routineCardHtml).join(''):'<div class="empty">Tu entrenador aún no te asigna pizarrones.</div>';
-  el.innerHTML=html;
+  html+=mine.length?mine.map(routineCardHtml).join(''):'<div class="empty">Todavía no creas ninguna. Empieza de cero o duplica una de abajo.</div>';
+  if(coachBoards.length){
+    html+='<div class="divider"></div><p class="slbl">De tu entrenador</p>';
+    html+=coachBoards.map(routineCardHtml).join('');
+  }
+  if(starter.length){
+    html+='<div class="divider"></div><p class="slbl">Rutinas básicas</p>';
+    html+='<div class="rut-section-note">Están para todos los socios. Úsalas tal cual o duplica una para hacerla tuya.</div>';
+    html+=starter.map(routineCardHtml).join('');
+  }
+  if(!coachBoards.length&&!starter.length){
+    html+='<div class="divider"></div><p class="slbl">Rutinas del gym</p>';
+    html+='<div class="empty">Todavía no hay rutinas del gym disponibles.</div>';
+  }
+  withScrollKept(el,()=>{el.innerHTML=html;});
 }
 
 function openAddRoutineToWeek(boardId){
@@ -9049,7 +9233,7 @@ async function forkRoutineSb(boardId){
 async function deleteRoutineSb(boardId){
   const b=routineById(boardId);
   if(!b)return;
-  if(!confirm('¿Eliminar "'+b.name+'"? Se quita de tu semana y de tus programas.'))return;
+  if(!await confirmSheet('¿Eliminar "'+b.name+'"? Se quita de tu semana y de tus programas.',{title:'Eliminar rutina',confirmLabel:'Eliminar',danger:true}))return;
   try{
     // La FK de coaching_week_templates es "on delete set null", así que borrar
     // la rutina sin limpiar dejaría el día apuntando a la nada con el nombre
@@ -9965,24 +10149,6 @@ function renderCoachWeekScoreHtml(){
     +'<div class="tu-stat"><div class="tu-stat-n">'+totalMin+'</div><div class="tu-stat-l">Min</div></div>'
     +'</div>';
 }
-async function loadCoachMyBoards(){
-  return await loadMyRoutinesSb(false);
-}
-async function openAddWorkoutModal(){
-  const boards=await loadCoachMyBoards();
-  const body=document.getElementById('add-workout-modal-body');
-  if(!boards.length){
-    body.innerHTML='<div class="empty">No tienes rutinas todavía. Crea una en Rutinas o pide a tu coach que te asigne un pizarrón.</div>';
-  }else{
-    body.innerHTML=boards.map(b=>
-      '<button class="ex-menu-item" onclick="closeAddWorkoutModal();startWorkoutFromBoardSb(&quot;'+esc(b.id)+'&quot;,&quot;'+esc(b.name)+'&quot;,&quot;'+esc(b.color||'#2563eb')+'&quot;)">'+esc(b.name)+'</button>'
-    ).join('');
-  }
-  document.getElementById('add-workout-modal').style.display='flex';
-}
-function closeAddWorkoutModal(){
-  document.getElementById('add-workout-modal').style.display='none';
-}
 // Permite corregir un entreno ya completado: carga sus series guardadas y
 // reusa la misma lista/ficha de ejercicio (editable) que la sesión en vivo.
 async function ensureWorkoutEditSetsSb(scheduleRow,exercises,existingRows){
@@ -10061,7 +10227,7 @@ function closeEditWorkoutModal(){
   _editingWorkoutContext=null;
 }
 async function deleteCompletedWorkoutSb(scheduleId){
-  if(!confirm('¿Eliminar este entreno? Se borrará todo su registro de series y pesos.'))return;
+  if(!await confirmSheet('¿Eliminar este entreno? Se borrará todo su registro de series y pesos.',{confirmLabel:'Eliminar',danger:true}))return;
   showLoading('Eliminando...');
   try{
     const{data,error}=await sb.from('coaching_schedule')
@@ -10285,9 +10451,11 @@ function renderCoachSemanaPanel(){
     :'';
   // Los números de fuerza y el cuerpo viven en Progreso y en Entrenar; desde
   // aquí solo se sale hacia allá.
+  // Aquí se ve cómo va la semana; para cambiarla se va a Entrenar, que es donde
+  // vive el plan. Nada se edita en los dos sitios.
   const links='<div class="coach-plan-links">'
     +'<button class="btn-sm" onclick="sv(&quot;progreso&quot;)">Ver mi progreso</button>'
-    +'<button class="btn-sm" onclick="sv(&quot;rutinas&quot;)">Editar mi semana</button>'
+    +'<button class="btn-sm" onclick="sv(&quot;rutinas&quot;)">Cambiar mi plan en Entrenar</button>'
     +'</div>';
   el.innerHTML=renderCoachWeekScoreHtml()+strip+summary+tasksHtml+fastStats+links;
 }
@@ -10583,7 +10751,7 @@ async function saveWorkoutFeedbackSb(){
 }
 async function cancelCoachingSessionSb(){
   if(!activeCoachingSession)return;
-  if(!confirm('¿Cancelar este entreno? Se perderá el progreso de esta sesión.'))return;
+  if(!await confirmSheet('¿Cancelar este entreno? Se perderá el progreso de esta sesión.',{confirmLabel:'Cancelar entreno',cancelLabel:'Seguir',danger:true}))return;
   const sessionId=activeCoachingSession.id;
   const wasSelfStarted=!!(sbUser&&activeCoachingSession.created_by===sbUser.id);
   try{
@@ -11187,7 +11355,7 @@ async function wsRemoveExercise(exKey){
   const name=found?found.ex.name:'este ejercicio';
   const doneSets=(coachSessionSets[exKey]||[]).filter(s=>s.done);
   if(doneSets.length){toast('Ya registraste series aquí; borra esas series primero','warn');return;}
-  if(!confirm('¿Quitar "'+name+'" de este entreno? Tu rutina no cambia.'))return;
+  if(!await confirmSheet('¿Quitar "'+name+'" de este entreno? Tu rutina no cambia.'))return;
   showLoading('Quitando...');
   try{
     const overlayNow=Array.isArray(activeCoachingSession.session_exercises)?activeCoachingSession.session_exercises:[];
@@ -11215,14 +11383,14 @@ async function wsRemoveExercise(exKey){
 }
 
 // ── Terminar ──────────────────────────────────────────────────────────────
-function wsFinishWorkout(){
+async function wsFinishWorkout(){
   const allSets=Object.values(coachSessionSets).flat();
   const pending=allSets.filter(s=>!s.done).length;
-  if(pending&&!confirm('Te faltan '+pending+' serie'+(pending===1?'':'s')+'. ¿Finalizar de todos modos?'))return;
+  if(pending&&!await confirmSheet('Te faltan '+pending+' serie'+(pending===1?'':'s')+'. ¿Finalizar de todos modos?'))return;
   finishCoachingSessionSb();
 }
-function wsCancelWorkout(){
-  if(!confirm('¿Cancelar este entreno? Se pierde lo registrado.'))return;
+async function wsCancelWorkout(){
+  if(!await confirmSheet('¿Cancelar este entreno? Se pierde lo registrado.',{confirmLabel:'Cancelar entreno',cancelLabel:'Seguir',danger:true}))return;
   cancelCoachingSessionSb();
 }
 
@@ -11574,36 +11742,6 @@ function closeChatLightbox(){
   document.body.style.overflow='';
 }
 
-// ── SCORES ──
-function renderScores(){} // legacy no-op
-function renderScoresTop(){
-  const el=document.getElementById('scores-top');
-  if(!el)return;
-  if(!Object.keys(scores).length){el.innerHTML='';return;}
-  el.innerHTML='';
-  const boardMap={};
-  Object.entries(scores).forEach(([k,data])=>{
-    const parts=k.split('_');const boardId=parts[0],exIdx=parseInt(parts[1]);
-    if(!boardMap[boardId])boardMap[boardId]=[];
-    boardMap[boardId].push({exIdx,k,...data});
-  });
-  const ranks=['🥇','🥈','🥉'];const rankCls=['gold','silver','bronze'];
-  Object.entries(boardMap).forEach(([boardId,exList])=>{
-    const board=boards.find(b=>b.id===boardId);
-    const div=document.createElement('div');div.className='score-board';
-    let exRows=exList.sort((a,b)=>a.exIdx-b.exIdx).map(ex=>{
-      if(!ex.entries.length)return'';
-      return'<div class="score-ex-row"><div class="score-ex-name">'+ex.exName+'</div>'+
-        ex.entries.slice(0,5).map((e,i)=>'<div class="score-entry"><span class="score-rank '+(rankCls[i]||'')+'">'+( i<3?ranks[i]:(i+1)+'.')+'</span><span class="score-user">'+e.name+'</span><span class="score-weight">'+e.weight+' kg</span><span class="score-reps">'+(e.reps?e.reps+' reps':'')+'</span></div>').join('')+
-        '</div>';
-    }).join('');
-    div.innerHTML='<div class="score-board-hdr"><span class="score-board-title">'+(board?board.name:'Rutina')+'</span><span class="badge bg-purple">Ranking</span></div><div class="score-ex">'+exRows+'</div>';
-    el.appendChild(div);
-  });
-}
-
-// ── COMMUNITY FEED ───────────────────────────────────────────
-let postImageState=null;
 function previewPostImg(input){
   if(!input.files||!input.files[0])return;
   const file=input.files[0];
@@ -12033,7 +12171,7 @@ async function blockSlotSb(ds,idx,spots,reason){
   spots=Math.min(CAP,Math.max(1,Number(spots)||1));
   reason=(reason||'').trim();
   if(!reason){toast('Agrega el motivo del bloqueo','err');return;}
-  if(!confirm('¿Bloquear '+fmtSlot(idx)+' del '+fmtDS(ds)+'? ('+spots+' espacio'+(spots>1?'s':'')+')'))return;
+  if(!await confirmSheet('¿Bloquear '+fmtSlot(idx)+' del '+fmtDS(ds)+'? ('+spots+' espacio'+(spots>1?'s':'')+')'))return;
   try{
     const{error}=await sb.from('slot_blocks').upsert({ds,slot_idx:idx,spots,reason,created_by:sbUser?.id||null},{onConflict:'ds,slot_idx'});
     if(error)throw error;
@@ -12058,7 +12196,7 @@ async function unblockSlotSb(ds,idx){
 }
 
 async function adminCancelBookingSb(bid){
-  if(!confirm('Cancelar esta reserva?'))return;
+  if(!await confirmSheet('¿Cancelar esta reserva?',{confirmLabel:'Cancelar reserva',cancelLabel:'Volver',danger:true}))return;
   showLoading('Cancelando reserva...');
   try{
     const{data:b,error}=await sb.from('bookings')
@@ -12283,6 +12421,7 @@ async function renderBoardsAdmin(){
     const isEditing=editingBoards.has(board.id);
     const card=document.createElement('div');card.className='board-card'+(isEditing?' is-editing':'');
     card.dataset.boardName=(board.name||'').toLowerCase();
+    card.dataset.starter=board.is_starter?'1':'';
     const isAddingEx=addingExBoards.has(board.id);
     const isAssigning=assigningBoards.has(board.id);
     const assignedUsers=users.filter(u=>board.assignedTo.includes(u.id));
@@ -12359,7 +12498,8 @@ async function renderBoardsAdmin(){
     card.innerHTML=
       '<div class="routine-board-row">'
       +'<div class="routine-board-dot" style="background:'+board.color+'"></div>'
-      +'<div class="routine-board-main"><div class="routine-board-name">'+esc(board.name)+'</div><div class="routine-board-meta"><span>'+board.exercises.length+' ejs</span><span>'+assignedUsers.length+' socios</span></div></div>'
+      +'<div class="routine-board-main"><div class="routine-board-name">'+esc(board.name)+(board.is_starter?'<span class="board-starter-tag">Básica</span>':'')+'</div>'
+      +'<div class="routine-board-meta"><span>'+board.exercises.length+' ejs</span><span>'+(board.is_starter?'Todos los socios':assignedUsers.length+' socios')+'</span></div></div>'
       +(isEditing?
         '<div style="display:flex;gap:6px"><button class="routine-board-action routine-board-done" onclick="toggleBoardEdit(&quot;'+board.id+'&quot;)">Listo</button><button class="routine-board-action routine-board-cancel" onclick="cancelBoardEdit(&quot;'+board.id+'&quot;)">Cerrar</button></div>'
         :'<button class="routine-board-action" onclick="toggleBoardEdit(&quot;'+board.id+'&quot;)">Editar</button>')
@@ -12386,6 +12526,11 @@ async function renderBoardsAdmin(){
         +'<div class="routine-board-color-grid">'
         +COLORS.map(c=>'<div class="routine-board-swatch" onclick="updateBoardColorSb(&quot;'+board.id+'&quot;,&quot;'+c+'&quot;)" style="background:'+c+';border:2.5px solid '+(board.color===c?'rgba(255,255,255,.9)':'rgba(255,255,255,.12)')+'" title="'+c+'"></div>').join('')
         +'</div>'
+        +'<div class="routine-board-section-label" style="margin-top:11px">Disponibilidad</div>'
+        +'<button class="starter-toggle'+(board.is_starter?' on':'')+'" data-bid="'+board.id+'" onclick="toggleBoardStarterSb(this.dataset.bid,'+(board.is_starter?'false':'true')+')">'
+          +'<span class="starter-toggle-box">'+(board.is_starter?'✓':'')+'</span>'
+          +'<span><strong>Rutina básica</strong><span>'+(board.is_starter?'La ven todos los socios, sin asignarla.':'Solo la ven los socios a los que se la asignes.')+'</span></span>'
+        +'</button>'
         +'<div style="display:grid;grid-template-columns:1fr 1fr;gap:7px;margin-top:9px">'
         +'<button class="btn-sm bblue" data-bid="'+board.id+'" onclick="updateBoardNameSb(this.dataset.bid)">Guardar</button>'
         +'<button class="btn-sm" style="background:transparent;border:1px solid var(--border);color:var(--gray)" onclick="cancelBoardEdit(&quot;'+board.id+'&quot;)">Cancelar</button>'
@@ -12438,6 +12583,20 @@ async function toggleAssignSb(cb){
   toast(checked?'Rutina asignada':'Rutina removida','ok');
 }
 
+// Una rutina básica la ve todo socio sin que nadie se la asigne (migración
+// 116). Es lo que hace que un socio nuevo no aterrice en una pantalla vacía.
+async function toggleBoardStarterSb(bid,on){
+  try{
+    const{error}=await sb.from('boards').update({is_starter:on,updated_at:new Date().toISOString()}).eq('id',bid);
+    if(error)throw error;
+    const b=boards.find(x=>x.id===bid);
+    if(b)b.is_starter=on;
+    renderBoardsAdmin();
+    toast(on?'Ahora la ven todos los socios':'Ya solo la ven quienes la tengan asignada','ok');
+  }catch(e){
+    toast(/is_starter|column/i.test(e.message||'')?'Falta correr la migración 116 en Supabase':'Error: '+e.message,'err');
+  }
+}
 async function updateBoardColorSb(bid,color){
   const b=boards.find(x=>x.id===bid);
   if(!b)return;
@@ -12627,7 +12786,7 @@ async function removeExerciseSb(bid,idx){
 }
 
 async function deleteBoardSb(bid){
-  if(!confirm('Eliminar este pizarron?'))return;
+  if(!await confirmSheet('¿Eliminar esta rutina?',{confirmLabel:'Eliminar',danger:true}))return;
   await sb.from('board_assignments').delete().eq('board_id',bid);
   await sb.from('boards').delete().eq('id',bid);
   boards=boards.filter(x=>x.id!==bid);
@@ -13440,10 +13599,10 @@ async function adminOpenUserProfile(uid){
 }
 
 async function adminDeleteUserSb(uid,name){
-  const reason=prompt('Motivo para eliminar a '+name+':');
+  const reason=await promptSheet('Motivo para eliminar a '+name+':');
   if(reason===null)return;
   if(!reason.trim()){toast('El motivo es obligatorio','err');return;}
-  if(!confirm('Eliminar definitivamente a '+name+'? Esta accion borra su cuenta y se registra en bitacora.'))return;
+  if(!await confirmSheet('Eliminar definitivamente a '+name+'? Esta accion borra su cuenta y se registra en bitacora.'))return;
   showLoading('Eliminando socio...');
   try{
     const{data:sessionData}=await sb.auth.getSession();
@@ -13673,7 +13832,7 @@ async function adminGrantSelectedPlanSb(uid,name){
   const modalEl=document.getElementById('membership-grant-modal');
   const hadActivePlan=modalEl?.dataset.hadActivePlan==='1';
   const currentPlanLabel=modalEl?.dataset.currentPlanLabel||'su plan actual';
-  if(hadActivePlan&&!confirm('Esto va a REEMPLAZAR el plan actual de '+name+' ('+currentPlanLabel+') por '+plan.name+'. ¿Confirmas? Si el socio ya pagó algo bajo el plan anterior, considera usar "Corregir plan" en vez de esto.'))return;
+  if(hadActivePlan&&!await confirmSheet('Esto va a REEMPLAZAR el plan actual de '+name+' ('+currentPlanLabel+') por '+plan.name+'. ¿Confirmas? Si el socio ya pagó algo bajo el plan anterior, considera usar "Corregir plan" en vez de esto.'))return;
   const method=(document.getElementById('grant-method')||{value:'adjustment'}).value;
   const amount=Number((document.getElementById('grant-amount')||{value:0}).value||0);
   const note=(document.getElementById('grant-note')||{value:''}).value.trim();
@@ -14097,7 +14256,7 @@ async function adminSaveGastoSb(){
 }
 
 async function adminDeleteGastoSb(gastoId){
-  if(!confirm('¿Eliminar este gasto?'))return;
+  if(!await confirmSheet('¿Eliminar este gasto?',{confirmLabel:'Eliminar',danger:true}))return;
   showLoading('Eliminando...');
   try{
     const{error}=await sb.from('habit_gastos').delete().eq('id',gastoId);
@@ -14341,7 +14500,7 @@ async function adminSaveRetiroSb(){
 }
 
 async function adminDeleteRetiroSb(id){
-  if(!confirm('¿Eliminar este retiro?'))return;
+  if(!await confirmSheet('¿Eliminar este retiro?',{confirmLabel:'Eliminar',danger:true}))return;
   showLoading('Eliminando...');
   try{
     const{error}=await sb.from('habit_retiros').delete().eq('id',id);
@@ -14381,7 +14540,7 @@ async function adminSaveDeudaPagoSb(){
 }
 
 async function adminDeleteDeudaPagoSb(id){
-  if(!confirm('¿Eliminar este pago de deuda?'))return;
+  if(!await confirmSheet('¿Eliminar este pago de deuda?',{confirmLabel:'Eliminar',danger:true}))return;
   showLoading('Eliminando...');
   try{
     const{error}=await sb.from('habit_deuda_pagos').delete().eq('id',id);
@@ -14733,7 +14892,7 @@ async function adminApplyPlanCorrection(paymentId,uid,name){
   const summary='Vas a cambiar a '+name+' de "'+originalPlanName+'" a "'+plan.name+'".'
     +(extraAmount>0?' Se registrará un pago adicional de '+MXN(extraAmount)+' ('+methodLabel+') fechado '+extraDate+'.':' No se registrará ningún pago adicional.')
     +' ¿Confirmas?';
-  if(!confirm(summary))return;
+  if(!await confirmSheet(summary))return;
   const btn=document.getElementById('fix-plan-submit');
   if(btn){btn.disabled=true;btn.textContent='Aplicando...';}
   try{
@@ -14767,10 +14926,10 @@ async function adminApplyPlanCorrection(paymentId,uid,name){
 }
 
 async function adminDeletePaymentSb(paymentId){
-  const reason=prompt('Motivo para eliminar este pago:');
+  const reason=await promptSheet('Motivo para eliminar este pago:');
   if(reason===null)return;
   if(!reason.trim()){toast('El motivo es obligatorio','err');return;}
-  if(!confirm('Eliminar este registro de pago? No cancela ni reembolsa el cargo en Stripe; solo limpia el registro financiero de HABIT.'))return;
+  if(!await confirmSheet('Eliminar este registro de pago? No cancela ni reembolsa el cargo en Stripe; solo limpia el registro financiero de HABIT.'))return;
   showLoading('Eliminando pago...');
   try{
     const{data:sessionData}=await sb.auth.getSession();
@@ -15024,6 +15183,10 @@ async function loadCoachingListTodayStatusSb(){
     _coachingListAll.sort((a,b)=>(b.sortAttention-a.sortAttention)||(b.activeRecently-a.activeRecently)||(a.name||'').localeCompare(b.name||''));
   }catch(e){console.error('loadCoachingListTodayStatusSb:',e);}
 }
+async function askDisableCoaching(uid,name){
+  if(await confirmSheet('¿Desactivar coaching para '+name+'?',{confirmLabel:'Desactivar',danger:true}))
+    adminToggleCoachingBetaSb(uid,false);
+}
 async function adminToggleCoachingBetaSb(uid,enabled,name){
   try{
     const{error}=await sb.from('profiles').update({coaching_beta:enabled}).eq('id',uid);
@@ -15048,8 +15211,8 @@ async function adminOpenCoachingCockpit(uid,name){
   document.getElementById('a-coaching-detail').classList.add('active');
   await loadAndRenderCoachingCockpit(uid,name);
 }
-function adminCloseCoachingCockpit(){
-  if(coachAdminDraftCount()&&!confirm('Tienes cambios sin guardar en la semana de este cliente. ¿Salir y descartarlos?'))return;
+async function adminCloseCoachingCockpit(){
+  if(coachAdminDraftCount()&&!await confirmSheet('Tienes cambios sin guardar en la semana de este cliente. ¿Salir y descartarlos?',{confirmLabel:'Salir sin guardar',cancelLabel:'Seguir aquí',danger:true}))return;
   coachAdminWeekDraft={};
   document.querySelectorAll('.adm-section').forEach(el=>el.classList.remove('active'));
   document.getElementById('a-users').classList.add('active');
@@ -15071,8 +15234,8 @@ async function loadAndRenderCoachingCockpit(uid,name){
   await loadCoachingWeekAdminSb();
   renderCoachingDetail();
 }
-function coachAdminWeekShift(days){
-  if(coachAdminDraftCount()&&!confirm('Tienes cambios sin guardar en esta semana. ¿Descartarlos y cambiar de semana?'))return;
+async function coachAdminWeekShift(days){
+  if(coachAdminDraftCount()&&!await confirmSheet('Tienes cambios sin guardar en esta semana. ¿Descartarlos y cambiar de semana?',{confirmLabel:'Descartar',cancelLabel:'Seguir aquí',danger:true}))return;
   coachAdminWeekDraft={};
   coachAdminWeekStart=addDaysDS(coachAdminWeekStart,days);
   loadCoachingWeekAdminSb().then(renderCoachingDetail);
@@ -15462,14 +15625,30 @@ function coachAssignableBoards(){
 // La misma hoja sirve para la semana del cliente y para un día del programa;
 // coachPicker.mode dice cuál, porque lo único que cambia es a dónde va la
 // elección.
-let coachPicker={mode:'week',dow:0,ds:'',query:'',filter:'todas',expanded:null};
+let coachPicker={mode:'week',dow:0,ds:'',query:'',filter:'todas',expanded:null,programId:null};
+// Cinco destinos, una sola hoja. Elegir una rutina es el mismo acto lo haga el
+// coach para un cliente o el socio para sí mismo, así que es el mismo
+// componente; lo único que cambia es de dónde salen las rutinas y a dónde va la
+// elección.
+//   week / program  → el coach, sobre la semana o el programa de su cliente
+//   my-week / my-program → el socio, sobre lo suyo
+//   start           → el socio, entrenar algo ahora mismo
+const COACH_PICKER_MEMBER_MODES=['my-week','my-program','start'];
+function coachPickerIsMember(){return COACH_PICKER_MEMBER_MODES.indexOf(coachPicker.mode)>-1;}
+function coachPickerBoards(){return coachPickerIsMember()?(myRoutines||[]).slice():coachAssignableBoards();}
 function closeCoachBoardPicker(){const m=document.getElementById('coach-board-picker');if(m)m.style.display='none';}
-function openCoachBoardPicker(mode,dow,ds){
-  coachPicker={mode,dow,ds:ds||'',query:'',filter:'todas',expanded:null};
+function coachPickerTitle(){
+  const m=coachPicker.mode, d=coachPicker.dow, ds=coachPicker.ds;
+  if(m==='start')return 'Entrenar ahora';
+  if(m==='week')return DOW_SHORT[d]+' '+(ds?parseDS(ds).d:'')+' · elegir rutina';
+  if(m==='program')return (coachProgramSheetWeek?'Semana '+coachProgramSheetWeek:'Todas las semanas')+' · '+DOW_SHORT[d];
+  if(m==='my-program')return 'Programa · '+['lunes','martes','miércoles','jueves','viernes','sábado','domingo'][d];
+  return 'Rutina del '+['lunes','martes','miércoles','jueves','viernes','sábado','domingo'][d];
+}
+function openCoachBoardPicker(mode,dow,ds,programId){
+  coachPicker={mode,dow:dow||0,ds:ds||'',query:'',filter:'todas',expanded:null,programId:programId||null};
   const t=document.getElementById('coach-picker-title');
-  if(t)t.textContent=mode==='week'
-    ? DOW_SHORT[dow]+' '+(ds?parseDS(ds).d:'')+' · elegir rutina'
-    : (coachProgramSheetWeek?'Semana '+coachProgramSheetWeek:'Todas las semanas')+' · '+DOW_SHORT[dow];
+  if(t)t.textContent=coachPickerTitle();
   const q=document.getElementById('coach-picker-search');
   if(q)q.value='';
   const m=document.getElementById('coach-board-picker');
@@ -15492,51 +15671,90 @@ function coachBoardSummaryLine(b){
   return exs.length+' ejercicio'+(exs.length===1?'':'s')+(muscles.length?' · '+muscles.slice(0,3).join(', '):'');
 }
 function coachPickerCurrentBoardId(){
-  if(coachPicker.mode==='week')return coachWeekDayState(coachPicker.dow).boardId||'';
+  const m=coachPicker.mode;
+  if(m==='start')return '';
+  if(m==='week')return coachWeekDayState(coachPicker.dow).boardId||'';
+  if(m==='my-week')return ((weekTemplate||[]).find(t=>t.dow===coachPicker.dow)||{}).board_id||'';
+  if(m==='my-program'){
+    const slot=programSlotsOf(coachPicker.programId,0).find(x=>x.dow===coachPicker.dow);
+    return (slot&&slot.board_id)||'';
+  }
   const slot=coachProgramSheetSlots().find(x=>x.dow===coachPicker.dow);
   return (slot&&slot.board_id)||'';
+}
+// De dónde viene cada rutina, dicho como lo entiende quien mira. El coach
+// necesita saber si ya se la asignó; el socio, si es suya o del gym.
+function coachPickerTags(b){
+  if(coachPickerIsMember()){
+    if(isMyRoutine(b))return '<i class="coach-pick-tag">tuya</i>';
+    if(b._starterOnly)return '<i class="coach-pick-tag is-on">básica</i>';
+    return '<i class="coach-pick-tag is-on">de tu entrenador</i>';
+  }
+  return (b.owner_id!=null?'<i class="coach-pick-tag">del socio</i>':'')
+    +(coachClientAssignedBoardIds.has(b.id)?'<i class="coach-pick-tag is-on">asignada</i>'
+      :b.is_starter?'<i class="coach-pick-tag is-on">básica</i>':'');
+}
+function coachPickerChips(all){
+  if(coachPickerIsMember())return[
+    ['todas','Todas',all.length],
+    ['mias','Mías',all.filter(isMyRoutine).length],
+    ['basicas','Básicas',all.filter(b=>b._starterOnly).length],
+    ['coach','De tu entrenador',all.filter(b=>!isMyRoutine(b)&&!b._starterOnly).length]
+  ];
+  return[
+    ['todas','Todo el catálogo',all.length],
+    ['asignadas','Asignadas',all.filter(b=>coachClientAssignedBoardIds.has(b.id)).length],
+    ['socio','Del socio',all.filter(b=>b.owner_id!=null).length]
+  ];
+}
+function coachPickerMatchesFilter(b){
+  switch(coachPicker.filter){
+    case 'asignadas': return coachClientAssignedBoardIds.has(b.id);
+    case 'socio':     return b.owner_id!=null;
+    case 'mias':      return isMyRoutine(b);
+    case 'basicas':   return !!b._starterOnly;
+    case 'coach':     return !isMyRoutine(b)&&!b._starterOnly;
+    default:          return true;
+  }
 }
 function renderCoachBoardPicker(){
   const body=document.getElementById('coach-picker-body');
   if(!body)return;
-  const all=coachAssignableBoards();
+  const all=coachPickerBoards();
   const current=coachPickerCurrentBoardId();
+  const member=coachPickerIsMember();
   const chips=document.getElementById('coach-picker-chips');
-  const counts={
-    todas:all.length,
-    asignadas:all.filter(b=>coachClientAssignedBoardIds.has(b.id)).length,
-    socio:all.filter(b=>b.owner_id!=null).length
-  };
-  if(chips)chips.innerHTML=[['todas','Todo el catálogo'],['asignadas','Asignadas'],['socio','Del socio']]
-    .filter(([k])=>k==='todas'||counts[k])
-    .map(([k,l])=>'<button class="coach-picker-chip'+(coachPicker.filter===k?' active':'')+'" onclick="coachPickerFilter(&quot;'+k+'&quot;)">'+l+' <i>'+counts[k]+'</i></button>').join('');
+  if(chips)chips.innerHTML=coachPickerChips(all)
+    .filter(([k,,n])=>k==='todas'||n)
+    .map(([k,l,n])=>'<button class="coach-picker-chip'+(coachPicker.filter===k?' active':'')+'" onclick="coachPickerFilter(&quot;'+k+'&quot;)">'+l+' <i>'+n+'</i></button>').join('');
   const q=coachPicker.query.trim().toLowerCase();
   const list=all.filter(b=>{
-    if(coachPicker.filter==='asignadas'&&!coachClientAssignedBoardIds.has(b.id))return false;
-    if(coachPicker.filter==='socio'&&b.owner_id==null)return false;
+    if(!coachPickerMatchesFilter(b))return false;
     if(!q)return true;
     const exs=Array.isArray(b.exercises)?b.exercises:[];
-    // Busca también dentro de los ejercicios: el coach se acuerda de "la del
-    // peso muerto" más veces que del nombre que le puso a la rutina.
+    // Busca también dentro de los ejercicios: uno se acuerda de "la del peso
+    // muerto" más veces que del nombre que le puso a la rutina.
     return String(b.name||'').toLowerCase().includes(q)
       || exs.some(ex=>String(ex&&ex.name||'').toLowerCase().includes(q));
   });
-  const rest='<button class="coach-pick-row'+(current?'':' is-current')+'" onclick="coachPickerChoose(&quot;&quot;)">'
+  // La primera fila es la salida sin rutina. Entrenando ahora eso no es
+  // descansar, es entrenar por libre: el mismo hueco, otra intención.
+  const noneLabel=coachPicker.mode==='start'?'Entreno libre':'Descanso';
+  const noneSub=coachPicker.mode==='start'?'Empieza sin rutina y ve anotando':'Sin entreno este día';
+  const none='<button class="coach-pick-row'+(current?'':' is-current')+'" onclick="coachPickerChoose(&quot;&quot;)">'
     +'<span class="coach-pick-dot" style="background:#334155"></span>'
-    +'<span class="coach-pick-main"><span class="coach-pick-name">Descanso</span>'
-    +'<span class="coach-pick-sub">Sin entreno este día</span></span>'
+    +'<span class="coach-pick-main"><span class="coach-pick-name">'+noneLabel+'</span>'
+    +'<span class="coach-pick-sub">'+noneSub+'</span></span>'
     +(current?'':'<span class="coach-pick-check">✓</span>')+'</button>';
   const rows=list.map(b=>{
     const on=current===b.id;
-    const own=b.owner_id!=null;
+    const own=coachPickerIsMember()?isMyRoutine(b):b.owner_id!=null;
     const open=coachPicker.expanded===b.id;
     const exs=Array.isArray(b.exercises)?b.exercises:[];
     return '<div class="coach-pick-item'+(on?' is-current':'')+'">'
       +'<button class="coach-pick-row" onclick="coachPickerChoose(&quot;'+esc(b.id)+'&quot;)">'
         +'<span class="coach-pick-dot" style="background:'+esc(own?MEMBER_ROUTINE_COLOR:(b.color||'#2563eb'))+'"></span>'
-        +'<span class="coach-pick-main"><span class="coach-pick-name">'+esc(b.name)
-          +(own?'<i class="coach-pick-tag">del socio</i>':'')
-          +(coachClientAssignedBoardIds.has(b.id)?'<i class="coach-pick-tag is-on">asignada</i>':'')+'</span>'
+        +'<span class="coach-pick-main"><span class="coach-pick-name">'+esc(b.name)+coachPickerTags(b)+'</span>'
         +'<span class="coach-pick-sub">'+esc(coachBoardSummaryLine(b))+'</span></span>'
         +(on?'<span class="coach-pick-check">✓</span>':'')
       +'</button>'
@@ -15547,18 +15765,27 @@ function renderCoachBoardPicker(){
         +(exs.length>12?'<div class="coach-pick-ex-more">+'+(exs.length-12)+' más</div>':'')+'</div>':'')
       +'</div>';
   }).join('');
-  body.innerHTML=rest
+  body.innerHTML=none
     +(rows||'<div class="empty">'+(q?'Ninguna rutina coincide con «'+esc(coachPicker.query)+'».':'No hay rutinas en este filtro.')+'</div>')
-    +'<button class="btn-sm" style="width:100%;margin-top:14px" onclick="coachCreateBoardForClient()">+ Crear una rutina nueva</button>';
+    +'<button class="btn-sm" style="width:100%;margin-top:14px" onclick="'+(member?'closeCoachBoardPicker();openRoutineBuilder()':'coachCreateBoardForClient()')+'">+ Crear una rutina nueva</button>';
 }
 function coachPickerChoose(boardId){
-  if(coachPicker.mode==='week'){
-    coachAdminWeekDraft[coachPicker.ds]=boardId||'';
-    closeCoachBoardPicker();
+  const{mode,dow,ds,programId}=coachPicker;
+  closeCoachBoardPicker();
+  if(mode==='week'){
+    coachAdminWeekDraft[ds]=boardId||'';
     renderCoachingDetail();
-  }else{
-    closeCoachBoardPicker();
-    setCoachProgramDaySb(coachPicker.dow,boardId||'');
+  }else if(mode==='program'){
+    setCoachProgramDaySb(dow,boardId||'');
+  }else if(mode==='my-week'){
+    boardId?setWeekDay(dow,boardId):clearWeekDay(dow);
+  }else if(mode==='my-program'){
+    setMyProgramDaySb(programId,dow,boardId||'');
+  }else if(mode==='start'){
+    if(boardId){
+      const b=routineById(boardId);
+      if(b)startWorkoutFromBoardSb(b.id,b.name,routineColor(b));
+    }else startFreeWorkoutSb();
   }
 }
 // El editor de semana guarda en memoria, no en el DOM: el panel se repinta
@@ -15591,7 +15818,7 @@ function goToBoardEdit(boardId){
 // desde aquí solo tiene un motivo.
 async function coachCreateBoardForClient(){
   if(!selectedCoachClientId)return;
-  const name=(prompt('Nombre de la rutina nueva')||'').trim();
+  const name=(await promptSheet('Nombre de la rutina nueva')||'').trim();
   if(!name)return;
   try{
     const{data,error}=await sb.from('boards').insert({name,color:'#2563eb',exercises:[]}).select().single();
@@ -15757,7 +15984,8 @@ function renderCoachingDetail(){
     const own=b.owner_id!=null;
     return '<div class="admin-board-row" onclick="toggleClientBoardAssignSb(&quot;'+esc(b.id)+'&quot;,'+(!on)+')">'
       +'<div class="admin-board-check '+(on?'on':'')+'">'+(on?'✓':'')+'</div>'
-      +'<div class="admin-board-name"><span style="width:10px;height:10px;border-radius:50%;background:'+esc(own?MEMBER_ROUTINE_COLOR:(b.color||'#2563eb'))+';flex-shrink:0"></span><span>'+esc(b.name)+'</span>'+(own?'<span class="admin-plan-chip">del socio</span>':'')+'</div>'
+      +'<div class="admin-board-name"><span style="width:10px;height:10px;border-radius:50%;background:'+esc(own?MEMBER_ROUTINE_COLOR:(b.color||'#2563eb'))+';flex-shrink:0"></span><span>'+esc(b.name)+'</span>'
+      +(own?'<span class="admin-plan-chip">del socio</span>':b.is_starter?'<span class="admin-plan-chip">ya la tiene</span>':'')+'</div>'
       +(own?'':'<button class="admin-board-edit" onclick="event.stopPropagation();goToBoardEdit(&quot;'+esc(b.id)+'&quot;)">Editar</button>')
       +'</div>';
   }).join(''):'<div class="empty">No hay rutinas creadas todavía.</div>';
@@ -15774,6 +16002,7 @@ function renderCoachingDetail(){
     +tabDef.map(([k,label])=>'<button class="coach-window-tab coach-detail-tab'+(coachDetailActiveTab===k?' active':'')+'" data-tab="'+k+'" onclick="coachDetailTab(&quot;'+k+'&quot;)">'+label+'</button>').join('')
     +'</div>';
 
+  const _box=el.closest('.adm-section'), _y=_box?_box.scrollTop:0;
   el.innerHTML=liveBanner
     +'<div class="coach-cockpit-head">'
     +'<div class="coach-cockpit-top">'
@@ -15857,9 +16086,10 @@ function renderCoachingDetail(){
     +'<p class="slbl" style="margin-bottom:8px">Notas del cliente</p>'
     +'<div id="coach-admin-notes"><div class="empty">Cargando...</div></div>'
     +'</div>'
-    +'<button class="btn-sm" style="width:100%;margin-top:6px;background:rgba(239,68,68,.12);border-color:var(--red);color:var(--red)" onclick="if(confirm(&quot;¿Desactivar coaching para '+esc(client.name||'este socio')+'?&quot;))adminToggleCoachingBetaSb(&quot;'+selectedCoachClientId+'&quot;,false)">Desactivar coaching para este socio</button>'
+    +'<button class="btn-sm" style="width:100%;margin-top:6px;background:rgba(239,68,68,.12);border-color:var(--red);color:var(--red)" onclick="askDisableCoaching(&quot;'+selectedCoachClientId+'&quot;,&quot;'+esc(client.name||'este socio')+'&quot;)">Desactivar coaching para este socio</button>'
     +'</div>';
 
+  if(_box&&_y)_box.scrollTop=_y;
   toggleCoachTaskDueVisibility();
   updateCoachWeekDirtyUi();
   renderCoachTodaySummarySection().catch(console.error);
@@ -16075,28 +16305,28 @@ function coachProgramWeekIndexFor(p,weekStartDs){
   const idx=Math.floor(coachDaysBetweenDS(startMon,mon)/7)+1;
   return idx>Math.max(1,p.weeks||4)?-1:idx;
 }
-function coachProgramPhaseRow(programId,weekIndex){
-  return coachAdminProgramWeeks.find(w=>w.program_id===programId&&w.week_index===weekIndex)||null;
+function coachProgramPhaseRow(programId,weekIndex,rows){
+  return (rows||coachAdminProgramWeeks||[]).find(w=>w.program_id===programId&&w.week_index===weekIndex)||null;
 }
 function coachProgramEndDs(p){
   if(!p||!p.start_date)return '';
   return addDaysDS(mazWeekStart(p.start_date),Math.max(1,p.weeks||4)*7-1);
 }
 // La línea que resume el ciclo en la tarjeta del programa activo.
-function coachProgramCycleLine(p,weekStartDs){
+function coachProgramCycleLine(p,weekStartDs,rows){
   if(!p||!p.start_date)return 'Se repite cada semana · sin fecha de fin';
   const idx=coachProgramWeekIndexFor(p,weekStartDs);
   const total=Math.max(1,p.weeks||4);
   if(idx===0)return 'Empieza el '+fmtDS(mazWeekStart(p.start_date))+' · '+total+' semanas';
   if(idx===-1)return 'El ciclo terminó el '+fmtDS(coachProgramEndDs(p))+' · sin plan hasta que lo renueves';
-  const ph=coachProgramPhaseRow(p.id,idx);
+  const ph=coachProgramPhaseRow(p.id,idx,rows);
   return 'Semana '+idx+' de '+total+' · '+coachPhaseLabel(ph&&ph.phase)+(ph&&ph.note?' · '+ph.note:'');
 }
 // Los días del programa que rigen una semana concreta del ciclo. Es la misma
 // regla de reemplazo que coaching_week_slots en SQL: si la semana N tiene fila
 // propia para ese día, esa manda; si no, la de 0.
-function coachProgramSlotsFor(programId,weekIndex){
-  const all=coachAdminProgramDaysOf(programId);
+function coachProgramSlotsFor(programId,weekIndex,rows){
+  const all=rows?rows.filter(d=>d.program_id===programId).sort((a,b)=>a.dow-b.dow):coachAdminProgramDaysOf(programId);
   if(weekIndex<=0)return all.filter(d=>d.week_index===0||d.week_index==null);
   const own=all.filter(d=>d.week_index===weekIndex);
   const base=all.filter(d=>(d.week_index===0||d.week_index==null)&&!own.some(o=>o.dow===d.dow));
@@ -16373,7 +16603,7 @@ async function coachUpdateProgramFromWeekSb(id){
   const days=coachWeekTemplateDays();
   if(!days.length){toast('La semana base está vacía','warn');return;}
   const own=coachAdminProgramDaysOf(id).filter(d=>d.week_index>0).length;
-  if(!confirm('¿Reemplazar la semana base de este programa con la del cliente?'
+  if(!await confirmSheet('¿Reemplazar la semana base de este programa con la del cliente?'
     +(own?'\n\nLas semanas con versión propia no se tocan.':'')))return;
   try{
     const{error:dErr}=await sb.from('coaching_program_days').delete().eq('program_id',id).eq('week_index',0);
@@ -16392,7 +16622,7 @@ async function coachApplyProgramSb(id){
   if(_coachApplyingProgram)return;
   const p=coachAdminPrograms.find(x=>x.id===id);
   if(!p)return;
-  if(coachAdminDraftCount()&&!confirm('Tienes cambios sin guardar en la semana. Aplicar el programa los descarta. ¿Continuar?'))return;
+  if(coachAdminDraftCount()&&!await confirmSheet('Tienes cambios sin guardar en la semana. Aplicar el programa los descarta. ¿Continuar?'))return;
   // El socio también arma su semana desde Entrenar. Si algún día lo puso él,
   // el coach tiene que verlo antes de reemplazarlo, no después.
   const memberDays=Object.values(coachAdminWeekTemplate||{}).filter(t=>t&&t.created_by===selectedCoachClientId);
@@ -16400,16 +16630,16 @@ async function coachApplyProgramSb(id){
     ? '¿Poner a este cliente en "'+p.name+'"?\n\nOjo: el socio había elegido '+memberDays.length+' día'+(memberDays.length===1?'':'s')
       +' ('+memberDays.map(t=>DOW_SHORT[t.dow]).join(', ')+') y el programa los reemplaza.'
     : '¿Poner a este cliente en "'+p.name+'"?';
-  if(!confirm(aviso))return;
+  if(!await confirmSheet(aviso))return;
   // Un programa con semanas distintas (una descarga en la 5) necesita saber
   // desde cuándo cuenta la semana 1; uno de una sola semana no, y preguntarlo
   // sería ruido. La fecha se ancla al lunes de la semana que el coach tiene
   // abierta, que es casi siempre "arranca ya".
   const total=Math.max(1,p.weeks||4);
   const hasWeekVariants=coachAdminProgramDaysOf(id).some(d=>d.week_index>0)||total>1;
-  let startDs=p.start_date||null;
-  if(hasWeekVariants&&!startDs){
-    startDs=confirm('¿Arrancar el ciclo de '+total+' semana'+(total===1?'':'s')+' esta semana ('+fmtDS(coachAdminWeekStart)+')?\n\nCancelar lo deja sin fechas: el programa se repetiría igual cada semana.')
+  let startDs=null;   // null = el RPC no toca la fecha que ya tenga
+  if(hasWeekVariants&&!p.start_date){
+    startDs=await confirmSheet('¿Arrancar el ciclo de '+total+' semana'+(total===1?'':'s')+' esta semana ('+fmtDS(coachAdminWeekStart)+')?\n\nCancelar lo deja sin fechas: el programa se repetiría igual cada semana.')
       ? coachAdminWeekStart : null;
   }
   _coachApplyingProgram=true;
@@ -16437,7 +16667,7 @@ async function coachApplyProgramSb(id){
 async function coachDeleteProgramSb(id){
   const p=coachAdminPrograms.find(x=>x.id===id);
   if(!p)return;
-  if(!confirm('¿Eliminar '+(p.user_id==null?'la plantilla':'el programa')+' "'+p.name+'"? La semana del cliente no cambia.'))return;
+  if(!await confirmSheet('¿Eliminar '+(p.user_id==null?'la plantilla':'el programa')+' "'+p.name+'"? La semana del cliente no cambia.'))return;
   try{
     const{error}=await sb.from('coaching_programs').delete().eq('id',id);
     if(error)throw error;
@@ -16921,7 +17151,7 @@ async function addCommentSb(input){
 }
 
 async function deletePostSb(postId){
-  if(!confirm('Eliminar esta publicacion?'))return;
+  if(!await confirmSheet('¿Eliminar esta publicación?',{confirmLabel:'Eliminar',danger:true}))return;
   showLoading('Eliminando...');
   try{
     const{data:sessionData}=await sb.auth.getSession();
@@ -16944,7 +17174,7 @@ async function deletePostSb(postId){
 }
 
 async function deleteCommentSb(commentId){
-  if(!confirm('Eliminar este comentario?'))return;
+  if(!await confirmSheet('¿Eliminar este comentario?',{confirmLabel:'Eliminar',danger:true}))return;
   showLoading('Eliminando...');
   try{
     const{data:sessionData}=await sb.auth.getSession();
