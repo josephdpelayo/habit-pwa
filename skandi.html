@@ -8,19 +8,19 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="Skandi Fit">
 <meta name="application-name" content="Skandi Fit">
-<link rel="manifest" href="/skandi-manifest.json?v=20260908-1">
-<link rel="apple-touch-icon" sizes="180x180" href="/icons/skandi-180.png?v=20260908-1">
-<link rel="icon" type="image/png" sizes="192x192" href="/icons/skandi-192.png?v=20260908-1">
+<link rel="manifest" href="/skandi-manifest.json?v=20260911-1">
+<link rel="apple-touch-icon" sizes="180x180" href="/icons/skandi-180.png?v=20260911-1">
+<link rel="icon" type="image/png" sizes="192x192" href="/icons/skandi-192.png?v=20260911-1">
 <title>Skandi Fit</title>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="/skandi-recovery.js?v=20260908-1"></script>
-<script src="/skandi-plan.js?v=20260908-1"></script>
-<script src="/body-figure.js?v=20260908-1"></script>
-<script src="/skandi-nutrition.js?v=20260908-1"></script>
-<script src="/skandi-load.js?v=20260908-1"></script>
-<script src="/skandi-brief.js?v=20260908-1"></script>
-<script src="/skandi-joint-load.js?v=20260908-1"></script>
-<script src="/skandi-outbox.js?v=20260908-1"></script>
+<script src="/skandi-recovery.js?v=20260911-1"></script>
+<script src="/skandi-plan.js?v=20260911-1"></script>
+<script src="/body-figure.js?v=20260911-1"></script>
+<script src="/skandi-nutrition.js?v=20260911-1"></script>
+<script src="/skandi-load.js?v=20260911-1"></script>
+<script src="/skandi-brief.js?v=20260911-1"></script>
+<script src="/skandi-joint-load.js?v=20260911-1"></script>
+<script src="/skandi-outbox.js?v=20260911-1"></script>
 <style>
 :root{
   --bg:#eef4f8;
@@ -669,7 +669,7 @@ button.chip{min-height:44px}
 // Versión compartida con app.html (APP_VERSION) y sw.js (CACHE_VERSION): un solo service
 // worker sirve las dos apps, así que una sola cadena las invalida a las dos. Al cambiarla
 // hay que actualizarla también en los ?v= del <head>, en index.html y en los dos manifests.
-const SKANDI_VERSION='20260908-1';
+const SKANDI_VERSION='20260911-1';
 const SUPABASE_URL='https://pmpjteuqjusbiduevbwq.supabase.co';
 const SUPABASE_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBtcGp0ZXVxanVzYmlkdWV2YndxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc2OTI1NjUsImV4cCI6MjA5MzI2ODU2NX0.XbMzZoo2yqtrD8znLnyo_1zDfrdJAvAPj1lqGOyXnLw';
 const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
@@ -2350,10 +2350,10 @@ async function loadAll(){
        {data:planned,error:plannedError}]=await Promise.all([
     sb.from('profiles').select('id,name,avatar_url').eq('id',state.user.id).maybeSingle(),
     sb.from('skandi_exercises').select('*').order('name'),
-    sb.from('skandi_templates').select('*, profile:profiles(name,avatar_url)').order('weekday',{nullsFirst:false}).order('created_at',{ascending:false}),
+    sb.from('skandi_templates').select('*').order('weekday',{nullsFirst:false}).order('created_at',{ascending:false}),
     sb.from('skandi_template_items').select('*, exercise:skandi_exercises(*)').order('sort_order'),
-    sb.from('skandi_sessions').select('*, profile:profiles(name,avatar_url)').eq('user_id',state.user.id).order('started_at',{ascending:false}),
-    sb.from('skandi_sessions').select('*, profile:profiles(name,avatar_url)').eq('visibility','crew').order('started_at',{ascending:false}).limit(60),
+    sb.from('skandi_sessions').select('*').eq('user_id',state.user.id).order('started_at',{ascending:false}),
+    sb.from('skandi_sessions').select('*').eq('visibility','crew').order('started_at',{ascending:false}).limit(60),
     sb.from('skandi_sets').select('*, exercise:skandi_exercises(name,slug)').eq('user_id',state.user.id).order('created_at',{ascending:false}),
     sb.from('skandi_sets').select('*, exercise:skandi_exercises(name,slug)').neq('user_id',state.user.id).order('created_at',{ascending:false}).limit(600),
     sb.from('skandi_external_activities').select('*').eq('user_id',state.user.id).order('performed_at',{ascending:false}).limit(200),
@@ -2394,6 +2394,19 @@ async function loadAll(){
       ({data:profile}=await sb.from('profiles').select('id,name,avatar_url').eq('id',state.user.id).maybeSingle());
     }
   }
+  // profiles ya no expone la ficha completa de todos los usuarios. Comunidad
+  // resuelve únicamente nombre/avatar mediante la vista pública segura.
+  const publicProfileIds=[...new Set([...(templates||[]),...(ownSessions||[]),...(crewSessions||[])]
+    .map(row=>row&&row.user_id).filter(Boolean))];
+  let publicProfiles=[];
+  if(publicProfileIds.length){
+    const{data}=await sb.from('profile_cards').select('id,name,avatar_url').in('id',publicProfileIds);
+    publicProfiles=data||[];
+  }
+  const publicById=new Map(publicProfiles.map(row=>[row.id,row]));
+  (templates||[]).forEach(row=>{row.profile=publicById.get(row.user_id)||null;});
+  (ownSessions||[]).forEach(row=>{row.profile=publicById.get(row.user_id)||null;});
+  (crewSessions||[]).forEach(row=>{row.profile=publicById.get(row.user_id)||null;});
   state.profile=profile||{name:state.user.email};
   const ignored=ignoredSessionIds();
   state.exercises=exercises||[];
@@ -2785,7 +2798,7 @@ function todayDetailCard(){
     series:SkandiLoad.dailySeries({sessions:state.sessions,sets:state.sets,activities:state.externalActivities,
       userId:state.user.id,refs,days:SkandiLoad.CHRONIC_DAYS*2}),
     isDeloadWeek:isDeload});
-  const jointWorst=SkandiJointLoad.allJointsReadout({sets:state.sets,sessions:state.sessions,exercises:state.exercises,userId:state.user.id})
+  const jointWorst=SkandiJointLoad.allJointsReadout({sets:state.sets,sessions:state.sessions,exercises:state.exercises,userId:state.user.id,bodyweightKg:latestWeightKg()})
     .find(r=>r.level==='high');
   const jointHigh=jointWorst?{name:jointLabel(jointWorst.joint),pct:Math.round((jointWorst.ratio-1)*100)}:null;
 
@@ -6069,6 +6082,9 @@ function getMyRecovery(){
   return SkandiRecovery.computeMuscleRecovery({
     sets:state.sets, sessions:state.sessions, exercises:state.exercises,
     activities:state.externalActivities, userId:state.user.id, now:Date.now(),
+    // Peso corporal real para los ejercicios que cuelgan el cuerpo entero (bodyweight_share,
+    // migración 118). Sin pesaje reciente el motor usa su proxy de 70 kg, como antes.
+    bodyweightKg:latestWeightKg(),
     // Sin FCmáx capturada el motor cae a bandas absolutas de bpm, que es lo que hacía antes.
     maxHeartRate:state.skandiSettings?.max_heart_rate||null,
     // Y con las zonas del reloj capturadas, manda la frontera real y no el porcentaje.
@@ -6113,7 +6129,7 @@ function formatHours(h){
 // body, just concentrated on the 2-3 joints calisthenics skill work actually loads hard.
 const jointLabel=j=>t('joint.'+j);
 function jointLoadCard(){
-  const rows=SkandiJointLoad.allJointsReadout({sets:state.sets,sessions:state.sessions,exercises:state.exercises,userId:state.user.id});
+  const rows=SkandiJointLoad.allJointsReadout({sets:state.sets,sessions:state.sessions,exercises:state.exercises,userId:state.user.id,bodyweightKg:latestWeightKg()});
   const trained=rows.filter(r=>r.level!=='none');
   if(!trained.length) return ''; // no skill work logged yet — nothing this card can say
   const tone={high:'var(--pink)',low:'var(--amber)',ok:'var(--green)',building:'var(--muted)'};

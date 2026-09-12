@@ -62,7 +62,7 @@ function jointSplitFor(exercise){
 // Estímulo diario para UNA articulación, del más viejo al más nuevo, sin huecos — mismo
 // requisito que dailySeries() en skandi-load.js, por la misma razón: el promedio de 28 días
 // tiene que caer sobre días calendario reales, no solo los días entrenados.
-function dailyJointSeries({ sets = [], sessions = [], exercises = [], userId, joint, days = Load.CHRONIC_DAYS, now = Date.now() }){
+function dailyJointSeries({ sets = [], sessions = [], exercises = [], userId, joint, bodyweightKg, days = Load.CHRONIC_DAYS, now = Date.now() }){
   const exerciseById = new Map(exercises.map(e => [e.id, e]));
   const sessionById = new Map(sessions.map(s => [s.id, s]));
   const byDay = new Map();
@@ -70,9 +70,16 @@ function dailyJointSeries({ sets = [], sessions = [], exercises = [], userId, jo
     if (!s.done || (userId && s.user_id !== userId)) return;
     const session = sessionById.get(s.session_id);
     if (!session || !session.completed_at) return;
-    const split = jointSplitFor(exerciseById.get(s.exercise_id));
+    const exercise = exerciseById.get(s.exercise_id);
+    const split = jointSplitFor(exercise);
     if (!split || !split[joint]) return;
-    const su = Recovery.setStimulusUnits(s) * split[joint] / 100;
+    // El peso corporal cuenta: estas articulaciones se cargan colgando o sosteniendo el cuerpo
+    // entero, así que sin `bodyweightKg` una dominada lastrada pesaría solo lo que trae el
+    // cinturón. Ver setLoadKg() en skandi-recovery.js.
+    const su = Recovery.setStimulusUnits(s, {
+      bodyweightShare: exercise && exercise.bodyweight_share,
+      bodyweightKg
+    }) * split[joint] / 100;
     if (!su) return;
     const day = Load.localDay(session.completed_at);
     if (!day) return;

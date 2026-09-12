@@ -53,15 +53,39 @@ function tauHoursForMuscle(name){
   return H / -Math.log(RECOVERY_EPSILON);
 }
 
+// Los kilos que una serie realmente mueve, que no son los del disco.
+//
+// En calistenia lastrada la carga es peso corporal + lastre. Esto era
+// `weight > 0 ? weight : BODYWEIGHT_KG_PROXY`, o sea que el lastre SUSTITUÍA al peso corporal:
+// unos fondos con +15 kg × 8 valían 0.24 SU y los mismos fondos sin lastre 1.12 SU. Ponerse
+// disco bajaba la carga calculada casi cinco veces, justo en los ejercicios donde el tendón es
+// el que paga.
+//
+// `bodyweightShare` (columna `skandi_exercises.bodyweight_share`, migración 118) es la fracción
+// del peso corporal que el ejercicio mueve, y solo está poblada donde el cuerpo entero cuelga o
+// se sostiene con los brazos —dominada, fondos, muscle-up, levers, planche, handstand—: ahí
+// vale 1 porque es un hecho del movimiento, no una estimación. Un curl, una sentadilla, una
+// flexión o un ejercicio que alguien acaba de crear la dejan nula y el cálculo sale idéntico al
+// de siempre. Eso es deliberado por dos razones: repartir fracciones por ejercicio sin poder
+// defenderlas es el error que este repo ya se prohibió en skandi-joint-load.js, y HABIT carga
+// este mismo módulo sin esa columna, así que su figura muscular no se mueve ni un punto.
+function setLoadKg(set, opts){
+  const weight = Number(set && set.weight_kg) || 0;
+  const share = Number(opts && opts.bodyweightShare);
+  if (!(share > 0)) return weight > 0 ? weight : BODYWEIGHT_KG_PROXY;
+  const bodyweight = Number(opts && opts.bodyweightKg);
+  // Sin pesaje reciente se usa el mismo proxy de siempre: la alternativa es no contar el peso
+  // corporal, que es exactamente el error que esta función viene a arreglar.
+  return (bodyweight > 0 ? bodyweight : BODYWEIGHT_KG_PROXY) * share + weight;
+}
+
 // One lifting set -> stimulus units (SU).
-function setStimulusUnits(set){
+function setStimulusUnits(set, opts){
   if (!set.done) return 0;
-  const weight = Number(set.weight_kg) || 0;
   const reps = Number(set.reps) || 0;
   const seconds = Number(set.seconds) || 0;
-  const load = weight > 0 ? weight : BODYWEIGHT_KG_PROXY;
   const repsEquivalent = reps > 0 ? reps : Math.max(1, seconds / 30);
-  return (load * repsEquivalent) / SET_WORK_REFERENCE;
+  return (setLoadKg(set, opts) * repsEquivalent) / SET_WORK_REFERENCE;
 }
 
 // Heart rate mapped onto the same 1-10 scale as effort-based RPE, so a run logged with heart
@@ -135,7 +159,7 @@ function activityStimulusUnits(activity, maxHeartRate, zoneBounds){
 }
 
 // Flatten sets+activities into per-muscle timestamped stimulus events within the lookback window.
-function buildStimulusEvents({ sets, sessions, exercises, activities, userId, now, maxHeartRate, hrZones }){
+function buildStimulusEvents({ sets, sessions, exercises, activities, userId, now, maxHeartRate, hrZones, bodyweightKg }){
   const sessionById = new Map((sessions||[]).map(s => [s.id, s]));
   const exerciseById = new Map((exercises||[]).map(e => [e.id, e]));
   const since = now - RECOVERY_LOOKBACK_DAYS * 864e5;
@@ -148,7 +172,7 @@ function buildStimulusEvents({ sets, sessions, exercises, activities, userId, no
     if (!t || t < since || t > now) return;
     const ex = exerciseById.get(s.exercise_id);
     if (!ex) return;
-    const su = setStimulusUnits(s);
+    const su = setStimulusUnits(s, { bodyweightShare: ex.bodyweight_share, bodyweightKg });
     if (!su) return;
     Object.entries(ex.muscles || {}).forEach(([muscle, pct]) => {
       if (!MUSCLE_RECOVERY_HOURS[muscle]) return; // ignore unrecognized muscle keys
@@ -201,9 +225,9 @@ function hoursUntilFresh(fatigueNow, muscleName){
 }
 
 // Public entry point: returns rows sorted ascending by score (least-fresh/most-fatigued first).
-function computeMuscleRecovery({ sets, sessions, exercises, activities, userId, now, maxHeartRate, hrZones }){
+function computeMuscleRecovery({ sets, sessions, exercises, activities, userId, now, maxHeartRate, hrZones, bodyweightKg }){
   now = now || Date.now();
-  const events = buildStimulusEvents({ sets, sessions, exercises, activities, userId, now, maxHeartRate, hrZones });
+  const events = buildStimulusEvents({ sets, sessions, exercises, activities, userId, now, maxHeartRate, hrZones, bodyweightKg });
   const F = muscleFatigueAt(events, now);
   return RECOVERY_MUSCLES.map(name => {
     const f = F.get(name) || 0;
@@ -221,7 +245,8 @@ function computeMuscleRecovery({ sets, sessions, exercises, activities, userId, 
 const SkandiRecovery = {
   MUSCLE_RECOVERY_HOURS, RECOVERY_MUSCLES, ACTIVITY_MUSCLE_MAP,
   RECOVERY_LOOKBACK_DAYS, FRESH_THRESHOLD, HR_MAX_REFERENCE,
-  tauHoursForMuscle, setStimulusUnits, activityStimulusUnits, heartRateIntensity, zoneOf, ZONE_INTENSITY,
+  BODYWEIGHT_KG_PROXY, SET_WORK_REFERENCE,
+  tauHoursForMuscle, setLoadKg, setStimulusUnits, activityStimulusUnits, heartRateIntensity, zoneOf, ZONE_INTENSITY,
   buildStimulusEvents, muscleFatigueAt, freshnessScore, hoursUntilFresh,
   computeMuscleRecovery
 };

@@ -6,20 +6,22 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="HABIT">
 <meta name="application-name" content="HABIT">
-<link rel="manifest" href="/manifest.json?v=20260908-1">
-<link rel="apple-touch-icon" sizes="120x120" href="/icons/icon-120.png?v=20260908-1">
-<link rel="apple-touch-icon" sizes="152x152" href="/icons/icon-152.png?v=20260908-1">
-<link rel="apple-touch-icon" sizes="167x167" href="/icons/icon-167.png?v=20260908-1">
-<link rel="apple-touch-icon" sizes="180x180" href="/icons/icon-180.png?v=20260908-1">
-<link rel="icon" type="image/png" sizes="32x32" href="/icons/icon-32.png?v=20260908-1">
+<link rel="manifest" href="/manifest.json?v=20260911-1">
+<link rel="apple-touch-icon" sizes="120x120" href="/icons/icon-120.png?v=20260911-1">
+<link rel="apple-touch-icon" sizes="152x152" href="/icons/icon-152.png?v=20260911-1">
+<link rel="apple-touch-icon" sizes="167x167" href="/icons/icon-167.png?v=20260911-1">
+<link rel="apple-touch-icon" sizes="180x180" href="/icons/icon-180.png?v=20260911-1">
+<link rel="icon" type="image/png" sizes="32x32" href="/icons/icon-32.png?v=20260911-1">
 <title>HABIT</title>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Share+Tech+Mono&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="/skandi-recovery.js?v=20260908-1"></script>
-<script src="/body-figure.js?v=20260908-1"></script>
+<script src="/skandi-recovery.js?v=20260911-1"></script>
+<script src="/body-figure.js?v=20260911-1"></script>
+<script src="/habit-training.js?v=20260911-1"></script>
 <style>
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+@media (prefers-reduced-motion:reduce){*,*:before,*:after{scroll-behavior:auto!important;animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}}
 :root{
   --black:#0a0a0a;--dark:#111;--card:#1a1a1a;--card2:#222;
   --border:#2a2a2a;--blue:#2563eb;--bl:#3b82f6;--bdim:#1e3a8a;
@@ -828,7 +830,7 @@ input,select,button,textarea{font-family:'Inter',sans-serif}
 .coach-context-sub{font-size:11px;color:var(--gray);line-height:1.35;margin-top:3px}
 .coach-primary-action{width:100%;min-height:46px;margin-bottom:12px;border-radius:14px}
 .coach-day-strip{display:grid;grid-template-columns:repeat(7,1fr);gap:6px;background:rgba(255,255,255,.045);border:1px solid rgba(255,255,255,.08);border-radius:16px;padding:10px 8px;margin-bottom:12px;box-shadow:0 12px 30px rgba(0,0,0,.2)}
-.coach-day{display:flex;flex-direction:column;align-items:center;gap:6px;font-family:'Inter',sans-serif;min-width:0}
+.coach-day{display:flex;flex-direction:column;align-items:center;gap:6px;font-family:'Inter',sans-serif;min-width:0;border:0;background:transparent;color:inherit;padding:0}
 .coach-day-label{font-size:9px;font-weight:800;letter-spacing:.04em;color:#737985;text-transform:uppercase}
 .coach-day-num{width:34px;height:34px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:800;color:var(--gray);border:1px solid rgba(255,255,255,.08);background:rgba(0,0,0,.18);transition:transform .18s,background .18s,border-color .18s}
 .coach-day.scheduled .coach-day-num{border-color:rgba(59,130,246,.45);color:#93c5fd;background:rgba(37,99,235,.11)}
@@ -2068,6 +2070,12 @@ body.admin-mode #courtesy-modal label{border-radius:14px!important;border-color:
 .workout-sheet .set-tracker-actions{margin-top:7px}
 .workout-sheet .set-tracker-actions .btn-sm{border-color:transparent;background:transparent;color:#7f8a99;padding:7px 8px}
 .workout-sheet .set-tracker-actions .btn-sm:last-child{flex:0 0 auto}
+.training-sync{display:inline-flex;align-items:center;gap:5px;border:1px solid var(--border);border-radius:999px;padding:4px 8px;font-size:9px;font-weight:800;letter-spacing:.04em;white-space:nowrap}
+.training-sync:before{content:'';width:6px;height:6px;border-radius:50%;background:currentColor}
+.training-sync.saved{color:var(--green);background:rgba(16,185,129,.08);border-color:rgba(16,185,129,.25)}
+.training-sync.pending{color:var(--amber);background:rgba(245,158,11,.08);border-color:rgba(245,158,11,.25)}
+.training-sync.offline,.training-sync.error{color:var(--red);background:rgba(239,68,68,.08);border-color:rgba(239,68,68,.25)}
+.set-row.pending-sync{outline:1px solid rgba(245,158,11,.35);border-radius:10px}
 /* Columna de RIR en el set-tracker */
 .set-tracker.has-rir .set-tracker-hdr,.set-tracker.has-rir .set-row{grid-template-columns:24px 1fr 1fr 46px 40px 22px}
 .set-rir-in{text-align:center}
@@ -2171,7 +2179,7 @@ body.admin-mode #courtesy-modal label{border-radius:14px!important;border-color:
 </head>
 <body>
 <div class="app">
-<div class="toast-wrap"><div id="toast" class="toast"></div></div>
+<div class="toast-wrap"><div id="toast" class="toast" role="status" aria-live="polite" aria-atomic="true"></div></div>
 
 <!-- AUTH -->
 <div id="s-auth" class="screen active">
@@ -3202,7 +3210,7 @@ body.admin-mode #courtesy-modal label{border-radius:14px!important;border-color:
 // ── CONFIG & SUPABASE ───────────────────────────────────────
 const SUPABASE_URL='https://pmpjteuqjusbiduevbwq.supabase.co';
 const SUPABASE_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBtcGp0ZXVxanVzYmlkdWV2YndxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc2OTI1NjUsImV4cCI6MjA5MzI2ODU2NX0.XbMzZoo2yqtrD8znLnyo_1zDfrdJAvAPj1lqGOyXnLw';
-const APP_VERSION='20260908-1';
+const APP_VERSION='20260911-1';
 // La pierna va separada en cuádriceps, femorales y pantorrillas: la figura
 // corporal pinta esas tres regiones por separado y el motor de recuperación les
 // da ventanas de descanso distintas. 'Piernas' sigue reconociéndose al leer
@@ -3649,8 +3657,11 @@ async function loadUserData(){
   if(coachBtn)coachBtn.style.display=prof.coaching_beta?'':'none';
   document.body.classList.toggle('member-has-coaching',!!prof.coaching_beta);
   if(prof.coaching_beta){startChatRealtime();}else{stopChatRealtime();updateCoachingNavBadge();}
-  if(prof.coaching_beta)loadActiveCoachingSessionSb().catch(console.error);
-  if(prof.coaching_beta)loadCoachWeekDataSb(true).then(updateCoachingNavBadge).catch(console.error);
+  // Entrenar es para todos los socios: una recarga siempre debe recuperar la
+  // sesión activa y la semana, aunque el usuario no tenga Coaching habilitado.
+  loadActiveCoachingSessionSb().catch(console.error);
+  loadCoachWeekDataSb(true).then(updateCoachingNavBadge).catch(console.error);
+  refreshTrainingPendingCount().then(flushTrainingOutbox).catch(console.error);
   loadExerciseNotesSb().catch(console.error);
   const[bkRes,payRes]=await Promise.allSettled([
     sb.from('bookings').select('*').eq('user_id',sbUser.id).eq('status','active').gte('ds',addDaysDS(mazToday(),-1)).order('ds').order('start_idx').limit(20),
@@ -4124,6 +4135,84 @@ function withScrollKept(el,paint){
 }
 function toast(msg,t){const el=document.getElementById('toast');el.textContent=msg;el.className='toast show'+(t?' '+t:'');setTimeout(()=>el.className='toast',3200);}
 
+// ── ENTRENAR: guardado local y sincronización ───────────────────────────
+let trainingSyncPending=0,trainingSyncBusy=false,trainingSyncError='';
+const TRAINING_OUTBOX_TABLES=new Set(['coaching_session_sets','coaching_schedule']);
+function trainingCachedSessionKey(){return sbUser?'habit_active_training_'+sbUser.id:'';}
+function cacheActiveTrainingSession(row){
+  const key=trainingCachedSessionKey();
+  if(!key)return;
+  if(row)localStorage.setItem(key,JSON.stringify(row));
+  else localStorage.removeItem(key);
+}
+function readCachedTrainingSession(){
+  try{return JSON.parse(localStorage.getItem(trainingCachedSessionKey())||'null');}catch(_){return null;}
+}
+function trainingSyncText(){
+  if(!navigator.onLine)return trainingSyncPending?'Sin conexión · '+trainingSyncPending+' pendiente'+(trainingSyncPending===1?'':'s'):'Sin conexión';
+  if(trainingSyncBusy)return'Sincronizando…';
+  if(trainingSyncError)return'Error al sincronizar';
+  return trainingSyncPending?trainingSyncPending+' pendiente'+(trainingSyncPending===1?'':'s'):'Guardado';
+}
+function trainingSyncClass(){return !navigator.onLine?' offline':trainingSyncError?' error':trainingSyncPending||trainingSyncBusy?' pending':' saved';}
+function renderTrainingSyncState(){
+  document.querySelectorAll('[data-training-sync]').forEach(el=>{
+    el.textContent=trainingSyncText();
+    el.className='training-sync'+trainingSyncClass();
+  });
+}
+async function refreshTrainingPendingCount(){
+  if(!window.HabitTraining)return;
+  try{trainingSyncPending=(await HabitTraining.list()).length;}catch(_){trainingSyncPending=0;}
+  renderTrainingSyncState();
+}
+async function queueTrainingUpdate(table,id,patch){
+  if(!TRAINING_OUTBOX_TABLES.has(table))throw new Error('Operación offline no permitida');
+  await HabitTraining.enqueue({table,id,patch});
+  trainingSyncPending=(await HabitTraining.list()).length;
+  trainingSyncError='';
+  renderTrainingSyncState();
+}
+async function trainingUpdate(table,id,patch,currentRow){
+  try{
+    if(!navigator.onLine)throw new TypeError('offline');
+    const{data,error}=await sb.from(table).update(patch).eq('id',id).select().single();
+    if(error)throw error;
+    return data;
+  }catch(error){
+    if(window.HabitTraining&&HabitTraining.isRetryable(error,!navigator.onLine)){
+      await queueTrainingUpdate(table,id,patch);
+      return Object.assign({},currentRow||{id},patch,{_pendingSync:true});
+    }
+    throw error;
+  }
+}
+async function flushTrainingOutbox(){
+  if(trainingSyncBusy||!navigator.onLine||!sbUser||!window.HabitTraining)return;
+  trainingSyncBusy=true;trainingSyncError='';renderTrainingSyncState();
+  try{
+    const entries=await HabitTraining.list();
+    for(const entry of entries){
+      if(!TRAINING_OUTBOX_TABLES.has(entry.table)){await HabitTraining.remove(entry.key);continue;}
+      const{error}=await sb.from(entry.table).update(entry.patch).eq('id',entry.id);
+      if(!error){
+        await HabitTraining.remove(entry.key);
+        if(entry.table==='coaching_session_sets')Object.values(coachSessionSets).flat().forEach(row=>{if(String(row.id)===entry.id)delete row._pendingSync;});
+        continue;
+      }
+      if(HabitTraining.isRetryable(error,false)){await HabitTraining.bump(entry);break;}
+      if((entry.tries||0)>=4){await HabitTraining.remove(entry.key);trainingSyncError=error.message||'No se pudo guardar';}
+      else{await HabitTraining.bump(entry);trainingSyncError=error.message||'No se pudo guardar';break;}
+    }
+  }catch(error){trainingSyncError=error.message||String(error);}
+  trainingSyncBusy=false;
+  await refreshTrainingPendingCount();
+  if(wsOpen)renderWorkoutSheet();
+}
+window.addEventListener('online',()=>{renderTrainingSyncState();flushTrainingOutbox();});
+window.addEventListener('offline',renderTrainingSyncState);
+document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible')flushTrainingOutbox();});
+
 // Auto-insert slash in MM/AA expiry field
 function autoSlash(input){
   let v=input.value.replace(/\D/g,'');
@@ -4144,7 +4233,7 @@ let coachWeekStart=null, coachSchedule=[], coachTasks=[], coachBoardsById={}, ac
 let chatMessages=[], chatChannel=null, chatPollInt=null, chatSendContext=null,
     chatMediaRecorder=null, chatRecordChunks=[], chatRecordStartMs=0, chatRecordTimerInt=null,
     chatPendingImgFile=null;
-let coachingAdminClients=[], selectedCoachClientId=null, coachAdminWeekStart=null, coachAdminSchedule=[], coachAdminWeekTemplate={}, coachAdminTasks=[], coachAdminTaskLogsByDs={}, coachAdminFastingLogs=[], coachClientAssignedBoardIds=new Set(), editingCoachTaskId=null, coachingListFilter='todos';
+let coachingAdminClients=[], selectedCoachClientId=null, coachAdminWeekStart=null, coachAdminSchedule=[], coachAdminWeekTemplate={}, coachAdminTasks=[], coachAdminTaskLogsByDs={}, coachAdminFastingLogs=[], coachClientAssignedBoardIds=new Set(), editingCoachTaskId=null, coachingListFilter='todos', coachAdminWeekVersion=0, coachAdminChangeRequests=[];
 let selectedCoachDetailDs=null, coachSessionDetailRows=[], coachDetailActiveTab='semana', coachProgressView='habitos', coachPlanBoardsOpen=false;
 // Lo que el coach ha tocado en el editor de semana y todavía no guarda, por
 // fecha (ds -> board_id, '' = descanso). Vive en memoria y no en el DOM porque
@@ -4597,7 +4686,7 @@ async function renderGuestGroup(reload=true){
       const favIds=(favRes.data||[]).map(f=>f.guest_user_id).filter(Boolean);
       let profs=[];
       if(favIds.length){
-        const profRes=await sb.from('profiles').select('id,name,email').in('id',favIds);
+        const profRes=await sb.from('profile_cards').select('id,name').in('id',favIds);
         if(profRes.error)throw profRes.error;
         profs=profRes.data||[];
       }
@@ -4955,13 +5044,11 @@ async function doRegister(){
 async function ensureProfile(reg){
   const{data:existing}=await sb.from('profiles').select('id').eq('id',sbUser.id).maybeSingle();
   if(existing)return;
-  let code;
-  for(let attempts=0;attempts<20;attempts++){
-    code=String(Math.floor(1000+Math.random()*9000));
-    const{data:taken}=await sb.from('profiles').select('id').eq('access_code',code).maybeSingle();
-    if(!taken)break;
+  let{error}=await sb.rpc('ensure_habit_profile',{p_name:reg.name,p_phone:reg.phone||null});
+  if(error&&/ensure_habit_profile|schema cache|does not exist/i.test(error.message||'')){
+    const code=String(Math.floor(1000+Math.random()*9000));
+    ({error}=await sb.from('profiles').insert({id:sbUser.id,name:reg.name,phone:reg.phone||null,role:'user',access_code:code}));
   }
-  const{error}=await sb.from('profiles').insert({id:sbUser.id,name:reg.name,phone:reg.phone||null,role:'user',access_code:code});
   if(error)throw error;
   // Las rutinas básicas ya no se copian al socio al registrarse: son del gym y
   // las ve por `boards.is_starter` (migración 116). Copiarlas dejaba una fila
@@ -5226,7 +5313,7 @@ async function loadReceptionSessions(){
       // Get reception branding from profiles
       const uids=instructorHosts.map(s=>s.user_id).filter(Boolean);
       if(uids.length){
-        const{data:profs}=await sb.from('profiles').select('id,reception_title,reception_logo,avatar_url').in('id',uids);
+        const{data:profs}=await sb.from('profile_cards').select('id,reception_title,reception_logo,avatar_url').in('id',uids);
         if(profs){
           profs.forEach(p=>{
             sessions.forEach(s=>{
@@ -6985,19 +7072,22 @@ function renderPrCardsInto(containerEl,chartsRegistry,scoreRows,unit,canvasPrefi
     return;
   }
   const exMap={};
-  scoreRows.forEach(r=>{
+  const ordered=window.HabitTraining?HabitTraining.sortScores(scoreRows):scoreRows.slice().sort((a,b)=>new Date(a.logged_at)-new Date(b.logged_at));
+  ordered.forEach(r=>{
     const k=scoreGroupKey(r);
     if(!exMap[k])exMap[k]={name:r.ex_name,entries:[]};
-    exMap[k].entries.push({w:parseFloat(r.weight),reps:r.reps||'',ts:r.logged_at});
+    const reps=parseFloat(r.reps)||0;
+    const w=parseFloat(r.weight);
+    exMap[k].entries.push({w,reps:r.reps||'',e1rm:window.HabitTraining?HabitTraining.estimated1RM(w,reps):w,ts:r.logged_at});
   });
   containerEl.innerHTML='';
   Object.entries(exMap).forEach(([k,ex])=>{
-    const best=ex.entries.reduce((a,b)=>b.w>a.w?b:a);
+    const best=ex.entries.reduce((a,b)=>b.e1rm>a.e1rm?b:a);
     const last=ex.entries[ex.entries.length-1];
-    const isPR=last.w===best.w;
+    const isPR=Math.abs(last.e1rm-best.e1rm)<0.001;
     const recent=ex.entries.slice(-20);
     const labels=recent.map(e=>new Date(e.ts).toLocaleDateString('es-MX',{day:'2-digit',month:'short'}));
-    const data=recent.map(e=>kgToUnit(e.w,unit));
+    const data=recent.map(e=>kgToUnit(e.e1rm||e.w,unit));
     const card=document.createElement('div');
     card.style.cssText='background:var(--card);border-radius:12px;padding:14px;margin-bottom:14px;border:1px solid var(--border)';
     const canvasId=(canvasPrefix||'h')+'-pr-chart-'+k.replace(/[^a-z0-9]/gi,'_');
@@ -7007,6 +7097,7 @@ function renderPrCardsInto(containerEl,chartsRegistry,scoreRows,unit,canvasPrefi
       +'<div style="text-align:right;flex-shrink:0">'
       +'<div style="font-size:20px;font-weight:800;color:'+(isPR?'var(--green)':'var(--white)')+'">'+fmtScoreWeight(best.w,unit)+'</div>'
       +(best.reps?'<div style="font-size:11px;color:var(--gray)">x '+esc(best.reps)+'</div>':'')
+      +(best.e1rm&&best.reps>1?'<div style="font-size:10px;color:var(--bl)">e1RM '+fmtScoreWeight(best.e1rm,unit)+'</div>':'')
       +'<div style="font-size:10px;color:var(--gray);margin-top:1px">PR · '+new Date(best.ts).toLocaleDateString('es-MX',{day:'2-digit',month:'short',year:'numeric'})+'</div>'
       +'</div></div>'
       +'<canvas id="'+canvasId+'" height="90"></canvas>'
@@ -7018,12 +7109,12 @@ function renderPrCardsInto(containerEl,chartsRegistry,scoreRows,unit,canvasPrefi
         type:'line',
         data:{labels,datasets:[{
           data,borderColor:'#2563eb',backgroundColor:'rgba(37,99,235,.12)',borderWidth:2,pointRadius:3,
-          pointBackgroundColor:data.map((v,i)=>i===recent.length-1-[...recent].reverse().findIndex(e=>e.w===best.w)?'#10b981':'#2563eb'),
+          pointBackgroundColor:data.map((v,i)=>i===recent.length-1-[...recent].reverse().findIndex(e=>Math.abs(e.e1rm-best.e1rm)<.001)?'#10b981':'#2563eb'),
           tension:0.3,fill:true
         }]},
         options:{
           responsive:true,
-          plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>fmtScoreWeight(recent[c.dataIndex].w,unit)+(recent[c.dataIndex].reps?' x '+recent[c.dataIndex].reps:'')}}},
+          plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>'e1RM '+fmtScoreWeight(recent[c.dataIndex].e1rm||recent[c.dataIndex].w,unit)+(recent[c.dataIndex].reps?' · serie '+fmtScoreWeight(recent[c.dataIndex].w,unit)+' x '+recent[c.dataIndex].reps:'')}}},
           scales:{
             x:{grid:{color:'rgba(255,255,255,.04)'},ticks:{color:'#6b7280',font:{size:10},maxRotation:0}},
             y:{grid:{color:'rgba(255,255,255,.04)'},ticks:{color:'#6b7280',font:{size:11},callback:v=>fmtWeightValue(v,unit,true)}}
@@ -7714,13 +7805,17 @@ function renderSetTrackerHtml(sessionCtx,exKey,ex){
   const sets=sessionCtx.sets[exKey]||[];
   if(!sets.length)return'';
   const unit=exerciseWeightUnit(exKey);
+  const metric=window.HabitTraining?HabitTraining.metricType(ex):(inferTargetType(ex)==='time'?'time':'reps');
   const focusSetIdx=typeof sessionCtx.focusSetIdx==='number'?sessionCtx.focusSetIdx:null;
   return '<div class="set-tracker has-del has-rir">'
-    +'<div class="set-tracker-hdr"><span>SERIE</span><button class="unit-toggle-btn" onclick="toggleExerciseWeightUnit(&quot;'+esc(exKey)+'&quot;)" title="Cambiar unidad de peso">'+unit.toUpperCase()+'</button><span>REPS</span><span class="rir-k" title="Repeticiones en reserva">RIR</span><span></span><span></span></div>'
-    +sets.map(s=>'<div class="set-row'+(focusSetIdx===s.set_idx&&!s.done?' next':'')+'" data-set-id="'+s.id+'" data-ex-key="'+esc(exKey)+'">'
+    +'<div class="set-tracker-hdr"><span>SERIE</span>'
+    +(metric==='time'?'<span>TIEMPO</span><span>OBJ.</span>':'<button class="unit-toggle-btn" onclick="toggleExerciseWeightUnit(&quot;'+esc(exKey)+'&quot;)" title="Cambiar unidad de peso">'+unit.toUpperCase()+'</button><span>REPS</span>')
+    +'<span class="rir-k" title="Repeticiones en reserva">RIR</span><span></span><span></span></div>'
+    +sets.map(s=>'<div class="set-row'+(focusSetIdx===s.set_idx&&!s.done?' next':'')+(s._pendingSync?' pending-sync':'')+'" data-set-id="'+s.id+'" data-ex-key="'+esc(exKey)+'">'
       +'<span class="set-num">'+(s.set_idx+1)+'</span>'
-      +'<input class="set-reps-in set-weight-in" type="number" inputmode="decimal" placeholder="'+unit+'" value="'+formatWeightForUnit(s.weight,unit)+'" onchange="updateSetWeightSb(&quot;'+s.id+'&quot;,this.value,&quot;'+esc(exKey)+'&quot;)">'
-      +'<input class="set-reps-in set-actual-reps-in" type="number" inputmode="numeric" placeholder="'+esc(s.reps_target||'reps')+'" value="'+(s.actual_reps!=null?esc(String(s.actual_reps)):'')+'" onchange="updateSetRepsSb(&quot;'+s.id+'&quot;,this.value)">'
+      +(metric==='time'
+        ?'<input class="set-reps-in set-actual-time-in" type="number" inputmode="numeric" min="0" placeholder="seg" value="'+(s.actual_seconds!=null?esc(String(s.actual_seconds)):'')+'" onchange="updateSetSecondsSb(&quot;'+s.id+'&quot;,this.value)"><span class="set-num">'+esc(s.reps_target||ex.reps||'—')+'</span>'
+        :'<input class="set-reps-in set-weight-in" type="number" inputmode="decimal" placeholder="'+unit+'" value="'+formatWeightForUnit(s.weight,unit)+'" onchange="updateSetWeightSb(&quot;'+s.id+'&quot;,this.value,&quot;'+esc(exKey)+'&quot;)"><input class="set-reps-in set-actual-reps-in" type="number" inputmode="numeric" placeholder="'+esc(s.reps_target||'reps')+'" value="'+(s.actual_reps!=null?esc(String(s.actual_reps)):'')+'" onchange="updateSetRepsSb(&quot;'+s.id+'&quot;,this.value)">')
       +'<input class="set-reps-in set-rir-in" type="number" inputmode="numeric" min="0" max="10" placeholder="'+(s.target_rir!=null?esc(String(s.target_rir)):'–')+'" value="'+(s.rir!=null?esc(String(s.rir)):'')+'" onchange="updateSetRirSb(&quot;'+s.id+'&quot;,this.value)">'
       +'<button class="set-check'+(s.done?' done':'')+'" onclick="toggleSetDoneSb(&quot;'+s.id+'&quot;,'+(!s.done)+',this)">'+(s.done?'✓':'')+'</button>'
       +'<button class="set-del-btn" title="Eliminar serie" onclick="deleteSetSb(&quot;'+s.id+'&quot;,&quot;'+esc(exKey)+'&quot;)">✕</button>'
@@ -7742,7 +7837,11 @@ function sessionExerciseList(scheduleRow,setsMap){
   // (editarla desde el historial) hay que pasar sus propias series.
   const sets=setsMap||((activeCoachingSession&&row.id===activeCoachingSession.id)?coachSessionSets:{});
   const board=coachBoardsById[row.board_id];
-  const base=(board&&board.exercises)||[];
+  // exercise_snapshot nace al iniciar y nunca cambia. Los reportes antiguos
+  // dejan de depender de la versión actual (o incluso de la existencia) de la
+  // rutina del coach.
+  const snapshot=Array.isArray(row.exercise_snapshot)?row.exercise_snapshot:[];
+  const base=snapshot.length?snapshot:((board&&board.exercises)||[]);
   const overlay=Array.isArray(row.session_exercises)?row.session_exercises:[];
   const replacedBy={};
   overlay.forEach(o=>{if(o&&o.replaces)replacedBy[o.replaces]=o;});
@@ -7769,6 +7868,19 @@ function sessionExerciseList(scheduleRow,setsMap){
   });
   overlay.filter(o=>o&&!o.replaces&&!o.removed&&o.ex_key).forEach(o=>out.push({...o,_exKey:o.ex_key}));
   return out;
+}
+function buildTrainingExerciseSnapshot(scheduleRow){
+  const row=scheduleRow||activeCoachingSession;
+  if(!row)return[];
+  const board=coachBoardsById[row.board_id];
+  const source=(board&&Array.isArray(board.exercises))?board.exercises:[];
+  return source.map((exercise,index)=>{
+    const copy=JSON.parse(JSON.stringify(exercise||{}));
+    copy._exKey=exerciseKeyForSession(row.board_id,copy,index);
+    copy.metricType=window.HabitTraining?HabitTraining.metricType(copy):(inferTargetType(copy)==='time'?'time':'reps');
+    copy.snapshotIndex=index;
+    return copy;
+  });
 }
 function findExerciseByExKey(exKey){
   if(!activeCoachingSession)return null;
@@ -7830,10 +7942,13 @@ function logSetToUserScores(row){
   if(!activeCoachingSession||row.weight==null)return;
   const found=findExerciseByExKey(row.ex_key);
   if(!found)return;
-  sb.from('user_scores').insert({
-    user_id:sbUser.id,board_id:activeCoachingSession.board_id,ex_idx:found.idx,ex_key:row.ex_key,
-    ex_name:found.ex.name,weight:row.weight,reps:row.actual_reps||null
-  }).then(({error})=>{if(error)console.error('logSetToUserScores:',error);});
+  const score={
+    user_id:sbUser.id,board_id:activeCoachingSession.board_id||'free',ex_idx:found.idx,ex_key:row.ex_key,
+    ex_name:found.ex.name,weight:row.weight,reps:row.actual_reps||null,
+    schedule_id:activeCoachingSession.id,set_id:row.id,logged_at:row.updated_at||new Date().toISOString()
+  };
+  sb.from('user_scores').upsert(score,{onConflict:'set_id'})
+    .then(({error})=>{if(error&&!/set_id|schedule_id|schema cache|column/i.test(error.message||''))console.error('logSetToUserScores:',error);});
 }
 function getSetRowElement(setId){
   const modal=document.getElementById('exercise-focus-modal');
@@ -7883,6 +7998,8 @@ async function toggleSetDoneSb(setId,newDone,btnEl){
       patch.weight=(w==null||isNaN(w))?null:(unit==='lb'?Math.round(lbToKg(w)*100)/100:w);
     }
     if(rIn){const r=rIn.value===''?null:parseInt(rIn.value,10);patch.actual_reps=(r==null||isNaN(r))?null:r;}
+    const timeIn=row?.querySelector('.set-actual-time-in');
+    if(timeIn){const seconds=timeIn.value===''?null:parseInt(timeIn.value,10);patch.actual_seconds=(seconds==null||isNaN(seconds))?null:Math.max(0,seconds);}
     const rirIn=row?.querySelector('.set-rir-in');
     if(rirIn&&rirIn.value!==''){
       const v=parseInt(rirIn.value,10);
@@ -7890,8 +8007,8 @@ async function toggleSetDoneSb(setId,newDone,btnEl){
     }
   }
   try{
-    const{data,error}=await sb.from('coaching_session_sets').update(patch).eq('id',setId).select().single();
-    if(error)throw error;
+    const current=Object.values(coachSessionSets).flat().find(s=>s.id===setId)||{id:setId};
+    const data=await trainingUpdate('coaching_session_sets',setId,patch,current);
     const arr=coachSessionSets[data.ex_key];
     if(arr){
       const idx=arr.findIndex(s=>s.id===setId);
@@ -7900,8 +8017,10 @@ async function toggleSetDoneSb(setId,newDone,btnEl){
         logSetToUserScores(data);
         const next=arr.find(s=>s.set_idx===data.set_idx+1&&!s.done);
         if(next&&data.weight!=null&&next.weight!==data.weight){
-          const{data:nextData,error:nErr}=await sb.from('coaching_session_sets').update({weight:data.weight}).eq('id',next.id).select().single();
-          if(!nErr){const ni=arr.findIndex(s=>s.id===next.id);if(ni>-1)arr[ni]=nextData;}
+          try{
+            const nextData=await trainingUpdate('coaching_session_sets',next.id,{weight:data.weight,updated_at:new Date().toISOString()},next);
+            const ni=arr.findIndex(s=>s.id===next.id);if(ni>-1)arr[ni]=nextData;
+          }catch(_){/* la serie actual sí quedó guardada; no se bloquea por el prefijo */}
         }
         const found=findExerciseByExKey(data.ex_key);
         // El avance por rondas depende de que la sesión esté viva, no de que
@@ -7936,8 +8055,8 @@ async function updateSetRirSb(setId,value){
     rir=n;
   }
   try{
-    const{data,error}=await sb.from('coaching_session_sets').update({rir,updated_at:new Date().toISOString()}).eq('id',setId).select().single();
-    if(error)throw error;
+    const current=Object.values(coachSessionSets).flat().find(s=>s.id===setId)||{id:setId};
+    const data=await trainingUpdate('coaching_session_sets',setId,{rir,updated_at:new Date().toISOString()},current);
     const arr=coachSessionSets[data.ex_key];
     if(arr){const idx=arr.findIndex(s=>s.id===setId);if(idx>-1)arr[idx]=data;}
   }catch(e){toast('Error: '+e.message,'err');}
@@ -7946,8 +8065,18 @@ async function updateSetRepsSb(setId,value){
   const r=value===''?null:parseInt(value,10);
   const reps=(r==null||isNaN(r))?null:r;
   try{
-    const{data,error}=await sb.from('coaching_session_sets').update({actual_reps:reps,updated_at:new Date().toISOString()}).eq('id',setId).select().single();
-    if(error)throw error;
+    const current=Object.values(coachSessionSets).flat().find(s=>s.id===setId)||{id:setId};
+    const data=await trainingUpdate('coaching_session_sets',setId,{actual_reps:reps,updated_at:new Date().toISOString()},current);
+    const arr=coachSessionSets[data.ex_key];
+    if(arr){const idx=arr.findIndex(s=>s.id===setId);if(idx>-1)arr[idx]=data;}
+  }catch(e){toast('Error: '+e.message,'err');}
+}
+async function updateSetSecondsSb(setId,value){
+  const raw=value===''?null:parseInt(value,10);
+  const actual_seconds=(raw==null||isNaN(raw))?null:Math.max(0,raw);
+  try{
+    const current=Object.values(coachSessionSets).flat().find(s=>s.id===setId)||{id:setId};
+    const data=await trainingUpdate('coaching_session_sets',setId,{actual_seconds,metric_type:'time',updated_at:new Date().toISOString()},current);
     const arr=coachSessionSets[data.ex_key];
     if(arr){const idx=arr.findIndex(s=>s.id===setId);if(idx>-1)arr[idx]=data;}
   }catch(e){toast('Error: '+e.message,'err');}
@@ -7957,13 +8086,14 @@ async function updateSetWeightSb(setId,value,exKey){
   let w=(raw==null||isNaN(raw))?null:raw;
   if(w!=null&&exKey&&exerciseWeightUnit(exKey)==='lb')w=Math.round(lbToKg(w)*100)/100;
   try{
-    const{data,error}=await sb.from('coaching_session_sets').update({weight:w,updated_at:new Date().toISOString()}).eq('id',setId).select().single();
-    if(error)throw error;
+    const current=Object.values(coachSessionSets).flat().find(s=>s.id===setId)||{id:setId};
+    const data=await trainingUpdate('coaching_session_sets',setId,{weight:w,updated_at:new Date().toISOString()},current);
     const arr=coachSessionSets[data.ex_key];
     if(arr){const idx=arr.findIndex(s=>s.id===setId);if(idx>-1)arr[idx]=data;}
   }catch(e){toast('Error: '+e.message,'err');}
 }
 async function addSetSb(scheduleId,exKey,defaultReps){
+  if(!navigator.onLine){toast('Conéctate para agregar una serie nueva. Las series existentes sí se guardan offline.','warn');return;}
   const arr=coachSessionSets[exKey]||[];
   const nextIdx=arr.length;
   const lastWeight=arr.length?arr[arr.length-1].weight:null;
@@ -7977,6 +8107,7 @@ async function addSetSb(scheduleId,exKey,defaultReps){
   }catch(e){toast('Error: '+e.message,'err');}
 }
 async function deleteSetSb(setId,exKey){
+  if(!navigator.onLine){toast('Conéctate para eliminar series. Puedes seguir registrando las existentes.','warn');return;}
   const arr=coachSessionSets[exKey]||[];
   if(arr.length<=1){toast('Debe quedar al menos una serie','warn');return;}
   if(!await confirmSheet('¿Eliminar esta serie?',{confirmLabel:'Eliminar',danger:true}))return;
@@ -8032,12 +8163,11 @@ async function markAllSetsSb(exKey){
     return{id:s.id,weight:w,actual_reps:r};
   });
   try{
-    const results=await Promise.all(patches.map(p=>
-      sb.from('coaching_session_sets').update({weight:p.weight,actual_reps:p.actual_reps,done:true,updated_at:new Date().toISOString()}).eq('id',p.id).select().single()
-    ));
-    const failed=results.find(r=>r.error);
-    if(failed)throw failed.error;
-    results.forEach(({data})=>{
+    const results=await Promise.all(patches.map(p=>{
+      const current=arr.find(s=>s.id===p.id)||{id:p.id,ex_key:exKey};
+      return trainingUpdate('coaching_session_sets',p.id,{weight:p.weight,actual_reps:p.actual_reps,done:true,updated_at:new Date().toISOString()},current);
+    }));
+    results.forEach(data=>{
       if(!data)return;
       const idx=arr.findIndex(s=>s.id===data.id);
       if(idx>-1)arr[idx]=data;
@@ -8491,7 +8621,12 @@ function closeMuscleDetail(){document.getElementById('muscle-detail-modal').styl
 let _progresoData=null;
 let _progresoQuery='';
 let _progresoCharts={};
-const PROGRESO_LOOKBACK_DAYS=84;   // 12 semanas
+let PROGRESO_LOOKBACK_DAYS=Number(localStorage.getItem('habit_progress_days'))||84;
+function setProgresoRange(days){
+  PROGRESO_LOOKBACK_DAYS=[28,56,84].includes(Number(days))?Number(days):84;
+  localStorage.setItem('habit_progress_days',String(PROGRESO_LOOKBACK_DAYS));
+  _progresoData=null;renderProgreso();
+}
 
 async function loadProgresoSb(force){
   if(!sbUser)return null;
@@ -8499,16 +8634,17 @@ async function loadProgresoSb(force){
   await loadExerciseCatalogSb();
   const since=addDaysDS(mazToday(),-PROGRESO_LOOKBACK_DAYS);
   const{data:sched,error}=await sb.from('coaching_schedule')
-    .select('id,board_id,board_name,ds,started_at,completed_at,duration_sec,status,session_exercises')
+    .select('id,board_id,board_name,ds,started_at,completed_at,duration_sec,status,session_exercises,exercise_snapshot')
     .eq('user_id',sbUser.id).gte('ds',since).order('ds');
   if(error)throw error;
   const rows=sched||[];
   const done=rows.filter(r=>r.status==='done');
   let sets=[];
-  if(rows.length){
-    const{data}=await sb.from('coaching_session_sets')
-      .select('schedule_id,ex_key,weight,actual_reps,rir,done,updated_at')
-      .in('schedule_id',rows.map(r=>r.id)).eq('done',true);
+  if(done.length){
+    const{data,error:setsError}=await sb.from('coaching_session_sets')
+      .select('schedule_id,ex_key,weight,actual_reps,actual_seconds,metric_type,rir,done,updated_at')
+      .in('schedule_id',done.map(r=>r.id)).eq('done',true);
+    if(setsError)throw setsError;
     sets=data||[];
   }
   const boardIds=[...new Set(rows.map(r=>r.board_id).filter(Boolean))];
@@ -8529,9 +8665,10 @@ async function loadProgresoSb(force){
 // Racha = semanas consecutivas hacia atrás con al menos un entreno completado.
 function progresoStreak(done){
   const weeks=new Set(done.map(r=>mazWeekStart(r.ds)));
-  let streak=0, w=mazWeekStart(mazToday());
-  while(weeks.has(w)){streak++;w=addDaysDS(w,-7);}
-  return streak;
+  const current=mazWeekStart(mazToday());
+  if(window.HabitTraining)return HabitTraining.weeklyStreak([...weeks],current,addDaysDS(current,-7));
+  let streak=0,w=weeks.has(current)?current:addDaysDS(current,-7);
+  while(weeks.has(w)){streak++;w=addDaysDS(w,-7);}return streak;
 }
 
 function progresoStatsHtml(d){
@@ -8539,7 +8676,7 @@ function progresoStatsHtml(d){
   const thisWeek=mazWeekStart(mazToday());
   const weekCount=d.done.filter(r=>mazWeekStart(r.ds)===thisWeek).length;
   return '<div class="tu-stats-row">'
-    +'<div class="tu-stat"><div class="tu-stat-n">'+d.done.length+'</div><div class="tu-stat-l">Entrenos (12 sem)</div></div>'
+    +'<div class="tu-stat"><div class="tu-stat-n">'+d.done.length+'</div><div class="tu-stat-l">Entrenos ('+Math.round(PROGRESO_LOOKBACK_DAYS/7)+' sem)</div></div>'
     +'<div class="tu-stat"><div class="tu-stat-n">'+weekCount+'</div><div class="tu-stat-l">Esta semana</div></div>'
     +'<div class="tu-stat"><div class="tu-stat-n">'+progresoStreak(d.done)+'</div><div class="tu-stat-l">Semanas seguidas</div></div>'
     +'<div class="tu-stat"><div class="tu-stat-n">'+d.sets.length+'</div><div class="tu-stat-l">Series</div></div>'
@@ -8690,7 +8827,7 @@ async function renderProgreso(){
   if(!d){el.innerHTML='<div class="empty">Sin datos.</div>';return;}
 
   el.innerHTML='<div style="display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:12px">'
-      +'<p class="slbl" style="margin:0">Últimas 12 semanas</p>'
+      +'<select aria-label="Periodo de progreso" onchange="setProgresoRange(this.value)" style="background:var(--card);color:var(--white);border:1px solid var(--border);border-radius:6px;padding:8px"><option value="28" '+(PROGRESO_LOOKBACK_DAYS===28?'selected':'')+'>4 semanas</option><option value="56" '+(PROGRESO_LOOKBACK_DAYS===56?'selected':'')+'>8 semanas</option><option value="84" '+(PROGRESO_LOOKBACK_DAYS===84?'selected':'')+'>12 semanas</option></select>'
       +'<button class="btn-sm" onclick="sv(&quot;rutinas&quot;)">Volver a Entrenar</button></div>'
     +progresoStatsHtml(d)
     +'<div class="divider"></div><p class="slbl">Volumen por músculo · 4 semanas</p>'
@@ -8704,7 +8841,12 @@ async function renderProgreso(){
 
   // Las tarjetas de PR son las mismas de Coaching → Tú, alimentadas por user_scores.
   try{
-    const{data:scores}=await sb.from('user_scores').select('*').eq('user_id',sbUser.id).order('logged_at',{ascending:false});
+    let{data:scores,error:scoresError}=await sb.rpc('training_score_history',{p_user_id:sbUser.id,p_limit_per_exercise:40});
+    if(scoresError&&/training_score_history|schema cache|does not exist/i.test(scoresError.message||'')){
+      const fallback=await sb.from('user_scores').select('*').eq('user_id',sbUser.id).order('logged_at',{ascending:false});
+      scores=fallback.data;scoresError=fallback.error;
+    }
+    if(scoresError)throw scoresError;
     _tuScoreRows=scores||[];   // lo reusa setLogScoreUnit al cambiar kg/lb
     const box=document.getElementById('progreso-prs');
     if(box)renderPrCardsInto(box,_progresoCharts,_tuScoreRows,scoreWeightUnit,'prog');
@@ -8712,6 +8854,27 @@ async function renderProgreso(){
 }
 
 // ── HOY ───────────────────────────────────────────────────────────────────
+function routineTodayMeta(board){
+  const exercises=routineExercises(board);
+  const duration=Number(board&&board.duration_min)||Math.max(15,Math.round(exercises.reduce((n,ex)=>n+exerciseSetCount(ex)*2.5,0)/5)*5);
+  const equipment=[...new Set([...(board&&board.equipment||[]),...exercises.flatMap(ex=>Array.isArray(ex.equipment)?ex.equipment:[])])].slice(0,3);
+  return{duration,equipment,exercises};
+}
+function nextExerciseSuggestion(ex,last){
+  if(!last)return'';
+  const metric=window.HabitTraining?HabitTraining.metricType(ex):(inferTargetType(ex)==='time'?'time':'reps');
+  if(metric==='time'){
+    const target=HabitTraining.parseSeconds(ex.reps);
+    return target?'Objetivo sugerido: '+(target+5)+' s con técnica estable':'';
+  }
+  if(last.weight!=null){
+    const reps=parseInt(last.reps,10)||0;
+    const target=parseInt(String(ex.reps||'').match(/\d+/)?.[0]||'0',10);
+    if(target&&reps>=target)return'Objetivo sugerido: '+fmtWeightValue(kgToUnit(Math.round(last.weight*1.025*2)/2,exerciseWeightUnit(ex._exKey||ex.id||'')),exerciseWeightUnit(ex._exKey||ex.id||''),false)+' o +1 repetición';
+    return'Objetivo sugerido: repetir '+fmtScoreWeight(last.weight,exerciseWeightUnit(ex._exKey||ex.id||''))+' con ejecución limpia';
+  }
+  return'';
+}
 function renderRutHoy(){
   const el=document.getElementById('rut-hoy-content');
   if(!el)return;
@@ -8722,20 +8885,29 @@ function renderRutHoy(){
   if(activeCoachingSession){
     const total=Object.values(coachSessionSets).reduce((n,l)=>n+(Array.isArray(l)?l.length:0),0);
     const done=Object.values(coachSessionSets).reduce((n,l)=>n+(Array.isArray(l)?l.filter(s=>s.done).length:0),0);
+    const nextEx=sessionExerciseList().find((ex,i)=>(coachSessionSets[exerciseKeyForSession(activeCoachingSession.board_id,ex,i)]||[]).some(s=>!s.done));
     html+='<div class="coach-session-card" style="border-color:rgba(127,176,255,.4);background:rgba(37,99,235,.08)">'
       +'<div class="coach-session-top"><div class="coach-session-dot" style="background:'+esc(activeCoachingSession.board_color||'#2563eb')+'"></div>'
       +'<div style="min-width:0"><div class="coach-session-title">'+esc(activeCoachingSession.board_name)+'</div>'
-      +'<div class="coach-session-meta">En curso · '+done+'/'+total+' series</div></div></div>'
+      +'<div class="coach-session-meta">En curso · '+done+'/'+total+' series'+(nextEx?' · Sigue: '+esc(nextEx.name||'ejercicio'):'')+'</div>'
+      +'<div style="margin-top:6px"><span class="training-sync'+trainingSyncClass()+'" data-training-sync>'+trainingSyncText()+'</span></div></div></div>'
       +'<div class="coach-session-actions"><button class="btn" onclick="openWorkoutSheet()">Continuar</button></div></div>';
   }
 
   if(!todayRows.length&&!activeCoachingSession){
-    html+='<div class="coach-empty">Hoy no tienes entreno programado.<br>Elige una rutina o arma tu semana.</div>';
+    const starter=myRoutines.find(b=>b.is_starter)||null;
+    html+='<div class="coach-empty">Hoy no tienes entreno programado.<br>'
+      +(starter?'Puedes empezar con '+esc(starter.name)+' o armar una semana según tus días disponibles.':'Elige tu objetivo y arma una semana para no decidir desde cero cada día.')
+      +'</div><div style="display:flex;gap:8px;margin-bottom:10px">'
+      +(starter?'<button class="btn" style="flex:1" onclick="startWorkoutFromBoardSb(&quot;'+esc(starter.id)+'&quot;,&quot;'+esc(starter.name)+'&quot;,&quot;'+esc(routineColor(starter))+'&quot;)">Empezar básica</button>':'')
+      +'<button class="btn-sm" style="flex:1" onclick="openProgramPicker()">Elegir programa</button></div>';
   }
 
   todayRows.forEach(row=>{
     if(activeCoachingSession&&row.id===activeCoachingSession.id)return;
-    const exercises=routineExercises(coachBoardsById[row.board_id]);
+    const board=coachBoardsById[row.board_id];
+    const todayMeta=routineTodayMeta(board);
+    const exercises=todayMeta.exercises;
     if(row.status==='done'){
       html+='<div class="coach-session-card"><div class="coach-session-row">'
         +'<div class="coach-session-dot" style="background:'+esc(row.board_color||'#2563eb')+'"></div>'
@@ -8751,7 +8923,7 @@ function renderRutHoy(){
     html+='<div class="coach-session-card">'
       +'<div class="coach-session-top"><div class="coach-session-dot" style="background:'+esc(row.board_color||'#2563eb')+'"></div>'
       +'<div style="min-width:0"><div class="coach-session-title">'+esc(row.board_name)+'</div>'
-      +'<div class="coach-session-meta">'+(fromCoach?'Programado por tu coach':'Rutina lista')+' · '+exercises.length+' ejercicios</div></div></div>'
+      +'<div class="coach-session-meta">'+(fromCoach?'Programado por tu coach':'Rutina lista')+' · '+exercises.length+' ejercicios · ~'+todayMeta.duration+' min'+(todayMeta.equipment.length?' · '+esc(todayMeta.equipment.join(', ')):'')+'</div></div></div>'
       +'<div class="coach-session-actions">'
       +'<button class="btn" onclick="startCoachingSessionSb(&quot;'+row.id+'&quot;)">Iniciar</button>'
       +'</div></div>';
@@ -8814,7 +8986,7 @@ function renderRutSemana(){
     +(cycleIdx===-1
       ? 'Tu bloque terminó. Elige otro programa o arma la semana a mano: no se repite solo.'
       : 'La semana se aplica sola cada lunes. Mover o saltarte un día suelto no cambia el programa.')
-    +(coachSetDays().length?' Los días marcados los puso tu coach; puedes cambiarlos y él lo verá.':'')
+    +(coachSetDays().length?' Los días marcados los puso tu coach; cualquier cambio se envía como solicitud.':'')
     +'</div>';
   withScrollKept(el,()=>{el.innerHTML=html;});
 }
@@ -8832,6 +9004,10 @@ function closeDayPickerModal(){
 async function setWeekDay(dow,boardId){
   const b=routineById(boardId);
   if(!b)return;
+  const current=weekTemplate.find(t=>t.dow===dow);
+  if(current&&isCoachSet(current)&&sbProfile&&sbProfile.coaching_beta){
+    await requestCoachWeekChange(dow,current,b);closeDayPickerModal();return;
+  }
   try{
     const{error}=await sb.from('coaching_week_templates').upsert({
       user_id:sbUser.id,dow,board_id:b.id,board_name:b.name,board_color:routineColor(b),
@@ -8845,12 +9021,28 @@ async function setWeekDay(dow,boardId){
 }
 
 async function clearWeekDay(dow){
+  const current=weekTemplate.find(t=>t.dow===dow);
+  if(current&&isCoachSet(current)&&sbProfile&&sbProfile.coaching_beta){
+    await requestCoachWeekChange(dow,current,null);closeDayPickerModal();return;
+  }
   try{
     const{error}=await sb.from('coaching_week_templates').delete().eq('user_id',sbUser.id).eq('dow',dow);
     if(error)throw error;
     closeDayPickerModal();
     await refreshWeekAndSchedule();
   }catch(e){toast('Error: '+e.message,'err');}
+}
+async function requestCoachWeekChange(dow,current,nextBoard){
+  const action=nextBoard?'cambiar '+DOW_SHORT[dow]+' a '+nextBoard.name:'dejar '+DOW_SHORT[dow]+' como descanso';
+  if(!await confirmSheet('Este día pertenece al plan de tu coach. ¿Solicitar '+action+'?',{confirmLabel:'Enviar solicitud'}))return;
+  const reason=(await promptSheet('Motivo del cambio (opcional)')||'').trim();
+  const{error}=await sb.from('coaching_plan_change_requests').insert({
+    user_id:sbUser.id,dow,from_board_id:current.board_id,from_board_name:current.board_name,
+    to_board_id:nextBoard?nextBoard.id:null,to_board_name:nextBoard?nextBoard.name:'Descanso',reason:reason||null
+  });
+  if(error){toast(/coaching_plan_change_requests|schema cache/i.test(error.message||'')?'Falta correr la migración 117':'Error: '+error.message,'err');return;}
+  sendPush('admin','↔️ Solicitud de cambio',(curUser&&curUser.name||'Socio')+' quiere '+action+'.');
+  toast('Solicitud enviada a tu coach','ok');
 }
 
 // Cambiar la plantilla de la semana tiene que verse reflejado en los días que
@@ -10501,7 +10693,8 @@ async function seedSessionSetsSb(scheduleRow){
     const targetRir=parseTargetRir(ex);
     // reps_target es por serie: en una pirámide cada fila nace con su
     // escalón, en todo lo demás con la misma cifra de siempre.
-    for(let s=0;s<n;s++)rows.push({schedule_id:scheduleRow.id,user_id:sbUser.id,ex_key:exKey,set_idx:s,reps_target:repsTargetForSet(ex,s),weight:prev.weight!=null?prev.weight:null,actual_reps:prev.reps||null,target_rir:targetRir,done:false});
+    const metricType=window.HabitTraining?HabitTraining.metricType(ex):(inferTargetType(ex)==='time'?'time':'reps');
+    for(let s=0;s<n;s++)rows.push({schedule_id:scheduleRow.id,user_id:sbUser.id,ex_key:exKey,set_idx:s,reps_target:repsTargetForSet(ex,s),weight:metricType==='reps'&&prev.weight!=null?prev.weight:null,actual_reps:metricType==='reps'?(prev.reps||null):null,actual_seconds:null,metric_type:metricType,target_rir:targetRir,done:false});
   });
   if(!rows.length)return;
   // Si esto falla, el socio abre el entreno y cada ejercicio dice "Sin series"
@@ -10518,7 +10711,7 @@ async function seedSessionSetsSb(scheduleRow){
     // dejarlo con un entreno inservible se reintenta sin ese campo.
     if(e.code==='PGRST204'||/target_rir/i.test(msg)){
       const{error:retryErr}=await sb.from('coaching_session_sets')
-        .upsert(rows.map(({target_rir,...r})=>r),{onConflict:'schedule_id,ex_key,set_idx',ignoreDuplicates:true});
+        .upsert(rows.map(({target_rir,actual_seconds,metric_type,...r})=>r),{onConflict:'schedule_id,ex_key,set_idx',ignoreDuplicates:true});
       if(!retryErr){
         toast('Entreno listo, pero sin RIR: falta correr la migración 070','warn');
         return;
@@ -10531,8 +10724,13 @@ async function loadSessionSetsSb(scheduleId){
   try{
     const{data,error}=await sb.from('coaching_session_sets').select('*').eq('schedule_id',scheduleId).order('set_idx');
     if(error)throw error;
+    let loaded=data||[];
+    if(window.HabitTraining){
+      const pending=await HabitTraining.list();
+      loaded=HabitTraining.applyPending(pending,'coaching_session_sets',loaded);
+    }
     coachSessionSets={};
-    (data||[]).forEach(row=>{
+    loaded.forEach(row=>{
       if(!coachSessionSets[row.ex_key])coachSessionSets[row.ex_key]=[];
       coachSessionSets[row.ex_key].push(row);
     });
@@ -10560,16 +10758,25 @@ async function hydrateSessionSetDefaults(){
   }catch(e){console.error('hydrateSessionSetDefaults:',e);}
 }
 async function startCoachingSessionSb(scheduleId){
+  if(!navigator.onLine&&!activeCoachingSession){toast('Necesitas conexión para iniciar. Una vez abierto, el entreno funciona sin señal.','warn');return;}
   if(activeCoachingSession&&activeCoachingSession.id!==scheduleId){
     toast('Ya tienes un entreno en curso: '+activeCoachingSession.board_name+'. Termínalo o cancélalo primero.','warn');
     return;
   }
   try{
-    const{data,error}=await sb.from('coaching_schedule').update({status:'in_progress',started_at:new Date().toISOString()}).eq('id',scheduleId).select().single();
+    const schedule=coachSchedule.find(row=>row.id===scheduleId);
+    if(schedule)await ensureBoardLoadedSb(schedule.board_id);
+    const snapshot=schedule?buildTrainingExerciseSnapshot(schedule):[];
+    let{data,error}=await sb.rpc('start_training_session',{p_schedule_id:scheduleId,p_exercise_snapshot:snapshot}).single();
+    if(error&&/start_training_session|schema cache|does not exist/i.test(error.message||'')){
+      const fallback=await sb.from('coaching_schedule').update({status:'in_progress',started_at:new Date().toISOString()}).eq('id',scheduleId).eq('user_id',sbUser.id).select().single();
+      data=fallback.data;error=fallback.error;
+    }
     if(error)throw error;
     const idx=coachSchedule.findIndex(r=>r.id===data.id);
     if(idx>-1)coachSchedule[idx]=data;
     activeCoachingSession=data;
+    cacheActiveTrainingSession(data);
     showActiveSessionBar();
     await seedSessionSetsSb(data);
     await loadSessionSetsSb(data.id);
@@ -10582,14 +10789,28 @@ async function startCoachingSessionSb(scheduleId){
 async function finishCoachingSessionSb(){
   if(!activeCoachingSession)return;
   try{
-    const startedMs=new Date(activeCoachingSession.started_at).getTime();
-    const durationSec=Math.max(0,Math.round((Date.now()-startedMs)/1000));
+    const finishingSession={...activeCoachingSession};
     workoutFeedbackSets=JSON.parse(JSON.stringify(coachSessionSets||{}));
-    const{data,error}=await sb.from('coaching_schedule').update({status:'done',completed_at:new Date().toISOString(),duration_sec:durationSec}).eq('id',activeCoachingSession.id).select().single();
+    let data,error;
+    if(navigator.onLine){
+      const result=await sb.rpc('finish_training_session',{p_schedule_id:finishingSession.id}).single();
+      data=result.data;error=result.error;
+      if(error&&/finish_training_session|schema cache|does not exist/i.test(error.message||'')){
+        const durationSec=wsElapsedSec();
+        const fallback=await sb.from('coaching_schedule').update({status:'done',completed_at:new Date().toISOString(),duration_sec:durationSec}).eq('id',finishingSession.id).eq('user_id',sbUser.id).select().single();
+        data=fallback.data;error=fallback.error;
+      }
+    }
+    if(!navigator.onLine||(error&&window.HabitTraining&&HabitTraining.isRetryable(error,false))){
+      const completedAt=new Date().toISOString();
+      data=await trainingUpdate('coaching_schedule',finishingSession.id,{status:'done',completed_at:completedAt,duration_sec:wsElapsedSec(),paused_at:null,updated_at:completedAt},finishingSession);
+      error=null;
+    }
     if(error)throw error;
     const idx=coachSchedule.findIndex(r=>r.id===data.id);
     if(idx>-1)coachSchedule[idx]=data;
     activeCoachingSession=null;
+    cacheActiveTrainingSession(null);
     coachSessionSets={};
     hideActiveSessionBar();
     closeWorkoutSheet();
@@ -10609,7 +10830,9 @@ function openWorkoutFeedbackModal(scheduleId){
   workoutFeedbackSorenessArea='';
   workoutFeedbackSorenessLevel=0;
   workoutFeedbackSorenessTrend='igual';
-  workoutFeedbackShare=true;
+  // Compartir en chat requiere una decisión explícita; guardar el feedback en
+  // el reporte no publica automáticamente información sensible.
+  workoutFeedbackShare=false;
   renderWorkoutFeedbackModalBody();
   document.getElementById('workout-feedback-modal').style.display='flex';
 }
@@ -10659,7 +10882,7 @@ function buildWorkoutProgressionSummary(scheduleId){
   const donePct=Math.round(doneSets.length/allSets.length*100);
   const reps=doneSets.map(s=>parseFloat(s.actual_reps)).filter(n=>!isNaN(n));
   const avgReps=reps.length?Math.round((reps.reduce((a,b)=>a+b,0)/reps.length)*10)/10:null;
-  if(workoutFeedbackSoreness&&workoutFeedbackSorenessLevel>=5)return 'Bajar o mantener carga: molestia '+workoutFeedbackSorenessLevel+'/10'+(workoutFeedbackSorenessArea?' en '+workoutFeedbackSorenessArea:'')+'. Revisar técnica antes de progresar.';
+  if(workoutFeedbackSoreness&&workoutFeedbackSorenessLevel>=5)return 'No ajustar automáticamente: avisar al coach por molestia '+workoutFeedbackSorenessLevel+'/10'+(workoutFeedbackSorenessArea?' en '+workoutFeedbackSorenessArea:'')+'. Detener el ejercicio si empeora.';
   if(workoutFeedbackEnergy==='baja'||workoutFeedbackDifficulty==='pesado')return 'Mantener carga la próxima sesión. Buscar ejecución limpia antes de subir.';
   if(donePct>=90&&workoutFeedbackDifficulty==='facil')return 'Progresar: subir 1-2 reps por serie o 2.5-5% de peso en ejercicios con carga.';
   if(donePct>=80)return 'Buen margen. Repetir o subir muy poco si la técnica se mantuvo sólida.';
@@ -10731,7 +10954,10 @@ async function saveWorkoutFeedbackSb(){
     feedback_note:note||null
   };
   try{
-    let{data,error}=await sb.from('coaching_schedule').update(fullPatch).eq('id',workoutFeedbackScheduleId).eq('user_id',sbUser.id).select().single();
+    const current=coachSchedule.find(r=>r.id===workoutFeedbackScheduleId)||{id:workoutFeedbackScheduleId};
+    let data,error;
+    try{data=await trainingUpdate('coaching_schedule',workoutFeedbackScheduleId,fullPatch,current);}
+    catch(e){error=e;}
     if(error&&/feedback_difficulty|feedback_soreness_area|feedback_soreness_level|feedback_soreness_trend|progression_hint|schema cache|column/i.test(error.message||'')){
       const retry=await sb.from('coaching_schedule').update(basicPatch).eq('id',workoutFeedbackScheduleId).eq('user_id',sbUser.id).select().single();
       data=retry.data;error=retry.error;
@@ -10768,6 +10994,7 @@ async function cancelCoachingSessionSb(){
       if(idx>-1)coachSchedule[idx]=data;
     }
     activeCoachingSession=null;
+    cacheActiveTrainingSession(null);
     coachSessionSets={};
     hideActiveSessionBar();
     closeWorkoutSheet();
@@ -10783,12 +11010,32 @@ async function cancelCoachingSessionSb(){
 async function loadActiveCoachingSessionSb(){
   if(!sbUser)return;
   try{
-    const{data}=await sb.from('coaching_schedule').select('*').eq('user_id',sbUser.id).eq('status','in_progress').limit(1).maybeSingle();
-    activeCoachingSession=data||null;
-    if(data){wsPausedMs=0;wsPausedAt=0;showActiveSessionBar();wsStartTicker();}
+    const{data,error}=await sb.from('coaching_schedule').select('*').eq('user_id',sbUser.id).eq('status','in_progress').order('started_at',{ascending:false}).limit(1).maybeSingle();
+    if(error)throw error;
+    let resolved=data||null;
+    if(resolved&&window.HabitTraining){
+      const pending=await HabitTraining.list();
+      resolved=HabitTraining.applyPending(pending,'coaching_schedule',[resolved])[0]||resolved;
+      if(resolved.status!=='in_progress')resolved=null;
+    }
+    activeCoachingSession=resolved;
+    if(resolved){
+      wsPausedMs=Math.max(0,Number(resolved.paused_seconds)||0)*1000;
+      wsPausedAt=resolved.paused_at?new Date(resolved.paused_at).getTime():0;
+      cacheActiveTrainingSession(resolved);showActiveSessionBar();wsStartTicker();
+    }else cacheActiveTrainingSession(null);
     updateCoachingNavBadge();
     if(document.getElementById('v-inicio')?.classList.contains('active'))renderInicioCoachingWidgets();
-  }catch(e){console.error('loadActiveCoachingSessionSb:',e);}
+  }catch(e){
+    console.error('loadActiveCoachingSessionSb:',e);
+    const cached=readCachedTrainingSession();
+    if(cached&&cached.status==='in_progress'){
+      activeCoachingSession=cached;
+      wsPausedMs=Math.max(0,Number(cached.paused_seconds)||0)*1000;
+      wsPausedAt=cached.paused_at?new Date(cached.paused_at).getTime():0;
+      showActiveSessionBar();wsStartTicker();
+    }
+  }
 }
 function showActiveSessionBar(){
   const bar=document.getElementById('active-session-bar');
@@ -10955,7 +11202,8 @@ function wsToggleTimerPanel(){
   wsTimerOpen=!wsTimerOpen;
   wsRenderTimer();
 }
-function wsToggleRunning(){
+async function wsToggleRunning(){
+  const shouldPause=!wsPausedAt;
   if(wsPausedAt){
     // Reanudar: el tiempo en pausa se descuenta del cronómetro y el descanso
     // retoma justo donde se quedó.
@@ -10965,6 +11213,26 @@ function wsToggleRunning(){
   }else{
     wsRestFrozen=wsRestSec();
     wsPausedAt=Date.now();
+  }
+  if(activeCoachingSession){
+    const optimistic={...activeCoachingSession,
+      paused_seconds:Math.round(wsPausedMs/1000),
+      paused_at:wsPausedAt?new Date(wsPausedAt).toISOString():null};
+    activeCoachingSession=optimistic;cacheActiveTrainingSession(optimistic);
+    if(navigator.onLine){
+      try{
+        const{data,error}=await sb.rpc('set_training_session_paused',{p_schedule_id:optimistic.id,p_paused:shouldPause}).single();
+        if(error&&!/set_training_session_paused|schema cache|does not exist/i.test(error.message||''))throw error;
+        if(data){
+          activeCoachingSession=data;
+          wsPausedMs=Math.max(0,Number(data.paused_seconds)||0)*1000;
+          wsPausedAt=data.paused_at?new Date(data.paused_at).getTime():0;
+          cacheActiveTrainingSession(data);
+        }
+      }catch(e){
+        if(!HabitTraining.isRetryable(e,false))toast('No se pudo guardar la pausa','warn');
+      }
+    }
   }
   wsRenderTimer();
   wsUpdateClocks();
@@ -11107,7 +11375,8 @@ function renderWorkoutSheet(){
 
   let html='<div class="ws-progress"><div class="ws-progress-copy">'
     +'<span class="ws-progress-k"><strong>'+exercises.length+'</strong> ejercicios</span>'
-    +'<span class="ws-progress-pill">'+done+' de '+allSets.length+' series</span></div>'
+    +'<span class="ws-progress-pill">'+done+' de '+allSets.length+' series</span>'
+    +'<span class="training-sync'+trainingSyncClass()+'" data-training-sync>'+trainingSyncText()+'</span></div>'
     +'<div class="ws-progress-track"><i style="width:'+progressPct+'%"></i></div></div>';
   html+=exercises.map((ex,i)=>wsExerciseHtml(ex,i)).join('')
     ||(activeCoachingSession.board_id
@@ -11140,6 +11409,7 @@ function wsExerciseHtml(ex,i){
   const allDone=sets.length>0&&doneCount===sets.length;
   const videos=getExerciseVideos(ex);
   const last=wsLastScores[exKey];
+  const nextSuggestion=nextExerciseSuggestion({...ex,_exKey:exKey},last);
   const groupLabel=exerciseGroupLabel(ex);
   const focusSetIdx=(wsFocusSet&&wsFocusSet.exKey===exKey)?wsFocusSet.setIdx:null;
   const exData={name:ex.name,sets:ex.sets||'',reps:ex.reps||'',repsType:inferTargetType(ex),rest:ex.rest||'',
@@ -11163,6 +11433,7 @@ function wsExerciseHtml(ex,i){
     +(ex._replaced?'<div class="ws-ex-meta" style="color:var(--gray)">Cambiado a media sesión</div>':'')
     +(last&&last.weight!=null?'<div class="ws-ex-last">Última vez: '+esc(fmtWeightValue(kgToUnit(last.weight,exerciseWeightUnit(exKey)),exerciseWeightUnit(exKey),false))
         +(last.reps?' × '+esc(String(last.reps)):'')+'</div>':'')
+    +(nextSuggestion?'<div class="ws-ex-last" style="color:var(--green)">'+esc(nextSuggestion)+'</div>':'')
     +'</div>'
     +(videos.length?'<button class="ws-ex-video" onclick="event.stopPropagation();openVideoModal(getEmbedUrl(&quot;'+esc(videos[0].url)+'&quot;))" aria-label="Ver video">▶</button>':'')
     +'<span class="ws-ex-badge'+(allDone?' done':'')+'">'+doneCount+'/'+sets.length+'</span>'
@@ -12400,7 +12671,11 @@ async function renderBoardsAdmin(){
   renderBoardCreatePanel();
   await loadBoardsSb();
   await loadExerciseCatalogSb();
-  const{data:allU}=await sb.from('profiles').select('id,name').neq('role','admin').neq('source','skandi').order('name').limit(1000);
+  // La lista completa de socios solo se necesita al abrir "Asignar". Evita
+  // descargarla en cada cambio de nombre, color o ejercicio.
+  const{data:allU}=assigningBoards.size
+    ?await sb.from('profiles').select('id,name').neq('role','admin').neq('source','skandi').order('name').limit(1000)
+    :{data:[]};
   const users=allU||[];
   const el=document.getElementById('boards-list');
   if(!el)return;
@@ -12421,6 +12696,7 @@ async function renderBoardsAdmin(){
     const isEditing=editingBoards.has(board.id);
     const card=document.createElement('div');card.className='board-card'+(isEditing?' is-editing':'');
     card.dataset.boardName=(board.name||'').toLowerCase();
+    card.dataset.boardSearch=[board.name,board.goal,board.level,(board.tags||[]).join(' '),(board.equipment||[]).join(' '),...(board.exercises||[]).map(ex=>(ex.name||'')+' '+(ex.muscleGroup||ex.primary_muscle||''))].join(' ').toLowerCase();
     card.dataset.starter=board.is_starter?'1':'';
     const isAddingEx=addingExBoards.has(board.id);
     const isAssigning=assigningBoards.has(board.id);
@@ -12438,7 +12714,7 @@ async function renderBoardsAdmin(){
       // dato que se escriba: se muestra el conteo aunque `sets` esté vacío.
       const exSetsValue=exTargetType==='pyramid'?String(exerciseSetCount(ex)):(ex.sets||'');
       const meta=[groupLabel,exerciseTypeLabel(ex),exSetsValue?exSetsValue+' series':null,exerciseTargetLabel(ex),ex.rest?'descanso '+ex.rest:null,exerciseMuscleLabel(ex)].filter(Boolean).join(' · ');
-      const summary='<div class="board-ex-summary" onclick="toggleBoardExerciseDetails(&quot;'+board.id+'&quot;,'+i+')">'
+      const summary='<div class="board-ex-summary" role="button" tabindex="0" onclick="toggleBoardExerciseDetails(&quot;'+board.id+'&quot;,'+i+')" onkeydown="if(event.key===&quot;Enter&quot;||event.key===&quot; &quot;){event.preventDefault();this.click()}">'
         +'<div class="board-ex-index">'+(i+1)+'</div><div class="board-ex-main"><div class="board-ex-name">'+(groupLabel?'<span class="board-ex-badge">'+esc(groupLabel)+'</span>':'')+esc(ex.name||'Sin nombre')+'</div><div class="board-ex-meta">'+esc(meta||'Toca para ver detalles')+'</div></div>'
         +(isEditing?'<div class="board-ex-actions"><button class="board-ex-icon" '+(i===0?'disabled':'')+' data-bid="'+board.id+'" data-idx="'+i+'" onclick="event.stopPropagation();moveExerciseSb(this.dataset.bid,parseInt(this.dataset.idx),-1)">↑</button><button class="board-ex-icon" '+(i===board.exercises.length-1?'disabled':'')+' data-bid="'+board.id+'" data-idx="'+i+'" onclick="event.stopPropagation();moveExerciseSb(this.dataset.bid,parseInt(this.dataset.idx),1)">↓</button></div>':'')
         +'<div class="board-ex-chevron">'+(isOpen?'⌃':'⌄')+'</div></div>';
@@ -12499,7 +12775,7 @@ async function renderBoardsAdmin(){
       '<div class="routine-board-row">'
       +'<div class="routine-board-dot" style="background:'+board.color+'"></div>'
       +'<div class="routine-board-main"><div class="routine-board-name">'+esc(board.name)+(board.is_starter?'<span class="board-starter-tag">Básica</span>':'')+'</div>'
-      +'<div class="routine-board-meta"><span>'+board.exercises.length+' ejs</span><span>'+(board.is_starter?'Todos los socios':assignedUsers.length+' socios')+'</span></div></div>'
+      +'<div class="routine-board-meta"><span>'+board.exercises.length+' ejs</span><span>'+(board.duration_min?board.duration_min+' min':'duración automática')+'</span><span>'+(board.goal?esc(board.goal):board.level?esc(board.level):'sin etiqueta')+'</span><span>'+(board.is_starter?'Todos los socios':board.assignedTo.length+' socios')+'</span><span>v'+(board.version||1)+'</span></div></div>'
       +(isEditing?
         '<div style="display:flex;gap:6px"><button class="routine-board-action routine-board-done" onclick="toggleBoardEdit(&quot;'+board.id+'&quot;)">Listo</button><button class="routine-board-action routine-board-cancel" onclick="cancelBoardEdit(&quot;'+board.id+'&quot;)">Cerrar</button></div>'
         :'<button class="routine-board-action" onclick="toggleBoardEdit(&quot;'+board.id+'&quot;)">Editar</button>')
@@ -12513,7 +12789,7 @@ async function renderBoardsAdmin(){
         +(exHtml||'<div class="member-routine-empty">Esta rutina todavía no tiene ejercicios.</div>')
         +'<div class="routine-board-tools">'
         +'<button class="routine-board-tool" onclick="toggleBoardAddPanel(&quot;'+board.id+'&quot;)" style="background:rgba(37,99,235,.12);border:1px solid var(--blue);color:var(--bl)">+ Agregar ejercicio</button>'
-        +'<button class="routine-board-tool" onclick="assigningBoards.has(&quot;'+board.id+'&quot;)?assigningBoards.delete(&quot;'+board.id+'&quot;):assigningBoards.add(&quot;'+board.id+'&quot;);renderBoardsAdmin()" style="background:rgba(16,185,129,.1);border:1px solid var(--green);color:var(--green)">Asignar socios ('+assignedUsers.length+')</button>'
+        +'<button class="routine-board-tool" onclick="assigningBoards.has(&quot;'+board.id+'&quot;)?assigningBoards.delete(&quot;'+board.id+'&quot;):assigningBoards.add(&quot;'+board.id+'&quot;);renderBoardsAdmin()" style="background:rgba(16,185,129,.1);border:1px solid var(--green);color:var(--green)">Asignar socios ('+board.assignedTo.length+')</button>'
         +'</div>'
         +addExForm
         +'</div>'
@@ -12522,6 +12798,12 @@ async function renderBoardsAdmin(){
         +'<div class="routine-board-section-label">Información de la rutina</div>'
         +'<div class="routine-board-section-label">Nombre</div>'
         +'<input id="bn-'+board.id+'" value="'+esc(board.name)+'" style="width:100%;background:var(--card);border:1px solid var(--border);padding:10px;font-size:14px;font-weight:700;color:var(--white);outline:none;margin-bottom:10px;box-sizing:border-box" onkeydown="if(event.key===&quot;Enter&quot;)updateBoardNameSb(&quot;'+board.id+'&quot;)">'
+        +'<div class="routine-board-section-label">Objetivo y nivel</div>'
+        +'<input id="bgoal-'+board.id+'" value="'+esc(board.goal||'')+'" placeholder="Ej: Fuerza, hipertrofia, regreso" style="width:100%;background:var(--card);border:1px solid var(--border);padding:9px;color:var(--white);margin-bottom:7px">'
+        +'<select id="blevel-'+board.id+'" style="width:100%;background:var(--card);border:1px solid var(--border);padding:9px;color:var(--white);margin-bottom:7px"><option value="">Nivel</option>'+['principiante','intermedio','avanzado'].map(v=>'<option value="'+v+'" '+(board.level===v?'selected':'')+'>'+v+'</option>').join('')+'</select>'
+        +'<input id="bduration-'+board.id+'" type="number" min="5" max="300" value="'+esc(board.duration_min||'')+'" placeholder="Duración estimada (min)" style="width:100%;background:var(--card);border:1px solid var(--border);padding:9px;color:var(--white);margin-bottom:7px">'
+        +'<input id="bequipment-'+board.id+'" value="'+esc((board.equipment||[]).join(', '))+'" placeholder="Equipo, separado por comas" style="width:100%;background:var(--card);border:1px solid var(--border);padding:9px;color:var(--white);margin-bottom:7px">'
+        +'<input id="btags-'+board.id+'" value="'+esc((board.tags||[]).join(', '))+'" placeholder="Etiquetas, separadas por comas" style="width:100%;background:var(--card);border:1px solid var(--border);padding:9px;color:var(--white);margin-bottom:10px">'
         +'<div class="routine-board-section-label">Color</div>'
         +'<div class="routine-board-color-grid">'
         +COLORS.map(c=>'<div class="routine-board-swatch" onclick="updateBoardColorSb(&quot;'+board.id+'&quot;,&quot;'+c+'&quot;)" style="background:'+c+';border:2.5px solid '+(board.color===c?'rgba(255,255,255,.9)':'rgba(255,255,255,.12)')+'" title="'+c+'"></div>').join('')
@@ -12532,12 +12814,12 @@ async function renderBoardsAdmin(){
           +'<span><strong>Rutina básica</strong><span>'+(board.is_starter?'La ven todos los socios, sin asignarla.':'Solo la ven los socios a los que se la asignes.')+'</span></span>'
         +'</button>'
         +'<div style="display:grid;grid-template-columns:1fr 1fr;gap:7px;margin-top:9px">'
-        +'<button class="btn-sm bblue" data-bid="'+board.id+'" onclick="updateBoardNameSb(this.dataset.bid)">Guardar</button>'
+        +'<button class="btn-sm bblue" data-bid="'+board.id+'" onclick="updateBoardMetadataSb(this.dataset.bid)">Guardar</button>'
         +'<button class="btn-sm" style="background:transparent;border:1px solid var(--border);color:var(--gray)" onclick="cancelBoardEdit(&quot;'+board.id+'&quot;)">Cancelar</button>'
         +'</div>'
         +'</div>'
         +assignPanel
-        +'<details class="routine-board-danger"><summary>Opciones avanzadas</summary><button class="btn-sm bred routine-board-delete" style="width:100%" data-bid="'+board.id+'" onclick="deleteBoardSb(this.dataset.bid)">Eliminar rutina</button></details>'
+        +'<details class="routine-board-danger"><summary>Opciones avanzadas</summary><button class="btn-sm bblue" style="width:100%;margin-bottom:8px" data-bid="'+board.id+'" onclick="cloneBoardVersionSb(this.dataset.bid)">Duplicar como nueva versión</button><button class="btn-sm bred routine-board-delete" style="width:100%" data-bid="'+board.id+'" onclick="deleteBoardSb(this.dataset.bid)">Eliminar rutina</button></details>'
         +'</aside></div></div>'
       :'');
 
@@ -12551,7 +12833,7 @@ function filterBoardsAdmin(value){
   const cards=[...document.querySelectorAll('#boards-list .board-card')];
   let visible=0;
   cards.forEach(card=>{
-    const show=!q||(card.dataset.boardName||'').includes(q)||card.classList.contains('is-editing');
+    const show=!q||(card.dataset.boardSearch||card.dataset.boardName||'').includes(q)||card.classList.contains('is-editing');
     card.style.display=show?'block':'none';
     if(show)visible++;
   });
@@ -12623,6 +12905,31 @@ async function updateBoardNameSb(bid){
   }catch(e){
     toast('Error al guardar nombre: '+(e.message||e),'err');
   }
+}
+async function updateBoardMetadataSb(bid){
+  const board=boards.find(x=>x.id===bid);if(!board)return;
+  const name=(document.getElementById('bn-'+bid)?.value||'').trim();
+  if(!name){toast('La rutina necesita nombre','err');return;}
+  const split=id=>(document.getElementById(id)?.value||'').split(',').map(v=>v.trim()).filter(Boolean);
+  const rawDuration=parseInt(document.getElementById('bduration-'+bid)?.value||'',10);
+  const patch={name,goal:(document.getElementById('bgoal-'+bid)?.value||'').trim()||null,
+    level:(document.getElementById('blevel-'+bid)?.value||'').trim()||null,
+    duration_min:Number.isFinite(rawDuration)?Math.max(5,Math.min(300,rawDuration)):null,
+    equipment:split('bequipment-'+bid),tags:split('btags-'+bid),
+    version:(Number(board.version)||1)+1,updated_at:new Date().toISOString()};
+  const{data,error}=await sb.from('boards').update(patch).eq('id',bid).select().single();
+  if(error){toast(/goal|level|duration_min|tags|version|schema cache/i.test(error.message||'')?'Falta correr la migración 117':'Error: '+error.message,'err');return;}
+  Object.assign(board,data||patch);toast('Rutina y metadatos guardados','ok');renderBoardsAdmin();
+}
+async function cloneBoardVersionSb(bid){
+  const board=boards.find(x=>x.id===bid);if(!board)return;
+  const copy={name:board.name+' · nueva versión',color:board.color,exercises:board.exercises||[],owner_id:null,
+    goal:board.goal||null,level:board.level||null,duration_min:board.duration_min||null,
+    equipment:board.equipment||[],tags:board.tags||[],version:1,parent_version_id:board.id,is_starter:false};
+  const{data,error}=await sb.from('boards').insert(copy).select().single();
+  if(error){toast(/parent_version_id|goal|schema cache/i.test(error.message||'')?'Falta correr la migración 117':'Error: '+error.message,'err');return;}
+  boards.push({...data,assignedTo:[]});editingBoards.delete(bid);editingBoards.add(data.id);
+  toast('Nueva versión creada sin alterar la rutina activa','ok');renderBoardsAdmin();
 }
 
 // RIR objetivo de la rutina: se guarda como targetRir en boards.exercises y es
@@ -15028,13 +15335,29 @@ function coachListRelevantTask(t,today){
 }
 function coachBuildAttentionSignals(u){
   const signals=[];
-  if((u.unreadChats||0)>0)signals.push({kind:'chat',label:u.unreadChats+' chat'+(u.unreadChats===1?'':'s')+' sin leer'});
-  if((u.missedWorkouts||0)>0)signals.push({kind:'workout',label:u.missedWorkouts+' entreno'+(u.missedWorkouts===1?'':'s')+' vencido'+(u.missedWorkouts===1?'':'s')});
-  if(u.lowEnergy)signals.push({kind:'feedback',label:'Energía baja'});
-  if(u.soreness)signals.push({kind:'feedback',label:'Molestia reportada'});
-  if((u.pendingHabitsToday||0)>0)signals.push({kind:'habit',label:u.pendingHabitsToday+' hábito'+(u.pendingHabitsToday===1?'':'s')+' pendiente'+(u.pendingHabitsToday===1?'':'s')});
-  if(u.fastingBehind)signals.push({kind:'fasting',label:'Ayuno sin registro reciente'});
-  return signals;
+  if((u.unreadChats||0)>0)signals.push({key:'chat:'+u.unreadChats,kind:'chat',severity:3,label:u.unreadChats+' chat'+(u.unreadChats===1?'':'s')+' sin leer'});
+  if((u.missedWorkouts||0)>0)signals.push({key:'workout:'+(u.latestMissedDs||'')+':'+u.missedWorkouts,kind:'workout',severity:3,label:u.missedWorkouts+' entreno'+(u.missedWorkouts===1?'':'s')+' vencido'+(u.missedWorkouts===1?'':'s')});
+  if(u.lowEnergy)signals.push({key:'energy:'+(u.latestLowEnergyDs||''),kind:'feedback',severity:2,label:'Energía baja'});
+  if(u.soreness)signals.push({key:'soreness:'+(u.latestSorenessDs||''),kind:'feedback',severity:3,label:'Molestia reportada'});
+  if((u.pendingHabitsToday||0)>0)signals.push({key:'habit:'+mazToday()+':'+u.pendingHabitsToday,kind:'habit',severity:1,label:u.pendingHabitsToday+' hábito'+(u.pendingHabitsToday===1?'':'s')+' pendiente'+(u.pendingHabitsToday===1?'':'s')});
+  if(u.fastingBehind)signals.push({key:'fasting:'+(u.lastFastingDs||'none'),kind:'fasting',severity:1,label:'Ayuno sin registro reciente'});
+  const actions=u.alertActions||{};
+  return signals.filter(signal=>{
+    const action=actions[signal.key];
+    if(!action)return true;
+    if(action.status==='resolved')return false;
+    if(action.status==='snoozed'&&action.snoozed_until&&new Date(action.snoozed_until)>new Date())return false;
+    return true;
+  });
+}
+async function setCoachingAlertAction(uid,signalKey,status){
+  const patch={user_id:uid,signal_key:signalKey,status,assigned_to:sbUser.id,updated_at:new Date().toISOString(),
+    resolved_at:status==='resolved'?new Date().toISOString():null,
+    snoozed_until:status==='snoozed'?new Date(Date.now()+24*3600000).toISOString():null};
+  const{error}=await sb.from('coaching_alert_actions').upsert(patch,{onConflict:'user_id,signal_key'});
+  if(error){toast(/coaching_alert_actions|schema cache/i.test(error.message||'')?'Falta correr la migración 117':'Error: '+error.message,'err');return;}
+  toast(status==='resolved'?'Seguimiento resuelto':'Pospuesto 24 horas','ok');
+  await loadCoachingListTodayStatusSb();renderCoachingListRows((document.getElementById('coaching-search')||{}).value||'');
 }
 function renderCoachingCommandCenter(){
   const el=document.getElementById('coaching-command-center');
@@ -15050,11 +15373,11 @@ function renderCoachingCommandCenter(){
     ?'<div class="coach-attention-list">'+topAttention.map((u,idx)=>'<div class="coach-attention-item" onclick="adminOpenCoachingCockpit(&quot;'+esc(u.id)+'&quot;,&quot;'+esc(u.name||'')+'&quot;)">'
       +'<div class="coach-attention-dot"></div>'
       +'<div style="min-width:0"><div class="coach-attention-title">'+esc(u.name||'Socio')+'</div><div class="coach-attention-sub">'+esc((u.attentionSignals||[]).map(s=>s.label).slice(0,2).join(' · '))+'</div></div>'
-      +'<div class="coach-client-avatar" style="width:34px;height:34px;background:'+coachListAvatarColor(idx)+'">'+inits(u.name||'?')+'</div>'
+      +'<button class="btn-sm" onclick="event.stopPropagation();setCoachingAlertAction(&quot;'+esc(u.id)+'&quot;,&quot;'+esc((u.attentionSignals[0]||{}).key||'')+'&quot;,&quot;resolved&quot;)">Resolver</button>'
       +'</div>').join('')+'</div>'
     :'<div class="empty" style="margin-bottom:12px">Sin clientes que requieran atención inmediata.</div>';
   const automations=[
-    {title:'Alertas de seguimiento',sub:'Entrenos, hábitos, feedback y chats.',on:true},
+    {title:'Alertas de seguimiento',sub:'Entrenos, hábitos, feedback y chats.',on:rows.some(u=>Array.isArray(u.attentionSignals))},
     {title:'Resumen semanal',sub:'Se actualiza al abrir cada cliente.',on:true},
     {title:'Hábitos recurrentes',sub:'Check-list diario con historial.',on:rows.some(u=>u.hasRecurringTasks)}
   ];
@@ -15066,8 +15389,8 @@ function renderCoachingCommandCenter(){
     +'<div class="coach-admin-kpi"><strong>'+unread+'</strong><span>Chats sin leer</span></div>'
     +'</div>'
     +'<div class="coach-window-card"><div class="coach-card-head"><div><div class="coach-card-k">Prioridad</div><div class="coach-card-sub">Clientes que requieren seguimiento.</div></div><div class="admin-report-pill '+(attention?'warn':'good')+'">'+attention+'</div></div>'+attentionHtml
-    +'<details class="coach-automation-disclosure"><summary>Estado del sistema</summary><div class="coach-automation-list">'
-    +automations.map(a=>'<div class="coach-automation-row"><div class="coach-automation-light '+(a.on?'on':'')+'"></div><div><div class="coach-automation-title">'+esc(a.title)+'</div><div class="coach-automation-sub">'+esc(a.sub)+'</div></div><div class="admin-report-pill '+(a.on?'good':'warn')+'">'+(a.on?'Activo':'Pendiente')+'</div></div>').join('')
+    +'<details class="coach-automation-disclosure"><summary>Cobertura del panel</summary><div class="coach-automation-list">'
+    +automations.map(a=>'<div class="coach-automation-row"><div class="coach-automation-light '+(a.on?'on':'')+'"></div><div><div class="coach-automation-title">'+esc(a.title)+'</div><div class="coach-automation-sub">'+esc(a.sub)+'</div></div><div class="admin-report-pill '+(a.on?'good':'warn')+'">'+(a.on?'Disponible':'Sin datos')+'</div></div>').join('')
     +'</div></details></div>';
 }
 function renderCoachingListRows(filter){
@@ -15090,7 +15413,7 @@ function renderCoachingListRows(filter){
     +'<div class="coach-client-avatar" style="background:'+coachListAvatarColor(idx)+'">'+inits(u.name||'?')+'</div>'
     +'<div class="coach-client-main">'
     +'<div class="coach-client-name">'+esc(u.name||'Socio')+'</div>'
-    +'<div class="coach-client-meta">'+esc(u.lastActivityLabel||'Sin actividad reciente')+' · '+(u.plannedToday?u.doneWorkoutsToday+'/'+u.plannedToday+' entrenos hoy':'sin plan hoy')+'</div>'
+    +'<div class="coach-client-meta">'+esc(u.lastActivityLabel||'Sin actividad reciente')+' · '+(u.plannedToday?u.doneWorkoutsToday+'/'+u.plannedToday+' entrenos hoy':u.plannedRestToday?'descanso programado':'sin plan hoy')+'</div>'
     +'<div class="coach-client-tags">'
     +(u.attentionSignals||[]).slice(0,3).map(s=>'<span class="coach-client-tag '+(s.kind==='chat'||s.kind==='workout'?'hot':'warn')+'">'+esc(s.label)+'</span>').join('')
     +(!(u.attentionSignals||[]).length&&u.habitsDoneToday?'<span class="coach-client-tag">Hábitos listos</span>':'')
@@ -15124,12 +15447,14 @@ async function loadCoachingListTodayStatusSb(){
   const today=mazToday();
   const weekAgo=addDaysDS(today,-6);
   try{
-    const[scheduleRes,tasksRes,logsRes,fastingRes,msgRes]=await Promise.all([
+    const[scheduleRes,tasksRes,logsRes,fastingRes,msgRes,templateRes,actionRes]=await Promise.all([
       sb.from('coaching_schedule').select('user_id,ds,status,completed_at,duration_sec,feedback_energy,feedback_soreness,feedback_note').gte('ds',weekAgo).lte('ds',today).in('user_id',ids),
       sb.from('coaching_tasks').select('id,user_id,is_recurring,due_date,is_done').in('user_id',ids),
       sb.from('coaching_task_logs').select('task_id,user_id,ds').gte('ds',weekAgo).lte('ds',today).in('user_id',ids),
       sb.from('coaching_fasting_logs').select('user_id,fast_end_ds,duration_min,target_hours').gte('fast_end_ds',weekAgo).in('user_id',ids),
-      sb.from('coaching_messages').select('user_id,sender_role,read_at,created_at').in('user_id',ids).order('created_at',{ascending:false}).limit(500)
+      sb.from('coaching_messages').select('user_id,sender_role,read_at,created_at').in('user_id',ids).order('created_at',{ascending:false}).limit(2000),
+      sb.from('coaching_week_templates').select('user_id,dow').in('user_id',ids),
+      sb.from('coaching_alert_actions').select('*').in('user_id',ids)
     ]);
     const scheduleByUser={};
     (scheduleRes.data||[]).forEach(r=>{(scheduleByUser[r.user_id]=scheduleByUser[r.user_id]||[]).push(r);});
@@ -15151,16 +15476,26 @@ async function loadCoachingListTodayStatusSb(){
       const ds=dsFromIsoMaz(m.created_at);
       if(ds&&(!lastMsgDsByUser[m.user_id]||ds>lastMsgDsByUser[m.user_id]))lastMsgDsByUser[m.user_id]=ds;
     });
+    const templateDaysByUser={};
+    (templateRes.data||[]).forEach(row=>(templateDaysByUser[row.user_id]=templateDaysByUser[row.user_id]||new Set()).add(row.dow));
+    const actionsByUser={};
+    (actionRes.data||[]).forEach(row=>{(actionsByUser[row.user_id]=actionsByUser[row.user_id]||{})[row.signal_key]=row;});
+    const todayDow=(dateObjFromDS(today).getUTCDay()+6)%7;
     _coachingListAll.forEach((u,idx)=>{
       const rows=scheduleByUser[u.id]||[];
       const dayRows=rows.filter(r=>r.ds===today);
       u.plannedToday=dayRows.length;
       u.doneWorkoutsToday=dayRows.filter(r=>r.status==='done').length;
       u.workoutDoneToday=dayRows.length>0&&u.doneWorkoutsToday===dayRows.length;
-      u.noPlanToday=dayRows.length===0;
+      const templateDays=templateDaysByUser[u.id]||new Set();
+      u.plannedRestToday=dayRows.length===0&&templateDays.size>0&&!templateDays.has(todayDow);
+      u.noPlanToday=dayRows.length===0&&templateDays.size===0;
       u.missedWorkouts=rows.filter(r=>r.ds<today&&r.status!=='done'&&r.status!=='skipped').length;
+      u.latestMissedDs=rows.filter(r=>r.ds<today&&r.status!=='done'&&r.status!=='skipped').map(r=>r.ds).sort().pop()||'';
       u.lowEnergy=rows.some(r=>r.feedback_energy==='baja');
       u.soreness=rows.some(r=>r.feedback_soreness);
+      u.latestLowEnergyDs=rows.filter(r=>r.feedback_energy==='baja').map(r=>r.ds).sort().pop()||'';
+      u.latestSorenessDs=rows.filter(r=>r.feedback_soreness).map(r=>r.ds).sort().pop()||'';
       const relevant=(tasksByUser[u.id]||[]).filter(t=>coachListRelevantTask(t,today));
       const loggedIds=loggedIdsTodayByUser[u.id]||new Set();
       const doneCount=relevant.filter(t=>t.is_recurring?loggedIds.has(t.id):t.is_done).length;
@@ -15170,6 +15505,7 @@ async function loadCoachingListTodayStatusSb(){
       const hasFastingHabit=(tasksByUser[u.id]||[]).some(t=>(t.title||'').toLowerCase().includes('ayuno'));
       const fastLag=coachDaysBetweenDS(fastingLastDsByUser[u.id],today);
       u.fastingBehind=hasFastingHabit&&fastLag>2;
+      u.lastFastingDs=fastingLastDsByUser[u.id]||'';
       u.unreadChats=unreadByUser[u.id]||0;
       const lastWorkoutDs=rows.filter(r=>r.status==='done').map(r=>r.ds).sort().pop()||'';
       const lastDs=[lastWorkoutDs,lastLogDsByUser[u.id]||'',lastMsgDsByUser[u.id]||'',fastingLastDsByUser[u.id]||''].filter(Boolean).sort().pop()||'';
@@ -15177,6 +15513,7 @@ async function loadCoachingListTodayStatusSb(){
       u.activeRecently=lag<=2||u.plannedToday>0||u.unreadChats>0;
       u.lastActivityLabel=lastDs?(lag===0?'activo hoy':lag===1?'activo ayer':'activo hace '+lag+'d'):'sin actividad';
       u.sortAttention=(u.unreadChats*3)+(u.missedWorkouts*2)+(u.lowEnergy?2:0)+(u.soreness?2:0)+u.pendingHabitsToday+(u.fastingBehind?1:0);
+      u.alertActions=actionsByUser[u.id]||{};
       u.attentionSignals=coachBuildAttentionSignals(u);
       u._listIdx=idx;
     });
@@ -15248,14 +15585,18 @@ async function loadCoachingWeekAdminSb(){
   // pasado inventa entrenos perdidos que nadie tenía asignados y ensucia la
   // adherencia del cliente.
   if(weekEnd>=mazToday())await ensureCoachingWeekFromTemplateSb(selectedCoachClientId,coachAdminWeekStart);
-  const[schRes,tplRes,taskRes,logRes,fastingRes,pgmRes]=await Promise.allSettled([
+  const[schRes,tplRes,taskRes,logRes,fastingRes,pgmRes,revRes,changeRes]=await Promise.allSettled([
     sb.from('coaching_schedule').select('*').eq('user_id',selectedCoachClientId).gte('ds',coachAdminWeekStart).lte('ds',weekEnd),
     sb.from('coaching_week_templates').select('*').eq('user_id',selectedCoachClientId).order('dow'),
     sb.from('coaching_tasks').select('*').eq('user_id',selectedCoachClientId).order('due_date',{ascending:true,nullsFirst:false}).order('created_at',{ascending:false}).limit(50),
     sb.from('coaching_task_logs').select('task_id,ds').eq('user_id',selectedCoachClientId).gte('ds',coachAdminWeekStart).lte('ds',weekEnd),
     sb.from('coaching_fasting_logs').select('*').eq('user_id',selectedCoachClientId).or('fast_start_ds.gte.'+coachAdminWeekStart+',fast_end_ds.gte.'+coachAdminWeekStart).order('fast_start_at',{ascending:false}).limit(30),
-    sb.from('coaching_programs').select('*').or('user_id.eq.'+selectedCoachClientId+',user_id.is.null').order('name')
+    sb.from('coaching_programs').select('*').or('user_id.eq.'+selectedCoachClientId+',user_id.is.null').order('name'),
+    sb.from('coaching_plan_revisions').select('version').eq('user_id',selectedCoachClientId).eq('week_start',coachAdminWeekStart).maybeSingle(),
+    sb.from('coaching_plan_change_requests').select('*').eq('user_id',selectedCoachClientId).eq('status','pending').order('created_at',{ascending:false})
   ]);
+  coachAdminWeekVersion=(revRes.status==='fulfilled'&&!revRes.value.error&&revRes.value.data)?Number(revRes.value.data.version)||0:0;
+  coachAdminChangeRequests=(changeRes.status==='fulfilled'&&!changeRes.value.error)?(changeRes.value.data||[]):[];
   // La migración 114 puede no estar corrida todavía: sin ella el panel sigue
   // funcionando, solo que sin la sección de programas.
   coachAdminPrograms=(pgmRes.status==='fulfilled'&&!pgmRes.value.error)?(pgmRes.value.data||[]):[];
@@ -15315,6 +15656,15 @@ function resolveExKeyInfo(exKey){
     }
   }
   return{name:'Ejercicio',boardName:''};
+}
+function resolveSessionExerciseInfo(scheduleRow,exKey,setsMap){
+  if(scheduleRow){
+    const list=sessionExerciseList(scheduleRow,setsMap||{});
+    for(let i=0;i<list.length;i++){
+      if(exerciseKeyForSession(scheduleRow.board_id,list[i],i)===exKey)return{name:list[i].name||'Ejercicio',boardName:scheduleRow.board_name||''};
+    }
+  }
+  return resolveExKeyInfo(exKey);
 }
 function selectCoachDetailDay(ds){
   selectedCoachDetailDs=ds;
@@ -15476,7 +15826,9 @@ async function renderCoachTodaySummarySection(){
     (data||[]).forEach(r=>{(byEx[r.ex_key]=byEx[r.ex_key]||[]).push(r);});
     const entries=Object.entries(byEx);
     const html=entries.slice(0,3).map(([exKey,sets])=>{
-      const info=resolveExKeyInfo(exKey);
+      const owningSet=sets[0];
+      const scheduleRow=rows.find(row=>row.id===owningSet.schedule_id)||null;
+      const info=resolveSessionExerciseInfo(scheduleRow,exKey,byEx);
       const compact=sets.map(s=>[
         'S'+(s.set_idx+1),
         s.weight!=null?fmtWeightValue(s.weight,'kg',false):null,
@@ -15505,14 +15857,18 @@ function renderCoachAdminReportHtml(statusStrip,weekEnd){
     habitDone+=tasks.filter(t=>isCoachAdminTaskDoneOnDs(t,ds)).length;
     habitTotal+=tasks.length;
   }
-  const compliance=(planned+habitTotal)?Math.round(((done+habitDone)/(planned+habitTotal))*100):0;
+  const trainingCompliance=planned?Math.round(done/planned*100):0;
+  const habitCompliance=habitTotal?Math.round(habitDone/habitTotal*100):0;
+  const lowEnergy=rows.filter(r=>r.feedback_energy==='baja').length;
+  const soreness=rows.filter(r=>r.feedback_soreness).length;
   const progressTabs='<div class="coach-report-tabs">'
     +['habitos','entrenamientos','ayuno','prs'].map(v=>'<button class="coach-report-tab '+(coachProgressView===v?'active':'')+'" data-view="'+v+'" onclick="setCoachProgressView(&quot;'+v+'&quot;)">'+(v==='habitos'?'Hábitos':v==='entrenamientos'?'Entrenos':v==='ayuno'?'Ayuno':'PRs')+'</button>').join('')
     +'</div>';
   return '<div class="admin-report-shell">'
     +'<div class="admin-report-head" style="margin-bottom:0"><button class="btn-sm" onclick="coachAdminWeekShift(-7)">‹</button><strong>'+esc(fmtDS(coachAdminWeekStart))+' – '+esc(fmtDS(weekEnd))+'</strong><button class="btn-sm" onclick="coachAdminWeekShift(7)">›</button></div>'
     +'<div class="coach-mini-grid"><div class="coach-mini-stat"><strong>'+done+'/'+planned+'</strong><span>Entrenos</span></div><div class="coach-mini-stat"><strong>'+habitDone+'/'+habitTotal+'</strong><span>Hábitos</span></div><div class="coach-mini-stat"><strong>'+minutes+'</strong><span>Minutos</span></div></div>'
-    +'<div class="coach-mini-grid"><div class="coach-mini-stat"><strong>'+compliance+'%</strong><span>Cumplimiento</span></div><div class="coach-mini-stat"><strong>'+(coachAdminFastingLogs||[]).length+'</strong><span>Ayunos</span></div><div class="coach-mini-stat"><strong>'+rows.length+'</strong><span>Días</span></div></div>'
+    +'<div class="coach-mini-grid"><div class="coach-mini-stat"><strong>'+trainingCompliance+'%</strong><span>Adherencia entreno</span></div><div class="coach-mini-stat"><strong>'+habitCompliance+'%</strong><span>Adherencia hábitos</span></div><div class="coach-mini-stat"><strong>'+(coachAdminFastingLogs||[]).length+'</strong><span>Ayunos</span></div></div>'
+    +((lowEnergy||soreness)?'<div class="coach-alert" style="margin:10px 0">Señales esta semana: '+lowEnergy+' energía baja · '+soreness+' molestia'+(soreness===1?'':'s')+'.</div>':'')
     +progressTabs
     +'<div id="coach-progress-panel">'+renderCoachProgressPanelHtml()+'</div>'
   +'</div>';
@@ -15556,10 +15912,12 @@ function renderCoachSessionDetailAdmin(){
   const feedbackText=coachingFeedbackText(scheduleRow);
   const commentHtml=feedbackText?'<div class="admin-session-comment">'+esc(feedbackText)+'</div>':'';
   const exercisesHtml=Object.entries(byEx).map(([exKey,sets])=>{
-    const info=resolveExKeyInfo(exKey);
+    const info=resolveSessionExerciseInfo(scheduleRow,exKey,byEx);
     const rows=sets.map(s=>{
       const weight=s.weight!=null?fmtWeightValue(s.weight,'kg',false):'Sin peso';
-      const reps=s.actual_reps!=null?String(s.actual_reps)+' reps':(s.reps_target?esc(s.reps_target)+' reps':'Sin reps');
+      const reps=s.metric_type==='time'||s.actual_seconds!=null
+        ?(s.actual_seconds!=null?String(s.actual_seconds)+' s':(s.reps_target?esc(s.reps_target):'Sin tiempo'))
+        :(s.actual_reps!=null?String(s.actual_reps)+' reps':(s.reps_target?esc(s.reps_target)+' reps':'Sin reps'));
       return '<div class="admin-session-set">'
         +'<span class="admin-session-set-num">S'+(s.set_idx+1)+'</span>'
         +'<span class="admin-session-metric'+(s.weight==null?' muted':'')+'">'+weight+'</span>'
@@ -15876,6 +16234,27 @@ function coachAdminPrimaryScheduleForDs(ds,dow){
   const rows=coachAdminScheduleRowsForDs(ds);
   return rows.find(r=>r.base_template_dow===dow)||rows.find(r=>r.generated_from_base)||rows[0]||null;
 }
+function coachChangeRequestsHtml(){
+  if(!coachAdminChangeRequests.length)return'';
+  return '<div class="coach-window-card" style="border-color:rgba(245,158,11,.35);margin-bottom:12px"><div class="coach-card-k">Solicitudes del cliente</div>'
+    +coachAdminChangeRequests.map(request=>'<div style="padding:10px 0;border-bottom:1px solid var(--border)"><strong style="font-size:13px">'+DOW_SHORT[request.dow]+': '+esc(request.from_board_name||'Sin rutina')+' → '+esc(request.to_board_name||'Descanso')+'</strong>'
+      +(request.reason?'<div class="coach-card-sub" style="margin-top:4px">'+esc(request.reason)+'</div>':'')
+      +'<div style="display:flex;gap:8px;margin-top:8px"><button class="btn-sm bgreen" onclick="approveCoachChangeRequest(&quot;'+request.id+'&quot;)">Aprobar</button><button class="btn-sm" onclick="declineCoachChangeRequest(&quot;'+request.id+'&quot;)">Rechazar</button></div></div>').join('')+'</div>';
+}
+async function approveCoachChangeRequest(id){
+  const request=coachAdminChangeRequests.find(row=>row.id===id);if(!request)return;
+  const ds=addDaysDS(coachAdminWeekStart,request.dow);
+  coachAdminWeekDraft[ds]=request.to_board_id||'';
+  await saveCoachingWeekSb('base');
+  if(Object.keys(coachAdminWeekDraft).length)return;
+  await sb.from('coaching_plan_change_requests').update({status:'approved',reviewed_by:sbUser.id,reviewed_at:new Date().toISOString()}).eq('id',id);
+  coachAdminChangeRequests=coachAdminChangeRequests.filter(row=>row.id!==id);renderCoachingDetail();
+}
+async function declineCoachChangeRequest(id){
+  const{error}=await sb.from('coaching_plan_change_requests').update({status:'declined',reviewed_by:sbUser.id,reviewed_at:new Date().toISOString()}).eq('id',id);
+  if(error){toast('Error: '+error.message,'err');return;}
+  coachAdminChangeRequests=coachAdminChangeRequests.filter(row=>row.id!==id);toast('Solicitud rechazada','ok');renderCoachingDetail();
+}
 async function renderCoachClientNotesAdmin(){
   const el=document.getElementById('coach-admin-notes');
   if(!el||!selectedCoachClientId)return;
@@ -15959,7 +16338,7 @@ function renderCoachingDetail(){
     }
     const habitDots=coachAdminRelevantTasks(ds).some(t=>isCoachAdminTaskDoneOnDs(t,ds));
     const dots=habitDots?'<span class="coach-day-dots"><i class="coach-day-dot habit"></i></span>':'';
-    statusStrip+='<div class="'+dayCls+'" data-ds="'+ds+'" onclick="selectCoachDetailDay(&quot;'+ds+'&quot;)"><span class="coach-day-label">'+DN_MON[i]+'</span><span class="coach-day-num">'+parseDS(ds).d+'</span>'+dots+'</div>';
+    statusStrip+='<button type="button" class="'+dayCls+'" data-ds="'+ds+'" onclick="selectCoachDetailDay(&quot;'+ds+'&quot;)"><span class="coach-day-label">'+DN_MON[i]+'</span><span class="coach-day-num">'+parseDS(ds).d+'</span>'+dots+'</button>';
   }
   statusStrip+='</div>';
 
@@ -16021,6 +16400,7 @@ function renderCoachingDetail(){
     +'</div>'
 
     +'<div class="coach-window coach-detail-panel'+(coachDetailActiveTab==='plan'?' active':'')+'" data-panel="plan">'
+    +coachChangeRequestsHtml()
     +coachFirstStepsHtml()
     +'<div class="coach-plan-actions">'
     +'<button class="coach-plan-action wide" onclick="openCoachProgramPicker()"><strong>Programa</strong><span>'+esc(activeProgramName||'Sin programa')+'</span></button>'
@@ -16102,7 +16482,11 @@ async function renderCoachingAdminScores(){
   const el=document.getElementById('coach-admin-scores');
   if(!el||!selectedCoachClientId)return;
   try{
-    const{data,error}=await sb.from('user_scores').select('*').eq('user_id',selectedCoachClientId).order('logged_at',{ascending:true}).limit(300);
+    let{data,error}=await sb.rpc('training_score_history',{p_user_id:selectedCoachClientId,p_limit_per_exercise:40});
+    if(error&&/training_score_history|schema cache|does not exist/i.test(error.message||'')){
+      const fallback=await sb.from('user_scores').select('*').eq('user_id',selectedCoachClientId).order('logged_at',{ascending:false}).limit(1000);
+      data=fallback.data;error=fallback.error;
+    }
     if(error)throw error;
     renderPrCardsInto(el,_coachAdminPrCharts,data||[],'kg','ca');
   }catch(e){
@@ -16121,6 +16505,36 @@ async function saveCoachingWeekSb(mode){
   const asBase=mode==='base';
   if(!coachAdminWeekStart)return;
   const weekEnd=addDaysDS(coachAdminWeekStart,6);
+  // Migración 117: el servidor guarda todos los días tocados en una sola
+  // transacción y rechaza una versión vieja si otro coach cambió la semana.
+  const rpcDays=Object.keys(coachAdminWeekDraft).map(ds=>{
+    const dow=coachDaysBetweenDS(coachAdminWeekStart,ds);
+    const boardId=coachAdminWeekDraft[ds]||'';
+    const board=boardId?boards.find(b=>b.id===boardId):null;
+    return{dow,board_id:board?board.id:null,board_name:board?board.name:'Descanso',board_color:board?(board.color||'#2563eb'):'#2563eb'};
+  }).filter(day=>day.dow>=0&&day.dow<7);
+  if(rpcDays.length){
+    const{data:nextVersion,error:rpcError}=await sb.rpc('save_coaching_week',{
+      p_user_id:selectedCoachClientId,p_week_start:coachAdminWeekStart,p_mode:mode,
+      p_days:rpcDays,p_expected_version:coachAdminWeekVersion
+    });
+    if(!rpcError){
+      coachAdminWeekVersion=Number(nextVersion)||coachAdminWeekVersion+1;
+      if(weekEnd>=mazToday())await ensureCoachingWeekFromTemplateSb(selectedCoachClientId,coachAdminWeekStart);
+      sendPush('user:'+selectedCoachClientId,'🏋️ Tu plan cambió',asBase?'Tu coach actualizó tu semana de entrenamiento.':'Tu coach ajustó tu semana del '+fmtDS(coachAdminWeekStart)+' al '+fmtDS(weekEnd)+'.');
+      coachAdminWeekDraft={};toast(asBase?'Semana base guardada':'Semana guardada','ok');
+      await loadCoachingWeekAdminSb();renderCoachingDetail();return;
+    }
+    if(/PLAN_VERSION_CONFLICT/i.test(rpcError.message||'')){
+      coachAdminWeekDraft={};
+      await loadCoachingWeekAdminSb();renderCoachingDetail();
+      toast('Otro coach cambió esta semana. Se recargó la versión nueva.','warn');return;
+    }
+    if(!/save_coaching_week|schema cache|does not exist/i.test(rpcError.message||'')){
+      toast('Error al guardar: '+rpcError.message,'err');return;
+    }
+    console.warn('save_coaching_week no disponible; usando guardado compatible');
+  }
   const templateRows=[], updates=[], inserts=[], deletes=[], skips=[];
   let baseChanged=false;
   const stamp=b=>({board_id:b.id,board_name:b.name,board_color:b.color||'#2563eb'});
