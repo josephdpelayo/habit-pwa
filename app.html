@@ -6,19 +6,19 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="HABIT">
 <meta name="application-name" content="HABIT">
-<link rel="manifest" href="/manifest.json?v=20260911-1">
-<link rel="apple-touch-icon" sizes="120x120" href="/icons/icon-120.png?v=20260911-1">
-<link rel="apple-touch-icon" sizes="152x152" href="/icons/icon-152.png?v=20260911-1">
-<link rel="apple-touch-icon" sizes="167x167" href="/icons/icon-167.png?v=20260911-1">
-<link rel="apple-touch-icon" sizes="180x180" href="/icons/icon-180.png?v=20260911-1">
-<link rel="icon" type="image/png" sizes="32x32" href="/icons/icon-32.png?v=20260911-1">
+<link rel="manifest" href="/manifest.json?v=20260919-1">
+<link rel="apple-touch-icon" sizes="120x120" href="/icons/icon-120.png?v=20260919-1">
+<link rel="apple-touch-icon" sizes="152x152" href="/icons/icon-152.png?v=20260919-1">
+<link rel="apple-touch-icon" sizes="167x167" href="/icons/icon-167.png?v=20260919-1">
+<link rel="apple-touch-icon" sizes="180x180" href="/icons/icon-180.png?v=20260919-1">
+<link rel="icon" type="image/png" sizes="32x32" href="/icons/icon-32.png?v=20260919-1">
 <title>HABIT</title>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Share+Tech+Mono&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="/skandi-recovery.js?v=20260911-1"></script>
-<script src="/body-figure.js?v=20260911-1"></script>
-<script src="/habit-training.js?v=20260911-1"></script>
+<script src="/skandi-recovery.js?v=20260919-1"></script>
+<script src="/body-figure.js?v=20260919-1"></script>
+<script src="/habit-training.js?v=20260919-1"></script>
 <style>
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
 @media (prefers-reduced-motion:reduce){*,*:before,*:after{scroll-behavior:auto!important;animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}}
@@ -470,12 +470,25 @@ input,select,button,textarea{font-family:'Inter',sans-serif}
 .set-tracker{padding:12px;background:var(--card2);border-top:1px solid var(--border)}
 .set-tracker-hdr{display:grid;grid-template-columns:28px 1fr 1fr 40px;gap:6px;font-size:10px;font-weight:700;color:var(--gray);letter-spacing:.06em;text-transform:uppercase;padding:0 2px 6px;text-align:center}
 .set-tracker-hdr span:first-child{text-align:left}
-.set-row{display:grid;grid-template-columns:28px 1fr 1fr 40px;gap:6px;align-items:center;margin-bottom:6px}
+.set-row{display:grid;grid-template-columns:28px 1fr 1fr 40px;gap:6px;align-items:center;margin-bottom:6px;transition:opacity .2s ease}
 .set-tracker.has-del .set-tracker-hdr,.set-tracker.has-del .set-row{grid-template-columns:28px 1fr 1fr 40px 22px}
 .set-num{font-size:12px;font-weight:700;color:var(--gray);text-align:center}
 .set-reps-in{background:var(--card);border:1px solid var(--border);border-radius:4px;padding:8px;font-size:13px;color:var(--white);width:100%}
-.set-check{width:32px;height:32px;border-radius:6px;border:1.5px solid var(--border);background:var(--card);color:transparent;font-size:14px;font-weight:900;cursor:pointer;justify-self:center}
+/* La palomita se ve SIEMPRE, apagada mientras la serie sigue abierta. Un
+   cuadro vacío no dice qué hace: el socio no sabía que ahí se cierra la serie.
+   Al palomear, el botón da un pop y suelta un anillo verde que se expande —
+   la confirmación que antes era solo un cambio de color al final del viaje
+   a la red. */
+.set-check{position:relative;width:34px;height:34px;border-radius:9px;border:1.5px solid var(--border);background:var(--card);color:rgba(255,255,255,.26);font-size:15px;font-weight:900;line-height:1;cursor:pointer;justify-self:center;display:flex;align-items:center;justify-content:center;padding:0;-webkit-tap-highlight-color:transparent;touch-action:manipulation;transition:background .16s ease,border-color .16s ease,color .16s ease,transform .1s ease}
+.set-check:active{transform:scale(.88)}
 .set-check.done{background:var(--green);border-color:var(--green);color:#03120d}
+.set-check.pop{animation:set-check-pop .4s cubic-bezier(.2,.85,.3,1.35)}
+.set-check.pop:after{content:'';position:absolute;inset:-5px;border-radius:13px;border:2px solid var(--green);animation:set-check-ring .5s ease-out forwards;pointer-events:none}
+@keyframes set-check-pop{0%{transform:scale(.68)}45%{transform:scale(1.16)}100%{transform:scale(1)}}
+@keyframes set-check-ring{from{opacity:.6;transform:scale(.85)}to{opacity:0;transform:scale(1.45)}}
+.set-row.done{opacity:.72}
+.set-row.done .set-reps-in{color:#9aa1ad;border-color:rgba(255,255,255,.06)}
+@media(prefers-reduced-motion:reduce){.set-check.pop{animation:none}.set-check.pop:after{display:none}}
 .set-del-btn{width:18px;height:18px;margin-left:4px;border-radius:5px;border:none;background:transparent;color:var(--gray);font-size:10px;line-height:1;cursor:pointer;justify-self:center;display:flex;align-items:center;justify-content:center;opacity:.6}
 .set-del-btn:active{background:rgba(239,68,68,.15);color:#fca5a5;opacity:1}
 .set-row.next{border-radius:10px;background:rgba(59,130,246,.12);box-shadow:0 0 0 1px rgba(59,130,246,.25);padding:5px 4px;margin-left:-4px;margin-right:-4px}
@@ -2025,13 +2038,20 @@ body.admin-mode #courtesy-modal label{border-radius:14px!important;border-color:
 .ws-progress-pill{font-size:11.5px;font-weight:650;color:var(--gray);white-space:nowrap}
 .ws-progress-track{height:3px;border-radius:99px;background:rgba(255,255,255,.08);overflow:hidden}
 .ws-progress-track i{display:block;height:100%;border-radius:inherit;background:var(--green);transition:width .2s ease}
-.ws-foot{display:flex;gap:10px;margin-top:18px}
-.ws-foot .btn{flex:2}
-.ws-foot .btn-cancel{flex:1;background:rgba(239,68,68,.12);border:1px solid rgba(239,68,68,.3);color:#ef4444;
-  border-radius:13px;min-height:50px;font-size:13px;font-weight:800;cursor:pointer}
+/* Finalizar y cancelar dejaron de ser dos botones del mismo peso pegados uno
+   al otro: cancelar borra la sesión entera y estaba a un dedo del que la
+   cierra bien. Finalizar ocupa el ancho completo y lleva debajo lo que falta;
+   cancelar baja a un texto aparte. */
+.ws-foot{margin-top:22px}
+.ws-foot .btn{width:100%}
+.ws-foot .btn[disabled]{opacity:.55;pointer-events:none}
+.ws-foot-sum{text-align:center;font-size:11.5px;font-weight:650;color:#777d88;margin-top:9px;font-variant-numeric:tabular-nums}
+.ws-foot-cancel{display:block;width:100%;margin-top:16px;border:0;background:transparent;color:#8a5b5b;
+  font-size:12.5px;font-weight:750;padding:11px;cursor:pointer;border-radius:11px;-webkit-tap-highlight-color:transparent}
+.ws-foot-cancel:active{background:rgba(239,68,68,.1);color:#ef4444}
 
 /* Tarjeta de ejercicio dentro de la hoja */
-.ws-ex{position:relative;background:transparent;border:0;border-bottom:1px solid rgba(255,255,255,.075);border-radius:0;padding:5px 0 15px;margin-bottom:10px}
+.ws-ex{position:relative;background:transparent;border:0;border-bottom:1px solid rgba(255,255,255,.075);border-radius:0;padding:5px 0 15px;margin-bottom:10px;transition:opacity .25s ease}
 .ws-ex.done{opacity:.48}
 .ws-ex.in-progress{opacity:1}
 .ws-ex-head{display:flex;align-items:flex-start;gap:10px;padding:10px 0 8px;cursor:pointer}
@@ -2067,6 +2087,14 @@ body.admin-mode #courtesy-modal label{border-radius:14px!important;border-color:
 .workout-sheet .set-row{margin-bottom:5px}
 .workout-sheet .set-reps-in{background:rgba(255,255,255,.04);border-color:rgba(255,255,255,.075);border-radius:9px;padding:8px 5px;text-align:center}
 .workout-sheet .set-check{border-radius:10px;background:rgba(255,255,255,.035);border-color:rgba(255,255,255,.12)}
+/* Una serie hecha NO se ponía verde ni en la hoja ni en Coaching: estos tres
+   contextos repintan el fondo de `.set-check` y ganaban la cascada (misma
+   especificidad y más abajo en la hoja; con el `#v-coaching` delante, más
+   especificidad todavía). Quedaba la palomita casi negra sobre fondo casi
+   negro, o sea un cuadro vacío idéntico al de una serie sin cerrar. Por eso
+   el estado "hecha" se redeclara aquí, después de los tres overrides. */
+.workout-sheet .set-check.done,#v-coaching .set-check.done,#a-coaching-detail .set-check.done{
+  background:var(--green);border-color:var(--green);color:#03120d}
 .workout-sheet .set-tracker-actions{margin-top:7px}
 .workout-sheet .set-tracker-actions .btn-sm{border-color:transparent;background:transparent;color:#7f8a99;padding:7px 8px}
 .workout-sheet .set-tracker-actions .btn-sm:last-child{flex:0 0 auto}
@@ -2079,7 +2107,10 @@ body.admin-mode #courtesy-modal label{border-radius:14px!important;border-color:
 /* Columna de RIR en el set-tracker */
 .set-tracker.has-rir .set-tracker-hdr,.set-tracker.has-rir .set-row{grid-template-columns:24px 1fr 1fr 46px 40px 22px}
 .set-rir-in{text-align:center}
-.set-tracker-hdr .rir-k{font-size:9px}
+/* El RIR nunca fue obligatorio, pero la cabecera no lo decía y el socio creía
+   que sin él no podía cerrar la serie. */
+.set-tracker-hdr .rir-k{font-size:9px;display:flex;flex-direction:column;align-items:center;line-height:1.15}
+.set-tracker-hdr .rir-k i{font-style:normal;font-size:7.5px;font-weight:700;letter-spacing:.01em;text-transform:none;color:#5a606b}
 
 /* Timer flotante */
 .ws-timer{position:absolute;right:12px;bottom:calc(env(safe-area-inset-bottom,0px) + 16px);z-index:12;
@@ -3210,7 +3241,7 @@ body.admin-mode #courtesy-modal label{border-radius:14px!important;border-color:
 // ── CONFIG & SUPABASE ───────────────────────────────────────
 const SUPABASE_URL='https://pmpjteuqjusbiduevbwq.supabase.co';
 const SUPABASE_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBtcGp0ZXVxanVzYmlkdWV2YndxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc2OTI1NjUsImV4cCI6MjA5MzI2ODU2NX0.XbMzZoo2yqtrD8znLnyo_1zDfrdJAvAPj1lqGOyXnLw';
-const APP_VERSION='20260911-1';
+const APP_VERSION='20260919-1';
 // La pierna va separada en cuádriceps, femorales y pantorrillas: la figura
 // corporal pinta esas tres regiones por separado y el motor de recuperación les
 // da ventanas de descanso distintas. 'Piernas' sigue reconociéndose al leer
@@ -7810,14 +7841,14 @@ function renderSetTrackerHtml(sessionCtx,exKey,ex){
   return '<div class="set-tracker has-del has-rir">'
     +'<div class="set-tracker-hdr"><span>SERIE</span>'
     +(metric==='time'?'<span>TIEMPO</span><span>OBJ.</span>':'<button class="unit-toggle-btn" onclick="toggleExerciseWeightUnit(&quot;'+esc(exKey)+'&quot;)" title="Cambiar unidad de peso">'+unit.toUpperCase()+'</button><span>REPS</span>')
-    +'<span class="rir-k" title="Repeticiones en reserva">RIR</span><span></span><span></span></div>'
-    +sets.map(s=>'<div class="set-row'+(focusSetIdx===s.set_idx&&!s.done?' next':'')+(s._pendingSync?' pending-sync':'')+'" data-set-id="'+s.id+'" data-ex-key="'+esc(exKey)+'">'
+    +'<span class="rir-k" title="Repeticiones en reserva. Es opcional: puedes cerrar la serie sin llenarlo.">RIR<i>opcional</i></span><span></span><span></span></div>'
+    +sets.map(s=>'<div class="set-row'+(s.done?' done':'')+(focusSetIdx===s.set_idx&&!s.done?' next':'')+(s._pendingSync?' pending-sync':'')+'" data-set-id="'+s.id+'" data-ex-key="'+esc(exKey)+'">'
       +'<span class="set-num">'+(s.set_idx+1)+'</span>'
       +(metric==='time'
         ?'<input class="set-reps-in set-actual-time-in" type="number" inputmode="numeric" min="0" placeholder="seg" value="'+(s.actual_seconds!=null?esc(String(s.actual_seconds)):'')+'" onchange="updateSetSecondsSb(&quot;'+s.id+'&quot;,this.value)"><span class="set-num">'+esc(s.reps_target||ex.reps||'—')+'</span>'
         :'<input class="set-reps-in set-weight-in" type="number" inputmode="decimal" placeholder="'+unit+'" value="'+formatWeightForUnit(s.weight,unit)+'" onchange="updateSetWeightSb(&quot;'+s.id+'&quot;,this.value,&quot;'+esc(exKey)+'&quot;)"><input class="set-reps-in set-actual-reps-in" type="number" inputmode="numeric" placeholder="'+esc(s.reps_target||'reps')+'" value="'+(s.actual_reps!=null?esc(String(s.actual_reps)):'')+'" onchange="updateSetRepsSb(&quot;'+s.id+'&quot;,this.value)">')
-      +'<input class="set-reps-in set-rir-in" type="number" inputmode="numeric" min="0" max="10" placeholder="'+(s.target_rir!=null?esc(String(s.target_rir)):'–')+'" value="'+(s.rir!=null?esc(String(s.rir)):'')+'" onchange="updateSetRirSb(&quot;'+s.id+'&quot;,this.value)">'
-      +'<button class="set-check'+(s.done?' done':'')+'" onclick="toggleSetDoneSb(&quot;'+s.id+'&quot;,'+(!s.done)+',this)">'+(s.done?'✓':'')+'</button>'
+      +'<input class="set-reps-in set-rir-in" type="number" inputmode="numeric" min="0" max="10" title="Opcional" placeholder="'+(s.target_rir!=null?esc(String(s.target_rir)):'–')+'" value="'+(s.rir!=null?esc(String(s.rir)):'')+'" onchange="updateSetRirSb(&quot;'+s.id+'&quot;,this.value,this)">'
+      +'<button type="button" class="set-check'+(s.done?' done':'')+'" aria-pressed="'+(s.done?'true':'false')+'" aria-label="'+(s.done?'Serie hecha':'Marcar serie como hecha')+'" onpointerdown="setCheckTap(event,this,&quot;'+s.id+'&quot;,'+(!s.done)+')" onclick="setCheckTap(event,this,&quot;'+s.id+'&quot;,'+(!s.done)+')">✓</button>'
       +'<button class="set-del-btn" title="Eliminar serie" onclick="deleteSetSb(&quot;'+s.id+'&quot;,&quot;'+esc(exKey)+'&quot;)">✕</button>'
       +'</div>').join('')
     +'<div class="set-tracker-actions">'
@@ -7969,8 +8000,11 @@ async function getLastScoreForExKey(exKey){
 // Refresca tanto la lista (badges de progreso) como el set-tracker dentro de
 // la ficha del ejercicio si está abierta mostrando este mismo ejercicio —
 // son dos árboles de DOM separados, uno no actualiza al otro solo.
-function refreshSessionUiFor(exKey){
-  if(wsOpen){renderWorkoutSheet();}
+// `opts.skipSheet` lo pasa quien ya pintó el cambio a mano sobre los nodos
+// que hay (palomear una serie): repintar la hoja entera encima solo serviría
+// para matar la animación que acaba de empezar.
+function refreshSessionUiFor(exKey,opts){
+  if(wsOpen&&!(opts&&opts.skipSheet)){renderWorkoutSheet();}
   if(document.getElementById('v-rutinas')?.classList.contains('active')&&rutActiveTab==='hoy')renderRutHoy();
   renderCoachHoyPanel();
   if(_editingWorkoutContext&&document.getElementById('edit-workout-modal')?.style.display==='flex'){
@@ -7980,6 +8014,86 @@ function refreshSessionUiFor(exKey){
     const bodyEl=document.getElementById('exercise-focus-body');
     if(bodyEl)bodyEl.innerHTML=renderExerciseFocusBodyHtml();
   }
+}
+// Palomear se resuelve en `pointerdown`, no en `click`. Con el teclado
+// numérico abierto (peso, reps o RIR), iOS lo cierra en el primer toque, la
+// hoja se reacomoda bajo el dedo y el `click` sintético cae en otro lado o no
+// llega nunca. El socio lo vivía como "no me deja palomear si no pongo el
+// RIR", porque el campo de RIR es justo el vecino del botón y era el que se
+// comía el toque. El `preventDefault` mata el click de compatibilidad para
+// que un solo toque no cuente dos veces; el `onclick` sigue ahí para el
+// teclado físico y para cualquier navegador sin Pointer Events.
+const _setTapAt=new Map();
+function setCheckTap(ev,btnEl,setId,newDone){
+  const now=Date.now();
+  if(ev&&ev.type==='click'&&now-(_setTapAt.get(setId)||0)<800)return;
+  _setTapAt.set(setId,now);
+  if(ev&&ev.type==='pointerdown'&&ev.preventDefault)ev.preventDefault();
+  // El input que tenga el foco se cierra primero para que su `change` guarde
+  // lo que el socio acaba de teclear antes de que se marque la serie.
+  const focused=document.activeElement;
+  if(focused&&focused.blur&&focused.classList&&focused.classList.contains('set-reps-in'))focused.blur();
+  toggleSetDoneSb(setId,newDone,btnEl);
+}
+// Repinta SOLO la serie que cambió: su botón, su fila y los contadores. Antes
+// cada palomita lanzaba un `innerHTML` de la hoja completa — ocho ejercicios y
+// decenas de inputs — y además solo después del viaje a Supabase, así que
+// entre el toque y la palomita verde había medio segundo muerto.
+function wsPaintSetDone(setId,exKey,done,pop,pending){
+  const row=getSetRowElement(setId);
+  if(row){
+    row.classList.toggle('done',!!done);
+    row.classList.toggle('pending-sync',!!pending);
+    if(done)row.classList.remove('next');
+    const btn=row.querySelector('.set-check');
+    if(btn){
+      btn.classList.toggle('done',!!done);
+      btn.setAttribute('aria-pressed',done?'true':'false');
+      btn.setAttribute('aria-label',done?'Serie hecha':'Marcar serie como hecha');
+      // El estado siguiente viaja dentro del atributo, así que hay que darle
+      // la vuelta o el segundo toque repetiría la misma orden.
+      const handler='setCheckTap(event,this,"'+setId+'",'+(!done)+')';
+      btn.setAttribute('onpointerdown',handler);
+      btn.setAttribute('onclick',handler);
+      if(pop&&done){
+        btn.classList.remove('pop');
+        void btn.offsetWidth;            // reinicia la animación si se repite
+        btn.classList.add('pop');
+        setTimeout(()=>btn.classList.remove('pop'),560);
+      }
+    }
+  }
+  wsPaintSessionProgress(exKey);
+}
+function wsPaintSessionProgress(exKey){
+  if(!wsOpen||!activeCoachingSession)return;
+  const q=v=>(window.CSS&&CSS.escape)?CSS.escape(String(v)):String(v).replace(/["\\]/g,'\\$&');
+  if(exKey){
+    const art=document.querySelector('#ws-content .ws-ex[data-ex-key="'+q(exKey)+'"]');
+    if(art){
+      const sets=coachSessionSets[exKey]||[];
+      const doneCount=sets.filter(x=>x.done).length;
+      const allDone=sets.length>0&&doneCount===sets.length;
+      art.classList.toggle('done',allDone);
+      art.classList.toggle('in-progress',!allDone&&doneCount>0);
+      const badge=art.querySelector('.ws-ex-badge');
+      if(badge){badge.textContent=doneCount+'/'+sets.length;badge.classList.toggle('done',allDone);}
+    }
+  }
+  const allSets=Object.values(coachSessionSets).flat();
+  const done=allSets.filter(x=>x.done).length;
+  const pill=document.querySelector('#ws-content .ws-progress-pill');
+  if(pill)pill.textContent=done+' de '+allSets.length+' series';
+  const bar=document.querySelector('#ws-content .ws-progress-track i');
+  if(bar)bar.style.width=(allSets.length?Math.round(done/allSets.length*100):0)+'%';
+  const sum=document.getElementById('ws-foot-sum');
+  if(sum)sum.textContent=wsFootSummaryText();
+}
+function wsFootSummaryText(){
+  const allSets=Object.values(coachSessionSets).flat();
+  if(!allSets.length)return 'Sin series registradas';
+  const left=allSets.length-allSets.filter(x=>x.done).length;
+  return left?left+' serie'+(left===1?'':'s')+' por cerrar':'Todas las series cerradas';
 }
 async function toggleSetDoneSb(setId,newDone,btnEl){
   wsUnlockAudio();
@@ -8006,8 +8120,18 @@ async function toggleSetDoneSb(setId,newDone,btnEl){
       if(!isNaN(v)&&v>=0&&v<=10)patch.rir=v;
     }
   }
+  // Pinta ya, guarda después: la palomita cae en el mismo toque y Supabase
+  // solo reconcilia. Si el guardado falla de verdad, el catch devuelve la fila
+  // a como estaba para que la palomita no mienta.
+  const live=Object.values(coachSessionSets).flat().find(s=>s.id===setId);
+  const before=live?{...live}:null;
+  if(live){
+    Object.assign(live,patch);
+    wsPaintSetDone(setId,live.ex_key,newDone,true,live._pendingSync);
+    if(newDone&&navigator.vibrate){try{navigator.vibrate(16);}catch(_){}}
+  }
   try{
-    const current=Object.values(coachSessionSets).flat().find(s=>s.id===setId)||{id:setId};
+    const current=before||{id:setId};
     const data=await trainingUpdate('coaching_session_sets',setId,patch,current);
     const arr=coachSessionSets[data.ex_key];
     if(arr){
@@ -8044,15 +8168,30 @@ async function toggleSetDoneSb(setId,newDone,btnEl){
         }else wsFocusSet=null;
       }
     }
-    refreshSessionUiFor(data.ex_key);
-  }catch(e){toast('Error: '+e.message,'err');}
+    if(live)wsPaintSetDone(setId,data.ex_key,!!data.done,false,data._pendingSync);
+    refreshSessionUiFor(data.ex_key,{skipSheet:wsOpen&&!!live});
+  }catch(e){
+    if(before){
+      const arr=coachSessionSets[before.ex_key];
+      const idx=arr?arr.findIndex(s=>s.id===setId):-1;
+      if(idx>-1)arr[idx]=before;
+      wsPaintSetDone(setId,before.ex_key,!!before.done,false,before._pendingSync);
+    }
+    toast('Error: '+e.message,'err');
+  }
 }
-async function updateSetRirSb(setId,value){
+// El RIR es opcional y nunca bloquea nada: vacío se guarda como null y un
+// número fuera de rango se acota a 0-10 en el propio campo. Antes se rechazaba
+// con un toast y el campo se quedaba con el valor inválido, que nadie corregía.
+async function updateSetRirSb(setId,value,inputEl){
   let rir=null;
-  if(value!==''){
+  if(String(value).trim()!==''){
     const n=parseInt(value,10);
-    if(isNaN(n)||n<0||n>10){toast('El RIR va de 0 a 10','warn');return;}
-    rir=n;
+    if(isNaN(n)){if(inputEl)inputEl.value='';}
+    else{
+      rir=Math.min(10,Math.max(0,n));
+      if(inputEl&&String(inputEl.value)!==String(rir))inputEl.value=rir;
+    }
   }
   try{
     const current=Object.values(coachSessionSets).flat().find(s=>s.id===setId)||{id:setId};
@@ -10975,9 +11114,10 @@ async function saveWorkoutFeedbackSb(){
     console.warn('saveWorkoutFeedbackSb:',e.message||e);
   }
 }
-async function cancelCoachingSessionSb(){
+async function cancelCoachingSessionSb(opts){
   if(!activeCoachingSession)return;
-  if(!await confirmSheet('¿Cancelar este entreno? Se perderá el progreso de esta sesión.',{confirmLabel:'Cancelar entreno',cancelLabel:'Seguir',danger:true}))return;
+  if(!(opts&&opts.skipConfirm)
+    &&!await confirmSheet('¿Cancelar este entreno? Se perderá el progreso de esta sesión.',{confirmLabel:'Cancelar entreno',cancelLabel:'Seguir',danger:true}))return;
   const sessionId=activeCoachingSession.id;
   const wasSelfStarted=!!(sbUser&&activeCoachingSession.created_by===sbUser.id);
   try{
@@ -11385,8 +11525,9 @@ function renderWorkoutSheet(){
   html+='<button class="ws-add-ex" onclick="wsToggleAdd()">+ Agregar ejercicio</button>';
   html+=wsAddPanelHtml();
   html+='<div class="ws-foot">'
-    +'<button class="btn-cancel" onclick="wsCancelWorkout()">Cancelar</button>'
-    +'<button class="btn" onclick="wsFinishWorkout()">Finalizar entreno</button>'
+    +'<button type="button" class="btn" id="ws-finish-btn" onclick="wsFinishWorkout(this)">Finalizar entreno</button>'
+    +'<div class="ws-foot-sum" id="ws-foot-sum">'+esc(wsFootSummaryText())+'</div>'
+    +'<button type="button" class="ws-foot-cancel" onclick="wsCancelWorkout()">Cancelar entreno</button>'
     +'</div>';
   content.innerHTML=html;
   content.scrollTop=scrollTop;
@@ -11422,7 +11563,7 @@ function wsExerciseHtml(ex,i){
     commonMistakes:ex.common_mistakes||ex.commonMistakes||ex.mistakes||ex.errors||'',
     coachTips:ex.coach_tips||ex.coachTips||ex.tips||''};
 
-  let html='<article class="ws-ex'+(allDone?' done':(doneCount?' in-progress':''))+'">'
+  let html='<article class="ws-ex'+(allDone?' done':(doneCount?' in-progress':''))+'" data-ex-key="'+esc(exKey)+'">'
     +'<div class="ws-ex-head" onclick="openExerciseFocus(this)" data-ex="'+esc(JSON.stringify(exData))+'">'
     +'<div class="ws-ex-num">'+(i+1)+'</div>'
     +'<div class="ws-ex-info">'
@@ -11654,15 +11795,37 @@ async function wsRemoveExercise(exKey){
 }
 
 // ── Terminar ──────────────────────────────────────────────────────────────
-async function wsFinishWorkout(){
+// Finalizar hace un RPC que no es idempotente y el botón se queda bajo el
+// dedo mientras la red responde: sin este cerrojo, un doble toque nervioso al
+// final del entreno lo disparaba dos veces.
+let wsFinishing=false;
+async function wsFinishWorkout(btnEl){
+  if(wsFinishing)return;
   const allSets=Object.values(coachSessionSets).flat();
   const pending=allSets.filter(s=>!s.done).length;
-  if(pending&&!await confirmSheet('Te faltan '+pending+' serie'+(pending===1?'':'s')+'. ¿Finalizar de todos modos?'))return;
-  finishCoachingSessionSb();
+  if(pending&&!await confirmSheet(
+      'Te faltan '+pending+' serie'+(pending===1?'':'s')+' por palomear. Se guarda solo lo que ya registraste.',
+      {title:'¿Finalizar ya?',confirmLabel:'Finalizar',cancelLabel:'Seguir entrenando'}))return;
+  wsFinishing=true;
+  const btn=btnEl||document.getElementById('ws-finish-btn');
+  if(btn){btn.disabled=true;btn.textContent='Guardando…';}
+  try{await finishCoachingSessionSb();}
+  finally{
+    wsFinishing=false;
+    if(btn&&document.body.contains(btn)){btn.disabled=false;btn.textContent='Finalizar entreno';}
+  }
 }
 async function wsCancelWorkout(){
-  if(!await confirmSheet('¿Cancelar este entreno? Se pierde lo registrado.',{confirmLabel:'Cancelar entreno',cancelLabel:'Seguir',danger:true}))return;
-  cancelCoachingSessionSb();
+  // Decir cuánto se pierde es la diferencia entre cancelar a ciegas y decidir.
+  const allSets=Object.values(coachSessionSets).flat();
+  const done=allSets.filter(s=>s.done).length;
+  const body=done
+    ?'Se borran las '+done+' serie'+(done===1?'':'s')+' que ya registraste y el entreno vuelve a quedar pendiente.'
+    :'El entreno vuelve a quedar pendiente y puedes empezarlo de nuevo cuando quieras.';
+  if(!await confirmSheet(body,{title:'¿Cancelar el entreno?',confirmLabel:'Sí, cancelar',cancelLabel:'Seguir entrenando',danger:true}))return;
+  // La hoja ya preguntó: `cancelCoachingSessionSb` volvería a preguntar lo
+  // mismo y el socio tenía que confirmar dos veces seguidas.
+  cancelCoachingSessionSb({skipConfirm:true});
 }
 
 async function toggleTaskSb(id){
