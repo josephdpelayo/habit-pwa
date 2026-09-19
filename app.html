@@ -6,19 +6,19 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="HABIT">
 <meta name="application-name" content="HABIT">
-<link rel="manifest" href="/manifest.json?v=20260919-1">
-<link rel="apple-touch-icon" sizes="120x120" href="/icons/icon-120.png?v=20260919-1">
-<link rel="apple-touch-icon" sizes="152x152" href="/icons/icon-152.png?v=20260919-1">
-<link rel="apple-touch-icon" sizes="167x167" href="/icons/icon-167.png?v=20260919-1">
-<link rel="apple-touch-icon" sizes="180x180" href="/icons/icon-180.png?v=20260919-1">
-<link rel="icon" type="image/png" sizes="32x32" href="/icons/icon-32.png?v=20260919-1">
+<link rel="manifest" href="/manifest.json?v=20260919-2">
+<link rel="apple-touch-icon" sizes="120x120" href="/icons/icon-120.png?v=20260919-2">
+<link rel="apple-touch-icon" sizes="152x152" href="/icons/icon-152.png?v=20260919-2">
+<link rel="apple-touch-icon" sizes="167x167" href="/icons/icon-167.png?v=20260919-2">
+<link rel="apple-touch-icon" sizes="180x180" href="/icons/icon-180.png?v=20260919-2">
+<link rel="icon" type="image/png" sizes="32x32" href="/icons/icon-32.png?v=20260919-2">
 <title>HABIT</title>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Share+Tech+Mono&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="/skandi-recovery.js?v=20260919-1"></script>
-<script src="/body-figure.js?v=20260919-1"></script>
-<script src="/habit-training.js?v=20260919-1"></script>
+<script src="/skandi-recovery.js?v=20260919-2"></script>
+<script src="/body-figure.js?v=20260919-2"></script>
+<script src="/habit-training.js?v=20260919-2"></script>
 <style>
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
 @media (prefers-reduced-motion:reduce){*,*:before,*:after{scroll-behavior:auto!important;animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}}
@@ -3241,7 +3241,7 @@ body.admin-mode #courtesy-modal label{border-radius:14px!important;border-color:
 // ── CONFIG & SUPABASE ───────────────────────────────────────
 const SUPABASE_URL='https://pmpjteuqjusbiduevbwq.supabase.co';
 const SUPABASE_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBtcGp0ZXVxanVzYmlkdWV2YndxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc2OTI1NjUsImV4cCI6MjA5MzI2ODU2NX0.XbMzZoo2yqtrD8znLnyo_1zDfrdJAvAPj1lqGOyXnLw';
-const APP_VERSION='20260919-1';
+const APP_VERSION='20260919-2';
 // La pierna va separada en cuádriceps, femorales y pantorrillas: la figura
 // corporal pinta esas tres regiones por separado y el motor de recuperación les
 // da ventanas de descanso distintas. 'Piernas' sigue reconociéndose al leer
@@ -7817,6 +7817,16 @@ async function submitScore(){
 // ambos) — la preferencia se guarda por ejercicio en localStorage, pero
 // siempre se almacena en Supabase convertido a kg para que el historial y
 // las gráficas de progreso comparen manzanas con manzanas.
+// Tocar un campo selecciona lo que ya trae. El peso llega prellenado con el de
+// la serie anterior — que es justo lo que hay que cambiar cuando se sube carga
+// — y sin esto había que borrarlo dígito a dígito antes de escribir el nuevo.
+function selectSetInput(el){
+  if(!el)return;
+  // Safari ignora un `select()` síncrono dentro del propio `focus` en algunos
+  // casos; un frame después siempre agarra.
+  try{el.select();}catch(_){}
+  requestAnimationFrame(()=>{try{if(document.activeElement===el)el.select();}catch(_){}});
+}
 function kgToLb(kg){return kg*2.20462;}
 function lbToKg(lb){return lb*0.453592;}
 function exerciseWeightUnit(exKey){
@@ -7845,9 +7855,9 @@ function renderSetTrackerHtml(sessionCtx,exKey,ex){
     +sets.map(s=>'<div class="set-row'+(s.done?' done':'')+(focusSetIdx===s.set_idx&&!s.done?' next':'')+(s._pendingSync?' pending-sync':'')+'" data-set-id="'+s.id+'" data-ex-key="'+esc(exKey)+'">'
       +'<span class="set-num">'+(s.set_idx+1)+'</span>'
       +(metric==='time'
-        ?'<input class="set-reps-in set-actual-time-in" type="number" inputmode="numeric" min="0" placeholder="seg" value="'+(s.actual_seconds!=null?esc(String(s.actual_seconds)):'')+'" onchange="updateSetSecondsSb(&quot;'+s.id+'&quot;,this.value)"><span class="set-num">'+esc(s.reps_target||ex.reps||'—')+'</span>'
-        :'<input class="set-reps-in set-weight-in" type="number" inputmode="decimal" placeholder="'+unit+'" value="'+formatWeightForUnit(s.weight,unit)+'" onchange="updateSetWeightSb(&quot;'+s.id+'&quot;,this.value,&quot;'+esc(exKey)+'&quot;)"><input class="set-reps-in set-actual-reps-in" type="number" inputmode="numeric" placeholder="'+esc(s.reps_target||'reps')+'" value="'+(s.actual_reps!=null?esc(String(s.actual_reps)):'')+'" onchange="updateSetRepsSb(&quot;'+s.id+'&quot;,this.value)">')
-      +'<input class="set-reps-in set-rir-in" type="number" inputmode="numeric" min="0" max="10" title="Opcional" placeholder="'+(s.target_rir!=null?esc(String(s.target_rir)):'–')+'" value="'+(s.rir!=null?esc(String(s.rir)):'')+'" onchange="updateSetRirSb(&quot;'+s.id+'&quot;,this.value,this)">'
+        ?'<input class="set-reps-in set-actual-time-in" type="number" inputmode="numeric" min="0" placeholder="seg" onfocus="selectSetInput(this)" value="'+(s.actual_seconds!=null?esc(String(s.actual_seconds)):'')+'" onchange="updateSetSecondsSb(&quot;'+s.id+'&quot;,this.value)"><span class="set-num">'+esc(s.reps_target||ex.reps||'—')+'</span>'
+        :'<input class="set-reps-in set-weight-in" type="number" inputmode="decimal" placeholder="'+unit+'" onfocus="selectSetInput(this)" value="'+formatWeightForUnit(s.weight,unit)+'" onchange="updateSetWeightSb(&quot;'+s.id+'&quot;,this.value,&quot;'+esc(exKey)+'&quot;)"><input class="set-reps-in set-actual-reps-in" type="number" inputmode="numeric" placeholder="'+esc(s.reps_target||'reps')+'" onfocus="selectSetInput(this)" value="'+(s.actual_reps!=null?esc(String(s.actual_reps)):'')+'" onchange="updateSetRepsSb(&quot;'+s.id+'&quot;,this.value)">')
+      +'<input class="set-reps-in set-rir-in" type="number" inputmode="numeric" min="0" max="10" title="Opcional" onfocus="selectSetInput(this)" placeholder="'+(s.target_rir!=null?esc(String(s.target_rir)):'–')+'" value="'+(s.rir!=null?esc(String(s.rir)):'')+'" onchange="updateSetRirSb(&quot;'+s.id+'&quot;,this.value,this)">'
       +'<button type="button" class="set-check'+(s.done?' done':'')+'" aria-pressed="'+(s.done?'true':'false')+'" aria-label="'+(s.done?'Serie hecha':'Marcar serie como hecha')+'" onpointerdown="setCheckTap(event,this,&quot;'+s.id+'&quot;,'+(!s.done)+')" onclick="setCheckTap(event,this,&quot;'+s.id+'&quot;,'+(!s.done)+')">✓</button>'
       +'<button class="set-del-btn" title="Eliminar serie" onclick="deleteSetSb(&quot;'+s.id+'&quot;,&quot;'+esc(exKey)+'&quot;)">✕</button>'
       +'</div>').join('')
@@ -7981,6 +7991,17 @@ function logSetToUserScores(row){
   sb.from('user_scores').upsert(score,{onConflict:'set_id'})
     .then(({error})=>{if(error&&!/set_id|schedule_id|schema cache|column/i.test(error.message||''))console.error('logSetToUserScores:',error);});
 }
+// Despalomear una serie — o borrarla — tiene que retirar también su marca del
+// historial. `user_scores` alimenta "Última vez", los PR de Progreso, el peso
+// que se siembra la próxima sesión y lo que ve el coach; dejar ahí una serie
+// que el socio deshizo convierte un dedazo en un PR falso que no hay forma de
+// quitar desde la app. La FK es `on delete set null` (migración 117), así que
+// borrar la serie no se lleva el score: hay que borrarlo antes y a mano.
+function unlogSetFromUserScores(setId){
+  if(!sbUser||!setId)return;
+  sb.from('user_scores').delete().eq('user_id',sbUser.id).eq('set_id',setId)
+    .then(({error})=>{if(error&&!/set_id|schema cache|column/i.test(error.message||''))console.error('unlogSetFromUserScores:',error);});
+}
 function getSetRowElement(setId){
   const modal=document.getElementById('exercise-focus-modal');
   if(modal&&modal.style.display==='flex'){
@@ -8089,6 +8110,19 @@ function wsPaintSessionProgress(exKey){
   const sum=document.getElementById('ws-foot-sum');
   if(sum)sum.textContent=wsFootSummaryText();
 }
+// Cerrar la última serie pendiente no decía nada y el botón de finalizar
+// quedaba a toda una lista de distancia hacia abajo: el socio terminaba de
+// entrenar y seguía desplazándose para encontrar cómo cerrar la sesión.
+function wsCelebrateIfComplete(){
+  if(!wsOpen||!activeCoachingSession)return;
+  const all=Object.values(coachSessionSets).flat();
+  if(!all.length||all.some(x=>!x.done))return;
+  toast('¡Cerraste todas las series! 🎉','ok');
+  requestAnimationFrame(()=>{
+    const btn=document.getElementById('ws-finish-btn');
+    if(btn&&btn.scrollIntoView)btn.scrollIntoView({block:'center',behavior:'smooth'});
+  });
+}
 function wsFootSummaryText(){
   const allSets=Object.values(coachSessionSets).flat();
   if(!allSets.length)return 'Sin series registradas';
@@ -8129,6 +8163,7 @@ async function toggleSetDoneSb(setId,newDone,btnEl){
     Object.assign(live,patch);
     wsPaintSetDone(setId,live.ex_key,newDone,true,live._pendingSync);
     if(newDone&&navigator.vibrate){try{navigator.vibrate(16);}catch(_){}}
+    if(newDone)wsCelebrateIfComplete();
   }
   try{
     const current=before||{id:setId};
@@ -8137,6 +8172,7 @@ async function toggleSetDoneSb(setId,newDone,btnEl){
     if(arr){
       const idx=arr.findIndex(s=>s.id===setId);
       if(idx>-1)arr[idx]=data;
+      if(!newDone)unlogSetFromUserScores(setId);
       if(newDone){
         logSetToUserScores(data);
         const next=arr.find(s=>s.set_idx===data.set_idx+1&&!s.done);
@@ -8251,6 +8287,9 @@ async function deleteSetSb(setId,exKey){
   if(arr.length<=1){toast('Debe quedar al menos una serie','warn');return;}
   if(!await confirmSheet('¿Eliminar esta serie?',{confirmLabel:'Eliminar',danger:true}))return;
   try{
+    // Antes de la serie, porque la FK es `on delete set null` y después ya no
+    // habría por dónde alcanzar su fila en `user_scores`.
+    unlogSetFromUserScores(setId);
     const{error}=await sb.from('coaching_session_sets').delete().eq('id',setId);
     if(error)throw error;
     // Renumera las series restantes para que el conteo siga consecutivo
@@ -8301,17 +8340,48 @@ async function markAllSetsSb(exKey){
     const r=(rRaw!=null&&!isNaN(rRaw))?rRaw:lastReps;
     return{id:s.id,weight:w,actual_reps:r};
   });
+  // Mismo criterio que palomear una por una: pinta ya y deja que la red
+  // alcance. Si no, "Marcar Todo" se quedaba muerto hasta que respondieran
+  // las tres o cuatro escrituras.
+  patches.forEach(pp=>{
+    const fila=arr.find(x=>x.id===pp.id);
+    if(!fila)return;
+    fila.weight=pp.weight;fila.actual_reps=pp.actual_reps;fila.done=true;
+    const el=getSetRowElement(pp.id);
+    if(el){
+      const wIn=el.querySelector('.set-weight-in');
+      if(wIn&&wIn.value===''&&pp.weight!=null)wIn.value=formatWeightForUnit(pp.weight,unit);
+      const rIn=el.querySelector('.set-actual-reps-in');
+      if(rIn&&rIn.value===''&&pp.actual_reps!=null)rIn.value=pp.actual_reps;
+    }
+    wsPaintSetDone(pp.id,exKey,true,true,fila._pendingSync);
+  });
+  if(navigator.vibrate){try{navigator.vibrate(16);}catch(_){}}
+  wsCelebrateIfComplete();
+  // `allSettled` y no `all`: son N escrituras independientes y con `all` una
+  // sola que fallara descartaba los resultados de las demás — quedaban
+  // guardadas en la base pero sin palomear en pantalla, que es la peor de las
+  // dos mentiras posibles. Así cada serie se resuelve por su cuenta y solo se
+  // deshacen las que de verdad no entraron.
   try{
-    const results=await Promise.all(patches.map(p=>{
+    const results=await Promise.allSettled(patches.map(p=>{
       const current=arr.find(s=>s.id===p.id)||{id:p.id,ex_key:exKey};
       return trainingUpdate('coaching_session_sets',p.id,{weight:p.weight,actual_reps:p.actual_reps,done:true,updated_at:new Date().toISOString()},current);
     }));
-    results.forEach(data=>{
-      if(!data)return;
-      const idx=arr.findIndex(s=>s.id===data.id);
-      if(idx>-1)arr[idx]=data;
-      logSetToUserScores(data);
+    let fallaron=0;
+    results.forEach((res,i)=>{
+      if(res.status==='fulfilled'&&res.value){
+        const data=res.value;
+        const idx=arr.findIndex(s=>s.id===data.id);
+        if(idx>-1)arr[idx]=data;
+        logSetToUserScores(data);
+        return;
+      }
+      fallaron++;
+      const fila=arr.find(x=>x.id===patches[i].id);
+      if(fila){fila.done=false;wsPaintSetDone(patches[i].id,exKey,false,false,fila._pendingSync);}
     });
+    if(fallaron)toast(fallaron===1?'No se pudo guardar 1 serie':'No se pudieron guardar '+fallaron+' series','err');
     renderCoachHoyPanel();
     if(_editingWorkoutContext&&document.getElementById('edit-workout-modal')?.style.display==='flex'){
       renderEditWorkoutModalBody();
@@ -8327,7 +8397,10 @@ async function markAllSetsSb(exKey){
       // El descanso antes del siguiente ejercicio usa restNext si el admin lo
       // configuró; si no, cae al mismo descanso entre series.
       if(found)startRestTimerForExercise(found.ex.restNext?{...found.ex,rest:found.ex.restNext}:found.ex);
-      if(wsOpen){wsFocusSet=null;renderWorkoutSheet();}
+      // Apagar el resaltado dejaba al socio sin saber qué sigue justo después
+      // de cerrar un ejercicio entero; palomear serie por serie sí encadena
+      // (nextTrainingTargetAfterSet), y "Marcar Todo" tenía que hacer lo mismo.
+      if(wsOpen){const ir=wsFocusFirstPending();renderWorkoutSheet();if(ir)wsScrollToFocus();}
       else if(_exFocusData&&_exFocusData.exKey===exKey)advanceToNextExerciseInFocus();
     }else if(_exFocusData&&_exFocusData.exKey===exKey){
       closeExerciseFocus();
@@ -10896,12 +10969,22 @@ async function hydrateSessionSetDefaults(){
     });
   }catch(e){console.error('hydrateSessionSetDefaults:',e);}
 }
+// Arrancar son cuatro viajes a la red en serie (cargar la rutina, el RPC,
+// sembrar las series, releerlas) y no mostraba nada mientras tanto: el socio
+// tocaba "Iniciar", no pasaba nada durante un par de segundos con datos
+// móviles, y volvía a tocar — lo que arrancaba la sesión dos veces, porque la
+// guarda de `activeCoachingSession` solo existe una vez que la primera
+// terminó.
+let _arrancandoEntreno=false;
 async function startCoachingSessionSb(scheduleId){
+  if(_arrancandoEntreno)return;
   if(!navigator.onLine&&!activeCoachingSession){toast('Necesitas conexión para iniciar. Una vez abierto, el entreno funciona sin señal.','warn');return;}
   if(activeCoachingSession&&activeCoachingSession.id!==scheduleId){
     toast('Ya tienes un entreno en curso: '+activeCoachingSession.board_name+'. Termínalo o cancélalo primero.','warn');
     return;
   }
+  _arrancandoEntreno=true;
+  showLoading('Preparando tu entreno...');
   try{
     const schedule=coachSchedule.find(row=>row.id===scheduleId);
     if(schedule)await ensureBoardLoadedSb(schedule.board_id);
@@ -10924,6 +11007,7 @@ async function startCoachingSessionSb(scheduleId){
     renderInicioCoachingWidgets();
     openWorkoutSheet();
   }catch(e){toast('Error al iniciar entreno: '+e.message,'err');}
+  finally{_arrancandoEntreno=false;hideLoading();}
 }
 async function finishCoachingSessionSb(){
   if(!activeCoachingSession)return;
@@ -11437,9 +11521,30 @@ function openWorkoutSheet(){
   document.body.style.overflow='hidden';
   loadExerciseCatalogSb().catch(()=>{});
   wsLoadLastScores().catch(()=>{});
+  const traerALaVista=wsFocusFirstPending();
   renderWorkoutSheet();
+  if(traerALaVista)wsScrollToFocus();
   wsStartTicker();
   wsRepairMissingSetsSb().catch(console.error);
+}
+// A media sesión — al volver de minimizar, o al reabrir la app — la hoja
+// dejaba al socio hasta arriba y tenía que buscar por dónde iba entre ocho
+// ejercicios. Marca la primera serie pendiente y devuelve si vale la pena
+// desplazarse hasta ella: si aún no ha cerrado ninguna no hay nada que buscar
+// y arrancar desde el principio es lo correcto.
+function wsFocusFirstPending(){
+  wsFocusSet=null;
+  if(!activeCoachingSession)return false;
+  let pendiente=null,algunaHecha=false;
+  sessionExerciseList().forEach((ex,i)=>{
+    const exKey=exerciseKeyForSession(activeCoachingSession.board_id,ex,i);
+    (coachSessionSets[exKey]||[]).slice().sort((a,b)=>a.set_idx-b.set_idx).forEach(x=>{
+      if(x.done){algunaHecha=true;return;}
+      if(!pendiente)pendiente={exKey,setIdx:x.set_idx};
+    });
+  });
+  wsFocusSet=pendiente;
+  return !!(pendiente&&algunaHecha);
 }
 
 // Una sesión que arrancó con la rutina fuera del mapa de boards quedaba sin una
