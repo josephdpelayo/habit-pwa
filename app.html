@@ -6,19 +6,19 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="HABIT">
 <meta name="application-name" content="HABIT">
-<link rel="manifest" href="/manifest.json?v=20260919-2">
-<link rel="apple-touch-icon" sizes="120x120" href="/icons/icon-120.png?v=20260919-2">
-<link rel="apple-touch-icon" sizes="152x152" href="/icons/icon-152.png?v=20260919-2">
-<link rel="apple-touch-icon" sizes="167x167" href="/icons/icon-167.png?v=20260919-2">
-<link rel="apple-touch-icon" sizes="180x180" href="/icons/icon-180.png?v=20260919-2">
-<link rel="icon" type="image/png" sizes="32x32" href="/icons/icon-32.png?v=20260919-2">
+<link rel="manifest" href="/manifest.json?v=20260919-3">
+<link rel="apple-touch-icon" sizes="120x120" href="/icons/icon-120.png?v=20260919-3">
+<link rel="apple-touch-icon" sizes="152x152" href="/icons/icon-152.png?v=20260919-3">
+<link rel="apple-touch-icon" sizes="167x167" href="/icons/icon-167.png?v=20260919-3">
+<link rel="apple-touch-icon" sizes="180x180" href="/icons/icon-180.png?v=20260919-3">
+<link rel="icon" type="image/png" sizes="32x32" href="/icons/icon-32.png?v=20260919-3">
 <title>HABIT</title>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Share+Tech+Mono&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="/skandi-recovery.js?v=20260919-2"></script>
-<script src="/body-figure.js?v=20260919-2"></script>
-<script src="/habit-training.js?v=20260919-2"></script>
+<script src="/skandi-recovery.js?v=20260919-3"></script>
+<script src="/body-figure.js?v=20260919-3"></script>
+<script src="/habit-training.js?v=20260919-3"></script>
 <style>
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
 @media (prefers-reduced-motion:reduce){*,*:before,*:after{scroll-behavior:auto!important;animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}}
@@ -2052,8 +2052,30 @@ body.admin-mode #courtesy-modal label{border-radius:14px!important;border-color:
 
 /* Tarjeta de ejercicio dentro de la hoja */
 .ws-ex{position:relative;background:transparent;border:0;border-bottom:1px solid rgba(255,255,255,.075);border-radius:0;padding:5px 0 15px;margin-bottom:10px;transition:opacity .25s ease}
-.ws-ex.done{opacity:.48}
+/* Un ejercicio terminado se pliega a una sola línea con lo que se levantó:
+   en una rutina de ocho, la mitad de la pantalla era peso muerto que había
+   que recorrer para llegar a lo que falta. El atenuado pasa de la tarjeta
+   entera a su cabecera, porque el resumen tiene que seguir leíble. */
+.ws-ex.done{opacity:1}
+.ws-ex.done>.ws-ex-head{opacity:.5}
 .ws-ex.in-progress{opacity:1}
+.ws-ex.done.collapsed{padding-bottom:11px}
+.ws-ex.done.collapsed .set-tracker,.ws-ex.done.collapsed .ws-ex-more,
+.ws-ex.done.collapsed .ws-swap-panel{display:none}
+.ws-ex-recap{display:none;width:100%;align-items:center;gap:10px;text-align:left;
+  border:0;border-radius:11px;background:rgba(255,255,255,.035);color:#9aa1ad;
+  padding:9px 11px;margin-top:2px;font-family:inherit;font-size:11.5px;font-weight:650;cursor:pointer;
+  -webkit-tap-highlight-color:transparent}
+.ws-ex.done .ws-ex-recap{display:flex}
+.ws-ex-recap:active{background:rgba(255,255,255,.07)}
+.ws-ex-recap-txt{flex:1;min-width:0;color:#c3c9d4;font-variant-numeric:tabular-nums;
+  overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.ws-ex-recap-go{flex:0 0 auto;font-size:10.5px;font-weight:800;color:#7f8a99;letter-spacing:.04em}
+.ws-ex.done:not(.collapsed) .ws-ex-recap{margin-top:8px;background:transparent;justify-content:center}
+.ws-ex.done:not(.collapsed) .ws-ex-recap-txt{display:none}
+.ws-ex-recap .rec-abrir,.ws-ex-recap .rec-cerrar{display:none}
+.ws-ex.done.collapsed .ws-ex-recap .rec-abrir{display:inline}
+.ws-ex.done:not(.collapsed) .ws-ex-recap .rec-cerrar{display:inline}
 .ws-ex-head{display:flex;align-items:flex-start;gap:10px;padding:10px 0 8px;cursor:pointer}
 .ws-ex-num{width:24px;height:24px;border-radius:8px;background:rgba(255,255,255,.055);color:var(--gray);
   display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:800;flex:0 0 auto}
@@ -3241,7 +3263,7 @@ body.admin-mode #courtesy-modal label{border-radius:14px!important;border-color:
 // ── CONFIG & SUPABASE ───────────────────────────────────────
 const SUPABASE_URL='https://pmpjteuqjusbiduevbwq.supabase.co';
 const SUPABASE_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBtcGp0ZXVxanVzYmlkdWV2YndxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc2OTI1NjUsImV4cCI6MjA5MzI2ODU2NX0.XbMzZoo2yqtrD8znLnyo_1zDfrdJAvAPj1lqGOyXnLw';
-const APP_VERSION='20260919-2';
+const APP_VERSION='20260919-3';
 // La pierna va separada en cuádriceps, femorales y pantorrillas: la figura
 // corporal pinta esas tres regiones por separado y el motor de recuperación les
 // da ventanas de descanso distintas. 'Piernas' sigue reconociéndose al leer
@@ -8088,17 +8110,24 @@ function wsPaintSetDone(setId,exKey,done,pop,pending){
 }
 function wsPaintSessionProgress(exKey){
   if(!wsOpen||!activeCoachingSession)return;
-  const q=v=>(window.CSS&&CSS.escape)?CSS.escape(String(v)):String(v).replace(/["\\]/g,'\\$&');
   if(exKey){
-    const art=document.querySelector('#ws-content .ws-ex[data-ex-key="'+q(exKey)+'"]');
+    const art=wsExerciseNode(exKey);
     if(art){
       const sets=coachSessionSets[exKey]||[];
       const doneCount=sets.filter(x=>x.done).length;
       const allDone=sets.length>0&&doneCount===sets.length;
       art.classList.toggle('done',allDone);
       art.classList.toggle('in-progress',!allDone&&doneCount>0);
+      // Dejar de estar completo tiene que desplegarlo: si no, el socio que
+      // despaloma una serie se queda con el ejercicio cerrado y sin ver la
+      // que acaba de abrir.
+      if(!allDone)art.classList.remove('collapsed');
       const badge=art.querySelector('.ws-ex-badge');
       if(badge){badge.textContent=doneCount+'/'+sets.length;badge.classList.toggle('done',allDone);}
+      // El resumen se pinta con el último dato aunque el plegado solo ocurra
+      // en el siguiente repintado.
+      const txt=art.querySelector('.ws-ex-recap-txt');
+      if(txt)txt.textContent=wsExerciseRecapText(exKey);
     }
   }
   const allSets=Object.values(coachSessionSets).flat();
@@ -8194,9 +8223,15 @@ async function toggleSetDoneSb(setId,newDone,btnEl){
         if(found&&(!target||!target.sameRoundSuperset))startRestTimerForExercise(found.ex);
         if(target){
           const list=sessionExerciseList();
-          wsFocusSet=list[target.idx]
-            ?{exKey:exerciseKeyForSession(activeCoachingSession.board_id,list[target.idx],target.idx),setIdx:target.setIdx}
-            :null;
+          // Al saltar de ejercicio, `target.setIdx` viene en null porque el
+          // salto es "al siguiente", no "a la serie N". Sin resolverlo, la
+          // hoja se quedaba sin marcar dónde sigue justo cuando el socio
+          // cambia de aparato, que es cuando más falta hace.
+          if(list[target.idx]){
+            const k=exerciseKeyForSession(activeCoachingSession.board_id,list[target.idx],target.idx);
+            const pendiente=(coachSessionSets[k]||[]).slice().sort((a,b)=>a.set_idx-b.set_idx).find(x=>!x.done);
+            wsFocusSet={exKey:k,setIdx:target.setIdx!=null?target.setIdx:(pendiente?pendiente.set_idx:null)};
+          }else wsFocusSet=null;
           if(wsOpen){renderWorkoutSheet();wsScrollToFocus();}
           else if(focusOpen)openActiveCoachingExercise(target.idx,target.setIdx);
           if(target.sameRoundSuperset)toast('Siguiente en '+exerciseGroupLabel({supersetGroup:target.group}),'ok');
@@ -11308,6 +11343,7 @@ let wsSwapTarget=null, wsSwapQuery='';
 let wsAddOpen=false, wsAddQuery='';
 let wsLastScores={};
 let wsFocusSet=null;   // {exKey,setIdx} — la serie que toca ahora
+let wsExpandedDone=new Set();  // ejercicios ya cerrados que el socio volvió a abrir
 
 // ── Campana de descanso ───────────────────────────────────────────────────
 // Sintetizada con Web Audio en vez de un archivo: la app es un solo HTML sin
@@ -11580,7 +11616,7 @@ function closeWorkoutSheet(){
   document.body.style.overflow='';
   wsStopTicker();
   wsPausedMs=0;wsPausedAt=0;wsRestEndAt=0;wsRestFrozen=0;wsRestTotal=0;wsLastRest=0;
-  wsSwapTarget=null;wsAddOpen=false;wsFocusSet=null;wsLastScores={};
+  wsSwapTarget=null;wsAddOpen=false;wsFocusSet=null;wsLastScores={};wsExpandedDone=new Set();
   const bar=document.getElementById('rest-timer-bar');
   if(bar)bar.style.display='none';
 }
@@ -11668,7 +11704,8 @@ function wsExerciseHtml(ex,i){
     commonMistakes:ex.common_mistakes||ex.commonMistakes||ex.mistakes||ex.errors||'',
     coachTips:ex.coach_tips||ex.coachTips||ex.tips||''};
 
-  let html='<article class="ws-ex'+(allDone?' done':(doneCount?' in-progress':''))+'" data-ex-key="'+esc(exKey)+'">'
+  const plegado=allDone&&!wsExpandedDone.has(exKey);
+  let html='<article class="ws-ex'+(allDone?' done':(doneCount?' in-progress':''))+(plegado?' collapsed':'')+'" data-ex-key="'+esc(exKey)+'">'
     +'<div class="ws-ex-head" onclick="openExerciseFocus(this)" data-ex="'+esc(JSON.stringify(exData))+'">'
     +'<div class="ws-ex-num">'+(i+1)+'</div>'
     +'<div class="ws-ex-info">'
@@ -11695,8 +11732,46 @@ function wsExerciseHtml(ex,i){
   html+=renderSetTrackerHtml({scheduleId:activeCoachingSession.id,sets:coachSessionSets,focusSetIdx},exKey,ex)
     ||'<div class="set-tracker"><div class="empty" style="margin:0">Sin series.</div>'
       +'<div class="set-tracker-actions"><button class="btn-sm compact" onclick="addSetSb(&quot;'+activeCoachingSession.id+'&quot;,&quot;'+esc(exKey)+'&quot;,&quot;'+esc(repsTargetForSet(ex,0)||'')+'&quot;)">+ Serie</button></div></div>';
+  html+='<button type="button" class="ws-ex-recap" onclick="wsToggleExerciseOpen(&quot;'+esc(exKey)+'&quot;)">'
+    +'<span class="ws-ex-recap-txt">'+esc(wsExerciseRecapText(exKey))+'</span>'
+    +'<span class="ws-ex-recap-go"><i class="rec-abrir">Ver series</i><i class="rec-cerrar">Ocultar</i></span>'
+    +'</button>';
   html+='</article>';
   return html;
+}
+// Resumen de un ejercicio ya cerrado, agrupando las series idénticas: tres
+// series de 20 kg × 10 se leen "3× 20 kg × 10" y no tres veces lo mismo.
+function wsExerciseRecapText(exKey){
+  const hechas=(coachSessionSets[exKey]||[]).slice().sort((a,b)=>a.set_idx-b.set_idx).filter(x=>x.done);
+  if(!hechas.length)return 'Sin registro';
+  const unit=exerciseWeightUnit(exKey);
+  const grupos=[];
+  hechas.forEach(x=>{
+    const etiqueta=x.actual_seconds!=null
+      ? x.actual_seconds+' s'
+      : ([x.weight!=null?fmtWeightValue(kgToUnit(x.weight,unit),unit,false):null,
+          x.actual_reps!=null?x.actual_reps+' reps':null].filter(Boolean).join(' × ')||'sin dato');
+    const ultimo=grupos[grupos.length-1];
+    if(ultimo&&ultimo.etiqueta===etiqueta)ultimo.n++;
+    else grupos.push({etiqueta,n:1});
+  });
+  return grupos.map(g=>(g.n>1?g.n+'× ':'')+g.etiqueta).join(' · ');
+}
+// Plegar y desplegar es un cambio de clase, no un repintado: la hoja entera
+// se rehace con innerHTML y eso perdería el scroll y lo que el socio tuviera
+// a medio escribir en otro ejercicio.
+function wsToggleExerciseOpen(exKey){
+  const estabaAbierto=wsExpandedDone.has(exKey);
+  if(estabaAbierto)wsExpandedDone.delete(exKey);else wsExpandedDone.add(exKey);
+  const art=wsExerciseNode(exKey);
+  if(!art)return;
+  art.classList.toggle('collapsed',estabaAbierto);
+  const txt=art.querySelector('.ws-ex-recap-txt');
+  if(txt)txt.textContent=wsExerciseRecapText(exKey);
+}
+function wsExerciseNode(exKey){
+  const q=(window.CSS&&CSS.escape)?CSS.escape(String(exKey)):String(exKey).replace(/["\\]/g,'\\$&');
+  return document.querySelector('#ws-content .ws-ex[data-ex-key="'+q+'"]');
 }
 
 // ── Cambiar / agregar ejercicio en vivo ───────────────────────────────────
