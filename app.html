@@ -6,19 +6,19 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="HABIT">
 <meta name="application-name" content="HABIT">
-<link rel="manifest" href="/manifest.json?v=20260919-4">
-<link rel="apple-touch-icon" sizes="120x120" href="/icons/icon-120.png?v=20260919-4">
-<link rel="apple-touch-icon" sizes="152x152" href="/icons/icon-152.png?v=20260919-4">
-<link rel="apple-touch-icon" sizes="167x167" href="/icons/icon-167.png?v=20260919-4">
-<link rel="apple-touch-icon" sizes="180x180" href="/icons/icon-180.png?v=20260919-4">
-<link rel="icon" type="image/png" sizes="32x32" href="/icons/icon-32.png?v=20260919-4">
+<link rel="manifest" href="/manifest.json?v=20260919-5">
+<link rel="apple-touch-icon" sizes="120x120" href="/icons/icon-120.png?v=20260919-5">
+<link rel="apple-touch-icon" sizes="152x152" href="/icons/icon-152.png?v=20260919-5">
+<link rel="apple-touch-icon" sizes="167x167" href="/icons/icon-167.png?v=20260919-5">
+<link rel="apple-touch-icon" sizes="180x180" href="/icons/icon-180.png?v=20260919-5">
+<link rel="icon" type="image/png" sizes="32x32" href="/icons/icon-32.png?v=20260919-5">
 <title>HABIT</title>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Share+Tech+Mono&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="/skandi-recovery.js?v=20260919-4"></script>
-<script src="/body-figure.js?v=20260919-4"></script>
-<script src="/habit-training.js?v=20260919-4"></script>
+<script src="/skandi-recovery.js?v=20260919-5"></script>
+<script src="/body-figure.js?v=20260919-5"></script>
+<script src="/habit-training.js?v=20260919-5"></script>
 <style>
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
 @media (prefers-reduced-motion:reduce){*,*:before,*:after{scroll-behavior:auto!important;animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}}
@@ -2224,6 +2224,14 @@ body.admin-mode #courtesy-modal label{border-radius:14px!important;border-color:
 .muscle-detail-row{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:9px 0;border-bottom:1px solid var(--border)}
 .muscle-detail-row:last-child{border-bottom:none}
 .muscle-detail-row strong{display:block;font-size:13px;font-weight:700}
+/* El nombre ocupa el hueco que sobra para que el play y el porcentaje queden
+   siempre pegados a la derecha, aunque el nombre sea largo. */
+.muscle-detail-main{flex:1;min-width:0}
+.muscle-ex-play{flex:0 0 auto;width:30px;height:30px;border-radius:50%;
+  border:1px solid rgba(127,176,255,.3);background:rgba(37,99,235,.14);color:#8bb7ff;
+  font-size:10px;line-height:1;cursor:pointer;padding:0 0 0 1px;
+  display:flex;align-items:center;justify-content:center;-webkit-tap-highlight-color:transparent}
+.muscle-ex-play:active{background:rgba(37,99,235,.3);color:var(--white)}
 .muscle-detail-row span span,.muscle-detail-row div span{display:block;font-size:11px;color:var(--gray);margin-top:2px}
 
 /* ── Progreso ──────────────────────────────────────────────────────────── */
@@ -3280,7 +3288,7 @@ body.admin-mode #courtesy-modal label{border-radius:14px!important;border-color:
 // ── CONFIG & SUPABASE ───────────────────────────────────────
 const SUPABASE_URL='https://pmpjteuqjusbiduevbwq.supabase.co';
 const SUPABASE_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBtcGp0ZXVxanVzYmlkdWV2YndxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc2OTI1NjUsImV4cCI6MjA5MzI2ODU2NX0.XbMzZoo2yqtrD8znLnyo_1zDfrdJAvAPj1lqGOyXnLw';
-const APP_VERSION='20260919-4';
+const APP_VERSION='20260919-5';
 // La pierna va separada en cuádriceps, femorales y pantorrillas: la figura
 // corporal pinta esas tres regiones por separado y el motor de recuperación les
 // da ventanas de descanso distintas. 'Piernas' sigue reconociéndose al leer
@@ -8822,6 +8830,27 @@ function bodyCardHtml(){
 
 // Detalle de un músculo: qué ejercicios lo cargaron en la ventana de
 // recuperación y con cuáles se entrena mejor.
+// El video que ya trae el ejercicio. Primero el que lleve encima (una rutina
+// se lo copia del catálogo al elegirlo) y si no, el del catálogo por nombre:
+// una ficha vieja puede haberse guardado antes de que el gym subiera el video.
+function muscleExerciseVideo(ex){
+  if(!ex)return '';
+  const propio=getExerciseVideos(ex)[0];
+  if(propio&&propio.url)return propio.url;
+  const fila=findExerciseCatalogMatch(ex.name||'');
+  const delCatalogo=fila?getExerciseVideos(fila)[0]:null;
+  return (delCatalogo&&delCatalogo.url)||'';
+}
+// La URL viaja en un `data-`, no dentro del `onclick`. Interpolarla en el
+// atributo de evento la mete en medio de código JS: una comilla en el enlace
+// — y los enlaces firmados del storage llevan de todo — cierra la cadena y
+// rompe el botón. En un atributo normal es solo texto.
+function musclePlayBtnHtml(url,nombre){
+  if(!url)return '';
+  return '<button type="button" class="muscle-ex-play" data-video="'+esc(url)+'"'
+    +' aria-label="Ver video de '+esc(nombre||'ejercicio')+'"'
+    +' onclick="openVideoModal(getEmbedUrl(this.dataset.video))">▶</button>';
+}
 async function openMuscleDetail(en){
   const row=myRecovery.find(r=>r.name===en)||{name:en,score:100,hoursUntilFresh:0,rested:true};
   const label=muscleLabelEs(en);
@@ -8829,6 +8858,8 @@ async function openMuscleDetail(en){
   const body=document.getElementById('muscle-detail-body');
   body.innerHTML='<div class="empty">Cargando…</div>';
   document.getElementById('muscle-detail-modal').style.display='flex';
+  // Sin el catálogo real solo hay el fallback, que no trae los videos del gym.
+  await loadExerciseCatalogSb().catch(()=>{});
   let worked=[];
   try{
     const since=addDaysDS(mazToday(),-SkandiRecovery.RECOVERY_LOOKBACK_DAYS);
@@ -8840,17 +8871,18 @@ async function openMuscleDetail(en){
       ?await sb.from('coaching_session_sets').select('ex_key,weight,actual_reps')
          .in('schedule_id',rows.map(r=>r.id)).eq('done',true)
       :{data:[]};
-    const nameByKey={},pctByKey={};
+    const nameByKey={},pctByKey={},exByKey={};
     rows.forEach(r=>sessionExerciseList(r,{}).forEach((ex,i)=>{
       const k=exerciseKeyForSession(r.board_id,ex,i);
       if(nameByKey[k])return;
       const split=exerciseMuscleSplit(ex);
-      if(split&&split[en]){nameByKey[k]=ex.name||'Ejercicio';pctByKey[k]=Math.round(split[en]);}
+      if(split&&split[en]){nameByKey[k]=ex.name||'Ejercicio';pctByKey[k]=Math.round(split[en]);exByKey[k]=ex;}
     }));
     const agg={};
     (sets||[]).forEach(s=>{
       if(!nameByKey[s.ex_key])return;
-      const a=agg[s.ex_key]||(agg[s.ex_key]={name:nameByKey[s.ex_key],pct:pctByKey[s.ex_key],sets:0});
+      const a=agg[s.ex_key]||(agg[s.ex_key]={name:nameByKey[s.ex_key],pct:pctByKey[s.ex_key],sets:0,
+        video:muscleExerciseVideo(exByKey[s.ex_key])});
       a.sets++;
     });
     worked=Object.values(agg).sort((a,b)=>b.sets-a.sets);
@@ -8864,14 +8896,16 @@ async function openMuscleDetail(en){
     +'<p class="muscle-detail-eta">'+(row.rested?'Listo para entrenar':'Listo en '+esc(formatHoursEs(row.hoursUntilFresh)))+'</p>'
     +'<p class="slbl">Lo que lo cargó estos días</p>'
     +(worked.length
-      ?worked.map(w=>'<div class="muscle-detail-row"><div><strong>'+esc(w.name)+'</strong>'
+      ?worked.map(w=>'<div class="muscle-detail-row"><div class="muscle-detail-main"><strong>'+esc(w.name)+'</strong>'
         +'<span>'+w.sets+' serie'+(w.sets===1?'':'s')+'</span></div>'
+        +musclePlayBtnHtml(w.video,w.name)
         +'<span class="badge bg-blue">'+w.pct+'% del ejercicio</span></div>').join('')
       :'<div class="empty">Sin series registradas en '+esc(String(SkandiRecovery.RECOVERY_LOOKBACK_DAYS))+' días.</div>')
     +'<div class="divider"></div><p class="slbl">Mejores ejercicios para '+esc(label)+'</p>'
     +(best.length
-      ?best.map(c=>'<div class="muscle-detail-row"><div><strong>'+esc(c.name)+'</strong>'
+      ?best.map(c=>'<div class="muscle-detail-row"><div class="muscle-detail-main"><strong>'+esc(c.name)+'</strong>'
         +'<span>'+esc([c.category,(c.equipment||[]).join('/')].filter(Boolean).join(' · '))+'</span></div>'
+        +musclePlayBtnHtml(muscleExerciseVideo(c),c.name)
         +'<span class="badge bg-blue">'+Math.round(c.muscle_split[en])+'%</span></div>').join('')
       :'<div class="empty">Sin ejercicios en el catálogo para este músculo.</div>');
 }
@@ -11807,7 +11841,7 @@ function wsExerciseHtml(ex,i){
         +(last.reps?' × '+esc(String(last.reps)):'')+'</div>':'')
     +(nextSuggestion?'<div class="ws-ex-last" style="color:var(--green)">'+esc(nextSuggestion)+'</div>':'')
     +'</div>'
-    +(videos.length?'<button class="ws-ex-video" onclick="event.stopPropagation();openVideoModal(getEmbedUrl(&quot;'+esc(videos[0].url)+'&quot;))" aria-label="Ver video">▶</button>':'')
+    +(videos.length?'<button class="ws-ex-video" data-video="'+esc(videos[0].url)+'" onclick="event.stopPropagation();openVideoModal(getEmbedUrl(this.dataset.video))" aria-label="Ver video">▶</button>':'')
     +'<span class="ws-ex-badge'+(allDone?' done':'')+'">'+doneCount+'/'+sets.length+'</span>'
     +'</div>';
 
