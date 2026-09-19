@@ -6,19 +6,19 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="HABIT">
 <meta name="application-name" content="HABIT">
-<link rel="manifest" href="/manifest.json?v=20260919-5">
-<link rel="apple-touch-icon" sizes="120x120" href="/icons/icon-120.png?v=20260919-5">
-<link rel="apple-touch-icon" sizes="152x152" href="/icons/icon-152.png?v=20260919-5">
-<link rel="apple-touch-icon" sizes="167x167" href="/icons/icon-167.png?v=20260919-5">
-<link rel="apple-touch-icon" sizes="180x180" href="/icons/icon-180.png?v=20260919-5">
-<link rel="icon" type="image/png" sizes="32x32" href="/icons/icon-32.png?v=20260919-5">
+<link rel="manifest" href="/manifest.json?v=20260919-6">
+<link rel="apple-touch-icon" sizes="120x120" href="/icons/icon-120.png?v=20260919-6">
+<link rel="apple-touch-icon" sizes="152x152" href="/icons/icon-152.png?v=20260919-6">
+<link rel="apple-touch-icon" sizes="167x167" href="/icons/icon-167.png?v=20260919-6">
+<link rel="apple-touch-icon" sizes="180x180" href="/icons/icon-180.png?v=20260919-6">
+<link rel="icon" type="image/png" sizes="32x32" href="/icons/icon-32.png?v=20260919-6">
 <title>HABIT</title>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Share+Tech+Mono&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="/skandi-recovery.js?v=20260919-5"></script>
-<script src="/body-figure.js?v=20260919-5"></script>
-<script src="/habit-training.js?v=20260919-5"></script>
+<script src="/skandi-recovery.js?v=20260919-6"></script>
+<script src="/body-figure.js?v=20260919-6"></script>
+<script src="/habit-training.js?v=20260919-6"></script>
 <style>
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
 @media (prefers-reduced-motion:reduce){*,*:before,*:after{scroll-behavior:auto!important;animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}}
@@ -3288,7 +3288,7 @@ body.admin-mode #courtesy-modal label{border-radius:14px!important;border-color:
 // ── CONFIG & SUPABASE ───────────────────────────────────────
 const SUPABASE_URL='https://pmpjteuqjusbiduevbwq.supabase.co';
 const SUPABASE_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBtcGp0ZXVxanVzYmlkdWV2YndxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc2OTI1NjUsImV4cCI6MjA5MzI2ODU2NX0.XbMzZoo2yqtrD8znLnyo_1zDfrdJAvAPj1lqGOyXnLw';
-const APP_VERSION='20260919-5';
+const APP_VERSION='20260919-6';
 // La pierna va separada en cuádriceps, femorales y pantorrillas: la figura
 // corporal pinta esas tres regiones por separado y el motor de recuperación les
 // da ventanas de descanso distintas. 'Piernas' sigue reconociéndose al leer
@@ -4043,10 +4043,29 @@ function maxBookableDS(){
   const exp=curUser&&curUser.planExpiry?dsFromIsoMaz(curUser.planExpiry):null;
   return exp&&exp<cap?exp:cap;
 }
-function getYTId(url){if(!url)return null;const m=String(url).match(/(?:youtu\.be\/|youtube\.com\/(?:watch\?v=|embed\/|shorts\/))([A-Za-z0-9_-]{11})/);return m?m[1]:null;}
+// El id de YouTube llega de dos maneras: en la ruta (youtu.be, /embed/,
+// /shorts/, /live/, /v/) o en el parámetro v=. El patrón anterior exigía
+// literalmente "watch?v=", así que un enlace compartido desde la app —
+// watch?app=desktop&v=ID — y los de /live/ no se reconocían: entraban tal cual
+// al iframe, y YouTube no deja incrustar una página /watch, o sea marco en
+// blanco. El v= suelto solo cuenta si de verdad es un enlace de YouTube,
+// porque un archivo del storage puede traer su propio ?v= de cache busting.
+function getYTId(url){
+  if(!url)return null;
+  const s=String(url).trim();
+  const porRuta=s.match(/(?:youtu\.be\/|youtube(?:-nocookie)?\.com\/(?:embed\/|shorts\/|live\/|v\/))([A-Za-z0-9_-]{11})/);
+  if(porRuta)return porRuta[1];
+  if(!/youtube(?:-nocookie)?\.com/i.test(s))return null;
+  const porParam=s.match(/[?&]v=([A-Za-z0-9_-]{11})(?:[&#]|$)/);
+  return porParam?porParam[1]:null;
+}
+// Solo se mira si el enlace es de Google. El `id=` suelto pescaba cualquier
+// URL con ese parámetro — un GIF del storage con ?id=... acababa abriéndose
+// como un iframe de Drive en vez de pintarse como imagen.
 function getDriveId(url){
   if(!url)return null;
   const s=String(url);
+  if(!/google\.com/i.test(s))return null;
   const m=s.match(/\/file\/d\/([^/?#]+)/)||s.match(/\/d\/([^/?#]+)/)||s.match(/[?&]id=([^&#]+)/);
   return m?m[1]:null;
 }
