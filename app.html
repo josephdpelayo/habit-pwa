@@ -6,19 +6,19 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="HABIT">
 <meta name="application-name" content="HABIT">
-<link rel="manifest" href="/manifest.json?v=20260919-3">
-<link rel="apple-touch-icon" sizes="120x120" href="/icons/icon-120.png?v=20260919-3">
-<link rel="apple-touch-icon" sizes="152x152" href="/icons/icon-152.png?v=20260919-3">
-<link rel="apple-touch-icon" sizes="167x167" href="/icons/icon-167.png?v=20260919-3">
-<link rel="apple-touch-icon" sizes="180x180" href="/icons/icon-180.png?v=20260919-3">
-<link rel="icon" type="image/png" sizes="32x32" href="/icons/icon-32.png?v=20260919-3">
+<link rel="manifest" href="/manifest.json?v=20260919-4">
+<link rel="apple-touch-icon" sizes="120x120" href="/icons/icon-120.png?v=20260919-4">
+<link rel="apple-touch-icon" sizes="152x152" href="/icons/icon-152.png?v=20260919-4">
+<link rel="apple-touch-icon" sizes="167x167" href="/icons/icon-167.png?v=20260919-4">
+<link rel="apple-touch-icon" sizes="180x180" href="/icons/icon-180.png?v=20260919-4">
+<link rel="icon" type="image/png" sizes="32x32" href="/icons/icon-32.png?v=20260919-4">
 <title>HABIT</title>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Share+Tech+Mono&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="/skandi-recovery.js?v=20260919-3"></script>
-<script src="/body-figure.js?v=20260919-3"></script>
-<script src="/habit-training.js?v=20260919-3"></script>
+<script src="/skandi-recovery.js?v=20260919-4"></script>
+<script src="/body-figure.js?v=20260919-4"></script>
+<script src="/habit-training.js?v=20260919-4"></script>
 <style>
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
 @media (prefers-reduced-motion:reduce){*,*:before,*:after{scroll-behavior:auto!important;animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}}
@@ -1985,6 +1985,18 @@ body.admin-mode #courtesy-modal label{border-radius:14px!important;border-color:
 .week-day-name{min-width:0;font-size:14px;font-weight:700;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;display:flex;align-items:center;gap:8px}
 .week-day-name .week-dot{width:8px;height:8px}
 .week-day-empty{font-size:13px;color:var(--gray);font-weight:500}
+/* Reordenar ejercicios en el builder. El orden ES la rutina: sin esto, mover
+   el quinto ejercicio al segundo lugar obligaba a borrar y rehacer todo lo
+   que venía después. */
+.rb-move{display:flex;flex-direction:column;gap:3px;flex:0 0 auto}
+.rb-move-btn{width:28px;height:19px;border:1px solid var(--border);background:var(--surface,rgba(255,255,255,.045));
+  color:var(--gl);border-radius:6px;font-size:9px;line-height:1;cursor:pointer;padding:0;
+  display:flex;align-items:center;justify-content:center;-webkit-tap-highlight-color:transparent}
+.rb-move-btn:disabled{opacity:.28;cursor:default}
+.rb-move-btn:active:not(:disabled){background:rgba(255,255,255,.13);color:var(--white)}
+.rb-ex-foot{display:flex;gap:8px;align-items:center;margin-top:8px}
+.rb-ex-foot select{flex:1;min-width:0}
+.rb-ex-foot .ws-ex-tool{flex:0 0 auto}
 .week-day-go{font-size:18px;color:var(--gray);line-height:1}
 .week-day-edit{border:1px solid var(--border);background:var(--surface,rgba(255,255,255,.045));color:var(--gl);border-radius:9px;
   width:30px;height:30px;font-size:14px;cursor:pointer;line-height:1;flex:0 0 auto}
@@ -2008,6 +2020,11 @@ body.admin-mode #courtesy-modal label{border-radius:14px!important;border-color:
 .routine-card.open .routine-card-chev{transform:rotate(90deg)}
 .routine-card-body{padding:0 14px 14px;border-top:1px solid var(--border);padding-top:12px}
 .routine-ex-pills{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:12px}
+/* La pastilla llevaba solo el nombre: para saber si una rutina del gym te
+   sirve había que duplicarla primero, porque "Editar" solo existe en las
+   tuyas. Ahora carga su objetivo, y la tarjeta el total de series. */
+.routine-ex-pill i{font-style:normal;opacity:.55;margin-left:5px;font-variant-numeric:tabular-nums}
+.routine-card-meta{font-size:11.5px;color:var(--gray);margin:-2px 0 10px;line-height:1.45}
 .routine-ex-pill{font-size:10.5px;font-weight:650;color:var(--gl);background:var(--surface,rgba(255,255,255,.05));
   border:1px solid var(--border);border-radius:999px;padding:5px 10px}
 .routine-card-actions{display:flex;gap:8px;flex-wrap:wrap}
@@ -3263,7 +3280,7 @@ body.admin-mode #courtesy-modal label{border-radius:14px!important;border-color:
 // ── CONFIG & SUPABASE ───────────────────────────────────────
 const SUPABASE_URL='https://pmpjteuqjusbiduevbwq.supabase.co';
 const SUPABASE_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBtcGp0ZXVxanVzYmlkdWV2YndxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc2OTI1NjUsImV4cCI6MjA5MzI2ODU2NX0.XbMzZoo2yqtrD8znLnyo_1zDfrdJAvAPj1lqGOyXnLw';
-const APP_VERSION='20260919-3';
+const APP_VERSION='20260919-4';
 // La pierna va separada en cuádriceps, femorales y pantorrillas: la figura
 // corporal pinta esas tres regiones por separado y el motor de recuperación les
 // da ventanas de descanso distintas. 'Piernas' sigue reconociéndose al leer
@@ -8505,6 +8522,7 @@ function renderWorkoutEditListHtml(exercises,boardId,scheduleId){
 // socio. Eso deja que los videos, la ficha de técnica y el motor de series
 // funcionen igual para las dos sin duplicar nada.
 const DOW_SHORT=['Lun','Mar','Mié','Jue','Vie','Sáb','Dom'];
+const DOW_LONG=['lunes','martes','miércoles','jueves','viernes','sábado','domingo'];
 let rutActiveTab='hoy';
 let myRoutines=[];            // boards propios + asignados
 let myRoutinesLoadedAt=0;
@@ -9272,6 +9290,13 @@ async function clearWeekDay(dow){
   if(current&&isCoachSet(current)&&sbProfile&&sbProfile.coaching_beta){
     await requestCoachWeekChange(dow,current,null);closeDayPickerModal();return;
   }
+  // La ✕ está pegada al nombre del día, que también se toca, y no borraba solo
+  // la plantilla: refreshWeekAndSchedule se lleva además los entrenos de esta
+  // semana que aún no empiezas. Demasiado para un toque sin vuelta atrás.
+  if(current&&!await confirmSheet(
+      'El '+DOW_LONG[dow]+' queda libre y se quita "'+(current.board_name||'la rutina')
+        +'" de los días de esta semana que aún no empiezas.',
+      {title:'¿Dejar el '+DOW_LONG[dow]+' libre?',confirmLabel:'Dejar libre',cancelLabel:'Cancelar',danger:true}))return;
   try{
     const{error}=await sb.from('coaching_week_templates').delete().eq('user_id',sbUser.id).eq('dow',dow);
     if(error)throw error;
@@ -9571,6 +9596,15 @@ function toggleRoutineCard(id){
   renderRutRutinas();
 }
 
+// Lo que hace falta para decidir si una rutina te sirve antes de abrirla:
+// cuánto trabajo es y qué necesitas para hacerla.
+function routineCardMetaHtml(b,exercises){
+  const meta=routineTodayMeta(b);
+  const series=exercises.reduce((n,ex)=>n+(exerciseSetCount(ex)||0),0);
+  const partes=[series?series+' serie'+(series===1?'':'s')+' en total':null,'~'+meta.duration+' min'];
+  if(meta.equipment.length)partes.push(meta.equipment.join(', '));
+  return '<div class="routine-card-meta">'+esc(partes.filter(Boolean).join(' · '))+'</div>';
+}
 function routineCardHtml(b){
   const exercises=routineExercises(b);
   const mine=isMyRoutine(b);
@@ -9586,8 +9620,11 @@ function routineCardHtml(b){
     +'<span class="routine-card-chev">›</span></div>'
     +(open?'<div class="routine-card-body">'
       +(b.forked_from_name?'<div style="font-size:11.5px;color:var(--gray);margin-bottom:10px">Adaptada de '+esc(b.forked_from_name)+'</div>':'')
-      +(exercises.length?'<div class="routine-ex-pills">'
-        +exercises.slice(0,6).map(ex=>'<span class="routine-ex-pill">'+esc(ex.name||'Ejercicio')+'</span>').join('')
+      +(exercises.length?routineCardMetaHtml(b,exercises)+'<div class="routine-ex-pills">'
+        +exercises.slice(0,6).map(ex=>{
+          const objetivo=[exerciseSetCount(ex)||null,String(ex.reps||'').trim()||null].filter(Boolean).join('×');
+          return '<span class="routine-ex-pill">'+esc(ex.name||'Ejercicio')+(objetivo?'<i>'+esc(objetivo)+'</i>':'')+'</span>';
+        }).join('')
         +(exercises.length>6?'<span class="routine-ex-pill">+'+(exercises.length-6)+'</span>':'')
         +'</div>':'<div class="empty" style="margin:0 0 12px">Esta rutina aún no tiene ejercicios.</div>')
       +'<div class="routine-card-actions">'
@@ -9639,9 +9676,13 @@ function openAddRoutineToWeek(boardId){
     body.innerHTML='<div style="padding:8px 10px;font-size:12px;color:var(--gray)">¿Qué día de la semana?</div>'
       +Array.from({length:7},(_,d)=>{
         const tpl=weekTemplate.find(t=>t.dow===d);
+        // Un día del coach no se cambia, se solicita: decirlo aquí evita que el
+        // socio elija el día y se encuentre con un diálogo que no esperaba.
+        const delCoach=!!(tpl&&isCoachSet(tpl));
         return '<button class="ex-menu-item" onclick="setWeekDay('+d+',&quot;'+esc(b.id)+'&quot;)">'
-          +'<span style="flex:1">'+['Lunes','Martes','Miércoles','Jueves','Viernes','Sábado','Domingo'][d]
-          +(tpl?'<span style="display:block;font-size:11px;color:var(--gray)">Ahora: '+esc(tpl.board_name)+'</span>'
+          +'<span style="flex:1">'+DOW_LONG[d].charAt(0).toUpperCase()+DOW_LONG[d].slice(1)
+          +(tpl?'<span style="display:block;font-size:11px;color:var(--gray)">Ahora: '+esc(tpl.board_name)
+                 +(delCoach?' · de tu coach, se envía como solicitud':'')+'</span>'
                :'<span style="display:block;font-size:11px;color:var(--gray)">Libre</span>')
           +'</span></button>';
       }).join('');
@@ -9703,6 +9744,7 @@ let _rbBoardId=null;
 let _rbDraft=null;
 let _rbPickerFor=null;   // índice del ejercicio que se está eligiendo, o 'new'
 let _rbPickerQuery='';
+let _rbBaseline='';      // cómo estaba la rutina al abrir, para saber si hay cambios
 
 async function openRoutineBuilder(boardId){
   await loadExerciseCatalogSb();
@@ -9714,12 +9756,34 @@ async function openRoutineBuilder(boardId){
   };
   _rbPickerFor=null;_rbPickerQuery='';
   document.getElementById('routine-builder-title').textContent=boardId?'Editar rutina':'Nueva rutina';
+  _rbBaseline=rbSnapshot();
   renderRoutineBuilder();
   document.getElementById('routine-builder-modal').style.display='flex';
 }
-function closeRoutineBuilder(){
+// Foto normalizada del borrador. Pasa los valores por String igual que haría
+// el viaje por el DOM, para que abrir y cerrar sin tocar nada no cuente como
+// un cambio.
+function rbSnapshot(){
+  if(!_rbDraft)return '';
+  return JSON.stringify({
+    nombre:String(_rbDraft.name||'').trim(),
+    ejercicios:(_rbDraft.exercises||[]).map(ex=>[
+      String(ex.name||''),String(ex.sets??''),String(ex.reps??''),
+      String(ex.rest??''),String(ex.targetRir??''),String(ex.supersetGroup||'').toUpperCase()
+    ])
+  });
+}
+// Cerrar tiraba el borrador entero sin preguntar: ocho ejercicios configurados
+// se perdían con un toque en "Cerrar" y no había forma de recuperarlos.
+async function closeRoutineBuilder(){
+  if(_rbDraft&&!_savingRoutine){
+    rbSyncFromDom();
+    if(rbSnapshot()!==_rbBaseline
+      &&!await confirmSheet('Perderás lo que llevas escrito en esta rutina.',
+        {title:'¿Salir sin guardar?',confirmLabel:'Salir sin guardar',cancelLabel:'Seguir editando',danger:true}))return;
+  }
   document.getElementById('routine-builder-modal').style.display='none';
-  _rbBoardId=null;_rbDraft=null;_rbPickerFor=null;
+  _rbBoardId=null;_rbDraft=null;_rbPickerFor=null;_rbBaseline='';
 }
 
 // El draft se lee del DOM antes de cada re-render para no perder lo que el
@@ -9753,6 +9817,7 @@ function renderRoutineBuilder(){
 
   html+=_rbDraft.exercises.map((ex,i)=>{
     const meta=[ex.muscleGroup,ex.exerciseType].filter(Boolean).join(' · ');
+    const ultimo=_rbDraft.exercises.length-1;
     return '<div class="exercise-detail static" style="padding:12px;cursor:default">'
       +'<div style="display:flex;align-items:center;gap:8px;margin-bottom:8px">'
       +'<div class="ex-num">'+(i+1)+'</div>'
@@ -9760,20 +9825,25 @@ function renderRoutineBuilder(){
       +'<span>'+esc(ex.name||'Elegir ejercicio')+'</span>'
       +(meta?'<small>'+esc(meta)+'</small>':'<small>toca para elegir del catálogo</small>')
       +'</button>'
-      +'<button class="ws-ex-tool danger" onclick="rbRemoveEx('+i+')">Quitar</button>'
+      +'<span class="rb-move">'
+      +'<button type="button" class="rb-move-btn"'+(i===0?' disabled':'')+' aria-label="Subir ejercicio" onclick="rbMoveEx('+i+',-1)">▲</button>'
+      +'<button type="button" class="rb-move-btn"'+(i===ultimo?' disabled':'')+' aria-label="Bajar ejercicio" onclick="rbMoveEx('+i+',1)">▼</button>'
+      +'</span>'
       +'</div>'
       +(_rbPickerFor===i?rbPickerHtml():'')
       +'<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:6px">'
-      +rbFieldHtml('rb-ex-sets-'+i,'Series',ex.sets||'','3')
+      +rbFieldHtml('rb-ex-sets-'+i,'Series',ex.sets||'','3',true)
       +rbFieldHtml('rb-ex-reps-'+i,'Reps/tiempo',ex.reps||'','8-10')
       +rbFieldHtml('rb-ex-rest-'+i,'Descanso',ex.rest||'','90s')
-      +rbFieldHtml('rb-ex-rir-'+i,'RIR',ex.targetRir??'','2')
+      +rbFieldHtml('rb-ex-rir-'+i,'RIR',ex.targetRir??'','2',true)
       +'</div>'
       +'<div class="exercise-field-hint" style="margin:7px 0 0">Reps admite un número, un rango (8-10), un tiempo (0:30) o una pirámide (10-9-8-7…); en pirámide las series se cuentan solas.</div>'
-      +'<div style="margin-top:8px"><select id="rb-ex-group-'+i+'" class="exercise-form-control small">'
+      +'<div class="rb-ex-foot"><select id="rb-ex-group-'+i+'" class="exercise-form-control small">'
       +'<option value="">Normal</option>'
       +['A','B','C','D'].map(g=>'<option value="'+g+'" '+(String(ex.supersetGroup||'').toUpperCase()===g?'selected':'')+'>Superserie '+g+'</option>').join('')
-      +'</select></div>'
+      +'</select>'
+      +'<button class="ws-ex-tool danger" onclick="rbRemoveEx('+i+')">Quitar</button>'
+      +'</div>'
       +'</div>';
   }).join('');
 
@@ -9785,9 +9855,13 @@ function renderRoutineBuilder(){
   if(q)q.focus();
 }
 
-function rbFieldHtml(id,label,value,ph){
+// Series y RIR son números sueltos y sacaban el teclado completo. Reps y
+// descanso siguen en texto a propósito: admiten "8-10", "0:30", "10-9-8-7" y
+// "2 min", que un teclado numérico no deja escribir.
+function rbFieldHtml(id,label,value,ph,numerico){
   return '<div><div class="exercise-field-label">'+label+'</div>'
-    +'<input type="text" id="'+id+'" placeholder="'+ph+'" value="'+esc(String(value??''))+'" '
+    +'<input type="text" id="'+id+'" placeholder="'+ph+'" value="'+esc(String(value??''))+'"'
+    +(numerico?' inputmode="numeric"':'')+' onfocus="selectSetInput(this)" '
     +'style="width:100%;background:var(--card2);border:1px solid var(--border);border-radius:8px;padding:8px;color:var(--white);font-size:12.5px;text-align:center"></div>';
 }
 
@@ -9843,6 +9917,21 @@ function rbRemoveEx(i){
   rbSyncFromDom();
   _rbDraft.exercises.splice(i,1);
   if(_rbPickerFor===i)_rbPickerFor=null;
+  else if(typeof _rbPickerFor==='number'&&_rbPickerFor>i)_rbPickerFor--;
+  renderRoutineBuilder();
+}
+// El orden de los ejercicios ES la rutina, y solo se podía agregar al final:
+// llevar el quinto al segundo lugar obligaba a borrar y rehacer todo lo que
+// venía después.
+function rbMoveEx(i,dir){
+  rbSyncFromDom();
+  const j=i+dir;
+  if(j<0||j>=_rbDraft.exercises.length)return;
+  const [ex]=_rbDraft.exercises.splice(i,1);
+  _rbDraft.exercises.splice(j,0,ex);
+  // El buscador abierto viaja con el ejercicio que se movió.
+  if(_rbPickerFor===i)_rbPickerFor=j;
+  else if(_rbPickerFor===j)_rbPickerFor=i;
   renderRoutineBuilder();
 }
 
