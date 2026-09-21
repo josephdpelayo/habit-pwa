@@ -88,11 +88,18 @@ module.exports = async function handler(req, res) {
     if (profileError) throw profileError;
     if (!profile) return deny(res, 'not_found', 'Codigo no encontrado.');
 
+    // Una reserva sigue 'active' para siempre aunque ya haya pasado, y el orden
+    // es ascendente: sin este filtro, a un socio con más de 20 reservas en su
+    // historial solo le llegaban las 20 más viejas —todas terminadas— y el
+    // teclado le decía "la reserva ya termino" teniendo una en curso. Es el
+    // mismo arreglo que recibió request-door-open.js en junio (b84f5d3).
+    const yesterday = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString().slice(0, 10);
     const { data: bookings, error: bookingError } = await supabase
       .from('bookings')
       .select('id,ds,start_idx,slots_used,time_str,status')
       .eq('user_id', profile.id)
       .eq('status', 'active')
+      .gte('ds', yesterday)
       .order('ds', { ascending: true })
       .order('start_idx', { ascending: true })
       .limit(20);

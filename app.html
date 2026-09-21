@@ -6,19 +6,19 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="HABIT">
 <meta name="application-name" content="HABIT">
-<link rel="manifest" href="/manifest.json?v=20260921-1">
-<link rel="apple-touch-icon" sizes="120x120" href="/icons/icon-120.png?v=20260921-1">
-<link rel="apple-touch-icon" sizes="152x152" href="/icons/icon-152.png?v=20260921-1">
-<link rel="apple-touch-icon" sizes="167x167" href="/icons/icon-167.png?v=20260921-1">
-<link rel="apple-touch-icon" sizes="180x180" href="/icons/icon-180.png?v=20260921-1">
-<link rel="icon" type="image/png" sizes="32x32" href="/icons/icon-32.png?v=20260921-1">
+<link rel="manifest" href="/manifest.json?v=20260921-2">
+<link rel="apple-touch-icon" sizes="120x120" href="/icons/icon-120.png?v=20260921-2">
+<link rel="apple-touch-icon" sizes="152x152" href="/icons/icon-152.png?v=20260921-2">
+<link rel="apple-touch-icon" sizes="167x167" href="/icons/icon-167.png?v=20260921-2">
+<link rel="apple-touch-icon" sizes="180x180" href="/icons/icon-180.png?v=20260921-2">
+<link rel="icon" type="image/png" sizes="32x32" href="/icons/icon-32.png?v=20260921-2">
 <title>HABIT</title>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Share+Tech+Mono&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="/skandi-recovery.js?v=20260921-1"></script>
-<script src="/body-figure.js?v=20260921-1"></script>
-<script src="/habit-training.js?v=20260921-1"></script>
+<script src="/skandi-recovery.js?v=20260921-2"></script>
+<script src="/body-figure.js?v=20260921-2"></script>
+<script src="/habit-training.js?v=20260921-2"></script>
 <style>
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
 @media (prefers-reduced-motion:reduce){*,*:before,*:after{scroll-behavior:auto!important;animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}}
@@ -3288,7 +3288,7 @@ body.admin-mode #courtesy-modal label{border-radius:14px!important;border-color:
 // ── CONFIG & SUPABASE ───────────────────────────────────────
 const SUPABASE_URL='https://pmpjteuqjusbiduevbwq.supabase.co';
 const SUPABASE_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBtcGp0ZXVxanVzYmlkdWV2YndxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc2OTI1NjUsImV4cCI6MjA5MzI2ODU2NX0.XbMzZoo2yqtrD8znLnyo_1zDfrdJAvAPj1lqGOyXnLw';
-const APP_VERSION='20260921-1';
+const APP_VERSION='20260921-2';
 // La pierna va separada en cuádriceps, femorales y pantorrillas: la figura
 // corporal pinta esas tres regiones por separado y el motor de recuperación les
 // da ventanas de descanso distintas. 'Piernas' sigue reconociéndose al leer
@@ -4290,14 +4290,23 @@ async function flushTrainingOutbox(){
   try{
     const entries=await HabitTraining.list();
     for(const entry of entries){
-      if(!TRAINING_OUTBOX_TABLES.has(entry.table)){await HabitTraining.remove(entry.key);continue;}
-      const{error}=await sb.from(entry.table).update(entry.patch).eq('id',entry.id);
+      // Las marcas del historial viajan en la misma cola pero no son un update
+      // por id: son upsert o borrado por `set_id` (ver writeTrainingScore).
+      const esMarca=entry.table==='user_scores';
+      if(!esMarca&&!TRAINING_OUTBOX_TABLES.has(entry.table)){await HabitTraining.remove(entry.key);continue;}
+      const{error}=esMarca
+        ?await trainingScoreRequest(entry.id,entry.patch)
+        :await sb.from(entry.table).update(entry.patch).eq('id',entry.id);
       if(!error){
         await HabitTraining.remove(entry.key);
         if(entry.table==='coaching_session_sets')Object.values(coachSessionSets).flat().forEach(row=>{if(String(row.id)===entry.id)delete row._pendingSync;});
         continue;
       }
       if(HabitTraining.isRetryable(error,false)){await HabitTraining.bump(entry);break;}
+      // Una marca que la base rechaza (p. ej. sin la migración 117) se
+      // descarta, como pasaba antes al escribirla directo: el historial no
+      // puede atorar la cola de las series que vienen detrás.
+      if(esMarca){await HabitTraining.remove(entry.key);console.error('flushTrainingOutbox (user_scores):',error);continue;}
       if((entry.tries||0)>=4){await HabitTraining.remove(entry.key);trainingSyncError=error.message||'No se pudo guardar';}
       else{await HabitTraining.bump(entry);trainingSyncError=error.message||'No se pudo guardar';break;}
     }
@@ -7924,7 +7933,7 @@ function renderSetTrackerHtml(sessionCtx,exKey,ex){
         ?'<input class="set-reps-in set-actual-time-in" type="number" inputmode="numeric" min="0" placeholder="seg" onfocus="selectSetInput(this)" value="'+(s.actual_seconds!=null?esc(String(s.actual_seconds)):'')+'" onchange="updateSetSecondsSb(&quot;'+s.id+'&quot;,this.value)"><span class="set-num">'+esc(s.reps_target||ex.reps||'—')+'</span>'
         :'<input class="set-reps-in set-weight-in" type="number" inputmode="decimal" placeholder="'+unit+'" onfocus="selectSetInput(this)" value="'+formatWeightForUnit(s.weight,unit)+'" onchange="updateSetWeightSb(&quot;'+s.id+'&quot;,this.value,&quot;'+esc(exKey)+'&quot;)"><input class="set-reps-in set-actual-reps-in" type="number" inputmode="numeric" placeholder="'+esc(s.reps_target||'reps')+'" onfocus="selectSetInput(this)" value="'+(s.actual_reps!=null?esc(String(s.actual_reps)):'')+'" onchange="updateSetRepsSb(&quot;'+s.id+'&quot;,this.value)">')
       +'<input class="set-reps-in set-rir-in" type="number" inputmode="numeric" min="0" max="10" title="Opcional" onfocus="selectSetInput(this)" placeholder="'+(s.target_rir!=null?esc(String(s.target_rir)):'–')+'" value="'+(s.rir!=null?esc(String(s.rir)):'')+'" onchange="updateSetRirSb(&quot;'+s.id+'&quot;,this.value,this)">'
-      +'<button type="button" class="set-check'+(s.done?' done':'')+'" aria-pressed="'+(s.done?'true':'false')+'" aria-label="'+(s.done?'Serie hecha':'Marcar serie como hecha')+'" onpointerdown="setCheckTap(event,this,&quot;'+s.id+'&quot;,'+(!s.done)+')" onclick="setCheckTap(event,this,&quot;'+s.id+'&quot;,'+(!s.done)+')">✓</button>'
+      +'<button type="button" class="set-check'+(s.done?' done':'')+'" aria-pressed="'+(s.done?'true':'false')+'" aria-label="'+(s.done?'Serie hecha':'Marcar serie como hecha')+'"'+SET_CHECK_EVENTS.map(on=>' '+on+'="setCheckTap(event,this,&quot;'+s.id+'&quot;,'+(!s.done)+')"').join('')+'>✓</button>'
       +'<button class="set-del-btn" title="Eliminar serie" onclick="deleteSetSb(&quot;'+s.id+'&quot;,&quot;'+esc(exKey)+'&quot;)">✕</button>'
       +'</div>').join('')
     +'<div class="set-tracker-actions">'
@@ -8054,8 +8063,7 @@ function logSetToUserScores(row){
     ex_name:found.ex.name,weight:row.weight,reps:row.actual_reps||null,
     schedule_id:activeCoachingSession.id,set_id:row.id,logged_at:row.updated_at||new Date().toISOString()
   };
-  sb.from('user_scores').upsert(score,{onConflict:'set_id'})
-    .then(({error})=>{if(error&&!/set_id|schedule_id|schema cache|column/i.test(error.message||''))console.error('logSetToUserScores:',error);});
+  return writeTrainingScore(row.id,{op:'upsert',row:score});
 }
 // Despalomear una serie — o borrarla — tiene que retirar también su marca del
 // historial. `user_scores` alimenta "Última vez", los PR de Progreso, el peso
@@ -8064,9 +8072,42 @@ function logSetToUserScores(row){
 // quitar desde la app. La FK es `on delete set null` (migración 117), así que
 // borrar la serie no se lleva el score: hay que borrarlo antes y a mano.
 function unlogSetFromUserScores(setId){
-  if(!sbUser||!setId)return;
-  sb.from('user_scores').delete().eq('user_id',sbUser.id).eq('set_id',setId)
-    .then(({error})=>{if(error&&!/set_id|schema cache|column/i.test(error.message||''))console.error('unlogSetFromUserScores:',error);});
+  if(!sbUser||!setId)return Promise.resolve();
+  return writeTrainingScore(setId,{op:'delete'});
+}
+// La marca de una serie en `user_scores` iba directo a Supabase, fuera de la
+// cola offline: un entreno sin señal guardaba sus series (esas sí van por la
+// cola) pero perdía el historial en un console.error, y la sesión quedaba
+// "hecha" sin "Última vez", sin PR y sin nada para el coach. Ahora, sin
+// conexión o ante un error de red, la marca se encola junto a las series y
+// sube con ellas. La entrada es una por serie y gana la última orden
+// (`mergeEntries` fusiona el patch), así que palomear y despalomear sin señal
+// termina en lo último que hizo el socio. Con conexión va directo, y al
+// entrar retira lo que hubiera encolado para esa serie: si no, una marca vieja
+// podría revivir una serie que el socio ya despalomeó.
+function trainingScoreRequest(setId,op){
+  return op&&op.op==='delete'
+    ?sb.from('user_scores').delete().eq('user_id',sbUser.id).eq('set_id',setId)
+    :sb.from('user_scores').upsert(op.row,{onConflict:'set_id'});
+}
+async function writeTrainingScore(setId,op){
+  try{
+    if(!navigator.onLine)throw new TypeError('offline');
+    const{error}=await trainingScoreRequest(setId,op);
+    if(error)throw error;
+    if(trainingSyncPending&&window.HabitTraining){
+      HabitTraining.remove(HabitTraining.keyOf('user_scores',setId)).then(refreshTrainingPendingCount).catch(()=>{});
+    }
+  }catch(error){
+    if(window.HabitTraining&&HabitTraining.isRetryable(error,!navigator.onLine)){
+      try{
+        await HabitTraining.enqueue({table:'user_scores',id:String(setId),patch:op});
+        await refreshTrainingPendingCount();
+      }catch(e){console.error('writeTrainingScore (cola):',e);}
+      return;
+    }
+    if(!/set_id|schedule_id|schema cache|column/i.test(error.message||''))console.error('writeTrainingScore:',error);
+  }
 }
 function getSetRowElement(setId){
   const modal=document.getElementById('exercise-focus-modal');
@@ -8102,20 +8143,37 @@ function refreshSessionUiFor(exKey,opts){
     if(bodyEl)bodyEl.innerHTML=renderExerciseFocusBodyHtml();
   }
 }
-// Palomear se resuelve en `pointerdown`, no en `click`. Con el teclado
-// numérico abierto (peso, reps o RIR), iOS lo cierra en el primer toque, la
-// hoja se reacomoda bajo el dedo y el `click` sintético cae en otro lado o no
-// llega nunca. El socio lo vivía como "no me deja palomear si no pongo el
-// RIR", porque el campo de RIR es justo el vecino del botón y era el que se
-// comía el toque. El `preventDefault` mata el click de compatibilidad para
-// que un solo toque no cuente dos veces; el `onclick` sigue ahí para el
-// teclado físico y para cualquier navegador sin Pointer Events.
-const _setTapAt=new Map();
+// Palomear no se resuelve en `click`: con el teclado numérico abierto (peso,
+// reps o RIR), iOS lo cierra en el primer toque, la hoja se reacomoda bajo el
+// dedo y el `click` sintético cae en otro lado o no llega nunca. El socio lo
+// vivía como "no me deja palomear si no pongo el RIR", porque el campo de RIR
+// es justo el vecino del botón y era el que se comía el toque.
+// Tampoco en `pointerdown`, que fue el primer arreglo: ese evento sale en
+// cuanto el dedo toca, antes de que el navegador sepa si es un toque o el
+// inicio de un scroll, y la columna de palomitas queda justo bajo el pulgar al
+// desplazar la hoja — marcaba (o desmarcaba, borrando su historial) series que
+// nadie quiso tocar. Ahora `pointerdown` solo aparta el toque, `pointercancel`
+// —lo que manda el navegador cuando el gesto resulta ser scroll— lo suelta, y
+// `pointerup` lo cumple. Un toque táctil queda capturado por el elemento donde
+// empezó, así que el `pointerup` llega al botón aunque la hoja se reacomode
+// bajo el dedo. El `click` que viene detrás se descarta; queda para el
+// teclado físico y para navegadores sin Pointer Events.
+const SET_CHECK_EVENTS=['onpointerdown','onpointerup','onpointercancel','onclick'];
+const _setTapAt=new Map(), _setTapDown=new Map();
 function setCheckTap(ev,btnEl,setId,newDone){
+  const type=ev&&ev.type;
+  if(type==='pointerdown'){
+    if(ev.isPrimary!==false&&!(ev.button>0))_setTapDown.set(setId,ev.pointerId);
+    return;
+  }
+  if(type==='pointercancel'){_setTapDown.delete(setId);return;}
+  if(type==='pointerup'){
+    if(!_setTapDown.has(setId)||_setTapDown.get(setId)!==ev.pointerId)return;
+    _setTapDown.delete(setId);
+  }
   const now=Date.now();
-  if(ev&&ev.type==='click'&&now-(_setTapAt.get(setId)||0)<800)return;
+  if(type==='click'&&now-(_setTapAt.get(setId)||0)<800)return;
   _setTapAt.set(setId,now);
-  if(ev&&ev.type==='pointerdown'&&ev.preventDefault)ev.preventDefault();
   // El input que tenga el foco se cierra primero para que su `change` guarde
   // lo que el socio acaba de teclear antes de que se marque la serie.
   const focused=document.activeElement;
@@ -8140,8 +8198,7 @@ function wsPaintSetDone(setId,exKey,done,pop,pending){
       // El estado siguiente viaja dentro del atributo, así que hay que darle
       // la vuelta o el segundo toque repetiría la misma orden.
       const handler='setCheckTap(event,this,"'+setId+'",'+(!done)+')';
-      btn.setAttribute('onpointerdown',handler);
-      btn.setAttribute('onclick',handler);
+      SET_CHECK_EVENTS.forEach(on=>btn.setAttribute(on,handler));
       if(pop&&done){
         btn.classList.remove('pop');
         void btn.offsetWidth;            // reinicia la animación si se repite
@@ -8366,9 +8423,10 @@ async function deleteSetSb(setId,exKey){
   if(arr.length<=1){toast('Debe quedar al menos una serie','warn');return;}
   if(!await confirmSheet('¿Eliminar esta serie?',{confirmLabel:'Eliminar',danger:true}))return;
   try{
-    // Antes de la serie, porque la FK es `on delete set null` y después ya no
-    // habría por dónde alcanzar su fila en `user_scores`.
-    unlogSetFromUserScores(setId);
+    // Antes de la serie —y esperando a que termine—, porque la FK es `on
+    // delete set null` y después ya no habría por dónde alcanzar su fila en
+    // `user_scores`.
+    await unlogSetFromUserScores(setId);
     const{error}=await sb.from('coaching_session_sets').delete().eq('id',setId);
     if(error)throw error;
     // Renumera las series restantes para que el conteo siga consecutivo
