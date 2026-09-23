@@ -228,7 +228,20 @@ a silent overwrite.
   `video_url` (`upgradeCatalogVideo`). Among the candidates the **type** wins before the order:
   YouTube/Drive > MP4 > GIF (`videoKindRank`), because the GIFs and MP4s are Skandi's import and
   a routine that picked the exercise from the catalog carries a copy of that GIF; a gym-recorded
-  video replaces a GIF in the catalog too, never an equal or better one
+  video replaces a GIF in the catalog too, never an equal or better one.
+  **An exercise's identity is its name signature, not its spelling**: `exerciseSignature()` (no
+  accents, no "de/con/en", singular, a few synonyms — lagartija = push up, bench = banca, bar =
+  barra) is what `findExerciseCatalogMatch()` falls back to after the exact match, so a coach
+  typing "Extension de tricep con cuerda" links to "Extensión tríceps cuerda" instead of creating
+  a new catalog row (the live search while typing stays exact, `strict`). The same signature keys
+  the video index (`g:`). `saveExerciseCatalogFromBoardExercise` no longer rewrites a row that
+  already exists — its upsert renamed it after the routine and emptied its aliases — it only
+  upgrades the video. Duplicates already in the catalog are grouped by signature (aliases
+  included) in Admin → Rutinas → "Ejercicios repetidos", and `merge_exercise_catalog(keep, drop)`
+  (migration 123) merges a pair: the dropped row goes `is_active = false`, its name and slug
+  become aliases of the kept one, it keeps the best video and fills what the kept one lacked, and
+  routines and `session_exercises` are repointed (`catalogId`/`exerciseKey` only — names and set
+  history are untouched, since history goes by each routine exercise's own id)
 - `boards.is_starter` (migration 116) — a **rutina básica**: a gym board every member sees
   without anyone assigning it. Not `board_assignments`, which is one row per member per board:
   seeding those leaves thousands of rows to maintain and covers nobody who registers tomorrow.

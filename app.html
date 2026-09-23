@@ -6,19 +6,19 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="HABIT">
 <meta name="application-name" content="HABIT">
-<link rel="manifest" href="/manifest.json?v=20260923-3">
-<link rel="apple-touch-icon" sizes="120x120" href="/icons/icon-120.png?v=20260923-3">
-<link rel="apple-touch-icon" sizes="152x152" href="/icons/icon-152.png?v=20260923-3">
-<link rel="apple-touch-icon" sizes="167x167" href="/icons/icon-167.png?v=20260923-3">
-<link rel="apple-touch-icon" sizes="180x180" href="/icons/icon-180.png?v=20260923-3">
-<link rel="icon" type="image/png" sizes="32x32" href="/icons/icon-32.png?v=20260923-3">
+<link rel="manifest" href="/manifest.json?v=20260923-4">
+<link rel="apple-touch-icon" sizes="120x120" href="/icons/icon-120.png?v=20260923-4">
+<link rel="apple-touch-icon" sizes="152x152" href="/icons/icon-152.png?v=20260923-4">
+<link rel="apple-touch-icon" sizes="167x167" href="/icons/icon-167.png?v=20260923-4">
+<link rel="apple-touch-icon" sizes="180x180" href="/icons/icon-180.png?v=20260923-4">
+<link rel="icon" type="image/png" sizes="32x32" href="/icons/icon-32.png?v=20260923-4">
 <title>HABIT</title>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Share+Tech+Mono&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="/skandi-recovery.js?v=20260923-3"></script>
-<script src="/body-figure.js?v=20260923-3"></script>
-<script src="/habit-training.js?v=20260923-3"></script>
+<script src="/skandi-recovery.js?v=20260923-4"></script>
+<script src="/body-figure.js?v=20260923-4"></script>
+<script src="/habit-training.js?v=20260923-4"></script>
 <style>
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
 @media (prefers-reduced-motion:reduce){*,*:before,*:after{scroll-behavior:auto!important;animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}}
@@ -1636,6 +1636,18 @@ body.admin-mode .adm-search,body.admin-mode .adm-date,body.admin-mode .admin-sel
 .board-library-stat strong{display:block;color:var(--white);font-size:19px;font-weight:760;line-height:1;font-variant-numeric:tabular-nums}
 .board-library-stat span{display:block;color:#828b99;font-size:9.5px;font-weight:760;letter-spacing:.07em;text-transform:uppercase;margin-top:5px}
 .board-library-empty{display:none;grid-column:1/-1}
+.exdup-card{border:1px solid rgba(245,158,11,.28);background:rgba(245,158,11,.06);border-radius:14px;padding:12px;margin-bottom:12px}
+.exdup-head{display:flex;align-items:center;justify-content:space-between;gap:10px;cursor:pointer;background:none;border:0;width:100%;padding:0;color:var(--white);text-align:left}
+.exdup-head strong{font-size:13px;font-weight:760}
+.exdup-head span{font-size:11px;color:#c9a35a}
+.exdup-note{font-size:11.5px;color:#9aa3b0;line-height:1.45;margin:9px 0 10px}
+.exdup-group{border-top:1px solid rgba(255,255,255,.07);padding:9px 0}
+.exdup-row{display:flex;align-items:center;gap:10px;padding:5px 0}
+.exdup-main{flex:1;min-width:0}
+.exdup-main strong{display:block;font-size:13px;color:var(--white);font-weight:700}
+.exdup-main span{display:block;font-size:10.5px;color:#8f97a3;margin-top:2px}
+.exdup-keep{flex-shrink:0;font-size:11px;padding:7px 10px;border-radius:9px;border:1px solid rgba(255,255,255,.14);background:rgba(255,255,255,.04);color:var(--white);cursor:pointer}
+.exdup-keep.suggested{border-color:rgba(16,185,129,.45);background:rgba(16,185,129,.1)}
 .routine-editor-grid{display:grid;gap:12px}
 .routine-editor-main,.routine-editor-side{min-width:0}
 .routine-editor-side{display:grid;align-content:start;gap:10px}
@@ -2795,6 +2807,7 @@ body.admin-mode #courtesy-modal label{border-radius:14px!important;border-color:
         <div id="board-create-panel"></div>
       </div>
       <div id="board-library-summary" class="board-library-summary"></div>
+      <div id="exercise-dup-panel"></div>
       <div id="boards-list"></div>
       <div id="board-search-empty" class="empty board-library-empty">No hay rutinas con ese nombre.</div>
     </div>
@@ -3288,7 +3301,7 @@ body.admin-mode #courtesy-modal label{border-radius:14px!important;border-color:
 // ── CONFIG & SUPABASE ───────────────────────────────────────
 const SUPABASE_URL='https://pmpjteuqjusbiduevbwq.supabase.co';
 const SUPABASE_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBtcGp0ZXVxanVzYmlkdWV2YndxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc2OTI1NjUsImV4cCI6MjA5MzI2ODU2NX0.XbMzZoo2yqtrD8znLnyo_1zDfrdJAvAPj1lqGOyXnLw';
-const APP_VERSION='20260923-3';
+const APP_VERSION='20260923-4';
 // La pierna va separada en cuádriceps, femorales y pantorrillas: la figura
 // corporal pinta esas tres regiones por separado y el motor de recuperación les
 // da ventanas de descanso distintas. 'Piernas' sigue reconociéndose al leer
@@ -3420,14 +3433,51 @@ function exerciseCatalogOptionsHtml(id){
   const rows=exerciseCatalogRows().slice(0,500);
   return '<datalist id="'+id+'">'+rows.map(ex=>'<option value="'+esc(ex.name)+'">'+esc([ex.primary_muscle,ex.category,(ex.equipment||[]).join('/')].filter(Boolean).join(' · '))+'</option>').join('')+'</datalist>';
 }
-function findExerciseCatalogMatch(value){
+// La identidad de un ejercicio por su nombre, sin importar cómo se escriba:
+// sin acentos, sin "de/con/en…", en singular y con unos pocos sinónimos
+// (lagartija = push up, parada de manos = handstand, bench = banca).
+// "Extensión de tríceps con cuerda" y "Extensión tríceps cuerda" dan lo mismo,
+// `cuerda extension tricep`. Comparar el nombre al pie de la letra es lo que
+// dejaba sin encontrar el video del gym y lo que creaba un ejercicio nuevo en
+// el catálogo cada vez que el coach lo escribía distinto.
+const EXERCISE_SIG_STOPWORDS=new Set(['de','del','con','en','la','el','los','las','al','a','y','para','por','the','of','with','on']);
+const EXERCISE_SIG_SYNONYMS={lagartija:'pushup',flexion:'pushup',bench:'banca',cable:'polea',dumbbell:'mancuerna',barbell:'barra',bar:'barra'};
+function exerciseSignature(name){
+  const s=String(name||'').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g,'')
+    .replace(/push[- ]?ups?/g,'pushup').replace(/pull[- ]?ups?/g,'pullup').replace(/muscle[- ]?ups?/g,'muscleup')
+    .replace(/parada de manos/g,'handstand').replace(/cross[- ]?over/g,'crossover');
+  const toks=new Set();
+  s.split(/[^a-z0-9]+/).forEach(w=>{
+    if(!w||EXERCISE_SIG_STOPWORDS.has(w))return;
+    // Plural a singular: consonante + "es" (laterales, elevaciones) y vocal + "s".
+    if(w.length>4&&/[^aeiou]es$/.test(w))w=w.slice(0,-2);
+    else if(w.length>3&&w.endsWith('s'))w=w.slice(0,-1);
+    toks.add(EXERCISE_SIG_SYNONYMS[w]||w);
+  });
+  return [...toks].sort().join(' ');
+}
+function catalogRowSignatures(row){
+  if(!row._sigs)row._sigs=new Set([row.name,...(row.aliases||[])].map(exerciseSignature).filter(Boolean));
+  return row._sigs;
+}
+// `strict` es para el buscador mientras se escribe: ahí un parecido no debe
+// reescribir lo que el coach está tecleando. En todo lo demás, dos nombres con
+// la misma identidad son el mismo ejercicio; si hay varias filas así (un
+// duplicado sin fusionar), gana la que tiene reparto de músculos y mejor video.
+function findExerciseCatalogMatch(value,strict){
   const q=String(value||'').trim().toLowerCase();
   if(!q)return null;
   const rows=exerciseCatalogRows();
-  return rows.find(ex=>(ex.name||'').toLowerCase()===q||(ex.slug||'')===exerciseSlug(q)||(ex.aliases||[]).some(a=>String(a).toLowerCase()===q))||null;
+  const exact=rows.find(ex=>(ex.name||'').toLowerCase()===q||(ex.slug||'')===exerciseSlug(q)||(ex.aliases||[]).some(a=>String(a).toLowerCase()===q))||null;
+  if(exact||strict)return exact;
+  const sig=exerciseSignature(q);
+  if(!sig)return null;
+  const hasSplit=r=>r.muscle_split&&Object.keys(r.muscle_split).length?1:0;
+  return rows.filter(ex=>catalogRowSignatures(ex).has(sig))
+    .sort((a,b)=>(hasSplit(b)-hasSplit(a))||(videoKindRank(b.video_url)-videoKindRank(a.video_url)))[0]||null;
 }
 function applyExerciseCatalogPick(bid,value){
-  const ex=findExerciseCatalogMatch(value);
+  const ex=findExerciseCatalogMatch(value,true);
   const nameInput=document.getElementById('exn-'+bid);
   if(!nameInput)return;
   if(!ex){nameInput.dataset.catalogId='';return;}
@@ -8936,8 +8986,13 @@ function exerciseVideoKeys(ex,catalogId){
   const keys=new Set();
   const id=catalogId||ex.catalogId;
   if(id)keys.add('id:'+id);
+  // 's:' es el slug de siempre; 'g:' la identidad del nombre, que es la que
+  // junta "Extensión de tríceps con cuerda" con "Extensión tríceps cuerda".
   [ex.slug,ex.exerciseKey,ex.name,ex.canonicalName,...(Array.isArray(ex.aliases)?ex.aliases:[])]
-    .forEach(v=>{const s=exerciseSlug(v);if(s)keys.add('s:'+s);});
+    .forEach(v=>{
+      const s=exerciseSlug(v);if(s)keys.add('s:'+s);
+      const g=exerciseSignature(v);if(g)keys.add('g:'+g);
+    });
   return [...keys];
 }
 async function loadGymExerciseVideoIndex(){
@@ -9037,7 +9092,9 @@ async function openMuscleDetail(en){
     .filter(x=>x.pct>0)
     .map(x=>({...x,video:muscleExerciseVideo(x.c,true)}))
     .sort((a,b)=>(b.pct-a.pct)||(videoKindRank(b.video)-videoKindRank(a.video)))
-    .filter(x=>{const k=(x.c.name||'').trim().toLowerCase();if(seen.has(k))return false;seen.add(k);return true;})
+    // Un duplicado sin fusionar sale una vez: la mejor de sus filas, que el
+    // orden de arriba ya dejó primero.
+    .filter(x=>{const k=exerciseSignature(x.c.name)||x.c.id;if(seen.has(k))return false;seen.add(k);return true;})
     .slice(0,6);
 
   body.innerHTML='<div class="muscle-detail-score" style="background:'+BodyFigure.freshColor(row.score)+'">'+row.score+'%</div>'
@@ -13297,6 +13354,7 @@ async function renderBoardsAdmin(){
   // Esta biblioteca es la del gym. Las rutinas que cada socio se arma en
   // Entrenar (owner_id) son suyas y no se editan ni se asignan desde aquí.
   const gymBoards=boards.filter(b=>b.owner_id==null);
+  renderExerciseDuplicatesPanel(gymBoards);
   if(!gymBoards.length){el.innerHTML='<div class="empty">Sin pizarrones. Crea el primero.</div>';return;}
   const summary=document.getElementById('board-library-summary');
   if(summary){
@@ -15915,11 +15973,100 @@ async function upgradeCatalogVideo(catalogId,url){
   if(error){console.warn('video al catálogo:',error.message||error);return;}
   if(row)row.video_url=url;
 }
+// ── EJERCICIOS REPETIDOS ─────────────────────────────────────
+// El mismo ejercicio escrito de dos formas ("Extensión tríceps cuerda" y
+// "Extensión de tríceps con cuerda") son dos filas del catálogo: dos entradas
+// en el buscador, dos en la ficha del músculo, y el video pegado en una no lo
+// encuentra la otra. Se agrupan por la identidad del nombre, alias incluidos,
+// y el admin elige con cuál se queda; merge_exercise_catalog (migración 123)
+// hace el resto en una sola transacción.
+let exerciseDupOpen=false;
+function exerciseDuplicateGroups(){
+  const rows=exerciseCatalog.filter(c=>c.id);
+  const parent=new Map(rows.map(r=>[r.id,r.id]));
+  const root=id=>{while(parent.get(id)!==id){parent.set(id,parent.get(parent.get(id)));id=parent.get(id);}return id;};
+  const bySig=new Map();
+  rows.forEach(r=>catalogRowSignatures(r).forEach(sig=>{
+    const other=bySig.get(sig);
+    if(other)parent.set(root(r.id),root(other));else bySig.set(sig,r.id);
+  }));
+  const groups=new Map();
+  rows.forEach(r=>{const k=root(r.id);if(!groups.has(k))groups.set(k,[]);groups.get(k).push(r);});
+  return [...groups.values()].filter(g=>g.length>1);
+}
+function catalogRowUsage(row,gymBoards){
+  return gymBoards.filter(b=>(Array.isArray(b.exercises)?b.exercises:[])
+    .some(ex=>ex&&(ex.catalogId===row.id||ex.exerciseKey===row.slug))).length;
+}
+function renderExerciseDuplicatesPanel(gymBoards){
+  const panel=document.getElementById('exercise-dup-panel');
+  if(!panel)return;
+  const groups=exerciseDuplicateGroups();
+  if(!groups.length){panel.innerHTML='';return;}
+  const hasSplit=r=>r.muscle_split&&Object.keys(r.muscle_split).length?1:0;
+  const kindLabel=url=>['','GIF','MP4','video'][videoKindRank(url)+1]||'';
+  const body=groups.map(g=>{
+    const rows=g.map(r=>({r,uses:catalogRowUsage(r,gymBoards)}))
+      // Sugerido: el que ya venía completo en el catálogo (con reparto de
+      // músculos, que es lo que no trae uno que el coach escribió a mano); a
+      // igual, el más usado. El video no decide: la fusión se queda con el mejor.
+      .sort((a,b)=>(hasSplit(b.r)-hasSplit(a.r))||(b.uses-a.uses));
+    const ids=rows.map(x=>x.r.id);
+    return '<div class="exdup-group">'+rows.map((x,i)=>{
+      const meta=[x.r.primary_muscle||'sin músculo',kindLabel(x.r.video_url)||'sin video',
+        x.uses?'en '+x.uses+' rutina'+(x.uses===1?'':'s'):'sin rutinas'];
+      return '<div class="exdup-row"><div class="exdup-main"><strong>'+esc(x.r.name)+'</strong><span>'+esc(meta.join(' · '))+'</span></div>'
+        +'<button class="exdup-keep'+(i===0?' suggested':'')+'" data-keep="'+x.r.id+'" data-drops="'+ids.filter(id=>id!==x.r.id).join(',')+'"'
+        +' onclick="mergeExerciseDuplicatesSb(this.dataset.keep,this.dataset.drops.split(&quot;,&quot;))">Quedarme con este</button></div>';
+    }).join('')+'</div>';
+  }).join('');
+  panel.innerHTML='<div class="exdup-card">'
+    +'<button class="exdup-head" onclick="exerciseDupOpen=!exerciseDupOpen;renderExerciseDuplicatesPanel(boards.filter(b=>b.owner_id==null))">'
+    +'<strong>Ejercicios repetidos en el catálogo · '+groups.length+'</strong><span>'+(exerciseDupOpen?'Ocultar':'Revisar')+'</span></button>'
+    +(exerciseDupOpen
+      ?'<div class="exdup-note">El mismo ejercicio escrito de dos formas. Elige con qué nombre se queda: el otro pasa a ser un alias (el buscador lo sigue encontrando), las rutinas que lo usan apuntan al que queda y se conserva el mejor video. El verde es la sugerencia: el que ya venía completo en el catálogo.</div>'+body
+      :'')
+    +'</div>';
+}
+async function mergeExerciseDuplicatesSb(keepId,dropIds){
+  const keep=exerciseCatalog.find(c=>c.id===keepId);
+  const drops=(dropIds||[]).map(id=>exerciseCatalog.find(c=>c.id===id)).filter(Boolean);
+  if(!keep||!drops.length)return;
+  const names=drops.map(d=>'«'+d.name+'»').join(', ');
+  if(!await confirmSheet(names+(drops.length>1?' se fusionan':' se fusiona')+' en «'+keep.name+'». Las rutinas que '+(drops.length>1?'los':'lo')+' usan pasan a apuntar a «'+keep.name+'» y se queda el mejor video.',
+    {title:'Fusionar ejercicios',confirmLabel:'Fusionar'}))return;
+  showLoading('Fusionando...');
+  try{
+    for(const d of drops){
+      const{error}=await sb.rpc('merge_exercise_catalog',{p_keep:keep.id,p_drop:d.id});
+      if(error)throw error;
+    }
+    exerciseCatalogLoaded=false;gymExerciseVideoIndex=null;
+    hideLoading();
+    toast('Ejercicios fusionados','ok');
+    renderBoardsAdmin();
+  }catch(e){
+    hideLoading();
+    toast(/merge_exercise_catalog|schema cache|does not exist/i.test(e.message||'')?'Falta correr la migración 123 en Supabase':'Error: '+(e.message||e),'err');
+  }
+}
 async function saveExerciseCatalogFromBoardExercise(ex){
   if(!ex||!ex.name)return null;
   const canonicalName=(ex.canonicalName||ex.name||'').trim();
   if(!canonicalName)return null;
   const videos=getExerciseVideos(ex);
+  // Si el ejercicio ya está en el catálogo —por id, por clave o por un nombre
+  // escrito de otra forma— no se reescribe. Una rutina no es dueña de la ficha
+  // compartida: el upsert le cambiaba el nombre por el de esta rutina y le
+  // vaciaba los alias, que es justo lo que junta a un duplicado fusionado.
+  // Solo se le sube el video, si el de la rutina es mejor.
+  const existing=(ex.catalogId&&exerciseCatalog.find(x=>x.id===ex.catalogId))
+    ||(ex.exerciseKey&&exerciseCatalog.find(x=>x.slug===ex.exerciseKey))
+    ||findExerciseCatalogMatch(canonicalName);
+  if(existing&&existing.id){
+    if(videos[0])await upgradeCatalogVideo(existing.id,videos[0].url);
+    return existing.id;
+  }
   const row={
     name:canonicalName,
     slug:ex.exerciseKey||exerciseSlug(canonicalName),
