@@ -237,7 +237,7 @@ a silent overwrite.
   the video index (`g:`). `saveExerciseCatalogFromBoardExercise` no longer rewrites a row that
   already exists — its upsert renamed it after the routine and emptied its aliases — it only
   upgrades the video. Duplicates already in the catalog are grouped by signature (aliases
-  included) in Admin → Rutinas → "Ejercicios repetidos", and `merge_exercise_catalog(keep, drop)`
+  included) in Admin → Ejercicios → "Posibles repetidos", and `merge_exercise_catalog(keep, drop)`
   (migration 123) merges a pair: the dropped row goes `is_active = false`, its name and slug
   become aliases of the kept one, it keeps the best video and fills what the kept one lacked, and
   routines and `session_exercises` are repointed (`catalogId`/`exerciseKey` only — names and set
@@ -248,7 +248,20 @@ a silent overwrite.
   anon key could merge any exercise; 124 revokes `anon` explicitly and checks `auth.role()` (empty
   in the SQL Editor, `service_role` from the server) instead. It also revokes `anon` on 057's
   `assign_default_member_boards` — only if it exists, since production doesn't have it and a
-  revoke on a missing function aborts the whole migration
+  revoke on a missing function aborts the whole migration.
+  **Admin → Ejercicios** is the catalog's own screen (before, it was only ever written as a side
+  effect of saving a routine exercise — which is how the coach's upsert renamed "Hip thrust" to
+  "HIP THRUST" and emptied its muscle; migration 125 repaired those from `muscle_split`, 037's
+  seed with 072's leg mapping, and `skandi_exercises` via 071's translation, gave the hand-typed
+  exercises a muscle, and merged the clear duplicates). It edits name, aliases, muscles (changing
+  them empties `muscle_split` so the app derives it), video (offering the videos the exercise
+  already has in routines, and optionally pushing the new one into them), and hides / restores /
+  merges. "Posibles repetidos" shows the exact-signature groups plus **parecidos**: names equal but
+  for one word or one typo (`sigTokenClose`, edit distance ≤ 1), unless that word marks a variant
+  (`EXERCISE_VARIANT_WORDS`: inclinado, tuck, multipower…) — dismissed pairs live in localStorage.
+  During a workout the video is `exerciseVideosForWorkout()`: the routine's own, unless the catalog
+  has one of a better kind (YouTube over the GIF the routine copied, anything over nothing), so a
+  video changed in Ejercicios reaches the workout without touching every routine
 - `boards.is_starter` (migration 116) — a **rutina básica**: a gym board every member sees
   without anyone assigning it. Not `board_assignments`, which is one row per member per board:
   seeding those leaves thousands of rows to maintain and covers nobody who registers tomorrow.

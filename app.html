@@ -6,19 +6,19 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="HABIT">
 <meta name="application-name" content="HABIT">
-<link rel="manifest" href="/manifest.json?v=20260923-4">
-<link rel="apple-touch-icon" sizes="120x120" href="/icons/icon-120.png?v=20260923-4">
-<link rel="apple-touch-icon" sizes="152x152" href="/icons/icon-152.png?v=20260923-4">
-<link rel="apple-touch-icon" sizes="167x167" href="/icons/icon-167.png?v=20260923-4">
-<link rel="apple-touch-icon" sizes="180x180" href="/icons/icon-180.png?v=20260923-4">
-<link rel="icon" type="image/png" sizes="32x32" href="/icons/icon-32.png?v=20260923-4">
+<link rel="manifest" href="/manifest.json?v=20260923-5">
+<link rel="apple-touch-icon" sizes="120x120" href="/icons/icon-120.png?v=20260923-5">
+<link rel="apple-touch-icon" sizes="152x152" href="/icons/icon-152.png?v=20260923-5">
+<link rel="apple-touch-icon" sizes="167x167" href="/icons/icon-167.png?v=20260923-5">
+<link rel="apple-touch-icon" sizes="180x180" href="/icons/icon-180.png?v=20260923-5">
+<link rel="icon" type="image/png" sizes="32x32" href="/icons/icon-32.png?v=20260923-5">
 <title>HABIT</title>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Share+Tech+Mono&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="/skandi-recovery.js?v=20260923-4"></script>
-<script src="/body-figure.js?v=20260923-4"></script>
-<script src="/habit-training.js?v=20260923-4"></script>
+<script src="/skandi-recovery.js?v=20260923-5"></script>
+<script src="/body-figure.js?v=20260923-5"></script>
+<script src="/habit-training.js?v=20260923-5"></script>
 <style>
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
 @media (prefers-reduced-motion:reduce){*,*:before,*:after{scroll-behavior:auto!important;animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}}
@@ -1648,6 +1648,27 @@ body.admin-mode .adm-search,body.admin-mode .adm-date,body.admin-mode .admin-sel
 .exdup-main span{display:block;font-size:10.5px;color:#8f97a3;margin-top:2px}
 .exdup-keep{flex-shrink:0;font-size:11px;padding:7px 10px;border-radius:9px;border:1px solid rgba(255,255,255,.14);background:rgba(255,255,255,.04);color:var(--white);cursor:pointer}
 .exdup-keep.suggested{border-color:rgba(16,185,129,.45);background:rgba(16,185,129,.1)}
+.exdup-keep.danger{border-color:rgba(239,68,68,.4);background:rgba(239,68,68,.1);color:#fca5a5}
+.exdup-sub{font-size:9.5px;font-weight:850;letter-spacing:.1em;text-transform:uppercase;color:#c9a35a;margin:12px 0 2px}
+.exdup-dismiss{background:none;border:0;color:#8f97a3;font-size:11px;padding:4px 0;cursor:pointer;text-decoration:underline}
+.exadm-row{display:flex;align-items:center;gap:10px;width:100%;text-align:left;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.07);border-radius:12px;padding:10px 12px;margin-bottom:6px;color:var(--white);cursor:pointer}
+.exadm-row.is-hidden{cursor:default;opacity:.75}
+.exadm-main{flex:1;min-width:0}
+.exadm-main strong{display:block;font-size:13px;font-weight:700;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.exadm-main span{display:block;font-size:10.5px;color:#8f97a3;margin-top:2px}
+.exadm-main em{font-style:normal;color:#f59e0b}
+.exadm-badge{flex-shrink:0;font-size:9.5px;font-weight:800;letter-spacing:.05em;text-transform:uppercase;padding:4px 8px;border-radius:999px;background:rgba(255,255,255,.05);color:#8f97a3}
+.exadm-badge.k2{background:rgba(16,185,129,.13);color:var(--green)}
+.exadm-badge.k0,.exadm-badge.k1{background:rgba(245,158,11,.12);color:#f5b544}
+.terms-box.exadm-box{max-height:92vh}
+.exadm-body{padding:14px;line-height:1.4}
+.exadm-body .exercise-form-control{margin-bottom:10px}
+.exadm-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.exadm-hint{font-size:11px;color:#8f97a3;line-height:1.45;margin:-4px 0 10px}
+.exadm-video-preview{margin-bottom:8px}
+.exadm-cand{display:flex;align-items:center;gap:8px;justify-content:space-between;font-size:11px;color:#aeb4c0;margin-bottom:6px}
+.exadm-cand span{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.exadm-actions{display:flex;gap:8px;justify-content:space-between;margin-top:10px}
 .routine-editor-grid{display:grid;gap:12px}
 .routine-editor-main,.routine-editor-side{min-width:0}
 .routine-editor-side{display:grid;align-content:start;gap:10px}
@@ -2666,6 +2687,7 @@ body.admin-mode #courtesy-modal label{border-radius:14px!important;border-color:
     <div class="adm-nav-group"><div class="adm-nav-label">Entrenamiento</div>
       <button class="adm-tab" data-admin-tab="coaching" onclick="admTab('coaching')"><span class="adm-nav-icon">↗</span><span>Coaching</span></button>
       <button class="adm-tab" data-admin-tab="boards" onclick="admTab('boards')"><span class="adm-nav-icon">▥</span><span>Rutinas</span></button>
+      <button class="adm-tab" data-admin-tab="ejercicios" onclick="admTab('ejercicios')"><span class="adm-nav-icon">◉</span><span>Ejercicios</span></button>
     </div>
     <div class="adm-nav-group"><div class="adm-nav-label">Negocio</div>
       <button class="adm-tab" data-admin-tab="payments" onclick="admTab('payments')"><span class="adm-nav-icon">$</span><span>Finanzas</span></button>
@@ -2807,9 +2829,20 @@ body.admin-mode #courtesy-modal label{border-radius:14px!important;border-color:
         <div id="board-create-panel"></div>
       </div>
       <div id="board-library-summary" class="board-library-summary"></div>
-      <div id="exercise-dup-panel"></div>
       <div id="boards-list"></div>
       <div id="board-search-empty" class="empty board-library-empty">No hay rutinas con ese nombre.</div>
+    </div>
+
+    <!-- EJERCICIOS -->
+    <div id="a-ejercicios" class="adm-section">
+      <div class="admin-page-head">
+        <div><div class="admin-page-kicker">Biblioteca</div><h2 class="admin-page-title">Ejercicios</h2><div class="admin-page-sub">Nombre, músculos, video e indicaciones de cada ejercicio</div></div>
+        <div class="admin-page-actions"><button class="admin-page-action primary" onclick="openExerciseEditor(null)">Nuevo ejercicio</button></div>
+      </div>
+      <div class="board-library-search" style="margin-bottom:8px"><span class="board-library-search-icon">⌕</span><input class="adm-search" id="exadm-search" placeholder="Buscar ejercicio..." aria-label="Buscar ejercicio" oninput="exAdmQuery=this.value;renderExerciseAdminList()"></div>
+      <div class="coach-picker-chips" id="exadm-chips"></div>
+      <div id="exercise-dup-panel"></div>
+      <div id="exadm-list"></div>
     </div>
 
 
@@ -3301,7 +3334,7 @@ body.admin-mode #courtesy-modal label{border-radius:14px!important;border-color:
 // ── CONFIG & SUPABASE ───────────────────────────────────────
 const SUPABASE_URL='https://pmpjteuqjusbiduevbwq.supabase.co';
 const SUPABASE_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBtcGp0ZXVxanVzYmlkdWV2YndxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc2OTI1NjUsImV4cCI6MjA5MzI2ODU2NX0.XbMzZoo2yqtrD8znLnyo_1zDfrdJAvAPj1lqGOyXnLw';
-const APP_VERSION='20260923-4';
+const APP_VERSION='20260923-5';
 // La pierna va separada en cuádriceps, femorales y pantorrillas: la figura
 // corporal pinta esas tres regiones por separado y el motor de recuperación les
 // da ventanas de descanso distintas. 'Piernas' sigue reconociéndose al leer
@@ -3444,7 +3477,7 @@ const EXERCISE_SIG_STOPWORDS=new Set(['de','del','con','en','la','el','los','las
 const EXERCISE_SIG_SYNONYMS={lagartija:'pushup',flexion:'pushup',bench:'banca',cable:'polea',dumbbell:'mancuerna',barbell:'barra',bar:'barra'};
 function exerciseSignature(name){
   const s=String(name||'').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g,'')
-    .replace(/push[- ]?ups?/g,'pushup').replace(/pull[- ]?ups?/g,'pullup').replace(/muscle[- ]?ups?/g,'muscleup')
+    .replace(/(push|pull|chin|sit|step|muscle)[- ]?ups?\b/g,'$1up')
     .replace(/parada de manos/g,'handstand').replace(/cross[- ]?over/g,'crossover');
   const toks=new Set();
   s.split(/[^a-z0-9]+/).forEach(w=>{
@@ -4196,6 +4229,20 @@ function getExerciseVideos(ex){
   return list.slice(0,2);
 }
 
+// Durante el entreno manda el video de la rutina, salvo que el catálogo tenga
+// uno de mejor tipo: un YouTube frente al GIF que la rutina copió al elegir el
+// ejercicio, o cualquiera frente a nada. Así cambiar un video en Admin →
+// Ejercicios llega al entreno sin tocar cada rutina.
+function exerciseVideosForWorkout(ex){
+  const own=getExerciseVideos(ex);
+  const row=(ex&&ex.catalogId&&exerciseCatalog.find(r=>r.id===ex.catalogId))
+    ||(ex&&ex.exerciseKey&&exerciseCatalog.find(r=>r.slug===ex.exerciseKey))
+    ||findExerciseCatalogMatch((ex&&ex.name)||'');
+  const cat=row&&row.video_url;
+  if(!cat||own.some(v=>v.url===cat))return own;
+  const bestOwn=Math.max(-1,...own.map(v=>videoKindRank(v.url)));
+  return videoKindRank(cat)>bestOwn?[{url:cat,title:row.name},...own].slice(0,2):own;
+}
 function openVideoModal(embed){
   if(!embed)return;
   const old=document.getElementById('video-modal');
@@ -5274,7 +5321,7 @@ function showAdmin(){
   toggleAdminMobileMenu(false);
   const d=document.getElementById('adm-date');if(d){d.value=mazToday();d.max=addDaysDS(mazToday(),ADMIN_BLOCK_ADVANCE_DAYS);}
   const savedAdminTab=sessionStorage.getItem('habit-admin-tab');
-  const safeAdminTabs=['dash','slots','users','coaching','boards','payments','shop','gaia','reports','mensajes','comunidad','notifs'];
+  const safeAdminTabs=['dash','slots','users','coaching','boards','ejercicios','payments','shop','gaia','reports','mensajes','comunidad','notifs'];
   admTab(safeAdminTabs.includes(savedAdminTab)?savedAdminTab:'dash');
   loadBoardsSb();
   startAdminChatRealtime();
@@ -5590,6 +5637,7 @@ function admTab(t){
   if(t==='slots')renderAdmSlots();
   if(t==='users')renderUsersSb();
   if(t==='boards')renderBoardsAdmin();
+  if(t==='ejercicios')renderExerciseAdmin();
   if(t==='coaching')renderCoachingListSb();
   if(t==='mensajes')renderMensajesAdminSb();
   if(t==='payments')renderPaymentsSb();
@@ -7778,7 +7826,7 @@ function buildExerciseFocusData(exercises,idx,boardId,scheduleId){
   if(!ex)return null;
   const exKey=ex._exKey||ex.id||boardId+'_idx_'+idx;
   return {name:ex.name,sets:ex.sets||'',reps:ex.reps||'',repsType:inferTargetType(ex),rest:ex.rest||'',
-    videos:getExerciseVideos(ex),exKey,hasNote:!!exerciseNotesMap[exKey],
+    videos:exerciseVideosForWorkout(ex),exKey,hasNote:!!exerciseNotesMap[exKey],
     bid:boardId,idx,exid:ex.id||'',scheduleId:scheduleId||null,
     supersetGroup:exerciseGroupRaw(ex),focusSetIdx:arguments.length>4?arguments[4]:null,
     showAsesoria:canAccessCoaching(),
@@ -9016,21 +9064,22 @@ async function loadGymExerciseVideoIndex(){
   return gymExerciseVideoIndex;
 }
 // El video de un ejercicio. Se juntan los candidatos en este orden —el que
-// lleve encima (una rutina o una sesión), los que el gym le pegó en sus
-// rutinas, el del catálogo— y gana el mejor tipo (videoKindRank); el orden
-// solo desempata. Una fila del catálogo (`fromCatalog`) no tiene "encima":
-// su propio video es el del catálogo, y va al final.
+// lleve encima (una rutina o una sesión), el del catálogo, los que el gym le
+// pegó en sus rutinas— y gana el mejor tipo (videoKindRank); el orden solo
+// desempata. El catálogo va antes que las rutinas porque es el que se edita a
+// propósito en Admin → Ejercicios. Una fila del catálogo (`fromCatalog`) no
+// tiene "encima": empieza por su propio video.
 function muscleExerciseVideo(ex,fromCatalog){
   if(!ex)return '';
-  const urls=fromCatalog?[]:getExerciseVideos(ex).map(v=>v.url);
   const fila=fromCatalog?ex:findExerciseCatalogMatch(ex.name||'');
+  const urls=fromCatalog?[]:getExerciseVideos(ex).map(v=>v.url);
+  if(fila)getExerciseVideos(fila).forEach(v=>urls.push(v.url));
   const idx=gymExerciseVideoIndex;
   if(idx){
     const keys=fromCatalog?exerciseVideoKeys(ex,ex.id)
       :exerciseVideoKeys(ex).concat(fila?exerciseVideoKeys(fila,fila.id):[]);
     keys.forEach(k=>(idx.get(k)||[]).forEach(u=>urls.push(u)));
   }
-  if(fila)getExerciseVideos(fila).forEach(v=>urls.push(v.url));
   return pickBestVideo(urls);
 }
 // La URL viaja en un `data-`, no dentro del `onclick`. Interpolarla en el
@@ -9050,8 +9099,9 @@ async function openMuscleDetail(en){
   const body=document.getElementById('muscle-detail-body');
   body.innerHTML='<div class="empty">Cargando…</div>';
   document.getElementById('muscle-detail-modal').style.display='flex';
-  // Sin el catálogo real solo hay el fallback, que no trae los videos del gym.
-  await loadExerciseCatalogSb().catch(()=>{});
+  // Sin el catálogo real solo hay el fallback, que no trae los videos del gym;
+  // y los de Drive/YouTube están en las rutinas, no en el catálogo.
+  await Promise.all([loadExerciseCatalogSb().catch(()=>{}),loadGymExerciseVideoIndex()]);
   let worked=[];
   try{
     const since=addDaysDS(mazToday(),-SkandiRecovery.RECOVERY_LOOKBACK_DAYS);
@@ -13354,7 +13404,6 @@ async function renderBoardsAdmin(){
   // Esta biblioteca es la del gym. Las rutinas que cada socio se arma en
   // Entrenar (owner_id) son suyas y no se editan ni se asignan desde aquí.
   const gymBoards=boards.filter(b=>b.owner_id==null);
-  renderExerciseDuplicatesPanel(gymBoards);
   if(!gymBoards.length){el.innerHTML='<div class="empty">Sin pizarrones. Crea el primero.</div>';return;}
   const summary=document.getElementById('board-library-summary');
   if(summary){
@@ -15973,14 +16022,50 @@ async function upgradeCatalogVideo(catalogId,url){
   if(error){console.warn('video al catálogo:',error.message||error);return;}
   if(row)row.video_url=url;
 }
-// ── EJERCICIOS REPETIDOS ─────────────────────────────────────
-// El mismo ejercicio escrito de dos formas ("Extensión tríceps cuerda" y
-// "Extensión de tríceps con cuerda") son dos filas del catálogo: dos entradas
-// en el buscador, dos en la ficha del músculo, y el video pegado en una no lo
-// encuentra la otra. Se agrupan por la identidad del nombre, alias incluidos,
-// y el admin elige con cuál se queda; merge_exercise_catalog (migración 123)
-// hace el resto en una sola transacción.
-let exerciseDupOpen=false;
+// ── ADMIN → EJERCICIOS ───────────────────────────────────────
+// El catálogo como pantalla propia: cada ejercicio con su nombre, músculos,
+// video e indicaciones, editable en un solo lugar. Antes solo se tocaba de
+// rebote, al guardar un ejercicio dentro de una rutina — y así fue como el
+// coach le pisó el nombre y el músculo a varios (arreglado en la 125).
+let exAdmQuery='', exAdmFilter='todos', exAdmHidden=null, exerciseDupOpen=false;
+const exAdmNorm=s=>String(s||'').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g,'');
+
+// Qué ejercicios de las rutinas del gym son este ejercicio del catálogo: por
+// id, por clave o por la identidad del nombre. Un id que apunta a una ficha
+// fusionada (inactiva) cae a la clave y al nombre, que llevan a la que quedó.
+function catalogUsageIndex(gymBoards){
+  const byId=new Map(), bySlug=new Map(), bySig=new Map();
+  exerciseCatalog.forEach(r=>{
+    if(!r.id)return;
+    byId.set(r.id,r);bySlug.set(r.slug,r);
+    catalogRowSignatures(r).forEach(sg=>{if(!bySig.has(sg))bySig.set(sg,r);});
+  });
+  const idx=new Map();
+  gymBoards.forEach(b=>(Array.isArray(b.exercises)?b.exercises:[]).forEach((ex,i)=>{
+    if(!ex)return;
+    const r=(ex.catalogId&&byId.get(ex.catalogId))||(ex.exerciseKey&&bySlug.get(ex.exerciseKey))||bySig.get(exerciseSignature(ex.name));
+    if(!r)return;
+    if(!idx.has(r.id))idx.set(r.id,[]);
+    idx.get(r.id).push({board:b,ex,i});
+  }));
+  return idx;
+}
+const routinesUsing=(usage,id)=>new Set((usage.get(id)||[]).map(u=>u.board.id)).size;
+function videoSourceLabel(url){
+  if(!url)return 'Sin video';
+  if(getYTId(url))return 'YouTube';
+  if(getDriveId(url))return 'Drive';
+  const k=mediaKind(url);
+  return k==='image'?'GIF':k==='video'?'MP4':'Link';
+}
+
+// ── Repetidos ──
+// Exactos: la misma identidad de nombre (alias incluidos) — "Extensión tríceps
+// cuerda" y "Extensión de tríceps con cuerda". Parecidos: lo que la identidad
+// no junta, errores de dedo ("EXTENCION", "CRUADRICEP") o un nombre que es el
+// otro más un dato ("ELEVACIONES LATERALES" / "… MANCUERNAS"). Los parecidos
+// son una sugerencia: una palabra que marca variante (inclinado, tuck,
+// unilateral…) no cuenta como "un dato más", y el admin puede descartar el par.
 function exerciseDuplicateGroups(){
   const rows=exerciseCatalog.filter(c=>c.id);
   const parent=new Map(rows.map(r=>[r.id,r.id]));
@@ -15994,47 +16079,97 @@ function exerciseDuplicateGroups(){
   rows.forEach(r=>{const k=root(r.id);if(!groups.has(k))groups.set(k,[]);groups.get(k).push(r);});
   return [...groups.values()].filter(g=>g.length>1);
 }
-function catalogRowUsage(row,gymBoards){
-  return gymBoards.filter(b=>(Array.isArray(b.exercises)?b.exercises:[])
-    .some(ex=>ex&&(ex.catalogId===row.id||ex.exerciseKey===row.slug))).length;
+const EXERCISE_VARIANT_WORDS=new Set(['avanzado','avanzada','inclinado','inclinada','declinado','declinada','unilateral',
+  'sentado','sentada','parado','parada','acostado','acostada','frontal','lateral','alta','alto','baja','bajo','cerrado','cerrada',
+  'abierto','abierta','negativo','negativa','lastre','completo','completa','straddle','tuck','explosivo','explosiva','arquero',
+  'pistol','bulgara','sumo','rumano','invertido','prono','supino','neutro','concentrado','estatico','estatica','isometrico',
+  'multipower','smith','colgado','colgada','pared','t']);
+function sigTokenClose(a,b){
+  if(a===b)return true;
+  if(a.length<5||b.length<5||Math.abs(a.length-b.length)>1)return false;
+  // Distancia de edición ≤ 1: una letra de más, de menos o cambiada.
+  let i=0,j=0,edits=0;
+  while(i<a.length&&j<b.length){
+    if(a[i]===b[j]){i++;j++;continue;}
+    if(++edits>1)return false;
+    if(a.length>b.length)i++;else if(b.length>a.length)j++;else{i++;j++;}
+  }
+  return edits+(a.length-i)+(b.length-j)<=1;
 }
-function renderExerciseDuplicatesPanel(gymBoards){
+function readDismissedExercisePairs(){
+  try{return new Set(JSON.parse(localStorage.getItem('habit_exdup_dismissed')||'[]'));}catch(e){return new Set();}
+}
+function dismissExercisePair(a,b){
+  const set=readDismissedExercisePairs();set.add([a,b].sort().join('|'));
+  try{localStorage.setItem('habit_exdup_dismissed',JSON.stringify([...set]));}catch(e){}
+  renderExerciseAdminList();
+}
+function exerciseSimilarPairs(exactGroups){
+  const rows=exerciseCatalog.filter(r=>r.id);
+  const inExact=new Set(exactGroups.flat().map(r=>r.id));
+  const dismissed=readDismissedExercisePairs();
+  const toks=new Map(rows.map(r=>[r.id,exerciseSignature(r.name).split(' ').filter(Boolean)]));
+  const pairs=[];
+  for(let x=0;x<rows.length;x++)for(let y=x+1;y<rows.length;y++){
+    const a=rows[x],b=rows[y];
+    if(inExact.has(a.id)&&inExact.has(b.id))continue;
+    if(a.primary_muscle&&b.primary_muscle&&a.primary_muscle!==b.primary_muscle)continue;
+    if(dismissed.has([a.id,b.id].sort().join('|')))continue;
+    const ta=toks.get(a.id),tb=toks.get(b.id);
+    const extraA=ta.filter(t=>!tb.some(u=>sigTokenClose(t,u)));
+    const extraB=tb.filter(u=>!ta.some(t=>sigTokenClose(t,u)));
+    const shared=ta.length-extraA.length;
+    // Iguales salvo una palabra de más o un error de dedo, y esa palabra no
+    // marca una variante (inclinado, tuck, multipower…): eso es otro ejercicio.
+    if(shared<2||extraA.length+extraB.length>1)continue;
+    if([...extraA,...extraB].some(w=>EXERCISE_VARIANT_WORDS.has(w)))continue;
+    pairs.push({a,b,score:shared/(shared+extraA.length+extraB.length)});
+  }
+  return pairs.sort((p,q)=>q.score-p.score).slice(0,40);
+}
+function exerciseKeepButton(keep,drops,label,suggested){
+  return '<button class="exdup-keep'+(suggested?' suggested':'')+'" data-keep="'+keep.id+'" data-drops="'+drops.map(d=>d.id).join(',')+'"'
+    +' onclick="mergeExerciseDuplicatesSb(this.dataset.keep,this.dataset.drops.split(&quot;,&quot;))">'+esc(label)+'</button>';
+}
+function renderExerciseDuplicatesPanel(usage){
   const panel=document.getElementById('exercise-dup-panel');
   if(!panel)return;
   const groups=exerciseDuplicateGroups();
-  if(!groups.length){panel.innerHTML='';return;}
+  const similar=exerciseSimilarPairs(groups);
+  if(!groups.length&&!similar.length){panel.innerHTML='';return;}
   const hasSplit=r=>r.muscle_split&&Object.keys(r.muscle_split).length?1:0;
-  const kindLabel=url=>['','GIF','MP4','video'][videoKindRank(url)+1]||'';
-  const body=groups.map(g=>{
-    const rows=g.map(r=>({r,uses:catalogRowUsage(r,gymBoards)}))
-      // Sugerido: el que ya venía completo en el catálogo (con reparto de
-      // músculos, que es lo que no trae uno que el coach escribió a mano); a
-      // igual, el más usado. El video no decide: la fusión se queda con el mejor.
-      .sort((a,b)=>(hasSplit(b.r)-hasSplit(a.r))||(b.uses-a.uses));
-    const ids=rows.map(x=>x.r.id);
-    return '<div class="exdup-group">'+rows.map((x,i)=>{
-      const meta=[x.r.primary_muscle||'sin músculo',kindLabel(x.r.video_url)||'sin video',
-        x.uses?'en '+x.uses+' rutina'+(x.uses===1?'':'s'):'sin rutinas'];
-      return '<div class="exdup-row"><div class="exdup-main"><strong>'+esc(x.r.name)+'</strong><span>'+esc(meta.join(' · '))+'</span></div>'
-        +'<button class="exdup-keep'+(i===0?' suggested':'')+'" data-keep="'+x.r.id+'" data-drops="'+ids.filter(id=>id!==x.r.id).join(',')+'"'
-        +' onclick="mergeExerciseDuplicatesSb(this.dataset.keep,this.dataset.drops.split(&quot;,&quot;))">Quedarme con este</button></div>';
-    }).join('')+'</div>';
+  const meta=r=>[r.primary_muscle||'sin músculo',videoSourceLabel(r.video_url),
+    routinesUsing(usage,r.id)?'en '+routinesUsing(usage,r.id)+' rutina'+(routinesUsing(usage,r.id)===1?'':'s'):'sin rutinas'].join(' · ');
+  const exactHtml=groups.map(g=>{
+    // Sugerido: el que ya venía completo en el catálogo (con reparto de
+    // músculos, que es lo que no trae uno que el coach escribió a mano); a
+    // igual, el más usado. El video no decide: la fusión se queda con el mejor.
+    const rows=g.slice().sort((a,b)=>(hasSplit(b)-hasSplit(a))||(routinesUsing(usage,b.id)-routinesUsing(usage,a.id)));
+    return '<div class="exdup-group">'+rows.map((r,i)=>'<div class="exdup-row"><div class="exdup-main"><strong>'+esc(r.name)+'</strong><span>'+esc(meta(r))+'</span></div>'
+      +exerciseKeepButton(r,rows.filter(x=>x!==r),'Quedarme con este',i===0)+'</div>').join('')+'</div>';
   }).join('');
+  const similarHtml=similar.map(({a,b})=>'<div class="exdup-group">'
+    +[a,b].map(r=>'<div class="exdup-row"><div class="exdup-main"><strong>'+esc(r.name)+'</strong><span>'+esc(meta(r))+'</span></div>'
+      +exerciseKeepButton(r,[r===a?b:a],'Quedarme con este',false)+'</div>').join('')
+    +'<button class="exdup-dismiss" data-a="'+a.id+'" data-b="'+b.id+'" onclick="dismissExercisePair(this.dataset.a,this.dataset.b)">No son el mismo</button></div>').join('');
+  const total=groups.length+similar.length;
   panel.innerHTML='<div class="exdup-card">'
-    +'<button class="exdup-head" onclick="exerciseDupOpen=!exerciseDupOpen;renderExerciseDuplicatesPanel(boards.filter(b=>b.owner_id==null))">'
-    +'<strong>Ejercicios repetidos en el catálogo · '+groups.length+'</strong><span>'+(exerciseDupOpen?'Ocultar':'Revisar')+'</span></button>'
+    +'<button class="exdup-head" onclick="exerciseDupOpen=!exerciseDupOpen;renderExerciseAdminList()">'
+    +'<strong>Posibles repetidos · '+total+'</strong><span>'+(exerciseDupOpen?'Ocultar':'Revisar')+'</span></button>'
     +(exerciseDupOpen
-      ?'<div class="exdup-note">El mismo ejercicio escrito de dos formas. Elige con qué nombre se queda: el otro pasa a ser un alias (el buscador lo sigue encontrando), las rutinas que lo usan apuntan al que queda y se conserva el mejor video. El verde es la sugerencia: el que ya venía completo en el catálogo.</div>'+body
+      ?'<div class="exdup-note">Elige con qué nombre se queda cada uno: el otro pasa a ser un nombre alterno (el buscador lo sigue encontrando), las rutinas que lo usan apuntan al que queda y se conserva el mejor video. El verde es la sugerencia: el que ya venía completo en el catálogo.</div>'
+        +(groups.length?'<div class="exdup-sub">Mismo ejercicio, escrito distinto</div>'+exactHtml:'')
+        +(similar.length?'<div class="exdup-sub">Parecidos — revisa si son el mismo</div>'+similarHtml:'')
       :'')
     +'</div>';
 }
 async function mergeExerciseDuplicatesSb(keepId,dropIds){
   const keep=exerciseCatalog.find(c=>c.id===keepId);
   const drops=(dropIds||[]).map(id=>exerciseCatalog.find(c=>c.id===id)).filter(Boolean);
-  if(!keep||!drops.length)return;
+  if(!keep||!drops.length)return false;
   const names=drops.map(d=>'«'+d.name+'»').join(', ');
   if(!await confirmSheet(names+(drops.length>1?' se fusionan':' se fusiona')+' en «'+keep.name+'». Las rutinas que '+(drops.length>1?'los':'lo')+' usan pasan a apuntar a «'+keep.name+'» y se queda el mejor video.',
-    {title:'Fusionar ejercicios',confirmLabel:'Fusionar'}))return;
+    {title:'Fusionar ejercicios',confirmLabel:'Fusionar'}))return false;
   showLoading('Fusionando...');
   try{
     for(const d of drops){
@@ -16044,12 +16179,241 @@ async function mergeExerciseDuplicatesSb(keepId,dropIds){
     exerciseCatalogLoaded=false;gymExerciseVideoIndex=null;
     hideLoading();
     toast('Ejercicios fusionados','ok');
-    renderBoardsAdmin();
+    closeExerciseEditor();
+    renderExerciseAdmin();
+    return true;
   }catch(e){
     hideLoading();
     toast(/merge_exercise_catalog|schema cache|does not exist/i.test(e.message||'')?'Falta correr la migración 123 en Supabase':'Error: '+(e.message||e),'err');
+    return false;
   }
 }
+
+// ── Lista ──
+async function renderExerciseAdmin(){
+  const list=document.getElementById('exadm-list');
+  if(list&&!exerciseCatalog.length)list.innerHTML='<div class="empty">Cargando…</div>';
+  await Promise.all([loadBoardsSb(),loadExerciseCatalogSb(),loadGymExerciseVideoIndex()]);
+  if(exAdmFilter==='ocultos')await loadHiddenExercises();
+  renderExerciseAdminList();
+}
+async function loadHiddenExercises(){
+  const{data,error}=await sb.from('exercise_catalog').select('*').eq('is_active',false).order('name').limit(500);
+  exAdmHidden=error?[]:(data||[]).map(normalizeExerciseCatalogRow);
+}
+function setExerciseAdminFilter(f){
+  exAdmFilter=f;
+  if(f==='ocultos'&&!exAdmHidden){loadHiddenExercises().then(renderExerciseAdminList);return;}
+  renderExerciseAdminList();
+}
+function renderExerciseAdminList(){
+  const list=document.getElementById('exadm-list');
+  if(!list)return;
+  const gymBoards=boards.filter(b=>b.owner_id==null);
+  const usage=catalogUsageIndex(gymBoards);
+  renderExerciseDuplicatesPanel(usage);
+  const rows=exerciseCatalog.filter(r=>r.id);
+  const filters=[
+    ['todos','Todos',()=>true],
+    ['sin-musculo','Sin músculo',r=>!r.primary_muscle],
+    ['sin-video','Sin video',r=>!r.video_url],
+    ['gif','Solo GIF o MP4',r=>r.video_url&&videoKindRank(r.video_url)<2],
+    ...MUSCLE_GROUPS.map(m=>[m,m,r=>r.primary_muscle===m])
+  ];
+  const chips=document.getElementById('exadm-chips');
+  if(chips)chips.innerHTML=filters.map(([id,label,f])=>{
+    const n=rows.filter(f).length;
+    if(!n&&id!=='todos'&&id!==exAdmFilter)return '';
+    return '<button class="coach-picker-chip'+(exAdmFilter===id?' active':'')+'" data-f="'+esc(id)+'" onclick="setExerciseAdminFilter(this.dataset.f)">'+esc(label)+'<i>'+n+'</i></button>';
+  }).join('')+'<button class="coach-picker-chip'+(exAdmFilter==='ocultos'?' active':'')+'" onclick="setExerciseAdminFilter(&quot;ocultos&quot;)">Ocultos</button>';
+  const q=exAdmNorm(exAdmQuery).trim();
+  const matchesQ=r=>!q||exAdmNorm([r.name,...(r.aliases||[])].join(' ')).includes(q);
+  if(exAdmFilter==='ocultos'){
+    const hidden=(exAdmHidden||[]).filter(matchesQ);
+    list.innerHTML=hidden.length?hidden.map(r=>'<div class="exadm-row is-hidden"><div class="exadm-main"><strong>'+esc(r.name)+'</strong><span>'+esc(r.primary_muscle||'sin músculo')+'</span></div>'
+      +'<button class="exdup-keep" data-id="'+r.id+'" onclick="restoreCatalogExercise(this.dataset.id)">Volver a mostrar</button></div>').join('')
+      :'<div class="empty">No hay ejercicios ocultos.</div>';
+    return;
+  }
+  const f=(filters.find(x=>x[0]===exAdmFilter)||filters[0])[2];
+  const shown=rows.filter(f).filter(matchesQ).sort((a,b)=>a.name.localeCompare(b.name,'es'));
+  list.innerHTML=shown.length?shown.map(r=>{
+    const n=routinesUsing(usage,r.id);
+    const kind=videoKindRank(r.video_url);
+    return '<button class="exadm-row" data-id="'+r.id+'" onclick="openExerciseEditor(this.dataset.id)">'
+      +'<div class="exadm-main"><strong>'+esc(r.name)+'</strong><span>'
+      +(r.primary_muscle?esc(r.primary_muscle):'<em>sin músculo</em>')
+      +' · '+esc(r.category||'Fuerza')+(n?' · en '+n+' rutina'+(n===1?'':'s'):'')+'</span></div>'
+      +'<span class="exadm-badge k'+kind+'">'+esc(videoSourceLabel(r.video_url))+'</span></button>';
+  }).join(''):'<div class="empty">Ningún ejercicio con ese filtro.</div>';
+}
+
+// ── Editor ──
+function closeExerciseEditor(){const m=document.getElementById('exadm-editor');if(m)m.remove();}
+function exAdmPreviewVideo(url){
+  const el=document.getElementById('exadm-video-preview');
+  if(el)el.innerHTML=url&&isUrl(url)?getVideoHtml(url):'';
+}
+function exAdmUseVideo(url){
+  const input=document.getElementById('exadm-video');
+  if(input)input.value=url;
+  exAdmPreviewVideo(url);
+}
+function openExerciseEditor(id){
+  const row=id?exerciseCatalog.find(r=>r.id===id):null;
+  const r=row||{name:'',category:'Fuerza',primary_muscle:'',secondary_muscles:[],equipment:[],video_url:'',instructions:'',aliases:[]};
+  const usage=row?(catalogUsageIndex(boards.filter(b=>b.owner_id==null)).get(row.id)||[]):[];
+  // Los videos que el coach le pegó en sus rutinas y que no son el del
+  // catálogo: el YouTube que grabó suele estar ahí y no aquí.
+  const cands=[...new Set(usage.flatMap(u=>getExerciseVideos(u.ex).map(v=>v.url)))].filter(u=>u&&u!==r.video_url)
+    .sort((a,b)=>videoKindRank(b)-videoKindRank(a));
+  const routineNames=[...new Set(usage.map(u=>u.board.name))];
+  closeExerciseEditor();
+  const m=document.createElement('div');
+  m.id='exadm-editor';m.className='terms-modal';
+  m.innerHTML='<div class="terms-box exadm-box" onclick="event.stopPropagation()">'
+    +'<div class="terms-hdr"><h2>'+(row?'Editar ejercicio':'Nuevo ejercicio')+'</h2><button class="video-modal-close" onclick="closeExerciseEditor()">Cerrar</button></div>'
+    +'<div class="terms-body exadm-body" id="exadm-body">'
+    +'<div class="exercise-field-label">Nombre</div><input class="exercise-form-control" id="exadm-name" value="'+esc(r.name)+'">'
+    +'<div class="exercise-field-label">Otros nombres</div><input class="exercise-form-control small" id="exadm-aliases" value="'+esc((r.aliases||[]).join(', '))+'" placeholder="Separados por comas">'
+    +'<div class="exadm-hint">El buscador también lo encuentra por estos. Al renombrarlo, el nombre anterior se agrega aquí solo.</div>'
+    +'<div class="exadm-grid">'+musclePrimarySelectHtml('exadm-primary',r.primary_muscle||'')+exerciseTypeSelectHtml('exadm-type',r.category||'')+'</div>'
+    +muscleSecondaryPickerHtml('exadm-secondary',r.secondary_muscles||[])
+    +'<div class="exercise-field-label">Equipo</div><input class="exercise-form-control small" id="exadm-equipment" value="'+esc((r.equipment||[]).join(', '))+'" placeholder="Barra, Banco…">'
+    +'<div class="exercise-field-label">Video</div><input class="exercise-form-control small" id="exadm-video" value="'+esc(r.video_url||'')+'" placeholder="Link de YouTube o Drive" onchange="exAdmPreviewVideo(this.value.trim())">'
+    +'<div id="exadm-video-preview" class="exadm-video-preview">'+(r.video_url?getVideoHtml(r.video_url):'')+'</div>'
+    +(cands.length?'<div class="exadm-hint">Videos que ya tiene en sus rutinas:</div>'+cands.map(u=>'<div class="exadm-cand"><span>'+esc(videoSourceLabel(u))+' · '+esc(u.replace(/^https?:\/\//,'').slice(0,42))+'</span>'
+      +'<button class="exdup-keep" data-url="'+esc(u)+'" onclick="exAdmUseVideo(this.dataset.url)">Usar este</button></div>').join(''):'')
+    +'<div class="exercise-field-label">Indicaciones</div><textarea class="exercise-form-control small" id="exadm-instructions" rows="4" placeholder="Cómo se hace, en qué fijarse">'+esc(r.instructions||'')+'</textarea>'
+    +(routineNames.length?'<div class="exadm-hint">En '+routineNames.length+' rutina'+(routineNames.length===1?'':'s')+': '+esc(routineNames.slice(0,8).join(', '))+(routineNames.length>8?'…':'')+'</div>':'')
+    +'<button class="btn" style="margin-top:12px" data-id="'+(row?row.id:'')+'" onclick="saveExerciseEditor(this.dataset.id)">'+(row?'Guardar':'Crear ejercicio')+'</button>'
+    +(row?'<div class="exadm-actions">'
+      +'<button class="exdup-keep" data-id="'+row.id+'" onclick="openExerciseMergePicker(this.dataset.id)">Es el mismo que otro…</button>'
+      +'<button class="exdup-keep danger" data-id="'+row.id+'" onclick="hideCatalogExercise(this.dataset.id)">Ocultar</button></div>':'')
+    +'</div></div>';
+  m.onclick=()=>closeExerciseEditor();
+  document.body.appendChild(m);
+}
+async function saveExerciseEditor(id){
+  const row=id?exerciseCatalog.find(r=>r.id===id):null;
+  const val=x=>(document.getElementById(x)?.value||'').trim();
+  const split=s=>s.split(',').map(x=>x.trim()).filter(Boolean);
+  const name=val('exadm-name');
+  if(!name){toast('El ejercicio necesita nombre','err');return;}
+  const primary=val('exadm-primary');
+  const secondary=[...document.querySelectorAll('input[name="exadm-secondary"]:checked')].map(i=>i.value).filter(m=>m!==primary);
+  const video=val('exadm-video');
+  if(video&&!isUrl(video)){toast('El video debe empezar con https://','err');return;}
+  // No se crea ni se renombra a un ejercicio que ya existe con otro nombre: eso
+  // es justo el duplicado que esta pantalla sirve para limpiar.
+  const sig=exerciseSignature(name);
+  const clash=exerciseCatalog.find(r=>r.id&&r.id!==id&&catalogRowSignatures(r).has(sig));
+  if(clash){toast('Ya existe «'+clash.name+'»: usa «Es el mismo que otro…»','err');return;}
+  let aliases=[...new Set(split(val('exadm-aliases')).map(a=>a.toLowerCase()))];
+  if(row&&row.name!==name)aliases.push(row.name.toLowerCase());
+  aliases=[...new Set(aliases)].filter(a=>a!==name.toLowerCase());
+  const patch={name,category:val('exadm-type')||'Fuerza',primary_muscle:primary||null,secondary_muscles:secondary,
+    equipment:split(val('exadm-equipment')),video_url:video||null,instructions:val('exadm-instructions')||null,
+    aliases,updated_at:new Date().toISOString()};
+  // Cambiar los músculos invalida el reparto guardado (el de Skandi venía en
+  // porcentajes medidos): vacío, la app lo deriva de principal y secundarios.
+  const sameSet=(a,b)=>a.length===b.length&&a.every(x=>b.includes(x));
+  if(row&&((row.primary_muscle||'')!==primary||!sameSet(row.secondary_muscles||[],secondary)))patch.muscle_split={};
+  const gymBoards=boards.filter(b=>b.owner_id==null);
+  showLoading('Guardando...');
+  try{
+    if(row){
+      const{error}=await sb.from('exercise_catalog').update(patch).eq('id',row.id);
+      if(error)throw error;
+    }else{
+      // El slug es único y las fichas ocultas lo conservan: si ya está tomado,
+      // se prueba con sufijo.
+      const base=exerciseSlug(name)||'ejercicio';
+      let done=false;
+      for(let n=1;n<=6&&!done;n++){
+        const{error}=await sb.from('exercise_catalog').insert({...patch,slug:n===1?base:base+'-'+n,is_active:true});
+        if(!error)done=true;
+        else if(error.code!=='23505')throw error;
+      }
+      if(!done)throw new Error('No se pudo crear: el nombre ya está tomado');
+    }
+    hideLoading();
+    if(row&&video&&video!==(row.video_url||'')){
+      const links=(catalogUsageIndex(gymBoards).get(row.id)||[]).filter(u=>(getExerciseVideos(u.ex)[0]||{}).url!==video);
+      const n=new Set(links.map(u=>u.board.id)).size;
+      if(n&&await confirmSheet('¿Poner este video también en '+(n===1?'la rutina que tiene':'las '+n+' rutinas que tienen')+' este ejercicio? Si no, durante el entreno el del catálogo solo gana a un GIF o a nada; un video propio de la rutina se queda.',
+        {title:'Video en las rutinas',confirmLabel:'Ponerlo en las rutinas',cancelLabel:'Solo en el catálogo'})){
+        await applyVideoToRoutines(links,video);
+      }
+    }
+    exerciseCatalogLoaded=false;gymExerciseVideoIndex=null;
+    closeExerciseEditor();
+    toast(row?'Ejercicio guardado':'Ejercicio creado','ok');
+    renderExerciseAdmin();
+  }catch(e){
+    hideLoading();
+    toast('Error: '+(e.message||e),'err');
+  }
+}
+async function applyVideoToRoutines(links,url){
+  const byBoard=new Map();
+  links.forEach(u=>{if(!byBoard.has(u.board.id))byBoard.set(u.board.id,{board:u.board,idx:new Set()});byBoard.get(u.board.id).idx.add(u.i);});
+  let failed=0;
+  for(const{board,idx}of byBoard.values()){
+    const exercises=board.exercises.map((ex,i)=>{
+      if(!idx.has(i))return ex;
+      // Los campos viejos de video también se vacían: getExerciseVideos los
+      // antepone, y un GIF olvidado en video_url volvería a salir primero.
+      const next={...ex,video:url,videoTitle:'',videos:[{url,title:''}]};
+      ['videoUrl','video_url','videoLink','video_link','driveUrl','drive_url','youtube','url'].forEach(k=>delete next[k]);
+      return next;
+    });
+    const{error}=await sb.from('boards').update({exercises}).eq('id',board.id);
+    if(error)failed++;else board.exercises=exercises;
+  }
+  toast(failed?'No se pudo actualizar '+failed+' rutina'+(failed===1?'':'s'):'Video puesto en las rutinas',failed?'err':'ok');
+}
+async function hideCatalogExercise(id){
+  const row=exerciseCatalog.find(r=>r.id===id);
+  if(!row)return;
+  const n=routinesUsing(catalogUsageIndex(boards.filter(b=>b.owner_id==null)),id);
+  if(!await confirmSheet('«'+row.name+'» deja de salir en el buscador y en la ficha del músculo.'+(n?' Las '+n+' rutinas que lo tienen siguen igual.':'')+' Se puede volver a mostrar desde «Ocultos».',
+    {title:'Ocultar ejercicio',confirmLabel:'Ocultar',danger:true}))return;
+  const{error}=await sb.from('exercise_catalog').update({is_active:false,updated_at:new Date().toISOString()}).eq('id',id);
+  if(error){toast('Error: '+error.message,'err');return;}
+  exerciseCatalogLoaded=false;exAdmHidden=null;
+  closeExerciseEditor();toast('Ejercicio oculto','ok');renderExerciseAdmin();
+}
+async function restoreCatalogExercise(id){
+  const{error}=await sb.from('exercise_catalog').update({is_active:true,updated_at:new Date().toISOString()}).eq('id',id);
+  if(error){toast('Error: '+error.message,'err');return;}
+  exerciseCatalogLoaded=false;exAdmHidden=null;
+  toast('Ejercicio visible otra vez','ok');renderExerciseAdmin();
+}
+// "Es el mismo que otro…": el que se elige se queda; este pasa a ser un
+// nombre alterno suyo. Para los repetidos que ninguna heurística encuentra.
+function openExerciseMergePicker(id){
+  const row=exerciseCatalog.find(r=>r.id===id);
+  const body=document.getElementById('exadm-body');
+  if(!row||!body)return;
+  body.innerHTML='<div class="exadm-hint">¿Cuál es el mismo ejercicio que «'+esc(row.name)+'»? El que elijas se queda con su nombre; «'+esc(row.name)+'» pasa a ser un nombre alterno, sus rutinas apuntan al que queda y se conserva el mejor video.</div>'
+    +'<input class="exercise-form-control small" id="exadm-merge-q" placeholder="Buscar ejercicio…" oninput="renderExerciseMergeOptions(&quot;'+row.id+'&quot;,this.value)">'
+    +'<div id="exadm-merge-list" style="margin-top:8px"></div>';
+  renderExerciseMergeOptions(row.id,'');
+  document.getElementById('exadm-merge-q')?.focus();
+}
+function renderExerciseMergeOptions(id,query){
+  const el=document.getElementById('exadm-merge-list');
+  if(!el)return;
+  const q=exAdmNorm(query).trim();
+  const row=exerciseCatalog.find(r=>r.id===id);
+  const opts=exerciseCatalog.filter(r=>r.id&&r.id!==id&&(!q||exAdmNorm([r.name,...(r.aliases||[])].join(' ')).includes(q)))
+    .sort((a,b)=>((b.primary_muscle===row?.primary_muscle)-(a.primary_muscle===row?.primary_muscle))||a.name.localeCompare(b.name,'es'))
+    .slice(0,40);
+  el.innerHTML=opts.map(r=>'<div class="exdup-row"><div class="exdup-main"><strong>'+esc(r.name)+'</strong><span>'+esc([r.primary_muscle||'sin músculo',videoSourceLabel(r.video_url)].join(' · '))+'</span></div>'
+    +exerciseKeepButton(r,[row],'Es este',false)+'</div>').join('')||'<div class="empty">Sin resultados.</div>';
+}
+
 async function saveExerciseCatalogFromBoardExercise(ex){
   if(!ex||!ex.name)return null;
   const canonicalName=(ex.canonicalName||ex.name||'').trim();
