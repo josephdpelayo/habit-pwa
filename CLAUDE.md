@@ -220,7 +220,12 @@ a silent overwrite.
 - `exercise_catalog` — the only place a member can pick an exercise from. Migration 071 imported
   Skandi Fit's `skandi_exercises` into it (names translated to Spanish, English name kept as an
   alias); its `video_url` values are GIFs and MP4s, not embeds, so `mediaKind()` in `app.html`
-  decides between `<img>`, `<video>` and an iframe
+  decides between `<img>`, `<video>` and an iframe. **The gym's own Drive/YouTube videos live in
+  `boards.exercises`, not in the catalog**: picking a catalog exercise and pasting a link used to
+  save it only on that routine. `muscleExerciseVideo()` (the muscle sheet's play button) looks in
+  the exercise itself → every gym board (`loadGymExerciseVideoIndex`, by catalog id / name slug /
+  alias) → the catalog, and adding a catalog exercise with a link now also fills the catalog's
+  `video_url` if it was empty (`fillCatalogVideoIfEmpty`, never overwriting one)
 - `boards.is_starter` (migration 116) — a **rutina básica**: a gym board every member sees
   without anyone assigning it. Not `board_assignments`, which is one row per member per board:
   seeding those leaves thousands of rows to maintain and covers nobody who registers tomorrow.
