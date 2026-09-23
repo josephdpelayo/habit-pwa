@@ -8730,6 +8730,10 @@ async function loadWeekPlanSb(force){
 // lo que le puso el coach. Se resuelve al pintar, no solo al guardar, para que
 // las rutinas creadas antes de esta regla también se vean uniformes.
 const MEMBER_ROUTINE_COLOR='#a78bfa';
+// El azul (#2563eb) es de las rutinas básicas de siempre y no se crean más;
+// una rutina nueva del gym arranca en verde para que el azul siga diciendo
+// "básica" en la lista del admin. Ser básica lo decide boards.is_starter.
+const NEW_BOARD_COLOR='#10b981';
 function routineById(id){return myRoutines.find(b=>b.id===id)||coachBoardsById[id]||null;}
 function isMyRoutine(b){return !!(b&&sbUser&&b.owner_id===sbUser.id);}
 function routineColor(b){return isMyRoutine(b)?MEMBER_ROUTINE_COLOR:((b&&b.color)||'#2563eb');}
@@ -13176,7 +13180,7 @@ function renderBoardCreatePanel(){
   panel.innerHTML='<div class="board-create-form">'
     +'<div class="admin-card-title" style="margin-bottom:9px">Nueva rutina</div>'
     +'<div class="field"><label>Nombre</label><input type="text" id="board-name-in" placeholder="Ej: Fuerza Lunes" onkeydown="if(event.key===&quot;Enter&quot;)addBoardSb()"></div>'
-    +'<div class="field"><label>Color</label><input class="board-color-input" type="color" id="board-color-in" value="#2563eb"></div>'
+    +'<div class="field"><label>Color</label><input class="board-color-input" type="color" id="board-color-in" value="'+NEW_BOARD_COLOR+'"></div>'
     +'<div class="board-create-actions">'
     +'<button class="btn" onclick="addBoardSb()">Crear rutina</button>'
     +'<button class="btn-sm" style="background:transparent;border:1px solid var(--border);color:var(--gray)" onclick="toggleNewBoardForm()">Cancelar</button>'
@@ -16722,7 +16726,7 @@ async function coachCreateBoardForClient(){
   const name=(await promptSheet('Nombre de la rutina nueva')||'').trim();
   if(!name)return;
   try{
-    const{data,error}=await sb.from('boards').insert({name,color:'#2563eb',exercises:[]}).select().single();
+    const{data,error}=await sb.from('boards').insert({name,color:NEW_BOARD_COLOR,exercises:[]}).select().single();
     if(error)throw error;
     await sb.from('board_assignments').insert({board_id:data.id,user_id:selectedCoachClientId});
     coachClientAssignedBoardIds.add(data.id);
@@ -18194,7 +18198,7 @@ async function renderAdminFeed(){
 
 async function addBoardSb(){
   const name=document.getElementById('board-name-in').value.trim();
-  const color=document.getElementById('board-color-in').value||'#2563eb';
+  const color=document.getElementById('board-color-in').value||NEW_BOARD_COLOR;
   if(!name){toast('Escribe el nombre del pizarron','err');return;}
   showLoading('Guardando...');
   try{
