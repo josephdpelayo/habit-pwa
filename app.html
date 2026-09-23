@@ -6,19 +6,19 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="HABIT">
 <meta name="application-name" content="HABIT">
-<link rel="manifest" href="/manifest.json?v=20260923-2">
-<link rel="apple-touch-icon" sizes="120x120" href="/icons/icon-120.png?v=20260923-2">
-<link rel="apple-touch-icon" sizes="152x152" href="/icons/icon-152.png?v=20260923-2">
-<link rel="apple-touch-icon" sizes="167x167" href="/icons/icon-167.png?v=20260923-2">
-<link rel="apple-touch-icon" sizes="180x180" href="/icons/icon-180.png?v=20260923-2">
-<link rel="icon" type="image/png" sizes="32x32" href="/icons/icon-32.png?v=20260923-2">
+<link rel="manifest" href="/manifest.json?v=20260923-3">
+<link rel="apple-touch-icon" sizes="120x120" href="/icons/icon-120.png?v=20260923-3">
+<link rel="apple-touch-icon" sizes="152x152" href="/icons/icon-152.png?v=20260923-3">
+<link rel="apple-touch-icon" sizes="167x167" href="/icons/icon-167.png?v=20260923-3">
+<link rel="apple-touch-icon" sizes="180x180" href="/icons/icon-180.png?v=20260923-3">
+<link rel="icon" type="image/png" sizes="32x32" href="/icons/icon-32.png?v=20260923-3">
 <title>HABIT</title>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Share+Tech+Mono&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="/skandi-recovery.js?v=20260923-2"></script>
-<script src="/body-figure.js?v=20260923-2"></script>
-<script src="/habit-training.js?v=20260923-2"></script>
+<script src="/skandi-recovery.js?v=20260923-3"></script>
+<script src="/body-figure.js?v=20260923-3"></script>
+<script src="/habit-training.js?v=20260923-3"></script>
 <style>
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
 @media (prefers-reduced-motion:reduce){*,*:before,*:after{scroll-behavior:auto!important;animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}}
@@ -3288,7 +3288,7 @@ body.admin-mode #courtesy-modal label{border-radius:14px!important;border-color:
 // ── CONFIG & SUPABASE ───────────────────────────────────────
 const SUPABASE_URL='https://pmpjteuqjusbiduevbwq.supabase.co';
 const SUPABASE_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBtcGp0ZXVxanVzYmlkdWV2YndxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc2OTI1NjUsImV4cCI6MjA5MzI2ODU2NX0.XbMzZoo2yqtrD8znLnyo_1zDfrdJAvAPj1lqGOyXnLw';
-const APP_VERSION='20260923-2';
+const APP_VERSION='20260923-3';
 // La pierna va separada en cuádriceps, femorales y pantorrillas: la figura
 // corporal pinta esas tres regiones por separado y el motor de recuperación les
 // da ventanas de descanso distintas. 'Piernas' sigue reconociéndose al leer
@@ -8915,8 +8915,23 @@ function bodyCardHtml(){
 // no en el catálogo: al elegir un ejercicio del catálogo y pegarle un link, el
 // link se guardaba solo en esa rutina. Este índice los junta por ejercicio
 // (id del catálogo y slug de nombre, clave y alias) para que la ficha del
-// músculo los encuentre. Las rutinas más recientes ganan si dos discrepan.
+// músculo los encuentre. Cada clave guarda todos sus videos, de la rutina más
+// reciente a la más vieja, y quien pregunta elige con videoKindRank().
 let gymExerciseVideoIndex=null, gymExerciseVideoIndexAt=0;
+// Un GIF sirve cuando no hay otra cosa, pero si el gym grabó el ejercicio en
+// YouTube o Drive, ese video manda: YouTube/Drive > MP4 > GIF o imagen. Los
+// GIF y MP4 son casi siempre los de la importación de Skandi, y una rutina
+// que eligió el ejercicio del catálogo se los copia encima.
+function videoKindRank(url){
+  if(!url)return -1;
+  const k=mediaKind(url);
+  return k==='embed'?2:(k==='video'?1:0);
+}
+function pickBestVideo(urls){
+  let best='',rank=-1;
+  urls.forEach(u=>{const r=videoKindRank(u);if(r>rank){best=u;rank=r;}});
+  return best;
+}
 function exerciseVideoKeys(ex,catalogId){
   const keys=new Set();
   const id=catalogId||ex.catalogId;
@@ -8933,34 +8948,35 @@ async function loadGymExerciseVideoIndex(){
     if(error)throw error;
     const idx=new Map();
     (data||[]).forEach(b=>(Array.isArray(b.exercises)?b.exercises:[]).forEach(ex=>{
-      const v=ex&&getExerciseVideos(ex)[0];
-      if(!v||!v.url)return;
-      exerciseVideoKeys(ex).forEach(k=>{if(!idx.has(k))idx.set(k,v.url);});
+      const urls=ex?getExerciseVideos(ex).map(v=>v.url):[];
+      if(!urls.length)return;
+      exerciseVideoKeys(ex).forEach(k=>{
+        const list=idx.get(k)||[];
+        urls.forEach(u=>{if(!list.includes(u))list.push(u);});
+        idx.set(k,list);
+      });
     }));
     gymExerciseVideoIndex=idx;gymExerciseVideoIndexAt=Date.now();
   }catch(e){console.warn('videos de las rutinas del gym:',e.message||e);}
   return gymExerciseVideoIndex;
 }
-// El video de un ejercicio, en este orden: el que lleve encima (una rutina o
-// una sesión), el que el gym le pegó en cualquiera de sus rutinas, y el del
-// catálogo. Una fila del catálogo (`fromCatalog`) salta el primer paso: su
-// "propio" es el del catálogo — a menudo un GIF importado de Skandi — y el
-// video que subió el gym tiene prioridad sobre ese.
+// El video de un ejercicio. Se juntan los candidatos en este orden —el que
+// lleve encima (una rutina o una sesión), los que el gym le pegó en sus
+// rutinas, el del catálogo— y gana el mejor tipo (videoKindRank); el orden
+// solo desempata. Una fila del catálogo (`fromCatalog`) no tiene "encima":
+// su propio video es el del catálogo, y va al final.
 function muscleExerciseVideo(ex,fromCatalog){
   if(!ex)return '';
-  if(!fromCatalog){
-    const propio=getExerciseVideos(ex)[0];
-    if(propio&&propio.url)return propio.url;
-  }
+  const urls=fromCatalog?[]:getExerciseVideos(ex).map(v=>v.url);
   const fila=fromCatalog?ex:findExerciseCatalogMatch(ex.name||'');
   const idx=gymExerciseVideoIndex;
   if(idx){
     const keys=fromCatalog?exerciseVideoKeys(ex,ex.id)
       :exerciseVideoKeys(ex).concat(fila?exerciseVideoKeys(fila,fila.id):[]);
-    for(const k of keys)if(idx.has(k))return idx.get(k);
+    keys.forEach(k=>(idx.get(k)||[]).forEach(u=>urls.push(u)));
   }
-  const delCatalogo=fila?getExerciseVideos(fila)[0]:null;
-  return (delCatalogo&&delCatalogo.url)||'';
+  if(fila)getExerciseVideos(fila).forEach(v=>urls.push(v.url));
+  return pickBestVideo(urls);
 }
 // La URL viaja en un `data-`, no dentro del `onclick`. Interpolarla en el
 // atributo de evento la mete en medio de código JS: una comilla en el enlace
@@ -9020,7 +9036,7 @@ async function openMuscleDetail(en){
     .map(c=>({c,pct:splitOf(c)[en]||0}))
     .filter(x=>x.pct>0)
     .map(x=>({...x,video:muscleExerciseVideo(x.c,true)}))
-    .sort((a,b)=>(b.pct-a.pct)||((b.video?1:0)-(a.video?1:0)))
+    .sort((a,b)=>(b.pct-a.pct)||(videoKindRank(b.video)-videoKindRank(a.video)))
     .filter(x=>{const k=(x.c.name||'').trim().toLowerCase();if(seen.has(k))return false;seen.add(k);return true;})
     .slice(0,6);
 
@@ -13584,7 +13600,7 @@ async function addExerciseSb(bid){
     const savedCatalogId=await saveExerciseCatalogFromBoardExercise(exToSave);
     if(savedCatalogId)exToSave.catalogId=savedCatalogId;
   }else if(videos[0]){
-    await fillCatalogVideoIfEmpty(exToSave.catalogId,videos[0].url);
+    await upgradeCatalogVideo(exToSave.catalogId,videos[0].url);
   }
   b.exercises.push(exToSave);
   await sb.from('boards').update({exercises:b.exercises}).eq('id',bid);
@@ -15885,14 +15901,17 @@ async function loadBoardsSb(){
 
 // Elegir un ejercicio del catálogo y pegarle un link de Drive o YouTube: ese
 // video es del ejercicio, no solo de esta rutina. Se copia al catálogo si ahí
-// no hay ninguno, para que lo vean la ficha del músculo y quien elija ese
-// ejercicio después. Nunca pisa un video que el catálogo ya tenga.
-async function fillCatalogVideoIfEmpty(catalogId,url){
+// no hay ninguno o hay uno de peor tipo (el GIF de Skandi frente a un YouTube
+// del gym), para que lo vean la ficha del músculo y quien elija ese ejercicio
+// después. Nunca pisa un video igual o mejor. El filtro por el valor que se
+// vio evita pisar uno que alguien haya cambiado entretanto.
+async function upgradeCatalogVideo(catalogId,url){
   if(!catalogId||!url)return;
   const row=exerciseCatalog.find(x=>x.id===catalogId);
-  if(row&&row.video_url)return;
-  const{error}=await sb.from('exercise_catalog').update({video_url:url})
-    .eq('id',catalogId).or('video_url.is.null,video_url.eq.');
+  const actual=(row&&row.video_url)||'';
+  if(actual&&videoKindRank(actual)>=videoKindRank(url))return;
+  const q=sb.from('exercise_catalog').update({video_url:url}).eq('id',catalogId);
+  const{error}=await (actual?q.eq('video_url',actual):q.or('video_url.is.null,video_url.eq.'));
   if(error){console.warn('video al catálogo:',error.message||error);return;}
   if(row)row.video_url=url;
 }

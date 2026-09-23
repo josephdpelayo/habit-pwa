@@ -225,7 +225,10 @@ a silent overwrite.
   save it only on that routine. `muscleExerciseVideo()` (the muscle sheet's play button) looks in
   the exercise itself → every gym board (`loadGymExerciseVideoIndex`, by catalog id / name slug /
   alias) → the catalog, and adding a catalog exercise with a link now also fills the catalog's
-  `video_url` if it was empty (`fillCatalogVideoIfEmpty`, never overwriting one)
+  `video_url` (`upgradeCatalogVideo`). Among the candidates the **type** wins before the order:
+  YouTube/Drive > MP4 > GIF (`videoKindRank`), because the GIFs and MP4s are Skandi's import and
+  a routine that picked the exercise from the catalog carries a copy of that GIF; a gym-recorded
+  video replaces a GIF in the catalog too, never an equal or better one
 - `boards.is_starter` (migration 116) — a **rutina básica**: a gym board every member sees
   without anyone assigning it. Not `board_assignments`, which is one row per member per board:
   seeding those leaves thousands of rows to maintain and covers nobody who registers tomorrow.
