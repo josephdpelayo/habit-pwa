@@ -8,8 +8,9 @@
 -- sus privilegios por defecto: el `revoke ... from public` de la 123 no lo
 -- quita. Comprobado contra producción: la anon key pasaba el filtro y solo
 -- la frenaba que los ids no existieran. Con ella se podía fusionar (y así
--- desactivar) cualquier ejercicio del catálogo, o asignar rutinas a
--- cualquier socio.
+-- desactivar) cualquier ejercicio del catálogo. La de la 057 tiene el mismo
+-- patrón (asignar rutinas a cualquier socio), pero en producción no existe;
+-- se cierra solo donde esté.
 --
 -- Dos capas: se le quita EXECUTE a anon, y la 123 deja de fiarse de un
 -- auth.uid() vacío — ahora distingue por el rol del JWT. Sin JWT (SQL
@@ -18,7 +19,16 @@
 begin;
 
 revoke execute on function public.merge_exercise_catalog(uuid, uuid) from anon, public;
-revoke execute on function public.assign_default_member_boards(uuid) from anon, public;
+
+-- La de la 057 no existe en todas las bases (en producción no está): solo
+-- se le quita el permiso si está. Un revoke sobre una función que no existe
+-- es un error que tumba toda la migración.
+do $$
+begin
+  if to_regprocedure('public.assign_default_member_boards(uuid)') is not null then
+    execute 'revoke execute on function public.assign_default_member_boards(uuid) from anon, public';
+  end if;
+end $$;
 
 -- Igual que la 123, salvo la primera comprobación.
 create or replace function public.merge_exercise_catalog(p_keep uuid, p_drop uuid)

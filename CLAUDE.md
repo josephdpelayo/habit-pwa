@@ -246,8 +246,9 @@ a silent overwrite.
   arrives without one too, and Supabase's default privileges grant EXECUTE on every new `public`
   function to `anon`, so `revoke … from public` doesn't remove it. 123 trusted a null uid and the
   anon key could merge any exercise; 124 revokes `anon` explicitly and checks `auth.role()` (empty
-  in the SQL Editor, `service_role` from the server) instead. Same fix for 057's
-  `assign_default_member_boards`
+  in the SQL Editor, `service_role` from the server) instead. It also revokes `anon` on 057's
+  `assign_default_member_boards` — only if it exists, since production doesn't have it and a
+  revoke on a missing function aborts the whole migration
 - `boards.is_starter` (migration 116) — a **rutina básica**: a gym board every member sees
   without anyone assigning it. Not `board_assignments`, which is one row per member per board:
   seeding those leaves thousands of rows to maintain and covers nobody who registers tomorrow.
