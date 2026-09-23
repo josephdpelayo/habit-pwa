@@ -233,12 +233,20 @@ a silent overwrite.
   **116 replaces migration 057**, which did this with assignments (`assign_default_member_boards`
   + an after-insert trigger on `profiles`): one row per member per board, only created at
   registration so yesterday's members never got a newly-added starter, and indistinguishable in
-  the coach's panel from what he assigned on purpose. 116 drops that trigger and deletes the
-  assignments pointing at a starter board, which gives `board_assignments` back its single
-  meaning — "his coach gave this person this board".
+  the coach's panel from what he assigned on purpose. 116 dropped that trigger and deleted the
+  assignments pointing at a starter board.
+  **Migration 122 brings the assignments back on top of `is_starter`**, because in Admin →
+  Editar socio → "Pizarrones asignados" the starters showed unchecked, and an empty list reads as
+  a member with no routines. The column still decides: `default_member_board_ids()` is now "the
+  starter boards", and the after-insert trigger on `profiles` assigns them to every new HABIT
+  member (inserting directly, and degrading any error to a WARNING — a failed assignment must
+  never abort the profile insert). 122 also marked the blue gym boards made after 116 as
+  starters, and backfilled members with no assigned and no own routine. Visibility still comes
+  from `is_starter` alone, so a starter reaches members who registered before it was marked;
+  the assignment only makes it show as checked
   `loadMyRoutinesSb` asks for the three origins separately (own / assigned / starter) and tags
-  `_starterOnly` on the ones nobody assigned, which is what splits the member's list into
-  "De tu entrenador" and "Rutinas básicas"
+  `_starterOnly` on every `is_starter` board, assigned or not, which is what splits the member's
+  list into "De tu entrenador" and "Rutinas básicas"
 **No queda un `confirm()` ni un `prompt()` nativo en `app.html`**: los sustituyen `confirmSheet()`
 y `promptSheet()` (mismo patrón que Skandi en `a6ea2cb`, sin su i18n), que devuelven promesas —
 `if(!confirm(x))` pasó a `if(!await confirmSheet(x))`, y las cinco funciones que no eran `async`

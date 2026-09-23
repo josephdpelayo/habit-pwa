@@ -5156,9 +5156,9 @@ async function ensureProfile(reg){
     ({error}=await sb.from('profiles').insert({id:sbUser.id,name:reg.name,phone:reg.phone||null,role:'user',access_code:code}));
   }
   if(error)throw error;
-  // Las rutinas básicas ya no se copian al socio al registrarse: son del gym y
-  // las ve por `boards.is_starter` (migración 116). Copiarlas dejaba una fila
-  // por socio y por rutina, y solo alcanzaba a quien se registrara después.
+  // Las rutinas básicas (`boards.is_starter`) se le asignan en la base de datos,
+  // con un trigger al insertar el perfil (migración 122): no hay que hacer nada
+  // aquí, y así también le llegan a quien da de alta el admin.
 }
 async function completeRegister(reg){
   showLoading('Creando cuenta...');
