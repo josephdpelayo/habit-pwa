@@ -241,7 +241,13 @@ a silent overwrite.
   (migration 123) merges a pair: the dropped row goes `is_active = false`, its name and slug
   become aliases of the kept one, it keeps the best video and fills what the kept one lacked, and
   routines and `session_exercises` are repointed (`catalogId`/`exerciseKey` only — names and set
-  history are untouched, since history goes by each routine exercise's own id)
+  history are untouched, since history goes by each routine exercise's own id).
+  **A null `auth.uid()` is not proof of the SQL Editor**: a call with the app's public anon key
+  arrives without one too, and Supabase's default privileges grant EXECUTE on every new `public`
+  function to `anon`, so `revoke … from public` doesn't remove it. 123 trusted a null uid and the
+  anon key could merge any exercise; 124 revokes `anon` explicitly and checks `auth.role()` (empty
+  in the SQL Editor, `service_role` from the server) instead. Same fix for 057's
+  `assign_default_member_boards`
 - `boards.is_starter` (migration 116) — a **rutina básica**: a gym board every member sees
   without anyone assigning it. Not `board_assignments`, which is one row per member per board:
   seeding those leaves thousands of rows to maintain and covers nobody who registers tomorrow.
