@@ -6,19 +6,19 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="HABIT">
 <meta name="application-name" content="HABIT">
-<link rel="manifest" href="/manifest.json?v=20260923-5">
-<link rel="apple-touch-icon" sizes="120x120" href="/icons/icon-120.png?v=20260923-5">
-<link rel="apple-touch-icon" sizes="152x152" href="/icons/icon-152.png?v=20260923-5">
-<link rel="apple-touch-icon" sizes="167x167" href="/icons/icon-167.png?v=20260923-5">
-<link rel="apple-touch-icon" sizes="180x180" href="/icons/icon-180.png?v=20260923-5">
-<link rel="icon" type="image/png" sizes="32x32" href="/icons/icon-32.png?v=20260923-5">
+<link rel="manifest" href="/manifest.json?v=20261014-1">
+<link rel="apple-touch-icon" sizes="120x120" href="/icons/icon-120.png?v=20261014-1">
+<link rel="apple-touch-icon" sizes="152x152" href="/icons/icon-152.png?v=20261014-1">
+<link rel="apple-touch-icon" sizes="167x167" href="/icons/icon-167.png?v=20261014-1">
+<link rel="apple-touch-icon" sizes="180x180" href="/icons/icon-180.png?v=20261014-1">
+<link rel="icon" type="image/png" sizes="32x32" href="/icons/icon-32.png?v=20261014-1">
 <title>HABIT</title>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Share+Tech+Mono&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="/skandi-recovery.js?v=20260923-5"></script>
-<script src="/body-figure.js?v=20260923-5"></script>
-<script src="/habit-training.js?v=20260923-5"></script>
+<script src="/skandi-recovery.js?v=20261014-1"></script>
+<script src="/body-figure.js?v=20261014-1"></script>
+<script src="/habit-training.js?v=20261014-1"></script>
 <style>
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
 @media (prefers-reduced-motion:reduce){*,*:before,*:after{scroll-behavior:auto!important;animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}}
@@ -1669,6 +1669,59 @@ body.admin-mode .adm-search,body.admin-mode .adm-date,body.admin-mode .admin-sel
 .exadm-cand{display:flex;align-items:center;gap:8px;justify-content:space-between;font-size:11px;color:#aeb4c0;margin-bottom:6px}
 .exadm-cand span{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .exadm-actions{display:flex;gap:8px;justify-content:space-between;margin-top:10px}
+/* COMPETENCIA (admin): una fila por competidor, intentos editables en el lugar */
+.comp-card{padding:16px}
+.comp-head{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-bottom:14px}
+.comp-head-main{min-width:0}
+.comp-title{font-size:20px;font-weight:900;letter-spacing:-.01em;line-height:1.15;color:var(--white);overflow-wrap:anywhere}
+.comp-meta{font-size:12px;color:var(--gray);margin-top:4px;line-height:1.4}
+.comp-screen-state{display:flex;align-items:center;gap:6px;flex-shrink:0}
+.comp-link{background:none;border:none;color:#9aa1ad;font-size:12px;font-weight:700;cursor:pointer;padding:6px 4px}
+.comp-link.danger{color:#fca5a5}
+.comp-live-dot{display:inline-block;width:7px;height:7px;border-radius:50%;background:var(--green);box-shadow:0 0 10px var(--green);margin-right:6px;vertical-align:1px}
+.comp-add{display:flex;gap:8px;margin-bottom:12px}
+/* body.admin-mode #s-admin input (radio 13px, fondo y letra de 13px) le ganaba a estas dos */
+body.admin-mode #s-admin .comp-add input{flex:1;min-width:0;background:var(--card2);border:1px solid var(--border);border-radius:12px;padding:12px 14px;font-size:16px;color:var(--white);outline:none;-webkit-appearance:none}
+body.admin-mode #s-admin .comp-add input:focus{border-color:var(--blue)}
+.comp-add input::placeholder{color:#5c616b}
+.comp-add button{flex-shrink:0;border:1px solid rgba(96,165,250,.35);background:var(--blue);color:#fff;border-radius:12px;padding:0 18px;font-size:13px;font-weight:800;letter-spacing:.04em;cursor:pointer}
+.comp-order{display:flex;gap:6px;margin:-4px 0 6px;padding:0}
+.comp-list{display:grid;gap:8px}
+.comp-row{display:grid;grid-template-columns:38px minmax(0,1fr) auto 30px;grid-template-areas:"place name best del" "atts atts atts atts";align-items:center;gap:10px;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.07);border-radius:14px;padding:10px 12px}
+.comp-row.is-lead{border-color:rgba(245,196,81,.32);background:linear-gradient(90deg,rgba(245,196,81,.08),rgba(255,255,255,.03) 65%)}
+.comp-place{grid-area:place;width:38px;height:38px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:15px;font-weight:900;background:rgba(255,255,255,.05);color:#8f96a3;font-variant-numeric:tabular-nums}
+.comp-place.p1{background:rgba(245,196,81,.16);color:#f5c451}
+.comp-place.p2{background:rgba(201,206,215,.13);color:#e3e6ec}
+.comp-place.p3{background:rgba(208,139,91,.16);color:#e0a174}
+.comp-name{grid-area:name;min-width:0;background:none;border:none;color:var(--white);font-size:16px;font-weight:800;line-height:1.2;text-align:left;cursor:pointer;padding:4px 0;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow-wrap:anywhere}
+.comp-best{grid-area:best;display:flex;align-items:baseline;justify-content:flex-end;gap:3px;font-variant-numeric:tabular-nums;white-space:nowrap}
+.comp-best small{display:none;font-size:9.5px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:#778294;margin-right:4px}
+.comp-best b{font-size:22px;font-weight:900;color:var(--white)}
+.comp-best span{font-size:11px;color:var(--gray);font-weight:700}
+.comp-del{grid-area:del;width:30px;height:30px;border-radius:10px;border:1px solid rgba(255,255,255,.08);background:transparent;color:#8f96a3;font-size:18px;line-height:1;cursor:pointer}
+.comp-atts{grid-area:atts;display:grid;grid-template-columns:1fr 1fr;gap:8px;min-width:0}
+.comp-att{min-width:0}
+.comp-att label{display:block;font-size:9.5px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:#778294;margin-bottom:5px}
+.comp-att-ctl{display:flex;align-items:center;gap:4px;background:var(--card2);border:1px solid var(--border);border-radius:12px;padding:4px 4px 4px 9px}
+.comp-att-ctl:focus-within{border-color:var(--blue)}
+body.admin-mode #s-admin .comp-att input{flex:1;min-width:0;width:100%;background:transparent;border:none;border-radius:0;outline:none;color:var(--white);font-size:17px;font-weight:800;font-variant-numeric:tabular-nums;padding:6px 0;-webkit-appearance:none}
+.comp-att input::placeholder{color:#4b5059}
+.comp-unit{font-size:11px;color:var(--gray);font-weight:700}
+.comp-valid{flex-shrink:0;border-radius:9px;border:1px solid;padding:7px 7px;font-size:9.5px;font-weight:850;letter-spacing:.05em;text-transform:uppercase;cursor:pointer}
+.comp-valid.ok{background:rgba(32,212,146,.1);border-color:rgba(32,212,146,.3);color:var(--green)}
+.comp-valid.bad{background:rgba(255,100,100,.12);border-color:rgba(255,100,100,.38);color:#fca5a5}
+.comp-valid:disabled{opacity:.3;cursor:default}
+.comp-att.is-best .comp-att-ctl{border-color:rgba(127,176,255,.42);background:rgba(37,99,235,.1)}
+body.admin-mode #s-admin .comp-att.is-null input{color:#fca5a5;text-decoration:line-through}
+.comp-foot{display:flex;justify-content:space-between;flex-wrap:wrap;gap:6px;margin-top:14px;padding-top:10px;border-top:1px solid rgba(255,255,255,.06)}
+.comp-hint{font-size:12.5px;color:var(--gray);line-height:1.5}
+.comp-empty{text-align:center;padding:30px 16px}
+.comp-empty-title{font-size:16px;font-weight:850;color:var(--white);margin-bottom:6px}
+.comp-empty .admin-page-action{margin-top:14px}
+@media(min-width:1180px){
+  .comp-row{grid-template-columns:42px minmax(0,1fr) minmax(0,460px) 120px 30px;grid-template-areas:"place name atts best del";padding:8px 12px}
+  .comp-best small{display:inline}
+}
 .routine-editor-grid{display:grid;gap:12px}
 .routine-editor-main,.routine-editor-side{min-width:0}
 .routine-editor-side{display:grid;align-content:start;gap:10px}
@@ -2688,6 +2741,7 @@ body.admin-mode #courtesy-modal label{border-radius:14px!important;border-color:
       <button class="adm-tab" data-admin-tab="coaching" onclick="admTab('coaching')"><span class="adm-nav-icon">↗</span><span>Coaching</span></button>
       <button class="adm-tab" data-admin-tab="boards" onclick="admTab('boards')"><span class="adm-nav-icon">▥</span><span>Rutinas</span></button>
       <button class="adm-tab" data-admin-tab="ejercicios" onclick="admTab('ejercicios')"><span class="adm-nav-icon">◉</span><span>Ejercicios</span></button>
+      <button class="adm-tab" data-admin-tab="competencia" onclick="admTab('competencia')"><span class="adm-nav-icon">▲</span><span>Competencia</span></button>
     </div>
     <div class="adm-nav-group"><div class="adm-nav-label">Negocio</div>
       <button class="adm-tab" data-admin-tab="payments" onclick="admTab('payments')"><span class="adm-nav-icon">$</span><span>Finanzas</span></button>
@@ -2843,6 +2897,15 @@ body.admin-mode #courtesy-modal label{border-radius:14px!important;border-color:
       <div class="coach-picker-chips" id="exadm-chips"></div>
       <div id="exercise-dup-panel"></div>
       <div id="exadm-list"></div>
+    </div>
+
+    <!-- COMPETENCIA DE LEVANTAMIENTO -->
+    <div id="a-competencia" class="adm-section">
+      <div class="admin-page-head">
+        <div><div class="admin-page-kicker">Eventos</div><h2 class="admin-page-title">Competencia</h2><div class="admin-page-sub">Captura los intentos y la pantalla se ordena sola</div></div>
+        <div class="admin-page-actions"><button class="admin-page-action" onclick="openCompetitionScreen()">Abrir pantalla ↗</button><button class="admin-page-action primary" onclick="createCompetition()">Nueva competencia</button></div>
+      </div>
+      <div id="comp-admin"></div>
     </div>
 
 
@@ -3334,7 +3397,7 @@ body.admin-mode #courtesy-modal label{border-radius:14px!important;border-color:
 // ── CONFIG & SUPABASE ───────────────────────────────────────
 const SUPABASE_URL='https://pmpjteuqjusbiduevbwq.supabase.co';
 const SUPABASE_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBtcGp0ZXVxanVzYmlkdWV2YndxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc2OTI1NjUsImV4cCI6MjA5MzI2ODU2NX0.XbMzZoo2yqtrD8znLnyo_1zDfrdJAvAPj1lqGOyXnLw';
-const APP_VERSION='20260923-5';
+const APP_VERSION='20261014-1';
 // La pierna va separada en cuádriceps, femorales y pantorrillas: la figura
 // corporal pinta esas tres regiones por separado y el motor de recuperación les
 // da ventanas de descanso distintas. 'Piernas' sigue reconociéndose al leer
@@ -5321,7 +5384,7 @@ function showAdmin(){
   toggleAdminMobileMenu(false);
   const d=document.getElementById('adm-date');if(d){d.value=mazToday();d.max=addDaysDS(mazToday(),ADMIN_BLOCK_ADVANCE_DAYS);}
   const savedAdminTab=sessionStorage.getItem('habit-admin-tab');
-  const safeAdminTabs=['dash','slots','users','coaching','boards','ejercicios','payments','shop','gaia','reports','mensajes','comunidad','notifs'];
+  const safeAdminTabs=['dash','slots','users','coaching','boards','ejercicios','competencia','payments','shop','gaia','reports','mensajes','comunidad','notifs'];
   admTab(safeAdminTabs.includes(savedAdminTab)?savedAdminTab:'dash');
   loadBoardsSb();
   startAdminChatRealtime();
@@ -5638,6 +5701,7 @@ function admTab(t){
   if(t==='users')renderUsersSb();
   if(t==='boards')renderBoardsAdmin();
   if(t==='ejercicios')renderExerciseAdmin();
+  if(t==='competencia')renderCompetitionAdmin();
   if(t==='coaching')renderCoachingListSb();
   if(t==='mensajes')renderMensajesAdminSb();
   if(t==='payments')renderPaymentsSb();
@@ -16458,6 +16522,328 @@ async function saveExerciseCatalogFromBoardExercise(ex){
     console.warn('save exercise catalog skipped:',e.message||e);
     return null;
   }
+}
+
+// ── COMPETENCIA DE LEVANTAMIENTO (migración 126) ─────────────────────────────
+// El admin captura aquí; /competencia (competencia.html) lo proyecta en la
+// pantalla del gym. El lugar no se calcula en la app: viene de la vista
+// lift_competition_standings, la misma que lee la pantalla, y el mejor intento
+// lo pone un trigger — así el admin y la tele nunca dicen cosas distintas.
+// La lista va en orden de captura (el orden en que pasan a la plataforma) para
+// que una fila no salte de lugar mientras se le está escribiendo el peso.
+const COMP_DEFAULT_LIFT='Bench press';
+let compList=[],compSelectedId=null,compRows=[],compOrder='entrada',compMissing=false,compSeq=0,compRowsLoading=false;
+function compIsMissing(e){return /lift_compet|schema cache|does not exist|42P01/i.test(((e&&e.message)||'')+' '+((e&&e.code)||''));}
+function compFail(e,what){toast(compIsMissing(e)?'Falta correr la migración 126 en Supabase':(what||'Error')+': '+(e.message||e),'err');}
+function compKg(v){
+  if(v==null||v==='')return '';
+  const n=Number(v);
+  return Number.isInteger(n)?String(n):String(+n.toFixed(2));
+}
+// "142,5", "142.5 kg" → 142.5; vacío → null (borrar el intento); fuera de rango → NaN.
+function parseCompKg(raw){
+  const s=String(raw??'').toLowerCase().replace(/kg/g,'').replace(',','.').trim();
+  if(!s)return null;
+  const n=Number(s);
+  if(!Number.isFinite(n)||n<=0||n>1000)return NaN;
+  return Math.round(n*100)/100;
+}
+function compSelected(){return compList.find(c=>c.id===compSelectedId)||null;}
+function fmtCompDate(ds){
+  if(!ds)return '';
+  const d=new Date(ds+'T12:00:00');
+  return isNaN(d)?ds:d.toLocaleDateString('es-MX',{day:'numeric',month:'short',year:'numeric'});
+}
+function compScreenUrl(c){
+  const origin=/^https?:/.test(location.origin)?location.origin:PUBLIC_API_ORIGIN;
+  // La que está en pantalla se abre sin ?id= (es la URL que va en la tele);
+  // cualquier otra, como vista previa — solo un admin con sesión la puede leer.
+  return origin+'/competencia'+(c&&!c.on_screen?'?id='+encodeURIComponent(c.id):'');
+}
+function openCompetitionScreen(){window.open(compScreenUrl(compSelected()),'_blank','noopener');}
+
+async function loadCompetitions(){
+  const{data,error}=await sb.from('lift_competitions').select('*').order('event_date',{ascending:false}).order('created_at',{ascending:false});
+  if(error)throw error;
+  compList=data||[];
+  if(!compList.some(c=>c.id===compSelectedId))compSelectedId=(compList.find(c=>c.on_screen)||compList[0]||{}).id||null;
+}
+async function fetchCompetitors(id){
+  if(!id)return [];
+  const{data,error}=await sb.from('lift_competition_standings').select('*').eq('competition_id',id).order('created_at');
+  if(error)throw error;
+  return data||[];
+}
+async function renderCompetitionAdmin(){
+  const box=document.getElementById('comp-admin');if(!box)return;
+  if(!compList.length&&!compMissing)box.innerHTML='<div class="empty">Cargando…</div>';
+  const seq=++compSeq;
+  try{
+    await loadCompetitions();
+    const rows=await fetchCompetitors(compSelectedId);
+    if(seq!==compSeq)return;
+    compRows=rows;compMissing=false;compRowsLoading=false;
+  }catch(e){
+    if(seq!==compSeq)return;
+    if(compIsMissing(e))compMissing=true;else compFail(e);
+  }
+  paintCompetitionAdmin();
+}
+// Solo la recarga más reciente pinta: dos guardados seguidos lanzan dos lecturas
+// y la primera en volver puede ser la vieja.
+async function refreshCompetitors(){
+  const seq=++compSeq;
+  try{
+    const rows=await fetchCompetitors(compSelectedId);
+    if(seq!==compSeq)return;
+    compRows=rows;
+  }catch(e){if(seq===compSeq)compFail(e);}
+  if(seq!==compSeq)return;
+  compRowsLoading=false;
+  syncCompetitionAdmin();
+}
+function selectCompetition(id){
+  compSelectedId=id;compRows=[];compRowsLoading=true;
+  paintCompetitionAdmin();
+  refreshCompetitors();
+}
+function setCompOrder(k){compOrder=k==='lugar'?'lugar':'entrada';paintCompetitionAdmin();}
+function compSortedRows(){
+  const byEntry=(a,b)=>String(a.created_at).localeCompare(String(b.created_at));
+  const rows=compRows.slice();
+  return compOrder==='lugar'?rows.sort((a,b)=>(a.place??1e9)-(b.place??1e9)||byEntry(a,b)):rows.sort(byEntry);
+}
+
+// El panel se repinta entero después de cada guardado; esto devuelve el foco
+// (y lo que ya se iba escribiendo) al campo donde estaba el admin, que es lo
+// que deja capturar de corrido con Enter.
+function compCaptureFocus(){
+  const a=document.activeElement;
+  if(!a||!a.id||!a.closest||!a.closest('#comp-admin'))return null;
+  return{id:a.id,value:a.tagName==='INPUT'?a.value:null,start:a.selectionStart,end:a.selectionEnd};
+}
+function compRestoreFocus(f){
+  if(!f)return;
+  const el=document.getElementById(f.id);
+  if(!el||el.disabled)return;
+  if(f.value!=null)el.value=f.value;
+  el.focus({preventScroll:true});
+  try{if(f.start!=null)el.setSelectionRange(f.start,f.end);}catch(_){}
+}
+function compPlaceHtml(p){return '<span class="comp-place'+(p&&p<=3?' p'+p:'')+'">'+(p?p+'°':'–')+'</span>';}
+function compAttState(r,n){
+  const kg=r['attempt'+n+'_kg'],ok=r['attempt'+n+'_valid']!==false,has=kg!=null;
+  return{kg,ok,has,counts:has&&ok&&r.best_kg!=null&&Number(kg)===Number(r.best_kg)};
+}
+function compMetaText(c){
+  const n=compRows.length,marked=compRows.filter(r=>r.best_kg!=null).length;
+  return c.lift_name+' · '+fmtCompDate(c.event_date)+' · '+n+' competidor'+(n===1?'':'es')+(n?' · '+marked+' con marca':'');
+}
+function compAttemptHtml(r,n){
+  const{kg,ok,has,counts}=compAttState(r,n);
+  const inputId='comp-'+r.id+'-'+n;
+  return '<div class="comp-att'+(has&&!ok?' is-null':'')+(counts?' is-best':'')+'">'
+    +'<label for="'+inputId+'">'+(n===1?'1er':'2º')+' intento</label>'
+    +'<div class="comp-att-ctl">'
+      +'<input id="'+inputId+'" inputmode="decimal" enterkeyhint="next" autocomplete="off" data-id="'+r.id+'" data-field="attempt'+n+'_kg" value="'+esc(compKg(kg))+'" placeholder="—" onchange="saveCompetitorAttempt(this)" onkeydown="compInputKey(event,this)">'
+      +'<span class="comp-unit">kg</span>'
+      +'<button type="button" id="comp-'+r.id+'-v'+n+'" class="comp-valid '+(ok?'ok':'bad')+'" data-id="'+r.id+'" data-n="'+n+'"'+(has?'':' disabled')+' onclick="toggleCompetitorValid(this)">'+(ok?'Válido':'Nulo')+'</button>'
+    +'</div></div>';
+}
+function compRowHtml(r){
+  const best=r.best_kg!=null;
+  return '<div class="comp-row'+(r.place===1?' is-lead':'')+'" data-id="'+r.id+'">'
+    +compPlaceHtml(r.place)
+    +'<button type="button" class="comp-name" data-id="'+r.id+'" onclick="renameCompetitor(this.dataset.id)" title="Editar nombre">'+esc(r.name)+'</button>'
+    +'<div class="comp-atts">'+compAttemptHtml(r,1)+compAttemptHtml(r,2)+'</div>'
+    +'<div class="comp-best"><small>Mejor</small><b>'+(best?esc(compKg(r.best_kg)):'—')+'</b>'+(best?'<span>kg</span>':'')+'</div>'
+    +'<button type="button" class="comp-del" data-id="'+r.id+'" onclick="deleteCompetitor(this.dataset.id)" aria-label="Eliminar a '+esc(r.name)+'">×</button>'
+  +'</div>';
+}
+function paintCompetitionAdmin(){
+  const box=document.getElementById('comp-admin');if(!box)return;
+  if(compMissing){
+    box.innerHTML='<div class="admin-card"><div class="admin-card-title">Falta correr la migración 126</div>'
+      +'<div class="comp-hint">Pega <b>migrations/126_lift_competition.sql</b> en el SQL Editor de Supabase y vuelve a abrir esta pestaña.</div></div>';
+    return;
+  }
+  if(!compList.length){
+    box.innerHTML='<div class="admin-card comp-empty"><div class="comp-empty-title">Todavía no hay competencias</div>'
+      +'<div class="comp-hint">Crea una, agrega a los competidores y ponla en pantalla.</div>'
+      +'<button class="admin-page-action primary" onclick="createCompetition()">Nueva competencia</button></div>';
+    return;
+  }
+  const c=compSelected();if(!c)return;
+  const focus=compCaptureFocus();
+  const rows=compSortedRows();
+  const chips=compList.length>1
+    ?'<div class="coach-picker-chips">'+compList.map(k=>'<button class="coach-picker-chip'+(k.id===compSelectedId?' active':'')+'" data-id="'+k.id+'" onclick="selectCompetition(this.dataset.id)">'
+      +(k.on_screen?'<span class="comp-live-dot"></span>':'')+esc(k.name)+'</button>').join('')+'</div>'
+    :'';
+  box.innerHTML=chips
+    +'<div class="admin-card comp-card">'
+      +'<div class="comp-head">'
+        +'<div class="comp-head-main"><div class="comp-title">'+esc(c.name)+'</div>'
+          +'<div class="comp-meta" id="comp-meta">'+esc(compMetaText(c))+'</div></div>'
+        +(c.on_screen
+          ?'<div class="comp-screen-state"><span class="admin-status-pill">En pantalla</span><button class="comp-link" onclick="setCompetitionOnScreen(null)">Quitar</button></div>'
+          :'<button class="admin-page-action primary" onclick="setCompetitionOnScreen(compSelectedId)">Poner en pantalla</button>')
+      +'</div>'
+      +'<form class="comp-add" onsubmit="addCompetitor(event)"><input id="comp-add-name" maxlength="80" autocomplete="off" enterkeyhint="done" placeholder="Nombre del competidor" aria-label="Nombre del competidor"><button type="submit">Agregar</button></form>'
+      +(compRows.length>1?'<div class="coach-picker-chips comp-order">'+[['entrada','Orden de captura'],['lugar','Por lugar']].map(([k,l])=>'<button class="coach-picker-chip'+(compOrder===k?' active':'')+'" data-k="'+k+'" onclick="setCompOrder(this.dataset.k)">'+l+'</button>').join('')+'</div>':'')
+      +'<div class="comp-list">'+(rows.length?rows.map(compRowHtml).join(''):'<div class="empty">'+(compRowsLoading?'Cargando…':'Agrega al primer competidor.')+'</div>')+'</div>'
+      +'<div class="comp-foot"><button class="comp-link" onclick="editCompetitionDetails()">Editar nombre y levantamiento</button><button class="comp-link danger" onclick="deleteCompetition()">Eliminar competencia</button></div>'
+    +'</div>';
+  compRestoreFocus(focus);
+}
+
+// Después de guardar se actualiza lo que cambió sin rehacer los campos: rehacer
+// el campo donde el admin ya estaba escribiendo el siguiente intento le quita el
+// foco, y el navegador lo da por terminado (change) con el número a medias.
+// El orden "por lugar" se aplica con CSS order por lo mismo: mover el nodo
+// también le quita el foco. Si cambió quién está (alta, baja), se repinta todo.
+function syncCompetitionAdmin(){
+  const list=document.querySelector('#comp-admin .comp-list');
+  const c=compSelected();
+  const rowEl=id=>list&&list.querySelector(':scope>.comp-row[data-id="'+id+'"]');
+  if(!c||!list||list.querySelectorAll(':scope>.comp-row').length!==compRows.length||compRows.some(r=>!rowEl(r.id))){paintCompetitionAdmin();return;}
+  const meta=document.getElementById('comp-meta');if(meta)meta.textContent=compMetaText(c);
+  compSortedRows().forEach((r,i)=>{
+    const row=rowEl(r.id);
+    row.style.order=i;
+    row.classList.toggle('is-lead',r.place===1);
+    const place=row.querySelector('.comp-place');
+    place.className='comp-place'+(r.place&&r.place<=3?' p'+r.place:'');
+    place.textContent=r.place?r.place+'°':'–';
+    row.querySelector('.comp-name').textContent=r.name;
+    row.querySelectorAll('.comp-att').forEach((att,k)=>{
+      const n=k+1,st=compAttState(r,n);
+      att.classList.toggle('is-null',st.has&&!st.ok);
+      att.classList.toggle('is-best',st.counts);
+      const input=att.querySelector('input');
+      if(input&&document.activeElement!==input)input.value=compKg(st.kg);
+      const btn=att.querySelector('.comp-valid');
+      if(btn){btn.className='comp-valid '+(st.ok?'ok':'bad');btn.textContent=st.ok?'Válido':'Nulo';btn.disabled=!st.has;}
+    });
+    const best=row.querySelector('.comp-best');
+    if(best)best.innerHTML='<small>Mejor</small><b>'+(r.best_kg!=null?esc(compKg(r.best_kg)):'—')+'</b>'+(r.best_kg!=null?'<span>kg</span>':'');
+  });
+}
+
+// Enter pasa al siguiente intento, como en una hoja de cálculo; salir del campo
+// dispara el change que lo guarda. El siguiente es el de abajo en pantalla, que
+// con el orden "por lugar" no es el siguiente en el DOM.
+function compInputKey(e,input){
+  if(e.key!=='Enter')return;
+  e.preventDefault();
+  const all=compSortedRows().flatMap(r=>[...document.querySelectorAll('#comp-admin .comp-row[data-id="'+r.id+'"] .comp-att input')]);
+  const next=all[all.indexOf(input)+1];
+  if(next){next.focus();next.select();}else input.blur();
+}
+async function compUpdate(id,patch){
+  const{error}=await sb.from('lift_competitors').update(patch).eq('id',id);
+  if(error)compFail(error,'No se guardó');
+  await refreshCompetitors();
+}
+async function saveCompetitorAttempt(input){
+  if(!input.isConnected)return;
+  const id=input.dataset.id,field=input.dataset.field;
+  const row=compRows.find(r=>r.id===id);if(!row)return;
+  const kg=parseCompKg(input.value);
+  const prev=row[field]==null?null:Number(row[field]);
+  if(Number.isNaN(kg)){toast('Escribe el peso en kg (entre 0 y 1000)','warn');input.value=compKg(prev);return;}
+  if(kg===prev){input.value=compKg(prev);return;}
+  const patch={[field]:kg};
+  // Un intento borrado no se queda marcado como nulo para cuando se vuelva a capturar.
+  if(kg==null)patch[field.replace('_kg','_valid')]=true;
+  await compUpdate(id,patch);
+}
+async function toggleCompetitorValid(btn){
+  const row=compRows.find(r=>r.id===btn.dataset.id);if(!row)return;
+  const field='attempt'+btn.dataset.n+'_valid';
+  btn.disabled=true;
+  await compUpdate(row.id,{[field]:row[field]===false});
+}
+async function addCompetitor(e){
+  e.preventDefault();
+  const input=document.getElementById('comp-add-name');
+  const name=(input?.value||'').trim().replace(/\s+/g,' ').slice(0,80);
+  if(!name||!compSelectedId){input?.focus();return;}
+  if(compRows.some(r=>r.name.toLowerCase()===name.toLowerCase())
+     &&!await confirmSheet('Ya hay alguien llamado «'+name+'» en esta competencia.',{title:'¿Agregarlo otra vez?',confirmLabel:'Agregar'}))return;
+  const{error}=await sb.from('lift_competitors').insert({competition_id:compSelectedId,name});
+  if(error){compFail(error,'No se agregó');return;}
+  const box=document.getElementById('comp-add-name');if(box)box.value='';
+  await refreshCompetitors();
+  // El foco vuelve al nombre: en la mesa de registro se dan de alta varios seguidos.
+  document.getElementById('comp-add-name')?.focus();
+}
+async function renameCompetitor(id){
+  const row=compRows.find(r=>r.id===id);if(!row)return;
+  const v=await promptSheet('Así aparece en la pantalla.',{title:'Nombre del competidor',defaultValue:row.name,confirmLabel:'Guardar'});
+  if(v==null)return;
+  const name=v.trim().replace(/\s+/g,' ').slice(0,80);
+  if(!name||name===row.name)return;
+  await compUpdate(id,{name});
+}
+async function deleteCompetitor(id){
+  const row=compRows.find(r=>r.id===id);if(!row)return;
+  if(!await confirmSheet('Se borra a '+row.name+' y sus dos intentos. Desaparece de la pantalla.',{title:'Eliminar competidor',confirmLabel:'Eliminar',danger:true}))return;
+  const{error}=await sb.from('lift_competitors').delete().eq('id',id);
+  if(error)compFail(error,'No se eliminó');
+  await refreshCompetitors();
+}
+async function createCompetition(){
+  if(compMissing){toast('Falta correr la migración 126 en Supabase','err');return;}
+  const name=await promptSheet('Es el título que sale arriba en la pantalla.',{title:'Nueva competencia',placeholder:'Reto HABIT de bench press',confirmLabel:'Siguiente'});
+  if(name==null||!name.trim())return;
+  const lift=await promptSheet('¿Qué levantamiento se compite?',{title:'Levantamiento',defaultValue:COMP_DEFAULT_LIFT,confirmLabel:'Crear'});
+  if(lift==null)return;
+  // Si no hay ninguna en pantalla, la nueva entra directo: es lo que se quiere el día del evento.
+  const{data,error}=await sb.from('lift_competitions').insert({
+    name:name.trim().replace(/\s+/g,' ').slice(0,80),
+    lift_name:(lift.trim().replace(/\s+/g,' ')||COMP_DEFAULT_LIFT).slice(0,60),
+    event_date:mazToday(),
+    on_screen:!compList.some(c=>c.on_screen)
+  }).select().single();
+  if(error){compFail(error,'No se creó');return;}
+  compSelectedId=data.id;compRows=[];
+  await renderCompetitionAdmin();
+  document.getElementById('comp-add-name')?.focus();
+}
+async function editCompetitionDetails(){
+  const c=compSelected();if(!c)return;
+  const name=await promptSheet('Es el título que sale arriba en la pantalla.',{title:'Nombre de la competencia',defaultValue:c.name,confirmLabel:'Siguiente'});
+  if(name==null)return;
+  const lift=await promptSheet('¿Qué levantamiento se compite?',{title:'Levantamiento',defaultValue:c.lift_name,confirmLabel:'Guardar'});
+  if(lift==null)return;
+  const patch={
+    name:(name.trim().replace(/\s+/g,' ')||c.name).slice(0,80),
+    lift_name:(lift.trim().replace(/\s+/g,' ')||c.lift_name).slice(0,60)
+  };
+  if(patch.name===c.name&&patch.lift_name===c.lift_name)return;
+  const{error}=await sb.from('lift_competitions').update(patch).eq('id',c.id);
+  if(error){compFail(error,'No se guardó');return;}
+  renderCompetitionAdmin();
+}
+// Una sola en pantalla (índice único de la 126): primero se apaga la que esté.
+async function setCompetitionOnScreen(id){
+  const off=await sb.from('lift_competitions').update({on_screen:false}).eq('on_screen',true);
+  if(off.error){compFail(off.error,'No se cambió la pantalla');return;}
+  if(id){
+    const on=await sb.from('lift_competitions').update({on_screen:true}).eq('id',id);
+    if(on.error){compFail(on.error,'No se cambió la pantalla');renderCompetitionAdmin();return;}
+  }
+  toast(id?'Ya está en la pantalla':'Pantalla sin competencia','ok');
+  renderCompetitionAdmin();
+}
+async function deleteCompetition(){
+  const c=compSelected();if(!c)return;
+  if(!await confirmSheet('Se borran «'+c.name+'», sus '+compRows.length+' competidores y todos sus intentos. No se puede deshacer.',{title:'Eliminar competencia',confirmLabel:'Eliminar',danger:true}))return;
+  const{error}=await sb.from('lift_competitions').delete().eq('id',c.id);
+  if(error){compFail(error,'No se eliminó');return;}
+  compSelectedId=null;compRows=[];
+  renderCompetitionAdmin();
 }
 
 // ── COACHING ADMIN (beta oculta) ─────────────────────────────

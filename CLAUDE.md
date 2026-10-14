@@ -14,6 +14,9 @@ This repo ships **two** front-ends off the same Vercel project and the same Supa
   modules (`skandi-recovery.js`, `body-figure.js`), but has its own tables (`skandi_*`), its own
   manifest, and no overlap in UI code. See `docs/PROYECTO_SKANDI_V2.md` for the roadmap in progress.
 
+Plus one standalone page: **`competencia.html`** (served at `/competencia`) — the live scoreboard of
+a lifting competition, for the gym's TV. Read-only; it's captured in Admin → Competencia.
+
 ## Commands
 
 ```bash
@@ -36,7 +39,7 @@ A single ~5500-line file containing all HTML, CSS, and JavaScript. There is no f
 The app has four screens (`#s-auth`, `#s-main`, `#s-admin`, `#s-reception`), toggled by adding/removing the `.active` CSS class. Within `#s-main`, tabs are toggled via `.view.active`. Admin has its own tab system via `admTab()`.
 
 - `index.html` — just redirects to `app.html` with a version query string for cache busting
-- `sw.js` — service worker: push notifications + app shell cache. **One registration at scope `/` serves both apps** — two service workers at the root would evict each other, so Skandi registers this same file. Fetch handler: icons and the shared JS modules are cache-first, navigation is network-first (and refreshes the cached shell with what it just fetched), API calls pass through untouched. `shellFor()` picks the offline fallback by path: `/skandi*` → `skandi.html`, everything else → `app.html`.
+- `sw.js` — service worker: push notifications + app shell cache. **One registration at scope `/` serves both apps** — two service workers at the root would evict each other, so Skandi registers this same file. Fetch handler: icons and the shared JS modules are cache-first, navigation is network-first (and refreshes the cached shell with what it just fetched), API calls pass through untouched. `shellFor()` picks the offline fallback by path: `/skandi*` → `skandi.html`, `/competencia*` → `competencia.html`, everything else → `app.html`. Any new standalone page needs its own line there: the navigation handler stores what it fetched under `shellFor()`, so a page that falls through to `app.html` overwrites the app's offline copy with itself.
 - `manifest.json` / `skandi-manifest.json` — one PWA manifest per app. Both use `scope: "/"` and are told apart by `id`.
 
 **Version / cache busting**: one version string covers the whole project, because one service worker caches both apps. It lives in `APP_VERSION` (`app.html`), `SKANDI_VERSION` (`skandi.html`) and `CACHE_VERSION` (`sw.js`), plus the `?v=` strings in `index.html`, both manifests' `start_url`, and the `<link>`/`<script>` tags at the top of `app.html` and `skandi.html`. **Changing either app means bumping all of them to the same value** — a stale `CACHE_VERSION` leaves the offline shell frozen at the previous deploy.
@@ -308,6 +311,19 @@ places. PRs live in **Progreso** only: Historial used to render them too, with i
 - `posts` / `post_reactions` / `post_comments` — community feed
 - `booking_guest_passes` — group session guest passes (from `group-guest-passes.sql`)
 - `admin_notifs` — in-app notifications for admin
+- `lift_competitions` / `lift_competitors` (migration 126) — **competencia de levantamiento**.
+  Admin → Competencia captures each competitor's two attempts (kg + válido/nulo); `/competencia`
+  (`competencia.html`) shows them on the TV. `best_kg` (best *valid* attempt) and `best_at` are set
+  by a trigger, never by the client; `best_at` only moves when `best_kg` changes, and it is the
+  tie-break (same kilos → whoever lifted it first). The ranking lives in **one** place, the
+  `lift_competition_standings` view (`security_invoker`, `place` null until a valid attempt) — the
+  admin and the TV both read `place` from it. RLS: anon may read only the competition with
+  `on_screen = true` (a partial unique index allows one) and its competitors, so the TV needs no
+  login; `?id=` previews any other one and needs an admin session; writes are admin-only. The TV
+  listens on Realtime and re-reads every 15 s as a fallback. In the admin the list stays in capture
+  order and a save **updates rows in place** (`syncCompetitionAdmin`, "por lugar" via CSS `order`):
+  rebuilding the row the admin is already typing the next attempt into blurs it, and the browser
+  then commits the half-typed number
 
 **Skandi Fit tables** (all prefixed `skandi_`, migrations 040–073). They share `profiles` with HABIT
 and nothing else:

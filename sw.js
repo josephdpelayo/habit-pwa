@@ -1,7 +1,7 @@
 // HABIT Training Hub — Service Worker
 // Push notifications + app shell caching
 
-const CACHE_VERSION = '20260923-5'; // keep in sync with APP_VERSION in app.html
+const CACHE_VERSION = '20261014-1'; // keep in sync with APP_VERSION in app.html
 const CACHE = `habit-${CACHE_VERSION}`;
 
 // Librerías compartidas con Skandi Fit: la app no arranca sin ellas, así que
@@ -13,7 +13,15 @@ const SHELL = ['/app.html', '/skandi.html', `/skandi-recovery.js?v=${CACHE_VERSI
 
 // Qué shell le toca a una navegación. Sin esto, abrir /skandi sin señal servía el
 // fallback de HABIT: la app equivocada, con la sesión equivocada.
-const shellFor = pathname => (pathname === '/skandi' || pathname.startsWith('/skandi.html')) ? '/skandi.html' : '/app.html';
+// /competencia (la pantalla de la competencia) también necesita el suyo: la
+// navegación guarda lo que baja bajo shellFor(), y sin esta línea abrirla desde
+// un teléfono con la app instalada pisaba la copia offline de app.html con el
+// marcador. No va en SHELL: sin red no hay marcador que mostrar.
+const shellFor = pathname => {
+  if (pathname === '/skandi' || pathname.startsWith('/skandi.html')) return '/skandi.html';
+  if (pathname === '/competencia' || pathname.startsWith('/competencia.html')) return '/competencia.html';
+  return '/app.html';
+};
 
 self.addEventListener('install', e => {
   e.waitUntil(
