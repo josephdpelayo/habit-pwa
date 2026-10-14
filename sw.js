@@ -1,7 +1,7 @@
 // HABIT Training Hub — Service Worker
 // Push notifications + app shell caching
 
-const CACHE_VERSION = '20261014-1'; // keep in sync with APP_VERSION in app.html
+const CACHE_VERSION = '20261014-2'; // keep in sync with APP_VERSION in app.html
 const CACHE = `habit-${CACHE_VERSION}`;
 
 // Librerías compartidas con Skandi Fit: la app no arranca sin ellas, así que
@@ -23,9 +23,27 @@ const shellFor = pathname => {
   return '/app.html';
 };
 
+// Vercel contesta /app.html con una redirección a /app (cleanUrls), así que lo
+// que se guarda del shell llega marcado como "redirected". Safari se niega a
+// entregarle eso a una navegación ("Response served by service worker has
+// redirections") y la app instalada en el iPhone se queda en blanco, sin
+// siquiera la pantalla de inicio de sesión. Toda respuesta que se guarda o se
+// entrega para navegar pasa por aquí y sale limpia.
+const clean = res => (res && res.redirected)
+  ? res.blob().then(body => new Response(body, { status: res.status, statusText: res.statusText, headers: res.headers }))
+  : Promise.resolve(res);
+
+// cache.addAll guardaba la respuesta redirigida tal cual; se baja cada una y se
+// guarda la copia limpia. Si una falla, falla la instalación y se queda el
+// service worker anterior, igual que con addAll.
 self.addEventListener('install', e => {
   e.waitUntil(
-    caches.open(CACHE).then(cache => cache.addAll(SHELL))
+    caches.open(CACHE).then(cache => Promise.all(SHELL.map(path =>
+      fetch(path, { cache: 'reload' }).then(res => {
+        if (!res.ok) throw new Error(`shell ${path}: ${res.status}`);
+        return clean(res).then(copy => cache.put(path, copy));
+      })
+    )))
   );
   self.skipWaiting();
 });
@@ -76,26 +94,33 @@ self.addEventListener('fetch', e => {
   // If the network response went through an HTTP redirect (e.g. apex → www),
   // Safari refuses to let a SW hand back a "redirected" Response to respondWith()
   // for a navigation ("Response served by service worker has redirections").
-  // Rebuilding a plain Response from the body strips that flag; Chrome is unaffected.
+  // clean() strips that flag; Chrome is unaffected. The cached fallback goes
+  // through clean() too: it used to be handed back raw, and the copy cache.addAll
+  // stored for /app.html is exactly such a redirected response.
   if (request.mode === 'navigate') {
     const shell = shellFor(url.pathname);
-    e.respondWith(
-      fetch(request).then(res => {
-        // Refrescar el shell guardado con lo que acaba de bajar de la red: si no,
-        // la copia offline se quedaba congelada en la versión del último install
-        // y podía servir HTML viejo durante semanas.
-        if (res.ok && res.type === 'basic') {
-          const copy = res.clone();
-          e.waitUntil(caches.open(CACHE).then(c => c.put(shell, copy)));
-        }
-        if (!res.redirected) return res;
-        return res.blob().then(body => new Response(body, {
-          status: res.status,
-          statusText: res.statusText,
-          headers: res.headers,
-        }));
-      }).catch(() => caches.match(shell))
-    );
+    e.respondWith((async () => {
+      let res;
+      try {
+        res = await fetch(request);
+      } catch (_) {
+        const cached = await caches.match(shell);
+        return cached ? clean(cached) : Response.error();
+      }
+      // Refrescar el shell guardado con lo que acaba de bajar de la red: si no,
+      // la copia offline se quedaba congelada en la versión del último install
+      // y podía servir HTML viejo durante semanas. Es un extra: antes, si
+      // waitUntil fallaba (Safari no siempre lo acepta tan tarde), la página que
+      // sí había bajado se cambiaba por la copia guardada. Ahora la red se
+      // entrega pase lo que pase con la copia.
+      if (res.ok && res.type === 'basic') {
+        const save = clean(res.clone())
+          .then(copy => caches.open(CACHE).then(c => c.put(shell, copy)))
+          .catch(() => {});
+        try { e.waitUntil(save); } catch (_) { /* la copia se guarda igual, solo sin alargar la vida del worker */ }
+      }
+      try { return await clean(res); } catch (_) { return res; }
+    })());
   }
 });
 
