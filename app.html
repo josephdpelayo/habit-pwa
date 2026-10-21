@@ -6,19 +6,19 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="HABIT">
 <meta name="application-name" content="HABIT">
-<link rel="manifest" href="/manifest.json?v=20261019-1">
-<link rel="apple-touch-icon" sizes="120x120" href="/icons/icon-120.png?v=20261019-1">
-<link rel="apple-touch-icon" sizes="152x152" href="/icons/icon-152.png?v=20261019-1">
-<link rel="apple-touch-icon" sizes="167x167" href="/icons/icon-167.png?v=20261019-1">
-<link rel="apple-touch-icon" sizes="180x180" href="/icons/icon-180.png?v=20261019-1">
-<link rel="icon" type="image/png" sizes="32x32" href="/icons/icon-32.png?v=20261019-1">
+<link rel="manifest" href="/manifest.json?v=20261020-1">
+<link rel="apple-touch-icon" sizes="120x120" href="/icons/icon-120.png?v=20261020-1">
+<link rel="apple-touch-icon" sizes="152x152" href="/icons/icon-152.png?v=20261020-1">
+<link rel="apple-touch-icon" sizes="167x167" href="/icons/icon-167.png?v=20261020-1">
+<link rel="apple-touch-icon" sizes="180x180" href="/icons/icon-180.png?v=20261020-1">
+<link rel="icon" type="image/png" sizes="32x32" href="/icons/icon-32.png?v=20261020-1">
 <title>HABIT</title>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Share+Tech+Mono&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="/skandi-recovery.js?v=20261019-1"></script>
-<script src="/body-figure.js?v=20261019-1"></script>
-<script src="/habit-training.js?v=20261019-1"></script>
+<script src="/skandi-recovery.js?v=20261020-1"></script>
+<script src="/body-figure.js?v=20261020-1"></script>
+<script src="/habit-training.js?v=20261020-1"></script>
 <style>
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
 @media (prefers-reduced-motion:reduce){*,*:before,*:after{scroll-behavior:auto!important;animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}}
@@ -2339,6 +2339,32 @@ body.admin-mode #courtesy-modal label{border-radius:14px!important;border-color:
   body.workout-sheet-open .support-fab svg{width:22px;height:22px}
   .vol-row{grid-template-columns:76px 1fr auto;gap:8px}
 }
+/* HABIT para todos (Fase 0): registro gym/app, onboarding, invitación al gym, cuenta. */
+.reg-where .ptype-btn{text-transform:none;letter-spacing:0;font-size:13px;min-height:44px}
+.reg-where-hint{font-size:12px;line-height:1.5;color:var(--gray);margin:0 0 14px}
+.reg-where-hint.err{color:var(--red)}
+.app-gym-invite{display:flex;align-items:center;gap:12px;padding:14px;margin-bottom:16px;border:1px solid var(--hairline);border-radius:var(--radius-md);background:var(--surface)}
+.app-gym-invite>div{flex:1;min-width:0;display:flex;flex-direction:column;gap:3px}
+.app-gym-invite strong{font-size:13.5px;color:var(--white)}
+.app-gym-invite span{font-size:12px;color:var(--gray);line-height:1.45}
+.onb-progress{display:flex;gap:5px;margin:2px 0 18px}
+.onb-progress i{flex:1;height:3px;border-radius:2px;background:var(--surface-2)}
+.onb-progress i.on{background:var(--bl)}
+.terms-body h3.onb-q{font-size:20px;letter-spacing:0;text-transform:none;margin:0 0 6px;line-height:1.25}
+.terms-body p.onb-sub{margin:0 0 14px;font-size:13px}
+.onb-opts{display:grid;gap:8px;margin-top:14px}
+.onb-opts.onb-compact{grid-template-columns:repeat(7,1fr);gap:6px}
+.onb-opt{display:flex;flex-direction:column;align-items:flex-start;gap:3px;width:100%;min-height:48px;padding:12px 14px;text-align:left;cursor:pointer;border:1px solid var(--hairline);border-radius:var(--radius-sm);background:var(--surface);color:var(--white);font:inherit}
+.onb-opt strong{font-size:14.5px;font-weight:750}
+.onb-opt span{font-size:12px;color:var(--gray);line-height:1.4}
+.onb-compact .onb-opt{align-items:center;justify-content:center;padding:0;min-height:48px}
+.onb-opt.active{border-color:var(--blue);background:rgba(37,99,235,.16)}
+.onb-footer{display:flex;gap:8px}
+.onb-footer .btn,.onb-footer .btn-ghost{flex:1;margin:0}
+.perfil-row-btn{display:flex;align-items:center;justify-content:space-between;gap:10px;text-align:left}
+.perfil-row-sum{font-size:12px;color:var(--gray);font-weight:500;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:55%}
+.perfil-delete-btn{color:var(--red);border-color:rgba(255,100,100,.28)}
+.perfil-delete-hint{font-size:11.5px;color:var(--gray);line-height:1.5;margin:6px 0 0}
 </style>
 </head>
 <body>
@@ -2364,6 +2390,12 @@ body.admin-mode #courtesy-modal label{border-radius:14px!important;border-color:
       <button class="forgot-link" onclick="forgotPassword()">Olvidé mi contraseña</button>
     </div>
     <div id="ar" style="display:none">
+      <p class="slbl" style="margin-bottom:6px">¿Dónde entrenas?</p>
+      <div class="ptype-row reg-where" style="margin-bottom:6px">
+        <button type="button" class="ptype-btn" data-joined="gym" onclick="setRegJoinedAs('gym')">En HABIT Mazatlán</button>
+        <button type="button" class="ptype-btn" data-joined="app" onclick="setRegJoinedAs('app')">Por mi cuenta</button>
+      </div>
+      <p id="reg-where-hint" class="reg-where-hint">Elige una opción. Si entrenas en otro gym, en casa o en un parque, es "Por mi cuenta": la app es gratis y no necesitas membresía.</p>
       <div class="field"><label>Nombre completo</label><input type="text" id="rn" placeholder="Tu nombre" autocomplete="name"></div>
       <div class="field"><label>Correo</label><input type="email" id="re" placeholder="tu@correo.com" autocomplete="email"></div>
       <div class="field"><label>Confirmar correo</label><input type="email" id="re2" placeholder="Repite tu correo"></div>
@@ -2453,6 +2485,15 @@ body.admin-mode #courtesy-modal label{border-radius:14px!important;border-color:
         <div class="field"><label>Confirmar nueva contraseña</label><input type="password" id="pf-newpass2" placeholder="Repite la contraseña"></div>
         <button class="btn" onclick="savePerfil()">Guardar cambios</button>
         <button class="btn-ghost" onclick="sv('inicio')" style="margin-top:8px">Volver</button>
+        <div class="divider" style="margin:.75rem 0"></div>
+        <p class="slbl">Mi entrenamiento</p>
+        <button class="btn-ghost perfil-row-btn" onclick="openTrainingOnboarding()"><span>Objetivo, nivel y equipo</span><span id="perfil-training-sum" class="perfil-row-sum"></span></button>
+        <div id="perfil-account-section">
+          <div class="divider" style="margin:.75rem 0"></div>
+          <p class="slbl">Cuenta</p>
+          <button class="btn-ghost perfil-delete-btn" onclick="deleteMyAccount()">Borrar mi cuenta</button>
+          <p class="perfil-delete-hint">Borra tu cuenta, tus rutinas, tu historial de entrenamiento y tu progreso. No se puede deshacer.</p>
+        </div>
       </div>
     </div>
   </div>
@@ -2835,6 +2876,7 @@ body.admin-mode #courtesy-modal label{border-radius:14px!important;border-color:
           <button class="filter-chip" data-filter="sin-plan" onclick="setUserFilter(this)">Sin plan <span class="user-filter-count" data-user-filter-count="sin-plan"></span></button>
           <button class="filter-chip" data-filter="nunca-compro" onclick="setUserFilter(this)">Nunca compraron <span class="user-filter-count" data-user-filter-count="nunca-compro"></span></button>
           <button class="filter-chip" data-filter="coaching" onclick="setUserFilter(this)">Coaching <span class="user-filter-count" data-user-filter-count="coaching"></span></button>
+          <button class="filter-chip" data-filter="app" onclick="setUserFilter(this)" title="Entrenan por su cuenta: nunca han tenido membresía">App <span class="user-filter-count" data-user-filter-count="app"></span></button>
       </div>
       <div id="user-count" style="font-size:11px;color:var(--gray);margin-bottom:8px"></div>
       <div id="user-list"></div>
@@ -3043,10 +3085,24 @@ body.admin-mode #courtesy-modal label{border-radius:14px!important;border-color:
 <div id="terms-modal" class="terms-modal" style="display:none">
   <div class="terms-box">
     <div class="terms-hdr">
-      <h2>Reglamento y Términos</h2>
+      <h2 id="terms-title">Reglamento y Términos</h2>
       <button onclick="closeTerms()" style="background:none;border:none;color:var(--gray);font-size:22px;cursor:pointer;line-height:1">×</button>
     </div>
-    <div class="terms-body">
+    <!-- Quien entrena por su cuenta no acepta el reglamento del gym al registrarse: no va a
+         usar sus instalaciones. Lo acepta al comprar su primera membresía (doPay). -->
+    <div class="terms-body" id="terms-body-app" style="display:none">
+      <h3>Qué es la app</h3>
+      <p>HABIT es una herramienta para planear y registrar tus entrenamientos y ver tu progreso. <strong>No sustituye la supervisión de un entrenador ni el consejo de un médico.</strong> Usarla para entrenar por tu cuenta es gratis y no requiere membresía.</p>
+      <h3>Condición física y salud</h3>
+      <p>Declaras encontrarte en condiciones aptas para hacer ejercicio. Consulta a un médico antes de empezar un programa, especialmente si tienes alguna condición de salud, lesión o estás embarazada. Detén el ejercicio ante dolor, mareo o falta de aire.</p>
+      <p>Entrenas <strong>bajo tu propia responsabilidad</strong>, en el lugar y con el equipo que tú eliges. HABIT Training Hub, sus propietarios y coaches no se hacen responsables de lesiones o daños derivados de entrenar por tu cuenta, con o sin las rutinas y programas de la app.</p>
+      <h3>Tus datos</h3>
+      <p>Usamos tu nombre, correo y teléfono para tu cuenta, y lo que registras (pesos, repeticiones, tiempos, notas, tu objetivo y tu equipo) para que la app funcione y te muestre tu progreso. No vendemos tus datos ni los compartimos con terceros sin tu consentimiento. Puedes borrar tu cuenta y tus datos desde Perfil en cualquier momento.</p>
+      <h3>Si después entrenas en el gym</h3>
+      <p>Para reservar en HABIT Mazatlán necesitas una membresía. Al comprarla aceptarás el reglamento de las instalaciones.</p>
+      <p style="font-size:11px;color:#555;margin-top:1.5rem">Última actualización: Octubre 2026 · HABIT Training Hub · Mazatlán, Sinaloa, México</p>
+    </div>
+    <div class="terms-body" id="terms-body-gym">
       <h3>Uso de instalaciones y equipo</h3>
       <p>Al registrarte aceptas que el uso de las instalaciones, equipo y áreas de entrenamiento de <strong>HABIT Training Hub</strong> es bajo tu propia responsabilidad. HABIT Training Hub, sus propietarios y representantes <strong>no se hacen responsables</strong> por lesiones, accidentes, daños a la salud o muerte que puedan ocurrir durante el uso de las instalaciones, ya sea por causas atribuibles al socio o a terceros.</p>
       <h3>Condición física y salud</h3>
@@ -3069,10 +3125,22 @@ body.admin-mode #courtesy-modal label{border-radius:14px!important;border-color:
     <div class="terms-footer">
       <label class="terms-check">
         <input type="checkbox" id="terms-check" onchange="updateTermsButton()">
-        <span>He leído y acepto el Reglamento y Términos de HABIT Training Hub, incluyendo la exención de responsabilidad por accidentes y mi responsabilidad ante daños al equipo.</span>
+        <span id="terms-check-label">He leído y acepto el Reglamento y Términos de HABIT Training Hub, incluyendo la exención de responsabilidad por accidentes y mi responsabilidad ante daños al equipo.</span>
       </label>
       <button class="btn" id="terms-accept-btn" onclick="acceptTerms()" disabled style="opacity:.35">Aceptar y continuar</button>
     </div>
+  </div>
+</div>
+
+<!-- ONBOARDING: cómo entrena quien llega por la app (training_profiles, migración 127) -->
+<div id="onboarding-modal" class="terms-modal" style="display:none">
+  <div class="terms-box">
+    <div class="terms-hdr">
+      <h2>Tu entrenamiento</h2>
+      <button onclick="closeTrainingOnboarding()" aria-label="Cerrar" style="background:none;border:none;color:var(--gray);font-size:22px;cursor:pointer;line-height:1">×</button>
+    </div>
+    <div class="terms-body" id="onboarding-body"></div>
+    <div class="terms-footer onb-footer" id="onboarding-footer"></div>
   </div>
 </div>
 
@@ -3397,7 +3465,7 @@ body.admin-mode #courtesy-modal label{border-radius:14px!important;border-color:
 // ── CONFIG & SUPABASE ───────────────────────────────────────
 const SUPABASE_URL='https://pmpjteuqjusbiduevbwq.supabase.co';
 const SUPABASE_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBtcGp0ZXVxanVzYmlkdWV2YndxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc2OTI1NjUsImV4cCI6MjA5MzI2ODU2NX0.XbMzZoo2yqtrD8znLnyo_1zDfrdJAvAPj1lqGOyXnLw';
-const APP_VERSION='20261019-1';
+const APP_VERSION='20261020-1';
 // La pierna va separada en cuádriceps, femorales y pantorrillas: la figura
 // corporal pinta esas tres regiones por separado y el motor de recuperación les
 // da ventanas de descanso distintas. 'Piernas' sigue reconociéndose al leer
@@ -3863,6 +3931,8 @@ function profileToLocal(p){
   const credits=(plan&&plan.credits>=999)?999:(p.credits||0);
   return{id:p.id,name:p.name,email:sbUser?sbUser.email:'',phone:p.phone,
     role:p.role,plan:p.plan_id,planType:p.plan_type,
+    // Sin la 127 la columna no existe: todo perfil es del gym, como siempre fue.
+    joinedAs:p.joined_as==='app'?'app':'gym',
     credits,planExpiry:p.plan_expiry,
     accessCode:p.access_code,avatarUrl:p.avatar_url||'',bookings:[],guestBookings:[],payments:[]};
 }
@@ -3871,6 +3941,10 @@ async function loadUserData(){
   const{data:prof,error}=await sb.from('profiles').select('*').eq('id',sbUser.id).single();
   if(error)throw error;
   sbProfile=prof;curUser=profileToLocal(prof);
+  // El onboarding es de quien llega por la app; a un socio del gym no se le pregunta,
+  // aunque lo puede llenar desde Perfil.
+  trainingProfile=null;
+  loadTrainingProfileSb().catch(console.error);
   const shopBtn=document.getElementById('shop-nav-btn');
   if(shopBtn)shopBtn.style.display='none';
   const rutBtn=document.getElementById('rutinas-nav-btn');
@@ -5057,6 +5131,9 @@ function renderAccess(){
   const el=document.getElementById('access-main');
   if(!curUser||!sbUser){if(el)el.innerHTML='';return;}
   const res=nextBk(curUser),now=mazNow();
+  // Sin reserva, la tarjeta de la puerta solo le dice a quien entrena por su cuenta que
+  // no tiene acceso a un lugar al que no va. Si algún día reserva, aparece sola.
+  if(!res&&isAppOnly()){_notifSent={};el.innerHTML='';return;}
   if(!res){
     _notifSent={};
     el.innerHTML='<div class="ac-card ac-off">'+DOOR_ICON+'<div class="ac-status">Sin acceso activo</div><div class="ac-info">Reserva un turno para activar tu acceso desde la app.</div><div class="ac-hint">El boton de puerta aparece cuando estes dentro de tu ventana de acceso.</div></div>';
@@ -5264,7 +5341,21 @@ function closeInstallGuide(){
   const modal=document.getElementById('install-guide-modal');
   if(modal)modal.style.display='none';
 }
-let pendingRegistration=null;
+// Por dónde entra quien se registra (migración 127): 'gym' o 'app'. No es un permiso
+// —reservar y abrir la puerta los decide la membresía—; decide qué reglamento se acepta,
+// si el admin recibe el aviso de socio nuevo y qué se le muestra primero.
+let regJoinedAs=null;
+function setRegJoinedAs(v){
+  regJoinedAs=v==='app'?'app':'gym';
+  document.querySelectorAll('.reg-where .ptype-btn').forEach(b=>b.classList.toggle('active',b.dataset.joined===regJoinedAs));
+  const hint=document.getElementById('reg-where-hint');
+  if(hint){
+    hint.classList.remove('err');
+    hint.textContent=regJoinedAs==='app'
+      ?'Gratis y sin membresía: rutinas, tu semana y tu progreso. Si algún día entrenas en HABIT Mazatlán, la compras desde la app.'
+      :'Tu acceso a la puerta se activa con tu membresía y tu reserva.';
+  }
+}
 function updateTermsButton(){
   const chk=document.getElementById('terms-check');
   const btn=document.getElementById('terms-accept-btn');
@@ -5273,9 +5364,26 @@ function updateTermsButton(){
   btn.disabled=!ok;
   btn.style.opacity=ok?'1':'.35';
 }
-function showTerms(){
+// Un modal, dos textos: el reglamento del gym (instalaciones, daños, código de acceso) y los
+// términos de la app (entrenar por tu cuenta). `onAccept` es lo que sigue: crear la cuenta,
+// o el pago de la primera membresía de quien entró por la app (doPay).
+let termsOnAccept=null;
+const TERMS_LABEL_GYM='He leído y acepto el Reglamento y Términos de HABIT Training Hub, incluyendo la exención de responsabilidad por accidentes y mi responsabilidad ante daños al equipo.';
+const TERMS_LABEL_APP='He leído y acepto los Términos de uso de HABIT, incluyendo que entreno bajo mi propia responsabilidad.';
+function showTerms(kind,onAccept){
+  const app=kind==='app';
+  termsOnAccept=onAccept||null;
   const modal=document.getElementById('terms-modal');
   const chk=document.getElementById('terms-check');
+  const title=document.getElementById('terms-title');
+  const label=document.getElementById('terms-check-label');
+  const bodyApp=document.getElementById('terms-body-app');
+  const bodyGym=document.getElementById('terms-body-gym');
+  if(title)title.textContent=app?'Términos de uso':'Reglamento y Términos';
+  if(label)label.textContent=app?TERMS_LABEL_APP:TERMS_LABEL_GYM;
+  if(bodyApp)bodyApp.style.display=app?'':'none';
+  if(bodyGym){bodyGym.style.display=app?'none':'';bodyGym.scrollTop=0;}
+  if(bodyApp)bodyApp.scrollTop=0;
   if(chk)chk.checked=false;
   updateTermsButton();
   if(modal)modal.style.display='flex';
@@ -5283,16 +5391,16 @@ function showTerms(){
 function closeTerms(){
   const modal=document.getElementById('terms-modal');
   if(modal)modal.style.display='none';
-  pendingRegistration=null;
+  termsOnAccept=null;
 }
 function acceptTerms(){
   const chk=document.getElementById('terms-check');
   if(!chk||!chk.checked){toast('Acepta los terminos para continuar','err');return;}
   const modal=document.getElementById('terms-modal');
   if(modal)modal.style.display='none';
-  const data=pendingRegistration;
-  pendingRegistration=null;
-  if(data)completeRegister(data);
+  const next=termsOnAccept;
+  termsOnAccept=null;
+  if(next)next();
 }
 async function doRegister(){
   const name=document.getElementById('rn').value.trim();
@@ -5304,26 +5412,39 @@ async function doRegister(){
   if(!name||!email||!pass){toast('Completa todos los campos','err');return;}
   if(email2&&email!==email2){toast('Los correos no coinciden','err');return;}
   if(pass2&&pass!==pass2){toast('Las contrasenas no coinciden','err');return;}
-  pendingRegistration={name,email,phone,pass};
-  showTerms();
+  if(!regJoinedAs){
+    const hint=document.getElementById('reg-where-hint');
+    if(hint)hint.classList.add('err');
+    toast('Elige dónde entrenas','err');
+    return;
+  }
+  const reg={name,email,phone,pass,joinedAs:regJoinedAs};
+  showTerms(reg.joinedAs,()=>completeRegister(reg));
 }
 async function ensureProfile(reg){
+  // El perfil normalmente ya existe: lo crea handle_new_user al hacer signUp, con el
+  // joined_as de los metadatos (127). Esto es el respaldo para cuando ese trigger falló.
   const{data:existing}=await sb.from('profiles').select('id').eq('id',sbUser.id).maybeSingle();
   if(existing)return;
-  let{error}=await sb.rpc('ensure_habit_profile',{p_name:reg.name,p_phone:reg.phone||null});
-  if(error&&/ensure_habit_profile|schema cache|does not exist/i.test(error.message||'')){
+  const missingFn=e=>!!e&&/ensure_habit_profile|schema cache|does not exist|PGRST202/i.test((e.message||'')+' '+(e.code||''));
+  let{error}=await sb.rpc('ensure_habit_profile',{p_name:reg.name,p_phone:reg.phone||null,p_joined_as:reg.joinedAs==='app'?'app':'gym'});
+  // Sin la 127 solo existe la versión de dos argumentos (117).
+  if(missingFn(error))({error}=await sb.rpc('ensure_habit_profile',{p_name:reg.name,p_phone:reg.phone||null}));
+  if(missingFn(error)){
     const code=String(Math.floor(1000+Math.random()*9000));
     ({error}=await sb.from('profiles').insert({id:sbUser.id,name:reg.name,phone:reg.phone||null,role:'user',access_code:code}));
   }
   if(error)throw error;
   // Las rutinas básicas (`boards.is_starter`) se le asignan en la base de datos,
-  // con un trigger al insertar el perfil (migración 122): no hay que hacer nada
-  // aquí, y así también le llegan a quien da de alta el admin.
+  // con un trigger al insertar el perfil (migración 122) — solo a quien entra por
+  // el gym (127): no hay que hacer nada aquí, y así también le llegan a quien da
+  // de alta el admin.
 }
 async function completeRegister(reg){
   showLoading('Creando cuenta...');
   try{
-    const{error}=await sb.auth.signUp({email:reg.email,password:reg.pass,options:{data:{name:reg.name,phone:reg.phone}}});
+    const isApp=reg.joinedAs==='app';
+    const{error}=await sb.auth.signUp({email:reg.email,password:reg.pass,options:{data:{name:reg.name,phone:reg.phone,joined_as:isApp?'app':'gym'}}});
     if(error)throw error;
     await new Promise(r=>setTimeout(r,1000));
     const{data,error:e2}=await sb.auth.signInWithPassword({email:reg.email,password:reg.pass});
@@ -5331,20 +5452,220 @@ async function completeRegister(reg){
     sbUser=data.user;
     await new Promise(r=>setTimeout(r,800));
     await ensureProfile(reg);
+    // El onboarding lo abre este flujo al final; que loadUserData no lo abra también.
+    onboardingSuppressed=true;
     await loadUserData();
-    sendPush('admin','👤 Nuevo socio',curUser.name+' se registró · código '+curUser.accessCode,{tag:'new-member'});
+    // Con la 127 el perfil ya nace con joined_as. Esto cubre un perfil creado por el
+    // handle_new_user anterior (117), que no lo leía.
+    if(isApp&&curUser.joinedAs!=='app'&&sbProfile&&'joined_as' in sbProfile){
+      const{error:jErr}=await sb.from('profiles').update({joined_as:'app'}).eq('id',sbUser.id);
+      if(!jErr){sbProfile.joined_as='app';curUser.joinedAs='app';}
+    }
     hideLoading();
-    addN('Bienvenido/a a HABIT. Tu acceso se activa desde la app durante tu reserva.','success');
-    showMainSb();
-    setTimeout(showInstallGuide,350);
+    if(isApp){
+      // Sin push al admin: quien entrena por su cuenta no es un socio nuevo del gym. Se
+      // cuenta en el dashboard (Usuarios de la app).
+      addN('Bienvenido/a a HABIT. Cuéntanos cómo entrenas y te dejamos listo para empezar.','success');
+      showMainSb();
+      openTrainingOnboarding({afterSignup:true});
+    }else{
+      sendPush('admin','👤 Nuevo socio',curUser.name+' se registró · código '+curUser.accessCode,{tag:'new-member'});
+      addN('Bienvenido/a a HABIT. Tu acceso se activa desde la app durante tu reserva.','success');
+      showMainSb();
+      setTimeout(showInstallGuide,350);
+    }
     toast('Cuenta creada','ok');
   }catch(e){
     hideLoading();
     toast(e.message||'Error al crear cuenta','err');
   }
 }
+
+// ── ONBOARDING: cómo entrena quien llega por la app ──────────
+// Se guarda en training_profiles (127), privada. Hoy sirve para que el coach sepa con qué
+// equipo cuenta alguien y para las métricas; la biblioteca de programas (Fase 1) lo usa para
+// recomendar. Cada paso es un toque; cerrarlo no pierde nada (se completa desde Perfil).
+const ONB_STEPS=[
+  {key:'goal',title:'¿Qué buscas?',opts:[
+    ['fuerza','Ganar fuerza'],['masa','Ganar músculo'],['perder_grasa','Perder grasa'],
+    ['resistencia','Resistencia y cardio'],['calistenia','Calistenia y habilidades'],['salud','Salud y constancia']]},
+  {key:'level',title:'¿Cuánto llevas entrenando?',opts:[
+    ['principiante','Empezando','Menos de 6 meses, o vuelvo después de mucho tiempo'],
+    ['intermedio','Con constancia','Más de 6 meses entrenando seguido'],
+    ['avanzado','Años','Conozco mis marcas y cómo progresar']]},
+  {key:'equipment',title:'¿Con qué cuentas?',sub:'Elige todo lo que tengas a la mano.',multi:true,opts:[
+    ['gym_completo','Gym completo'],['mancuernas','Mancuernas'],['barra_dominadas','Barra de dominadas'],
+    ['peso_corporal','Solo mi cuerpo'],['ligas','Ligas'],['caminadora','Caminadora']]},
+  {key:'days_per_week',title:'¿Cuántos días a la semana?',sub:'Los que de verdad puedes, no los ideales.',compact:true,opts:[
+    [1,'1'],[2,'2'],[3,'3'],[4,'4'],[5,'5'],[6,'6'],[7,'7']]},
+  {key:'disciplines',title:'¿Qué te gusta entrenar?',sub:'Puedes elegir varias.',multi:true,opts:[
+    ['pesas','Pesas'],['funcional','Funcional'],['calistenia','Calistenia'],['carrera','Correr'],['hyrox','Hyrox']]}
+];
+let trainingProfile=null;
+// completeRegister abre el onboarding él mismo al final; esto evita que loadUserData lo abra
+// antes. Y cerrarlo sin terminar no lo vuelve a abrir en la misma sesión.
+let onboardingSuppressed=false,onboardingDismissed=false;
+let onb=null;
+function isMissingTrainingProfiles(error){
+  return !!error&&/training_profiles|schema cache|does not exist|PGRST205|42P01/i.test((error.message||'')+' '+(error.code||''));
+}
+async function loadTrainingProfileSb(){
+  const suppress=onboardingSuppressed;
+  onboardingSuppressed=false;
+  if(!sbUser)return null;
+  const{data,error}=await sb.from('training_profiles').select('*').eq('user_id',sbUser.id).maybeSingle();
+  // Sin la 127 la tabla no existe: no hay onboarding que guardar, y no se insiste.
+  if(error){if(!isMissingTrainingProfiles(error))console.warn('training_profiles:',error.message);return null;}
+  trainingProfile=data||null;
+  renderPerfilTrainingSummary();
+  if(!suppress&&!onboardingDismissed&&curUser&&curUser.joinedAs==='app'&&!(data&&data.onboarded_at))openTrainingOnboarding();
+  return trainingProfile;
+}
+function openTrainingOnboarding(opts){
+  const modal=document.getElementById('onboarding-modal');
+  if(!modal||!sbUser)return;
+  if(modal.style.display==='flex')return;
+  const tp=trainingProfile||{};
+  onb={step:0,afterSignup:!!(opts&&opts.afterSignup),saving:false,data:{
+    goal:tp.goal||null,level:tp.level||null,
+    equipment:Array.isArray(tp.equipment)?tp.equipment.slice():[],
+    days_per_week:tp.days_per_week||null,
+    disciplines:Array.isArray(tp.disciplines)?tp.disciplines.slice():[]
+  }};
+  renderOnboarding();
+  modal.style.display='flex';
+}
+function closeTrainingOnboarding(done){
+  const modal=document.getElementById('onboarding-modal');
+  if(modal)modal.style.display='none';
+  const afterSignup=onb&&onb.afterSignup;
+  if(!done)onboardingDismissed=true;
+  onb=null;
+  if(afterSignup)setTimeout(showInstallGuide,500);
+}
+function onbAnswered(step){
+  const v=onb.data[step.key];
+  return step.multi?(v||[]).length>0:v!=null;
+}
+function renderOnboarding(){
+  const body=document.getElementById('onboarding-body');
+  const foot=document.getElementById('onboarding-footer');
+  if(!body||!foot||!onb)return;
+  const s=ONB_STEPS[onb.step];
+  const val=onb.data[s.key];
+  const isOn=v=>s.multi?(val||[]).includes(v):val===v;
+  const last=onb.step===ONB_STEPS.length-1;
+  body.innerHTML='<div class="onb-progress">'+ONB_STEPS.map((_,i)=>'<i class="'+(i<=onb.step?'on':'')+'"></i>').join('')+'</div>'
+    +'<h3 class="onb-q">'+esc(s.title)+'</h3>'
+    +(s.sub?'<p class="onb-sub">'+esc(s.sub)+'</p>':'')
+    +'<div class="onb-opts'+(s.compact?' onb-compact':'')+'">'
+    +s.opts.map((o,i)=>'<button type="button" class="onb-opt'+(isOn(o[0])?' active':'')+'" onclick="onbPick('+i+')">'
+      +'<strong>'+esc(o[1])+'</strong>'+(o[2]?'<span>'+esc(o[2])+'</span>':'')+'</button>').join('')
+    +'</div>';
+  const ok=onbAnswered(s);
+  foot.innerHTML=(onb.step>0?'<button type="button" class="btn-ghost" onclick="onbBack()">Atrás</button>':'')
+    +'<button type="button" class="btn" onclick="onbNext()"'+(ok&&!onb.saving?'':' disabled style="opacity:.35"')+'>'
+    +(last?(onb.saving?'Guardando…':'Listo'):'Siguiente')+'</button>';
+}
+function onbPick(i){
+  if(!onb)return;
+  const s=ONB_STEPS[onb.step];
+  const v=s.opts[i][0];
+  if(s.multi){
+    const list=onb.data[s.key]||[];
+    onb.data[s.key]=list.includes(v)?list.filter(x=>x!==v):list.concat(v);
+    // "Solo mi cuerpo" y "Gym completo" no son excluyentes con lo demás: alguien con gym
+    // también puede tener una barra en casa. No se corrige la elección.
+    renderOnboarding();
+    return;
+  }
+  onb.data[s.key]=v;
+  renderOnboarding();
+  // Una sola respuesta: se avanza solo, que es lo que el dedo espera.
+  if(onb.step<ONB_STEPS.length-1)setTimeout(()=>{if(onb&&onb.data[s.key]===v&&ONB_STEPS[onb.step]===s)onbNext();},180);
+}
+function onbBack(){
+  if(!onb||onb.step===0)return;
+  onb.step--;
+  renderOnboarding();
+}
+async function onbNext(){
+  if(!onb||onb.saving)return;
+  if(!onbAnswered(ONB_STEPS[onb.step]))return;
+  if(onb.step<ONB_STEPS.length-1){onb.step++;renderOnboarding();return;}
+  onb.saving=true;renderOnboarding();
+  const now=new Date().toISOString();
+  const row={user_id:sbUser.id,...onb.data,onboarded_at:(trainingProfile&&trainingProfile.onboarded_at)||now,updated_at:now};
+  const{error}=await sb.from('training_profiles').upsert(row,{onConflict:'user_id'});
+  if(error&&!isMissingTrainingProfiles(error)){
+    onb.saving=false;renderOnboarding();
+    toast('No se pudo guardar: '+(error.message||'intenta de nuevo'),'err');
+    return;
+  }
+  if(!error)trainingProfile=row;
+  renderPerfilTrainingSummary();
+  const afterSignup=onb.afterSignup;
+  closeTrainingOnboarding(true);
+  if(afterSignup||isAppOnly()){
+    // Hasta que exista la biblioteca de programas (Fase 1), el siguiente paso real son las
+    // rutinas: las básicas del gym ya se ven en Mis rutinas, y crear la propia está ahí mismo.
+    rutActiveTab='rutinas';
+    sv('rutinas');
+    toast('Listo. Empieza con una rutina básica o crea la tuya','ok');
+  }else{
+    toast('Guardado','ok');
+  }
+}
+const ONB_LABELS={};
+ONB_STEPS.forEach(s=>s.opts.forEach(o=>{ONB_LABELS[s.key+':'+o[0]]=o[1];}));
+function renderPerfilTrainingSummary(){
+  const el=document.getElementById('perfil-training-sum');
+  if(!el)return;
+  const tp=trainingProfile;
+  if(!tp||!tp.onboarded_at){el.textContent='Sin llenar';return;}
+  const parts=[ONB_LABELS['goal:'+tp.goal],tp.days_per_week?tp.days_per_week+' días':''].filter(Boolean);
+  el.textContent=parts.join(' · ');
+}
+
+// ── BORRAR MI CUENTA ──
+// Apple pide que quien puede crear una cuenta desde la app la pueda borrar desde la app.
+// El borrado lo hace api/delete-user.js con service-role ({self:true}); aquí solo se confirma
+// dos veces, porque no tiene vuelta.
+async function deleteMyAccount(){
+  if(!sbUser||!curUser)return;
+  if(curUser.role&&curUser.role!=='user'){toast('Las cuentas del staff se eliminan desde el admin','err');return;}
+  const live=hasActive(curUser)&&curUser.plan;
+  const ok=await confirmSheet(
+    (live?'Tienes una membresía vigente: al borrar tu cuenta la pierdes, junto con las visitas que te queden.\n\n':'')
+    +'Se borran tu cuenta, tus rutinas, tu historial de entrenamiento y tu progreso. No se puede deshacer.',
+    {title:'Borrar mi cuenta',confirmLabel:'Continuar',danger:true});
+  if(!ok)return;
+  const typed=await promptSheet('Escribe BORRAR para confirmar.',{title:'Último paso',placeholder:'BORRAR',confirmLabel:'Borrar cuenta'});
+  if(typed==null)return;
+  if(typed.trim().toUpperCase()!=='BORRAR'){toast('No coincide: tu cuenta sigue igual','warn');return;}
+  showLoading('Borrando tu cuenta...');
+  try{
+    const{data:sessionData}=await sb.auth.getSession();
+    const token=sessionData&&sessionData.session&&sessionData.session.access_token;
+    if(!token)throw new Error('Inicia sesión de nuevo para borrar tu cuenta');
+    const res=await fetch('/api/delete-user',{
+      method:'POST',
+      headers:{'Content-Type':'application/json',Authorization:'Bearer '+token},
+      body:JSON.stringify({self:true})
+    });
+    const payload=await res.json().catch(()=>({}));
+    if(!res.ok)throw new Error(payload.error||'No se pudo borrar la cuenta');
+    hideLoading();
+    await doLogout();
+    toast('Tu cuenta se borró','ok');
+  }catch(e){
+    hideLoading();
+    toast(e.message||'No se pudo borrar la cuenta','err');
+  }
+}
 async function doLogout(){
   curUser=null;sbUser=null;sbProfile=null;
+  trainingProfile=null;onboardingDismissed=false;onboardingSuppressed=false;
   selStartIdx=null;selShort=false;selPlan=null;notifs=[];
   slots30={};waitlists={};
   _adminBookProfiles=null;
@@ -5616,7 +5937,16 @@ async function loadReceptionSessions(){
 
 // ── NAVIGATION ──
 const ALL_VIEWS=['inicio','book','planes','rutinas','coaching','comunidad','shop','historial','perfil','progreso'];
-const MEMBER_LOCKED_VIEWS=['book','rutinas','comunidad'];
+// Entrenar ya no está aquí (docs/HABIT_PARA_TODOS.md, Fase 0): cualquier cuenta entrena,
+// registra y ve su progreso. Lo que sigue cerrado es lo del gym: reservar (y con eso la
+// puerta) y la comunidad de socios. El candado que importa es el del servidor
+// (book_my_slot, 120); este solo evita mostrar una pantalla que no puede usar.
+const MEMBER_LOCKED_VIEWS=['book','comunidad'];
+// Quien entró por la app y hoy no es socio del gym. Si compra un plan deja de serlo:
+// la membresía manda, joined_as solo dice por dónde llegó.
+function isAppOnly(){
+  return !!(curUser&&curUser.joinedAs==='app'&&!canUseMemberViews());
+}
 function canUseMemberViews(){
   if(!curUser)return false;
   if(hasActive(curUser))return true;
@@ -5653,8 +5983,19 @@ function updateSupportFab(v){
 }
 function sv(v){
   if(MEMBER_LOCKED_VIEWS.includes(v)&&!canUseMemberViews()){
-    toast('Activa una membresia vigente para usar esta seccion','warn');
-    v='inicio';
+    // Reservar lleva a las membresías, que es lo que falta para reservar, en vez de
+    // devolver a Inicio con un aviso.
+    if(v==='book'){
+      toast(curUser&&curUser.joinedAs==='app'
+        ?'Reservar es para entrenar en HABIT Mazatlán. Elige una membresía.'
+        :'Activa una membresía vigente para reservar','warn');
+      v='planes';
+    }else{
+      toast(curUser&&curUser.joinedAs==='app'
+        ?'La comunidad es para socios del gym'
+        :'Activa una membresia vigente para usar esta seccion','warn');
+      v='inicio';
+    }
   }
   if(v==='shop'&&!canAccessShop()){
     toast('Tienda disponible próximamente','warn');
@@ -5816,6 +6157,11 @@ async function renderPerfil(){
   if(pfPhone)pfPhone.value=curUser.phone||'';
   if(pfCode)pfCode.textContent=curUser.accessCode||'????';
   if(pfPlan)pfPlan.textContent=curUser.plan?[...PLANS.individual,...PLANS.grupal].find(p=>p.id===curUser.plan)?.name||curUser.plan:'Sin plan';
+  renderPerfilTrainingSummary();
+  // El staff (admin, recepción) no se borra a sí mismo desde aquí: se quedaría el gym sin
+  // quien lo administre por un toque equivocado.
+  const acct=document.getElementById('perfil-account-section');
+  if(acct)acct.style.display=(curUser.role&&curUser.role!=='user')?'none':'';
 }
 function prepareSquareImage(file,size=420,quality=.86){
   return new Promise((resolve,reject)=>{
@@ -6017,13 +6363,17 @@ function renderDailyQuote(){
   '</section>';
   els.forEach(el=>el.innerHTML=html);
 }
+// El entreno de hoy, arriba de todo en Inicio. Era solo para clientes de Coaching, pero la
+// semana es de Entrenar y Entrenar es de todos: cualquiera con algo agendado hoy lo ve aquí.
 function inicioCoachActionHtml(){
-  if(!canAccessCoaching()||!coachWeekStart)return '';
+  if(!coachWeekStart)return '';
   const today=mazToday();
   const active=activeCoachingSession;
   const next=coachSchedule.find(r=>r.ds===today&&r.status==='scheduled');
   const row=active||next;
-  if(!row)return '';
+  // Quien entrena por su cuenta no tiene puerta ni reservas que ver en Inicio: sin nada
+  // agendado, la entrada es elegir qué entrenar.
+  if(!row)return isAppOnly()?inicioStartTrainingHtml():'';
   const isActive=!!active;
   const title=esc(row.board_name||'Entreno');
   const cta=isActive?'Continuar':'Iniciar';
@@ -6050,22 +6400,30 @@ function inicioFastingMiniHtml(){
     +'<span class="inicio-fast-label">'+label+'</span><span class="inicio-fast-time" id="inicio-fasting-time">'+esc(time)+'</span>'
     +'</div></div>';
 }
+function inicioStartTrainingHtml(){
+  return '<div class="inicio-coach-action"><button type="button" class="inicio-coach-btn" onclick="startInicioFreeTraining()">'
+    +'<span class="inicio-coach-icon"><svg viewBox="0 0 24 24"><path d="M6 4h4v16H6zM14 4h4v16h-4zM4 9h2M10 9h4M18 9h2M4 15h2M10 15h4M18 15h2"/></svg></span>'
+    +'<span class="inicio-coach-title">Entrenar hoy</span>'
+    +'<span class="inicio-coach-go">Elegir</span>'
+    +'</button></div>';
+}
+function startInicioFreeTraining(){
+  rutActiveTab='hoy';
+  sv('rutinas');
+}
 function renderInicioCoachingWidgets(){
   const actionEl=document.getElementById('inicio-coach-action');
   const fastEl=document.getElementById('inicio-fasting-mini');
-  if(!canAccessCoaching()){
-    if(actionEl)actionEl.innerHTML='';
-    if(fastEl)fastEl.innerHTML='';
-    return;
-  }
+  // El ayuno es de Coaching; el entreno de hoy es de todos.
+  if(fastEl&&!canAccessCoaching())fastEl.innerHTML='';
   if(!coachWeekStart){
     if(actionEl)actionEl.innerHTML='';
     if(fastEl)fastEl.innerHTML='';
-    loadCoachWeekDataSb(false).then(renderInicioCoachingWidgets).catch(console.error);
+    loadCoachWeekDataSb(false).then(()=>{if(coachWeekStart)renderInicioCoachingWidgets();}).catch(console.error);
     return;
   }
   if(actionEl)actionEl.innerHTML=inicioCoachActionHtml();
-  if(fastEl)fastEl.innerHTML=inicioFastingMiniHtml();
+  if(fastEl&&canAccessCoaching())fastEl.innerHTML=inicioFastingMiniHtml();
 }
 function startInicioCoachWorkout(id){
   rutActiveTab='hoy';
@@ -6078,7 +6436,9 @@ function updateMainMembershipPill(){
   const pill=document.getElementById('main-member-pill');
   if(!pill)return;
   pill.className='main-member-pill';
-  if(!curUser){
+  // "Sin membresía" en rojo es un aviso para el socio del gym; a quien entrena por su
+  // cuenta no le falta nada.
+  if(!curUser||isAppOnly()){
     pill.style.display='none';
     pill.textContent='';
     return;
@@ -6103,6 +6463,14 @@ function renderMembershipStatus(){
   const el=document.getElementById('membership-status-wrap');
   updateMainMembershipPill();
   if(!el||!curUser)return;
+  // Quien entrena por su cuenta no "activa su membresía": la app ya es suya. El gym queda
+  // como invitación, abajo y en una línea.
+  if(isAppOnly()){
+    el.innerHTML='<div class="app-gym-invite"><div><strong>¿Estás en Mazatlán?</strong>'
+      +'<span>Entrena en HABIT con equipo completo y tu rutina en la app.</span></div>'
+      +'<button class="btn-sm" onclick="sv(\'planes\')">Ver membresías</button></div>';
+    return;
+  }
   if(!curUser.plan&&curUser.credits<=0){
     const indPlans=PLANS.individual.filter(canSeePlan);
     const cards=indPlans.map(p=>'<div class="plan-card'+(p.feat?' feat':'')+'" onclick="sv(\'planes\');setTimeout(()=>choosePlan('+JSON.stringify(p)+'),120)" style="margin-bottom:8px">'+
@@ -6751,6 +7119,18 @@ async function handleStripeReturn(){
 }
 async function doPay(){
   if(!selPlan){toast('Selecciona un plan','err');return;}
+  // Quien entró por la app aceptó los términos de la app, no el reglamento del gym: lo
+  // acepta antes de pagar su primera membresía. Recordarlo es solo para no preguntarle
+  // en cada compra desde este teléfono; si se pierde, se le vuelve a mostrar.
+  if(curUser&&curUser.joinedAs==='app'&&sbUser){
+    const key='habit_gym_terms_'+sbUser.id;
+    let accepted=false;
+    try{accepted=localStorage.getItem(key)==='1';}catch(_){}
+    if(!accepted){
+      showTerms('gym',()=>{try{localStorage.setItem(key,'1');}catch(_){}doPay();});
+      return;
+    }
+  }
   showLoading('Abriendo Stripe...');
   try{
     const{data}=await sb.auth.getSession();
@@ -13985,7 +14365,9 @@ async function renderDashboard(){
     const monthStart=today.slice(0,7);
     const cutoff14=addDaysDS(today,-14);
     const[{data:allU},{data:pays},{data:bks},{data:logs},{data:recentBks}]=await Promise.all([
-      sb.from('profiles').select('id,credits,plan_expiry,plan_id,plan_is_courtesy,coaching_beta,role,name,phone').neq('role','admin').neq('role','reception').neq('source','skandi'),
+      // '*' y no la lista de columnas: joined_as (127) puede no existir todavía, y pedirla
+      // por nombre tumbaría el dashboard entero.
+      sb.from('profiles').select('*').neq('role','admin').neq('role','reception').neq('source','skandi'),
       sb.from('payments').select('amount,created_at,plan_name,user_id,payment_method,net_amount').order('created_at',{ascending:false}).limit(2000),
       sb.from('bookings').select('ds,status').eq('status','active'),
       sb.from('access_log').select('id'),
@@ -13994,6 +14376,12 @@ async function renderDashboard(){
     const allPlans=[...PLANS.individual,...PLANS.grupal];
     const active=(allU||[]).filter(u=>{const pp=allPlans.find(x=>x.id===u.plan_id);const ul=u.credits>=999||(pp&&pp.credits>=999);return(ul||u.credits>0)&&(!u.plan_expiry||new Date(u.plan_expiry)>new Date());});
     const realPayerIds=new Set((pays||[]).filter(isRealMemberPayment).map(p=>p.user_id));
+    // Los usuarios de la app no son socios del gym (127): fuera de "Total socios" y de la
+    // gráfica de planes, con su propio contador.
+    const appOnlyU=(allU||[]).filter(u=>isAppOnlyProfile(u,realPayerIds));
+    const gymU=(allU||[]).filter(u=>!isAppOnlyProfile(u,realPayerIds));
+    const weekAgoMs=Date.now()-7*86400000;
+    const appNewWeek=appOnlyU.filter(u=>u.created_at&&new Date(u.created_at).getTime()>=weekAgoMs).length;
     const activePaid=active.filter(u=>!u.plan_is_courtesy&&u.plan_id!=='prueba'&&realPayerIds.has(u.id));
     // Dinero real recibido (Stripe neto + GAIA + efectivo/transferencia); no el cobrado bruto.
     const monthRev=(pays||[]).filter(p=>dsFromIsoMaz(p.created_at).startsWith(monthStart)).reduce((s,p)=>s+paymentRealAmount(p),0);
@@ -14015,7 +14403,8 @@ async function renderDashboard(){
     const kpisEl=document.getElementById('dash-kpis');
     if(kpisEl)kpisEl.innerHTML=
       '<div class="met"><div class="met-l">Socios activos</div><div class="met-v" style="color:var(--green)">'+activePaid.length+'</div></div>'
-      +'<div class="met"><div class="met-l">Total socios</div><div class="met-v">'+(allU||[]).length+'</div></div>'
+      +'<div class="met"><div class="met-l">Total socios</div><div class="met-v">'+gymU.length+'</div></div>'
+      +'<button class="met" onclick="openAdminUserFilter(\'app\')" style="text-align:left;cursor:pointer"><div class="met-l">Usuarios de la app</div><div class="met-v">'+appOnlyU.length+'</div>'+(appNewWeek?'<div class="met-l" style="margin-top:2px">+'+appNewWeek+' esta semana</div>':'')+'</button>'
       +'<button class="met" onclick="admTab(\'payments\')" style="text-align:left;cursor:pointer"><div class="met-l">Ingreso real (mes)</div><div class="met-v" style="color:var(--bl)">'+MXN(monthRev)+'</div></button>'
       +'<button class="met" onclick="admTab(\'payments\')" style="text-align:left;cursor:pointer"><div class="met-l">Ingreso real (total)</div><div class="met-v" style="color:var(--bl)">'+MXN(totalRev)+'</div></button>'
       +'<div class="met"><div class="met-l">Reservas hoy</div><div class="met-v" style="color:var(--amber)">'+todayBks+'</div></div>'
@@ -14024,7 +14413,7 @@ async function renderDashboard(){
     // Draw charts
     renderRevenueChart(pays);
     renderBookingsChart(bks);
-    renderPlansChart(allU,allPlans);
+    renderPlansChart(gymU,allPlans);
 
     // Expiry section content
     const expEl=document.getElementById('expiry-section');
@@ -14475,8 +14864,14 @@ function adminUserState(u){
   const expiring=!expired&&days!==null&&days>=0&&days<=7;
   return{plan,expired,days,unlimited,credits,noPlan,noVisits,active,expiring};
 }
-function updateAdminUserOverview(rows,realPayerIds){
-  const stats={todos:rows.length,activo:0,'activo-real':0,'por-vencer':0,'sin-visitas':0,vencido:0,'sin-plan':0,'nunca-compro':0,coaching:0};
+// Quien entró por la app (127) y nunca ha sido socio del gym: ni plan vigente ni un pago
+// real. No es un socio "sin plan": nunca vino a buscar uno. En cuanto compra, cuenta como
+// socio — y si su plan vence, como socio vencido, no como usuario de la app.
+function isAppOnlyProfile(u,realPayerIds){
+  return u.joined_as==='app'&&!adminUserState(u).active&&!(realPayerIds&&realPayerIds.has(u.id));
+}
+function updateAdminUserOverview(rows,realPayerIds,appCount){
+  const stats={todos:rows.length,activo:0,'activo-real':0,'por-vencer':0,'sin-visitas':0,vencido:0,'sin-plan':0,'nunca-compro':0,coaching:0,app:appCount||0};
   rows.forEach(u=>{
     const s=adminUserState(u);
     if(s.active)stats.activo++;
@@ -14524,9 +14919,15 @@ async function renderUsersSb(){
     const allU=userRes.data||[];
     const realPayerIds=new Set((paymentRes.data||[]).filter(isRealMemberPayment).map(p=>p.user_id));
     const memberRows=(allU||[]).filter(u=>u.role!=='admin'&&u.role!=='reception');
-    updateAdminUserOverview(memberRows,realPayerIds);
-    let filtered=memberRows.filter(u=>!q||((u.name||'').toLowerCase().includes(q)||(u.phone||'').includes(q)||(u.email||'').toLowerCase().includes(q)));
+    // Los usuarios de la app no son socios: no entran a "Todos" ni a sus conteos. Tienen su
+    // chip, y una búsqueda por nombre los encuentra igual (alguien que escribe pidiendo ayuda).
+    const appRows=memberRows.filter(u=>isAppOnlyProfile(u,realPayerIds));
+    const gymRows=memberRows.filter(u=>!isAppOnlyProfile(u,realPayerIds));
+    updateAdminUserOverview(gymRows,realPayerIds,appRows.length);
+    const base=_userFilter==='app'?appRows:(q?memberRows:gymRows);
+    let filtered=base.filter(u=>!q||((u.name||'').toLowerCase().includes(q)||(u.phone||'').includes(q)||(u.email||'').toLowerCase().includes(q)));
     filtered=filtered.filter(u=>{
+      if(_userFilter==='app') return true;
       const s=adminUserState(u);
       if(_userFilter==='activo') return s.active;
       if(_userFilter==='activo-real') return s.active&&!u.plan_is_courtesy&&u.plan_id!=='prueba'&&realPayerIds.has(u.id);
@@ -14547,7 +14948,9 @@ async function renderUsersSb(){
       if(sort==='creditos') return (b2.credits||0)-(a.credits||0);
       return 0;
     });
-    if(countEl) countEl.textContent=filtered.length+' socio'+(filtered.length!==1?'s':'');
+    if(countEl) countEl.textContent=_userFilter==='app'
+      ?filtered.length+' usuario'+(filtered.length!==1?'s':'')+' de la app'
+      :filtered.length+' socio'+(filtered.length!==1?'s':'');
     if(!filtered.length){
       list.innerHTML='<div class="empty">Sin usuarios'+(allU&&allU.length?' para este filtro':' — verifica RLS en Supabase')+'.</div>';
       return;

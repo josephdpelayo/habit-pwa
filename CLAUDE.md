@@ -121,6 +121,8 @@ Key routes:
   Re-importing an activity **never overwrites an `intensity_source = 'manual'` effort** — that is
   why the import is a read-then-split, not a blind upsert
 - `search-users.js` — admin user search (service-role Supabase query)
+- `delete-user.js` — the admin deletes a member (with a reason), or a member deletes their own
+  account from Perfil (`{self:true}`, `role = 'user'` only). Same function: the 12-function ceiling
 - `sync-stripe-payments.js` — admin-triggered payment sync
 
 Plans (prices, credits, expiry days) are defined centrally in `api/_plans.js` and shared by `_fulfillment.js`, `create-checkout-session.js`, and `confirm-checkout-session.js`.
@@ -130,6 +132,19 @@ Schema is in `habit-supabase-setup.sql`. Additional migrations are separate `.sq
 
 Core tables:
 - `profiles` — extends `auth.users`; has `role` (`user`/`admin`/`reception`), 4-digit `access_code`, `credits`, `plan_id`, `plan_expiry`
+- **Entrenar es de cualquier cuenta, no solo de socios** (migración 127, `docs/HABIT_PARA_TODOS.md`
+  Fase 0). `MEMBER_LOCKED_VIEWS` ya no incluye `rutinas`; Reservar y Comunidad siguen detrás de
+  la membresía, y el candado que de verdad cuenta es `book_my_slot` (120): la puerta solo mira
+  reservas. `profiles.joined_as` (`gym`/`app`) dice **por dónde entró**, no qué puede hacer —
+  no confundir con `profiles.source` (habit/skandi, 055). Lo escribe `handle_new_user` desde
+  los metadatos del `signUp` (el perfil nace en ese trigger, antes de que la app llame
+  `ensure_habit_profile`), y con `app` el trigger de la 122 no asigna rutinas básicas, no
+  sale el push "Nuevo socio" y se aceptan los términos de la app; el reglamento del gym se
+  acepta en `doPay` antes de su primera membresía. `isAppOnly()` (app) /
+  `isAppOnlyProfile()` (admin) = `joined_as = 'app'` **y** nunca ha tenido plan ni pago real:
+  en cuanto compra cuenta como socio. Su onboarding vive en `training_profiles` (privada, como
+  `skandi_settings`). Borrar la propia cuenta es `api/delete-user.js` con `{self:true}`
+  (solo `role = 'user'`), que Apple exige para publicar
 - `bookings` — reservations; `ds` = date (`YYYY-MM-DD`), `start_idx` = slot index 0–47 (each slot = 30 min), `slots_used` = 2 or 3
 - `slot_occupancy` — one row per booked slot per user per day
 - **Reservar, cancelar y cambiar de horario los hace el servidor** (migración 120):
