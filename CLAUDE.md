@@ -132,6 +132,20 @@ Core tables:
 - `profiles` — extends `auth.users`; has `role` (`user`/`admin`/`reception`), 4-digit `access_code`, `credits`, `plan_id`, `plan_expiry`
 - `bookings` — reservations; `ds` = date (`YYYY-MM-DD`), `start_idx` = slot index 0–47 (each slot = 30 min), `slots_used` = 2 or 3
 - `slot_occupancy` — one row per booked slot per user per day
+- **Reservar, cancelar y cambiar de horario los hace el servidor** (migración 120):
+  `book_my_slot` / `cancel_my_booking` / `reschedule_my_booking`, cada uno una transacción con
+  candado por día. Las reglas de `canStartAt()` / `canCancelBk()` (cupo de 4, bloqueos, una
+  reserva por día, 7 días, plan vigente ese día, 12 h / 2 h) viven **dos veces**: en la app para
+  avisar rápido y en esos RPC para decidir — cambiar una regla es cambiarla en los dos lados.
+  `bookings.credit_charged` dice si la reserva cobró visita, y cancelar devuelve eso. El socio
+  ya no escribe `bookings`, `slot_occupancy` ni `payments`, y `guard_profile_billing` (trigger
+  **security invoker**: distingue por `current_user`, que dentro de un RPC security definer es
+  el dueño) le impide tocar `credits`/`plan_*` de su perfil; el admin y el service-role siguen
+  escribiendo directo. Los errores salen como códigos (`SLOT_FULL`…) que `BOOKING_RPC_ERRORS`
+  traduce. Las funciones `legacy*` de app.html son el camino previo a la 120 y se pueden borrar.
+  **Cuidado con NULL en esas reglas**: `plan_id in ('im','gm')` con `plan_id` null da null, y
+  `false or null` también; sin `coalesce`, una cuenta nueva sin plan ni visitas reservaba y
+  quedaba en −1 (encontrado antes de correr la 120, probado contra Postgres real)
 - `slot_blocks` — admin-created manual blocks
 - `payments` — payment records (Stripe and manual)
 - `door_commands` — queue of door open requests with Shelly execution status

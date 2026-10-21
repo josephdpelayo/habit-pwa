@@ -14,7 +14,7 @@ create table if not exists public.profiles (
   role          text not null default 'user' check (role in ('user','admin','reception')),
   access_code   text unique not null,
   plan_id       text,
-  plan_type     text check (plan_type in ('individual','grupal') or plan_type is null),
+  plan_type     text check (plan_type in ('individual','grupal','gaia') or plan_type is null),
   credits       integer not null default 0,
   plan_expiry   timestamptz,
   avatar_url    text,

@@ -6,19 +6,19 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="HABIT">
 <meta name="application-name" content="HABIT">
-<link rel="manifest" href="/manifest.json?v=20261014-2">
-<link rel="apple-touch-icon" sizes="120x120" href="/icons/icon-120.png?v=20261014-2">
-<link rel="apple-touch-icon" sizes="152x152" href="/icons/icon-152.png?v=20261014-2">
-<link rel="apple-touch-icon" sizes="167x167" href="/icons/icon-167.png?v=20261014-2">
-<link rel="apple-touch-icon" sizes="180x180" href="/icons/icon-180.png?v=20261014-2">
-<link rel="icon" type="image/png" sizes="32x32" href="/icons/icon-32.png?v=20261014-2">
+<link rel="manifest" href="/manifest.json?v=20261019-1">
+<link rel="apple-touch-icon" sizes="120x120" href="/icons/icon-120.png?v=20261019-1">
+<link rel="apple-touch-icon" sizes="152x152" href="/icons/icon-152.png?v=20261019-1">
+<link rel="apple-touch-icon" sizes="167x167" href="/icons/icon-167.png?v=20261019-1">
+<link rel="apple-touch-icon" sizes="180x180" href="/icons/icon-180.png?v=20261019-1">
+<link rel="icon" type="image/png" sizes="32x32" href="/icons/icon-32.png?v=20261019-1">
 <title>HABIT</title>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Share+Tech+Mono&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="/skandi-recovery.js?v=20261014-2"></script>
-<script src="/body-figure.js?v=20261014-2"></script>
-<script src="/habit-training.js?v=20261014-2"></script>
+<script src="/skandi-recovery.js?v=20261019-1"></script>
+<script src="/body-figure.js?v=20261019-1"></script>
+<script src="/habit-training.js?v=20261019-1"></script>
 <style>
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
 @media (prefers-reduced-motion:reduce){*,*:before,*:after{scroll-behavior:auto!important;animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}}
@@ -3397,7 +3397,7 @@ body.admin-mode #courtesy-modal label{border-radius:14px!important;border-color:
 // ── CONFIG & SUPABASE ───────────────────────────────────────
 const SUPABASE_URL='https://pmpjteuqjusbiduevbwq.supabase.co';
 const SUPABASE_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBtcGp0ZXVxanVzYmlkdWV2YndxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc2OTI1NjUsImV4cCI6MjA5MzI2ODU2NX0.XbMzZoo2yqtrD8znLnyo_1zDfrdJAvAPj1lqGOyXnLw';
-const APP_VERSION='20261014-2';
+const APP_VERSION='20261019-1';
 // La pierna va separada en cuádriceps, femorales y pantorrillas: la figura
 // corporal pinta esas tres regiones por separado y el motor de recuperación les
 // da ventanas de descanso distintas. 'Piernas' sigue reconociéndose al leer
@@ -6417,59 +6417,32 @@ async function doConfirm(){
   const check=canStartAt(ds,selStartIdx,isGrupal,slotsUsed);
   if(!check.ok){bookingSubmitting=false;toast('Este horario ya no esta disponible','err');renderBook();return;}
   showLoading('Confirmando reserva...');
-  let createdBookingId=null;
   try{
-    const grupalSpots=isGrupal?(check.grupalSpots||CAP):1;
-    const durMin=slotsUsed*30;
-    const timeStr=fmtTimeRange(selStartIdx,slotsUsed);
-    const bookingId=crypto.randomUUID();
+    // La reserva, su ocupación y la visita se deciden en el servidor, en una
+    // sola transacción y con las mismas reglas (migración 120). Mientras esa
+    // migración no esté corrida el RPC no existe y se toma el camino de antes.
+    let bk;
+    const rpc=await sb.rpc('book_my_slot',{p_ds:ds,p_start_idx:selStartIdx,p_slots_used:slotsUsed});
+    if(rpc.error&&!isMissingRpcError(rpc.error))throw bookingRpcError(rpc.error);
+    if(rpc.error)bk=await legacyBookSlot(ds,selStartIdx,slotsUsed,isGrupal,check);
+    else{bk=rpc.data.booking;curUser.credits=rpc.data.credits;}
+    // Grupal o no, y cuántos lugares, lo decide el servidor por el plan.
+    const bkIsGroup=!!bk.is_group,grupalSpots=bk.grupal_spots,timeStr=bk.time_str,durMin=bk.dur_min||slotsUsed*30;
 
-    // 1. Save booking to Supabase
-    const{data:bk,error:bkErr}=await sb.from('bookings').insert({
-      id:bookingId,
-      user_id:sbUser.id,
-      ds:ds,
-      start_idx:selStartIdx,
-      slots_used:slotsUsed,
-      is_group:isGrupal,
-      grupal_spots:grupalSpots,
-      time_str:timeStr,
-      dur_min:durMin,
-      status:'active'
-    }).select().single();
-    if(bkErr)throw bkErr;
-    createdBookingId=bk.id;
-
-    // 2. Save slot occupancy to Supabase
-    const occRows=[];
-    for(const part of slotRange(ds,selStartIdx,slotsUsed)){
-      if(isGrupal){
-        occRows.push({ds:part.ds,slot_idx:part.idx,user_id:sbUser.id,booking_id:bk.id,is_group:true,spot:grupalSpots});
-      }else{
-        occRows.push({ds:part.ds,slot_idx:part.idx,user_id:sbUser.id,booking_id:bk.id,is_group:false});
-      }
-    }
-    const{error:occErr}=await sb.from('slot_occupancy').insert(occRows);
-    if(occErr)throw occErr;
-
-    // 3. Deduct credit in Supabase (skip for unlimited/monthly plans)
-    // 3. Deduct credit (skip for unlimited/monthly plans)
-    {const _allP=[...PLANS.individual,...PLANS.grupal];const _cp=_allP.find(x=>x.id===curUser.plan);const _unlim=curUser.credits>=999||(_cp&&_cp.credits>=999);if(!_unlim){const _nc=Math.max(0,curUser.credits-1);await sb.from('profiles').update({credits:_nc}).eq('id',sbUser.id);curUser.credits=_nc;}}
-
-    // 4. Update local state
-    const entry={userId:curUser.id,name:curUser.name,phone:curUser.phone||'',isGroup:isGrupal,bookingId:bk.id};
+    // Estado local
+    const entry={userId:curUser.id,name:curUser.name,phone:curUser.phone||'',isGroup:bkIsGroup,bookingId:bk.id};
     for(const part of slotRange(ds,selStartIdx,slotsUsed)){
       const targetDay=getDaySlots(part.ds);
       if(!targetDay[part.idx])targetDay[part.idx]=[];
-      if(isGrupal)targetDay[part.idx].push({...entry,spot:grupalSpots});
+      if(bkIsGroup)targetDay[part.idx].push({...entry,spot:grupalSpots});
       else targetDay[part.idx].push(entry);
     }
     curUser.bookings=curUser.bookings||[];
-    curUser.bookings.push({id:bk.id,ds,startIdx:selStartIdx,slotsUsed,isGroup:isGrupal,grupalSpots,timeStr,durMin,createdAt:bk.created_at});
+    curUser.bookings.push({id:bk.id,ds,startIdx:selStartIdx,slotsUsed,isGroup:bkIsGroup,grupalSpots,timeStr,durMin,createdAt:bk.created_at});
 
-    // 5. Notify admin
-    try{await sb.from('admin_notifs').insert({message:'Reserva: '+curUser.name+' - '+fmtDS(ds)+' '+timeStr+(isGrupal?' (grupal)':'')});}catch(e){}
-    sendPush('admin','📅 Nueva reserva',curUser.name+' · '+fmtDS(ds)+' '+timeStr+(isGrupal?' (grupal)':''),{tag:'booking-new'});
+    // Aviso al admin
+    try{await sb.from('admin_notifs').insert({message:'Reserva: '+curUser.name+' - '+fmtDS(ds)+' '+timeStr+(bkIsGroup?' (grupal)':'')});}catch(e){}
+    sendPush('admin','📅 Nueva reserva',curUser.name+' · '+fmtDS(ds)+' '+timeStr+(bkIsGroup?' (grupal)':''),{tag:'booking-new'});
 
     hideLoading();
     addN('Reserva confirmada - '+fmtDS(ds)+' '+timeStr+'. Abre la puerta desde la app al llegar.','success');
@@ -6477,16 +6450,106 @@ async function doConfirm(){
     toast('Reserva confirmada','ok');
     renderGuestGroup().catch(console.error);
   }catch(e){
-    if(createdBookingId){
-      try{await sb.from('bookings').delete().eq('id',createdBookingId);}catch(_){}
-      try{await sb.from('slot_occupancy').delete().eq('booking_id',createdBookingId);}catch(_){}
-    }
     hideLoading();
-    toast('Error al confirmar: '+e.message,'err');
+    toast(e.bookingRule?e.message:'Error al confirmar: '+e.message,'err');
     console.error('doConfirm error:',e);
+    // Si el servidor dijo que el horario ya no cabe, la vista estaba vieja.
+    if(e.code==='SLOT_FULL'||e.code==='SLOT_BLOCKED')loadSlotOccupancyFromSb(ds).then(renderBook).catch(()=>{});
   }finally{
     bookingSubmitting=false;
   }
+}
+// Los RPC de reservas (migración 120) contestan con un código; esto lo pone en
+// palabras. Un error que no esté aquí se muestra tal cual.
+const BOOKING_RPC_ERRORS={
+  NO_CREDITS:'Ya no te quedan visitas. Compra un plan para reservar.',
+  PLAN_EXPIRED:'Tu membresía venció. Renuévala para reservar.',
+  PLAN_ENDS_BEFORE:'Tu membresía vence antes de ese día.',
+  BOOKING_PAST:'Ese horario ya pasó.',
+  BOOKING_TOO_FAR:'Solo puedes reservar con '+BOOKING_ADVANCE_DAYS+' días de anticipación.',
+  ONE_PER_DAY:'Ya tienes una reserva ese día.',
+  OVERLAP:'Se cruza con otra reserva tuya.',
+  SLOT_FULL:'Este horario ya no está disponible.',
+  SLOT_BLOCKED:'Este horario ya no está disponible.',
+  SAME_TIME:'Ya tienes ese horario.',
+  BOOKING_STARTED:'Esta reserva ya no se puede cambiar.',
+  BOOKING_NOT_ACTIVE:'Esta reserva ya no está activa.',
+  BOOKING_NOT_FOUND:'No encontramos esa reserva.',
+  CANCEL_WINDOW_CLOSED:'Solo puedes cancelar con más de '+CANCEL_H+'h de anticipación, o dentro de las '+CANCEL_WINDOW_H+'h después de reservar. Prueba cambiar el horario.',
+};
+function bookingRpcError(error){
+  const msg=String((error&&error.message)||error||'');
+  const code=Object.keys(BOOKING_RPC_ERRORS).find(k=>msg===k);
+  const e=new Error(code?BOOKING_RPC_ERRORS[code]:msg);
+  e.code=code||'';
+  e.bookingRule=!!code;
+  return e;
+}
+// Sin la migración 120 el RPC todavía no existe, y PostgREST lo dice así.
+function isMissingRpcError(error){
+  return !!error&&(error.code==='PGRST202'||/could not find the function|schema cache/i.test(error.message||''));
+}
+// ── Camino anterior a la migración 120 ──
+// Escrituras sueltas desde el cliente. Solo corre mientras los RPC no existan;
+// ya aplicada la 120, la RLS las rechaza. Se puede borrar después de correrla.
+async function legacyBookSlot(ds,startIdx,slotsUsed,isGrupal,check){
+  const grupalSpots=isGrupal?(check.grupalSpots||CAP):1;
+  const{data:bk,error:bkErr}=await sb.from('bookings').insert({
+    id:crypto.randomUUID(),user_id:sbUser.id,ds,start_idx:startIdx,slots_used:slotsUsed,
+    is_group:isGrupal,grupal_spots:grupalSpots,time_str:fmtTimeRange(startIdx,slotsUsed),
+    dur_min:slotsUsed*30,status:'active'
+  }).select().single();
+  if(bkErr)throw bkErr;
+  try{
+    const occRows=slotRange(ds,startIdx,slotsUsed).map(part=>isGrupal
+      ?{ds:part.ds,slot_idx:part.idx,user_id:sbUser.id,booking_id:bk.id,is_group:true,spot:grupalSpots}
+      :{ds:part.ds,slot_idx:part.idx,user_id:sbUser.id,booking_id:bk.id,is_group:false});
+    const{error:occErr}=await sb.from('slot_occupancy').insert(occRows);
+    if(occErr)throw occErr;
+    // Si la visita no se pudo descontar, la reserva no se queda: antes quedaba
+    // gratis sin que nadie se enterara.
+    if(!isUnlimitedPlan(curUser)){
+      const nc=Math.max(0,curUser.credits-1);
+      const{error:credErr}=await sb.from('profiles').update({credits:nc}).eq('id',sbUser.id);
+      if(credErr)throw credErr;
+      curUser.credits=nc;
+    }
+    return bk;
+  }catch(e){
+    try{await sb.from('slot_occupancy').delete().eq('booking_id',bk.id);}catch(_){}
+    try{await sb.from('bookings').delete().eq('id',bk.id);}catch(_){}
+    throw e;
+  }
+}
+async function legacyCancelBooking(bid){
+  // La reserva primero y revisando el error: antes, si esto fallaba, la visita
+  // se devolvía igual y la reserva seguía abriendo la puerta.
+  const{error}=await sb.from('bookings').update({status:'cancelled'}).eq('id',bid);
+  if(error)throw error;
+  await sb.from('slot_occupancy').delete().eq('booking_id',bid);
+  if(isUnlimitedPlan(curUser))return false;
+  const nc=curUser.credits+1;
+  const{error:credErr}=await sb.from('profiles').update({credits:nc}).eq('id',sbUser.id);
+  if(credErr){console.error('legacyCancelBooking credits:',credErr);return false;}
+  curUser.credits=nc;
+  return true;
+}
+async function legacyRescheduleBooking(bid,ds,startIdx,slotsUsed,isGrupal,check){
+  const grupalSpots=isGrupal?(check.grupalSpots||CAP):1;
+  const timeStr=fmtTimeRange(startIdx,slotsUsed);
+  const{error:bkErr}=await sb.from('bookings').update({start_idx:startIdx,time_str:timeStr,grupal_spots:grupalSpots}).eq('id',bid);
+  if(bkErr)throw bkErr;
+  await sb.from('slot_occupancy').delete().eq('booking_id',bid);
+  const occRows=slotRange(ds,startIdx,slotsUsed).map(part=>isGrupal
+    ?{ds:part.ds,slot_idx:part.idx,user_id:sbUser.id,booking_id:bid,is_group:true,spot:grupalSpots}
+    :{ds:part.ds,slot_idx:part.idx,user_id:sbUser.id,booking_id:bid,is_group:false});
+  const{error:occErr}=await sb.from('slot_occupancy').insert(occRows);
+  if(occErr)throw occErr;
+  return{grupal_spots:grupalSpots,time_str:timeStr};
+}
+function isUnlimitedPlan(u){
+  const p=[...PLANS.individual,...PLANS.grupal].find(x=>x.id===u.plan);
+  return u.credits>=999||!!(p&&p.credits>=999);
 }
 
 async function doWaitlist(){
@@ -6529,9 +6592,14 @@ async function cancelBooking(bid){
   if(!canCancelBk(b)){toast('Solo puedes cancelar con más de '+CANCEL_H+'h de anticipación, o dentro de las '+CANCEL_WINDOW_H+'h después de reservar. Prueba cambiar el horario.','err');return;}
   showLoading('Cancelando...');
   try{
-    await sb.from('bookings').update({status:'cancelled'}).eq('id',bid);
-    await sb.from('slot_occupancy').delete().eq('booking_id',bid);
-    {const _allP=[...PLANS.individual,...PLANS.grupal];const _cp=_allP.find(x=>x.id===curUser.plan);const _unlim=curUser.credits>=999||(_cp&&_cp.credits>=999);if(!_unlim){const _nc=curUser.credits+1;await sb.from('profiles').update({credits:_nc}).eq('id',sbUser.id);curUser.credits=_nc;}}
+    // Cancelar, liberar el horario y devolver la visita es una sola
+    // transacción en el servidor (migración 120), que devuelve lo que la
+    // reserva cobró. Sin esa migración, el camino de antes.
+    let refunded;
+    const rpc=await sb.rpc('cancel_my_booking',{p_booking_id:bid});
+    if(rpc.error&&!isMissingRpcError(rpc.error))throw bookingRpcError(rpc.error);
+    if(rpc.error)refunded=await legacyCancelBooking(bid);
+    else{curUser.credits=rpc.data.credits;refunded=!!rpc.data.refunded;}
     // Update local state
     const day=getDaySlots(b.ds);
     const slotsUsed=b.slotsUsed||BOOKING_SLOTS;
@@ -6541,12 +6609,14 @@ async function cancelBooking(bid){
     }
     curUser.bookings=curUser.bookings.filter(x=>x.id!==bid);
     hideLoading();
-    addN('Reserva cancelada - '+fmtDS(b.ds)+' '+b.timeStr+'. Visita devuelta.','warn');
-    toast('Reserva cancelada - Visita devuelta','warn');
+    // "Visita devuelta" solo cuando de verdad se devolvió: con plan ilimitado
+    // no hay visita que devolver, y antes lo decía igual.
+    addN('Reserva cancelada - '+fmtDS(b.ds)+' '+b.timeStr+(refunded?'. Visita devuelta.':'.'),'warn');
+    toast(refunded?'Reserva cancelada - Visita devuelta':'Reserva cancelada','warn');
     sendPush('admin','❌ Reserva cancelada',curUser.name+' canceló · '+fmtDS(b.ds)+' '+b.timeStr,{tag:'booking-cancel'});
   }catch(e){
     hideLoading();
-    toast('Error: '+e.message,'err');
+    toast(e.bookingRule?e.message:'Error: '+e.message,'err');
   }
 }
 
@@ -6582,24 +6652,17 @@ async function doReschedule(){
   if(!check.ok){bookingSubmitting=false;toast('Este horario ya no está disponible','err');renderBook();return;}
   showLoading('Cambiando horario...');
   try{
-    const grupalSpots=isGrupal?(check.grupalSpots||CAP):1;
     const durMin=slotsUsed*30;
-    const timeStr=fmtTimeRange(selStartIdx,slotsUsed);
     const oldStartIdx=rescheduleBk.startIdx,oldDs=rescheduleBk.ds,bid=rescheduleBk.id;
 
-    const{error:bkErr}=await sb.from('bookings').update({
-      start_idx:selStartIdx,time_str:timeStr,grupal_spots:grupalSpots
-    }).eq('id',bid);
-    if(bkErr)throw bkErr;
-
-    await sb.from('slot_occupancy').delete().eq('booking_id',bid);
-    const occRows=[];
-    for(const part of slotRange(ds,selStartIdx,slotsUsed)){
-      if(isGrupal)occRows.push({ds:part.ds,slot_idx:part.idx,user_id:sbUser.id,booking_id:bid,is_group:true,spot:grupalSpots});
-      else occRows.push({ds:part.ds,slot_idx:part.idx,user_id:sbUser.id,booking_id:bid,is_group:false});
-    }
-    const{error:occErr}=await sb.from('slot_occupancy').insert(occRows);
-    if(occErr)throw occErr;
+    // Cambiar el horario y mover la ocupación es una sola transacción en el
+    // servidor, que vuelve a contar el cupo (migración 120).
+    let row;
+    const rpc=await sb.rpc('reschedule_my_booking',{p_booking_id:bid,p_start_idx:selStartIdx});
+    if(rpc.error&&!isMissingRpcError(rpc.error))throw bookingRpcError(rpc.error);
+    if(rpc.error)row=await legacyRescheduleBooking(bid,ds,selStartIdx,slotsUsed,isGrupal,check);
+    else row=rpc.data.booking;
+    const grupalSpots=row.grupal_spots,timeStr=row.time_str;
 
     // Update local state: remove old slot entries, add new ones
     const oldDay=getDaySlots(oldDs);
@@ -6628,8 +6691,9 @@ async function doReschedule(){
     renderActiveBookings().catch(()=>{});
   }catch(e){
     hideLoading();
-    toast('Error al cambiar horario: '+e.message,'err');
+    toast(e.bookingRule?e.message:'Error al cambiar horario: '+e.message,'err');
     console.error('doReschedule error:',e);
+    if(e.code==='SLOT_FULL'||e.code==='SLOT_BLOCKED')loadSlotOccupancyFromSb(ds).then(renderBook).catch(()=>{});
   }finally{
     bookingSubmitting=false;
   }
