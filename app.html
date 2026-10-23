@@ -6,12 +6,12 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="HABIT">
 <meta name="application-name" content="HABIT">
-<link rel="manifest" href="/manifest.json?v=20261023-1">
-<link rel="apple-touch-icon" sizes="120x120" href="/icons/icon-120.png?v=20261023-1">
-<link rel="apple-touch-icon" sizes="152x152" href="/icons/icon-152.png?v=20261023-1">
-<link rel="apple-touch-icon" sizes="167x167" href="/icons/icon-167.png?v=20261023-1">
-<link rel="apple-touch-icon" sizes="180x180" href="/icons/icon-180.png?v=20261023-1">
-<link rel="icon" type="image/png" sizes="32x32" href="/icons/icon-32.png?v=20261023-1">
+<link rel="manifest" href="/manifest.json?v=20261023-2">
+<link rel="apple-touch-icon" sizes="120x120" href="/icons/icon-120.png?v=20261023-2">
+<link rel="apple-touch-icon" sizes="152x152" href="/icons/icon-152.png?v=20261023-2">
+<link rel="apple-touch-icon" sizes="167x167" href="/icons/icon-167.png?v=20261023-2">
+<link rel="apple-touch-icon" sizes="180x180" href="/icons/icon-180.png?v=20261023-2">
+<link rel="icon" type="image/png" sizes="32x32" href="/icons/icon-32.png?v=20261023-2">
 <title>HABIT</title>
 <!-- Con id a propósito: scripts/check-training.js toma la primera etiqueta script sin
      atributos como el script principal de la app y la compila. -->
@@ -25,7 +25,7 @@
   var crew=/^\/crew(\/|$)/.test(location.pathname);
   window.HABIT_BRAND=crew?'crew':'gym';
   if(!crew)return;
-  var v='20261023-1';
+  var v='20261023-2';
   document.documentElement.classList.add('brand-crew');
   document.title='HABIT Crew';
   document.querySelectorAll('meta[name="apple-mobile-web-app-title"],meta[name="application-name"]')
@@ -40,9 +40,9 @@
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Share+Tech+Mono&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="/skandi-recovery.js?v=20261023-1"></script>
-<script src="/body-figure.js?v=20261023-1"></script>
-<script src="/habit-training.js?v=20261023-1"></script>
+<script src="/skandi-recovery.js?v=20261023-2"></script>
+<script src="/body-figure.js?v=20261023-2"></script>
+<script src="/habit-training.js?v=20261023-2"></script>
 <style>
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
 @media (prefers-reduced-motion:reduce){*,*:before,*:after{scroll-behavior:auto!important;animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}}
@@ -2254,7 +2254,7 @@ body.admin-mode #courtesy-modal label{border-radius:14px!important;border-color:
 .training-sync.offline,.training-sync.error{color:var(--red);background:rgba(239,68,68,.08);border-color:rgba(239,68,68,.25)}
 .set-row.pending-sync{outline:1px solid rgba(245,158,11,.35);border-radius:10px}
 /* Columna de RIR en el set-tracker */
-.set-tracker.has-rir .set-tracker-hdr,.set-tracker.has-rir .set-row{grid-template-columns:24px 1fr 1fr 46px 40px 22px}
+.set-tracker.has-rir .set-tracker-hdr,.set-tracker.has-rir .set-row{grid-template-columns:24px 1fr 1fr 46px 44px}
 .set-rir-in{text-align:center}
 /* El RIR nunca fue obligatorio, pero la cabecera no lo decía y el socio creía
    que sin él no podía cerrar la serie. */
@@ -2394,6 +2394,30 @@ body.admin-mode #courtesy-modal label{border-radius:14px!important;border-color:
 .perfil-row-sum{font-size:12px;color:var(--gray);font-weight:500;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:55%}
 .perfil-delete-btn{color:var(--red);border-color:rgba(255,100,100,.28)}
 .perfil-delete-hint{font-size:11.5px;color:var(--gray);line-height:1.5;margin:6px 0 0}
+/* Sesión, Fase A: dedos grandes, nada de ✕ por serie, descanso visible. */
+.set-tracker-hdr,.set-row{grid-template-columns:26px 1fr 1fr 44px}
+.set-row .set-reps-in{font-size:16px;padding:11px 8px;text-align:center}
+.set-row .set-check{width:44px;height:44px;border-radius:11px;font-size:17px}
+.set-tracker-actions .set-add-btn{flex:0 0 auto;background:transparent;border-color:transparent;color:var(--gray);padding-left:0}
+/* El menú del ejercicio flota sobre la lista, alineado a la derecha: abrirlo ya no empuja
+   las series hacia abajo ni corre los tres puntos a la izquierda. */
+.ws-ex-more[open]{z-index:25}
+.ws-ex-more[open] .ws-ex-tools{position:absolute;right:0;top:100%;flex-direction:column;align-items:stretch;gap:2px;min-width:190px;
+  padding:6px;border:1px solid var(--border);border-radius:14px;background:#17181b;box-shadow:0 18px 40px rgba(0,0,0,.45)}
+.ws-ex-more .ws-ex-tool{text-align:left;padding:12px 12px;border:none;border-radius:10px;background:transparent;color:var(--white);font-size:14px;font-weight:600}
+.ws-ex-more .ws-ex-tool:active{background:rgba(255,255,255,.07)}
+.ws-ex-more .ws-ex-tool.danger{color:var(--red)}
+.ws-rest-strip~.ws-timer-chip .ws-timer-rest{display:none}
+.ws-rest-strip{display:flex;align-items:center;gap:8px;width:min(420px,calc(100vw - 24px));padding:10px 10px 10px 16px;
+  border:1px solid rgba(127,176,255,.35);border-radius:16px;background:rgba(16,24,40,.97);color:var(--white)}
+.ws-rest-strip-k{font-size:12px;color:var(--bl);font-weight:700}
+.ws-rest-strip strong{font-size:22px;font-weight:800;font-variant-numeric:tabular-nums;margin-right:auto}
+.ws-rest-strip button{min-width:44px;min-height:40px;border-radius:10px;border:1px solid var(--border);background:rgba(255,255,255,.06);color:var(--white);font-weight:700;font-size:13px}
+.ws-rest-strip .ws-rest-skip{padding:0 12px}
+/* Toda fila tiene el mismo relleno; "la que sigue" solo cambia de color. Antes el
+   resaltado agregaba relleno y empujaba ~10 px todo lo de abajo al pasar de serie. */
+.set-row,.set-row.next{padding:4px;margin-left:-4px;margin-right:-4px;border-radius:12px}
+.set-row.next{background:rgba(59,130,246,.12);box-shadow:inset 0 0 0 1px rgba(59,130,246,.3)}
 </style>
 </head>
 <body>
@@ -3501,7 +3525,7 @@ const GYM_ONLY_VIEWS=['book','planes','historial','shop'];
 const GYM_APP_URL='/';
 document.querySelectorAll('.brand-name').forEach(el=>{el.textContent=BRAND_NAME;});
 const SUPABASE_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBtcGp0ZXVxanVzYmlkdWV2YndxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc2OTI1NjUsImV4cCI6MjA5MzI2ODU2NX0.XbMzZoo2yqtrD8znLnyo_1zDfrdJAvAPj1lqGOyXnLw';
-const APP_VERSION='20261023-1';
+const APP_VERSION='20261023-2';
 // La pierna va separada en cuádriceps, femorales y pantorrillas: la figura
 // corporal pinta esas tres regiones por separado y el motor de recuperación les
 // da ventanas de descanso distintas. 'Piernas' sigue reconociéndose al leer
@@ -3764,6 +3788,8 @@ function exerciseTargetLabel(ex){
   if(steps)return 'Pirámide '+steps.join('-')+' reps';
   const reps=String((ex&&ex.reps)||'').trim();
   if(!reps)return'';
+  const word=repsWordEs(reps);
+  if(word)return word;
   return inferTargetType(ex)==='time'?reps:reps+' reps';
 }
 function exerciseDetailParts(ex){
@@ -6004,7 +6030,8 @@ function openSupportWhatsapp(){
 function updateSupportFab(v){
   const fab=document.getElementById('support-fab');
   if(!fab)return;
-  const show=!!sbUser&&v==='rutinas';
+  // Vivía en Entrenar y tapaba ejercicios y series. En Perfil se encuentra igual.
+  const show=!!sbUser&&v==='perfil';
   fab.classList.toggle('show',show);
 }
 function sv(v){
@@ -8559,28 +8586,61 @@ function formatWeightForUnit(weightKg,unit){
   const v=unit==='lb'?kgToLb(weightKg):weightKg;
   return String(Math.round(v*10)/10);
 }
+// Lo que se ve en el campo de reps antes de escribir: el objetivo si es un número o un
+// rango (es lo que se guarda al palomear sin escribir); si no, "reps" — un "Failure"
+// gris dentro del campo parecía un valor.
+function repsPlaceholder(target){
+  return defaultRepsFromTarget(target)!=null?String(target).trim():'reps';
+}
+// Objetivos escritos con palabras, en español y como se dicen en el gym.
+function repsWordEs(raw){
+  const t=String(raw||'').trim();
+  if(/^(failure|al fallo|fallo)$/i.test(t))return 'al fallo';
+  if(/^(rounds?|rondas?)$/i.test(t))return 'por rondas';
+  if(/^(amrap|max|máx(imo)?)$/i.test(t))return 'al máximo';
+  return null;
+}
+function wsShowRir(){
+  try{return localStorage.getItem('habit_show_rir')==='1';}catch(_){return false;}
+}
+function wsToggleRir(){
+  const next=!wsShowRir();
+  try{localStorage.setItem('habit_show_rir',next?'1':'0');}catch(_){}
+  if(wsOpen)renderWorkoutSheet();
+  toast(next?'RIR visible en todas las series':'RIR oculto','ok');
+}
+// Quitar una serie desde el menú del ejercicio: la última pendiente, o la última si ya
+// están todas hechas. El borrado confirma (deleteSetSb), así que no hay dedazo posible.
+function wsRemoveLastSet(exKey){
+  const arr=(coachSessionSets[exKey]||[]).slice().sort((a,b)=>b.set_idx-a.set_idx);
+  const target=arr.find(x=>!x.done)||arr[0];
+  if(target)deleteSetSb(target.id,exKey);
+}
 function renderSetTrackerHtml(sessionCtx,exKey,ex){
   const sets=sessionCtx.sets[exKey]||[];
   if(!sets.length)return'';
   const unit=exerciseWeightUnit(exKey);
   const metric=window.HabitTraining?HabitTraining.metricType(ex):(inferTargetType(ex)==='time'?'time':'reps');
   const focusSetIdx=typeof sessionCtx.focusSetIdx==='number'?sessionCtx.focusSetIdx:null;
-  return '<div class="set-tracker has-del has-rir">'
+  // RIR es para quien lo usa: aparece si lo encendiste, o si la rutina lo pide (el
+  // coach puso un RIR objetivo) o ya lo registraste. Borrar una serie y "Marcar todas"
+  // viven en el menú del ejercicio (•••): una ✕ junto a cada palomita es una serie
+  // borrada por un dedazo.
+  const showRir=wsShowRir()||sets.some(s=>s.target_rir!=null||s.rir!=null);
+  return '<div class="set-tracker'+(showRir?' has-rir':'')+'">'
     +'<div class="set-tracker-hdr"><span>SERIE</span>'
     +(metric==='time'?'<span>TIEMPO</span><span>OBJ.</span>':'<button class="unit-toggle-btn" onclick="toggleExerciseWeightUnit(&quot;'+esc(exKey)+'&quot;)" title="Cambiar unidad de peso">'+unit.toUpperCase()+'</button><span>REPS</span>')
-    +'<span class="rir-k" title="Repeticiones en reserva. Es opcional: puedes cerrar la serie sin llenarlo.">RIR<i>opcional</i></span><span></span><span></span></div>'
+    +(showRir?'<span class="rir-k" title="Repeticiones en reserva. Es opcional: puedes cerrar la serie sin llenarlo.">RIR<i>opcional</i></span>':'')+'<span></span></div>'
     +sets.map(s=>'<div class="set-row'+(s.done?' done':'')+(focusSetIdx===s.set_idx&&!s.done?' next':'')+(s._pendingSync?' pending-sync':'')+'" data-set-id="'+s.id+'" data-ex-key="'+esc(exKey)+'">'
       +'<span class="set-num">'+(s.set_idx+1)+'</span>'
       +(metric==='time'
         ?'<input class="set-reps-in set-actual-time-in" type="number" inputmode="numeric" min="0" placeholder="seg" onfocus="selectSetInput(this)" value="'+(s.actual_seconds!=null?esc(String(s.actual_seconds)):'')+'" onchange="updateSetSecondsSb(&quot;'+s.id+'&quot;,this.value)"><span class="set-num">'+esc(s.reps_target||ex.reps||'—')+'</span>'
-        :'<input class="set-reps-in set-weight-in" type="number" inputmode="decimal" placeholder="'+unit+'" onfocus="selectSetInput(this)" value="'+formatWeightForUnit(s.weight,unit)+'" onchange="updateSetWeightSb(&quot;'+s.id+'&quot;,this.value,&quot;'+esc(exKey)+'&quot;)"><input class="set-reps-in set-actual-reps-in" type="number" inputmode="numeric" placeholder="'+esc(s.reps_target||'reps')+'" onfocus="selectSetInput(this)" value="'+(s.actual_reps!=null?esc(String(s.actual_reps)):'')+'" onchange="updateSetRepsSb(&quot;'+s.id+'&quot;,this.value)">')
-      +'<input class="set-reps-in set-rir-in" type="number" inputmode="numeric" min="0" max="10" title="Opcional" onfocus="selectSetInput(this)" placeholder="'+(s.target_rir!=null?esc(String(s.target_rir)):'–')+'" value="'+(s.rir!=null?esc(String(s.rir)):'')+'" onchange="updateSetRirSb(&quot;'+s.id+'&quot;,this.value,this)">'
+        :'<input class="set-reps-in set-weight-in" type="number" inputmode="decimal" placeholder="'+unit+'" onfocus="selectSetInput(this)" value="'+formatWeightForUnit(s.weight,unit)+'" onchange="updateSetWeightSb(&quot;'+s.id+'&quot;,this.value,&quot;'+esc(exKey)+'&quot;)"><input class="set-reps-in set-actual-reps-in" type="number" inputmode="numeric" placeholder="'+esc(repsPlaceholder(s.reps_target))+'" onfocus="selectSetInput(this)" value="'+(s.actual_reps!=null?esc(String(s.actual_reps)):'')+'" onchange="updateSetRepsSb(&quot;'+s.id+'&quot;,this.value)">')
+      +(!showRir?'':'<input class="set-reps-in set-rir-in" type="number" inputmode="numeric" min="0" max="10" title="Opcional" onfocus="selectSetInput(this)" placeholder="'+(s.target_rir!=null?esc(String(s.target_rir)):'–')+'" value="'+(s.rir!=null?esc(String(s.rir)):'')+'" onchange="updateSetRirSb(&quot;'+s.id+'&quot;,this.value,this)">')
       +'<button type="button" class="set-check'+(s.done?' done':'')+'" aria-pressed="'+(s.done?'true':'false')+'" aria-label="'+(s.done?'Serie hecha':'Marcar serie como hecha')+'"'+SET_CHECK_EVENTS.map(on=>' '+on+'="setCheckTap(event,this,&quot;'+s.id+'&quot;,'+(!s.done)+')"').join('')+'>✓</button>'
-      +'<button class="set-del-btn" title="Eliminar serie" onclick="deleteSetSb(&quot;'+s.id+'&quot;,&quot;'+esc(exKey)+'&quot;)">✕</button>'
       +'</div>').join('')
     +'<div class="set-tracker-actions">'
-    +'<button class="btn-sm compact" onclick="addSetSb(&quot;'+sessionCtx.scheduleId+'&quot;,&quot;'+esc(exKey)+'&quot;,&quot;'+esc(repsTargetForSet(ex,sets.length)||'')+'&quot;)">+ Serie</button>'
-    +'<button class="btn-sm" onclick="markAllSetsSb(&quot;'+esc(exKey)+'&quot;)">Marcar Todo</button>'
+    +'<button class="btn-sm compact set-add-btn" onclick="addSetSb(&quot;'+sessionCtx.scheduleId+'&quot;,&quot;'+esc(exKey)+'&quot;,&quot;'+esc(repsTargetForSet(ex,sets.length)||'')+'&quot;)">+ Serie</button>'
     +'</div></div>';
 }
 // Lista efectiva de ejercicios de una sesión: los de la rutina, con los
@@ -8859,6 +8919,10 @@ function wsPaintSessionProgress(exKey){
       const sets=coachSessionSets[exKey]||[];
       const doneCount=sets.filter(x=>x.done).length;
       const allDone=sets.length>0&&doneCount===sets.length;
+      // Un ejercicio que terminas a la vista se queda abierto: plegarlo en ese instante
+      // subía todo lo de abajo y el siguiente toque caía en otra serie. Se pliega la
+      // próxima vez que abras la hoja (o si tú lo pliegas).
+      if(allDone&&!art.classList.contains('collapsed'))wsExpandedDone.add(exKey);
       art.classList.toggle('done',allDone);
       art.classList.toggle('in-progress',!allDone&&doneCount>0);
       // Dejar de estar completo tiene que desplegarlo: si no, el socio que
@@ -8901,6 +8965,18 @@ function wsFootSummaryText(){
   const left=allSets.length-allSets.filter(x=>x.done).length;
   return left?left+' serie'+(left===1?'':'s')+' por cerrar':'Todas las series cerradas';
 }
+// Las reps que se guardan al palomear sin escribir: el número del objetivo, o el piso de
+// un rango ("8-10" → 8). El piso porque registrar de menos nunca inventa progreso, y el
+// consejo de progresión ya compara contra el techo. "Al fallo", "rondas" y demás no
+// tienen un número que suponer: esas se escriben.
+function defaultRepsFromTarget(target){
+  const t=String(target==null?'':target).trim();
+  let m=t.match(/^(\d{1,3})$/);
+  if(m)return parseInt(m[1],10);
+  m=t.match(/^(\d{1,3})\s*(?:-|–|a)\s*(\d{1,3})$/i);
+  if(m)return parseInt(m[1],10);
+  return null;
+}
 async function toggleSetDoneSb(setId,newDone,btnEl){
   wsUnlockAudio();
   // El peso/reps se leen directo del DOM al momento de palomear en vez de
@@ -8912,6 +8988,19 @@ async function toggleSetDoneSb(setId,newDone,btnEl){
     const row=btnEl?btnEl.closest('.set-row'):getSetRowElement(setId);
     const wIn=row?.querySelector('.set-weight-in');
     const rIn=row?.querySelector('.set-actual-reps-in');
+    // Palomear sin escribir es "hice lo planeado": las reps del objetivo se escriben
+    // en la fila y se guardan. Antes la serie mostraba "10" (era el placeholder) y se
+    // guardaba sin reps, así que el progreso de quien solo palomea quedaba vacío.
+    const planned=Object.values(coachSessionSets).flat().find(x=>x&&x.id===setId);
+    if(rIn&&rIn.value===''){
+      const r=defaultRepsFromTarget(planned?planned.reps_target:rIn.placeholder);
+      if(r!=null)rIn.value=String(r);
+    }
+    const tIn=row?.querySelector('.set-actual-time-in');
+    if(tIn&&tIn.value===''&&planned&&window.HabitTraining){
+      const sec=HabitTraining.parseSeconds(planned.reps_target);
+      if(sec)tIn.value=String(sec);
+    }
     if(wIn){
       const w=wIn.value===''?null:parseFloat(wIn.value);
       const unit=row?.dataset.exKey?exerciseWeightUnit(row.dataset.exKey):'kg';
@@ -8949,6 +9038,11 @@ async function toggleSetDoneSb(setId,newDone,btnEl){
         logSetToUserScores(data);
         const next=arr.find(s=>s.set_idx===data.set_idx+1&&!s.done);
         if(next&&data.weight!=null&&next.weight!==data.weight){
+          // El peso que se copia a la serie siguiente se ve en su campo al instante; antes
+          // solo se guardaba, y el campo seguía vacío hasta que algo repintara la hoja.
+          const nextRow=getSetRowElement(next.id);
+          const nextIn=nextRow&&nextRow.querySelector('.set-weight-in');
+          if(nextIn&&nextIn.value===''&&document.activeElement!==nextIn)nextIn.value=formatWeightForUnit(data.weight,exerciseWeightUnit(data.ex_key));
           try{
             const nextData=await trainingUpdate('coaching_session_sets',next.id,{weight:data.weight,updated_at:new Date().toISOString()},next);
             const ni=arr.findIndex(s=>s.id===next.id);if(ni>-1)arr[ni]=nextData;
@@ -8979,7 +9073,14 @@ async function toggleSetDoneSb(setId,newDone,btnEl){
           else if(focusOpen)openActiveCoachingExercise(target.idx,target.setIdx);
           if(target.sameRoundSuperset)toast('Siguiente en '+exerciseGroupLabel({supersetGroup:target.group}),'ok');
           if(wsOpen||focusOpen)return;
-        }else wsFocusSet=null;
+        }else{
+          // La que sigue es de este mismo ejercicio: se marca en su lugar, sin repintar la
+          // hoja (repintar es lo que movía la pantalla). Antes el resaltado se quedaba en
+          // la primera serie pendiente de la sesión, aunque fuera de otro ejercicio.
+          const pend=(coachSessionSets[data.ex_key]||[]).slice().sort((a,b)=>a.set_idx-b.set_idx).find(x=>!x.done);
+          wsMarkNextRow(pend?data.ex_key:null,pend?pend.set_idx:null);
+          if(wsOpen&&pend)wsScrollToFocus();
+        }
       }
     }
     if(live)wsPaintSetDone(setId,data.ex_key,!!data.done,false,data._pendingSync);
@@ -9274,20 +9375,28 @@ async function renderRutHub(){
   if(!sbUser)return;
   const panel=document.getElementById('rut-'+(rutActiveTab==='rutinas'?'content':rutActiveTab+'-content'));
   if(panel&&!myRoutinesLoadedAt)panel.innerHTML='<div class="empty">Cargando…</div>';
+  // Rutinas, semana y plan van juntos: no dependen entre sí, y en fila sumaban más de
+  // un segundo de "Cargando…" en cada visita. La figura del cuerpo (la más pesada: el
+  // catálogo de ejercicios más tus series de dos semanas) ya no detiene la pantalla:
+  // Hoy se pinta y el cuerpo se completa cuando llega.
+  const tab=rutActiveTab;
   try{
-    await loadMyRoutinesSb(false);
-    if(rutActiveTab==='hoy'){
-      await loadCoachWeekDataSb(false);
-      await loadMyRecoverySb(false);
-    }
-    if(rutActiveTab==='semana')await loadWeekPlanSb(false);
+    await Promise.all([
+      loadMyRoutinesSb(false),
+      tab==='hoy'?loadCoachWeekDataSb(false):null,
+      tab==='semana'?loadWeekPlanSb(false):null
+    ]);
   }catch(e){
     if(panel)panel.innerHTML='<div class="empty">Error cargando: '+esc(e.message||e)+'</div>';
     return;
   }
-  if(rutActiveTab==='hoy')renderRutHoy();
-  if(rutActiveTab==='semana')renderRutSemana();
-  if(rutActiveTab==='rutinas')renderRutRutinas();
+  if(tab==='hoy'){
+    renderRutHoy();
+    const fresh=recoveryLoadedAt&&Date.now()-recoveryLoadedAt<RECOVERY_TTL_MS;
+    if(!fresh)loadMyRecoverySb(false).then(()=>{if(rutActiveTab==='hoy')renderRutHoy();}).catch(console.error);
+  }
+  if(tab==='semana')renderRutSemana();
+  if(tab==='rutinas')renderRutRutinas();
 }
 
 // Un socio tiene tres orígenes de rutina: las suyas (owner_id), las que le
@@ -9303,10 +9412,17 @@ async function loadMyRoutinesSb(force){
     myRoutines.forEach(b=>{if(!coachBoardsById[b.id])coachBoardsById[b.id]=b;});
     return myRoutines;
   }
-  const{data:assignments}=await sb.from('board_assignments').select('board_id').eq('user_id',sbUser.id);
-  const boardIds=(assignments||[]).map(a=>a.board_id).filter(Boolean);
+  // Las asignadas y sus rutinas salen en una consulta (la rutina embebida por su FK) y
+  // en paralelo con las otras dos; antes eran dos viajes en fila antes de empezar.
+  const assignedReq=sb.from('board_assignments').select('board_id,boards(*)').eq('user_id',sbUser.id).then(async r=>{
+    if(!r.error)return{data:(r.data||[]).map(a=>a.boards).filter(Boolean)};
+    // Sin la relación expuesta, el camino de antes.
+    const{data:assignments}=await sb.from('board_assignments').select('board_id').eq('user_id',sbUser.id);
+    const ids=(assignments||[]).map(a=>a.board_id).filter(Boolean);
+    return ids.length?sb.from('boards').select('*').in('id',ids):{data:[]};
+  });
   const[gymRes,mineRes,starterRes]=await Promise.all([
-    boardIds.length?sb.from('boards').select('*').in('id',boardIds):Promise.resolve({data:[]}),
+    assignedReq,
     sb.from('boards').select('*').eq('owner_id',sbUser.id),
     // La 116 puede no estar corrida todavía: sin la columna, el socio se queda
     // con lo de siempre en vez de quedarse sin rutinas.
@@ -10841,14 +10957,19 @@ async function startWorkoutFromBoardSb(boardId,boardName,boardColor){
     // Reutiliza una fila de hoy de este mismo board si aún no se hizo; si no,
     // crea una nueva — así se pueden tener varios entrenos el mismo día.
     let todayRow=coachSchedule.find(r=>r.ds===today&&r.board_id===boardId&&r.status==='scheduled');
+    // Crear el día y traer la rutina no dependen uno del otro: van juntos.
+    const boardReq=coachBoardsById[boardId]?null:sb.from('boards').select('id,exercises').eq('id',boardId).single();
     if(!todayRow){
-      const{data,error}=await sb.from('coaching_schedule').insert({user_id:sbUser.id,board_id:boardId,board_name:boardName,board_color:boardColor,ds:today,created_by:sbUser.id}).select().single();
-      if(error)throw error;
-      todayRow=data;
-      coachSchedule.push(data);
-    }
-    if(!coachBoardsById[boardId]){
-      const{data:brd}=await sb.from('boards').select('id,exercises').eq('id',boardId).single();
+      const[ins,brdRes]=await Promise.all([
+        sb.from('coaching_schedule').insert({user_id:sbUser.id,board_id:boardId,board_name:boardName,board_color:boardColor,ds:today,created_by:sbUser.id}).select().single(),
+        boardReq||Promise.resolve(null)
+      ]);
+      if(ins.error)throw ins.error;
+      todayRow=ins.data;
+      coachSchedule.push(ins.data);
+      if(brdRes&&brdRes.data)coachBoardsById[boardId]=brdRes.data;
+    }else if(boardReq){
+      const{data:brd}=await boardReq;
       if(brd)coachBoardsById[boardId]=brd;
     }
     await startCoachingSessionSb(todayRow.id);
@@ -11836,6 +11957,45 @@ async function ensureBoardLoadedSb(boardId){
     return data||null;
   }catch(e){console.error('ensureBoardLoadedSb:',e);return null;}
 }
+// Último peso y reps por ejercicio, en UNA consulta por arranque. Antes se pedía tres
+// veces al abrir una sesión (sembrar, hidratar y "Última vez"), cada una en serie y
+// cada una con todo el historial de esos ejercicios en orden ascendente para quedarse
+// con el último. La promesa se comparte, así que quien llegue tarde espera la misma.
+let _lastScoresMemo=null;
+function lastScoresFor(exKeys,excludeScheduleId){
+  const keys=[...new Set((exKeys||[]).filter(Boolean))];
+  // "La vez pasada" es otra sesión: con la sesión en curso adentro, la primera serie de
+  // hoy se volvía "Última vez" y la app sugería subir de peso a media sesión.
+  const memoKey=keys.slice().sort().join('|')+'#'+(excludeScheduleId||'');
+  if(_lastScoresMemo&&_lastScoresMemo.key===memoKey&&Date.now()-_lastScoresMemo.at<60000)return _lastScoresMemo.promise;
+  const promise=(async()=>{
+    if(!sbUser||!keys.length)return{};
+    let q=sb.from('user_scores').select('ex_key,weight,reps,logged_at')
+      .eq('user_id',sbUser.id).in('ex_key',keys);
+    if(excludeScheduleId)q=q.or('schedule_id.is.null,schedule_id.neq.'+excludeScheduleId);
+    const{data,error}=await q.order('logged_at',{ascending:false}).limit(1000);
+    if(error)throw error;
+    const out={};
+    (data||[]).forEach(r=>{if(!out[r.ex_key])out[r.ex_key]={weight:r.weight,reps:r.reps};});
+    return out;
+  })();
+  _lastScoresMemo={key:memoKey,at:Date.now(),promise};
+  promise.catch(()=>{if(_lastScoresMemo&&_lastScoresMemo.promise===promise)_lastScoresMemo=null;});
+  return promise;
+}
+function sessionExKeys(scheduleRow){
+  const row=scheduleRow||activeCoachingSession;
+  if(!row)return[];
+  return sessionExerciseList(row).map((ex,i)=>exerciseKeyForSession(row.board_id,ex,i));
+}
+// Pone en memoria las series de la sesión tal como llegaron de la base.
+function setSessionSetsFromRows(rows){
+  coachSessionSets={};
+  (rows||[]).slice().sort((a,b)=>a.set_idx-b.set_idx).forEach(row=>{
+    if(!coachSessionSets[row.ex_key])coachSessionSets[row.ex_key]=[];
+    coachSessionSets[row.ex_key].push(row);
+  });
+}
 async function seedSessionSetsSb(scheduleRow){
   await ensureBoardLoadedSb(scheduleRow.board_id);
   const exercises=sessionExerciseList(scheduleRow);
@@ -11846,11 +12006,9 @@ async function seedSessionSetsSb(scheduleRow){
     return;
   }
   const exKeys=exercises.map((ex,i)=>exerciseKeyForSession(scheduleRow.board_id,ex,i));
-  const lastScores={};
-  try{
-    const{data}=await sb.from('user_scores').select('ex_key,weight,reps').eq('user_id',sbUser.id).in('ex_key',exKeys).order('logged_at',{ascending:true});
-    (data||[]).forEach(r=>{lastScores[r.ex_key]={weight:r.weight,reps:r.reps};}); // orden ascendente: el último sobreescribe = más reciente
-  }catch(e){console.error('seedSessionSetsSb scores:',e);}
+  let lastScores={};
+  try{lastScores=await lastScoresFor(exKeys,scheduleRow.id);}
+  catch(e){console.error('seedSessionSetsSb scores:',e);}
   const rows=[];
   exercises.forEach((ex,i)=>{
     const exKey=exKeys[i];
@@ -11870,8 +12028,11 @@ async function seedSessionSetsSb(scheduleRow){
   // sin ninguna explicación — el console.error mudo que había antes es
   // exactamente lo que escondía el problema. Ahora se avisa.
   try{
-    const{error}=await sb.from('coaching_session_sets').upsert(rows,{onConflict:'schedule_id,ex_key,set_idx',ignoreDuplicates:true});
+    // `.select()` devuelve las filas que sí insertó (las repetidas se ignoran). En una
+    // sesión nueva son todas, y releerlas sería otro viaje a la red para lo mismo.
+    const{data:inserted,error}=await sb.from('coaching_session_sets').upsert(rows,{onConflict:'schedule_id,ex_key,set_idx',ignoreDuplicates:true}).select();
     if(error)throw error;
+    if(Array.isArray(inserted)&&inserted.length===rows.length)return inserted;
   }catch(e){
     console.error('seedSessionSetsSb:',e);
     const msg=String(e.message||e);
@@ -11912,14 +12073,13 @@ async function hydrateSessionSetDefaults(){
   const needsDefaults=exKeys.some(k=>(coachSessionSets[k]||[]).some(s=>s.weight==null||!s.actual_reps));
   if(!needsDefaults)return;
   try{
-    const{data,error}=await sb.from('user_scores').select('ex_key,weight,reps').eq('user_id',sbUser.id).in('ex_key',exKeys).order('logged_at',{ascending:true});
-    if(error)throw error;
-    const lastScores={};
-    (data||[]).forEach(r=>{lastScores[r.ex_key]={weight:r.weight,reps:r.reps};});
+    const lastScores=await lastScoresFor(exKeys,activeCoachingSession&&activeCoachingSession.id);
     exKeys.forEach(k=>{
       const prev=lastScores[k];
       if(!prev)return;
       (coachSessionSets[k]||[]).forEach(s=>{
+        // Solo lo pendiente: una serie ya hecha sin peso (peso corporal) se queda así.
+        if(s.done)return;
         if(s.weight==null&&prev.weight!=null)s.weight=prev.weight;
         if(!s.actual_reps&&prev.reps)s.actual_reps=prev.reps;
       });
@@ -11946,6 +12106,9 @@ async function startCoachingSessionSb(scheduleId){
     const schedule=coachSchedule.find(row=>row.id===scheduleId);
     if(schedule)await ensureBoardLoadedSb(schedule.board_id);
     const snapshot=schedule?buildTrainingExerciseSnapshot(schedule):[];
+    // Los pesos de la vez pasada no dependen de iniciar la sesión: se piden ya, mientras
+    // el RPC corre, y la siembra recoge la misma promesa.
+    if(schedule)lastScoresFor(sessionExKeys(schedule),scheduleId).catch(()=>{});
     let{data,error}=await sb.rpc('start_training_session',{p_schedule_id:scheduleId,p_exercise_snapshot:snapshot}).single();
     if(error&&/start_training_session|schema cache|does not exist/i.test(error.message||'')){
       const fallback=await sb.from('coaching_schedule').update({status:'in_progress',started_at:new Date().toISOString()}).eq('id',scheduleId).eq('user_id',sbUser.id).select().single();
@@ -11957,8 +12120,9 @@ async function startCoachingSessionSb(scheduleId){
     activeCoachingSession=data;
     cacheActiveTrainingSession(data);
     showActiveSessionBar();
-    await seedSessionSetsSb(data);
-    await loadSessionSetsSb(data.id);
+    const seeded=await seedSessionSetsSb(data);
+    if(Array.isArray(seeded)){setSessionSetsFromRows(seeded);await hydrateSessionSetDefaults();}
+    else await loadSessionSetsSb(data.id);
     renderCoachHoyPanel();
     if(rutActiveTab==='hoy')renderRutHoy();
     renderInicioCoachingWidgets();
@@ -11998,6 +12162,7 @@ async function finishCoachingSessionSb(){
     renderCoachHoyPanel();
     if(rutActiveTab==='hoy')renderRutHoy();
     renderInicioCoachingWidgets();
+    _lastScoresMemo=null;
     toast('¡Entreno completado!','ok');
     openWorkoutFeedbackModal(data.id);
   }catch(e){toast('Error al finalizar entreno: '+e.message,'err');}
@@ -12162,6 +12327,15 @@ async function cancelCoachingSessionSb(opts){
   const sessionId=activeCoachingSession.id;
   const wasSelfStarted=!!(sbUser&&activeCoachingSession.created_by===sbUser.id);
   try{
+    // Los récords de esta sesión se van con ella, y antes que las series: la FK de
+    // user_scores es `on delete set null` (117), así que borrar la sesión dejaba cada
+    // récord huérfano —sin sesión y sin serie— y un entreno cancelado seguía saliendo
+    // como PR en Progreso. Primero por serie (pasa por la cola offline, como al
+    // despalomear) y luego por sesión, por si alguna serie ya no estaba en memoria.
+    const sessionSetIds=Object.values(coachSessionSets).flat().map(x=>x&&x.id).filter(Boolean);
+    await Promise.all(sessionSetIds.map(id=>unlogSetFromUserScores(id)));
+    await sb.from('user_scores').delete().eq('user_id',sbUser.id).eq('schedule_id',sessionId);
+    _lastScoresMemo=null;
     await sb.from('coaching_session_sets').delete().eq('schedule_id',sessionId);
     if(wasSelfStarted){
       const{data,error}=await sb.from('coaching_schedule').delete().eq('id',sessionId).eq('user_id',sbUser.id).select('id');
@@ -12368,6 +12542,9 @@ function wsUpdateClocks(){
   set('ws-chip-rest',rest?fmtClock(rest):'—');
   set('ws-panel-elapsed',fmtClock(elapsed));
   set('ws-panel-rest',fmtClock(rest));
+  set('ws-strip-rest',fmtClock(rest));
+  // La barra de descanso aparece al empezar (wsSetRest repinta) y se va sola al llegar a 0.
+  if(wsOpen&&!wsTimerOpen&&(rest>0)!==!!document.getElementById('ws-rest-strip'))wsRenderTimer();
   const chipRest=document.getElementById('ws-chip-rest');
   if(chipRest)chipRest.classList.toggle('resting',rest>0);
   const bar=document.getElementById('ws-rest-bar-fill');
@@ -12436,8 +12613,19 @@ function wsSetRest(seconds,total){
 // Lo llaman toggleSetDoneSb y markAllSetsSb al cerrar una serie. Antes pintaba
 // su propia barra; ahora alimenta el mismo reloj de la hoja, para que haya un
 // solo descanso corriendo y suene la campana esté la hoja abierta o no.
+// Sin descanso escrito en la rutina, 90 s: antes no corría ninguno y el socio tenía que
+// acordarse de mirar el reloj. El calentamiento y la movilidad no descansan, y con todas
+// las series cerradas tampoco hay nada que esperar.
+const DEFAULT_REST_SEC=90;
+function isWarmupExercise(ex){
+  return /calentamiento|warm.?up|movilidad|mobility|estiramiento|stretch/i.test([ex&&ex.name,ex&&ex.category,ex&&ex.type].filter(Boolean).join(' '));
+}
 function startRestTimerForExercise(ex){
-  const secs=ex?parseRestSeconds(ex.rest):0;
+  if(!ex)return;
+  const all=Object.values(coachSessionSets).flat();
+  if(all.length&&all.every(x=>x.done))return;
+  let secs=parseRestSeconds(ex.rest);
+  if(!secs&&!isWarmupExercise(ex))secs=DEFAULT_REST_SEC;
   if(!secs)return;
   wsSetRest(secs,secs);
 }
@@ -12461,6 +12649,13 @@ function wsRenderTimer(){
       +'<button class="ws-rest-step" onclick="wsAdjustRest(30)">+30s</button></div>'
       +'<div class="ws-rest-bar"><i id="ws-rest-bar-fill" style="width:'+(wsRestTotal?Math.max(0,Math.min(100,rest/wsRestTotal*100)):0)+'%"></i></div>'
       +'</div>':'')
+    // Descansando, el descanso es lo que importa: una barra ancha con su cuenta y los
+    // tres ajustes que se usan, en lugar de un número gris junto al reloj.
+    +(rest>0&&!wsTimerOpen?'<div class="ws-rest-strip" id="ws-rest-strip">'
+      +'<span class="ws-rest-strip-k">Descanso</span><strong id="ws-strip-rest">'+fmtClock(rest)+'</strong>'
+      +'<button type="button" onclick="wsAdjustRest(-15)" aria-label="Quitar 15 segundos">−15</button>'
+      +'<button type="button" onclick="wsAdjustRest(15)" aria-label="Agregar 15 segundos">+15</button>'
+      +'<button type="button" class="ws-rest-skip" onclick="stopRestTimer()">Saltar</button></div>':'')
     +'<button type="button" class="ws-timer-chip" onclick="wsToggleTimerPanel()" aria-expanded="'+wsTimerOpen+'" aria-label="Cronómetro del entreno">'
     +'<span class="ws-timer-dot'+(running?'':' paused')+'"></span>'
     +'<strong id="ws-chip-elapsed">'+fmtClock(wsElapsedSec())+'</strong>'
@@ -12472,6 +12667,8 @@ function wsRenderTimer(){
 function openWorkoutSheet(){
   if(!activeCoachingSession){toast('No tienes un entreno en curso','warn');return;}
   wsOpen=true;
+  // Al abrir, lo terminado se pliega; lo que se termine con la hoja abierta, no.
+  wsExpandedDone=new Set();
   wsUnlockAudio();
   hideActiveSessionBar();
   document.getElementById('workout-sheet').classList.add('open');
@@ -12550,12 +12747,11 @@ async function wsLoadLastScores(){
   const keys=sessionExerciseList().map((ex,i)=>exerciseKeyForSession(activeCoachingSession.board_id,ex,i));
   if(!keys.length)return;
   try{
-    const{data,error}=await sb.from('user_scores').select('ex_key,weight,reps,logged_at')
-      .eq('user_id',sbUser.id).in('ex_key',keys).order('logged_at',{ascending:true});
-    if(error)throw error;
-    wsLastScores={};
-    (data||[]).forEach(r=>{wsLastScores[r.ex_key]={weight:r.weight,reps:r.reps};}); // el último gana = el más reciente
-    if(wsOpen)renderWorkoutSheet();
+    const latest=await lastScoresFor(keys,activeCoachingSession&&activeCoachingSession.id);
+    const changed=JSON.stringify(latest)!==JSON.stringify(wsLastScores);
+    wsLastScores=latest;
+    // Solo repinta si cambió algo: si no, la hoja se rehacía entera al abrir sin motivo.
+    if(wsOpen&&changed)renderWorkoutSheet();
   }catch(e){console.warn('wsLoadLastScores:',e.message||e);}
 }
 
@@ -12571,6 +12767,8 @@ function renderWorkoutSheet(){
   document.getElementById('ws-bar-title').textContent=activeCoachingSession.board_name||'Entreno';
   document.getElementById('ws-bar-k').textContent=fmtDS(activeCoachingSession.ds);
 
+  // Si la hoja se abrió antes de que llegaran las series, la que sigue se resuelve aquí.
+  if(!wsFocusSet)wsFocusFirstPending();
   const exercises=sessionExerciseList();
   const allSets=Object.values(coachSessionSets).flat();
   const done=allSets.filter(s=>s.done).length;
@@ -12599,10 +12797,31 @@ function renderWorkoutSheet(){
 
 // Lleva la vista a la serie que sigue después de encadenar una superserie o
 // terminar un ejercicio, que es lo que en el modo ficha hacía el "Siguiente".
+// Un menú de ejercicio abierto se cierra al tocar fuera de él, como cualquier menú.
+document.addEventListener('click',e=>{
+  document.querySelectorAll('details.ws-ex-more[open]').forEach(d=>{if(!d.contains(e.target))d.open=false;});
+});
+function wsMarkNextRow(exKey,setIdx){
+  wsFocusSet=(exKey&&setIdx!=null)?{exKey,setIdx}:null;
+  document.querySelectorAll('#ws-content .set-row.next').forEach(r=>r.classList.remove('next'));
+  if(!wsFocusSet)return;
+  const set=(coachSessionSets[exKey]||[]).find(x=>x.set_idx===setIdx);
+  const row=set&&document.querySelector('#ws-content .set-row[data-set-id="'+set.id+'"]');
+  if(row)row.classList.add('next');
+}
 function wsScrollToFocus(){
   requestAnimationFrame(()=>{
     const el=document.querySelector('#ws-content .set-row.next');
-    if(el&&el.scrollIntoView)el.scrollIntoView({block:'center',behavior:'smooth'});
+    const box=document.getElementById('ws-content');
+    if(!el||!el.scrollIntoView)return;
+    // Si la serie que sigue ya está a la vista, la pantalla no se mueve: desplazarla de
+    // todos modos es lo que hacía que el siguiente toque cayera en otro lado. Abajo se
+    // reservan ~150 px, que es lo que tapan el reloj y el descanso.
+    if(box){
+      const r=el.getBoundingClientRect(), b=box.getBoundingClientRect();
+      if(r.top>=b.top+8&&r.bottom<=b.bottom-150)return;
+    }
+    el.scrollIntoView({block:'center',behavior:'smooth'});
   });
 }
 function wsExerciseHtml(ex,i){
@@ -12646,8 +12865,11 @@ function wsExerciseHtml(ex,i){
 
   if(!ex._replaced){
     html+='<details class="ws-ex-more"><summary aria-label="Opciones del ejercicio">•••</summary><div class="ws-ex-tools">'
+      +'<button class="ws-ex-tool" onclick="markAllSetsSb(&quot;'+esc(exKey)+'&quot;)">Marcar todas</button>'
       +'<button class="ws-ex-tool" onclick="wsToggleSwap(&quot;'+esc(exKey)+'&quot;)">Cambiar</button>'
-      +'<button class="ws-ex-tool danger" onclick="wsRemoveExercise(&quot;'+esc(exKey)+'&quot;)">Quitar</button>'
+      +'<button class="ws-ex-tool" onclick="wsRemoveLastSet(&quot;'+esc(exKey)+'&quot;)">Quitar una serie</button>'
+      +'<button class="ws-ex-tool" onclick="wsToggleRir()">'+(wsShowRir()?'Ocultar RIR':'Registrar RIR')+'</button>'
+      +'<button class="ws-ex-tool danger" onclick="wsRemoveExercise(&quot;'+esc(exKey)+'&quot;)">Quitar ejercicio</button>'
       +'</div></details>'
       +wsSwapPanelHtml(exKey);
   }

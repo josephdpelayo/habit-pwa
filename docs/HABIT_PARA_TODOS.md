@@ -684,3 +684,17 @@ nuevas.
   - Versión `20261023-1` (incluye la `v` del script `#brand-boot` y `crew-manifest.json`).
   - **Falta antes de promocionar Crew:** moderación de la comunidad (reportar, bloquear,
     cola del admin), y la app de Crew en la App Store (otro bundle id en Capacitor).
+- **2026-10-23 (2)** — **Pulido de Entrenar, Fase A** (la sesión y los bugs). Auditoría hecha
+  como usuario nuevo en `/crew` con la cuenta de prueba `1@habit.app`; propuesta en tres fases
+  (A sesión y bugs, B Hoy, C Semana y Rutinas), aprobada A.
+  - Bugs, verificados contra la base antes y después: cancelar dejaba los récords de la sesión
+    huérfanos (2 → 0 ahora); palomear sin escribir guardaba la serie sin reps (ahora 10);
+    "Última vez" tomaba la sesión en curso; el precargado rellenaba series ya hechas.
+  - Velocidad: Entrenar pinta Hoy en 0.43 s (antes 1.5 s; las consultas van en paralelo y el
+    cuerpo se completa después); abrir una sesión, 1.6 s con 4 consultas (antes ~5 s con 8).
+  - La hoja: sin ✕ ni RIR por serie (RIR opcional), menú ••• flotante con "Marcar todas",
+    "Cambiar", "Quitar una serie", "Registrar RIR" y "Quitar ejercicio"; campos y palomitas
+    de 44 px; nada se mueve al palomear (medido: 0 px); descanso automático de 90 s visible.
+  - La Comunidad lenta (una foto de 6.4 MB incrustada en `posts`) quedó para la sesión de
+    moderación, que está tocando el feed.
+  - Versión `20261023-2`. Pendiente: Fase B (Hoy) y Fase C (Semana y Rutinas).

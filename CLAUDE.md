@@ -258,6 +258,21 @@ a silent overwrite.
   stamping stops) — finishing a block is when the coach re-evaluates. Applying a program goes
   through the `apply_coaching_program` RPC, not loose client writes: it is four writes that must
   land together, and half of them leaves the member with no week at all
+- **La hoja de entrenamiento** (`renderWorkoutSheet`; pulido Fase A, bitácora de
+  `docs/HABIT_PARA_TODOS.md`). Palomear sin escribir es "hice lo planeado": `defaultRepsFromTarget` guarda el número del
+  objetivo o el **piso** de un rango ("8-10" → 8; registrar de menos nunca inventa progreso); "al
+  fallo" o "rondas" no se suponen. El peso de una serie se copia a la siguiente y se ve en su campo
+  al instante. "La vez pasada" sale de **una** consulta, `lastScoresFor(exKeys, excludeScheduleId)`
+  (memo de 60 s, compartida por la siembra, la hidratación y "Última vez"), y **excluye la sesión
+  en curso** — si no, la primera serie de hoy se volvía "Última vez" y sugería subir de peso a
+  media sesión. Cancelar borra los `user_scores` de la sesión **antes** que las series (la FK es
+  `on delete set null`: después quedan huérfanos y salen como PR). Nada se mueve bajo el dedo:
+  con la hoja abierta no se pliega un ejercicio recién terminado (`wsExpandedDone`), la siguiente
+  serie se marca en su lugar (`wsMarkNextRow`) y `wsScrollToFocus` solo desplaza si no se ve.
+  RIR aparece si el socio lo encendió (`habit_show_rir` en localStorage), o si la rutina o la serie
+  lo traen; borrar una serie y "Marcar todas" viven en el menú ••• del ejercicio, no junto a cada
+  palomita. Sin descanso escrito, 90 s (`DEFAULT_REST_SEC`), salvo calentamiento y movilidad,
+  como barra ancha (`ws-rest-strip`). Asistencia (WhatsApp) vive en Perfil, no en Entrenar
 - `coaching_schedule.session_exercises` — JSONB overlay of exercises swapped in or added during a
   live session. `boards.exercises` is never mutated by a workout; `sessionExerciseList()` in
   `app.html` merges the two and is the single source of the effective exercise list
