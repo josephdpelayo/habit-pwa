@@ -338,6 +338,8 @@ y `promptSheet()` (mismo patrón que Skandi en `a6ea2cb`, sin su i18n), que devu
 lo son ahora. `promptSheet` imita al nativo a propósito: `null` al cancelar, string al aceptar,
 `''` si se borró todo. Tocar el fondo cancela, nunca confirma. Las acciones destructivas pasan
 `{danger:true}` y un verbo propio ("Eliminar", "Cancelar entreno") en vez de un "Aceptar" genérico.
+`choiceSheet(body, choices)` es el tercero del mismo overlay: una lista de opciones
+(`{key, label, danger}`) que resuelve con la `key` elegida o `null` — el menú ⋯ de la comunidad.
 
 **`withScrollKept(el, paint)`** envuelve los repintados de una pieza (`innerHTML` entero) para
 devolver el scroll del contenedor. Marcar un día o asignar una rutina devolvía al usuario arriba
@@ -350,6 +352,33 @@ places. PRs live in **Progreso** only: Historial used to render them too, with i
 `user_scores` query, and now keeps what its name promises (reservas y pagos) plus a link.
 
 - `posts` / `post_reactions` / `post_comments` — community feed
+- **Moderación de la comunidad** (migración 128, `docs/HABIT_PARA_TODOS.md` D13): lo que Apple
+  pide (guideline 1.2) a una app con contenido de usuarios, en HABIT y HABIT Crew a la vez.
+  `community_reports`: el socio inserta (solo `post_id`/`comment_id`, `reason`, `details`:
+  permisos por columna) y **no lee ninguno, ni los suyos** — el duplicado se sabe por el 23505
+  de los índices parciales (uno pendiente por persona y cosa). Quién reporta, a quién y una
+  **copia** de lo reportado (texto, foto, autor) los pone un trigger: el cliente no puede mentir
+  sobre a quién reporta, y la cola sigue sirviendo si el autor lo borra. Todas sus referencias
+  son `on delete set null` (un reporte es historia), y por eso no hay CHECK de "post o
+  comentario": el set null lo rompería y el borrado del post fallaría. El admin solo cambia
+  `status`/`resolution_note`; `resolved_by`/`resolved_at` los pone otro trigger, que desde el
+  service role respeta el `resolved_by` que llega. Cada reporte deja un aviso en `admin_notifs`
+  (trigger) y la app manda además un push al admin.
+  `community_blocks` es privada: el bloqueado nunca la lee. **El filtro del bloqueo está en la
+  RLS, no en `renderFeedSb`** — políticas `restrictive` (se suman con AND a las permisivas que
+  haya, que la 001/005/007 recrearon con nombres distintos) sobre la lectura de `posts`,
+  `post_comments` y `user_notifications` (`community_visible_author()`) y sobre el insert de
+  comentarios y reacciones (`community_can_interact()`); así lo embebido
+  (`posts?select=*,post_comments(…)`) también se filtra y lo bloqueado no llega al teléfono.
+  Corre en los dos sentidos —el bloqueado tampoco ve ni comenta lo de quien lo bloqueó, que es
+  lo que impide el acoso en los comentarios— salvo hacia el admin: bloquearlo no lo deja ciego.
+  Son `to authenticated` porque `anon` no ejecuta esas funciones y su lectura de `posts` pasaría
+  de vacía a error. Borrar sigue siendo `api/delete-community-item.js`, que ahora resuelve los
+  pendientes de lo que borra (los busca **antes** de borrar: después el set null ya no deja
+  encontrarlos). En la app: ⋯ solo en lo ajeno (`communityMoreBtn` → `openCommunityItemMenu`;
+  el admin solo ve "Bloquear", porque él borra), Perfil → Usuarios bloqueados
+  (`renderPerfilBlocks`, que se esconde si falta la 128) y Admin → Comunidad arriba del feed
+  (`renderAdminReports`, agrupado por lo reportado; el badge suma posts nuevos + pendientes)
 - `booking_guest_passes` — group session guest passes (from `group-guest-passes.sql`)
 - `admin_notifs` — in-app notifications for admin
 - `lift_competitions` / `lift_competitors` (migration 126) — **competencia de levantamiento**.
