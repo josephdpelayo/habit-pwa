@@ -154,7 +154,10 @@ begin
     new.reported_user_id := v_post.user_id;
     new.author_name      := v_post.user_name;
     new.content_snapshot := v_post.text_content;
-    new.img_snapshot     := v_post.img_url;
+    -- Las fotos de antes de la 017 están en base64 dentro de posts.img_url (una pesa 6.4 MB):
+    -- copiarlas haría pesar igual la cola del admin. Esas no se copian; si el post sigue ahí,
+    -- el admin la ve en el feed.
+    new.img_snapshot     := case when v_post.img_url like 'data:%' then null else v_post.img_url end;
   else
     raise exception 'REPORT_NO_TARGET';
   end if;

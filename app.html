@@ -1064,6 +1064,7 @@ input,select,button,textarea{font-family:'Inter',sans-serif}
 .mod-empty{font-size:12px;color:var(--gray);margin-bottom:14px}
 .perfil-block-row{display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--hairline,var(--border))}
 .perfil-block-name{flex:1;min-width:0;font-size:13px;color:var(--white);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.post-img-load{display:block;width:calc(100% - 28px);min-height:44px;margin:0 14px 12px;border:1px dashed var(--border);border-radius:8px;background:var(--card2);color:var(--gray);font-size:13px;font-weight:600;cursor:pointer}
 .new-post-box{background:var(--card);border:1px solid var(--border);border-radius:6px;padding:1rem;margin-bottom:1rem}
 .new-post-box textarea{width:100%;background:var(--card2);border:1px solid var(--border);border-radius:4px;padding:10px 12px;font-size:14px;color:var(--white);outline:none;resize:none;line-height:1.5;min-height:70px}
 .new-post-box textarea::placeholder{color:#555}
@@ -19551,22 +19552,62 @@ async function createPostSb(){
   }
 }
 
+// Las fotos de la comunidad viven en el bucket community-images (017) e img_url es su URL. Las
+// de antes de la 017 se guardaron en base64 dentro de la tabla: una sola pesa 6.4 MB y hacía
+// tardar el feed ~6 s. Por eso las listas nunca piden img_url con lo demás: las URLs se piden
+// aparte, y de las incrustadas solo el id, para mostrar "Ver foto" y bajarla al tocarla.
+const POST_LIST_COLUMNS='id,user_id,user_name,text_content,created_at';
+async function attachPostImages(posts){
+  const ids=(posts||[]).map(p=>p.id);
+  if(!ids.length)return;
+  const[urls,embedded]=await Promise.all([
+    sb.from('posts').select('id,img_url').in('id',ids).not('img_url','is',null).not('img_url','like','data:%'),
+    sb.from('posts').select('id').in('id',ids).like('img_url','data:%')
+  ]);
+  if(urls.error||embedded.error)console.warn('attachPostImages:',urls.error||embedded.error);
+  const urlById=Object.fromEntries((urls.data||[]).map(r=>[r.id,r.img_url]));
+  const inTable=new Set((embedded.data||[]).map(r=>r.id));
+  posts.forEach(p=>{p.img_url=urlById[p.id]||null;p.img_embedded=inTable.has(p.id);});
+}
+function postImageHtml(post){
+  if(post.img_url)return'<img class="post-img-vertical" src="'+esc(post.img_url)+'">';
+  if(post.img_embedded)return'<button class="post-img-load" data-pid="'+esc(post.id)+'" onclick="loadEmbeddedPostImage(this)">Ver foto</button>';
+  return'';
+}
+async function loadEmbeddedPostImage(btn){
+  btn.disabled=true;btn.textContent='Cargando foto…';
+  try{
+    const{data,error}=await sb.from('posts').select('img_url').eq('id',btn.dataset.pid).single();
+    if(error)throw error;
+    if(!data||!data.img_url){btn.remove();return;}
+    const img=document.createElement('img');
+    img.className='post-img-vertical';img.src=data.img_url;
+    btn.replaceWith(img);
+  }catch(e){
+    console.warn('loadEmbeddedPostImage:',e);
+    btn.disabled=false;btn.textContent='Ver foto';
+    toast('No se pudo cargar la foto','err');
+  }
+}
+
 async function renderFeedSb(){
   const el=document.getElementById('feed-content');
   if(!el||!sbUser)return;
   el.innerHTML='<div class="empty">Cargando...</div>';
   try{
     const{data:posts,error}=await sb.from('posts')
-      .select('*,post_reactions(user_id,reaction_type),post_comments(id,user_id,user_name,text_content,created_at)')
+      .select(POST_LIST_COLUMNS+',post_reactions(user_id,reaction_type),post_comments(id,user_id,user_name,text_content,created_at)')
       .order('created_at',{ascending:false}).limit(50);
     if(error)throw error;
     if(!posts||!posts.length){el.innerHTML='<div class="empty">Sin publicaciones aun. Se el primero!</div>';return;}
+    const images=attachPostImages(posts);
     const profileIds=[...new Set((posts||[]).flatMap(p=>[p.user_id,...(p.post_comments||[]).map(c=>c.user_id)].filter(Boolean)))];
     let avatarMap={};
     if(profileIds.length){
       const{data:profileRows}=await sb.from('profiles').select('id,avatar_url').in('id',profileIds);
       avatarMap=Object.fromEntries((profileRows||[]).map(p=>[p.id,p.avatar_url||'']));
     }
+    await images;
     el.innerHTML='';
     const isAdmin=sbProfile&&sbProfile.role==='admin';
     posts.forEach(post=>{
@@ -19595,7 +19636,7 @@ async function renderFeedSb(){
         +(isAdmin?'<button data-pid="'+post.id+'" onclick="deletePostSb(this.dataset.pid)" style="background:none;border:none;color:var(--red);cursor:pointer;font-size:18px;padding:4px">🗑</button>':'')
         +'</div>'
         +(post.text_content?'<div class="post-body">'+esc(post.text_content)+'</div>':'')
-        +(post.img_url?'<img class="post-img-vertical" src="'+esc(post.img_url)+'">':'')
+        +postImageHtml(post)
         +'<div class="post-reactions">'+rxBtns+'<span style="margin-left:auto;font-size:12px;color:var(--gray);align-self:center">'+comments.length+' coment.</span></div>'
         +'<div class="post-comments">'+commentsHtml
         +'<div class="comment-form"><input type="text" maxlength="300" data-post="'+esc(post.id)+'" data-owner="'+esc(post.user_id)+'" placeholder="Escribe un comentario..." onkeydown="if(event.key===&quot;Enter&quot;)addCommentSb(this)">'
@@ -19926,10 +19967,11 @@ async function renderAdminFeed(){
   renderAdminReports();
   el.innerHTML='<div class="empty">Cargando...</div>';
   try{
-    const{data:posts,error}=await sb.from('posts').select('*,post_reactions(user_id,reaction_type)').order('created_at',{ascending:false}).limit(100);
+    const{data:posts,error}=await sb.from('posts').select(POST_LIST_COLUMNS+',post_reactions(user_id,reaction_type)').order('created_at',{ascending:false}).limit(100);
     if(error)throw error;
     markAdminCommunitySeen(posts||[]);
     if(!posts||!posts.length){el.innerHTML='<div class="empty">Sin publicaciones.</div>';return;}
+    await attachPostImages(posts);
     const profileIds=[...new Set((posts||[]).map(p=>p.user_id).filter(Boolean))];
     let avatarMap={};
     if(profileIds.length){
@@ -19948,7 +19990,7 @@ async function renderAdminFeed(){
         +'<button data-pid="'+post.id+'" onclick="deletePostSb(this.dataset.pid)" style="background:none;border:none;color:var(--red);cursor:pointer;font-size:18px;padding:4px">🗑</button>'
         +'</div>'
         +(post.text_content?'<div class="post-body">'+esc(post.text_content)+'</div>':'')
-        +(post.img_url?'<img class="post-img-vertical" src="'+esc(post.img_url)+'">':'')
+        +postImageHtml(post)
         +'<div class="post-reactions" style="pointer-events:none">'
         +'<span class="reaction-btn">🔥 '+counts.fire+'</span>'
         +'<span class="reaction-btn">👏 '+counts.clap+'</span>'

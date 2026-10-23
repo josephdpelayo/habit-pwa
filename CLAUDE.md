@@ -351,7 +351,11 @@ which was the only reason it looked like it duplicated Entrenar's week; nothing 
 places. PRs live in **Progreso** only: Historial used to render them too, with its own
 `user_scores` query, and now keeps what its name promises (reservas y pagos) plus a link.
 
-- `posts` / `post_reactions` / `post_comments` — community feed
+- `posts` / `post_reactions` / `post_comments` — community feed. **Las listas nunca piden
+  `img_url` junto con lo demás** (`POST_LIST_COLUMNS` + `attachPostImages()`): las fotos de antes
+  de la 017 están en base64 dentro de la tabla (una pesa 6.4 MB y hacía tardar el feed ~6 s), así
+  que las URLs se piden aparte con `not like 'data:%'`, de las incrustadas solo el id, y esas se
+  muestran como "Ver foto" y se bajan al tocarlas (`loadEmbeddedPostImage`)
 - **Moderación de la comunidad** (migración 128, `docs/HABIT_PARA_TODOS.md` D13): lo que Apple
   pide (guideline 1.2) a una app con contenido de usuarios, en HABIT y HABIT Crew a la vez.
   `community_reports`: el socio inserta (solo `post_id`/`comment_id`, `reason`, `details`:

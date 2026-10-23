@@ -731,3 +731,13 @@ nuevas.
     cada reporte manda un push al admin y deja un aviso en Alertas, pero alguien tiene que
     atenderlos); (4) Apple también pide filtrar lo
     ofensivo antes de publicarlo, y no hay filtro de palabras.
+  - **Feed lento por fotos en base64** (pedido de la sesión de planificación): la Comunidad
+    tardaba ~6 s porque el feed bajaba `img_url` de todos los posts, y uno de mayo 2026
+    (`b082c70a…`, de antes de la 017) trae su foto en base64 dentro de la tabla: 6.4 MB. El feed
+    y Admin → Comunidad ya no piden `img_url` con la lista: las URLs del bucket van en un
+    segundo select (`not like 'data:%'`), de las incrustadas solo el id, y esas muestran "Ver
+    foto" y la bajan al tocarla. El trigger de la 128 tampoco copia una foto base64 al reporte.
+    Verificado con el cliente simulado (las tres formas de post, y que la lista no pide
+    `img_url`) y en PGlite (67 casos). Arreglo de fondo, pendiente y aparte: subir esa foto al
+    bucket `community-images` y dejar su URL en `img_url`.
+
