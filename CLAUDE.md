@@ -9,6 +9,14 @@ HABIT Training Hub — a PWA for a gym in Mazatlán, Mexico. Members book traini
 This repo ships **two** front-ends off the same Vercel project and the same Supabase database:
 
 - **HABIT Training Hub** (`app.html`, served at `/`) — the gym: bookings, payments, door access, coaching.
+- **HABIT Crew** (the same `app.html`, served at `/crew` by a rewrite in `vercel.json`) — training and
+  the community, open to anyone. Not a separate file: a script in `<head>` (`#brand-boot`) sets
+  `window.HABIT_BRAND` from the path before the browser reads the manifest and icons, swaps them
+  to `crew-manifest.json` / `icons/crew-*`, and puts `brand-crew` on `<html>`; the main script
+  reads it as `IS_CREW`. Crew hides everything that is the gym's (`GYM_ONLY_VIEWS`: book, planes,
+  historial, shop; the door card, bookings, guest passes and their timers; admin/reception
+  routing — staff enter Crew as members). Markup that differs carries `gym-only` / `crew-only`.
+  One account works in both because it is one database. See `docs/HABIT_PARA_TODOS.md` D11–D13
 - **Skandi Fit** (`skandi.html`, served at `/skandi`) — a separate training app for the crew of the
   Skandi Nomad (a DOF vessel). Shares `profiles` and `auth.users` with HABIT, and shares two pure JS
   modules (`skandi-recovery.js`, `body-figure.js`), but has its own tables (`skandi_*`), its own
@@ -39,10 +47,10 @@ A single ~5500-line file containing all HTML, CSS, and JavaScript. There is no f
 The app has four screens (`#s-auth`, `#s-main`, `#s-admin`, `#s-reception`), toggled by adding/removing the `.active` CSS class. Within `#s-main`, tabs are toggled via `.view.active`. Admin has its own tab system via `admTab()`.
 
 - `index.html` — just redirects to `app.html` with a version query string for cache busting
-- `sw.js` — service worker: push notifications + app shell cache. **One registration at scope `/` serves both apps** — two service workers at the root would evict each other, so Skandi registers this same file. Fetch handler: icons and the shared JS modules are cache-first, navigation is network-first (and refreshes the cached shell with what it just fetched), API calls pass through untouched. `shellFor()` picks the offline fallback by path: `/skandi*` → `skandi.html`, `/competencia*` → `competencia.html`, everything else → `app.html`. Any new standalone page needs its own line there: the navigation handler stores what it fetched under `shellFor()`, so a page that falls through to `app.html` overwrites the app's offline copy with itself. **Every response the worker stores or hands to a navigation goes through `clean()`**: Vercel answers `/app.html` with a redirect to `/app`, `cache.addAll` stored that as a `redirected` response, and Safari refuses to give one to a navigation — the installed iPhone app opened completely blank (not even the login screen) whenever it fell back to the cache. Saving the offline copy is a side effect that must never replace a page that did arrive from the network.
-- `manifest.json` / `skandi-manifest.json` — one PWA manifest per app. Both use `scope: "/"` and are told apart by `id`.
+- `sw.js` — service worker: push notifications + app shell cache. **One registration at scope `/` serves both apps** — two service workers at the root would evict each other, so Skandi registers this same file. Fetch handler: icons and the shared JS modules are cache-first, navigation is network-first (and refreshes the cached shell with what it just fetched), API calls pass through untouched. `shellFor()` picks the offline fallback by path: `/skandi*` → `skandi.html`, `/competencia*` → `competencia.html`, everything else → `app.html` (`/crew` included on purpose: it is the same file). Any new standalone page needs its own line there: the navigation handler stores what it fetched under `shellFor()`, so a page that falls through to `app.html` overwrites the app's offline copy with itself. **Every response the worker stores or hands to a navigation goes through `clean()`**: Vercel answers `/app.html` with a redirect to `/app`, `cache.addAll` stored that as a `redirected` response, and Safari refuses to give one to a navigation — the installed iPhone app opened completely blank (not even the login screen) whenever it fell back to the cache. Saving the offline copy is a side effect that must never replace a page that did arrive from the network.
+- `manifest.json` / `crew-manifest.json` / `skandi-manifest.json` — one PWA manifest per app. All use `scope: "/"` and are told apart by `id`.
 
-**Version / cache busting**: one version string covers the whole project, because one service worker caches both apps. It lives in `APP_VERSION` (`app.html`), `SKANDI_VERSION` (`skandi.html`) and `CACHE_VERSION` (`sw.js`), plus the `?v=` strings in `index.html`, both manifests' `start_url`, and the `<link>`/`<script>` tags at the top of `app.html` and `skandi.html`. **Changing either app means bumping all of them to the same value** — a stale `CACHE_VERSION` leaves the offline shell frozen at the previous deploy.
+**Version / cache busting**: one version string covers the whole project, because one service worker caches both apps. It lives in `APP_VERSION` (`app.html`), `SKANDI_VERSION` (`skandi.html`) and `CACHE_VERSION` (`sw.js`), plus the `?v=` strings in `index.html`, the three manifests' `start_url`, the `<link>`/`<script>` tags at the top of `app.html` and `skandi.html`, and the `v` inside `app.html`'s `#brand-boot` script. **Changing either app means bumping all of them to the same value** — a stale `CACHE_VERSION` leaves the offline shell frozen at the previous deploy.
 
 ### Frontend (`skandi.html`)
 Same architecture as `app.html` — a single ~4,500-line vanilla-JS file, Supabase from CDN, no build
@@ -132,10 +140,12 @@ Schema is in `habit-supabase-setup.sql`. Additional migrations are separate `.sq
 
 Core tables:
 - `profiles` — extends `auth.users`; has `role` (`user`/`admin`/`reception`), 4-digit `access_code`, `credits`, `plan_id`, `plan_expiry`
-- **Entrenar es de cualquier cuenta, no solo de socios** (migración 127, `docs/HABIT_PARA_TODOS.md`
-  Fase 0). `MEMBER_LOCKED_VIEWS` ya no incluye `rutinas`; Reservar y Comunidad siguen detrás de
-  la membresía, y el candado que de verdad cuenta es `book_my_slot` (120): la puerta solo mira
-  reservas. `profiles.joined_as` (`gym`/`app`) dice **por dónde entró**, no qué puede hacer —
+- **Entrenar y la Comunidad son de cualquier cuenta, no solo de socios** (migración 127,
+  `docs/HABIT_PARA_TODOS.md`). `MEMBER_LOCKED_VIEWS` es solo `['book']`, y el candado que de
+  verdad cuenta es `book_my_slot` (120): la puerta solo mira reservas. La comunidad es una sola
+  en HABIT y en HABIT Crew (las políticas de `posts` siempre pidieron solo sesión).
+  `profiles.joined_as` (`gym`/`app`) dice **por dónde entró** —la app en la que se registró:
+  HABIT es `gym`, HABIT Crew es `app`—, no qué puede hacer —
   no confundir con `profiles.source` (habit/skandi, 055). Lo escribe `handle_new_user` desde
   los metadatos del `signUp` (el perfil nace en ese trigger, antes de que la app llame
   `ensure_habit_profile`), y con `app` el trigger de la 122 no asigna rutinas básicas, no

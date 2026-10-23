@@ -6,6 +6,10 @@
       "destination": "/app.html"
     },
     {
+      "source": "/crew",
+      "destination": "/app.html"
+    },
+    {
       "source": "/api/strava/callback",
       "destination": "/api/skandi?action=strava-callback"
     },
@@ -48,6 +52,15 @@
     },
     {
       "source": "/manifest.json",
+      "headers": [
+        {
+          "key": "Content-Type",
+          "value": "application/manifest+json"
+        }
+      ]
+    },
+    {
+      "source": "/crew-manifest.json",
       "headers": [
         {
           "key": "Content-Type",

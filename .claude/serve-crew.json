@@ -1,0 +1,5 @@
+{
+  "rewrites": [
+    { "source": "/crew", "destination": "/app.html" }
+  ]
+}

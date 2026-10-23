@@ -1,7 +1,7 @@
 // HABIT Training Hub — Service Worker
 // Push notifications + app shell caching
 
-const CACHE_VERSION = '20261020-1'; // keep in sync with APP_VERSION in app.html
+const CACHE_VERSION = '20261023-1'; // keep in sync with APP_VERSION in app.html
 const CACHE = `habit-${CACHE_VERSION}`;
 
 // Librerías compartidas con Skandi Fit: la app no arranca sin ellas, así que
@@ -17,9 +17,14 @@ const SHELL = ['/app.html', '/skandi.html', `/skandi-recovery.js?v=${CACHE_VERSI
 // navegación guarda lo que baja bajo shellFor(), y sin esta línea abrirla desde
 // un teléfono con la app instalada pisaba la copia offline de app.html con el
 // marcador. No va en SHELL: sin red no hay marcador que mostrar.
+// /crew (HABIT Crew) no es otra página: Vercel la reescribe al mismo app.html, que
+// decide la marca por location.pathname. Comparte el shell de HABIT a propósito —
+// lo que baja por /crew es byte por byte el mismo archivo—, y la línea está
+// explícita para que nadie le agregue un shell propio que se desincronice.
 const shellFor = pathname => {
   if (pathname === '/skandi' || pathname.startsWith('/skandi.html')) return '/skandi.html';
   if (pathname === '/competencia' || pathname.startsWith('/competencia.html')) return '/competencia.html';
+  if (pathname === '/crew' || pathname.startsWith('/crew/')) return '/app.html';
   return '/app.html';
 };
 

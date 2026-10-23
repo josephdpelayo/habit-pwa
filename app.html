@@ -6,19 +6,43 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="HABIT">
 <meta name="application-name" content="HABIT">
-<link rel="manifest" href="/manifest.json?v=20261020-1">
-<link rel="apple-touch-icon" sizes="120x120" href="/icons/icon-120.png?v=20261020-1">
-<link rel="apple-touch-icon" sizes="152x152" href="/icons/icon-152.png?v=20261020-1">
-<link rel="apple-touch-icon" sizes="167x167" href="/icons/icon-167.png?v=20261020-1">
-<link rel="apple-touch-icon" sizes="180x180" href="/icons/icon-180.png?v=20261020-1">
-<link rel="icon" type="image/png" sizes="32x32" href="/icons/icon-32.png?v=20261020-1">
+<link rel="manifest" href="/manifest.json?v=20261023-1">
+<link rel="apple-touch-icon" sizes="120x120" href="/icons/icon-120.png?v=20261023-1">
+<link rel="apple-touch-icon" sizes="152x152" href="/icons/icon-152.png?v=20261023-1">
+<link rel="apple-touch-icon" sizes="167x167" href="/icons/icon-167.png?v=20261023-1">
+<link rel="apple-touch-icon" sizes="180x180" href="/icons/icon-180.png?v=20261023-1">
+<link rel="icon" type="image/png" sizes="32x32" href="/icons/icon-32.png?v=20261023-1">
 <title>HABIT</title>
+<!-- Con id a propósito: scripts/check-training.js toma la primera etiqueta script sin
+     atributos como el script principal de la app y la compila. -->
+<script id="brand-boot">
+// Dos apps, un archivo. HABIT (el gym: reservar, la puerta, entrenar) y HABIT Crew
+// (entrenar y la comunidad, para cualquiera) son este mismo app.html: Vercel reescribe
+// /crew aquí, y la marca sale de la ruta. Una sola cuenta sirve en las dos porque es la
+// misma base. Se decide en el <head>, antes de que el navegador lea el manifest, los
+// íconos y el título que usa al instalarla (docs/HABIT_PARA_TODOS.md, D11–D13).
+(function(){
+  var crew=/^\/crew(\/|$)/.test(location.pathname);
+  window.HABIT_BRAND=crew?'crew':'gym';
+  if(!crew)return;
+  var v='20261023-1';
+  document.documentElement.classList.add('brand-crew');
+  document.title='HABIT Crew';
+  document.querySelectorAll('meta[name="apple-mobile-web-app-title"],meta[name="application-name"]')
+    .forEach(function(m){m.setAttribute('content','HABIT Crew');});
+  var mf=document.querySelector('link[rel="manifest"]');
+  if(mf)mf.href='/crew-manifest.json?v='+v;
+  document.querySelectorAll('link[rel="apple-touch-icon"],link[rel="icon"]').forEach(function(l){
+    l.href=l.href.replace('/icons/icon-','/icons/crew-');
+  });
+})();
+</script>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Share+Tech+Mono&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="/skandi-recovery.js?v=20261020-1"></script>
-<script src="/body-figure.js?v=20261020-1"></script>
-<script src="/habit-training.js?v=20261020-1"></script>
+<script src="/skandi-recovery.js?v=20261023-1"></script>
+<script src="/body-figure.js?v=20261023-1"></script>
+<script src="/habit-training.js?v=20261023-1"></script>
 <style>
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
 @media (prefers-reduced-motion:reduce){*,*:before,*:after{scroll-behavior:auto!important;animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}}
@@ -2340,9 +2364,14 @@ body.admin-mode #courtesy-modal label{border-radius:14px!important;border-color:
   .vol-row{grid-template-columns:76px 1fr auto;gap:8px}
 }
 /* HABIT para todos (Fase 0): registro gym/app, onboarding, invitación al gym, cuenta. */
-.reg-where .ptype-btn{text-transform:none;letter-spacing:0;font-size:13px;min-height:44px}
-.reg-where-hint{font-size:12px;line-height:1.5;color:var(--gray);margin:0 0 14px}
-.reg-where-hint.err{color:var(--red)}
+/* HABIT Crew: el mismo app.html con otra marca (clase brand-crew en <html>, puesta en el <head>). */
+.crew-only{display:none!important}
+.brand-crew .crew-only{display:block!important}
+.brand-crew .gym-only{display:none!important}
+.brand-crew .top-action[data-top-view="planes"],.brand-crew .top-action[data-top-view="historial"]{display:none}
+.brand-crew .bnav .bnb.gym-nav{display:none}
+.reg-other-app{font-size:12px;line-height:1.5;color:var(--gray);margin:12px 0 0;text-align:center}
+.reg-other-app a{color:var(--white);font-weight:700}
 .app-gym-invite{display:flex;align-items:center;gap:12px;padding:14px;margin-bottom:16px;border:1px solid var(--hairline);border-radius:var(--radius-md);background:var(--surface)}
 .app-gym-invite>div{flex:1;min-width:0;display:flex;flex-direction:column;gap:3px}
 .app-gym-invite strong{font-size:13.5px;color:var(--white)}
@@ -2377,7 +2406,8 @@ body.admin-mode #courtesy-modal label{border-radius:14px!important;border-color:
     <div class="auth-logo">
       <img src="/icons/logo-original.png" style="width:90px;height:90px;object-fit:contain;margin-bottom:.5rem">
       <div class="auth-brand">HABIT</div>
-      <div class="auth-sub" style="margin-top:.25rem">TRAINING HUB</div>
+      <div class="auth-sub gym-only" style="margin-top:.25rem">TRAINING HUB</div>
+      <div class="auth-sub crew-only" style="margin-top:.25rem">CREW</div>
     </div>
     <div class="auth-tabs">
       <button class="auth-tab active" onclick="authTab('login')">Entrar</button>
@@ -2390,12 +2420,6 @@ body.admin-mode #courtesy-modal label{border-radius:14px!important;border-color:
       <button class="forgot-link" onclick="forgotPassword()">Olvidé mi contraseña</button>
     </div>
     <div id="ar" style="display:none">
-      <p class="slbl" style="margin-bottom:6px">¿Dónde entrenas?</p>
-      <div class="ptype-row reg-where" style="margin-bottom:6px">
-        <button type="button" class="ptype-btn" data-joined="gym" onclick="setRegJoinedAs('gym')">En HABIT Mazatlán</button>
-        <button type="button" class="ptype-btn" data-joined="app" onclick="setRegJoinedAs('app')">Por mi cuenta</button>
-      </div>
-      <p id="reg-where-hint" class="reg-where-hint">Elige una opción. Si entrenas en otro gym, en casa o en un parque, es "Por mi cuenta": la app es gratis y no necesitas membresía.</p>
       <div class="field"><label>Nombre completo</label><input type="text" id="rn" placeholder="Tu nombre" autocomplete="name"></div>
       <div class="field"><label>Correo</label><input type="email" id="re" placeholder="tu@correo.com" autocomplete="email"></div>
       <div class="field"><label>Confirmar correo</label><input type="email" id="re2" placeholder="Repite tu correo"></div>
@@ -2415,7 +2439,10 @@ body.admin-mode #courtesy-modal label{border-radius:14px!important;border-color:
         </div>
       </div>
       <button class="btn" onclick="doRegister()">Crear cuenta</button>
-      <div class="install-hint">Al terminar tu registro te mostraremos como guardar HABIT en tu inicio y abrirla como app.</div>
+      <div class="install-hint">Al terminar tu registro te mostraremos como guardar <span class="brand-name">HABIT</span> en tu inicio y abrirla como app.</div>
+      <!-- Cada app manda a la otra a quien llegó a la equivocada. La cuenta es la misma. -->
+      <p class="reg-other-app gym-only">¿Entrenas por tu cuenta, fuera del gym? <a href="/crew">Usa HABIT Crew</a>: gratis, sin membresía, con la misma cuenta.</p>
+      <p class="reg-other-app crew-only">¿Entrenas en HABIT Mazatlán? Con esta misma cuenta reservas desde <a href="/">la app del gym</a>.</p>
     </div>
     <a class="auth-social" href="https://www.instagram.com/habit.traininghub" target="_blank" rel="noopener">
       <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="4" width="16" height="16" rx="5"/><circle cx="12" cy="12" r="3.5"/><circle cx="17.5" cy="6.5" r="1"/></svg>
@@ -2439,7 +2466,7 @@ body.admin-mode #courtesy-modal label{border-radius:14px!important;border-color:
 <!-- MAIN -->
 <div id="s-main" class="screen">
   <div class="hdr" id="main-hdr-bar">
-    <div class="logo-wrap" onclick="sv('inicio')" style="cursor:pointer"><img src="/icons/logo-original.png" style="width:30px;height:30px;object-fit:contain"><div><span class="ltxt">HABIT</span><span class="lsub">TRAINING HUB</span><span id="main-member-pill" class="main-member-pill"></span></div></div>
+    <div class="logo-wrap" onclick="sv('inicio')" style="cursor:pointer"><img src="/icons/logo-original.png" style="width:30px;height:30px;object-fit:contain"><div><span class="ltxt">HABIT</span><span class="lsub gym-only">TRAINING HUB</span><span class="lsub crew-only">CREW</span><span id="main-member-pill" class="main-member-pill"></span></div></div>
     <div class="top-actions">
       <button class="top-action" data-top-view="planes" onclick="sv('planes')" title="Membresía"><svg viewBox="0 0 24 24"><rect x="2" y="5" width="20" height="14" rx="2"/><path d="M2 10h20M6 15h4M14 15h4"/></svg></button>
       <button class="top-action" data-top-view="historial" onclick="sv('historial')" title="Historial"><svg viewBox="0 0 24 24"><path d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg></button>
@@ -2468,7 +2495,7 @@ body.admin-mode #courtesy-modal label{border-radius:14px!important;border-color:
       <div class="perfil-section">
         <div class="perfil-avatar" id="perfil-av"></div>
         <div id="perfil-info"></div>
-        <button class="btn-ghost" onclick="sv('inicio')" style="width:100%;margin-top:8px">Ver mi membresía y visitas →</button>
+        <button class="btn-ghost gym-only" onclick="sv('inicio')" style="width:100%;margin-top:8px">Ver mi membresía y visitas →</button>
         <div class="divider" style="margin:.75rem 0"></div>
         <p class="slbl">Editar datos</p>
         <div class="avatar-picker">
@@ -2686,7 +2713,7 @@ body.admin-mode #courtesy-modal label{border-radius:14px!important;border-color:
     <div class="bnav-inner">
       <button class="bnb active" onclick="sv('inicio')">
         <img src="/icons/logo-original.png" class="nav-logo-img" style="width:22px;height:22px;object-fit:contain">Inicio</button>
-      <button class="bnb" onclick="sv('book')">
+      <button class="bnb gym-nav" onclick="sv('book')">
         <svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>Reservar</button>
       <button id="rutinas-nav-btn" class="bnb" onclick="sv('rutinas')">
         <svg viewBox="0 0 24 24"><path d="M6 4h4v16H6zM14 4h4v16h-4zM4 9h2M10 9h4M18 9h2M4 15h2M10 15h4M18 15h2"/></svg>Entrenar</button>
@@ -2695,7 +2722,7 @@ body.admin-mode #courtesy-modal label{border-radius:14px!important;border-color:
         <svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M3 10h18M8 2v4M16 2v4M8 15l2 2 4-4"/></svg>Coaching</button>
       <button class="bnb" onclick="sv('comunidad')">
         <svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>Comunidad</button>
-      <button id="shop-nav-btn" class="bnb" onclick="sv('shop')" style="display:none">
+      <button id="shop-nav-btn" class="bnb gym-nav" onclick="sv('shop')" style="display:none">
         <span id="shop-nav-cart-badge" class="bnb-badge" data-shop-nav-count></span>
         <svg viewBox="0 0 24 24"><path d="M6 2l1.5 4h9L18 2"/><path d="M4 6h16l-1.5 14h-13z"/><path d="M9 11h6"/></svg>Tienda</button>
     </div>
@@ -3419,7 +3446,7 @@ body.admin-mode #courtesy-modal label{border-radius:14px!important;border-color:
     <div class="install-hdr">
       <div class="install-mark" aria-hidden="true"><img src="icons/logo-original.png" alt=""></div>
       <div class="install-kicker">Cuenta creada</div>
-      <h2>Instala HABIT como app</h2>
+      <h2>Instala <span class="brand-name">HABIT</span> como app</h2>
       <p>Guardala en tu pantalla de inicio para reservar, ver rutinas y entrar mas rapido sin buscar el link.</p>
     </div>
     <div class="install-body">
@@ -3464,8 +3491,17 @@ body.admin-mode #courtesy-modal label{border-radius:14px!important;border-color:
 
 // ── CONFIG & SUPABASE ───────────────────────────────────────
 const SUPABASE_URL='https://pmpjteuqjusbiduevbwq.supabase.co';
+// HABIT o HABIT Crew: lo decidió el <head> por la ruta (window.HABIT_BRAND). Crew es
+// entrenar y la comunidad, para cualquiera; lo del gym —reservar, la puerta, membresías,
+// pagos, la tienda— no existe ahí. Ocultarlo es solo para no mostrar lo que no aplica:
+// lo que de verdad cierra el gym es book_my_slot (120) y la puerta, que solo mira reservas.
+const IS_CREW=window.HABIT_BRAND==='crew';
+const BRAND_NAME=IS_CREW?'HABIT Crew':'HABIT';
+const GYM_ONLY_VIEWS=['book','planes','historial','shop'];
+const GYM_APP_URL='/';
+document.querySelectorAll('.brand-name').forEach(el=>{el.textContent=BRAND_NAME;});
 const SUPABASE_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBtcGp0ZXVxanVzYmlkdWV2YndxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc2OTI1NjUsImV4cCI6MjA5MzI2ODU2NX0.XbMzZoo2yqtrD8znLnyo_1zDfrdJAvAPj1lqGOyXnLw';
-const APP_VERSION='20261020-1';
+const APP_VERSION='20261023-1';
 // La pierna va separada en cuádriceps, femorales y pantorrillas: la figura
 // corporal pinta esas tres regiones por separado y el motor de recuperación les
 // da ventanas de descanso distintas. 'Piernas' sigue reconociéndose al leer
@@ -4033,8 +4069,10 @@ async function initApp(){
         else showShopAccessGate(true);
         return;
       }
-      if(sbProfile.role==='admin'){showAdmin();}
-      else if(sbProfile.role==='reception')showReception();
+      // En HABIT Crew todos entran como usuarios: el panel del admin y la pantalla de
+      // recepción son del gym y viven en la app del gym.
+      if(!IS_CREW&&sbProfile.role==='admin'){showAdmin();}
+      else if(!IS_CREW&&sbProfile.role==='reception')showReception();
       else{
         showMainSb();
         handleStripeReturn();
@@ -5016,7 +5054,8 @@ function paintGuestGroup(){
 async function renderGuestGroup(reload=true){
   const el=document.getElementById('guest-group-wrap');
   if(!el)return;
-  if(!isGroupMember()){el.innerHTML='';return;}
+  // Invitados a una reserva grupal: es del gym, no de Crew.
+  if(IS_CREW||!isGroupMember()){el.innerHTML='';return;}
   const active=futureOwnGroupBooking();
   guestActiveBookingId=active&&active.id?active.id:null;
   if(reload){
@@ -5092,7 +5131,8 @@ async function saveGuestGroup(){
 }
 
 async function loadAccessData(){
-  if(!curUser||!sbUser)return;
+  // HABIT Crew no abre la puerta: nada que cargar ni que pintar.
+  if(!curUser||!sbUser||IS_CREW)return;
   try{
     const yday2=addDaysDS(mazToday(),-1);
     const{data:bks}=await sb.from('bookings')
@@ -5129,7 +5169,7 @@ async function loadAccessData(){
 }
 function renderAccess(){
   const el=document.getElementById('access-main');
-  if(!curUser||!sbUser){if(el)el.innerHTML='';return;}
+  if(!curUser||!sbUser||IS_CREW){if(el)el.innerHTML='';return;}
   const res=nextBk(curUser),now=mazNow();
   // Sin reserva, la tarjeta de la puerta solo le dice a quien entrena por su cuenta que
   // no tiene acceso a un lugar al que no va. Si algún día reserva, aparece sola.
@@ -5232,6 +5272,8 @@ function renderAccess(){
 function startTimer(){
   if(accInt)clearInterval(accInt);
   if(accessDataInt)clearInterval(accessDataInt);
+  // Los dos relojes son de la puerta (refrescar reservas, contar la ventana de acceso).
+  if(IS_CREW)return;
   accessDataInt=setInterval(()=>{if(curUser&&sbUser)loadAccessData();},60000);
   accInt=setInterval(()=>{if(curUser&&document.getElementById('v-inicio').classList.contains('active'))renderAccess();},1000);
 }
@@ -5260,8 +5302,8 @@ async function doLogin(){
       else showShopAccessGate(true);
       return;
     }
-    if(sbProfile.role==='admin')showAdmin();
-    else if(sbProfile.role==='reception')showReception();
+    if(!IS_CREW&&sbProfile.role==='admin')showAdmin();
+    else if(!IS_CREW&&sbProfile.role==='reception')showReception();
     else showMainSb();
   }catch(e){
     hideLoading();
@@ -5341,21 +5383,6 @@ function closeInstallGuide(){
   const modal=document.getElementById('install-guide-modal');
   if(modal)modal.style.display='none';
 }
-// Por dónde entra quien se registra (migración 127): 'gym' o 'app'. No es un permiso
-// —reservar y abrir la puerta los decide la membresía—; decide qué reglamento se acepta,
-// si el admin recibe el aviso de socio nuevo y qué se le muestra primero.
-let regJoinedAs=null;
-function setRegJoinedAs(v){
-  regJoinedAs=v==='app'?'app':'gym';
-  document.querySelectorAll('.reg-where .ptype-btn').forEach(b=>b.classList.toggle('active',b.dataset.joined===regJoinedAs));
-  const hint=document.getElementById('reg-where-hint');
-  if(hint){
-    hint.classList.remove('err');
-    hint.textContent=regJoinedAs==='app'
-      ?'Gratis y sin membresía: rutinas, tu semana y tu progreso. Si algún día entrenas en HABIT Mazatlán, la compras desde la app.'
-      :'Tu acceso a la puerta se activa con tu membresía y tu reserva.';
-  }
-}
 function updateTermsButton(){
   const chk=document.getElementById('terms-check');
   const btn=document.getElementById('terms-accept-btn');
@@ -5412,13 +5439,11 @@ async function doRegister(){
   if(!name||!email||!pass){toast('Completa todos los campos','err');return;}
   if(email2&&email!==email2){toast('Los correos no coinciden','err');return;}
   if(pass2&&pass!==pass2){toast('Las contrasenas no coinciden','err');return;}
-  if(!regJoinedAs){
-    const hint=document.getElementById('reg-where-hint');
-    if(hint)hint.classList.add('err');
-    toast('Elige dónde entrenas','err');
-    return;
-  }
-  const reg={name,email,phone,pass,joinedAs:regJoinedAs};
+  // Por dónde entra (127) lo dice la app en la que se registra: quien se registra en
+  // HABIT es del gym, quien se registra en HABIT Crew entrena por su cuenta. No es un
+  // permiso —reservar y la puerta los decide la membresía—; decide el reglamento que
+  // acepta, si el admin recibe el aviso de socio nuevo y qué ve primero.
+  const reg={name,email,phone,pass,joinedAs:IS_CREW?'app':'gym'};
   showTerms(reg.joinedAs,()=>completeRegister(reg));
 }
 async function ensureProfile(reg){
@@ -5465,7 +5490,7 @@ async function completeRegister(reg){
     if(isApp){
       // Sin push al admin: quien entrena por su cuenta no es un socio nuevo del gym. Se
       // cuenta en el dashboard (Usuarios de la app).
-      addN('Bienvenido/a a HABIT. Cuéntanos cómo entrenas y te dejamos listo para empezar.','success');
+      addN('Bienvenido/a a '+BRAND_NAME+'. Cuéntanos cómo entrenas y te dejamos listo para empezar.','success');
       showMainSb();
       openTrainingOnboarding({afterSignup:true});
     }else{
@@ -5937,11 +5962,12 @@ async function loadReceptionSessions(){
 
 // ── NAVIGATION ──
 const ALL_VIEWS=['inicio','book','planes','rutinas','coaching','comunidad','shop','historial','perfil','progreso'];
-// Entrenar ya no está aquí (docs/HABIT_PARA_TODOS.md, Fase 0): cualquier cuenta entrena,
-// registra y ve su progreso. Lo que sigue cerrado es lo del gym: reservar (y con eso la
-// puerta) y la comunidad de socios. El candado que importa es el del servidor
-// (book_my_slot, 120); este solo evita mostrar una pantalla que no puede usar.
-const MEMBER_LOCKED_VIEWS=['book','comunidad'];
+// Entrenar y la Comunidad ya no están aquí (docs/HABIT_PARA_TODOS.md): cualquier cuenta
+// entrena, registra su progreso y participa en la comunidad, que es la misma en HABIT y en
+// HABIT Crew (D13). Lo único cerrado es reservar, y con eso la puerta. El candado que
+// importa es el del servidor (book_my_slot, 120); este solo evita mostrar una pantalla que
+// no puede usar.
+const MEMBER_LOCKED_VIEWS=['book'];
 // Quien entró por la app y hoy no es socio del gym. Si compra un plan deja de serlo:
 // la membresía manda, joined_as solo dice por dónde llegó.
 function isAppOnly(){
@@ -5982,20 +6008,16 @@ function updateSupportFab(v){
   fab.classList.toggle('show',show);
 }
 function sv(v){
+  // En HABIT Crew no hay reservas, membresías, pagos ni tienda: nada la lleva ahí, y si
+  // algo lo intenta, Inicio.
+  if(IS_CREW&&GYM_ONLY_VIEWS.includes(v))v='inicio';
+  // Reservar sin membresía lleva a las membresías, que es lo que falta para reservar, en
+  // vez de devolver a Inicio con un aviso.
   if(MEMBER_LOCKED_VIEWS.includes(v)&&!canUseMemberViews()){
-    // Reservar lleva a las membresías, que es lo que falta para reservar, en vez de
-    // devolver a Inicio con un aviso.
-    if(v==='book'){
-      toast(curUser&&curUser.joinedAs==='app'
-        ?'Reservar es para entrenar en HABIT Mazatlán. Elige una membresía.'
-        :'Activa una membresía vigente para reservar','warn');
-      v='planes';
-    }else{
-      toast(curUser&&curUser.joinedAs==='app'
-        ?'La comunidad es para socios del gym'
-        :'Activa una membresia vigente para usar esta seccion','warn');
-      v='inicio';
-    }
+    toast(curUser&&curUser.joinedAs==='app'
+      ?'Reservar es para entrenar en HABIT Mazatlán. Elige una membresía.'
+      :'Activa una membresía vigente para reservar','warn');
+    v='planes';
   }
   if(v==='shop'&&!canAccessShop()){
     toast('Tienda disponible próximamente','warn');
@@ -6252,6 +6274,7 @@ async function renderActiveBookings(){
   const el=document.getElementById('active-bookings-wrap');
   if(!el||!curUser||!sbUser)return;
   el.innerHTML='';
+  if(IS_CREW)return;
   try{
     const yesterdayStr=addDaysDS(mazToday(),-1);
     const{data:bks,error:bkErr}=await sb.from('bookings')
@@ -6373,7 +6396,7 @@ function inicioCoachActionHtml(){
   const row=active||next;
   // Quien entrena por su cuenta no tiene puerta ni reservas que ver en Inicio: sin nada
   // agendado, la entrada es elegir qué entrenar.
-  if(!row)return isAppOnly()?inicioStartTrainingHtml():'';
+  if(!row)return (IS_CREW||isAppOnly())?inicioStartTrainingHtml():'';
   const isActive=!!active;
   const title=esc(row.board_name||'Entreno');
   const cta=isActive?'Continuar':'Iniciar';
@@ -6407,6 +6430,9 @@ function inicioStartTrainingHtml(){
     +'<span class="inicio-coach-go">Elegir</span>'
     +'</button></div>';
 }
+function openGymApp(){
+  window.open(GYM_APP_URL,'_blank','noopener');
+}
 function startInicioFreeTraining(){
   rutActiveTab='hoy';
   sv('rutinas');
@@ -6438,7 +6464,7 @@ function updateMainMembershipPill(){
   pill.className='main-member-pill';
   // "Sin membresía" en rojo es un aviso para el socio del gym; a quien entrena por su
   // cuenta no le falta nada.
-  if(!curUser||isAppOnly()){
+  if(!curUser||IS_CREW||isAppOnly()){
     pill.style.display='none';
     pill.textContent='';
     return;
@@ -6463,6 +6489,16 @@ function renderMembershipStatus(){
   const el=document.getElementById('membership-status-wrap');
   updateMainMembershipPill();
   if(!el||!curUser)return;
+  // En Crew la membresía no se compra ni se muestra: es de la app del gym. Al socio le
+  // recuerda dónde reserva; a quien no lo es, lo invita. Se abre aparte porque una app
+  // instalada no puede saltar a la otra.
+  if(IS_CREW){
+    const member=canUseMemberViews();
+    el.innerHTML='<div class="app-gym-invite"><div><strong>'+(member?'Reservar y abrir la puerta':'¿Estás en Mazatlán?')+'</strong>'
+      +'<span>'+(member?'Eso vive en la app del gym, con esta misma cuenta.':'Entrena en el gym HABIT con equipo completo. Tu cuenta es la misma.')+'</span></div>'
+      +'<button class="btn-sm" onclick="openGymApp()">'+(member?'Abrir HABIT':'Conocer el gym')+'</button></div>';
+    return;
+  }
   // Quien entrena por su cuenta no "activa su membresía": la app ya es suya. El gym queda
   // como invitación, abajo y en una línea.
   if(isAppOnly()){

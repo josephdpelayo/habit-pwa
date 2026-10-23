@@ -131,11 +131,30 @@ app lo multiplica. **La 120 en producción es requisito de la Fase 0.**
 | D3 | ¿Renombrar las tablas `skandi_*` compartidas? | **No, por ahora.** Se documenta en `CLAUDE.md` que son "de la persona" | Renombrar toca el upsert de Strava, varios RPC y las dos apps a la vez, y no cambia nada para el usuario. Si algún día estorba, una vista `security_invoker` con el nombre nuevo |
 | D4 | ¿Cómo se distingue a quien solo usa la app? | **Sin rol nuevo.** Entrenar queda abierto a cualquier cuenta; Reservar, puerta y Comunidad siguen detrás de `hasActive()`. Se agrega `profiles.joined_as` (`gym`/`app`) y una tabla privada `training_profiles` (§4.2) | El acceso al gym ya lo decide la membresía; un rol nuevo duplicaría esa regla. `joined_as` es para métricas y para no avisarle al admin de cada descarga |
 | D5 | ¿Se cobra? | **Entrenar gratis.** Se cobran la membresía del gym (ya existe) y el **coaching en línea** (Stripe en web). Un plan premium "HABIT+" solo cuando haya uso que lo justifique | Lo gratis llena el embudo; lo que vale dinero es la persona (David, el gym). Ver §9.1 sobre las reglas de Apple |
-| D6 | ¿Comunidad abierta al público? | **No en v1.** Se queda para socios | Un feed abierto pide moderación; sin ella, el feed del gym se arruina |
+| D6 | ¿Comunidad abierta al público? | ~~No en v1~~ → **reemplazada por D13 (23 oct)** | — |
 | D7 | ¿Nutrición en HABIT? | **No en este proyecto.** Tú sigues usando Comida de Skandi; se evalúa en la Fase 8 | Comida es la mitad del código de Skandi y cuesta tokens por usuario. Abrirla al público es otro proyecto con su propio presupuesto |
 | D8 | ¿Idioma? | **Español primero.** Inglés en la Fase 8 | HABIT no tiene `t()`; meterlo ahora toca cada pantalla y no ayuda a lanzar en México |
 | D9 | ¿Dónde vive el código nuevo? | **Matemáticas en módulos puros, UI en `app.html`.** HABIT carga los módulos de Skandi como están; lo que hoy está inline en `skandi.html` (niveles de calistenia) se extrae primero a un módulo | Es la regla que ya funciona en el repo. `app.html` tiene 19,350 líneas; todo lo que se pueda probar en Node no debe crecerlo |
 | D10 | ¿Endpoints nuevos? | **Ninguno.** Todo como RPC o como `action` en routers existentes | Techo de 12 funciones en Vercel Hobby (ver §9.2) |
+| D11 | ¿Una app o dos? (23 oct) | **Dos apps, una cuenta, un código.** **HABIT** (el gym: reservar, la puerta, entrenar) y **HABIT Crew** (entrenar y la comunidad, para cualquiera). Las dos son el mismo `app.html`: Vercel reescribe `/crew` a ese archivo y la marca sale de la ruta. Misma base, así que la misma cuenta sirve en las dos | Entrenar son miles de líneas: copiarlo a otra app sería arreglar todo dos veces. Así cada mejora llega a las dos, y quien es del gym tiene todo lo de Crew sin registrarse otra vez |
+| D12 | ¿Cómo se llama? (23 oct) | **HABIT Crew**, en `habittraininghub.app/crew`. Ícono: el de HABIT invertido (aro negro sobre blanco) | Cabe completo bajo el ícono del iPhone (≈12 caracteres; "HABIT Community" se cortaba), suena a grupo y funciona como #HABITcrew. La dirección dentro del dominio actual no cuesta y se puede cambiar después |
+| D13 | ¿Comunidad abierta? (23 oct) | **Sí: una sola comunidad, abierta a toda cuenta, en las dos apps.** Reemplaza a D6 | Si Crew la abre, cerrarla en HABIT a la misma persona no tendría sentido. Pide **moderación** (reportar, bloquear) antes de promocionar: Apple la exige a toda app con contenido de usuarios |
+
+### 3.1 Qué tiene cada app (D11–D13)
+
+| | HABIT (`/`) | HABIT Crew (`/crew`) |
+|---|---|---|
+| Reservar, puerta, membresías, pagos, tienda | ✅ | — (una tarjeta en Inicio abre HABIT) |
+| Entrenar: rutinas, semana, programas, progreso | ✅ cualquier cuenta | ✅ |
+| Comunidad | ✅ cualquier cuenta | ✅ la misma |
+| Coaching (clientes de David) | ✅ | ✅ |
+| Admin y recepción | ✅ | — (entran como usuarios; administran desde HABIT) |
+| Registro | `joined_as = gym`, reglamento del gym, aviso "Nuevo socio" al admin | `joined_as = app`, términos de la app, onboarding, sin aviso |
+| Manifest e íconos | `manifest.json`, `icons/icon-*` | `crew-manifest.json` (`id: /crew`), `icons/crew-*` |
+
+Cada registro manda a la otra app a quien llegó a la equivocada ("¿Entrenas por tu cuenta? Usa
+HABIT Crew" / "¿Entrenas en HABIT Mazatlán? Reserva desde la app del gym"). La pregunta "¿Dónde
+entrenas?" de la Fase 0 desapareció: la app en la que te registras ya lo dice.
 
 ---
 
@@ -556,7 +575,7 @@ Lo que este ejemplo exige y por qué está en la 129:
   una vez.
 - **No renombramos tablas `skandi_*`** (D3).
 - **No creamos un rol "usuario de app".** El acceso al gym ya lo decide la membresía (D4).
-- **No abrimos la Comunidad** (D6) **ni metemos nutrición** (D7) en este proyecto.
+- **No metemos nutrición** (D7) en este proyecto. (La Comunidad sí se abrió: D13.)
 - **No integramos Garmin directo**: el programa de Garmin no acepta uso personal y tiene altas en
   pausa (`PROYECTO_SKANDI_V2.md` §3.1). Strava e Intervals ya lo cubren.
 - **No borramos Skandi ni su historia.**
@@ -647,3 +666,21 @@ nuevas.
     si no el camino viejo, pero la app vieja no sabe usar los RPC; (4) probar una reserva y
     una cancelación reales, registrar una cuenta "Por mi cuenta" y otra "En HABIT Mazatlán", y
     revisar el admin.
+- **2026-10-23** — Producción: 127 y 120 corridas, `1c0c7bc` desplegado (`20261020-1`);
+  comprobado desde fuera que los RPC existen y que la llave pública no los puede usar.
+  **HABIT Crew (D11–D13), commit y push el 23 oct:**
+  - `/crew` reescrito a `app.html` en `vercel.json`; `crew-manifest.json` e `icons/crew-*`
+    (el ícono de HABIT invertido); `sw.js` mapea `/crew` al mismo shell.
+  - Un script en el `<head>` (`#brand-boot`) decide la marca por la ruta antes de que el
+    navegador lea manifest, íconos y título; `IS_CREW` en el script principal.
+  - En Crew: sin Reservar, Tienda, Membresía ni Historial; Inicio sin puerta, reservas ni
+    pases de invitado (y sin sus relojes), con "Entrenar hoy" y una tarjeta que abre HABIT;
+    admin y recepción entran como usuarios.
+  - En las dos: la Comunidad se abre a toda cuenta (`MEMBER_LOCKED_VIEWS = ['book']`); la base
+    ya lo permitía (las políticas de `posts` solo piden sesión).
+  - Registro: sin "¿Dónde entrenas?"; `joined_as` sale de la app.
+  - Verificado en el navegador local con la reescritura de `/crew`: título, manifest, íconos,
+    registro, Inicio y barra de Crew; HABIT sin cambios salvo la Comunidad abierta.
+  - Versión `20261023-1` (incluye la `v` del script `#brand-boot` y `crew-manifest.json`).
+  - **Falta antes de promocionar Crew:** moderación de la comunidad (reportar, bloquear,
+    cola del admin), y la app de Crew en la App Store (otro bundle id en Capacitor).
