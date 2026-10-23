@@ -757,3 +757,23 @@ nuevas.
 - **2026-10-23 (3)** — La moderación y la Fase A se unieron en `main` (las dos habían subido a
   `20261023-2` por separado) con la versión `20261023-3`. Sin push hasta correr la **128** en
   Supabase.
+- **2026-10-23 (4)** — **Pulido de Entrenar, Fase B (Hoy)**, sin commitear. Una tarjeta y un
+  botón según el día (en curso → Continuar; agendado → Empezar; hecho → Ver lo que hiciste;
+  descanso → qué sigue; usuario nuevo → Elegir qué entrenar), otras sesiones del día en una
+  línea, la semana en siete puntos (toca → Semana), "Tu cuerpo" en una fila que se despliega
+  (`habit_hoy_body`) y "Tu progreso" con fila propia. Probado solo el estado de usuario nuevo;
+  faltan agendado, en curso y hecho. Versión `20261023-4`. Pendiente: Fase C.
+
+- **2026-10-23 (5)** — **Fases B y C de Entrenar**, versión `20261023-5`.
+  - Hoy: corregida la prioridad de días con varias sesiones (en curso/pendiente antes de
+    completo), recuperación de series al reabrir y descanso en semanas con sesiones omitidas.
+  - Semana: siete filas accesibles en una lista continua, programa compacto y menú de opciones;
+    conserva la distribución habitual y las solicitudes al coach.
+  - Rutinas: biblioteca de filas que abre una ficha completa, con todos los ejercicios y
+    acciones de entrenar, asignar, editar o adaptar. Editor y búsqueda a pantalla completa;
+    filtros por músculo y búsqueda por nombre, alias y equipo, sin límite artificial de 25.
+  - Validación: comprobaciones del proyecto y pruebas aisladas de Hoy (36) y Rutinas (21).
+    La sesión de prueba anterior no estaba disponible en el navegador local: queda pendiente
+    validar los recorridos autenticados y el aspecto final con esa cuenta.
+  - La foto histórica de 6.4 MB sigue pendiente de migrar a Storage. No se confirma ninguna
+    modificación de esa imagen ni del post.

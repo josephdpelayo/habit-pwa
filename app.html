@@ -6,12 +6,12 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="HABIT">
 <meta name="application-name" content="HABIT">
-<link rel="manifest" href="/manifest.json?v=20261023-3">
-<link rel="apple-touch-icon" sizes="120x120" href="/icons/icon-120.png?v=20261023-3">
-<link rel="apple-touch-icon" sizes="152x152" href="/icons/icon-152.png?v=20261023-3">
-<link rel="apple-touch-icon" sizes="167x167" href="/icons/icon-167.png?v=20261023-3">
-<link rel="apple-touch-icon" sizes="180x180" href="/icons/icon-180.png?v=20261023-3">
-<link rel="icon" type="image/png" sizes="32x32" href="/icons/icon-32.png?v=20261023-3">
+<link rel="manifest" href="/manifest.json?v=20261023-5">
+<link rel="apple-touch-icon" sizes="120x120" href="/icons/icon-120.png?v=20261023-5">
+<link rel="apple-touch-icon" sizes="152x152" href="/icons/icon-152.png?v=20261023-5">
+<link rel="apple-touch-icon" sizes="167x167" href="/icons/icon-167.png?v=20261023-5">
+<link rel="apple-touch-icon" sizes="180x180" href="/icons/icon-180.png?v=20261023-5">
+<link rel="icon" type="image/png" sizes="32x32" href="/icons/icon-32.png?v=20261023-5">
 <title>HABIT</title>
 <!-- Con id a propósito: scripts/check-training.js toma la primera etiqueta script sin
      atributos como el script principal de la app y la compila. -->
@@ -25,7 +25,7 @@
   var crew=/^\/crew(\/|$)/.test(location.pathname);
   window.HABIT_BRAND=crew?'crew':'gym';
   if(!crew)return;
-  var v='20261023-3';
+  var v='20261023-5';
   document.documentElement.classList.add('brand-crew');
   document.title='HABIT Crew';
   document.querySelectorAll('meta[name="apple-mobile-web-app-title"],meta[name="application-name"]')
@@ -40,9 +40,9 @@
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Share+Tech+Mono&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="/skandi-recovery.js?v=20261023-3"></script>
-<script src="/body-figure.js?v=20261023-3"></script>
-<script src="/habit-training.js?v=20261023-3"></script>
+<script src="/skandi-recovery.js?v=20261023-5"></script>
+<script src="/body-figure.js?v=20261023-5"></script>
+<script src="/habit-training.js?v=20261023-5"></script>
 <style>
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
 @media (prefers-reduced-motion:reduce){*,*:before,*:after{scroll-behavior:auto!important;animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}}
@@ -2104,21 +2104,43 @@ body.admin-mode #courtesy-modal label{border-radius:14px!important;border-color:
 .rut-panel{display:none;flex:1;min-height:0;flex-direction:column}
 .rut-panel.active{display:flex}
 
-/* Rejilla de la semana */
-.week-grid{display:flex;flex-direction:column;gap:6px}
-.week-day{display:grid;grid-template-columns:52px minmax(0,1fr) auto;align-items:center;gap:10px;width:100%;text-align:left;
-  background:var(--card);border:1px solid var(--border);border-radius:var(--radius-md,12px);padding:12px 12px;color:var(--white);cursor:pointer}
-.week-day.today{border-color:rgba(127,176,255,.45);background:rgba(37,99,235,.10)}
-.week-day.from-coach{border-left:3px solid var(--purple)}
-.from-coach-tag{display:block;font-size:10px;font-weight:600;color:var(--purple);letter-spacing:.02em;margin-top:2px}
-.week-day-dow{font-size:10.5px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--gray)}
-.week-day.today .week-day-dow{color:var(--bl)}
+/* Semana: una lista continua, con el mismo peso para los siete días. */
+.semana-program{display:flex;align-items:center;gap:14px;width:100%;padding:15px 0 20px;margin-bottom:4px;background:none;border:0;border-bottom:1px solid var(--border);color:var(--white);text-align:left;cursor:pointer;font:inherit}
+.semana-program-info{flex:1;min-width:0}
+.semana-program-k{display:block;font-size:10px;font-weight:750;letter-spacing:.12em;text-transform:uppercase;color:var(--gray);margin-bottom:5px}
+.semana-program-name{display:block;font-size:17px;font-weight:750;letter-spacing:-.025em;overflow-wrap:anywhere}
+.semana-program-sub{display:block;font-size:11.5px;color:var(--gray);line-height:1.5;margin-top:5px}
+.semana-program-sub.is-ended{color:#fbbf24}
+.semana-program-go{font-size:21px;color:var(--gray)}
+.semana-heading{display:flex;align-items:baseline;justify-content:space-between;gap:12px;margin:20px 0 5px}
+.semana-heading h2{font-size:19px;letter-spacing:-.035em;margin:0;font-weight:750}
+.semana-heading span{font-size:11.5px;color:var(--gray);white-space:nowrap}
+.semana-intro{font-size:12px;line-height:1.5;color:var(--gray);margin:0 0 15px}
+.week-grid{list-style:none;margin:0;padding:0;background:var(--card);border:1px solid var(--border);border-radius:18px;overflow:hidden}
+.week-day{display:flex;align-items:center;width:100%;border-bottom:1px solid var(--border);color:var(--white)}
+.week-day:last-child{border-bottom:0}
+.week-day.today{background:rgba(255,255,255,.035)}
+.week-day-main{display:grid;grid-template-columns:44px minmax(0,1fr) auto;align-items:center;gap:12px;flex:1;min-width:0;min-height:76px;padding:14px 14px;background:none;border:0;color:inherit;text-align:left;cursor:pointer;font:inherit}
+.week-day-label{display:flex;flex-direction:column;align-items:flex-start;gap:5px}
+.week-day-dow{font-size:11px;font-weight:750;color:var(--gray)}
+.week-day.today .week-day-dow{color:var(--white)}
+.week-day-today{font-size:9px;font-weight:750;color:var(--bl)}
+.week-day-info{display:block;min-width:0}
+.week-day-meta{display:block;font-size:11px;color:var(--gray);line-height:1.5;margin-top:4px;padding-left:16px}
+.week-day-meta.from-coach{color:var(--purple)}
+.week-day.is-free .week-day-meta{padding-left:0}
+.week-day-main:focus-visible,.week-day-edit:focus-visible,.semana-program:focus-visible{outline:2px solid var(--bl);outline-offset:-3px}
+.week-day-main:active,.week-day-edit:active{background:rgba(255,255,255,.045)}
+.semana-actions{display:flex;align-items:center;gap:8px;margin-top:16px}
+.semana-actions .btn-sm{flex:1;min-height:44px;font-size:11.5px}
+.semana-note{font-size:11px;color:var(--gray);margin:14px 2px 0;line-height:1.65}
 /* El punto de color se usa suelto en la nota del builder y en el selector de
    día, no solo dentro de la rejilla, así que necesita tamaño propio. */
 .week-dot{width:9px;height:9px;border-radius:50%;flex:0 0 auto;display:inline-block}
-.week-day-name{min-width:0;font-size:14px;font-weight:700;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;display:flex;align-items:center;gap:8px}
+.week-day-name{min-width:0;font-size:13.5px;font-weight:700;line-height:1.4;display:flex;align-items:center;gap:8px}
+.week-day-name-text{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;overflow-wrap:anywhere}
 .week-day-name .week-dot{width:8px;height:8px}
-.week-day-empty{font-size:13px;color:var(--gray);font-weight:500}
+.week-day-empty{display:block;font-size:13.5px;color:var(--gl);font-weight:500}
 /* Reordenar ejercicios en el builder. El orden ES la rutina: sin esto, mover
    el quinto ejercicio al segundo lugar obligaba a borrar y rehacer todo lo
    que venía después. */
@@ -2131,9 +2153,9 @@ body.admin-mode #courtesy-modal label{border-radius:14px!important;border-color:
 .rb-ex-foot{display:flex;gap:8px;align-items:center;margin-top:8px}
 .rb-ex-foot select{flex:1;min-width:0}
 .rb-ex-foot .ws-ex-tool{flex:0 0 auto}
-.week-day-go{font-size:18px;color:var(--gray);line-height:1}
-.week-day-edit{border:1px solid var(--border);background:var(--surface,rgba(255,255,255,.045));color:var(--gl);border-radius:9px;
-  width:30px;height:30px;font-size:14px;cursor:pointer;line-height:1;flex:0 0 auto}
+.week-day-go{font-size:20px;color:var(--gray);line-height:1;font-weight:400}
+.week-day-edit{border:0;background:none;color:var(--gray);border-radius:10px;margin-right:5px;
+  width:44px;height:44px;font-size:19px;cursor:pointer;line-height:1;flex:0 0 auto}
 
 /* Tarjeta de programas */
 .program-card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius-md,12px);padding:14px;margin-bottom:12px}
@@ -2380,7 +2402,7 @@ body.admin-mode #courtesy-modal label{border-radius:14px!important;border-color:
 #v-progreso .tu-stats-row{grid-template-columns:repeat(3,1fr)}
 
 @media(max-width:360px){
-  .week-day{grid-template-columns:44px minmax(0,1fr) auto;gap:8px}
+  .week-day-main{grid-template-columns:38px minmax(0,1fr) auto;gap:9px;padding-left:12px;padding-right:10px}
   .ws-timer-panel{width:200px}
   body.workout-sheet-open .support-fab{width:46px;height:46px;min-height:46px;padding:0;justify-content:center}
   body.workout-sheet-open .support-fab span{display:none}
@@ -2442,6 +2464,93 @@ body.admin-mode #courtesy-modal label{border-radius:14px!important;border-color:
    resaltado agregaba relleno y empujaba ~10 px todo lo de abajo al pasar de serie. */
 .set-row,.set-row.next{padding:4px;margin-left:-4px;margin-right:-4px;border-radius:12px}
 .set-row.next{background:rgba(59,130,246,.12);box-shadow:inset 0 0 0 1px rgba(59,130,246,.3)}
+/* Hoy, Fase B: una tarjeta, un botón, la semana en puntos. */
+.hoy-hero{border:1px solid var(--border);border-radius:18px;background:var(--card);padding:18px 16px 12px;margin-bottom:12px}
+.hoy-hero.live{border-color:rgba(127,176,255,.4);background:rgba(37,99,235,.08)}
+.hoy-k{font-size:12.5px;color:var(--gray);font-weight:600}
+.hoy-title{display:flex;align-items:center;gap:9px;font-size:22px;font-weight:800;margin:5px 0;line-height:1.2}
+.hoy-title span:last-child{min-width:0;overflow-wrap:anywhere}
+.hoy-dot{width:10px;height:10px;border-radius:50%;flex:0 0 auto}
+.hoy-meta{font-size:13.5px;color:var(--gray);line-height:1.45}
+.hoy-sync{margin-top:8px}
+.hoy-hero .hoy-cta{width:100%;margin-top:16px;min-height:52px;font-size:16px}
+.hoy-alt{display:block;width:100%;margin-top:4px;padding:12px;background:none;border:none;color:var(--gl);font-size:14px;font-weight:600;cursor:pointer}
+.hoy-also{display:flex;align-items:center;gap:10px;border:1px solid var(--border);border-radius:14px;background:var(--card);padding:10px 12px;margin-bottom:12px}
+.hoy-also-name{flex:1;min-width:0;font-weight:700;font-size:14px}
+.hoy-week{display:block;width:100%;text-align:left;border:1px solid var(--border);border-radius:16px;background:var(--card);padding:12px 12px 10px;margin-bottom:12px;color:var(--white);cursor:pointer;font:inherit}
+.hoy-week-head{display:flex;justify-content:space-between;font-size:12.5px;color:var(--gray);margin:0 2px 8px}
+.hoy-week-head span:first-child{color:var(--white);font-weight:700}
+.hoy-week-days{display:grid;grid-template-columns:repeat(7,1fr);gap:4px}
+.hoy-day{display:flex;flex-direction:column;align-items:center;gap:6px;padding:6px 0;border-radius:10px}
+.hoy-day b{font-size:11px;color:var(--gray);font-weight:700}
+.hoy-day i{font-style:normal;font-size:14px;font-weight:800;line-height:1;width:28px;height:28px;display:flex;align-items:center;justify-content:center;border-radius:50%;color:#5a606b}
+.hoy-day.done i{background:rgba(32,212,146,.16);color:var(--green)}
+.hoy-day.planned i{box-shadow:inset 0 0 0 1.5px rgba(255,255,255,.28)}
+.hoy-day.live i{background:rgba(127,176,255,.2);color:var(--bl);font-size:10px}
+.hoy-day.today{background:rgba(255,255,255,.07)}
+.hoy-day.today b{color:var(--white)}
+.hoy-rows{display:flex;flex-direction:column;gap:8px}
+.hoy-row{display:flex;align-items:center;justify-content:space-between;gap:10px;width:100%;text-align:left;border:1px solid var(--border);border-radius:14px;background:var(--card);padding:12px 14px;color:var(--white);cursor:pointer;font:inherit}
+.hoy-row span{display:flex;flex-direction:column;gap:2px;min-width:0}
+.hoy-row strong{font-size:14px}
+.hoy-row small{font-size:12.5px;color:var(--gray)}
+.hoy-row i{font-style:normal;color:var(--gray);font-size:16px}
+.hoy-body{margin-top:0}
+/* Rutinas: una biblioteca tranquila, detalle y búsqueda a pantalla completa. */
+.routine-library-head{display:flex;align-items:center;justify-content:space-between;gap:12px;margin:4px 0 22px}
+.routine-library-head h2{font-size:22px;letter-spacing:-.6px;font-weight:750}
+.routine-library-head p{font-size:12.5px;color:var(--gray);margin-top:5px}
+.routine-library-head .btn-sm{min-height:44px;padding:0 16px}
+.routine-library-section{margin-bottom:24px}
+.routine-library-label{display:flex;align-items:center;justify-content:space-between;margin:0 2px 10px;font-size:12px;font-weight:600;color:var(--gray)}
+.routine-library-label span{font-variant-numeric:tabular-nums}
+.routine-list{border:1px solid var(--border);border-radius:18px;overflow:hidden;background:var(--card)}
+.routine-list-row{display:flex;align-items:center;gap:13px;width:100%;min-height:84px;padding:18px 16px;text-align:left;border:0;background:none;color:var(--white);cursor:pointer;font:inherit}
+.routine-list-row+.routine-list-row{border-top:1px solid var(--border)}
+.routine-list-row:active{background:rgba(255,255,255,.05)}
+.routine-list-row:focus-visible,.routine-detail-tool:focus-visible,.rb-filter:focus-visible{outline:2px solid var(--bl);outline-offset:-3px}
+.routine-list-mark{width:4px;height:32px;border-radius:4px;flex:0 0 auto}
+.routine-list-copy{flex:1;min-width:0}
+.routine-list-copy strong{display:block;font-size:15px;font-weight:650;line-height:1.35;overflow-wrap:anywhere}
+.routine-list-copy small{display:block;color:var(--gray);font-size:12px;line-height:1.5;margin-top:5px}
+.routine-list-arrow{color:var(--gray);font-size:22px;font-weight:300}
+.routine-library-empty{border:1px dashed var(--border);border-radius:18px;padding:24px 20px;color:var(--gray);font-size:13px;line-height:1.6}
+.routine-library-empty strong{display:block;color:var(--white);font-size:15px;margin-bottom:5px}
+.training-page .terms-box{height:100%;height:100dvh;max-height:100dvh!important;max-width:480px;border-radius:0;border-top:0;background:var(--dark)}
+.training-page .terms-hdr{flex-shrink:0;min-height:70px;padding:calc(16px + env(safe-area-inset-top,0px)) 20px 16px;gap:12px}
+.training-page .terms-hdr h2{font-size:16px;font-weight:650;letter-spacing:0;text-transform:none;white-space:normal}
+.training-page .video-modal-close{min-height:44px;min-width:64px;font-size:13px}
+.training-page .terms-body{padding:24px 20px!important;overscroll-behavior:contain}
+.training-page-footer{flex-shrink:0;padding:14px 20px calc(14px + env(safe-area-inset-bottom,0px));border-top:1px solid var(--border);background:var(--dark)}
+.training-page-footer .btn{min-height:52px;font-size:15px}
+.routine-detail-origin{font-size:11px;font-weight:650;letter-spacing:.09em;text-transform:uppercase;color:var(--bl);margin-bottom:10px}
+.routine-detail-name{font-size:30px;letter-spacing:-1px;line-height:1.12;font-weight:750;overflow-wrap:anywhere}
+.routine-detail-note{font-size:13px;color:var(--gray);line-height:1.6;margin-top:12px}
+.routine-detail-stats{display:grid;grid-template-columns:repeat(3,1fr);padding:23px 0;margin:6px 0 20px;border-bottom:1px solid var(--border)}
+.routine-detail-stats strong{display:block;font-size:23px;letter-spacing:-.7px;font-weight:650;font-variant-numeric:tabular-nums}
+.routine-detail-stats small{display:block;color:var(--gray);font-size:11px;margin-top:4px}
+.routine-detail-exercises{list-style:none;margin:0;padding:0}
+.routine-detail-exercises li{display:flex;gap:14px;padding:17px 0;border-bottom:1px solid var(--border);align-items:flex-start}
+.routine-detail-number{color:var(--gray);font-size:11px;font-variant-numeric:tabular-nums;padding-top:3px;width:20px;flex-shrink:0}
+.routine-detail-exercises strong{font-size:14px;font-weight:600;line-height:1.45;display:block}
+.routine-detail-exercises small{font-size:12px;line-height:1.5;color:var(--gray);display:block;margin-top:4px}
+.routine-detail-tools{display:grid;gap:8px;margin-top:24px}
+.routine-detail-tool{min-height:48px;padding:12px 14px;border-radius:12px;border:1px solid var(--border);background:none;color:var(--white);font:inherit;font-size:13px;text-align:left;cursor:pointer}
+.routine-detail-tool.danger{color:var(--gray);border:0;text-align:center;margin-top:6px}
+#routine-builder-body .field input{min-height:50px;font-size:16px}
+#routine-builder-body .rb-ex-pick{min-height:48px}
+#routine-builder-body .rb-move-btn{min-width:38px;height:30px}
+.rb-search-tools{flex-shrink:0;padding:4px 20px 16px;border-bottom:1px solid var(--border)}
+.rb-search-input{width:100%;min-height:52px;border:1px solid var(--border);border-radius:14px;background:var(--card);color:var(--white);font:inherit;font-size:16px;padding:12px 14px;outline:none}
+.rb-search-input:focus{border-color:var(--bl)}
+.rb-search-filters{display:flex;gap:8px;overflow-x:auto;padding:14px 0 2px;scrollbar-width:none}
+.rb-filter{flex:0 0 auto;min-height:38px;border:1px solid var(--border);border-radius:20px;background:none;color:var(--gray);padding:8px 14px;font:inherit;font-size:12px;cursor:pointer}
+.rb-filter.active{background:var(--white);border-color:var(--white);color:var(--dark);font-weight:650}
+.rb-search-count{font-size:11px;color:var(--gray);margin:0 0 10px}
+#rb-pick-list .ws-pick-item{border:0;border-bottom:1px solid var(--border);border-radius:0;background:none;padding:17px 0;min-height:72px;font-size:14px;line-height:1.4;margin:0}
+#rb-pick-list .ws-pick-item small{font-size:12px;line-height:1.5;margin-top:5px}
+.rb-search-empty{padding:42px 8px;text-align:center;font-size:13px;color:var(--gray);line-height:1.7}
+.rb-search-empty strong{display:block;color:var(--white);font-size:16px;margin-bottom:6px}
 </style>
 </head>
 <body>
@@ -3418,14 +3527,34 @@ body.admin-mode #courtesy-modal label{border-radius:14px!important;border-color:
   </div>
 </div>
 
+<!-- BIBLIOTECA / DETALLE DE RUTINA -->
+<div id="routine-detail-modal" class="terms-modal training-page" style="display:none" role="dialog" aria-modal="true" aria-labelledby="routine-detail-title" onkeydown="trainingDialogKeydown(event)">
+  <div class="terms-box">
+    <div class="terms-hdr"><h2 id="routine-detail-title">Rutina</h2><button class="video-modal-close" onclick="closeRoutineDetail()">Volver</button></div>
+    <div class="terms-body" id="routine-detail-body"></div>
+    <div class="training-page-footer" id="routine-detail-footer"></div>
+  </div>
+</div>
 <!-- CREAR / EDITAR UNA RUTINA PROPIA -->
-<div id="routine-builder-modal" class="terms-modal" style="display:none">
-  <div class="terms-box" style="max-height:88vh">
+<div id="routine-builder-modal" class="terms-modal training-page" style="display:none" role="dialog" aria-modal="true" aria-labelledby="routine-builder-title" onkeydown="trainingDialogKeydown(event)">
+  <div class="terms-box">
     <div class="terms-hdr">
       <h2 id="routine-builder-title">Nueva rutina</h2>
       <button class="video-modal-close" onclick="closeRoutineBuilder()">Cerrar</button>
     </div>
-    <div class="terms-body" id="routine-builder-body" style="padding:10px"></div>
+    <div class="terms-body" id="routine-builder-body"></div>
+    <div class="training-page-footer"><button class="btn" onclick="saveRoutineSb()">Guardar rutina</button></div>
+  </div>
+</div>
+<!-- BÚSQUEDA DE EJERCICIOS: EL BORRADOR PERMANECE DEBAJO -->
+<div id="routine-exercise-picker" class="terms-modal training-page" style="display:none" role="dialog" aria-modal="true" aria-labelledby="rb-picker-title" onkeydown="trainingDialogKeydown(event)">
+  <div class="terms-box">
+    <div class="terms-hdr"><h2 id="rb-picker-title">Agregar ejercicio</h2><button class="video-modal-close" onclick="rbClosePicker()">Volver</button></div>
+    <div class="rb-search-tools">
+      <input id="rb-pick-q" class="rb-search-input" type="search" placeholder="Buscar ejercicio…" aria-label="Buscar ejercicio" autocomplete="off" oninput="rbRenderPickerList()">
+      <div id="rb-pick-filters" class="rb-search-filters" aria-label="Filtrar por músculo"></div>
+    </div>
+    <div class="terms-body"><p id="rb-pick-count" class="rb-search-count" role="status" aria-live="polite"></p><div id="rb-pick-list"></div></div>
   </div>
 </div>
 
@@ -3555,7 +3684,7 @@ const GYM_ONLY_VIEWS=['book','planes','historial','shop'];
 const GYM_APP_URL='/';
 document.querySelectorAll('.brand-name').forEach(el=>{el.textContent=BRAND_NAME;});
 const SUPABASE_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBtcGp0ZXVxanVzYmlkdWV2YndxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc2OTI1NjUsImV4cCI6MjA5MzI2ODU2NX0.XbMzZoo2yqtrD8znLnyo_1zDfrdJAvAPj1lqGOyXnLw';
-const APP_VERSION='20261023-3';
+const APP_VERSION='20261023-5';
 // La pierna va separada en cuádriceps, femorales y pantorrillas: la figura
 // corporal pinta esas tres regiones por separado y el motor de recuperación les
 // da ventanas de descanso distintas. 'Piernas' sigue reconociéndose al leer
@@ -9435,6 +9564,7 @@ async function renderRutHub(){
     await Promise.all([
       loadMyRoutinesSb(false),
       tab==='hoy'?loadCoachWeekDataSb(false):null,
+      tab==='hoy'?loadActiveCoachingSessionSb():null,
       tab==='semana'?loadWeekPlanSb(false):null
     ]);
   }catch(e){
@@ -9695,15 +9825,10 @@ function bodyCardHtml(){
   if(typeof BodyFigure==='undefined')return '';
   const scoreByName=new Map(myRecovery.map(r=>[r.name,r.score]));
   const rested=myRecovery.filter(r=>r.rested).length;
-  const worst=myRecovery[0];
-  return '<section class="body-card">'
-    +'<div class="body-card-head">'
-    +'<div><div class="ws-bar-k">Tu cuerpo</div>'
-    +'<div class="body-card-sub">'+(worst&&!worst.rested
-        ? esc(muscleLabelEs(worst.name))+' es lo más cargado · listo en '+esc(formatHoursEs(worst.hoursUntilFresh))
-        : 'Todo descansado y listo para entrenar')+'</div></div>'
-    +'<span class="body-card-pill">'+rested+'/'+myRecovery.length+' listos</span>'
-    +'</div>'
+  // Vive dentro de la fila "Tu cuerpo" de Hoy, así que no repite su título; "Ver mi
+  // progreso" pasó a ser su propia fila.
+  return '<section class="body-card hoy-body">'
+    +'<div class="body-card-head"><div class="body-card-sub">'+rested+' de '+myRecovery.length+' grupos listos</div></div>'
     +'<div class="body-fig-wrap">'
     +BodyFigure.svg(bodyFlip,scoreByName,'onHabitBodyClick(event)')
     +'<button class="body-flip-btn" onclick="toggleBodyFlip()" aria-label="Girar figura">'
@@ -9714,7 +9839,6 @@ function bodyCardHtml(){
     +'<span><i style="background:'+BodyFigure.freshColor(100)+'"></i>Listo</span>'
     +'</div>'
     +'<div class="body-figure-hint">Toca un músculo para ver su recuperación</div>'
-    +'<button class="btn body-progress-btn" onclick="sv(&quot;progreso&quot;)">Ver mi progreso</button>'
     +'</section>';
 }
 
@@ -10140,64 +10264,127 @@ function nextExerciseSuggestion(ex,last){
   }
   return'';
 }
+// La pantalla Hoy.
+// Una tarjeta y un botón: lo que toca hoy y "Empezar". Antes había tres botones del mismo
+// peso (empezar básica, elegir programa, entrenar otra cosa) y la figura del cuerpo ocupaba
+// media pantalla: quien abría Entrenar tenía que decidir antes de entrenar. Debajo, la
+// semana en siete puntos y dos filas: tu cuerpo (se despliega) y tu progreso.
+// (docs/HABIT_PARA_TODOS.md, pulido de Entrenar, Fase B)
+let hoyBodyOpen=(()=>{try{return localStorage.getItem('habit_hoy_body')==='1';}catch(_){return false;}})();
+function toggleHoyBody(){
+  hoyBodyOpen=!hoyBodyOpen;
+  try{localStorage.setItem('habit_hoy_body',hoyBodyOpen?'1':'0');}catch(_){}
+  renderRutHoy();
+}
+function hoyHeroHtml(o){
+  return '<section class="hoy-hero'+(o.live?' live':'')+'">'
+    +'<div class="hoy-k">'+esc(o.k)+'</div>'
+    +'<div class="hoy-title">'+(o.dot?'<span class="hoy-dot" style="background:'+esc(o.dot)+'"></span>':'')+'<span>'+esc(o.title)+'</span></div>'
+    +(o.meta?'<div class="hoy-meta">'+esc(o.meta)+'</div>':'')
+    +(o.extra||'')
+    +o.cta
+    +(o.alt?'<button type="button" class="hoy-alt" onclick="'+o.alt[1]+'">'+esc(o.alt[0])+'</button>':'')
+    +'</section>';
+}
+// La semana en siete puntos: hecho (✓), en curso, agendado (○), se pasó sin hacer (·) o
+// descanso (–). Tocarla lleva a Semana, que es donde se cambia.
+function hoyWeekHtml(){
+  if(!coachWeekStart)return '';
+  const today=mazToday();
+  const letters=['L','M','M','J','V','S','D'];
+  let planned=0,done=0;
+  const cells=letters.map((letter,i)=>{
+    const ds=addDaysDS(coachWeekStart,i);
+    const rows=coachSchedule.filter(r=>r.ds===ds&&r.status!=='skipped');
+    let st='rest';
+    if(rows.some(r=>r.status==='in_progress'))st='live';
+    else if(rows.some(r=>r.status==='scheduled'))st=ds<today?'missed':'planned';
+    else if(rows.length&&rows.every(r=>r.status==='done'))st='done';
+    if(rows.length)planned++;
+    if(st==='done')done++;
+    const mark={done:'✓',live:'●',planned:'',missed:'·',rest:'–'}[st];
+    const what=rows.map(r=>r.board_name).join(' + ')||'Descanso';
+    return '<span class="hoy-day '+st+(ds===today?' today':'')+'" title="'+esc(DOW_SHORT[i]+': '+what)+'"><b>'+letter+'</b><i>'+mark+'</i></span>';
+  }).join('');
+  return '<button type="button" class="hoy-week" onclick="rutTab(&quot;semana&quot;)" aria-label="Ver tu semana">'
+    +'<span class="hoy-week-head"><span>Esta semana</span><span>'+(planned?done+' de '+planned:'Sin plan')+' ›</span></span>'
+    +'<span class="hoy-week-days">'+cells+'</span></button>';
+}
+function hoyRowsHtml(){
+  const worst=myRecovery[0];
+  const bodySub=(worst&&!worst.rested)
+    ?muscleLabelEs(worst.name)+' cargado · listo en '+formatHoursEs(worst.hoursUntilFresh)
+    :'Todo listo para entrenar';
+  return '<div class="hoy-rows">'
+    +'<button type="button" class="hoy-row" onclick="toggleHoyBody()" aria-expanded="'+hoyBodyOpen+'">'
+    +'<span><strong>Tu cuerpo</strong><small>'+esc(bodySub)+'</small></span><i>'+(hoyBodyOpen?'⌃':'⌄')+'</i></button>'
+    +(hoyBodyOpen?bodyCardHtml():'')
+    +'<button type="button" class="hoy-row" onclick="sv(&quot;progreso&quot;)">'
+    +'<span><strong>Tu progreso</strong><small>Récords, volumen y cada ejercicio</small></span><i>›</i></button>'
+    +'</div>';
+}
 function renderRutHoy(){
   const el=document.getElementById('rut-hoy-content');
   if(!el)return;
   const today=mazToday();
-  const todayRows=coachSchedule.filter(r=>r.ds===today);
+  const dow=(dateObjFromDS(today).getUTCDay()+6)%7;
+  const dayLabel=DOW_LONG[dow].charAt(0).toUpperCase()+DOW_LONG[dow].slice(1)+' '+parseInt(today.slice(8),10);
+  const todayRows=coachSchedule.filter(r=>r.ds===today&&r.status!=='skipped');
+  const active=activeCoachingSession;
+  const pending=todayRows.filter(r=>r.status==='scheduled'&&!(active&&r.id===active.id));
+  const doneRows=todayRows.filter(r=>r.status==='done');
+  const other=['Entrenar otra cosa','openCoachBoardPicker(&quot;start&quot;)'];
   let html='';
 
-  if(activeCoachingSession){
+  if(active){
     const total=Object.values(coachSessionSets).reduce((n,l)=>n+(Array.isArray(l)?l.length:0),0);
     const done=Object.values(coachSessionSets).reduce((n,l)=>n+(Array.isArray(l)?l.filter(s=>s.done).length:0),0);
-    const nextEx=sessionExerciseList().find((ex,i)=>(coachSessionSets[exerciseKeyForSession(activeCoachingSession.board_id,ex,i)]||[]).some(s=>!s.done));
-    html+='<div class="coach-session-card" style="border-color:rgba(127,176,255,.4);background:rgba(37,99,235,.08)">'
-      +'<div class="coach-session-top"><div class="coach-session-dot" style="background:'+esc(activeCoachingSession.board_color||'#2563eb')+'"></div>'
-      +'<div style="min-width:0"><div class="coach-session-title">'+esc(activeCoachingSession.board_name)+'</div>'
-      +'<div class="coach-session-meta">En curso · '+done+'/'+total+' series'+(nextEx?' · Sigue: '+esc(nextEx.name||'ejercicio'):'')+'</div>'
-      +'<div style="margin-top:6px"><span class="training-sync'+trainingSyncClass()+'" data-training-sync>'+trainingSyncText()+'</span></div></div></div>'
-      +'<div class="coach-session-actions"><button class="btn" onclick="openWorkoutSheet()">Continuar</button></div></div>';
-  }
-
-  if(!todayRows.length&&!activeCoachingSession){
-    const starter=myRoutines.find(b=>b.is_starter)||null;
-    html+='<div class="coach-empty">Hoy no tienes entreno programado.<br>'
-      +(starter?'Puedes empezar con '+esc(starter.name)+' o armar una semana según tus días disponibles.':'Elige tu objetivo y arma una semana para no decidir desde cero cada día.')
-      +'</div><div style="display:flex;gap:8px;margin-bottom:10px">'
-      +(starter?'<button class="btn" style="flex:1" onclick="startWorkoutFromBoardSb(&quot;'+esc(starter.id)+'&quot;,&quot;'+esc(starter.name)+'&quot;,&quot;'+esc(routineColor(starter))+'&quot;)">Empezar básica</button>':'')
-      +'<button class="btn-sm" style="flex:1" onclick="openProgramPicker()">Elegir programa</button></div>';
-  }
-
-  todayRows.forEach(row=>{
-    if(activeCoachingSession&&row.id===activeCoachingSession.id)return;
-    const board=coachBoardsById[row.board_id];
-    const todayMeta=routineTodayMeta(board);
-    const exercises=todayMeta.exercises;
-    if(row.status==='done'){
-      html+='<div class="coach-session-card"><div class="coach-session-row">'
-        +'<div class="coach-session-dot" style="background:'+esc(row.board_color||'#2563eb')+'"></div>'
-        +'<div class="coach-session-info"><div class="coach-session-title">'+esc(row.board_name)+'</div>'
-        +'<div class="coach-session-meta">Completado ✓'+(row.duration_sec?' · '+Math.round(row.duration_sec/60)+' min':'')+'</div></div>'
-        +'<button class="btn-sm" onclick="openEditCompletedWorkoutSb(&quot;'+row.id+'&quot;)">Editar</button>'
-        +'</div></div>';
-      return;
-    }
-    // generated_from_base = la materializó la plantilla semanal; junto con
-    // created_by dice si el día viene del coach y no del propio socio.
+    const nextEx=sessionExerciseList().find((ex,i)=>(coachSessionSets[exerciseKeyForSession(active.board_id,ex,i)]||[]).some(s=>!s.done));
+    html+=hoyHeroHtml({live:true,k:'En curso',title:active.board_name||'Entreno',dot:active.board_color,
+      meta:total?done+' de '+total+' series'+(nextEx?' · Sigue: '+(nextEx.name||'ejercicio'):''):'Retoma tu sesión donde la dejaste.',
+      extra:'<div class="hoy-sync"><span class="training-sync'+trainingSyncClass()+'" data-training-sync>'+trainingSyncText()+'</span></div>',
+      cta:'<button class="btn hoy-cta" onclick="openWorkoutSheet()">Continuar</button>'});
+  }else if(pending.length){
+    const row=pending[0];
+    const meta=routineTodayMeta(coachBoardsById[row.board_id]);
+    // generated_from_base = la materializó la plantilla semanal; junto con created_by dice
+    // si el día viene del coach y no del propio socio.
     const fromCoach=isCoachSet(row)||(row.generated_from_base&&row.created_by&&sbUser&&row.created_by!==sbUser.id);
-    html+='<div class="coach-session-card">'
-      +'<div class="coach-session-top"><div class="coach-session-dot" style="background:'+esc(row.board_color||'#2563eb')+'"></div>'
-      +'<div style="min-width:0"><div class="coach-session-title">'+esc(row.board_name)+'</div>'
-      +'<div class="coach-session-meta">'+(fromCoach?'Programado por tu coach':'Rutina lista')+' · '+exercises.length+' ejercicios · ~'+todayMeta.duration+' min'+(todayMeta.equipment.length?' · '+esc(todayMeta.equipment.join(', ')):'')+'</div></div></div>'
-      +'<div class="coach-session-actions">'
-      +'<button class="btn" onclick="startCoachingSessionSb(&quot;'+row.id+'&quot;)">Iniciar</button>'
-      +'</div></div>';
+    html+=hoyHeroHtml({k:'Hoy · '+dayLabel,title:row.board_name,dot:row.board_color,
+      meta:meta.exercises.length+' ejercicios · ~'+meta.duration+' min'+(fromCoach?' · de tu coach':''),
+      cta:'<button class="btn hoy-cta" onclick="startCoachingSessionSb(&quot;'+row.id+'&quot;)">Empezar</button>',
+      alt:other});
+  }else if(doneRows.length){
+    const mins=doneRows.reduce((n,r)=>n+(r.duration_sec?Math.round(r.duration_sec/60):0),0);
+    html+=hoyHeroHtml({k:'Hoy · '+dayLabel,title:doneRows.map(r=>r.board_name).join(' + '),dot:doneRows[0].board_color,
+      meta:'Hecho ✓'+(mins?' · '+mins+' min':''),
+      cta:'<button class="btn-ghost hoy-cta" onclick="openEditCompletedWorkoutSb(&quot;'+doneRows[0].id+'&quot;)">Ver lo que hiciste</button>',
+      alt:other});
+  }else{
+    // Sin nada hoy: si hay semana armada es descanso, y se dice qué sigue; si no hay nada,
+    // es alguien empezando y la única acción es elegir qué entrenar.
+    const hasPlan=coachSchedule.length>0;
+    if(hasPlan){
+      const next=coachSchedule.filter(r=>r.ds>today&&r.status==='scheduled').sort((a,b)=>a.ds.localeCompare(b.ds))[0];
+      const nextDow=next?(dateObjFromDS(next.ds).getUTCDay()+6)%7:null;
+      html+=hoyHeroHtml({k:'Hoy · '+dayLabel,title:'Descanso',
+        meta:next?'Lo que sigue: '+DOW_LONG[nextDow]+' · '+next.board_name:'Recuperar también es parte del plan.',
+        cta:'<button class="btn-ghost hoy-cta" onclick="openCoachBoardPicker(&quot;start&quot;)">Entrenar de todos modos</button>'});
+    }else{
+      html+=hoyHeroHtml({k:'Hoy · '+dayLabel,title:'Empieza a entrenar',
+        meta:'Elige una rutina o entrena libre. Cada serie que palomeas queda en tu progreso.',
+        cta:'<button class="btn hoy-cta" onclick="openCoachBoardPicker(&quot;start&quot;)">Elegir qué entrenar</button>',
+        alt:['Armar mi semana','rutTab(&quot;semana&quot;)']});
+    }
+  }
+  // Más de una sesión hoy (fuerza y carrera, mañana y tarde): las demás, en una línea cada una.
+  pending.slice(active?0:1).forEach(row=>{
+    html+='<div class="hoy-also"><span class="hoy-dot" style="background:'+esc(row.board_color||'#2563eb')+'"></span>'
+      +'<span class="hoy-also-name">'+esc(row.board_name)+'</span>'
+      +'<button class="btn-sm" onclick="startCoachingSessionSb(&quot;'+row.id+'&quot;)">Empezar</button></div>';
   });
-
-  // Un solo botón: "entrenar otra rutina" y "entrenar libre" eran dos caminos
-  // al mismo sitio, y el segundo vive ahora como primera opción de la hoja.
-  html+='<button class="btn-sm coach-add-workout" style="width:100%" onclick="openCoachBoardPicker(&quot;start&quot;)">Entrenar otra cosa hoy</button>';
-  html+=bodyCardHtml();
+  html+=hoyWeekHtml();
+  html+=hoyRowsHtml();
   el.innerHTML=html;
 }
 
@@ -10212,48 +10399,68 @@ function renderRutSemana(){
   // que nada se lo dijera.
   const cycleIdx=pgm?myProgramCycleIndex(pgm):0;
   const cycleLine=(pgm&&pgm.start_date)?coachProgramCycleLine(pgm,mazWeekStart(mazToday()),myProgramWeeks):'';
-  let html='<div class="program-card">'
-    +'<div style="display:flex;align-items:center;justify-content:space-between;gap:10px">'
-    +'<div style="min-width:0"><div class="ws-bar-k">Programa</div>'
-    +'<div style="font-size:14.5px;font-weight:750;margin-top:3px">'+esc(pgm?pgm.name:'Semana libre')+'</div></div>'
-    +'<button class="btn-sm" onclick="openProgramPicker()">Programas</button></div>'
-    +(cycleLine?'<div class="program-cycle-line'+(cycleIdx===-1?' is-ended':'')+'">'+esc(cycleLine)+'</div>':'')
-    +(pgm&&pgm.notes?'<div style="font-size:11.5px;color:var(--gray);margin-top:8px">'+esc(pgm.notes)+'</div>':'')
-    +'</div>';
+  const trainingDays=new Set(weekTemplate.filter(t=>t.board_id&&t.dow>=0&&t.dow<7).map(t=>t.dow)).size;
+  let html='<button type="button" class="semana-program" onclick="openProgramPicker()" aria-label="Ver programas'+(pgm?': '+esc(pgm.name):'')+'">'
+    +'<span class="semana-program-info"><span class="semana-program-k">'+(pgm?'Tu programa':'A tu ritmo')+'</span>'
+    +'<span class="semana-program-name">'+esc(pgm?pgm.name:'Semana libre')+'</span>'
+    +'<span class="semana-program-sub'+(cycleIdx===-1?' is-ended':'')+'">'+esc(cycleLine||(pgm?'Ver y cambiar programa':'Elige un programa o arma tu semana'))+'</span>'
+    +(pgm&&pgm.notes?'<span class="semana-program-sub">'+esc(pgm.notes)+'</span>':'')
+    +'</span><span class="semana-program-go" aria-hidden="true">›</span></button>';
 
-  html+='<p class="slbl">Tu semana</p><div class="week-grid">';
+  // Esta es la distribución habitual, no el calendario de sesiones: ponerle
+  // fechas o palomitas confundiría la plantilla con lo que ocurrió esa semana.
+  html+='<div class="semana-heading"><h2>Tu semana</h2><span>'+trainingDays+' día'+(trainingDays===1?'':'s')+' de entreno</span></div>'
+    +'<p class="semana-intro">Tu distribución habitual, de lunes a domingo.</p>'
+    +'<ol class="week-grid" aria-label="Rutinas de tu semana habitual">';
   for(let d=0;d<7;d++){
-    const tpl=weekTemplate.find(t=>t.dow===d);
-    const cls='week-day'+(d===todayDow?' today':'');
+    const tpl=weekTemplate.find(t=>t.dow===d&&t.board_id);
+    const cls='week-day'+(d===todayDow?' today':'')+(tpl?'':' is-free');
+    const dayLabel='<span class="week-day-label"><span class="week-day-dow">'+DOW_SHORT[d]+'</span>'
+      +(d===todayDow?'<span class="week-day-today">Hoy</span>':'')+'</span>';
     if(!tpl){
-      html+='<button class="'+cls+'" onclick="openDayPicker('+d+')">'
-        +'<span class="week-day-dow">'+DOW_SHORT[d]+'</span>'
-        +'<span class="week-day-empty">Poner rutina</span>'
-        +'<span class="week-day-go">›</span></button>';
+      html+='<li class="'+cls+'"><button type="button" class="week-day-main" onclick="openDayPicker('+d+')" aria-label="Añadir rutina al '+DOW_LONG[d]+'">'
+        +dayLabel+'<span class="week-day-info"><span class="week-day-empty">Día libre</span>'
+        +'<span class="week-day-meta">Añadir rutina</span></span>'
+        +'<span class="week-day-go" aria-hidden="true">+</span></button></li>';
     }else{
       // board_color es una copia que se guardó al asignar el día; si la rutina
       // está cargada mandan sus datos actuales, y si no, la copia.
       const b=routineById(tpl.board_id);
       const dot=b?routineColor(b):(tpl.board_color||'#2563eb');
-      html+='<div class="'+cls+(isCoachSet(tpl)?' from-coach':'')+'">'
-        +'<span class="week-day-dow">'+DOW_SHORT[d]+'</span>'
-        +'<span class="week-day-name" onclick="openDayPicker('+d+')"><span class="week-dot" style="background:'+esc(dot)+'"></span>'
-          +esc(b?b.name:tpl.board_name)
-          +(isCoachSet(tpl)?'<small class="from-coach-tag">de tu coach</small>':'')+'</span>'
-        +'<button class="week-day-edit" onclick="clearWeekDay('+d+')" title="Quitar del día" aria-label="Quitar rutina del día">✕</button>'
-        +'</div>';
+      const name=(b&&b.name)||tpl.board_name||'Rutina';
+      const exCount=routineExercises(b).length;
+      const fromCoach=isCoachSet(tpl);
+      const meta=[exCount?exCount+' ejercicio'+(exCount===1?'':'s'):'',fromCoach?'De tu coach':''].filter(Boolean).join(' · ')||'Cambiar rutina';
+      html+='<li class="'+cls+'"><button type="button" class="week-day-main" onclick="openDayPicker('+d+')" aria-label="Cambiar rutina del '+DOW_LONG[d]+': '+esc(name)+'">'
+        +dayLabel+'<span class="week-day-info"><span class="week-day-name"><span class="week-dot" style="background:'+esc(dot)+'" aria-hidden="true"></span>'
+        +'<span class="week-day-name-text">'+esc(name)+'</span></span>'
+        +'<span class="week-day-meta'+(fromCoach?' from-coach':'')+'">'+esc(meta)+'</span></span></button>'
+        +'<button type="button" class="week-day-edit" onclick="openWeekDayOptions('+d+')" aria-label="Opciones para el '+DOW_LONG[d]+'" aria-haspopup="dialog">···</button></li>';
     }
   }
-  html+='</div>';
-  html+='<button class="btn-sm" style="width:100%;margin-top:12px" onclick="openProgramForm()">Guardar esta semana como programa</button>';
-  html+='<button class="btn-sm" style="width:100%;margin-top:8px" onclick="openCreateChooser()">+ Crear</button>';
-  html+='<div style="font-size:11.5px;color:var(--gray);margin-top:10px;line-height:1.5">'
+  html+='</ol><div class="semana-actions">'
+    +'<button type="button" class="btn-sm" onclick="openProgramForm()">Guardar como programa</button>'
+    +'<button type="button" class="btn-sm" onclick="openCreateChooser()">+ Crear</button></div>';
+  html+='<p class="semana-note">'
     +(cycleIdx===-1
       ? 'Tu bloque terminó. Elige otro programa o arma la semana a mano: no se repite solo.'
-      : 'La semana se aplica sola cada lunes. Mover o saltarte un día suelto no cambia el programa.')
+      : (pgm&&pgm.start_date?'Tu programa organiza el calendario según la semana del bloque.':'Esta distribución se repite cada semana.')
+        +' Mover un entreno puntual no cambia estos días.')
     +(coachSetDays().length?' Los días marcados los puso tu coach; cualquier cambio se envía como solicitud.':'')
-    +'</div>';
+    +'</p>';
   withScrollKept(el,()=>{el.innerHTML=html;});
+}
+
+async function openWeekDayOptions(dow){
+  const current=weekTemplate.find(t=>t.dow===dow&&t.board_id);
+  if(!current)return;
+  const request=!!(isCoachSet(current)&&sbProfile&&sbProfile.coaching_beta);
+  const action=await choiceSheet('Tu '+DOW_LONG[dow]+' habitual',[
+    {key:'change',label:request?'Solicitar otra rutina':'Cambiar rutina'},
+    {key:'clear',label:request?'Solicitar día libre':'Dejar el día libre',danger:!request}
+  ]);
+  if(action==='change')openDayPicker(dow);
+  if(action==='clear')await clearWeekDay(dow);
 }
 
 // Elegir la rutina de un día es la misma hoja que usa el coach: con buscador,
@@ -10590,78 +10797,98 @@ async function deleteProgramSb(id){
 }
 
 // ── MIS RUTINAS ───────────────────────────────────────────────────────────
-function toggleRoutineCard(id){
-  if(expandedRoutineCards.has(id))expandedRoutineCards.delete(id);
-  else expandedRoutineCards.add(id);
-  renderRutRutinas();
+// Una fila abre una ficha: los controles y ejercicios no compiten con la biblioteca.
+const trainingDialogReturnFocus=new Map();
+function showTrainingDialog(id,focusId){
+  const modal=document.getElementById(id);
+  if(!modal)return;
+  trainingDialogReturnFocus.set(id,document.activeElement);
+  modal.style.display='flex';
+  (document.getElementById(focusId)||modal.querySelector('button'))?.focus();
 }
-
-// Lo que hace falta para decidir si una rutina te sirve antes de abrirla:
-// cuánto trabajo es y qué necesitas para hacerla.
+function hideTrainingDialog(id){
+  const modal=document.getElementById(id);
+  if(modal)modal.style.display='none';
+  const previous=trainingDialogReturnFocus.get(id);
+  trainingDialogReturnFocus.delete(id);
+  if(previous&&previous.isConnected)previous.focus();
+}
+function trainingDialogKeydown(event){
+  const modal=event.currentTarget;
+  if(event.key==='Escape'){
+    event.preventDefault();event.stopPropagation();
+    if(modal.id==='routine-exercise-picker')rbClosePicker();
+    else if(modal.id==='routine-builder-modal')closeRoutineBuilder();
+    else closeRoutineDetail();
+  }
+  if(event.key!=='Tab')return;
+  const controls=[...modal.querySelectorAll('button:not([disabled]),input:not([disabled]),select:not([disabled]),textarea:not([disabled]),[tabindex="0"]')].filter(el=>el.getClientRects().length);
+  const first=controls[0],last=controls[controls.length-1];
+  if(event.shiftKey&&document.activeElement===first){event.preventDefault();last?.focus();}
+  else if(!event.shiftKey&&document.activeElement===last){event.preventDefault();first?.focus();}
+}
+function toggleRoutineCard(id){openRoutineDetail(id);}
 function routineCardMetaHtml(b,exercises){
   const meta=routineTodayMeta(b);
   const series=exercises.reduce((n,ex)=>n+(exerciseSetCount(ex)||0),0);
-  const partes=[series?series+' serie'+(series===1?'':'s')+' en total':null,'~'+meta.duration+' min'];
-  if(meta.equipment.length)partes.push(meta.equipment.join(', '));
-  return '<div class="routine-card-meta">'+esc(partes.filter(Boolean).join(' · '))+'</div>';
+  return '<div class="routine-card-meta">'+esc([series+' series','~'+meta.duration+' min',...meta.equipment].join(' · '))+'</div>';
 }
 function routineCardHtml(b){
   const exercises=routineExercises(b);
-  const mine=isMyRoutine(b);
-  const open=expandedRoutineCards.has(b.id);
-  const dayIdx=weekTemplate.filter(t=>t.board_id===b.id).map(t=>DOW_SHORT[t.dow]);
-  return '<article class="routine-card'+(open?' open':'')+'">'
-    +'<div class="routine-card-head" onclick="toggleRoutineCard(&quot;'+esc(b.id)+'&quot;)">'
-    +'<span class="week-dot" style="background:'+esc(routineColor(b))+'"></span>'
-    +'<div class="routine-card-title"><strong>'+esc(b.name)+'</strong>'
-    +'<span>'+exercises.length+' ejercicio'+(exercises.length===1?'':'s')
-    +(dayIdx.length?' · '+dayIdx.join(' '):'')
-    +' · '+(mine?'Tuya':'Del gym')+'</span></div>'
-    +'<span class="routine-card-chev">›</span></div>'
-    +(open?'<div class="routine-card-body">'
-      +(b.forked_from_name?'<div style="font-size:11.5px;color:var(--gray);margin-bottom:10px">Adaptada de '+esc(b.forked_from_name)+'</div>':'')
-      +(exercises.length?routineCardMetaHtml(b,exercises)+'<div class="routine-ex-pills">'
-        +exercises.slice(0,6).map(ex=>{
-          const objetivo=[exerciseSetCount(ex)||null,String(ex.reps||'').trim()||null].filter(Boolean).join('×');
-          return '<span class="routine-ex-pill">'+esc(ex.name||'Ejercicio')+(objetivo?'<i>'+esc(objetivo)+'</i>':'')+'</span>';
-        }).join('')
-        +(exercises.length>6?'<span class="routine-ex-pill">+'+(exercises.length-6)+'</span>':'')
-        +'</div>':'<div class="empty" style="margin:0 0 12px">Esta rutina aún no tiene ejercicios.</div>')
-      +'<div class="routine-card-actions">'
-      +(exercises.length?'<button class="btn" onclick="startWorkoutFromBoardSb(&quot;'+esc(b.id)+'&quot;,&quot;'+esc(b.name)+'&quot;,&quot;'+esc(routineColor(b))+'&quot;)">Entrenar</button>':'')
-      +(mine
-        ?'<button class="btn-sm" onclick="openRoutineBuilder(&quot;'+esc(b.id)+'&quot;)">Editar</button>'
-         +'<button class="btn-sm bred" onclick="deleteRoutineSb(&quot;'+esc(b.id)+'&quot;)">Eliminar</button>'
-        :'<button class="btn-sm" onclick="forkRoutineSb(&quot;'+esc(b.id)+'&quot;)">Duplicar y adaptar</button>')
-      +'<button class="btn-sm" onclick="openAddRoutineToWeek(&quot;'+esc(b.id)+'&quot;)">Poner en la semana</button>'
-      +'</div></div>':'')
-    +'</article>';
+  const meta=routineTodayMeta(b);
+  const days=weekTemplate.filter(t=>t.board_id===b.id).map(t=>DOW_SHORT[t.dow]);
+  return '<button type="button" class="routine-list-row" onclick="openRoutineDetail(&quot;'+esc(b.id)+'&quot;)">'
+    +'<span class="routine-list-mark" style="background:'+esc(routineColor(b))+'" aria-hidden="true"></span>'
+    +'<span class="routine-list-copy"><strong>'+esc(b.name)+'</strong><small>'
+    +exercises.length+' ejercicio'+(exercises.length===1?'':'s')+(exercises.length?' · ~'+meta.duration+' min':'')
+    +(days.length?' · '+esc(days.join(', ')):'')+'</small></span>'
+    +'<span class="routine-list-arrow" aria-hidden="true">›</span></button>';
 }
-
+function openRoutineDetail(boardId){
+  const b=routineById(boardId);
+  if(!b)return;
+  const exercises=routineExercises(b),meta=routineTodayMeta(b),mine=isMyRoutine(b);
+  const series=exercises.reduce((n,ex)=>n+(exerciseSetCount(ex)||0),0);
+  document.getElementById('routine-detail-body').innerHTML=
+    '<div class="routine-detail-origin">'+(mine?'Creada por ti':b._starterOnly?'HABIT · Básica':'De tu entrenador')+'</div>'
+    +'<h3 class="routine-detail-name">'+esc(b.name)+'</h3>'
+    +(b.forked_from_name?'<p class="routine-detail-note">Adaptada de '+esc(b.forked_from_name)+'</p>':'')
+    +'<div class="routine-detail-stats"><div><strong>'+exercises.length+'</strong><small>ejercicios</small></div>'
+    +'<div><strong>'+series+'</strong><small>series</small></div><div><strong>'+(exercises.length?'~'+meta.duration:'—')+'</strong><small>minutos</small></div></div>'
+    +(meta.equipment.length?'<p class="routine-detail-note" style="margin:0 0 18px">'+esc(meta.equipment.join(' · '))+'</p>':'')
+    +'<p class="routine-library-label">Tu recorrido</p>'
+    +(exercises.length?'<ol class="routine-detail-exercises">'+exercises.map((ex,i)=>'<li><span class="routine-detail-number">'+String(i+1).padStart(2,'0')+'</span><div><strong>'+esc(ex.name||'Ejercicio')+'</strong><small>'
+      +esc([exerciseSetCount(ex)+' series',exerciseTargetLabel(ex),ex.rest?'Descanso '+ex.rest:'',ex.supersetGroup?'Superserie '+ex.supersetGroup:''].filter(Boolean).join(' · '))+'</small></div></li>').join('')+'</ol>'
+      :'<div class="routine-library-empty">Agrega el primer ejercicio para empezar a entrenar.</div>')
+    +'<div class="routine-detail-tools">'
+    +'<button class="routine-detail-tool" onclick="closeRoutineDetail();openAddRoutineToWeek(&quot;'+esc(b.id)+'&quot;)">Asignar a mi semana <span aria-hidden="true">↗</span></button>'
+    +(mine?'<button class="routine-detail-tool" onclick="closeRoutineDetail();openRoutineBuilder(&quot;'+esc(b.id)+'&quot;)">Editar rutina <span aria-hidden="true">↗</span></button>'
+      :'<button class="routine-detail-tool" onclick="closeRoutineDetail();forkRoutineSb(&quot;'+esc(b.id)+'&quot;)">Duplicar y adaptar <span aria-hidden="true">↗</span></button>')
+    +(mine?'<button class="routine-detail-tool danger" onclick="deleteRoutineSb(&quot;'+esc(b.id)+'&quot;)">Eliminar rutina</button>':'')+'</div>';
+  document.getElementById('routine-detail-footer').innerHTML=exercises.length
+    ?'<button class="btn" onclick="startRoutineFromDetail(&quot;'+esc(b.id)+'&quot;)">Empezar entrenamiento</button>'
+    :'<button class="btn" onclick="closeRoutineDetail();'+(mine?'openRoutineBuilder':'forkRoutineSb')+'(&quot;'+esc(b.id)+'&quot;)">'+(mine?'Agregar ejercicios':'Crear mi versión')+'</button>';
+  document.getElementById('routine-detail-body').scrollTop=0;
+  showTrainingDialog('routine-detail-modal');
+}
+function closeRoutineDetail(){hideTrainingDialog('routine-detail-modal');}
+function startRoutineFromDetail(boardId){
+  const b=routineById(boardId);
+  if(!b)return;
+  closeRoutineDetail();
+  return startWorkoutFromBoardSb(b.id,b.name,routineColor(b));
+}
 function renderRutRutinas(){
   const el=document.getElementById('rut-content');
   if(!el)return;
   const mine=myRoutines.filter(isMyRoutine);
-  // Las que puso el coach a propósito van aparte de las básicas del gym: no
-  // son lo mismo y mezclarlas esconde lo que de verdad es tuyo.
   const coachBoards=myRoutines.filter(b=>!isMyRoutine(b)&&!b._starterOnly);
-  const starter=myRoutines.filter(b=>b._starterOnly);
-  let html='<button class="btn" style="margin-bottom:14px" onclick="openCreateChooser()">+ Crear</button>';
-  html+='<p class="slbl">Mis rutinas</p>';
-  html+=mine.length?mine.map(routineCardHtml).join(''):'<div class="empty">Todavía no creas ninguna. Empieza de cero o duplica una de abajo.</div>';
-  if(coachBoards.length){
-    html+='<div class="divider"></div><p class="slbl">De tu entrenador</p>';
-    html+=coachBoards.map(routineCardHtml).join('');
-  }
-  if(starter.length){
-    html+='<div class="divider"></div><p class="slbl">Rutinas básicas</p>';
-    html+='<div class="rut-section-note">Están para todos los socios. Úsalas tal cual o duplica una para hacerla tuya.</div>';
-    html+=starter.map(routineCardHtml).join('');
-  }
-  if(!coachBoards.length&&!starter.length){
-    html+='<div class="divider"></div><p class="slbl">Rutinas del gym</p>';
-    html+='<div class="empty">Todavía no hay rutinas del gym disponibles.</div>';
-  }
+  const starter=myRoutines.filter(b=>!isMyRoutine(b)&&b._starterOnly);
+  const section=(title,list)=>'<section class="routine-library-section"><h3 class="routine-library-label">'+title+'<span>'+list.length+'</span></h3><div class="routine-list">'+list.map(routineCardHtml).join('')+'</div></section>';
+  let html='<div class="routine-library-head"><div><h2>Tu biblioteca</h2><p>Encuentra tu siguiente entrenamiento.</p></div><button class="btn-sm" onclick="openCreateChooser()">+ Crear</button></div>';
+  html+=mine.length?section('Mis rutinas',mine):'<section class="routine-library-section"><h3 class="routine-library-label">Mis rutinas</h3><div class="routine-library-empty"><strong>Una rutina a tu manera.</strong>Crea la tuya o adapta una básica para empezar.</div></section>';
+  if(coachBoards.length)html+=section('De tu entrenador',coachBoards);
+  if(starter.length)html+=section('Básicas de HABIT',starter);
   withScrollKept(el,()=>{el.innerHTML=html;});
 }
 
@@ -10704,8 +10931,8 @@ async function forkRoutineSb(boardId){
     myRoutinesLoadedAt=0;
     await loadMyRoutinesSb(true);
     hideLoading();
-    expandedRoutineCards.add(data.id);
     renderRutRutinas();
+    await openRoutineBuilder(data.id);
     toast('Copia creada. Edítala a tu gusto.','ok');
   }catch(e){hideLoading();toast('Error: '+e.message,'err');}
 }
@@ -10725,6 +10952,7 @@ async function deleteRoutineSb(boardId){
     await loadMyRoutinesSb(true);
     await loadWeekPlanSb(true);
     renderRutRutinas();
+    closeRoutineDetail();
     toast('Rutina eliminada','ok');
   }catch(e){toast('Error: '+e.message,'err');}
 }
@@ -10744,6 +10972,7 @@ let _rbBoardId=null;
 let _rbDraft=null;
 let _rbPickerFor=null;   // índice del ejercicio que se está eligiendo, o 'new'
 let _rbPickerQuery='';
+let _rbPickerMuscle='';
 let _rbBaseline='';      // cómo estaba la rutina al abrir, para saber si hay cambios
 
 async function openRoutineBuilder(boardId){
@@ -10758,7 +10987,7 @@ async function openRoutineBuilder(boardId){
   document.getElementById('routine-builder-title').textContent=boardId?'Editar rutina':'Nueva rutina';
   _rbBaseline=rbSnapshot();
   renderRoutineBuilder();
-  document.getElementById('routine-builder-modal').style.display='flex';
+  showTrainingDialog('routine-builder-modal',boardId?null:'rb-name');
 }
 // Foto normalizada del borrador. Pasa los valores por String igual que haría
 // el viaje por el DOM, para que abrir y cerrar sin tocar nada no cuente como
@@ -10782,7 +11011,8 @@ async function closeRoutineBuilder(){
       &&!await confirmSheet('Perderás lo que llevas escrito en esta rutina.',
         {title:'¿Salir sin guardar?',confirmLabel:'Salir sin guardar',cancelLabel:'Seguir editando',danger:true}))return;
   }
-  document.getElementById('routine-builder-modal').style.display='none';
+  rbClosePicker();
+  hideTrainingDialog('routine-builder-modal');
   _rbBoardId=null;_rbDraft=null;_rbPickerFor=null;_rbBaseline='';
 }
 
@@ -10805,14 +11035,12 @@ function rbSyncFromDom(){
 function renderRoutineBuilder(){
   const body=document.getElementById('routine-builder-body');
   if(!body||!_rbDraft)return;
-  let html='<div class="field"><label>Nombre de la rutina</label>'
+  let html='<div class="field"><label for="rb-name">Nombre de la rutina</label>'
     +'<input type="text" id="rb-name" placeholder="Ej. Empuje pesado" value="'+esc(_rbDraft.name)+'"></div>'
-    +'<div class="rb-color-note"><span class="week-dot" style="background:'+MEMBER_ROUTINE_COLOR+'"></span>'
-    +'Tus rutinas llevan este color para distinguirlas de las del gym.</div>'
-    +'<p class="slbl">Ejercicios</p>';
+    +'<p class="slbl">Ejercicios · '+_rbDraft.exercises.length+'</p>';
 
-  if(!_rbDraft.exercises.length&&_rbPickerFor!=='new'){
-    html+='<div class="empty">Sin ejercicios todavía.</div>';
+  if(!_rbDraft.exercises.length){
+    html+='<div class="routine-library-empty"><strong>Empieza por un ejercicio.</strong>Busca por nombre, músculo o equipo. Después ajusta tus series.</div>';
   }
 
   html+=_rbDraft.exercises.map((ex,i)=>{
@@ -10830,7 +11058,6 @@ function renderRoutineBuilder(){
       +'<button type="button" class="rb-move-btn"'+(i===ultimo?' disabled':'')+' aria-label="Bajar ejercicio" onclick="rbMoveEx('+i+',1)">▼</button>'
       +'</span>'
       +'</div>'
-      +(_rbPickerFor===i?rbPickerHtml():'')
       +'<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:6px">'
       +rbFieldHtml('rb-ex-sets-'+i,'Series',ex.sets||'','3',true)
       +rbFieldHtml('rb-ex-reps-'+i,'Reps/tiempo',ex.reps||'','8-10')
@@ -10847,19 +11074,15 @@ function renderRoutineBuilder(){
       +'</div>';
   }).join('');
 
-  html+=(_rbPickerFor==='new'?'<div class="exercise-detail static" style="padding:12px;cursor:default">'+rbPickerHtml()+'</div>':'')
-    +'<button class="ws-add-ex" style="margin-top:6px" onclick="rbOpenPicker(&quot;new&quot;)">+ Agregar ejercicio</button>'
-    +'<button class="btn" style="margin-top:14px" onclick="saveRoutineSb()">Guardar rutina</button>';
+  html+='<button class="ws-add-ex" style="margin-top:12px;min-height:52px" onclick="rbOpenPicker(&quot;new&quot;)">+ Agregar ejercicio</button>';
   body.innerHTML=html;
-  const q=document.getElementById('rb-pick-q');
-  if(q)q.focus();
 }
 
 // Series y RIR son números sueltos y sacaban el teclado completo. Reps y
 // descanso siguen en texto a propósito: admiten "8-10", "0:30", "10-9-8-7" y
 // "2 min", que un teclado numérico no deja escribir.
 function rbFieldHtml(id,label,value,ph,numerico){
-  return '<div><div class="exercise-field-label">'+label+'</div>'
+  return '<div><label for="'+id+'" class="exercise-field-label">'+label+'</label>'
     +'<input type="text" id="'+id+'" placeholder="'+ph+'" value="'+esc(String(value??''))+'"'
     +(numerico?' inputmode="numeric"':'')+' onfocus="selectSetInput(this)" '
     +'style="width:100%;background:var(--card2);border:1px solid var(--border);border-radius:8px;padding:8px;color:var(--white);font-size:12.5px;text-align:center"></div>';
@@ -10867,31 +11090,51 @@ function rbFieldHtml(id,label,value,ph,numerico){
 
 // ── Selector de ejercicio (solo catálogo) ─────────────────────────────────
 function rbOpenPicker(target){
+  if(!_rbDraft)return;
   rbSyncFromDom();
-  _rbPickerFor=(_rbPickerFor===target)?null:target;
-  _rbPickerQuery='';
-  renderRoutineBuilder();
+  _rbPickerFor=target;_rbPickerQuery='';_rbPickerMuscle='';
+  document.getElementById('rb-picker-title').textContent=target==='new'?'Agregar ejercicio':'Cambiar ejercicio';
+  document.getElementById('rb-pick-q').value='';
+  rbRenderPickerFilters();
+  rbRenderPickerList();
+  showTrainingDialog('routine-exercise-picker','rb-pick-q');
 }
-function rbPickerHtml(){
-  return '<div class="ws-swap-panel" style="padding:0 0 10px">'
-    +'<input id="rb-pick-q" class="set-reps-in" style="width:100%;text-align:left;padding:10px 12px" '
-    +'placeholder="Buscar ejercicio…" value="'+esc(_rbPickerQuery)+'" oninput="rbRenderPickerList()">'
-    +'<div class="ws-swap-list" id="rb-pick-list">'+rbPickerListHtml()+'</div></div>';
+function rbClosePicker(){
+  hideTrainingDialog('routine-exercise-picker');
+  _rbPickerFor=null;_rbPickerQuery='';_rbPickerMuscle='';
 }
-function rbPickerListHtml(){
-  const list=wsCatalogList(_rbPickerQuery);
-  if(!list.length)return '<div class="empty" style="margin:0">Sin coincidencias.</div>';
+function rbRenderPickerFilters(){
+  const muscles=[...new Set(exerciseCatalogRows().map(e=>e.primary_muscle).filter(Boolean))].sort((a,b)=>a.localeCompare(b,'es'));
+  document.getElementById('rb-pick-filters').innerHTML=['',...muscles].map(m=>'<button type="button" class="rb-filter'+(_rbPickerMuscle===m?' active':'')+'" aria-pressed="'+(_rbPickerMuscle===m)+'" data-muscle="'+esc(m)+'" onclick="rbFilterPicker(this.dataset.muscle)">'+esc(m||'Todos')+'</button>').join('');
+}
+function rbFilterPicker(muscle){
+  _rbPickerMuscle=muscle;
+  rbRenderPickerFilters();rbRenderPickerList();
+}
+function rbPickerMatches(){
+  const normalize=v=>String(v||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase();
+  const terms=normalize(_rbPickerQuery).trim().split(/\s+/).filter(Boolean);
+  return exerciseCatalogRows().filter(e=>{
+    if(_rbPickerMuscle&&e.primary_muscle!==_rbPickerMuscle)return false;
+    const text=normalize([e.name,e.primary_muscle,e.category,...(e.aliases||[]),...(e.equipment||[])].join(' '));
+    return terms.every(t=>text.includes(t));
+  });
+}
+function rbPickerListHtml(list=rbPickerMatches()){
+  if(!list.length)return '<div class="rb-search-empty"><strong>No encontramos ese ejercicio.</strong>Prueba otro nombre o cambia el filtro de músculo.</div>';
   return list.map(e=>wsPickItemHtml(e,'rbPickExercise(&quot;'+esc(e.slug||e.name)+'&quot;)')).join('');
 }
 function rbRenderPickerList(){
   _rbPickerQuery=document.getElementById('rb-pick-q')?.value||'';
-  const el=document.getElementById('rb-pick-list');
-  if(el)el.innerHTML=rbPickerListHtml();
+  const list=rbPickerMatches();
+  document.getElementById('rb-pick-count').textContent=list.length+' ejercicio'+(list.length===1?'':'s');
+  document.getElementById('rb-pick-list').innerHTML=rbPickerListHtml(list);
 }
 // Al elegir del catálogo se copian músculo, tipo, instrucciones y video — es lo
 // que hace que una rutina del socio salga con video de demostración sin que él
 // tenga que pegar ningún enlace.
 function rbPickExercise(slug){
+  if(!_rbDraft||_rbPickerFor===null)return;
   rbSyncFromDom();
   const row=wsCatalogRowBySlug(slug);
   if(!row)return;
@@ -10910,8 +11153,10 @@ function rbPickExercise(slug){
   if(row.default_tracking==='time'&&!/[:sm]/.test(String(ex.reps||'')))ex.reps='0:30';
   if(target==='new')_rbDraft.exercises.push(ex);
   else _rbDraft.exercises[target]=ex;
-  _rbPickerFor=null;_rbPickerQuery='';
+  rbClosePicker();
   renderRoutineBuilder();
+  const index=target==='new'?_rbDraft.exercises.length-1:target;
+  document.getElementById('rb-ex-sets-'+index)?.focus();
 }
 function rbRemoveEx(i){
   rbSyncFromDom();
@@ -12413,8 +12658,17 @@ async function cancelCoachingSessionSb(opts){
     toast('Entreno cancelado','ok');
   }catch(e){toast('Error al cancelar: '+e.message,'err');}
 }
+let _activeCoachingSessionLoad=null;
 async function loadActiveCoachingSessionSb(){
   if(!sbUser)return;
+  // El inicio de sesión y Hoy pueden pedirla a la vez. Comparten una lectura;
+  // Hoy espera también sus series para recuperar el progreso al recargar.
+  if(_activeCoachingSessionLoad)return _activeCoachingSessionLoad;
+  _activeCoachingSessionLoad=restoreActiveCoachingSessionSb();
+  try{return await _activeCoachingSessionLoad;}
+  finally{_activeCoachingSessionLoad=null;}
+}
+async function restoreActiveCoachingSessionSb(){
   try{
     const{data,error}=await sb.from('coaching_schedule').select('*').eq('user_id',sbUser.id).eq('status','in_progress').order('started_at',{ascending:false}).limit(1).maybeSingle();
     if(error)throw error;
@@ -12424,22 +12678,28 @@ async function loadActiveCoachingSessionSb(){
       resolved=HabitTraining.applyPending(pending,'coaching_schedule',[resolved])[0]||resolved;
       if(resolved.status!=='in_progress')resolved=null;
     }
+    const previousId=activeCoachingSession&&activeCoachingSession.id;
     activeCoachingSession=resolved;
     if(resolved){
+      if(previousId!==resolved.id)coachSessionSets={};
       wsPausedMs=Math.max(0,Number(resolved.paused_seconds)||0)*1000;
       wsPausedAt=resolved.paused_at?new Date(resolved.paused_at).getTime():0;
       cacheActiveTrainingSession(resolved);showActiveSessionBar();wsStartTicker();
-    }else cacheActiveTrainingSession(null);
+      if(!Object.keys(coachSessionSets).length)await loadSessionSetsSb(resolved.id);
+    }else{coachSessionSets={};cacheActiveTrainingSession(null);}
     updateCoachingNavBadge();
     if(document.getElementById('v-inicio')?.classList.contains('active'))renderInicioCoachingWidgets();
   }catch(e){
     console.error('loadActiveCoachingSessionSb:',e);
     const cached=readCachedTrainingSession();
     if(cached&&cached.status==='in_progress'){
+      const previousId=activeCoachingSession&&activeCoachingSession.id;
       activeCoachingSession=cached;
+      if(previousId!==cached.id)coachSessionSets={};
       wsPausedMs=Math.max(0,Number(cached.paused_seconds)||0)*1000;
       wsPausedAt=cached.paused_at?new Date(cached.paused_at).getTime():0;
       showActiveSessionBar();wsStartTicker();
+      if(navigator.onLine&&!Object.keys(coachSessionSets).length)await loadSessionSetsSb(cached.id);
     }
   }
 }
