@@ -10,7 +10,9 @@ This repo ships **two** front-ends off the same Vercel project and the same Supa
 
 - **HABIT Training Hub** (`app.html`, served at `/`) — the gym: bookings, payments, door access, coaching.
 - **HABIT Crew** (the same `app.html`, served at `/crew` by a rewrite in `vercel.json`) — training and
-  the community, open to anyone. Not a separate file: a script in `<head>` (`#brand-boot`) sets
+  the community, open to anyone. The rewrite's destination is **`/app`, not `/app.html`**: with
+  `cleanUrls` Vercel publishes `app.html` as `/app`, and a rewrite to `/app.html` answers 404 (the
+  old `/` → `/app.html` rule never ran either — a real file, `index.html`, wins over a rewrite). Not a separate file: a script in `<head>` (`#brand-boot`) sets
   `window.HABIT_BRAND` from the path before the browser reads the manifest and icons, swaps them
   to `crew-manifest.json` / `icons/crew-*`, and puts `brand-crew` on `<html>`; the main script
   reads it as `IS_CREW`. Crew hides everything that is the gym's (`GYM_ONLY_VIEWS`: book, planes,

@@ -7,7 +7,7 @@
     },
     {
       "source": "/crew",
-      "destination": "/app.html"
+      "destination": "/app"
     },
     {
       "source": "/api/strava/callback",
