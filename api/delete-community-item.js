@@ -6,6 +6,33 @@ function getToken(req) {
   return String(req.headers.authorization || '').replace(/^Bearer\s+/i, '').trim();
 }
 
+// Reportes pendientes de lo que se va a borrar (migración 128). Se buscan antes del borrado:
+// sus referencias son "on delete set null", así que después ya no habría cómo encontrarlos.
+// Un reporte de comentario también guarda su post_id, así que borrar una publicación encuentra
+// de una vez los de sus comentarios. Sin la 128 no hay reportes que resolver.
+async function pendingReportIds(type, itemId) {
+  const { data, error } = await supabase
+    .from('community_reports')
+    .select('id')
+    .eq('status', 'pendiente')
+    .eq(type === 'comment' ? 'comment_id' : 'post_id', itemId);
+  if (error) {
+    console.warn('community_reports:', error.message);
+    return [];
+  }
+  return (data || []).map(r => r.id);
+}
+
+// Con service role no hay auth.uid(): el trigger de la 128 respeta el resolved_by que llega.
+async function resolveReports(ids, adminId) {
+  if (!ids.length) return;
+  const { error } = await supabase
+    .from('community_reports')
+    .update({ status: 'resuelto', resolved_by: adminId, resolution_note: 'Contenido eliminado' })
+    .in('id', ids);
+  if (error) console.warn('community_reports resolve:', error.message);
+}
+
 module.exports = async function handler(req, res) {
   if (req.method !== 'POST') {
     res.setHeader('Allow', 'POST');
@@ -32,18 +59,22 @@ module.exports = async function handler(req, res) {
     if (!itemId) return res.status(400).json({ error: 'Falta id' });
 
     if (type === 'comment') {
+      const reportIds = await pendingReportIds(type, itemId);
       const { error } = await supabase.from('post_comments').delete().eq('id', itemId);
       if (error) throw error;
-      return res.status(200).json({ ok: true });
+      await resolveReports(reportIds, profile.id);
+      return res.status(200).json({ ok: true, resolved: reportIds.length });
     }
 
     if (type === 'post') {
+      const reportIds = await pendingReportIds(type, itemId);
       await supabase.from('post_comments').delete().eq('post_id', itemId);
       await supabase.from('post_reactions').delete().eq('post_id', itemId);
       await supabase.from('user_notifications').delete().eq('post_id', itemId);
       const { error } = await supabase.from('posts').delete().eq('id', itemId);
       if (error) throw error;
-      return res.status(200).json({ ok: true });
+      await resolveReports(reportIds, profile.id);
+      return res.status(200).json({ ok: true, resolved: reportIds.length });
     }
 
     return res.status(400).json({ error: 'Tipo no valido' });

@@ -138,7 +138,7 @@ app lo multiplica. **La 120 en producción es requisito de la Fase 0.**
 | D10 | ¿Endpoints nuevos? | **Ninguno.** Todo como RPC o como `action` en routers existentes | Techo de 12 funciones en Vercel Hobby (ver §9.2) |
 | D11 | ¿Una app o dos? (23 oct) | **Dos apps, una cuenta, un código.** **HABIT** (el gym: reservar, la puerta, entrenar) y **HABIT Crew** (entrenar y la comunidad, para cualquiera). Las dos son el mismo `app.html`: Vercel reescribe `/crew` a ese archivo y la marca sale de la ruta. Misma base, así que la misma cuenta sirve en las dos | Entrenar son miles de líneas: copiarlo a otra app sería arreglar todo dos veces. Así cada mejora llega a las dos, y quien es del gym tiene todo lo de Crew sin registrarse otra vez |
 | D12 | ¿Cómo se llama? (23 oct) | **HABIT Crew**, en `habittraininghub.app/crew`. Ícono: el de HABIT invertido (aro negro sobre blanco) | Cabe completo bajo el ícono del iPhone (≈12 caracteres; "HABIT Community" se cortaba), suena a grupo y funciona como #HABITcrew. La dirección dentro del dominio actual no cuesta y se puede cambiar después |
-| D13 | ¿Comunidad abierta? (23 oct) | **Sí: una sola comunidad, abierta a toda cuenta, en las dos apps.** Reemplaza a D6 | Si Crew la abre, cerrarla en HABIT a la misma persona no tendría sentido. Pide **moderación** (reportar, bloquear) antes de promocionar: Apple la exige a toda app con contenido de usuarios |
+| D13 | ¿Comunidad abierta? (23 oct) | **Sí: una sola comunidad, abierta a toda cuenta, en las dos apps.** Reemplaza a D6 | Si Crew la abre, cerrarla en HABIT a la misma persona no tendría sentido. Pide **moderación** (reportar, bloquear) antes de promocionar: Apple la exige a toda app con contenido de usuarios. Hecha en la **128** (ver bitácora, 23 oct) |
 
 ### 3.1 Qué tiene cada app (D11–D13)
 
@@ -515,8 +515,8 @@ a otra persona (el coach).
 
 ### Fase 8 — Opcional
 
-Nutrición en HABIT (con tope de gasto por usuario), inglés, comunidad abierta con moderación,
-retos mensuales, coaches externos publicando programas (§10).
+Nutrición en HABIT (con tope de gasto por usuario), inglés, retos mensuales, coaches externos
+publicando programas (§10). (La comunidad abierta con moderación ya se hizo: D13 y la 128.)
 
 ---
 
@@ -684,6 +684,62 @@ nuevas.
   - Versión `20261023-1` (incluye la `v` del script `#brand-boot` y `crew-manifest.json`).
   - **Falta antes de promocionar Crew:** moderación de la comunidad (reportar, bloquear,
     cola del admin), y la app de Crew en la App Store (otro bundle id en Capacitor).
+- **2026-10-23** — **Moderación de la comunidad** (D13), lo que pide la guideline 1.2 de Apple
+  antes de promocionar Crew o subirla a la App Store. Parte del commit de HABIT Crew.
+  - **128** (`128_community_moderation.sql`): `community_reports` (reportar una publicación o un
+    comentario, con motivo y estado pendiente/resuelto/descartado) y `community_blocks`.
+    El socio inserta reportes y no lee ninguno; el admin (`is_habit_admin()`) los lee y los
+    resuelve. Lo reportado se copia al reporte (autor, texto, foto) en un trigger, así que la
+    cola funciona aunque el autor lo borre, y el cliente solo escribe qué y por qué.
+  - **Decisión: el filtro del bloqueo va en la RLS, no en `renderFeedSb`.** Una regla en un
+    lugar para las dos apps (y la nativa, y cualquier pantalla futura que lea posts); PostgREST
+    la aplica también a los comentarios embebidos en el feed; lo bloqueado no llega al
+    teléfono, y el `limit(50)` cuenta lo que sí se ve. Son políticas `restrictive`, que se
+    suman a las permisivas sin importar cuántas haya en producción. El bloqueo corre en los
+    dos sentidos (si no, el bloqueado seguiría comentando bajo las publicaciones de quien lo
+    bloqueó, a la vista de todos los demás) y no ciega al admin si alguien lo bloquea.
+  - `api/delete-community-item.js`: al borrar, marca resueltos los reportes pendientes de eso
+    (no es una función nueva: sigue el techo de 12).
+  - `app.html`: ⋯ en las publicaciones y comentarios de otros (reportar con cinco motivos,
+    bloquear; después de reportar ofrece bloquear), Perfil → Usuarios bloqueados con
+    "Desbloquear", y en Admin → Comunidad la cola de reportes pendientes arriba del feed
+    (agrupada por lo reportado, con quién reportó, cuánta gente bloqueó al autor, y Borrar /
+    Descartar / Marcar resuelto si ya no existe); cada reporte manda un push al admin
+    (`sendPush('admin', …)`, como las reservas). `choiceSheet()` nuevo junto a
+    `confirmSheet`/`promptSheet`. Versión `20261023-2`.
+  - **Probada contra Postgres real** (PGlite, esquema mínimo tipo Supabase con `anon` /
+    `authenticated` / `service_role` y `auth.uid()` por `request.jwt.claim.sub`; 65 casos, la
+    migración corrida dos veces seguidas): reportar, que nadie más lea los reportes, que el
+    cliente no pueda escribir quién reporta ni la copia, el duplicado, resolver y descartar,
+    borrar lo reportado sin que falle, bloquear en los dos sentidos, el admin exento,
+    desbloquear, y `anon` sin acceso. **Hallazgo:** con las políticas para todo rol, la lectura
+    de `posts` con la llave pública pasaba de vacía a error de permisos (anon no ejecuta la
+    función de la política); se arregló con `to authenticated`.
+  - Verificado en el navegador local, en `/crew` y en `/`, con el cliente de Supabase simulado en
+    la página (el servidor local apunta a producción: ni sesión ni escrituras): el ⋯ solo en lo
+    ajeno, el flujo de reportar (motivo → detalle → gracias → bloquear), el duplicado, bloquear
+    y que el feed se repinte, Perfil con su lista y el estado vacío, la sección escondida sin la
+    128, el menú del admin (solo bloquear) y la cola con sus tres botones y el badge.
+  - **No verificado:** contra la base real (la 128 no está corrida) ni en el iPhone.
+  - **Orden de despliegue:** cualquiera. Sin la 128, la app nueva esconde "Usuarios bloqueados"
+    y reportar o bloquear dicen "todavía no está disponible"; la app publicada no lee estas
+    tablas. Lo natural: correr la 128 y luego publicar.
+  - **Falta para la guideline 1.2** (no es código de esta migración, son decisiones tuyas):
+    (1) que los términos que se aceptan al registrarse digan que no se tolera contenido
+    ofensivo ni usuarios abusivos — hoy los de la app no hablan de la comunidad; (2) un
+    contacto publicado para quejas; (3) responder los reportes a tiempo (Apple espera ~24 h;
+    cada reporte manda un push al admin y deja un aviso en Alertas, pero alguien tiene que
+    atenderlos); (4) Apple también pide filtrar lo
+    ofensivo antes de publicarlo, y no hay filtro de palabras.
+  - **Feed lento por fotos en base64** (pedido de la sesión de planificación): la Comunidad
+    tardaba ~6 s porque el feed bajaba `img_url` de todos los posts, y uno de mayo 2026
+    (`b082c70a…`, de antes de la 017) trae su foto en base64 dentro de la tabla: 6.4 MB. El feed
+    y Admin → Comunidad ya no piden `img_url` con la lista: las URLs del bucket van en un
+    segundo select (`not like 'data:%'`), de las incrustadas solo el id, y esas muestran "Ver
+    foto" y la bajan al tocarla. El trigger de la 128 tampoco copia una foto base64 al reporte.
+    Verificado con el cliente simulado (las tres formas de post, y que la lista no pide
+    `img_url`) y en PGlite (67 casos). Arreglo de fondo, pendiente y aparte: subir esa foto al
+    bucket `community-images` y dejar su URL en `img_url`.
 - **2026-10-23 (2)** — **Pulido de Entrenar, Fase A** (la sesión y los bugs). Auditoría hecha
   como usuario nuevo en `/crew` con la cuenta de prueba `1@habit.app`; propuesta en tres fases
   (A sesión y bugs, B Hoy, C Semana y Rutinas), aprobada A.
@@ -695,6 +751,9 @@ nuevas.
   - La hoja: sin ✕ ni RIR por serie (RIR opcional), menú ••• flotante con "Marcar todas",
     "Cambiar", "Quitar una serie", "Registrar RIR" y "Quitar ejercicio"; campos y palomitas
     de 44 px; nada se mueve al palomear (medido: 0 px); descanso automático de 90 s visible.
-  - La Comunidad lenta (una foto de 6.4 MB incrustada en `posts`) quedó para la sesión de
-    moderación, que está tocando el feed.
+  - La Comunidad lenta (una foto de 6.4 MB incrustada en `posts`) la arregló la sesión de
+    moderación, que estaba tocando el feed (entrada de arriba).
   - Versión `20261023-2`. Pendiente: Fase B (Hoy) y Fase C (Semana y Rutinas).
+- **2026-10-23 (3)** — La moderación y la Fase A se unieron en `main` (las dos habían subido a
+  `20261023-2` por separado) con la versión `20261023-3`. Sin push hasta correr la **128** en
+  Supabase.

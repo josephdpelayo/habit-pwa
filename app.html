@@ -6,12 +6,12 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="HABIT">
 <meta name="application-name" content="HABIT">
-<link rel="manifest" href="/manifest.json?v=20261023-2">
-<link rel="apple-touch-icon" sizes="120x120" href="/icons/icon-120.png?v=20261023-2">
-<link rel="apple-touch-icon" sizes="152x152" href="/icons/icon-152.png?v=20261023-2">
-<link rel="apple-touch-icon" sizes="167x167" href="/icons/icon-167.png?v=20261023-2">
-<link rel="apple-touch-icon" sizes="180x180" href="/icons/icon-180.png?v=20261023-2">
-<link rel="icon" type="image/png" sizes="32x32" href="/icons/icon-32.png?v=20261023-2">
+<link rel="manifest" href="/manifest.json?v=20261023-3">
+<link rel="apple-touch-icon" sizes="120x120" href="/icons/icon-120.png?v=20261023-3">
+<link rel="apple-touch-icon" sizes="152x152" href="/icons/icon-152.png?v=20261023-3">
+<link rel="apple-touch-icon" sizes="167x167" href="/icons/icon-167.png?v=20261023-3">
+<link rel="apple-touch-icon" sizes="180x180" href="/icons/icon-180.png?v=20261023-3">
+<link rel="icon" type="image/png" sizes="32x32" href="/icons/icon-32.png?v=20261023-3">
 <title>HABIT</title>
 <!-- Con id a propósito: scripts/check-training.js toma la primera etiqueta script sin
      atributos como el script principal de la app y la compila. -->
@@ -25,7 +25,7 @@
   var crew=/^\/crew(\/|$)/.test(location.pathname);
   window.HABIT_BRAND=crew?'crew':'gym';
   if(!crew)return;
-  var v='20261023-2';
+  var v='20261023-3';
   document.documentElement.classList.add('brand-crew');
   document.title='HABIT Crew';
   document.querySelectorAll('meta[name="apple-mobile-web-app-title"],meta[name="application-name"]')
@@ -40,9 +40,9 @@
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Share+Tech+Mono&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="/skandi-recovery.js?v=20261023-2"></script>
-<script src="/body-figure.js?v=20261023-2"></script>
-<script src="/habit-training.js?v=20261023-2"></script>
+<script src="/skandi-recovery.js?v=20261023-3"></script>
+<script src="/body-figure.js?v=20261023-3"></script>
+<script src="/habit-training.js?v=20261023-3"></script>
 <style>
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
 @media (prefers-reduced-motion:reduce){*,*:before,*:after{scroll-behavior:auto!important;animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}}
@@ -1041,6 +1041,30 @@ input,select,button,textarea{font-family:'Inter',sans-serif}
 .comment-form{display:flex;gap:6px;margin-top:8px}
 .comment-form input{flex:1;min-width:0;background:var(--card2);border:1px solid var(--border);border-radius:4px;padding:8px 10px;font-size:13px;color:var(--white);outline:none}
 .comment-form input:focus{border-color:var(--blue)}
+/* Reportar y bloquear (migración 128) */
+.post-more-btn{background:none;border:none;color:var(--gray);cursor:pointer;font-size:18px;line-height:1;min-width:36px;min-height:36px;padding:4px 8px;border-radius:8px;flex-shrink:0}
+.post-more-btn:active{background:var(--card2)}
+.comment-more-btn{font-size:15px;min-width:30px;min-height:30px;padding:0 6px;align-self:flex-start}
+.choice-list{display:grid;gap:8px;margin-top:14px}
+.choice-list button{width:100%;min-height:44px;padding:10px 14px;text-align:left;border-radius:10px;background:var(--card2);border:1px solid var(--border);color:var(--white);font-size:14px;font-weight:600;cursor:pointer}
+.choice-list button.danger{color:#fca5a5;border-color:rgba(239,68,68,.4);background:rgba(239,68,68,.1)}
+.confirm-card .choice-cancel{width:100%;min-height:42px;margin-top:10px}
+.mod-report{background:var(--card);border:1px solid rgba(239,68,68,.32);border-radius:10px;padding:12px 14px;margin-bottom:10px}
+.mod-report-title{font-size:13.5px;font-weight:700;color:var(--white)}
+.mod-report-sub{font-size:11px;color:var(--gray);margin-top:2px}
+.mod-report-content{margin-top:10px;padding:8px 10px;border-radius:8px;background:var(--card2);font-size:13px;color:var(--gl);line-height:1.5;white-space:pre-wrap;word-break:break-word}
+.mod-report-img{display:block;margin-top:8px;max-width:160px;max-height:200px;border-radius:8px;object-fit:cover}
+.mod-report-gone{margin-top:8px;font-size:11.5px;color:var(--amber,#d97706)}
+.mod-report-reasons{display:grid;gap:6px;margin-top:10px}
+.mod-reason{font-size:12px;color:var(--gl);line-height:1.45}
+.mod-reason strong{color:var(--white);font-weight:700}
+.mod-reason-detail{margin-top:2px;color:var(--gray);font-style:italic;word-break:break-word}
+.mod-report-actions{display:flex;gap:8px;margin-top:12px}
+.mod-report-actions button{flex:1;min-height:38px}
+.mod-empty{font-size:12px;color:var(--gray);margin-bottom:14px}
+.perfil-block-row{display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--hairline,var(--border))}
+.perfil-block-name{flex:1;min-width:0;font-size:13px;color:var(--white);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.post-img-load{display:block;width:calc(100% - 28px);min-height:44px;margin:0 14px 12px;border:1px dashed var(--border);border-radius:8px;background:var(--card2);color:var(--gray);font-size:13px;font-weight:600;cursor:pointer}
 .new-post-box{background:var(--card);border:1px solid var(--border);border-radius:6px;padding:1rem;margin-bottom:1rem}
 .new-post-box textarea{width:100%;background:var(--card2);border:1px solid var(--border);border-radius:4px;padding:10px 12px;font-size:14px;color:var(--white);outline:none;resize:none;line-height:1.5;min-height:70px}
 .new-post-box textarea::placeholder{color:#555}
@@ -2539,6 +2563,11 @@ body.admin-mode #courtesy-modal label{border-radius:14px!important;border-color:
         <div class="divider" style="margin:.75rem 0"></div>
         <p class="slbl">Mi entrenamiento</p>
         <button class="btn-ghost perfil-row-btn" onclick="openTrainingOnboarding()"><span>Objetivo, nivel y equipo</span><span id="perfil-training-sum" class="perfil-row-sum"></span></button>
+        <div id="perfil-blocks-section">
+          <div class="divider" style="margin:.75rem 0"></div>
+          <p class="slbl">Usuarios bloqueados</p>
+          <div id="perfil-blocks"></div>
+        </div>
         <div id="perfil-account-section">
           <div class="divider" style="margin:.75rem 0"></div>
           <p class="slbl">Cuenta</p>
@@ -3045,6 +3074,7 @@ body.admin-mode #courtesy-modal label{border-radius:14px!important;border-color:
       <div class="admin-page-head">
         <div><div class="admin-page-kicker">Comunidad</div><h2 class="admin-page-title">Comunidad</h2><div class="admin-page-sub">Publicaciones y moderación</div></div>
       </div>
+      <div id="adm-reports-content"></div>
       <div id="adm-feed-content"></div>
     </div>
 
@@ -3525,7 +3555,7 @@ const GYM_ONLY_VIEWS=['book','planes','historial','shop'];
 const GYM_APP_URL='/';
 document.querySelectorAll('.brand-name').forEach(el=>{el.textContent=BRAND_NAME;});
 const SUPABASE_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBtcGp0ZXVxanVzYmlkdWV2YndxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc2OTI1NjUsImV4cCI6MjA5MzI2ODU2NX0.XbMzZoo2yqtrD8znLnyo_1zDfrdJAvAPj1lqGOyXnLw';
-const APP_VERSION='20261023-2';
+const APP_VERSION='20261023-3';
 // La pierna va separada en cuádriceps, femorales y pantorrillas: la figura
 // corporal pinta esas tres regiones por separado y el motor de recuperación les
 // da ventanas de descanso distintas. 'Piernas' sigue reconociéndose al leer
@@ -4520,6 +4550,26 @@ function promptSheet(body,opts){
     btns[1].onclick=()=>settle(input.value);
     input.onkeydown=e=>{if(e.key==='Enter'){e.preventDefault();settle(input.value);}};
     input.focus();input.select();
+  });
+}
+// Una lista de opciones ({key,label,danger}); resuelve con la key elegida o null. Igual que
+// los dos de arriba, tocar el fondo o "Cancelar" es null, nunca la primera opción.
+function choiceSheet(body,choices,opts){
+  const{title='',cancelLabel='Cancelar'}=opts||{};
+  return new Promise(resolve=>{
+    const overlay=document.getElementById('confirm-overlay');
+    if(!overlay){resolve(null);return;}
+    const settle=r=>{closeConfirmSheet();resolve(r);};
+    overlay.innerHTML='<div class="confirm-card" onclick="event.stopPropagation()">'
+      +(title?'<h3>'+esc(title)+'</h3>':'')
+      +(body?'<p>'+esc(body).replace(/\n/g,'<br>')+'</p>':'')
+      +'<div class="choice-list">'+choices.map((c,i)=>'<button type="button" data-i="'+i+'"'+(c.danger?' class="danger"':'')+'>'+esc(c.label)+'</button>').join('')+'</div>'
+      +'<button type="button" class="btn-sm confirm-ghost choice-cancel">'+esc(cancelLabel)+'</button>'
+      +'</div>';
+    overlay.classList.add('show');
+    overlay.onclick=()=>settle(null);
+    overlay.querySelectorAll('.choice-list button').forEach(b=>{b.onclick=()=>settle(choices[+b.dataset.i].key);});
+    overlay.querySelector('.choice-cancel').onclick=()=>settle(null);
   });
 }
 function withScrollKept(el,paint){
@@ -6207,6 +6257,7 @@ async function renderPerfil(){
   if(pfCode)pfCode.textContent=curUser.accessCode||'????';
   if(pfPlan)pfPlan.textContent=curUser.plan?[...PLANS.individual,...PLANS.grupal].find(p=>p.id===curUser.plan)?.name||curUser.plan:'Sin plan';
   renderPerfilTrainingSummary();
+  renderPerfilBlocks();
   // El staff (admin, recepción) no se borra a sí mismo desde aquí: se quedaría el gym sin
   // quien lo administre por un toque equivocado.
   const acct=document.getElementById('perfil-account-section');
@@ -19602,6 +19653,9 @@ function startAdminChatRealtime(){
     .on('postgres_changes',{event:'INSERT',schema:'public',table:'admin_notifs'},()=>{
       if(document.getElementById('a-notifs')?.classList.contains('active'))renderAdmNotifsSb();
       else refreshAdminAlertsBadge();
+      // Cada reporte de la comunidad deja un aviso aquí (trigger de la 128).
+      if(document.getElementById('a-comunidad')?.classList.contains('active'))renderAdminReports();
+      else refreshAdminCommunityBadge();
     }).subscribe();
   adminChatPollInt=setInterval(()=>{
     if(document.getElementById('a-mensajes')?.classList.contains('active'))renderMensajesAdminSb();
@@ -19647,18 +19701,29 @@ async function refreshAdminAlertsBadge(){
 }
 const ADMIN_ALERTS_SEEN_KEY='habit_admin_alerts_seen_at';
 const ADMIN_COMMUNITY_SEEN_KEY='habit_admin_community_seen_at';
+// El badge de Comunidad suma las publicaciones nuevas y los reportes pendientes. Ver el feed
+// apaga lo primero; lo segundo solo baja cuando se resuelve cada reporte.
+let adminPendingReports=0;
+async function countPendingReports(){
+  const{count,error}=await sb.from('community_reports').select('id',{count:'exact',head:true}).eq('status','pendiente');
+  adminPendingReports=error?0:(count||0);
+  return adminPendingReports;
+}
 async function refreshAdminCommunityBadge(){
   if(!sbUser)return;
   try{
     const seen=localStorage.getItem(ADMIN_COMMUNITY_SEEN_KEY)||new Date().toISOString();
-    const{count}=await sb.from('posts').select('id',{count:'exact',head:true}).gt('created_at',seen);
-    setAdminHeaderBadge('adm-comunidad-badge',count);
+    const[{count},pending]=await Promise.all([
+      sb.from('posts').select('id',{count:'exact',head:true}).gt('created_at',seen),
+      countPendingReports()
+    ]);
+    setAdminHeaderBadge('adm-comunidad-badge',(count||0)+pending);
   }catch(e){console.warn('refreshAdminCommunityBadge:',e);}
 }
 function markAdminCommunitySeen(posts){
   const latest=(posts&&posts[0]&&posts[0].created_at)||new Date().toISOString();
   localStorage.setItem(ADMIN_COMMUNITY_SEEN_KEY,latest);
-  setAdminHeaderBadge('adm-comunidad-badge',0);
+  setAdminHeaderBadge('adm-comunidad-badge',adminPendingReports);
 }
 function stopAdminChatRealtime(){
   if(adminChatChannel){sb.removeChannel(adminChatChannel);adminChatChannel=null;}
@@ -19709,22 +19774,62 @@ async function createPostSb(){
   }
 }
 
+// Las fotos de la comunidad viven en el bucket community-images (017) e img_url es su URL. Las
+// de antes de la 017 se guardaron en base64 dentro de la tabla: una sola pesa 6.4 MB y hacía
+// tardar el feed ~6 s. Por eso las listas nunca piden img_url con lo demás: las URLs se piden
+// aparte, y de las incrustadas solo el id, para mostrar "Ver foto" y bajarla al tocarla.
+const POST_LIST_COLUMNS='id,user_id,user_name,text_content,created_at';
+async function attachPostImages(posts){
+  const ids=(posts||[]).map(p=>p.id);
+  if(!ids.length)return;
+  const[urls,embedded]=await Promise.all([
+    sb.from('posts').select('id,img_url').in('id',ids).not('img_url','is',null).not('img_url','like','data:%'),
+    sb.from('posts').select('id').in('id',ids).like('img_url','data:%')
+  ]);
+  if(urls.error||embedded.error)console.warn('attachPostImages:',urls.error||embedded.error);
+  const urlById=Object.fromEntries((urls.data||[]).map(r=>[r.id,r.img_url]));
+  const inTable=new Set((embedded.data||[]).map(r=>r.id));
+  posts.forEach(p=>{p.img_url=urlById[p.id]||null;p.img_embedded=inTable.has(p.id);});
+}
+function postImageHtml(post){
+  if(post.img_url)return'<img class="post-img-vertical" src="'+esc(post.img_url)+'">';
+  if(post.img_embedded)return'<button class="post-img-load" data-pid="'+esc(post.id)+'" onclick="loadEmbeddedPostImage(this)">Ver foto</button>';
+  return'';
+}
+async function loadEmbeddedPostImage(btn){
+  btn.disabled=true;btn.textContent='Cargando foto…';
+  try{
+    const{data,error}=await sb.from('posts').select('img_url').eq('id',btn.dataset.pid).single();
+    if(error)throw error;
+    if(!data||!data.img_url){btn.remove();return;}
+    const img=document.createElement('img');
+    img.className='post-img-vertical';img.src=data.img_url;
+    btn.replaceWith(img);
+  }catch(e){
+    console.warn('loadEmbeddedPostImage:',e);
+    btn.disabled=false;btn.textContent='Ver foto';
+    toast('No se pudo cargar la foto','err');
+  }
+}
+
 async function renderFeedSb(){
   const el=document.getElementById('feed-content');
   if(!el||!sbUser)return;
   el.innerHTML='<div class="empty">Cargando...</div>';
   try{
     const{data:posts,error}=await sb.from('posts')
-      .select('*,post_reactions(user_id,reaction_type),post_comments(id,user_id,user_name,text_content,created_at)')
+      .select(POST_LIST_COLUMNS+',post_reactions(user_id,reaction_type),post_comments(id,user_id,user_name,text_content,created_at)')
       .order('created_at',{ascending:false}).limit(50);
     if(error)throw error;
     if(!posts||!posts.length){el.innerHTML='<div class="empty">Sin publicaciones aun. Se el primero!</div>';return;}
+    const images=attachPostImages(posts);
     const profileIds=[...new Set((posts||[]).flatMap(p=>[p.user_id,...(p.post_comments||[]).map(c=>c.user_id)].filter(Boolean)))];
     let avatarMap={};
     if(profileIds.length){
       const{data:profileRows}=await sb.from('profiles').select('id,avatar_url').in('id',profileIds);
       avatarMap=Object.fromEntries((profileRows||[]).map(p=>[p.id,p.avatar_url||'']));
     }
+    await images;
     el.innerHTML='';
     const isAdmin=sbProfile&&sbProfile.role==='admin';
     posts.forEach(post=>{
@@ -19737,6 +19842,7 @@ async function renderFeedSb(){
           +avatarHtml(c.user_name,avatarMap[c.user_id],'comment-av')
           +'<div class="comment-body"><div class="comment-meta">'+esc(c.user_name)+'<span class="comment-time">'+timeSince(c.created_at)+'</span></div>'
           +'<div class="comment-text">'+esc(c.text_content)+'</div></div>'
+          +communityMoreBtn('comment',c.id,c.user_id,c.user_name)
           +(isAdmin?'<button data-cid="'+esc(c.id)+'" onclick="deleteCommentSb(this.dataset.cid)" style="background:none;border:none;color:var(--red);cursor:pointer;font-size:14px;padding:4px">Eliminar</button>':'')
           +'</div>').join('')
         : '<div style="font-size:12px;color:var(--gray);margin-bottom:8px">Sin comentarios aun.</div>';
@@ -19748,10 +19854,11 @@ async function renderFeedSb(){
         '<div class="post-hdr">'
         +avatarHtml(post.user_name,avatarMap[post.user_id],'post-av')
         +'<div style="flex:1"><div class="post-user">'+esc(post.user_name)+'</div><div class="post-time">'+timeSince(post.created_at)+'</div></div>'
+        +communityMoreBtn('post',post.id,post.user_id,post.user_name)
         +(isAdmin?'<button data-pid="'+post.id+'" onclick="deletePostSb(this.dataset.pid)" style="background:none;border:none;color:var(--red);cursor:pointer;font-size:18px;padding:4px">🗑</button>':'')
         +'</div>'
         +(post.text_content?'<div class="post-body">'+esc(post.text_content)+'</div>':'')
-        +(post.img_url?'<img class="post-img-vertical" src="'+esc(post.img_url)+'">':'')
+        +postImageHtml(post)
         +'<div class="post-reactions">'+rxBtns+'<span style="margin-left:auto;font-size:12px;color:var(--gray);align-self:center">'+comments.length+' coment.</span></div>'
         +'<div class="post-comments">'+commentsHtml
         +'<div class="comment-form"><input type="text" maxlength="300" data-post="'+esc(post.id)+'" data-owner="'+esc(post.user_id)+'" placeholder="Escribe un comentario..." onkeydown="if(event.key===&quot;Enter&quot;)addCommentSb(this)">'
@@ -19770,7 +19877,9 @@ async function toggleReactionSb(btn){
     if(wasActive){
       await sb.from('post_reactions').delete().eq('post_id',postId).eq('user_id',sbUser.id).eq('reaction_type',type);
     }else{
-      await sb.from('post_reactions').insert({post_id:postId,user_id:sbUser.id,reaction_type:type});
+      // Si la base la rechaza (un bloqueo entre los dos, 128) no se cuenta ni se avisa.
+      const{error:rxErr}=await sb.from('post_reactions').insert({post_id:postId,user_id:sbUser.id,reaction_type:type});
+      if(rxErr)throw rxErr;
       const{data:post}=await sb.from('posts').select('user_id').eq('id',postId).single();
       const label={fire:'reaccionó a tu publicación',clap:'aplaudió tu publicación',heart:'le gustó tu publicación'}[type]||'reaccionó a tu publicación';
       await addUserNotif(post?.user_id,'reaction',(curUser?.name||'Alguien')+' '+label,postId);
@@ -19817,29 +19926,40 @@ async function addCommentSb(input){
     }
   }catch(e){
     console.error(e);
-    toast('Error al comentar: '+(e.message||e),'err');
+    // 42501: la RLS lo rechazó, que en un comentario solo pasa con un bloqueo de por medio (128).
+    toast(e&&e.code==='42501'?'No puedes comentar en esta publicación.':'Error al comentar: '+(e.message||e),'err');
   }finally{
     input.disabled=false;
   }
+}
+
+// Borrar es del admin y va por el servidor (service role). El servidor también marca
+// resueltos los reportes pendientes de lo que borra (128).
+async function deleteCommunityItemApi(type,id){
+  const{data:sessionData}=await sb.auth.getSession();
+  const token=sessionData?.session?.access_token;
+  const res=await fetch('/api/delete-community-item',{
+    method:'POST',
+    headers:{'Content-Type':'application/json',Authorization:'Bearer '+token},
+    body:JSON.stringify({type,id})
+  });
+  const payload=await res.json().catch(()=>({}));
+  if(!res.ok)throw new Error(payload.error||'No se pudo eliminar');
+  return payload;
+}
+function refreshAdminCommunityIfOpen(){
+  if(document.getElementById('a-comunidad')?.classList.contains('active'))renderAdminFeed();
 }
 
 async function deletePostSb(postId){
   if(!await confirmSheet('¿Eliminar esta publicación?',{confirmLabel:'Eliminar',danger:true}))return;
   showLoading('Eliminando...');
   try{
-    const{data:sessionData}=await sb.auth.getSession();
-    const token=sessionData?.session?.access_token;
-    const res=await fetch('/api/delete-community-item',{
-      method:'POST',
-      headers:{'Content-Type':'application/json',Authorization:'Bearer '+token},
-      body:JSON.stringify({type:'post',id:postId})
-    });
-    const payload=await res.json().catch(()=>({}));
-    if(!res.ok)throw new Error(payload.error||'No se pudo eliminar');
+    await deleteCommunityItemApi('post',postId);
     hideLoading();
     toast('Publicacion eliminada','ok');
     renderFeedSb();
-    if(document.getElementById('a-comunidad')?.classList.contains('active'))renderAdminFeed();
+    refreshAdminCommunityIfOpen();
   }catch(e){
     hideLoading();
     toast('Error al eliminar: '+(e.message||e),'err');
@@ -19850,34 +19970,230 @@ async function deleteCommentSb(commentId){
   if(!await confirmSheet('¿Eliminar este comentario?',{confirmLabel:'Eliminar',danger:true}))return;
   showLoading('Eliminando...');
   try{
-    const{data:sessionData}=await sb.auth.getSession();
-    const token=sessionData?.session?.access_token;
-    const res=await fetch('/api/delete-community-item',{
-      method:'POST',
-      headers:{'Content-Type':'application/json',Authorization:'Bearer '+token},
-      body:JSON.stringify({type:'comment',id:commentId})
-    });
-    const payload=await res.json().catch(()=>({}));
-    if(!res.ok)throw new Error(payload.error||'No se pudo eliminar');
+    await deleteCommunityItemApi('comment',commentId);
     hideLoading();
     toast('Comentario eliminado','ok');
     renderFeedSb();
+    refreshAdminCommunityIfOpen();
   }catch(e){
     hideLoading();
     toast('Error al eliminar: '+(e.message||e),'err');
   }
 }
 
+// ── COMUNIDAD: REPORTAR Y BLOQUEAR (migración 128) ──
+// Lo que pide Apple a una app con contenido de usuarios (guideline 1.2), en las dos apps:
+// reportar una publicación o un comentario, bloquear a quien molesta, y una cola donde el
+// admin los atiende. El filtro del bloqueo no vive aquí sino en la RLS de posts y
+// post_comments: lo bloqueado ya no llega del servidor, así que renderFeedSb no filtra nada.
+const COMMUNITY_REPORT_REASONS=[
+  {key:'spam',label:'Spam o publicidad'},
+  {key:'acoso',label:'Acoso o intimidación'},
+  {key:'ofensivo',label:'Odio, insultos o violencia'},
+  {key:'sexual',label:'Desnudos o contenido sexual'},
+  {key:'otro',label:'Otra cosa'}
+];
+function communityReasonLabel(k){
+  return(COMMUNITY_REPORT_REASONS.find(r=>r.key===k)||{label:k||'Otro'}).label;
+}
+// Sin la 128 las tablas no existen: 42P01 desde Postgres, PGRST205 desde el caché de PostgREST.
+function isMissingModerationTable(e){
+  const code=e&&e.code,msg=String((e&&e.message)||'');
+  return code==='42P01'||code==='PGRST205'||(/community_(reports|blocks)/.test(msg)&&/does not exist|schema cache/.test(msg));
+}
+function communityModerationError(e){
+  const msg=String((e&&e.message)||e||'');
+  if(isMissingModerationTable(e))return'Esta función todavía no está disponible.';
+  if(/REPORT_OWN_CONTENT/.test(msg))return'No puedes reportar lo que publicaste tú.';
+  if(/REPORT_TARGET_GONE/.test(msg))return'Eso ya no está en la comunidad.';
+  return msg||'No se pudo';
+}
+// El ⋯ solo en lo de otros: lo propio no se reporta ni se bloquea.
+function communityMoreBtn(kind,id,authorId,authorName){
+  if(!id||!authorId||!sbUser||authorId===sbUser.id)return'';
+  return'<button class="post-more-btn'+(kind==='comment'?' comment-more-btn':'')+'" data-kind="'+kind+'" data-id="'+esc(id)+'" data-author="'+esc(authorId)+'" data-name="'+esc(authorName||'')+'" onclick="openCommunityItemMenu(this)" aria-label="Más opciones">⋯</button>';
+}
+async function openCommunityItemMenu(btn){
+  const kind=btn.dataset.kind,id=btn.dataset.id,authorId=btn.dataset.author,name=btn.dataset.name||'este usuario';
+  // El admin no reporta: borra directo con el 🗑 de al lado.
+  const isAdmin=sbProfile&&sbProfile.role==='admin';
+  const choices=[];
+  if(!isAdmin)choices.push({key:'report',label:kind==='comment'?'Reportar comentario':'Reportar publicación'});
+  choices.push({key:'block',label:'Bloquear a '+name,danger:true});
+  const pick=await choiceSheet('',choices,{title:(kind==='comment'?'Comentario de ':'Publicación de ')+name});
+  if(pick==='report')await reportCommunityItem(kind,id,authorId,name);
+  else if(pick==='block')await blockCommunityUser(authorId,name);
+}
+async function reportCommunityItem(kind,id,authorId,name){
+  const reason=await choiceSheet(name+' no sabrá quién lo reportó.',COMMUNITY_REPORT_REASONS,
+    {title:kind==='comment'?'¿Qué pasa con este comentario?':'¿Qué pasa con esta publicación?'});
+  if(!reason)return;
+  let details=null;
+  if(reason==='otro'){
+    details=await promptSheet('Cuéntanos en pocas palabras qué pasa.',{title:'Otra cosa',placeholder:'Opcional',confirmLabel:'Enviar reporte'});
+    if(details===null)return;
+    details=details.trim().slice(0,300)||null;
+  }
+  // Solo qué y por qué: quién reporta y a quién lo pone la base (trigger de la 128).
+  const row=kind==='comment'?{comment_id:id,reason,details}:{post_id:id,reason,details};
+  const{error}=await sb.from('community_reports').insert(row);
+  // 23505: ya tenía un reporte pendiente de esto. Para quien reporta no es un error.
+  if(error&&error.code!=='23505'){toast(communityModerationError(error),'err');return;}
+  // Apple pide atender los reportes a tiempo: además del aviso en Alertas (trigger), un push.
+  if(!error)sendPush('admin','🚩 Reporte en la comunidad',communityReasonLabel(reason)+' · '+(kind==='comment'?'comentario':'publicación')+' de '+name,{tag:'community-report'});
+  const thanks=error?'Ya lo habías reportado; el equipo de HABIT lo está revisando.':'Gracias. El equipo de HABIT lo va a revisar.';
+  if(await confirmSheet(thanks+'\n\n¿También quieres bloquear a '+name+'? Dejarás de ver lo que publica y no podrá ver lo tuyo.',
+    {title:'Reporte enviado',confirmLabel:'Bloquear',cancelLabel:'No, gracias',danger:true}))
+    await blockCommunityUser(authorId,name,{confirmed:true});
+}
+async function blockCommunityUser(userId,name,opts){
+  if(!userId||!sbUser||userId===sbUser.id)return;
+  if(!(opts&&opts.confirmed)&&!await confirmSheet('Dejarás de ver sus publicaciones y comentarios, y no podrá ver ni comentar lo tuyo. No se le avisa. Lo puedes quitar en Perfil.',
+    {title:'¿Bloquear a '+name+'?',confirmLabel:'Bloquear',danger:true}))return;
+  const{error}=await sb.from('community_blocks').insert({blocked_id:userId});
+  if(error&&error.code!=='23505'){toast(communityModerationError(error),'err');return;}
+  toast(name+' bloqueado','ok');
+  if(document.getElementById('v-comunidad')?.classList.contains('active'))renderFeedSb();
+  if(document.getElementById('v-perfil')?.classList.contains('active'))renderPerfilBlocks();
+}
+async function renderPerfilBlocks(){
+  const el=document.getElementById('perfil-blocks');
+  const section=document.getElementById('perfil-blocks-section');
+  if(!el||!sbUser)return;
+  try{
+    const{data,error}=await sb.from('community_blocks').select('blocked_id,created_at')
+      .eq('blocker_id',sbUser.id).order('created_at',{ascending:false});
+    if(error)throw error;
+    if(section)section.style.display='';
+    const ids=(data||[]).map(r=>r.blocked_id);
+    if(!ids.length){
+      el.innerHTML='<p class="perfil-delete-hint" style="margin:0">No has bloqueado a nadie. Para bloquear a alguien, toca ⋯ en una publicación o un comentario suyo.</p>';
+      return;
+    }
+    const{data:cards}=await sb.from('profile_cards').select('id,name,avatar_url').in('id',ids);
+    const byId=Object.fromEntries((cards||[]).map(c=>[c.id,c]));
+    el.innerHTML='<p class="perfil-delete-hint" style="margin:0 0 4px">No ves lo que publican y no pueden ver lo tuyo.</p>'
+      +ids.map(id=>{
+        const c=byId[id]||{},name=c.name||'Usuario';
+        return'<div class="perfil-block-row">'+avatarHtml(name,c.avatar_url,'comment-av')
+          +'<span class="perfil-block-name">'+esc(name)+'</span>'
+          +'<button class="btn-sm bblue" data-uid="'+esc(id)+'" data-name="'+esc(name)+'" onclick="unblockCommunityUser(this)">Desbloquear</button></div>';
+      }).join('');
+  }catch(e){
+    // Sin la 128 la sección no tiene nada que mostrar; se esconde en vez de enseñar un error.
+    if(isMissingModerationTable(e)){if(section)section.style.display='none';return;}
+    console.warn('renderPerfilBlocks:',e);
+    el.innerHTML='<p class="perfil-delete-hint" style="margin:0">No se pudieron cargar tus bloqueos.</p>';
+  }
+}
+async function unblockCommunityUser(btn){
+  const id=btn.dataset.uid,name=btn.dataset.name||'Usuario';
+  btn.disabled=true;
+  const{error}=await sb.from('community_blocks').delete().eq('blocker_id',sbUser.id).eq('blocked_id',id);
+  if(error){btn.disabled=false;toast(communityModerationError(error),'err');return;}
+  toast(name+' desbloqueado','ok');
+  renderPerfilBlocks();
+}
+
+// Cola del admin: los reportes pendientes, agrupados por lo reportado (tres reportes de la
+// misma publicación son una sola decisión). Lo reportado se muestra desde la copia que guardó
+// el reporte, no desde el feed: así se ve aunque el autor ya lo haya borrado.
+async function renderAdminReports(){
+  const el=document.getElementById('adm-reports-content');
+  if(!el)return;
+  try{
+    const{data:reports,error}=await sb.from('community_reports')
+      .select('id,target_kind,post_id,comment_id,reported_user_id,reporter_id,reason,details,author_name,content_snapshot,img_snapshot,created_at')
+      .eq('status','pendiente').order('created_at',{ascending:true}).limit(200);
+    if(error)throw error;
+    adminPendingReports=(reports||[]).length;
+    setAdminHeaderBadge('adm-comunidad-badge',adminPendingReports);
+    if(!adminPendingReports){el.innerHTML='<p class="slbl" style="margin-bottom:6px">Reportes</p><div class="mod-empty">Sin reportes pendientes.</div>';return;}
+    const groups=[],byKey={};
+    reports.forEach(r=>{
+      const target=r.target_kind==='comment'?r.comment_id:r.post_id;
+      // Lo ya borrado no tiene id: se agrupa por su copia.
+      const key=target?r.target_kind+':'+target:'gone:'+r.target_kind+':'+(r.reported_user_id||'')+':'+(r.content_snapshot||'')+':'+(r.img_snapshot||'');
+      if(!byKey[key]){byKey[key]={kind:r.target_kind,targetId:target,first:r,reports:[]};groups.push(byKey[key]);}
+      byKey[key].reports.push(r);
+    });
+    // Lo más reportado arriba; a igual número, lo que lleva más tiempo esperando.
+    groups.sort((a,b)=>b.reports.length-a.reports.length||(a.first.created_at||'').localeCompare(b.first.created_at||''));
+    const reporterIds=[...new Set(reports.map(r=>r.reporter_id).filter(Boolean))];
+    const authorIds=[...new Set(reports.map(r=>r.reported_user_id).filter(Boolean))];
+    const[cardsRes,blocksRes]=await Promise.all([
+      reporterIds.length?sb.from('profile_cards').select('id,name').in('id',reporterIds):Promise.resolve({data:[]}),
+      authorIds.length?sb.from('community_blocks').select('blocked_id').in('blocked_id',authorIds):Promise.resolve({data:[]})
+    ]);
+    const names=Object.fromEntries((cardsRes.data||[]).map(p=>[p.id,p.name||'Usuario']));
+    const blockCount={};
+    (blocksRes.data||[]).forEach(b=>{blockCount[b.blocked_id]=(blockCount[b.blocked_id]||0)+1;});
+    el.innerHTML='<p class="slbl" style="margin-bottom:10px">Reportes pendientes · '+adminPendingReports+'</p>'
+      +groups.map(g=>{
+        const r0=g.first,n=g.reports.length,isComment=g.kind==='comment';
+        const blocked=blockCount[r0.reported_user_id]||0;
+        const ids=g.reports.map(r=>r.id).join(',');
+        const ago=timeSince(r0.created_at);
+        return'<div class="mod-report">'
+          +'<div class="mod-report-title">'+(isComment?'Comentario':'Publicación')+' de '+esc(r0.author_name||'Usuario')+'</div>'
+          +'<div class="mod-report-sub">'+n+' reporte'+(n===1?'':'s')+' · el primero '+(ago==='Ahora'?'hace un momento':'hace '+ago)
+            +(blocked?' · '+blocked+(blocked===1?' persona lo bloqueó':' personas lo bloquearon'):'')+'</div>'
+          +(r0.content_snapshot?'<div class="mod-report-content">'+esc(r0.content_snapshot)+'</div>':'')
+          +(r0.img_snapshot?'<img class="mod-report-img" src="'+esc(r0.img_snapshot)+'" alt="">':'')
+          +(!g.targetId?'<div class="mod-report-gone">Ya no está en la comunidad (lo borró su autor o se borró la cuenta).</div>':'')
+          +'<div class="mod-report-reasons">'+g.reports.map(r=>'<div class="mod-reason"><strong>'+esc(communityReasonLabel(r.reason))+'</strong> · '
+            +esc(r.reporter_id?(names[r.reporter_id]||'Usuario'):'Cuenta borrada')+' · '+timeSince(r.created_at)
+            +(r.details?'<div class="mod-reason-detail">“'+esc(r.details)+'”</div>':'')+'</div>').join('')+'</div>'
+          +'<div class="mod-report-actions">'
+          +(g.targetId
+            ?'<button class="btn-sm bred" data-kind="'+g.kind+'" data-id="'+esc(g.targetId)+'" onclick="deleteReportedItemSb(this)">Borrar '+(isComment?'comentario':'publicación')+'</button>'
+            :'<button class="btn-sm bblue" data-ids="'+esc(ids)+'" data-status="resuelto" onclick="setReportsStatusSb(this)">Marcar resuelto</button>')
+          +'<button class="btn-sm" data-ids="'+esc(ids)+'" data-status="descartado" onclick="setReportsStatusSb(this)">Descartar</button>'
+          +'</div></div>';
+      }).join('');
+  }catch(e){
+    if(isMissingModerationTable(e)){el.innerHTML='<div class="mod-empty">Reportes: falta correr la migración 128 en Supabase.</div>';return;}
+    console.warn('renderAdminReports:',e);
+    el.innerHTML='<div class="mod-empty">No se pudieron cargar los reportes: '+esc(e.message||e)+'</div>';
+  }
+}
+async function deleteReportedItemSb(btn){
+  const isComment=btn.dataset.kind==='comment',id=btn.dataset.id;
+  if(!await confirmSheet((isComment?'Se borra el comentario':'Se borra la publicación, con sus comentarios,')+' para todos, y sus reportes quedan resueltos.',
+    {title:isComment?'¿Borrar este comentario?':'¿Borrar esta publicación?',confirmLabel:'Borrar',danger:true}))return;
+  showLoading('Eliminando...');
+  try{
+    await deleteCommunityItemApi(isComment?'comment':'post',id);
+    hideLoading();
+    toast(isComment?'Comentario eliminado':'Publicación eliminada','ok');
+    renderAdminFeed();
+  }catch(e){
+    hideLoading();
+    toast('Error al eliminar: '+(e.message||e),'err');
+  }
+}
+// Descartar = lo reportado se queda. Quién y cuándo lo pone la base (trigger de la 128).
+async function setReportsStatusSb(btn){
+  const ids=(btn.dataset.ids||'').split(',').filter(Boolean),status=btn.dataset.status;
+  if(!ids.length)return;
+  btn.disabled=true;
+  const{error}=await sb.from('community_reports').update({status}).in('id',ids);
+  if(error){btn.disabled=false;toast('Error: '+error.message,'err');return;}
+  toast(status==='descartado'?(ids.length===1?'Reporte descartado':'Reportes descartados'):'Marcado como resuelto','ok');
+  renderAdminReports();
+}
 
 async function renderAdminFeed(){
   const el=document.getElementById('adm-feed-content');
   if(!el)return;
+  renderAdminReports();
   el.innerHTML='<div class="empty">Cargando...</div>';
   try{
-    const{data:posts,error}=await sb.from('posts').select('*,post_reactions(user_id,reaction_type)').order('created_at',{ascending:false}).limit(100);
+    const{data:posts,error}=await sb.from('posts').select(POST_LIST_COLUMNS+',post_reactions(user_id,reaction_type)').order('created_at',{ascending:false}).limit(100);
     if(error)throw error;
     markAdminCommunitySeen(posts||[]);
     if(!posts||!posts.length){el.innerHTML='<div class="empty">Sin publicaciones.</div>';return;}
+    await attachPostImages(posts);
     const profileIds=[...new Set((posts||[]).map(p=>p.user_id).filter(Boolean))];
     let avatarMap={};
     if(profileIds.length){
@@ -19896,7 +20212,7 @@ async function renderAdminFeed(){
         +'<button data-pid="'+post.id+'" onclick="deletePostSb(this.dataset.pid)" style="background:none;border:none;color:var(--red);cursor:pointer;font-size:18px;padding:4px">🗑</button>'
         +'</div>'
         +(post.text_content?'<div class="post-body">'+esc(post.text_content)+'</div>':'')
-        +(post.img_url?'<img class="post-img-vertical" src="'+esc(post.img_url)+'">':'')
+        +postImageHtml(post)
         +'<div class="post-reactions" style="pointer-events:none">'
         +'<span class="reaction-btn">🔥 '+counts.fire+'</span>'
         +'<span class="reaction-btn">👏 '+counts.clap+'</span>'
