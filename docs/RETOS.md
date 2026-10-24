@@ -249,7 +249,8 @@ Fuera de la Fase 1 a propósito: notificaciones, cronómetro, feed.
 - [x] Se ve bien a 375 px.
 - [x] Versión subida en todos los lugares que pide `CLAUDE.md` (`20261024-1`).
 - [x] `CLAUDE.md` describe las tablas nuevas y la vista.
-- [ ] Probado en el iPhone con la 129 corrida.
+- [x] 128 y 129 corridas en Supabase; publicado (`e2db310`, versión `20261024-1`).
+- [ ] Probado en el iPhone con cuentas reales.
 
 ---
 
@@ -300,3 +301,14 @@ Fuera de la Fase 1 a propósito: notificaciones, cronómetro, feed.
     reportar una marca y la cola del admin. Encontrado y arreglado: las pestañas usaban la grilla
     de tres columnas de `.admin-segmented`.
   - **No verificado** contra la base real ni en el iPhone.
+- **24 oct 2026** — **128 y 129 corridas en Supabase** (las corrió Joseph) y publicado en Vercel
+  (`e2db310`, versión `20261024-1`).
+  - Comprobado contra producción, solo lectura y con la llave pública: `challenges`,
+    `challenge_entries`, `challenge_standings`, `challenge_cards`, `community_blocks` y las
+    columnas `challenge_id` / `entry_id` de `community_reports` existen (responden 42501, permiso
+    denegado; una tabla o columna inventada responde PGRST205 / 42703), y `anon` no lee ninguna
+    ni ejecuta `challenge_is_open`. `/crew`, `/app`, `sw.js` y los manifests sirven la versión
+    nueva con Retos.
+  - **Falta:** la prueba con sesión (proponer, registrar, corregir, reportar, bloquear, moderar)
+    con dos cuentas reales en el iPhone. No se hizo desde aquí: un reto de prueba lo vería toda
+    la comunidad.
