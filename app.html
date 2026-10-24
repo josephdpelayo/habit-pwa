@@ -6,12 +6,12 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="HABIT">
 <meta name="application-name" content="HABIT">
-<link rel="manifest" href="/manifest.json?v=20261024-3">
-<link rel="apple-touch-icon" sizes="120x120" href="/icons/icon-120.png?v=20261024-3">
-<link rel="apple-touch-icon" sizes="152x152" href="/icons/icon-152.png?v=20261024-3">
-<link rel="apple-touch-icon" sizes="167x167" href="/icons/icon-167.png?v=20261024-3">
-<link rel="apple-touch-icon" sizes="180x180" href="/icons/icon-180.png?v=20261024-3">
-<link rel="icon" type="image/png" sizes="32x32" href="/icons/icon-32.png?v=20261024-3">
+<link rel="manifest" href="/manifest.json?v=20261024-4">
+<link rel="apple-touch-icon" sizes="120x120" href="/icons/icon-120.png?v=20261024-4">
+<link rel="apple-touch-icon" sizes="152x152" href="/icons/icon-152.png?v=20261024-4">
+<link rel="apple-touch-icon" sizes="167x167" href="/icons/icon-167.png?v=20261024-4">
+<link rel="apple-touch-icon" sizes="180x180" href="/icons/icon-180.png?v=20261024-4">
+<link rel="icon" type="image/png" sizes="32x32" href="/icons/icon-32.png?v=20261024-4">
 <title>HABIT</title>
 <!-- Con id a propósito: scripts/check-training.js toma la primera etiqueta script sin
      atributos como el script principal de la app y la compila. -->
@@ -25,7 +25,7 @@
   var crew=/^\/crew(\/|$)/.test(location.pathname);
   window.HABIT_BRAND=crew?'crew':'gym';
   if(!crew)return;
-  var v='20261024-3';
+  var v='20261024-4';
   document.documentElement.classList.add('brand-crew');
   document.title='HABIT Crew';
   document.querySelectorAll('meta[name="apple-mobile-web-app-title"],meta[name="application-name"]')
@@ -40,9 +40,9 @@
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Share+Tech+Mono&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="/skandi-recovery.js?v=20261024-3"></script>
-<script src="/body-figure.js?v=20261024-3"></script>
-<script src="/habit-training.js?v=20261024-3"></script>
+<script src="/skandi-recovery.js?v=20261024-4"></script>
+<script src="/body-figure.js?v=20261024-4"></script>
+<script src="/habit-training.js?v=20261024-4"></script>
 <style>
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
 @media (prefers-reduced-motion:reduce){*,*:before,*:after{scroll-behavior:auto!important;animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}}
@@ -3784,7 +3784,7 @@ const GYM_ONLY_VIEWS=['book','planes','historial','shop'];
 const GYM_APP_URL='/';
 document.querySelectorAll('.brand-name').forEach(el=>{el.textContent=BRAND_NAME;});
 const SUPABASE_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBtcGp0ZXVxanVzYmlkdWV2YndxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc2OTI1NjUsImV4cCI6MjA5MzI2ODU2NX0.XbMzZoo2yqtrD8znLnyo_1zDfrdJAvAPj1lqGOyXnLw';
-const APP_VERSION='20261024-3';
+const APP_VERSION='20261024-4';
 // La pierna va separada en cuádriceps, femorales y pantorrillas: la figura
 // corporal pinta esas tres regiones por separado y el motor de recuperación les
 // da ventanas de descanso distintas. 'Piernas' sigue reconociéndose al leer
@@ -4170,6 +4170,15 @@ function toggleBoardExerciseDetails(bid,idx){
 const PUBLIC_APP_URL='https://habittraininghub.app/app.html';
 const PUBLIC_API_ORIGIN='https://www.habittraininghub.app';
 const SHOP_ALLOWED_EMAILS=['josephdpelayo@gmail.com'];
+// En prueba (24 oct 2026): en HABIT (el gym) Retos no existe para nadie salvo estas cuentas —
+// ni la pestaña, ni las tarjetas del feed, ni Inicio, ni los avisos—; en HABIT Crew, para todos.
+// El admin sigue moderando desde Admin → Comunidad. Abrirlo en HABIT es vaciar esta condición.
+const RETOS_HABIT_TEST_EMAILS=['josephdpelayo@gmail.com'];
+function retosEnabled(){
+  if(IS_CREW)return true;
+  const email=String((sbUser&&sbUser.email)||'').toLowerCase();
+  return RETOS_HABIT_TEST_EMAILS.includes(email);
+}
 const sb=supabase.createClient(SUPABASE_URL,SUPABASE_KEY,{auth:{autoRefreshToken:true,persistSession:true,detectSessionInUrl:true}});
 let pendingProfilePhoto=null;
 let sbUser=null,sbProfile=null;
@@ -5028,7 +5037,10 @@ async function renderUserNotifsSb(){
   const el=document.getElementById('notif-wrap');
   if(!el||!sbUser)return;
   try{
-    const{data}=await sb.from('user_notifications').select('*').eq('user_id',sbUser.id).order('created_at',{ascending:false}).limit(5);
+    let nq=sb.from('user_notifications').select('*').eq('user_id',sbUser.id);
+    // Sin Retos (HABIT en prueba), los avisos de retos que lleguen por Crew no salen aquí.
+    if(!retosEnabled())nq=nq.is('challenge_id',null);
+    const{data}=await nq.order('created_at',{ascending:false}).limit(5);
     if(!data||!data.length){el.innerHTML='';return;}
     data.forEach(n=>{
       if(!userNotifSeen.has(n.id)){
@@ -20660,6 +20672,11 @@ function setCommunityTab(t){
   renderCommunityTab();
 }
 function renderCommunityTab(){
+  const on=retosEnabled();
+  const tabs=document.querySelector('.comm-tabs');
+  if(tabs)tabs.style.display=on?'':'none';
+  // Sin Retos se ve el feed, sin tocar la pestaña guardada (es de quien sí lo ve en Crew).
+  if(!on&&communityTab==='retos'){communityTab='feed';}
   document.querySelectorAll('.comm-tabs .fin-subtab').forEach(b=>b.classList.toggle('active',b.dataset.ctab===communityTab));
   const feed=document.getElementById('comm-feed-pane'),retos=document.getElementById('comm-retos-pane');
   if(feed)feed.style.display=communityTab==='feed'?'':'none';
@@ -21230,6 +21247,7 @@ async function renderAdminRetos(){
 // Feed: un reto nuevo sale como tarjeta entre las publicaciones. Sin la 129, o si algo falla,
 // el feed sigue igual: los retos son un extra, nunca lo que impide ver la comunidad.
 async function loadFeedRetos(sinceIso){
+  if(!retosEnabled())return[];
   try{
     let q=sb.from('challenge_cards').select('*').eq('status','activo').order('created_at',{ascending:false}).limit(10);
     if(sinceIso)q=q.gte('created_at',sinceIso);
@@ -21264,6 +21282,7 @@ function feedRetoCardHtml(c){
 async function renderInicioRetos(){
   const el=document.getElementById('inicio-retos');
   if(!el||!sbUser)return;
+  if(!retosEnabled()){el.innerHTML='';return;}
   try{
     const{data:mine,error:mineErr}=await sb.from('challenge_standings')
       .select('challenge_id,place,score_label,division').eq('user_id',sbUser.id);

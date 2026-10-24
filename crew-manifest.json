@@ -3,7 +3,7 @@
   "short_name": "HABIT Crew",
   "description": "Entrena donde sea, registra tus pesos y sé parte de la comunidad HABIT",
   "id": "/crew",
-  "start_url": "/crew?v=20261024-3",
+  "start_url": "/crew?v=20261024-4",
   "scope": "/",
   "display": "standalone",
   "orientation": "portrait",

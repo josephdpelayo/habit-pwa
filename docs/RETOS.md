@@ -362,3 +362,11 @@ Fuera de la Fase 1 a propósito: notificaciones, cronómetro, feed.
     insertar avisos `challenge_*`. Los confirma la prueba con dos cuentas en el iPhone: registrar
     en un reto ajeno → al autor le llega «registró su marca en tu reto»; pasar a alguien → «te
     pasó».
+- **24 oct 2026** — **Retos en prueba: en HABIT (el gym) no lo ve nadie** salvo
+  `RETOS_HABIT_TEST_EMAILS` (hoy, Joseph); en **HABIT Crew sigue para todos**. `retosEnabled()`
+  esconde la pestaña Retos, las tarjetas del feed, «Tus retos» en Inicio y los avisos de retos
+  (`user_notifications.challenge_id` no nulo); la app ni siquiera consulta las tablas. Lo que
+  queda abierto: Admin → Comunidad (el admin modera) y el push a quien ya participa desde Crew.
+  Abrirlo en HABIT es hacer que `retosEnabled()` devuelva `true`. Versión `20261024-4`.
+  Verificado en local: en `/app` una cuenta cualquiera no ve nada ni consulta retos, la de Joseph
+  lo ve todo; en `/crew` está abierto con cualquier cuenta.

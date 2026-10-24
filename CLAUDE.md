@@ -412,6 +412,7 @@ places. PRs live in **Progreso** only: Historial used to render them too, with i
   es insert y corregir update por id, no upsert (`challenge_id` no tiene permiso de update).
   Respeta los bloqueos de la 128 (restrictive) y se reporta por `community_reports.challenge_id`
   / `entry_id`; borrar desde el admin resuelve los reportes por trigger, sin endpoint.
+  **En prueba: en HABIT solo lo ven `RETOS_HABIT_TEST_EMAILS`; en Crew, todos** (`retosEnabled()`).
   En la app es la pestaña Retos de Comunidad (`setCommunityTab`) y una sola hoja, `#reto-modal`,
   con tres modos en `retoOpen.mode` (detalle / proponer-editar / registrar marca); el admin
   modera abriendo el mismo reto. `COMMUNITY_ITEM_KINDS` nombra los cuatro tipos reportables.
