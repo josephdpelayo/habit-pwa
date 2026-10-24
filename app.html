@@ -6,12 +6,12 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="HABIT">
 <meta name="application-name" content="HABIT">
-<link rel="manifest" href="/manifest.json?v=20261023-6">
-<link rel="apple-touch-icon" sizes="120x120" href="/icons/icon-120.png?v=20261023-6">
-<link rel="apple-touch-icon" sizes="152x152" href="/icons/icon-152.png?v=20261023-6">
-<link rel="apple-touch-icon" sizes="167x167" href="/icons/icon-167.png?v=20261023-6">
-<link rel="apple-touch-icon" sizes="180x180" href="/icons/icon-180.png?v=20261023-6">
-<link rel="icon" type="image/png" sizes="32x32" href="/icons/icon-32.png?v=20261023-6">
+<link rel="manifest" href="/manifest.json?v=20261024-1">
+<link rel="apple-touch-icon" sizes="120x120" href="/icons/icon-120.png?v=20261024-1">
+<link rel="apple-touch-icon" sizes="152x152" href="/icons/icon-152.png?v=20261024-1">
+<link rel="apple-touch-icon" sizes="167x167" href="/icons/icon-167.png?v=20261024-1">
+<link rel="apple-touch-icon" sizes="180x180" href="/icons/icon-180.png?v=20261024-1">
+<link rel="icon" type="image/png" sizes="32x32" href="/icons/icon-32.png?v=20261024-1">
 <title>HABIT</title>
 <!-- Con id a propósito: scripts/check-training.js toma la primera etiqueta script sin
      atributos como el script principal de la app y la compila. -->
@@ -25,7 +25,7 @@
   var crew=/^\/crew(\/|$)/.test(location.pathname);
   window.HABIT_BRAND=crew?'crew':'gym';
   if(!crew)return;
-  var v='20261023-6';
+  var v='20261024-1';
   document.documentElement.classList.add('brand-crew');
   document.title='HABIT Crew';
   document.querySelectorAll('meta[name="apple-mobile-web-app-title"],meta[name="application-name"]')
@@ -40,9 +40,9 @@
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Share+Tech+Mono&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="/skandi-recovery.js?v=20261023-6"></script>
-<script src="/body-figure.js?v=20261023-6"></script>
-<script src="/habit-training.js?v=20261023-6"></script>
+<script src="/skandi-recovery.js?v=20261024-1"></script>
+<script src="/body-figure.js?v=20261024-1"></script>
+<script src="/habit-training.js?v=20261024-1"></script>
 <style>
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
 @media (prefers-reduced-motion:reduce){*,*:before,*:after{scroll-behavior:auto!important;animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}}
@@ -1058,6 +1058,49 @@ input,select,button,textarea{font-family:'Inter',sans-serif}
 .mod-report-reasons{display:grid;gap:6px;margin-top:10px}
 .mod-reason{font-size:12px;color:var(--gl);line-height:1.45}
 .mod-reason strong{color:var(--white);font-weight:700}
+/* Retos (migración 129) */
+.admin-segmented.comm-tabs{grid-template-columns:repeat(2,minmax(0,1fr))}
+.retos-bar{display:flex;align-items:center;gap:8px;margin-bottom:12px}
+.retos-chips{display:flex;gap:6px;overflow-x:auto;flex:1;min-width:0;-webkit-overflow-scrolling:touch}
+.retos-bar .btn-sm{min-height:38px;flex-shrink:0}
+.retos-empty{text-align:center;padding:1.6rem .5rem;font-size:13px;color:var(--gray);line-height:1.55}
+.retos-empty .btn-sm{margin-top:12px;min-height:38px}
+.reto-card{display:block;width:100%;text-align:left;background:var(--card);border:1px solid var(--border);border-radius:10px;padding:12px 14px;margin-bottom:10px;color:var(--white);cursor:pointer;font:inherit}
+.reto-card:active{background:var(--card2)}
+.reto-card.is-official{border-color:rgba(37,99,235,.55)}
+.reto-card-top{display:flex;align-items:center;gap:6px;flex-wrap:wrap;font-size:10.5px;color:var(--gray);font-weight:700;letter-spacing:.03em}
+.reto-type{color:var(--bl);text-transform:uppercase}
+.reto-badge{padding:2px 7px;border-radius:999px;background:rgba(37,99,235,.16);color:var(--bl);font-size:9.5px;font-weight:800;text-transform:uppercase;letter-spacing:.04em}
+.reto-badge.is-hidden{background:rgba(239,68,68,.12);color:#fca5a5}
+.reto-when{margin-left:auto;white-space:nowrap}
+.reto-title{font-size:16px;font-weight:800;margin-top:6px;line-height:1.3;word-break:break-word}
+.reto-meta{font-size:11.5px;color:var(--gray);margin-top:4px;line-height:1.4}
+.reto-mine{margin-top:9px;padding:7px 10px;border-radius:8px;background:rgba(37,99,235,.1);font-size:12px;color:var(--gl);line-height:1.4}
+.reto-mine strong{color:var(--white)}
+.reto-hdr-actions{display:flex;align-items:center;gap:4px;flex-shrink:0}
+.reto-back{background:none;border:none;color:var(--white);font-size:26px;line-height:1;padding:0 4px 2px 0;cursor:pointer;flex-shrink:0}
+#reto-modal-title{flex:1;min-width:0}
+.reto-body{padding:12px 14px;line-height:1.5}
+.reto-info{display:flex;flex-wrap:wrap;gap:6px;align-items:center;font-size:12px;color:var(--gray);line-height:1.45}
+.reto-wod{margin:12px 0 14px;padding:12px;border-radius:10px;background:var(--card2);font-size:14px;color:var(--white);line-height:1.55;white-space:pre-wrap;word-break:break-word}
+.reto-board-empty{font-size:13px;color:var(--gray);padding:12px 0}
+.reto-row{display:flex;align-items:center;gap:10px;padding:10px 4px;border-bottom:1px solid var(--border)}
+.reto-row.is-me{background:rgba(37,99,235,.11);border-radius:8px;border-bottom-color:transparent;padding-left:8px;padding-right:8px}
+.reto-place{width:28px;flex-shrink:0;text-align:center;font-weight:800;color:var(--gray);font-size:13px;font-variant-numeric:tabular-nums}
+.reto-place.is-podium{color:var(--white)}
+.reto-row-main{flex:1;min-width:0}
+.reto-row-name{font-size:13.5px;font-weight:700;color:var(--white);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.reto-row-note{font-size:11.5px;color:var(--gray);word-break:break-word;margin-top:1px}
+.reto-row-score{font-size:14px;font-weight:800;color:var(--white);white-space:nowrap;font-variant-numeric:tabular-nums}
+.reto-proof{color:var(--bl);font-size:11px;font-weight:700;text-decoration:none;flex-shrink:0;padding:6px 4px}
+.reto-del{background:none;border:none;color:var(--red);font-size:15px;cursor:pointer;padding:4px;flex-shrink:0}
+.reto-chips{display:flex;flex-wrap:wrap;gap:6px}
+.reto-hint{font-size:12px;color:var(--gray);line-height:1.45;margin:8px 0 0}
+.reto-check{display:flex;align-items:center;gap:10px;font-size:13px;color:var(--gl);margin:0 0 12px;cursor:pointer;line-height:1.4}
+.reto-check input{width:20px;height:20px;accent-color:var(--blue);flex-shrink:0}
+.reto-foot{display:grid;gap:6px}
+.reto-link{background:none;border:none;color:var(--gray);font-size:12.5px;text-decoration:underline;cursor:pointer;padding:6px}
+.reto-locked{font-size:12px;color:var(--amber);line-height:1.45;margin:0 0 12px}
 .mod-reason-detail{margin-top:2px;color:var(--gray);font-style:italic;word-break:break-word}
 .mod-report-actions{display:flex;gap:8px;margin-top:12px}
 .mod-report-actions button{flex:1;min-height:38px}
@@ -2811,6 +2854,12 @@ body.admin-mode #courtesy-modal label{border-radius:14px!important;border-color:
   <!-- COMUNIDAD -->
   <div id="v-comunidad" class="view">
     <div class="scroll-area">
+      <div class="admin-segmented comm-tabs">
+        <button class="fin-subtab active" data-ctab="feed" onclick="setCommunityTab('feed')">Feed</button>
+        <button class="fin-subtab" data-ctab="retos" onclick="setCommunityTab('retos')">Retos</button>
+      </div>
+      <div id="comm-retos-pane" style="display:none"><div id="retos-content"></div></div>
+      <div id="comm-feed-pane">
       <div class="new-post-box">
         <textarea id="post-text" placeholder="¿Cómo fue tu entrenamiento hoy?" rows="3"></textarea>
         <div id="post-img-preview" style="display:none;margin-top:8px"></div>
@@ -2823,6 +2872,7 @@ body.admin-mode #courtesy-modal label{border-radius:14px!important;border-color:
         </div>
       </div>
       <div id="feed-content"></div>
+      </div>
     </div>
   </div>
 
@@ -3190,6 +3240,7 @@ body.admin-mode #courtesy-modal label{border-radius:14px!important;border-color:
         <div><div class="admin-page-kicker">Comunidad</div><h2 class="admin-page-title">Comunidad</h2><div class="admin-page-sub">Publicaciones y moderación</div></div>
       </div>
       <div id="adm-reports-content"></div>
+      <div id="adm-retos-content"></div>
       <div id="adm-feed-content"></div>
     </div>
 
@@ -3503,6 +3554,22 @@ body.admin-mode #courtesy-modal label{border-radius:14px!important;border-color:
   </div>
 </div>
 
+<!-- UN RETO: detalle con su tabla, proponer/editar y registrar marca (migración 129) -->
+<div id="reto-modal" class="terms-modal" style="display:none">
+  <div class="terms-box" style="max-height:92vh">
+    <div class="terms-hdr">
+      <button id="reto-back" class="reto-back" onclick="retoBack()" style="display:none" aria-label="Volver">‹</button>
+      <h2 id="reto-modal-title">Reto</h2>
+      <div class="reto-hdr-actions">
+        <button id="reto-more" class="post-more-btn" onclick="openRetoMenu()" style="display:none" aria-label="Más opciones">⋯</button>
+        <button class="video-modal-close" onclick="closeReto()">Cerrar</button>
+      </div>
+    </div>
+    <div class="terms-body reto-body" id="reto-modal-body"></div>
+    <div class="terms-footer" id="reto-modal-foot" style="display:none"></div>
+  </div>
+</div>
+
 <!-- CONFIRMACIONES Y PREGUNTAS (sustituyen a await confirmSheet()/await promptSheet() del navegador) -->
 <div class="confirm-overlay" id="confirm-overlay"></div>
 
@@ -3690,7 +3757,7 @@ const GYM_ONLY_VIEWS=['book','planes','historial','shop'];
 const GYM_APP_URL='/';
 document.querySelectorAll('.brand-name').forEach(el=>{el.textContent=BRAND_NAME;});
 const SUPABASE_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBtcGp0ZXVxanVzYmlkdWV2YndxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc2OTI1NjUsImV4cCI6MjA5MzI2ODU2NX0.XbMzZoo2yqtrD8znLnyo_1zDfrdJAvAPj1lqGOyXnLw';
-const APP_VERSION='20261023-6';
+const APP_VERSION='20261024-1';
 // La pierna va separada en cuádriceps, femorales y pantorrillas: la figura
 // corporal pinta esas tres regiones por separado y el motor de recuperación les
 // da ventanas de descanso distintas. 'Piernas' sigue reconociéndose al leer
@@ -6255,7 +6322,7 @@ function sv(v){
   if(v==='rutinas'){renderRutinas().catch(console.error);}
   if(v==='progreso'){renderProgreso().catch(console.error);}
   if(v==='coaching'){renderCoachHub();}
-  if(v==='comunidad'){renderFeedSb().catch(console.error);}
+  if(v==='comunidad'){renderCommunityTab();}
   if(v==='shop'){renderShop('shop-content',false);loadShopProducts().then(()=>renderShop('shop-content',false)).catch(()=>{});handleShopReturn();}
   if(v==='historial'){renderHistorial().catch(console.error);}
   if(v==='perfil'){renderPerfil().catch(console.error);}
@@ -20265,6 +20332,14 @@ const COMMUNITY_REPORT_REASONS=[
   {key:'sexual',label:'Desnudos o contenido sexual'},
   {key:'otro',label:'Otra cosa'}
 ];
+// Lo que se puede reportar: publicaciones y comentarios (128), retos y sus marcas (129).
+const COMMUNITY_ITEM_KINDS={
+  post:{noun:'publicación',title:'Publicación de ',ask:'¿Qué pasa con esta publicación?'},
+  comment:{noun:'comentario',title:'Comentario de ',ask:'¿Qué pasa con este comentario?'},
+  challenge:{noun:'reto',title:'Reto de ',ask:'¿Qué pasa con este reto?'},
+  entry:{noun:'marca',title:'Marca de ',ask:'¿Qué pasa con esta marca?'}
+};
+function communityKind(k){return COMMUNITY_ITEM_KINDS[k]||COMMUNITY_ITEM_KINDS.post;}
 function communityReasonLabel(k){
   return(COMMUNITY_REPORT_REASONS.find(r=>r.key===k)||{label:k||'Otro'}).label;
 }
@@ -20290,15 +20365,15 @@ async function openCommunityItemMenu(btn){
   // El admin no reporta: borra directo con el 🗑 de al lado.
   const isAdmin=sbProfile&&sbProfile.role==='admin';
   const choices=[];
-  if(!isAdmin)choices.push({key:'report',label:kind==='comment'?'Reportar comentario':'Reportar publicación'});
+  if(!isAdmin)choices.push({key:'report',label:'Reportar '+communityKind(kind).noun});
   choices.push({key:'block',label:'Bloquear a '+name,danger:true});
-  const pick=await choiceSheet('',choices,{title:(kind==='comment'?'Comentario de ':'Publicación de ')+name});
+  const pick=await choiceSheet('',choices,{title:communityKind(kind).title+name});
   if(pick==='report')await reportCommunityItem(kind,id,authorId,name);
   else if(pick==='block')await blockCommunityUser(authorId,name);
 }
 async function reportCommunityItem(kind,id,authorId,name){
   const reason=await choiceSheet(name+' no sabrá quién lo reportó.',COMMUNITY_REPORT_REASONS,
-    {title:kind==='comment'?'¿Qué pasa con este comentario?':'¿Qué pasa con esta publicación?'});
+    {title:communityKind(kind).ask});
   if(!reason)return;
   let details=null;
   if(reason==='otro'){
@@ -20307,12 +20382,13 @@ async function reportCommunityItem(kind,id,authorId,name){
     details=details.trim().slice(0,300)||null;
   }
   // Solo qué y por qué: quién reporta y a quién lo pone la base (trigger de la 128).
-  const row=kind==='comment'?{comment_id:id,reason,details}:{post_id:id,reason,details};
+  const col={comment:'comment_id',challenge:'challenge_id',entry:'entry_id'}[kind]||'post_id';
+  const row={[col]:id,reason,details};
   const{error}=await sb.from('community_reports').insert(row);
   // 23505: ya tenía un reporte pendiente de esto. Para quien reporta no es un error.
   if(error&&error.code!=='23505'){toast(communityModerationError(error),'err');return;}
   // Apple pide atender los reportes a tiempo: además del aviso en Alertas (trigger), un push.
-  if(!error)sendPush('admin','🚩 Reporte en la comunidad',communityReasonLabel(reason)+' · '+(kind==='comment'?'comentario':'publicación')+' de '+name,{tag:'community-report'});
+  if(!error)sendPush('admin','🚩 Reporte en la comunidad',communityReasonLabel(reason)+' · '+communityKind(kind).noun+' de '+name,{tag:'community-report'});
   const thanks=error?'Ya lo habías reportado; el equipo de HABIT lo está revisando.':'Gracias. El equipo de HABIT lo va a revisar.';
   if(await confirmSheet(thanks+'\n\n¿También quieres bloquear a '+name+'? Dejarás de ver lo que publica y no podrá ver lo tuyo.',
     {title:'Reporte enviado',confirmLabel:'Bloquear',cancelLabel:'No, gracias',danger:true}))
@@ -20325,7 +20401,13 @@ async function blockCommunityUser(userId,name,opts){
   const{error}=await sb.from('community_blocks').insert({blocked_id:userId});
   if(error&&error.code!=='23505'){toast(communityModerationError(error),'err');return;}
   toast(name+' bloqueado','ok');
-  if(document.getElementById('v-comunidad')?.classList.contains('active'))renderFeedSb();
+  // Lo bloqueado deja de llegar del servidor: un reto suyo abierto en la hoja ya no existe
+  // para quien bloqueó, y una marca suya sale de la tabla.
+  if(retoOpen){
+    if(retoOpen.challenge&&retoOpen.challenge.created_by===userId)closeReto();
+    else loadRetoDetail().catch(console.error);
+  }
+  if(document.getElementById('v-comunidad')?.classList.contains('active'))renderCommunityTab();
   if(document.getElementById('v-perfil')?.classList.contains('active'))renderPerfilBlocks();
 }
 async function renderPerfilBlocks(){
@@ -20375,7 +20457,7 @@ async function renderAdminReports(){
   if(!el)return;
   try{
     const{data:reports,error}=await sb.from('community_reports')
-      .select('id,target_kind,post_id,comment_id,reported_user_id,reporter_id,reason,details,author_name,content_snapshot,img_snapshot,created_at')
+      .select('id,target_kind,post_id,comment_id,challenge_id,entry_id,reported_user_id,reporter_id,reason,details,author_name,content_snapshot,img_snapshot,created_at')
       .eq('status','pendiente').order('created_at',{ascending:true}).limit(200);
     if(error)throw error;
     adminPendingReports=(reports||[]).length;
@@ -20383,10 +20465,10 @@ async function renderAdminReports(){
     if(!adminPendingReports){el.innerHTML='<p class="slbl" style="margin-bottom:6px">Reportes</p><div class="mod-empty">Sin reportes pendientes.</div>';return;}
     const groups=[],byKey={};
     reports.forEach(r=>{
-      const target=r.target_kind==='comment'?r.comment_id:r.post_id;
+      const target=r.target_kind==='comment'?r.comment_id:r.target_kind==='challenge'?r.challenge_id:r.target_kind==='entry'?r.entry_id:r.post_id;
       // Lo ya borrado no tiene id: se agrupa por su copia.
       const key=target?r.target_kind+':'+target:'gone:'+r.target_kind+':'+(r.reported_user_id||'')+':'+(r.content_snapshot||'')+':'+(r.img_snapshot||'');
-      if(!byKey[key]){byKey[key]={kind:r.target_kind,targetId:target,first:r,reports:[]};groups.push(byKey[key]);}
+      if(!byKey[key]){byKey[key]={kind:r.target_kind,targetId:target,challengeId:r.challenge_id,first:r,reports:[]};groups.push(byKey[key]);}
       byKey[key].reports.push(r);
     });
     // Lo más reportado arriba; a igual número, lo que lleva más tiempo esperando.
@@ -20402,12 +20484,12 @@ async function renderAdminReports(){
     (blocksRes.data||[]).forEach(b=>{blockCount[b.blocked_id]=(blockCount[b.blocked_id]||0)+1;});
     el.innerHTML='<p class="slbl" style="margin-bottom:10px">Reportes pendientes · '+adminPendingReports+'</p>'
       +groups.map(g=>{
-        const r0=g.first,n=g.reports.length,isComment=g.kind==='comment';
+        const r0=g.first,n=g.reports.length,k=communityKind(g.kind);
         const blocked=blockCount[r0.reported_user_id]||0;
         const ids=g.reports.map(r=>r.id).join(',');
         const ago=timeSince(r0.created_at);
         return'<div class="mod-report">'
-          +'<div class="mod-report-title">'+(isComment?'Comentario':'Publicación')+' de '+esc(r0.author_name||'Usuario')+'</div>'
+          +'<div class="mod-report-title">'+k.title+esc(r0.author_name||'Usuario')+'</div>'
           +'<div class="mod-report-sub">'+n+' reporte'+(n===1?'':'s')+' · el primero '+(ago==='Ahora'?'hace un momento':'hace '+ago)
             +(blocked?' · '+blocked+(blocked===1?' persona lo bloqueó':' personas lo bloquearon'):'')+'</div>'
           +(r0.content_snapshot?'<div class="mod-report-content">'+esc(r0.content_snapshot)+'</div>':'')
@@ -20418,7 +20500,8 @@ async function renderAdminReports(){
             +(r.details?'<div class="mod-reason-detail">“'+esc(r.details)+'”</div>':'')+'</div>').join('')+'</div>'
           +'<div class="mod-report-actions">'
           +(g.targetId
-            ?'<button class="btn-sm bred" data-kind="'+g.kind+'" data-id="'+esc(g.targetId)+'" onclick="deleteReportedItemSb(this)">Borrar '+(isComment?'comentario':'publicación')+'</button>'
+            ?(g.challengeId?'<button class="btn-sm bblue" data-id="'+esc(g.challengeId)+'" onclick="openReto(this.dataset.id)">Ver reto</button>':'')
+              +'<button class="btn-sm bred" data-kind="'+g.kind+'" data-id="'+esc(g.targetId)+'" onclick="deleteReportedItemSb(this)">Borrar '+k.noun+'</button>'
             :'<button class="btn-sm bblue" data-ids="'+esc(ids)+'" data-status="resuelto" onclick="setReportsStatusSb(this)">Marcar resuelto</button>')
           +'<button class="btn-sm" data-ids="'+esc(ids)+'" data-status="descartado" onclick="setReportsStatusSb(this)">Descartar</button>'
           +'</div></div>';
@@ -20430,7 +20513,18 @@ async function renderAdminReports(){
   }
 }
 async function deleteReportedItemSb(btn){
-  const isComment=btn.dataset.kind==='comment',id=btn.dataset.id;
+  const kind=btn.dataset.kind,isComment=kind==='comment',id=btn.dataset.id;
+  // Retos y marcas los borra el admin directo (RLS de la 129) y un trigger resuelve sus
+  // reportes; las publicaciones y comentarios siguen yendo por el servidor.
+  if(kind==='challenge'||kind==='entry'){
+    if(!await confirmSheet(kind==='challenge'?'Se borra el reto, con todas sus marcas, para todos, y sus reportes quedan resueltos.':'Se borra la marca de la tabla para todos, y sus reportes quedan resueltos.',
+      {title:kind==='challenge'?'¿Borrar este reto?':'¿Borrar esta marca?',confirmLabel:'Borrar',danger:true}))return;
+    const{error}=await sb.from(kind==='challenge'?'challenges':'challenge_entries').delete().eq('id',id);
+    if(error){toast(retoError(error),'err');return;}
+    toast(kind==='challenge'?'Reto borrado':'Marca borrada','ok');
+    renderAdminFeed();
+    return;
+  }
   if(!await confirmSheet((isComment?'Se borra el comentario':'Se borra la publicación, con sus comentarios,')+' para todos, y sus reportes quedan resueltos.',
     {title:isComment?'¿Borrar este comentario?':'¿Borrar esta publicación?',confirmLabel:'Borrar',danger:true}))return;
   showLoading('Eliminando...');
@@ -20459,6 +20553,7 @@ async function renderAdminFeed(){
   const el=document.getElementById('adm-feed-content');
   if(!el)return;
   renderAdminReports();
+  renderAdminRetos();
   el.innerHTML='<div class="empty">Cargando...</div>';
   try{
     const{data:posts,error}=await sb.from('posts').select(POST_LIST_COLUMNS+',post_reactions(user_id,reaction_type)').order('created_at',{ascending:false}).limit(100);
@@ -20495,6 +20590,591 @@ async function renderAdminFeed(){
   }catch(e){el.innerHTML='<div class="empty">Error: '+e.message+'</div>';}
 }
 
+
+// ── COMUNIDAD → RETOS (migración 129, docs/RETOS.md) ──
+// Alguien propone un reto (el WOD escrito y cómo se mide) y cualquiera registra su marca. La
+// base decide todo lo que importa: un trigger valida la marca contra el tipo y las fechas de
+// Mazatlán, y la vista challenge_standings da el lugar. Aquí no se calcula ningún lugar ni se
+// decide si un reto está abierto: se pinta lo que la base dice (`place`, `phase`).
+// Registrar es insert y corregir es update por id, nunca upsert: PostgREST pondría
+// challenge_id en el SET y esa columna no se puede actualizar.
+const RETO_TYPES={
+  amrap:{label:'AMRAP',hint:'Tantas rondas como puedas en el tiempo. Gana quien hace más rondas y reps.'},
+  for_time:{label:'For Time',hint:'Terminarlo lo más rápido posible, con un límite de tiempo. Quien no termina cuenta las reps que hizo.'},
+  max_reps:{label:'Máx. reps',hint:'Cuántas repeticiones. Gana quien hace más.'},
+  max_load:{label:'Máx. carga',hint:'El peso más alto que levantes, en kg. Gana quien levanta más.'},
+  max_time:{label:'Máx. tiempo',hint:'Cuánto aguantas: plancha, colgarte, hollow hold. Gana quien aguanta más.'}
+};
+let communityTab='feed';
+try{if(localStorage.getItem('habit_comm_tab')==='retos')communityTab='retos';}catch(e){}
+let retosFilter='activos';
+// El reto abierto en la hoja: {id, challenge, entries, division, mode:'detail'|'form'|'score'}.
+let retoOpen=null;
+let retoChannel=null,retoRefreshTimer=null;
+
+function setCommunityTab(t){
+  communityTab=t==='retos'?'retos':'feed';
+  try{localStorage.setItem('habit_comm_tab',communityTab);}catch(e){}
+  renderCommunityTab();
+}
+function renderCommunityTab(){
+  document.querySelectorAll('.comm-tabs .fin-subtab').forEach(b=>b.classList.toggle('active',b.dataset.ctab===communityTab));
+  const feed=document.getElementById('comm-feed-pane'),retos=document.getElementById('comm-retos-pane');
+  if(feed)feed.style.display=communityTab==='feed'?'':'none';
+  if(retos)retos.style.display=communityTab==='retos'?'':'none';
+  if(communityTab==='retos')renderRetos().catch(console.error);
+  else renderFeedSb().catch(console.error);
+}
+
+// Sin la 129 las tablas no existen: 42P01 desde Postgres, PGRST205 desde el caché de PostgREST.
+function isMissingRetosTable(e){
+  const code=e&&e.code,msg=String((e&&e.message)||'');
+  return code==='42P01'||code==='PGRST205'||(/challenge/.test(msg)&&/does not exist|schema cache/.test(msg));
+}
+// Los códigos que levantan los triggers de la 129.
+function retoError(e){
+  const msg=String((e&&e.message)||e||'');
+  if(isMissingRetosTable(e))return'Retos todavía no está disponible.';
+  if(/CHALLENGE_CLOSED/.test(msg))return'Este reto no está abierto: todavía no empieza o ya terminó.';
+  if(/CHALLENGE_BAD_SCORE/.test(msg))return'Revisa tu marca: falta un dato o pasa del límite de tiempo.';
+  if(/CHALLENGE_BAD_DATES/.test(msg))return'Revisa las fechas: empieza entre hoy y dentro de 30 días, y no puede terminar en el pasado.';
+  if(/CHALLENGE_LOCKED/.test(msg))return'Ya hay marcas de otros: solo puedes cambiar el título y la fecha de cierre.';
+  if(/challenges_cap_for_time/.test(msg))return'Un For Time necesita límite de tiempo.';
+  if(/challenges_dates/.test(msg))return'Un reto dura máximo 60 días y termina después de empezar.';
+  if(e&&e.code==='42501')return'No puedes participar en este reto.';
+  return msg||'No se pudo';
+}
+function retoDsLabel(ds){const p=parseDS(ds);return p.d+' '+MO[p.m-1];}
+function retoDaysBetween(a,b){return Math.round((dateObjFromDS(b)-dateObjFromDS(a))/86400000);}
+function retoWhenLabel(c){
+  const today=mazToday();
+  if(c.phase==='proximo'){
+    const n=retoDaysBetween(today,c.starts_on);
+    return n===1?'Empieza mañana':'Empieza el '+retoDsLabel(c.starts_on);
+  }
+  if(c.phase==='terminado')return'Terminó el '+retoDsLabel(c.ends_on);
+  const n=retoDaysBetween(today,c.ends_on);
+  return n<=0?'Cierra hoy':n===1?'Cierra mañana':'Cierra en '+n+' días';
+}
+function retoCapLabel(sec){
+  if(!sec)return'';
+  return sec%60?Math.floor(sec/60)+':'+pad(sec%60)+' min':(sec/60)+' min';
+}
+function retoTypeLabel(c){
+  const t=(RETO_TYPES[c.score_type]||{}).label||c.score_type;
+  if(c.score_type==='for_time'&&c.time_cap_sec)return t+' · límite '+retoCapLabel(c.time_cap_sec);
+  if(c.score_type==='amrap'&&c.time_cap_sec)return t+' · '+retoCapLabel(c.time_cap_sec);
+  return t;
+}
+function retoPlaceLabel(p){return p?p+'.º':'—';}
+
+async function renderRetos(){
+  const el=document.getElementById('retos-content');
+  if(!el||!sbUser)return;
+  if(!el.innerHTML)el.innerHTML='<div class="empty">Cargando...</div>';
+  try{
+    const me=sbUser.id;
+    // Mis marcas primero: dan "tu lugar" en las tarjetas y la lista de Míos.
+    const{data:mine,error:mineErr}=await sb.from('challenge_standings')
+      .select('challenge_id,place,score_label,division').eq('user_id',me);
+    if(mineErr)throw mineErr;
+    const myBy=Object.fromEntries((mine||[]).map(r=>[r.challenge_id,r]));
+    let q=sb.from('challenge_cards').select('*');
+    if(retosFilter==='activos')q=q.eq('status','activo').in('phase',['abierto','proximo']).order('ends_on',{ascending:true}).limit(50);
+    else if(retosFilter==='terminados')q=q.eq('status','activo').eq('phase','terminado').order('ends_on',{ascending:false}).limit(30);
+    else{
+      const ids=Object.keys(myBy);
+      q=q.or('created_by.eq.'+me+(ids.length?',id.in.('+ids.join(',')+')':'')).order('ends_on',{ascending:false}).limit(50);
+    }
+    const{data:cards,error}=await q;
+    if(error)throw error;
+    const list=(cards||[]).slice();
+    // Abiertos antes que próximos, y entre los abiertos los oficiales del gym arriba.
+    if(retosFilter==='activos')list.sort((a,b)=>(a.phase==='abierto'?0:1)-(b.phase==='abierto'?0:1)
+      ||(b.is_official?1:0)-(a.is_official?1:0)||(a.ends_on||'').localeCompare(b.ends_on||''));
+    const chips=[['activos','Activos'],['terminados','Terminados'],['mios','Míos']].map(([k,l])=>
+      '<button class="filter-chip'+(retosFilter===k?' active':'')+'" onclick="setRetosFilter(\''+k+'\')">'+l+'</button>').join('');
+    const empty={
+      activos:'No hay retos abiertos.<br>Propón el primero: un AMRAP, un For Time, tu máximo en dominadas…',
+      terminados:'Todavía no termina ningún reto.',
+      mios:'Aquí salen los retos que propongas y en los que registres tu marca.'
+    }[retosFilter];
+    withScrollKept(el,()=>{
+      el.innerHTML='<div class="retos-bar"><div class="retos-chips">'+chips+'</div>'
+        +'<button class="btn-sm bblue" onclick="openRetoForm()">+ Reto</button></div>'
+        +(list.length?list.map(c=>retoCardHtml(c,myBy[c.id])).join('')
+          :'<div class="retos-empty">'+empty+(retosFilter==='activos'?'<br><button class="btn-sm bblue" onclick="openRetoForm()">Proponer un reto</button>':'')+'</div>');
+    });
+  }catch(e){
+    if(isMissingRetosTable(e)){el.innerHTML='<div class="retos-empty">Retos todavía no está disponible.</div>';return;}
+    console.warn('renderRetos:',e);
+    el.innerHTML='<div class="retos-empty">No se pudieron cargar los retos.</div>';
+  }
+}
+function setRetosFilter(f){retosFilter=f;renderRetos().catch(console.error);}
+function retoCardHtml(c,mine){
+  const n=Number(c.entries_count)||0;
+  return'<button class="reto-card'+(c.is_official?' is-official':'')+'" data-id="'+esc(c.id)+'" onclick="openReto(this.dataset.id)">'
+    +'<div class="reto-card-top"><span class="reto-type">'+esc(retoTypeLabel(c))+'</span>'
+    +(c.is_official?'<span class="reto-badge">Oficial HABIT</span>':'')
+    +(c.status==='oculto'?'<span class="reto-badge is-hidden">Oculto</span>':'')
+    +'<span class="reto-when">'+esc(retoWhenLabel(c))+'</span></div>'
+    +'<div class="reto-title">'+esc(c.title)+'</div>'
+    +'<div class="reto-meta">'+(c.created_by_name?'Propuesto por '+esc(c.created_by_name)+' · ':'')
+    +(n?n+(n===1?' participante':' participantes'):'Nadie ha registrado todavía')+'</div>'
+    +(mine?'<div class="reto-mine">Tu marca: <strong>'+esc(mine.score_label)+'</strong>'
+      +(mine.division==='scaled'?' (Scaled)':'')+' · '+retoPlaceLabel(mine.place)+' lugar</div>':'')
+    +'</button>';
+}
+
+// ── La hoja de un reto ──
+function retoModalShow(){
+  const m=document.getElementById('reto-modal');
+  if(m)m.style.display='flex';
+}
+function retoSetChrome(title,{back=false,more=false}={}){
+  const t=document.getElementById('reto-modal-title');if(t)t.textContent=title;
+  const b=document.getElementById('reto-back');if(b)b.style.display=back?'':'none';
+  const m=document.getElementById('reto-more');if(m)m.style.display=more?'':'none';
+}
+function retoSetFoot(html){
+  const f=document.getElementById('reto-modal-foot');
+  if(!f)return;
+  f.innerHTML=html||'';
+  f.style.display=html?'':'none';
+}
+function closeReto(){
+  const m=document.getElementById('reto-modal');
+  if(m)m.style.display='none';
+  retoStopRealtime();
+  retoOpen=null;
+  if(document.getElementById('v-comunidad')?.classList.contains('active')&&communityTab==='retos')renderRetos().catch(console.error);
+  if(document.getElementById('a-comunidad')?.classList.contains('active'))renderAdminRetos();
+}
+function retoBack(){
+  if(retoOpen&&retoOpen.challenge){retoOpen.mode='detail';renderRetoDetail();}
+  else closeReto();
+}
+function retoStopRealtime(){
+  if(retoChannel){sb.removeChannel(retoChannel);retoChannel=null;}
+  if(retoRefreshTimer){clearTimeout(retoRefreshTimer);retoRefreshTimer=null;}
+}
+// La tabla se reordena sola cuando alguien registra (Realtime respeta la RLS). Solo se repinta
+// en el detalle: con un formulario abierto, repintar se llevaría lo que se está escribiendo.
+function retoStartRealtime(id){
+  retoStopRealtime();
+  try{
+    retoChannel=sb.channel('reto:'+id)
+      .on('postgres_changes',{event:'*',schema:'public',table:'challenge_entries',filter:'challenge_id=eq.'+id},()=>{
+        clearTimeout(retoRefreshTimer);
+        retoRefreshTimer=setTimeout(()=>{
+          if(retoOpen&&retoOpen.id===id&&retoOpen.mode==='detail')loadRetoDetail().catch(console.error);
+        },600);
+      })
+      .subscribe();
+  }catch(e){console.warn('retoStartRealtime:',e);}
+}
+async function openReto(id){
+  if(!id)return;
+  retoOpen={id,challenge:null,entries:[],division:'rx',mode:'detail'};
+  retoSetChrome('Reto');
+  retoSetFoot('');
+  const body=document.getElementById('reto-modal-body');
+  if(body)body.innerHTML='<div class="empty">Cargando...</div>';
+  retoModalShow();
+  retoStartRealtime(id);
+  await loadRetoDetail();
+}
+async function loadRetoDetail(){
+  if(!retoOpen)return;
+  const id=retoOpen.id;
+  try{
+    const[cRes,eRes]=await Promise.all([
+      sb.from('challenge_cards').select('*').eq('id',id).maybeSingle(),
+      sb.from('challenge_standings').select('*').eq('challenge_id',id).order('place',{ascending:true}).order('scored_at',{ascending:true}).limit(500)
+    ]);
+    if(cRes.error)throw cRes.error;
+    if(eRes.error)throw eRes.error;
+    if(!retoOpen||retoOpen.id!==id)return;
+    if(!cRes.data){
+      const body=document.getElementById('reto-modal-body');
+      if(body)body.innerHTML='<div class="retos-empty">Este reto ya no está disponible.</div>';
+      retoSetChrome('Reto');retoSetFoot('');
+      return;
+    }
+    retoOpen.challenge=cRes.data;
+    retoOpen.entries=eRes.data||[];
+    const mine=retoMyEntry();
+    if(mine&&!retoOpen.divisionPicked)retoOpen.division=mine.division||'rx';
+    if(retoOpen.mode==='detail')renderRetoDetail();
+  }catch(e){
+    console.warn('loadRetoDetail:',e);
+    const body=document.getElementById('reto-modal-body');
+    if(body)body.innerHTML='<div class="retos-empty">'+esc(retoError(e))+'</div>';
+  }
+}
+function retoMyEntry(){
+  return retoOpen&&sbUser?(retoOpen.entries||[]).find(e=>e.user_id===sbUser.id)||null:null;
+}
+function retoIsAdmin(){return!!(sbProfile&&sbProfile.role==='admin');}
+function retoIsAuthor(c){return!!(c&&sbUser&&c.created_by===sbUser.id);}
+function retoPickDivision(d){
+  if(!retoOpen)return;
+  retoOpen.division=d;retoOpen.divisionPicked=true;
+  renderRetoDetail();
+}
+function renderRetoDetail(){
+  const c=retoOpen&&retoOpen.challenge;
+  const body=document.getElementById('reto-modal-body');
+  if(!c||!body)return;
+  const me=sbUser&&sbUser.id,isAdmin=retoIsAdmin();
+  const mine=retoMyEntry();
+  const div=c.has_divisions?retoOpen.division:'rx';
+  const rows=(retoOpen.entries||[]).filter(e=>!c.has_divisions||e.division===div);
+  const countOf=d=>(retoOpen.entries||[]).filter(e=>e.division===d).length;
+  // El ⋯ de arriba tiene algo para todos: el autor edita, los demás reportan o bloquean, el
+  // admin modera. Solo un reto propio ya terminado se queda sin acciones.
+  const showMore=isAdmin||!retoIsAuthor(c)||c.phase!=='terminado';
+  retoSetChrome(c.title,{more:showMore});
+  withScrollKept(body,()=>{
+    body.innerHTML='<div class="reto-info"><span class="reto-type">'+esc(retoTypeLabel(c))+'</span>'
+      +(c.is_official?'<span class="reto-badge">Oficial HABIT</span>':'')
+      +(c.status==='oculto'?'<span class="reto-badge is-hidden">Oculto</span>':'')+'</div>'
+      +'<div class="reto-info" style="margin-top:3px">'+esc(retoWhenLabel(c))+' · '+retoDsLabel(c.starts_on)+' – '+retoDsLabel(c.ends_on)
+      +(c.created_by_name?' · Propuesto por '+esc(c.created_by_name):'')+'</div>'
+      +(c.description?'<div class="reto-wod">'+esc(c.description)+'</div>':'<div style="height:12px"></div>')
+      +(c.has_divisions?'<div class="admin-segmented comm-tabs" style="margin-bottom:6px">'
+        +['rx','scaled'].map(d=>'<button class="fin-subtab'+(div===d?' active':'')+'" onclick="retoPickDivision(\''+d+'\')">'
+          +(d==='rx'?'Rx':'Scaled')+' · '+countOf(d)+'</button>').join('')+'</div>':'')
+      +'<p class="slbl" style="margin:10px 0 2px">Tabla</p>'
+      +(rows.length?rows.map(e=>retoRowHtml(e,me,isAdmin)).join('')
+        :'<div class="reto-board-empty">'+(c.phase==='proximo'?'Se registra a partir del '+retoDsLabel(c.starts_on)+'.':'Nadie ha registrado todavía'+(c.has_divisions?' en esta división':'')+'.')+'</div>');
+  });
+  if(c.phase==='abierto'&&c.status==='activo'){
+    retoSetFoot('<div class="reto-foot"><button class="btn" onclick="openRetoScore()">'+(mine?'Corregir mi marca':'Registrar mi marca')+'</button>'
+      +(mine?'<button class="reto-link" onclick="deleteMyRetoEntry()">Quitar mi marca</button>':'')+'</div>');
+  }else if(c.phase==='proximo'){
+    retoSetFoot('<div class="reto-hint" style="text-align:center;margin:0">Se abre el '+retoDsLabel(c.starts_on)+'.</div>');
+  }else retoSetFoot('');
+}
+function retoRowHtml(e,me,isAdmin){
+  const isMe=e.user_id===me;
+  return'<div class="reto-row'+(isMe?' is-me':'')+'">'
+    +'<span class="reto-place'+(e.place&&e.place<=3?' is-podium':'')+'">'+retoPlaceLabel(e.place)+'</span>'
+    +'<div class="reto-row-main"><div class="reto-row-name">'+esc(isMe?'Tú':(e.user_name||'Usuario'))+'</div>'
+    +(e.note?'<div class="reto-row-note">'+esc(e.note)+'</div>':'')+'</div>'
+    +(e.proof_url?'<a class="reto-proof" href="'+esc(e.proof_url)+'" target="_blank" rel="noopener">Video</a>':'')
+    +'<span class="reto-row-score">'+esc(e.score_label)+'</span>'
+    +(isMe?'':communityMoreBtn('entry',e.id,e.user_id,e.user_name))
+    +(isAdmin&&!isMe?'<button class="reto-del" data-id="'+esc(e.id)+'" onclick="adminDeleteRetoEntry(this.dataset.id)" aria-label="Borrar marca">🗑</button>':'')
+    +'</div>';
+}
+
+async function openRetoMenu(){
+  const c=retoOpen&&retoOpen.challenge;
+  if(!c)return;
+  const isAdmin=retoIsAdmin(),isAuthor=retoIsAuthor(c);
+  const name=c.created_by_name||'el autor';
+  const choices=[];
+  if(isAuthor&&c.phase!=='terminado'){
+    choices.push({key:'edit',label:'Editar reto'});
+    if(c.phase==='abierto'&&c.ends_on>mazToday())choices.push({key:'close',label:'Terminar hoy'});
+  }
+  if(isAdmin){
+    if(!isAuthor)choices.push({key:'edit',label:'Editar reto'});
+    choices.push({key:'official',label:c.is_official?'Quitar «Oficial HABIT»':'Marcar como Oficial HABIT'});
+    choices.push({key:'hide',label:c.status==='oculto'?'Volver a mostrar':'Ocultar reto',danger:c.status!=='oculto'});
+  }else if(!isAuthor&&c.created_by){
+    choices.push({key:'report',label:'Reportar reto'});
+    choices.push({key:'block',label:'Bloquear a '+name,danger:true});
+  }
+  if(isAuthor||isAdmin)choices.push({key:'delete',label:'Borrar reto',danger:true});
+  if(!choices.length)return;
+  const pick=await choiceSheet('',choices,{title:c.title});
+  if(pick==='edit')openRetoForm(c);
+  else if(pick==='close')await retoUpdate({ends_on:mazToday()},'El reto termina hoy');
+  else if(pick==='official')await retoUpdate({is_official:!c.is_official},c.is_official?'Ya no es oficial':'Marcado como Oficial HABIT');
+  else if(pick==='hide')await retoUpdate({status:c.status==='oculto'?'activo':'oculto'},c.status==='oculto'?'Reto visible otra vez':'Reto oculto');
+  else if(pick==='report')await reportCommunityItem('challenge',c.id,c.created_by,name);
+  else if(pick==='block')await blockCommunityUser(c.created_by,name);
+  else if(pick==='delete')await deleteReto(c);
+}
+async function retoUpdate(patch,okMsg){
+  const c=retoOpen&&retoOpen.challenge;
+  if(!c)return false;
+  const{data,error}=await sb.from('challenges').update(patch).eq('id',c.id).select('id');
+  if(error){toast(retoError(error),'err');return false;}
+  if(!data||!data.length){toast('No se pudo cambiar este reto','err');return false;}
+  if(okMsg)toast(okMsg,'ok');
+  await loadRetoDetail();
+  return true;
+}
+async function deleteReto(c){
+  const isAdmin=retoIsAdmin();
+  const others=(retoOpen.entries||[]).filter(e=>e.user_id!==sbUser.id).length;
+  if(!isAdmin&&others){
+    toast('Ya hay marcas de otros: el reto ya es de todos. Puedes terminarlo hoy.','warn');
+    return;
+  }
+  if(!await confirmSheet(isAdmin?'Se borra para todos, con sus marcas, y sus reportes quedan resueltos.':'Se borra el reto y tu marca, si registraste.',
+    {title:'¿Borrar «'+c.title+'»?',confirmLabel:'Borrar',danger:true}))return;
+  const{data,error}=await sb.from('challenges').delete().eq('id',c.id).select('id');
+  if(error){toast(retoError(error),'err');return;}
+  // La RLS no deja borrar al autor si alguien más registró (aunque esa marca no la vea, por
+  // un bloqueo): no es un error, es que el reto ya es de todos.
+  if(!data||!data.length){toast('Ya hay marcas de otros: el reto ya es de todos.','warn');return;}
+  toast('Reto borrado','ok');
+  closeReto();
+}
+async function deleteMyRetoEntry(){
+  const mine=retoMyEntry();
+  if(!mine)return;
+  if(!await confirmSheet('Tu marca sale de la tabla. La puedes volver a registrar mientras el reto esté abierto.',
+    {title:'¿Quitar tu marca?',confirmLabel:'Quitar',danger:true}))return;
+  const{data,error}=await sb.from('challenge_entries').delete().eq('id',mine.id).select('id');
+  if(error){toast(retoError(error),'err');return;}
+  if(!data||!data.length){toast('Este reto ya terminó: la tabla final no se mueve.','warn');await loadRetoDetail();return;}
+  toast('Marca quitada','ok');
+  await loadRetoDetail();
+}
+// El admin borra directo (la RLS se lo permite); el trigger de la 129 resuelve los reportes.
+async function adminDeleteRetoEntry(id){
+  const e=(retoOpen&&retoOpen.entries||[]).find(x=>x.id===id);
+  if(!await confirmSheet('Sale de la tabla para todos, y sus reportes quedan resueltos.',
+    {title:'¿Borrar la marca de '+((e&&e.user_name)||'este usuario')+'?',confirmLabel:'Borrar',danger:true}))return;
+  const{error}=await sb.from('challenge_entries').delete().eq('id',id);
+  if(error){toast(retoError(error),'err');return;}
+  toast('Marca borrada','ok');
+  await loadRetoDetail();
+  renderAdminReports();
+}
+
+// ── Proponer y editar ──
+// Con marcas de otros el reto ya no cambia cómo se mide ni el WOD (lo decide el trigger;
+// aquí solo se desactivan esos campos para no dejar escribir lo que se va a rechazar).
+let retoFormType='amrap';
+function openRetoForm(existing){
+  const c=existing||null;
+  if(!c){
+    retoStopRealtime();
+    retoOpen={id:null,challenge:null,entries:[],division:'rx',mode:'form'};
+  }else retoOpen.mode='form';
+  const locked=!!c&&!retoIsAdmin()&&(retoOpen.entries||[]).some(e=>e.user_id!==sbUser.id);
+  retoFormType=c?c.score_type:'amrap';
+  const today=mazToday();
+  const capMin=c&&c.time_cap_sec?Math.round(c.time_cap_sec/60):'';
+  retoSetChrome(c?'Editar reto':'Proponer un reto',{back:!!c});
+  const dis=locked?' disabled':'';
+  const body=document.getElementById('reto-modal-body');
+  body.innerHTML=(locked?'<p class="reto-locked">Ya hay marcas de otros: puedes cambiar el título y la fecha de cierre. Lo demás quedó como estaba cuando registraron.</p>':'')
+    +'<div class="field"><label>Título</label><input id="rf-title" maxlength="80" placeholder="Ej. 100 burpees" value="'+esc(c?c.title:'')+'"></div>'
+    +'<div class="field"><label>Cómo se mide</label><div class="reto-chips" id="rf-types">'
+    +Object.entries(RETO_TYPES).map(([k,t])=>'<button type="button" class="filter-chip'+(retoFormType===k?' active':'')+'" data-type="'+k+'" onclick="retoFormPickType(this.dataset.type)"'+dis+'>'+t.label+'</button>').join('')
+    +'</div><p class="reto-hint" id="rf-type-hint">'+esc(RETO_TYPES[retoFormType].hint)+'</p></div>'
+    +'<div class="field" id="rf-cap-field"><label id="rf-cap-label"></label><input id="rf-cap" type="number" inputmode="numeric" min="1" max="120" step="1" value="'+esc(capMin)+'"'+dis+'></div>'
+    +'<div class="field"><label>El reto</label><textarea id="rf-desc" maxlength="1000" rows="5" placeholder="Qué hay que hacer, con pesos y movimientos. Ej. 21-15-9: thrusters 43 kg y dominadas"'+dis+'>'+esc(c?c.description:'')+'</textarea></div>'
+    +'<label class="reto-check"><input type="checkbox" id="rf-div"'+(c&&c.has_divisions?' checked':'')+dis+'> Rx y Scaled por separado (para que también participe quien escala)</label>'
+    +'<div class="field-row"><div class="field"><label>Empieza</label><input id="rf-start" type="date" min="'+today+'" max="'+addDaysDS(today,30)+'" value="'+esc(c?c.starts_on:today)+'"'+dis+'></div>'
+    +'<div class="field"><label>Termina</label><input id="rf-end" type="date" min="'+today+'" value="'+esc(c?c.ends_on:addDaysDS(today,7))+'"></div></div>';
+  retoFormSyncCap();
+  retoSetFoot('<button class="btn" onclick="saveRetoForm()">'+(c?'Guardar cambios':'Publicar reto')+'</button>');
+  retoModalShow();
+}
+function retoFormPickType(t){
+  retoFormType=t;
+  document.querySelectorAll('#rf-types .filter-chip').forEach(b=>b.classList.toggle('active',b.dataset.type===t));
+  const h=document.getElementById('rf-type-hint');if(h)h.textContent=RETO_TYPES[t].hint;
+  retoFormSyncCap();
+}
+// El límite es obligatorio en For Time (sin él no hay cómo ordenar a quien no terminó), opcional
+// en AMRAP (es su duración) y no aplica a los máximos.
+function retoFormSyncCap(){
+  const f=document.getElementById('rf-cap-field'),l=document.getElementById('rf-cap-label'),i=document.getElementById('rf-cap');
+  if(!f)return;
+  const show=retoFormType==='for_time'||retoFormType==='amrap';
+  f.style.display=show?'':'none';
+  if(l)l.textContent=retoFormType==='for_time'?'Límite de tiempo (minutos)':'Duración (minutos, opcional)';
+  if(i)i.placeholder=retoFormType==='for_time'?'Ej. 10':'Ej. 12';
+}
+async function saveRetoForm(){
+  const c=retoOpen&&retoOpen.challenge;
+  const val=id=>(document.getElementById(id)||{}).value||'';
+  const title=val('rf-title').trim();
+  if(!title){toast('Ponle un título al reto','err');return;}
+  const capRaw=val('rf-cap').trim();
+  const capMin=capRaw?Number(capRaw):null;
+  if(retoFormType==='for_time'&&!capMin){toast('Un For Time necesita límite de tiempo','err');return;}
+  if(capMin!==null&&(!(capMin>=1)||capMin>120)){toast('El tiempo va de 1 a 120 minutos','err');return;}
+  const start=val('rf-start'),end=val('rf-end');
+  if(!start||!end){toast('Elige las fechas','err');return;}
+  if(end<start){toast('Termina antes de empezar: revisa las fechas','err');return;}
+  const locked=!!c&&document.getElementById('rf-desc')?.disabled;
+  const payload=locked?{title,ends_on:end}:{
+    title,
+    description:val('rf-desc').trim(),
+    score_type:retoFormType,
+    time_cap_sec:(retoFormType==='for_time'||retoFormType==='amrap')&&capMin?Math.round(capMin*60):null,
+    has_divisions:!!document.getElementById('rf-div')?.checked,
+    starts_on:start,
+    ends_on:end
+  };
+  // Al editar solo va lo que cambió: un campo igual que se reenvía no cambia nada, pero si
+  // el reto ya tiene marcas el trigger compara campo por campo.
+  if(c)Object.keys(payload).forEach(k=>{if(payload[k]===c[k])delete payload[k];});
+  if(c&&!Object.keys(payload).length){retoBack();return;}
+  showLoading(c?'Guardando...':'Publicando...');
+  try{
+    if(c){
+      const{data,error}=await sb.from('challenges').update(payload).eq('id',c.id).select('id');
+      if(error)throw error;
+      if(!data||!data.length)throw new Error('No se pudo cambiar este reto');
+      hideLoading();
+      toast('Reto guardado','ok');
+      retoOpen.mode='detail';
+      await loadRetoDetail();
+    }else{
+      const{data,error}=await sb.from('challenges').insert(payload).select('id').single();
+      if(error)throw error;
+      hideLoading();
+      toast('Reto publicado','ok');
+      retosFilter='activos';
+      await openReto(data.id);
+    }
+  }catch(e){
+    hideLoading();
+    toast(retoError(e),'err');
+  }
+}
+
+// ── Registrar o corregir la marca ──
+let retoScoreFinished=true;
+function retoMmSs(sec){return sec?{m:Math.floor(sec/60),s:sec%60}:{m:'',s:''};}
+function openRetoScore(){
+  const c=retoOpen&&retoOpen.challenge;
+  if(!c)return;
+  retoOpen.mode='score';
+  const mine=retoMyEntry();
+  const t=c.score_type;
+  retoScoreFinished=mine&&t==='for_time'?mine.finished!==false:true;
+  retoSetChrome(mine?'Corregir mi marca':'Registrar mi marca',{back:true});
+  const num=(id,label,v,attrs)=>'<div class="field"><label>'+label+'</label><input id="'+id+'" type="number" inputmode="'+((attrs||'').includes('step="0.')?'decimal':'numeric')+'" min="0" '+(attrs||'')+' value="'+esc(v??'')+'"></div>';
+  const mmss=(v)=>{const x=retoMmSs(v);return'<div class="field-row">'+num('rs-min','Minutos',x.m,'max="1440" step="1"')+num('rs-sec','Segundos',x.s,'max="59" step="1"')+'</div>';};
+  let fields='';
+  if(t==='amrap')fields='<div class="field-row">'+num('rs-rounds','Rondas',mine?mine.rounds:'','max="999" step="1"')+num('rs-reps','Reps extra',mine&&mine.reps?mine.reps:'','max="9999" step="1"')+'</div>';
+  else if(t==='for_time')fields='<div class="field"><label>¿Terminaste dentro del límite ('+esc(retoCapLabel(c.time_cap_sec))+')?</label><div class="reto-chips" id="rs-finished">'
+      +'<button type="button" class="filter-chip" data-v="1" onclick="retoScorePickFinished(true)">Sí, terminé</button>'
+      +'<button type="button" class="filter-chip" data-v="0" onclick="retoScorePickFinished(false)">No, se acabó el tiempo</button></div></div>'
+      +'<div id="rs-time-wrap">'+mmss(mine&&mine.finished?mine.time_sec:null)+'</div>'
+      +'<div id="rs-reps-wrap">'+num('rs-reps','Reps que hiciste',mine&&!mine.finished?mine.reps:'','max="9999" step="1"')+'</div>';
+  else if(t==='max_reps')fields=num('rs-reps','Repeticiones',mine?mine.reps:'','max="9999" step="1"');
+  else if(t==='max_load')fields=num('rs-load','Peso (kg)',mine?mine.load_kg:'','max="1000" step="0.5"');
+  else if(t==='max_time')fields=mmss(mine?mine.time_sec:null);
+  const div=mine?mine.division:retoOpen.division;
+  const body=document.getElementById('reto-modal-body');
+  body.innerHTML='<div class="reto-info" style="margin-bottom:12px"><span class="reto-type">'+esc(retoTypeLabel(c))+'</span><span>· '+esc(c.title)+'</span></div>'
+    +fields
+    +(c.has_divisions?'<div class="field"><label>División</label><div class="reto-chips" id="rs-div">'
+      +['rx','scaled'].map(d=>'<button type="button" class="filter-chip'+(div===d?' active':'')+'" data-v="'+d+'" onclick="retoScorePickDiv(this.dataset.v)">'+(d==='rx'?'Rx':'Scaled')+'</button>').join('')+'</div></div>':'')
+    +'<div class="field"><label>Nota (opcional)</label><input id="rs-note" maxlength="300" placeholder="Ej. con banda verde" value="'+esc(mine&&mine.note||'')+'"></div>'
+    +'<div class="field"><label>Link de video (opcional)</label><input id="rs-proof" type="url" inputmode="url" maxlength="500" placeholder="https://…" value="'+esc(mine&&mine.proof_url||'')+'"></div>';
+  if(t==='for_time')retoScorePickFinished(retoScoreFinished);
+  retoSetFoot('<button class="btn" onclick="saveRetoScore()">Guardar marca</button>');
+}
+function retoScorePickFinished(v){
+  retoScoreFinished=!!v;
+  document.querySelectorAll('#rs-finished .filter-chip').forEach(b=>b.classList.toggle('active',(b.dataset.v==='1')===retoScoreFinished));
+  const tw=document.getElementById('rs-time-wrap'),rw=document.getElementById('rs-reps-wrap');
+  if(tw)tw.style.display=retoScoreFinished?'':'none';
+  if(rw)rw.style.display=retoScoreFinished?'none':'';
+}
+function retoScorePickDiv(d){
+  document.querySelectorAll('#rs-div .filter-chip').forEach(b=>b.classList.toggle('active',b.dataset.v===d));
+}
+async function saveRetoScore(){
+  const c=retoOpen&&retoOpen.challenge;
+  if(!c)return;
+  const n=id=>{const v=((document.getElementById(id)||{}).value||'').trim();return v===''?null:Number(v);};
+  const int=id=>{const v=n(id);return v===null?null:Math.floor(v);};
+  const t=c.score_type,row={};
+  const secs=()=>{const m=int('rs-min')||0,s=int('rs-sec')||0;return m*60+s||null;};
+  // Lo mínimo para no mandar algo que la base va a rechazar; la que decide es ella.
+  if(t==='amrap'){
+    row.rounds=int('rs-rounds')||0;row.reps=int('rs-reps')||0;
+    if(!row.rounds&&!row.reps){toast('Escribe tus rondas','err');return;}
+  }else if(t==='for_time'){
+    row.finished=retoScoreFinished;
+    if(retoScoreFinished){
+      row.time_sec=secs();
+      if(!row.time_sec){toast('Escribe tu tiempo','err');return;}
+      if(row.time_sec>c.time_cap_sec){toast('Ese tiempo pasa del límite: marca «No, se acabó el tiempo» y escribe tus reps','err');return;}
+    }else{
+      row.reps=int('rs-reps');
+      if(!row.reps){toast('Escribe cuántas reps hiciste','err');return;}
+    }
+  }else if(t==='max_reps'){
+    row.reps=int('rs-reps');
+    if(!row.reps){toast('Escribe tus repeticiones','err');return;}
+  }else if(t==='max_load'){
+    row.load_kg=n('rs-load');
+    if(!(row.load_kg>0)){toast('Escribe el peso','err');return;}
+  }else if(t==='max_time'){
+    row.time_sec=secs();
+    if(!row.time_sec){toast('Escribe tu tiempo','err');return;}
+  }
+  if(c.has_divisions)row.division=(document.querySelector('#rs-div .filter-chip.active')||{}).dataset?.v||'rx';
+  row.note=((document.getElementById('rs-note')||{}).value||'').trim()||null;
+  let proof=((document.getElementById('rs-proof')||{}).value||'').trim();
+  if(proof&&!/^https?:\/\//i.test(proof))proof='https://'+proof;
+  row.proof_url=proof||null;
+  // Un update manda todas las columnas del tipo (las que no se usan en null) para que una marca
+  // corregida no arrastre datos de la anterior.
+  const full={rounds:null,reps:null,time_sec:null,load_kg:null,finished:null,...row};
+  showLoading('Guardando...');
+  try{
+    let mine=retoMyEntry();
+    if(!mine){
+      const{error}=await sb.from('challenge_entries').insert({challenge_id:c.id,...row});
+      // 23505: ya había una (otro teléfono, o la tabla no estaba al día). Se corrige esa.
+      if(error&&error.code==='23505'){
+        const{data:ex}=await sb.from('challenge_entries').select('id').eq('challenge_id',c.id).eq('user_id',sbUser.id).maybeSingle();
+        if(!ex)throw error;
+        mine={id:ex.id};
+      }else if(error)throw error;
+    }
+    if(mine){
+      const{data,error}=await sb.from('challenge_entries').update(full).eq('id',mine.id).select('id');
+      if(error)throw error;
+      if(!data||!data.length)throw new Error('No se pudo guardar tu marca');
+    }
+    hideLoading();
+    toast('Marca guardada','ok');
+    retoOpen.mode='detail';
+    retoOpen.divisionPicked=false;
+    await loadRetoDetail();
+  }catch(e){
+    hideLoading();
+    toast(retoError(e),'err');
+  }
+}
+
+// ── Admin → Comunidad: los retos recientes, ocultos incluidos ──
+// Moderar es abrir el reto: la misma hoja trae ocultar, oficial y borrar para el admin.
+async function renderAdminRetos(){
+  const el=document.getElementById('adm-retos-content');
+  if(!el)return;
+  try{
+    const{data,error}=await sb.from('challenge_cards').select('*').order('created_at',{ascending:false}).limit(30);
+    if(error)throw error;
+    const list=data||[];
+    el.innerHTML='<p class="slbl" style="margin:4px 0 10px">Retos · '+list.length+(list.length===30?' más recientes':'')+'</p>'
+      +(list.length?list.map(c=>retoCardHtml(c,null)).join(''):'<div class="mod-empty">Nadie ha propuesto un reto todavía.</div>');
+  }catch(e){
+    // Sin la 129 no hay nada que moderar: la sección no aparece.
+    if(isMissingRetosTable(e)){el.innerHTML='';return;}
+    console.warn('renderAdminRetos:',e);
+    el.innerHTML='<div class="mod-empty">No se pudieron cargar los retos: '+esc(e.message||e)+'</div>';
+  }
+}
 
 async function addBoardSb(){
   const name=document.getElementById('board-name-in').value.trim();

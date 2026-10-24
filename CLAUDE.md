@@ -398,6 +398,21 @@ places. PRs live in **Progreso** only: Historial used to render them too, with i
   el admin solo ve "Bloquear", porque él borra), Perfil → Usuarios bloqueados
   (`renderPerfilBlocks`, que se esconde si falta la 128) y Admin → Comunidad arriba del feed
   (`renderAdminReports`, agrupado por lo reportado; el badge suma posts nuevos + pendientes)
+- **Retos** (migración 129, `docs/RETOS.md`): `challenges` (un reto: título, el WOD escrito,
+  `score_type` amrap / for_time / max_reps / max_load / max_time, fechas) y `challenge_entries`
+  (**una marca por persona y reto**, que se corrige mientras esté abierto). Cualquier cuenta crea
+  y registra, en HABIT y HABIT Crew, y se publica directo; el admin oculta (`status`) y marca
+  oficial (`is_official`). Un trigger valida cada marca contra el tipo (las columnas ajenas van
+  a null) y contra las fechas de Mazatlán (`challenge_is_open()`; "abierto" no se guarda); el
+  lugar vive solo en la vista `challenge_standings` (`security_invoker`, empate → `scored_at`, que
+  solo se mueve si cambia la marca), y `challenge_cards` da la fase y los participantes. Los
+  nombres van **copiados en la fila** porque desde la 117 nadie lee perfiles ajenos. Registrar
+  es insert y corregir update por id, no upsert (`challenge_id` no tiene permiso de update).
+  Respeta los bloqueos de la 128 (restrictive) y se reporta por `community_reports.challenge_id`
+  / `entry_id`; borrar desde el admin resuelve los reportes por trigger, sin endpoint.
+  En la app es la pestaña Retos de Comunidad (`setCommunityTab`) y una sola hoja, `#reto-modal`,
+  con tres modos en `retoOpen.mode` (detalle / proponer-editar / registrar marca); el admin
+  modera abriendo el mismo reto. `COMMUNITY_ITEM_KINDS` nombra los cuatro tipos reportables
 - `booking_guest_passes` — group session guest passes (from `group-guest-passes.sql`)
 - `admin_notifs` — in-app notifications for admin
 - `lift_competitions` / `lift_competitors` (migration 126) — **competencia de levantamiento**.
