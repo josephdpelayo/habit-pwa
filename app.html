@@ -6,12 +6,12 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="HABIT">
 <meta name="application-name" content="HABIT">
-<link rel="manifest" href="/manifest.json?v=20261024-2">
-<link rel="apple-touch-icon" sizes="120x120" href="/icons/icon-120.png?v=20261024-2">
-<link rel="apple-touch-icon" sizes="152x152" href="/icons/icon-152.png?v=20261024-2">
-<link rel="apple-touch-icon" sizes="167x167" href="/icons/icon-167.png?v=20261024-2">
-<link rel="apple-touch-icon" sizes="180x180" href="/icons/icon-180.png?v=20261024-2">
-<link rel="icon" type="image/png" sizes="32x32" href="/icons/icon-32.png?v=20261024-2">
+<link rel="manifest" href="/manifest.json?v=20261024-3">
+<link rel="apple-touch-icon" sizes="120x120" href="/icons/icon-120.png?v=20261024-3">
+<link rel="apple-touch-icon" sizes="152x152" href="/icons/icon-152.png?v=20261024-3">
+<link rel="apple-touch-icon" sizes="167x167" href="/icons/icon-167.png?v=20261024-3">
+<link rel="apple-touch-icon" sizes="180x180" href="/icons/icon-180.png?v=20261024-3">
+<link rel="icon" type="image/png" sizes="32x32" href="/icons/icon-32.png?v=20261024-3">
 <title>HABIT</title>
 <!-- Con id a propósito: scripts/check-training.js toma la primera etiqueta script sin
      atributos como el script principal de la app y la compila. -->
@@ -25,7 +25,7 @@
   var crew=/^\/crew(\/|$)/.test(location.pathname);
   window.HABIT_BRAND=crew?'crew':'gym';
   if(!crew)return;
-  var v='20261024-2';
+  var v='20261024-3';
   document.documentElement.classList.add('brand-crew');
   document.title='HABIT Crew';
   document.querySelectorAll('meta[name="apple-mobile-web-app-title"],meta[name="application-name"]')
@@ -40,9 +40,9 @@
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Share+Tech+Mono&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="/skandi-recovery.js?v=20261024-2"></script>
-<script src="/body-figure.js?v=20261024-2"></script>
-<script src="/habit-training.js?v=20261024-2"></script>
+<script src="/skandi-recovery.js?v=20261024-3"></script>
+<script src="/body-figure.js?v=20261024-3"></script>
+<script src="/habit-training.js?v=20261024-3"></script>
 <style>
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
 @media (prefers-reduced-motion:reduce){*,*:before,*:after{scroll-behavior:auto!important;animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}}
@@ -1103,6 +1103,30 @@ input,select,button,textarea{font-family:'Inter',sans-serif}
 .reto-foot{display:grid;gap:6px}
 .reto-link{background:none;border:none;color:var(--gray);font-size:12.5px;text-decoration:underline;cursor:pointer;padding:6px}
 .reto-locked{font-size:12px;color:var(--amber);line-height:1.45;margin:0 0 12px}
+/* Retos, Fase 2: feed, Inicio y cronómetro */
+.feed-reto{border-color:rgba(245,158,11,.32)}
+.feed-reto-verb{font-weight:400;color:var(--gray)}
+.feed-reto-body{display:block;width:100%;text-align:left;background:var(--card2);border:none;border-top:1px solid var(--border);padding:12px 14px;color:var(--white);cursor:pointer;font:inherit}
+.feed-reto-wod{margin-top:6px;font-size:13px;color:var(--gl);line-height:1.5;white-space:pre-wrap;word-break:break-word;max-height:4.5em;overflow:hidden}
+.feed-reto-cta{display:flex;justify-content:space-between;gap:10px;margin-top:10px;font-size:12px;color:var(--gray)}
+.feed-reto-cta span:last-child{color:var(--bl);font-weight:700}
+.inicio-retos-head{display:flex;align-items:center;justify-content:space-between;margin:4px 0 8px}
+#inicio-retos:not(:empty){margin-bottom:14px}
+.reto-timer-btn{width:100%;min-height:42px}
+.reto-timer{position:fixed;inset:0;z-index:10020;background:var(--black);color:var(--white);display:none;flex-direction:column;padding:calc(14px + env(safe-area-inset-top,0px)) 16px calc(16px + env(safe-area-inset-bottom,0px));max-width:430px;margin:0 auto}
+.reto-timer-top{display:flex;align-items:center;justify-content:space-between;gap:10px}
+.reto-timer-title{font-size:15px;font-weight:800;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.reto-timer-center{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;min-height:0}
+.reto-timer-phase{font-size:13px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;color:var(--gray)}
+.reto-timer-clock{font-size:clamp(72px,24vw,112px);font-weight:800;line-height:1.05;font-variant-numeric:tabular-nums;letter-spacing:-2px;margin:6px 0}
+.reto-timer-sub{font-size:13px;color:var(--gray);min-height:18px}
+.reto-timer-rounds{margin-top:14px;font-size:30px;font-weight:800;color:var(--amber);font-variant-numeric:tabular-nums}
+.reto-timer-wod{max-height:22vh;overflow-y:auto;margin:10px 0 12px;padding:10px 12px;border-radius:10px;background:var(--card);font-size:13px;color:var(--gl);line-height:1.5;white-space:pre-wrap}
+.reto-timer-actions{display:grid;gap:8px}
+.reto-timer-main{min-height:84px;border:none;border-radius:18px;background:var(--amber);color:#1a1200;font-size:24px;font-weight:800;cursor:pointer;-webkit-user-select:none;user-select:none;touch-action:manipulation}
+.reto-timer-main:active{transform:scale(.98)}
+.reto-timer-row{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.reto-timer-sec{min-height:48px;border-radius:14px;border:1px solid var(--border);background:var(--card2);color:var(--white);font-size:14px;font-weight:700;cursor:pointer}
 .mod-reason-detail{margin-top:2px;color:var(--gray);font-style:italic;word-break:break-word}
 .mod-report-actions{display:flex;gap:8px;margin-top:12px}
 .mod-report-actions button{flex:1;min-height:38px}
@@ -2693,6 +2717,7 @@ body.admin-mode #courtesy-modal label{border-radius:14px!important;border-color:
       <div id="guest-group-wrap"></div>
       <div id="active-bookings-wrap"></div>
       <div id="membership-status-wrap"></div>
+      <div id="inicio-retos"></div>
       <div id="notif-wrap"></div>
     </div>
   </div>
@@ -3759,7 +3784,7 @@ const GYM_ONLY_VIEWS=['book','planes','historial','shop'];
 const GYM_APP_URL='/';
 document.querySelectorAll('.brand-name').forEach(el=>{el.textContent=BRAND_NAME;});
 const SUPABASE_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBtcGp0ZXVxanVzYmlkdWV2YndxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc2OTI1NjUsImV4cCI6MjA5MzI2ODU2NX0.XbMzZoo2yqtrD8znLnyo_1zDfrdJAvAPj1lqGOyXnLw';
-const APP_VERSION='20261024-2';
+const APP_VERSION='20261024-3';
 // La pierna va separada en cuádriceps, femorales y pantorrillas: la figura
 // corporal pinta esas tres regiones por separado y el motor de recuperación les
 // da ventanas de descanso distintas. 'Piernas' sigue reconociéndose al leer
@@ -5013,8 +5038,8 @@ async function renderUserNotifsSb(){
     });
     userNotifBootstrapped=true;
     el.innerHTML='<p class="slbl" style="margin-bottom:10px">Notificaciones</p>'+
-      data.map(n=>'<div class="notif-item'+(n.is_read?'':' unread')+'" data-nid="'+esc(n.id)+'" onclick="markUserNotifRead(this)">'
-        +'<div class="ndot" style="background:'+(n.type==='comment'?'var(--blue)':'var(--green)')+'"></div>'
+      data.map(n=>'<div class="notif-item'+(n.is_read?'':' unread')+'" data-nid="'+esc(n.id)+'"'+(n.challenge_id?' data-cid="'+esc(n.challenge_id)+'"':'')+' onclick="markUserNotifRead(this)">'
+        +'<div class="ndot" style="background:'+(n.type==='comment'?'var(--blue)':String(n.type||'').startsWith('challenge')?'var(--amber)':'var(--green)')+'"></div>'
         +'<div class="ntext">'+esc(n.message)+'<div class="ntime">'+timeSince(n.created_at)+'</div></div></div>').join('');
   }catch(e){console.warn('load user notifs:',e);}
 }
@@ -5022,6 +5047,8 @@ async function markUserNotifRead(el){
   const id=el.dataset.nid;
   if(!id)return;
   el.classList.remove('unread');
+  // Un aviso de reto (migración 130) abre el reto: la tabla es lo que hay que ver.
+  if(el.dataset.cid)openReto(el.dataset.cid);
   try{await sb.from('user_notifications').update({is_read:true}).eq('id',id).eq('user_id',sbUser.id);}catch(e){}
 }
 function startUserNotifRealtime(){
@@ -6318,7 +6345,7 @@ function sv(v){
   updateTopActions(v);
   updateSupportFab(v);
   ALL_VIEWS.forEach(n=>{const el=document.getElementById('v-'+n);if(el)el.classList.toggle('active',n===v);});
-  if(v==='inicio'){renderMembershipStatus();loadAccessData().catch(console.error);renderDailyQuote();renderInicioCoachingWidgets();renderGuestGroup().catch(console.error);renderActiveBookings().catch(console.error);renderUserNotifsSb().catch(console.error);}
+  if(v==='inicio'){renderInicioRetos().catch(console.error);renderMembershipStatus();loadAccessData().catch(console.error);renderDailyQuote();renderInicioCoachingWidgets();renderGuestGroup().catch(console.error);renderActiveBookings().catch(console.error);renderUserNotifsSb().catch(console.error);}
   if(v==='book'){const _ds=dk(curDate);loadSlotOccupancyFromSb(_ds).then(()=>renderBook().catch(console.error));}
   if(v==='planes')renderPlans();
   if(v==='rutinas'){renderRutinas().catch(console.error);}
@@ -20162,8 +20189,12 @@ async function renderFeedSb(){
       .select(POST_LIST_COLUMNS+',post_reactions(user_id,reaction_type),post_comments(id,user_id,user_name,text_content,created_at)')
       .order('created_at',{ascending:false}).limit(50);
     if(error)throw error;
-    if(!posts||!posts.length){el.innerHTML='<div class="empty">Sin publicaciones aun. Se el primero!</div>';return;}
-    const images=attachPostImages(posts);
+    // Los retos nuevos salen en el feed como tarjeta, sacados de challenges (no son un post:
+    // habría que mantener los dos sincronizados). Con 50 posts el feed corta en el más viejo;
+    // con menos, el feed ya es todo y los retos también.
+    const feedRetos=await loadFeedRetos(posts&&posts.length===50?posts[posts.length-1].created_at:null);
+    if((!posts||!posts.length)&&!feedRetos.length){el.innerHTML='<div class="empty">Sin publicaciones aun. Se el primero!</div>';return;}
+    const images=attachPostImages(posts||[]);
     const profileIds=[...new Set((posts||[]).flatMap(p=>[p.user_id,...(p.post_comments||[]).map(c=>c.user_id)].filter(Boolean)))];
     let avatarMap={};
     if(profileIds.length){
@@ -20173,7 +20204,16 @@ async function renderFeedSb(){
     await images;
     el.innerHTML='';
     const isAdmin=sbProfile&&sbProfile.role==='admin';
-    posts.forEach(post=>{
+    const feedItems=[...(posts||[]).map(p=>({at:p.created_at,post:p})),...feedRetos.map(c=>({at:c.created_at,reto:c}))]
+      .sort((a,b)=>(b.at||'').localeCompare(a.at||''));
+    feedItems.forEach(item=>{
+      if(item.reto){
+        const div=document.createElement('div');div.className='post-card feed-reto';
+        div.innerHTML=feedRetoCardHtml(item.reto);
+        el.appendChild(div);
+        return;
+      }
+      const post=item.post;
       const myReactions=new Set((post.post_reactions||[]).filter(r=>r.user_id===sbUser.id).map(r=>r.reaction_type));
       const counts={fire:0,clap:0,heart:0};
       (post.post_reactions||[]).forEach(r=>{if(counts[r.reaction_type]!==undefined)counts[r.reaction_type]++;});
@@ -20749,6 +20789,7 @@ function closeReto(){
   const m=document.getElementById('reto-modal');
   if(m)m.style.display='none';
   retoStopRealtime();
+  retoTimerStop();
   retoOpen=null;
   if(document.getElementById('v-comunidad')?.classList.contains('active')&&communityTab==='retos')renderRetos().catch(console.error);
   if(document.getElementById('a-comunidad')?.classList.contains('active'))renderAdminRetos();
@@ -20853,7 +20894,9 @@ function renderRetoDetail(){
         :'<div class="reto-board-empty">'+(c.phase==='proximo'?'Se registra a partir del '+retoDsLabel(c.starts_on)+'.':'Nadie ha registrado todavía'+(c.has_divisions?' en esta división':'')+'.')+'</div>');
   });
   if(c.phase==='abierto'&&c.status==='activo'){
-    retoSetFoot('<div class="reto-foot"><button class="btn" onclick="openRetoScore()">'+(mine?'Corregir mi marca':'Registrar mi marca')+'</button>'
+    retoSetFoot('<div class="reto-foot">'
+      +(retoTimerSupported(c)?'<button class="btn-sm bblue reto-timer-btn" onclick="openRetoTimer()">⏱ Hacerlo ahora con cronómetro</button>':'')
+      +'<button class="btn" onclick="openRetoScore()">'+(mine?'Corregir mi marca':'Registrar mi marca')+'</button>'
       +(mine?'<button class="reto-link" onclick="deleteMyRetoEntry()">Quitar mi marca</button>':'')+'</div>');
   }else if(c.phase==='proximo'){
     retoSetFoot('<div class="reto-hint" style="text-align:center;margin:0">Se abre el '+retoDsLabel(c.starts_on)+'.</div>');
@@ -21051,26 +21094,29 @@ async function saveRetoForm(){
 // ── Registrar o corregir la marca ──
 let retoScoreFinished=true;
 function retoMmSs(sec){return sec?{m:Math.floor(sec/60),s:sec%60}:{m:'',s:''};}
-function openRetoScore(){
+// prefill: lo que midió el cronómetro ({rounds} / {finished, time_sec} / {time_sec}). Reemplaza la
+// marca anterior entera (es otro intento); la nota, el video y la división siguen siendo los tuyos.
+function openRetoScore(prefill){
   const c=retoOpen&&retoOpen.challenge;
   if(!c)return;
   retoOpen.mode='score';
   const mine=retoMyEntry();
   const t=c.score_type;
-  retoScoreFinished=mine&&t==='for_time'?mine.finished!==false:true;
+  const v=prefill?{...prefill}:(mine||{});
+  retoScoreFinished=t==='for_time'&&(prefill||mine)?v.finished!==false:true;
   retoSetChrome(mine?'Corregir mi marca':'Registrar mi marca',{back:true});
   const num=(id,label,v,attrs)=>'<div class="field"><label>'+label+'</label><input id="'+id+'" type="number" inputmode="'+((attrs||'').includes('step="0.')?'decimal':'numeric')+'" min="0" '+(attrs||'')+' value="'+esc(v??'')+'"></div>';
   const mmss=(v)=>{const x=retoMmSs(v);return'<div class="field-row">'+num('rs-min','Minutos',x.m,'max="1440" step="1"')+num('rs-sec','Segundos',x.s,'max="59" step="1"')+'</div>';};
   let fields='';
-  if(t==='amrap')fields='<div class="field-row">'+num('rs-rounds','Rondas',mine?mine.rounds:'','max="999" step="1"')+num('rs-reps','Reps extra',mine&&mine.reps?mine.reps:'','max="9999" step="1"')+'</div>';
+  if(t==='amrap')fields='<div class="field-row">'+num('rs-rounds','Rondas',v.rounds??'','max="999" step="1"')+num('rs-reps','Reps extra',v.reps||'','max="9999" step="1"')+'</div>';
   else if(t==='for_time')fields='<div class="field"><label>¿Terminaste dentro del límite ('+esc(retoCapLabel(c.time_cap_sec))+')?</label><div class="reto-chips" id="rs-finished">'
       +'<button type="button" class="filter-chip" data-v="1" onclick="retoScorePickFinished(true)">Sí, terminé</button>'
       +'<button type="button" class="filter-chip" data-v="0" onclick="retoScorePickFinished(false)">No, se acabó el tiempo</button></div></div>'
-      +'<div id="rs-time-wrap">'+mmss(mine&&mine.finished?mine.time_sec:null)+'</div>'
-      +'<div id="rs-reps-wrap">'+num('rs-reps','Reps que hiciste',mine&&!mine.finished?mine.reps:'','max="9999" step="1"')+'</div>';
-  else if(t==='max_reps')fields=num('rs-reps','Repeticiones',mine?mine.reps:'','max="9999" step="1"');
-  else if(t==='max_load')fields=num('rs-load','Peso (kg)',mine?mine.load_kg:'','max="1000" step="0.5"');
-  else if(t==='max_time')fields=mmss(mine?mine.time_sec:null);
+      +'<div id="rs-time-wrap">'+mmss(v.finished?v.time_sec:null)+'</div>'
+      +'<div id="rs-reps-wrap">'+num('rs-reps','Reps que hiciste',v.finished===false?(v.reps??''):'','max="9999" step="1"')+'</div>';
+  else if(t==='max_reps')fields=num('rs-reps','Repeticiones',v.reps??'','max="9999" step="1"');
+  else if(t==='max_load')fields=num('rs-load','Peso (kg)',v.load_kg??'','max="1000" step="0.5"');
+  else if(t==='max_time')fields=mmss(v.time_sec||null);
   const div=mine?mine.division:retoOpen.division;
   const body=document.getElementById('reto-modal-body');
   body.innerHTML='<div class="reto-info" style="margin-bottom:12px"><span class="reto-type">'+esc(retoTypeLabel(c))+'</span><span>· '+esc(c.title)+'</span></div>'
@@ -21131,6 +21177,7 @@ async function saveRetoScore(){
   // Un update manda todas las columnas del tipo (las que no se usan en null) para que una marca
   // corregida no arrastre datos de la anterior.
   const full={rounds:null,reps:null,time_sec:null,load_kg:null,finished:null,...row};
+  const before=(retoOpen.entries||[]).map(e=>({...e}));
   showLoading('Guardando...');
   try{
     let mine=retoMyEntry();
@@ -21153,6 +21200,7 @@ async function saveRetoScore(){
     retoOpen.mode='detail';
     retoOpen.divisionPicked=false;
     await loadRetoDetail();
+    if(retoOpen)retoPushAfterScore(c,before,retoOpen.entries);
   }catch(e){
     hideLoading();
     toast(retoError(e),'err');
@@ -21176,6 +21224,250 @@ async function renderAdminRetos(){
     console.warn('renderAdminRetos:',e);
     el.innerHTML='<div class="mod-empty">No se pudieron cargar los retos: '+esc(e.message||e)+'</div>';
   }
+}
+
+// ── Retos, Fase 2 (docs/RETOS.md) ──
+// Feed: un reto nuevo sale como tarjeta entre las publicaciones. Sin la 129, o si algo falla,
+// el feed sigue igual: los retos son un extra, nunca lo que impide ver la comunidad.
+async function loadFeedRetos(sinceIso){
+  try{
+    let q=sb.from('challenge_cards').select('*').eq('status','activo').order('created_at',{ascending:false}).limit(10);
+    if(sinceIso)q=q.gte('created_at',sinceIso);
+    const{data,error}=await q;
+    if(error)throw error;
+    return data||[];
+  }catch(e){
+    if(!isMissingRetosTable(e))console.warn('loadFeedRetos:',e);
+    return[];
+  }
+}
+function feedRetoCardHtml(c){
+  const n=Number(c.entries_count)||0;
+  return'<div class="post-hdr">'
+    +avatarHtml(c.created_by_name||'Reto',null,'post-av')
+    +'<div style="flex:1;min-width:0"><div class="post-user">'+esc(c.created_by_name||'Alguien')+' <span class="feed-reto-verb">propuso un reto</span></div>'
+    +'<div class="post-time">'+timeSince(c.created_at)+'</div></div>'
+    +communityMoreBtn('challenge',c.id,c.created_by,c.created_by_name)
+    +'</div>'
+    +'<button class="feed-reto-body" data-id="'+esc(c.id)+'" onclick="openReto(this.dataset.id)">'
+    +'<div class="reto-card-top"><span class="reto-type">'+esc(retoTypeLabel(c))+'</span>'
+    +(c.is_official?'<span class="reto-badge">Oficial HABIT</span>':'')
+    +'<span class="reto-when">'+esc(retoWhenLabel(c))+'</span></div>'
+    +'<div class="reto-title">'+esc(c.title)+'</div>'
+    +(c.description?'<div class="feed-reto-wod">'+esc(c.description)+'</div>':'')
+    +'<div class="feed-reto-cta"><span>'+(n?n+(n===1?' participante':' participantes'):'Sé el primero en registrar')+'</span><span>Ver reto ›</span></div>'
+    +'</button>';
+}
+
+// Inicio: los retos abiertos donde ya registraste, con tu lugar, y si no hay, el oficial del
+// gym que esté abierto. Nada si no hay ninguno: Inicio no se llena de invitaciones.
+async function renderInicioRetos(){
+  const el=document.getElementById('inicio-retos');
+  if(!el||!sbUser)return;
+  try{
+    const{data:mine,error:mineErr}=await sb.from('challenge_standings')
+      .select('challenge_id,place,score_label,division').eq('user_id',sbUser.id);
+    if(mineErr)throw mineErr;
+    const myBy=Object.fromEntries((mine||[]).map(r=>[r.challenge_id,r]));
+    const ids=Object.keys(myBy);
+    const{data:cards,error}=await sb.from('challenge_cards').select('*')
+      .eq('status','activo').eq('phase','abierto')
+      .or('is_official.eq.true'+(ids.length?',id.in.('+ids.join(',')+')':''))
+      .order('ends_on',{ascending:true}).limit(10);
+    if(error)throw error;
+    const list=(cards||[]).slice().sort((a,b)=>(myBy[b.id]?1:0)-(myBy[a.id]?1:0)).slice(0,3);
+    if(!list.length){el.innerHTML='';return;}
+    el.innerHTML='<div class="inicio-retos-head"><p class="slbl" style="margin:0">'+(Object.keys(myBy).some(id=>list.some(c=>c.id===id))?'Tus retos':'Reto de HABIT')+'</p>'
+      +'<button class="reto-link" onclick="goToRetos()">Ver todos</button></div>'
+      +list.map(c=>retoCardHtml(c,myBy[c.id])).join('');
+  }catch(e){
+    if(!isMissingRetosTable(e))console.warn('renderInicioRetos:',e);
+    el.innerHTML='';
+  }
+}
+function goToRetos(){
+  communityTab='retos';
+  try{localStorage.setItem('habit_comm_tab','retos');}catch(e){}
+  sv('comunidad');
+}
+
+// Push después de guardar una marca. Los avisos dentro de la app los escribe la base
+// (trigger de la 130); el push a quien tiene la app cerrada lo manda la app, como en los
+// comentarios. A quién: lo dicen los lugares de antes y de después que da la vista, no una
+// regla de orden propia. Lo bloqueado no llega aquí, así que tampoco recibe push.
+function retoPushAfterScore(c,before,after){
+  if(!c||!sbUser)return;
+  const me=sbUser.id;
+  const mineA=(after||[]).find(e=>e.user_id===me);
+  if(!mineA)return;
+  const mineB=(before||[]).find(e=>e.user_id===me);
+  if(mineB&&mineB.scored_at===mineA.scored_at)return;
+  const fresh=!mineB||mineB.division!==mineA.division;
+  const name=curUser?.name||'Alguien';
+  const passed=(after||[])
+    .filter(o=>o.user_id!==me&&o.division===mineA.division&&o.place>mineA.place)
+    .filter(o=>{const b=(before||[]).find(x=>x.id===o.id);return b&&(fresh||b.place<mineB.place);})
+    .sort((a,b)=>a.place-b.place).slice(0,10);
+  passed.forEach(o=>sendPush('user:'+o.user_id,'🏁 Te pasaron en un reto',name+' te pasó en «'+c.title+'» con '+mineA.score_label,{tag:'reto-'+c.id}));
+  if(!mineB&&c.created_by&&c.created_by!==me&&!passed.some(o=>o.user_id===c.created_by))
+    sendPush('user:'+c.created_by,'🏁 Nueva marca en tu reto',name+' registró '+mineA.score_label+' en «'+c.title+'»',{tag:'reto-'+c.id});
+}
+
+// ── Hacer el reto ahora: el cronómetro ──
+// Pantalla completa encima de la hoja del reto. Cuenta 10 s para prepararse y después:
+//   AMRAP     cuenta hacia atrás la duración (o hacia adelante si no tiene) y lleva las rondas
+//   For Time  cuenta hacia adelante; «Terminé» o el límite lo cortan
+//   Máx. tiempo  cuenta hacia adelante hasta «Paré»
+// Al terminar abre «Registrar marca» ya llenado, para revisarla y guardarla: el cronómetro
+// nunca guarda solo. El tiempo sale de Date.now() contra el inicio, no de sumar ticks: un
+// setInterval estrangulado (pantalla bloqueada) se come ticks.
+const RETO_TIMER_LEAD_SEC=10;
+let retoTimer=null;
+function retoTimerSupported(c){return!!c&&['amrap','for_time','max_time'].includes(c.score_type);}
+function retoClock(sec){
+  sec=Math.max(0,Math.floor(sec));
+  const h=Math.floor(sec/3600),m=Math.floor(sec%3600/60),s=sec%60;
+  return(h?h+':'+pad(m):m)+':'+pad(s);
+}
+function retoBeep(freq,dur){
+  try{
+    const ctx=wsAudioCtx();
+    if(!ctx)return;
+    const osc=ctx.createOscillator(),gain=ctx.createGain(),t=ctx.currentTime;
+    osc.type='sine';osc.frequency.value=freq;
+    gain.gain.setValueAtTime(0,t);
+    gain.gain.linearRampToValueAtTime(.35,t+.01);
+    gain.gain.exponentialRampToValueAtTime(.0005,t+dur);
+    osc.connect(gain).connect(ctx.destination);
+    osc.start(t);osc.stop(t+dur+.05);
+  }catch(e){}
+}
+async function openRetoTimer(){
+  const c=retoOpen&&retoOpen.challenge;
+  if(!retoTimerSupported(c))return;
+  wsUnlockAudio();
+  let el=document.getElementById('reto-timer');
+  if(!el){
+    el=document.createElement('div');
+    el.id='reto-timer';el.className='reto-timer';
+    document.body.appendChild(el);
+  }
+  retoTimer={c,phase:'countdown',startAt:Date.now()+RETO_TIMER_LEAD_SEC*1000,rounds:0,lastBeep:null,tick:null,wake:null,elapsed:0};
+  try{if(navigator.wakeLock)retoTimer.wake=await navigator.wakeLock.request('screen');}catch(e){}
+  el.style.display='flex';
+  renderRetoTimer();
+  retoTimer.tick=setInterval(retoTimerTick,200);
+}
+function renderRetoTimer(){
+  const t=retoTimer,el=document.getElementById('reto-timer');
+  if(!t||!el)return;
+  const c=t.c,type=c.score_type;
+  let action='';
+  if(t.phase==='countdown')action='<button class="reto-timer-main" onclick="retoTimerSkipLead()">Empezar ya</button>';
+  else if(type==='amrap')action='<button class="reto-timer-main" onclick="retoTimerRound(1)">+1 ronda</button>'
+    +'<div class="reto-timer-row"><button class="reto-timer-sec" onclick="retoTimerRound(-1)">−1 ronda</button>'
+    +'<button class="reto-timer-sec" onclick="retoTimerFinish(\'stop\')">Terminar</button></div>';
+  else action='<button class="reto-timer-main" onclick="retoTimerFinish(\'stop\')">'+(type==='for_time'?'Terminé':'Paré')+'</button>';
+  el.innerHTML='<div class="reto-timer-top"><span class="reto-timer-title">'+esc(c.title)+'</span>'
+    +'<button class="video-modal-close" onclick="exitRetoTimer()">Salir</button></div>'
+    +'<div class="reto-timer-center">'
+    +'<div class="reto-timer-phase" id="rt-phase"></div>'
+    +'<div class="reto-timer-clock" id="rt-clock"></div>'
+    +'<div class="reto-timer-sub" id="rt-sub"></div>'
+    +(type==='amrap'?'<div class="reto-timer-rounds" id="rt-rounds"></div>':'')
+    +'</div>'
+    +(c.description?'<div class="reto-timer-wod">'+esc(c.description)+'</div>':'')
+    +'<div class="reto-timer-actions">'+action+'</div>';
+  retoTimerPaint();
+}
+function retoTimerPaint(){
+  const t=retoTimer;
+  if(!t)return;
+  const c=t.c,type=c.score_type,now=Date.now();
+  const set=(id,v)=>{const x=document.getElementById(id);if(x)x.textContent=v;};
+  if(t.phase==='countdown'){
+    set('rt-phase','Prepárate');
+    set('rt-clock',String(Math.max(1,Math.ceil((t.startAt-now)/1000))));
+    set('rt-sub',retoTypeLabel(c));
+  }else{
+    const el=(now-t.startAt)/1000;
+    t.elapsed=el;
+    if(type==='amrap'&&c.time_cap_sec){
+      set('rt-phase','Quedan');
+      set('rt-clock',retoClock(Math.ceil(c.time_cap_sec-el)));
+      set('rt-sub','AMRAP '+retoCapLabel(c.time_cap_sec));
+    }else{
+      set('rt-phase',type==='max_time'?'Aguantando':'Tiempo');
+      set('rt-clock',retoClock(el));
+      set('rt-sub',type==='for_time'?'Límite '+retoClock(c.time_cap_sec):'');
+    }
+  }
+  if(type==='amrap')set('rt-rounds',t.rounds+(t.rounds===1?' ronda':' rondas'));
+}
+function retoTimerTick(){
+  const t=retoTimer;
+  if(!t)return;
+  const c=t.c,now=Date.now();
+  if(t.phase==='countdown'){
+    const rem=Math.ceil((t.startAt-now)/1000);
+    if(rem<=3&&rem>=1&&t.lastBeep!==rem){t.lastBeep=rem;retoBeep(880,.18);}
+    if(now>=t.startAt){
+      t.phase='running';
+      wsPlayRestBell();
+      renderRetoTimer();
+      return;
+    }
+  }else if(t.phase==='running'){
+    const el=(now-t.startAt)/1000;
+    const cap=c.score_type==='for_time'||c.score_type==='amrap'?c.time_cap_sec:null;
+    if(cap){
+      const rem=Math.ceil(cap-el);
+      if(rem<=3&&rem>=1&&t.lastBeep!==-rem){t.lastBeep=-rem;retoBeep(880,.18);}
+      if(el>=cap){retoTimerFinish('cap');return;}
+    }
+  }
+  retoTimerPaint();
+}
+function retoTimerSkipLead(){
+  if(!retoTimer||retoTimer.phase!=='countdown')return;
+  retoTimer.startAt=Date.now();
+  retoTimerTick();
+}
+function retoTimerRound(d){
+  if(!retoTimer||retoTimer.phase!=='running')return;
+  retoTimer.rounds=Math.max(0,retoTimer.rounds+d);
+  if(d>0&&navigator.vibrate)try{navigator.vibrate(30);}catch(e){}
+  retoTimerPaint();
+}
+function retoTimerStop(){
+  const t=retoTimer;
+  if(!t)return;
+  clearInterval(t.tick);
+  try{if(t.wake)t.wake.release();}catch(e){}
+  const el=document.getElementById('reto-timer');
+  if(el){el.style.display='none';el.innerHTML='';}
+  retoTimer=null;
+}
+function retoTimerFinish(reason){
+  const t=retoTimer;
+  if(!t||t.phase!=='running')return;
+  const c=t.c,type=c.score_type;
+  const sec=Math.max(1,Math.floor((Date.now()-t.startAt)/1000));
+  wsPlayRestBell();
+  let prefill;
+  if(type==='amrap')prefill={rounds:t.rounds};
+  else if(type==='for_time')prefill=reason==='cap'||sec>c.time_cap_sec?{finished:false}:{finished:true,time_sec:sec};
+  else prefill={time_sec:sec};
+  retoTimerStop();
+  if(!retoOpen||!retoOpen.challenge||retoOpen.challenge.id!==c.id)return;
+  openRetoScore(prefill);
+  toast(type==='for_time'&&prefill.finished===false?'Se acabó el tiempo: escribe tus reps y guarda':
+    type==='amrap'?'¡Tiempo! Revisa tus rondas, agrega las reps sueltas y guarda':'¡Listo! Revisa tu marca y guárdala','ok');
+}
+async function exitRetoTimer(){
+  if(retoTimer&&retoTimer.phase==='running'
+     &&!await confirmSheet('El cronómetro se detiene y no se guarda nada.',{title:'¿Salir del reto?',confirmLabel:'Salir',cancelLabel:'Seguir',danger:true}))return;
+  retoTimerStop();
 }
 
 async function addBoardSb(){

@@ -196,16 +196,31 @@ pendiente y la cola lo muestra como "ya no existe", igual que un post que su aut
 
 Fuera de la Fase 1 a propósito: notificaciones, cronómetro, feed.
 
-### Fase 2 — que se mueva solo
+### Fase 2 — que se mueva solo ✅ (migración 130, 24 oct)
 
 - **Tarjeta en el feed** cuando alguien crea un reto, derivada de `challenges` (no un `post`
-  aparte, que habría que mantener sincronizado).
-- **Avisos** en `user_notifications` + push: "X registró en tu reto", "Te pasaron en «…»".
-  Con un trigger, para que no dependa de que el cliente se acuerde.
-- **Tarjeta en Inicio** con el reto activo en el que participas y tu lugar.
-- **Hacerlo ahora**: cronómetro de AMRAP (cuenta regresiva + contador de rondas) y de For Time
-  (cronómetro con límite) que al terminar abre «Registrar marca» ya llenado.
-- **Convertir en rutina**: crear un `board` del socio con el WOD para usar la hoja de entrenamiento.
+  aparte, que habría que mantener sincronizado): `loadFeedRetos` + `feedRetoCardHtml`, mezclada
+  por fecha con las publicaciones. Si falla, el feed sigue igual.
+- **Avisos** en `user_notifications`: "X registró su marca en tu reto" (al autor, solo la primera
+  vez) y "X te pasó en «…»" (a las 10 personas más cercanas que una marca deja atrás). Los
+  escribe el trigger `challenge_entry_notify` de la **130**; una política restrictiva impide que
+  la app inserte avisos `challenge_*`. Tocar el aviso abre el reto. El **push** a quien tiene la
+  app cerrada lo manda la app después de guardar (`retoPushAfterScore`), comparando los lugares
+  de antes y de después que da la vista: la base no llama a `send-push`.
+- **El orden vive en `challenge_sort_key()`** desde la 130: la usan la vista y el trigger, así
+  que "te pasó" y la tabla no pueden discrepar.
+- **Tarjeta en Inicio** (`renderInicioRetos`): los retos abiertos donde registraste, con tu
+  lugar; si no hay, el oficial abierto. Nada si no hay ninguno.
+- **Hacerlo ahora** (`openRetoTimer`): pantalla completa con 10 s para prepararse, pitidos en
+  3-2-1 y la campana del descanso al empezar y al terminar. AMRAP cuenta hacia atrás la duración
+  (o hacia adelante si no tiene) con «+1 ronda»; For Time cuenta hacia adelante hasta «Terminé»
+  o el límite; Máx. tiempo hasta «Paré». Al terminar abre «Registrar marca» ya llenado —nunca
+  guarda solo— y pide la pantalla encendida (Wake Lock) mientras corre. El tiempo sale de
+  `Date.now()` contra el inicio, no de sumar ticks.
+- ~~Convertir en rutina~~ — **descartado**. Un reto es texto libre y una rutina de HABIT solo
+  admite ejercicios del `exercise_catalog` (el socio no escribe ejercicios a mano, ver
+  `CLAUDE.md`). Convertirlo pediría inventar fichas sin músculo ni video. El cronómetro cubre lo
+  que se quería: hacer el reto desde la app.
 
 ### Fase 3 — el gym
 
@@ -312,3 +327,27 @@ Fuera de la Fase 1 a propósito: notificaciones, cronómetro, feed.
   - **Falta:** la prueba con sesión (proponer, registrar, corregir, reportar, bloquear, moderar)
     con dos cuentas reales en el iPhone. No se hizo desde aquí: un reto de prueba lo vería toda
     la comunidad.
+- **24 oct 2026** — **Arreglo: las hojas de confirmar y los avisos quedaban detrás de las
+  hojas.** `.confirm-overlay` tenía `z-index` 2600 y el toast 999; toda `.terms-modal` tiene
+  9999. En producción, desde la Fase 1, el ⋯ del reto, reportar una marca, «Quitar mi marca» y los
+  «¿Borrar…?» abrían algo invisible, y los errores al guardar no se veían. La verificación de la
+  Fase 1 no lo vio porque tocaba los botones por código. Ahora 10050 y 10060 (`14ad524`, versión
+  `20261024-2`). Afecta a toda la app: cualquier `confirmSheet` dentro de una hoja.
+- **24 oct 2026** — **Fase 2** (migración **130**, versión `20261024-3`): tarjeta en el feed,
+  avisos por trigger y push, tarjeta en Inicio y el cronómetro. «Convertir en rutina» quedó
+  descartado (ver §4).
+  - **130 probada contra Postgres real** (PGlite: la 128, la 129 y la 130 dos veces; 104 casos, los
+    84 de la 129 con la vista nueva y 20 de avisos): aviso al autor solo la primera vez, "te pasó"
+    al subir y no al corregir la nota ni al subir sin pasar a nadie, empatar no es pasar, otra
+    división no pasa a nadie, autor que además queda atrás recibe un solo aviso, tope de 10 con los
+    más cercanos, la app no puede insertar avisos de reto pero sí los comentarios de la 005, el
+    aviso de alguien bloqueado no se ve y borrar el reto borra sus avisos.
+  - **Verificado en el navegador local** (`/crew`, 375 px, Supabase simulado): la tarjeta en el
+    feed mezclada por fecha, Inicio con «Tus retos» y el aviso en ámbar que abre el reto, el
+    cronómetro de For Time (Terminé → 0:09 llenado → guardado → 1.er lugar → push a los tres que
+    pasó), AMRAP (+1/−1, «Salir» pide confirmar y la confirmación se ve encima, corte a los 12 min
+    con las rondas llenadas, push al autor) y Máx. tiempo (Paré → 1:35), y For Time al acabarse el
+    tiempo (pide reps).
+  - **No verificado** contra la base real ni en el iPhone (sonido, vibración, Wake Lock).
+  - **Orden de despliegue:** cualquiera. Sin la 130 la app funciona igual pero no se crean los
+    avisos dentro de la app (el push sí sale).

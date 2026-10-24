@@ -353,6 +353,8 @@ y `promptSheet()` (mismo patrón que Skandi en `a6ea2cb`, sin su i18n), que devu
 lo son ahora. `promptSheet` imita al nativo a propósito: `null` al cancelar, string al aceptar,
 `''` si se borró todo. Tocar el fondo cancela, nunca confirma. Las acciones destructivas pasan
 `{danger:true}` y un verbo propio ("Eliminar", "Cancelar entreno") en vez de un "Aceptar" genérico.
+El overlay (`#confirm-overlay`, z-index 10050) y el toast (10060) van **encima de toda hoja**
+(`.terms-modal` 9999): se abren desde dentro de ellas, y con 2600 quedaban detrás, invisibles.
 `choiceSheet(body, choices)` es el tercero del mismo overlay: una lista de opciones
 (`{key, label, danger}`) que resuelve con la `key` elegida o `null` — el menú ⋯ de la comunidad.
 
@@ -412,7 +414,12 @@ places. PRs live in **Progreso** only: Historial used to render them too, with i
   / `entry_id`; borrar desde el admin resuelve los reportes por trigger, sin endpoint.
   En la app es la pestaña Retos de Comunidad (`setCommunityTab`) y una sola hoja, `#reto-modal`,
   con tres modos en `retoOpen.mode` (detalle / proponer-editar / registrar marca); el admin
-  modera abriendo el mismo reto. `COMMUNITY_ITEM_KINDS` nombra los cuatro tipos reportables
+  modera abriendo el mismo reto. `COMMUNITY_ITEM_KINDS` nombra los cuatro tipos reportables.
+  Fase 2 (migración 130): el orden vive en `challenge_sort_key()`, que usan la vista y el trigger
+  `challenge_entry_notify` ("registró en tu reto" / "te pasó", en `user_notifications.challenge_id`;
+  la app no puede insertar avisos `challenge_*`). El push lo manda la app tras guardar
+  (`retoPushAfterScore`). Los retos nuevos salen en el feed (`loadFeedRetos`), los tuyos en Inicio
+  (`renderInicioRetos`), y `openRetoTimer` es el cronómetro que llena «Registrar marca»
 - `booking_guest_passes` — group session guest passes (from `group-guest-passes.sql`)
 - `admin_notifs` — in-app notifications for admin
 - `lift_competitions` / `lift_competitors` (migration 126) — **competencia de levantamiento**.
