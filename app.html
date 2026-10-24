@@ -6,12 +6,12 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="HABIT">
 <meta name="application-name" content="HABIT">
-<link rel="manifest" href="/manifest.json?v=20261024-1">
-<link rel="apple-touch-icon" sizes="120x120" href="/icons/icon-120.png?v=20261024-1">
-<link rel="apple-touch-icon" sizes="152x152" href="/icons/icon-152.png?v=20261024-1">
-<link rel="apple-touch-icon" sizes="167x167" href="/icons/icon-167.png?v=20261024-1">
-<link rel="apple-touch-icon" sizes="180x180" href="/icons/icon-180.png?v=20261024-1">
-<link rel="icon" type="image/png" sizes="32x32" href="/icons/icon-32.png?v=20261024-1">
+<link rel="manifest" href="/manifest.json?v=20261024-2">
+<link rel="apple-touch-icon" sizes="120x120" href="/icons/icon-120.png?v=20261024-2">
+<link rel="apple-touch-icon" sizes="152x152" href="/icons/icon-152.png?v=20261024-2">
+<link rel="apple-touch-icon" sizes="167x167" href="/icons/icon-167.png?v=20261024-2">
+<link rel="apple-touch-icon" sizes="180x180" href="/icons/icon-180.png?v=20261024-2">
+<link rel="icon" type="image/png" sizes="32x32" href="/icons/icon-32.png?v=20261024-2">
 <title>HABIT</title>
 <!-- Con id a propósito: scripts/check-training.js toma la primera etiqueta script sin
      atributos como el script principal de la app y la compila. -->
@@ -25,7 +25,7 @@
   var crew=/^\/crew(\/|$)/.test(location.pathname);
   window.HABIT_BRAND=crew?'crew':'gym';
   if(!crew)return;
-  var v='20261024-1';
+  var v='20261024-2';
   document.documentElement.classList.add('brand-crew');
   document.title='HABIT Crew';
   document.querySelectorAll('meta[name="apple-mobile-web-app-title"],meta[name="application-name"]')
@@ -40,9 +40,9 @@
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Share+Tech+Mono&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="/skandi-recovery.js?v=20261024-1"></script>
-<script src="/body-figure.js?v=20261024-1"></script>
-<script src="/habit-training.js?v=20261024-1"></script>
+<script src="/skandi-recovery.js?v=20261024-2"></script>
+<script src="/body-figure.js?v=20261024-2"></script>
+<script src="/habit-training.js?v=20261024-2"></script>
 <style>
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
 @media (prefers-reduced-motion:reduce){*,*:before,*:after{scroll-behavior:auto!important;animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}}
@@ -106,7 +106,9 @@ input,select,button,textarea{font-family:'Inter',sans-serif}
 .tu-stat-l{font-size:11px;color:var(--gray);margin-top:4px;letter-spacing:.04em}
 .view{display:none;flex-direction:column;flex:1;overflow:hidden}
 .view.active{display:flex}
-.toast-wrap{position:absolute;top:60px;left:1rem;right:1rem;z-index:999;pointer-events:none}
+/* Encima de toda hoja (.terms-modal 9999, .video-modal 10000) y debajo de "Cargando" (99999):
+   confirmar, elegir y los avisos se abren desde dentro de las hojas, y debajo no se veían. */
+.toast-wrap{position:absolute;top:60px;left:1rem;right:1rem;z-index:10060;pointer-events:none}
 .toast{background:var(--blue);color:var(--white);padding:10px 16px;border-radius:6px;font-size:13px;font-weight:500;opacity:0;transition:opacity .3s;text-align:center;pointer-events:none}
 .toast.show{opacity:1;pointer-events:auto}
 .toast.err{background:var(--red)}.toast.warn{background:var(--amber);color:#000}.toast.ok{background:var(--green)}
@@ -652,7 +654,7 @@ input,select,button,textarea{font-family:'Inter',sans-serif}
 .hist-progress-link{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;
   border:1px solid var(--border);background:var(--card);border-radius:12px;padding:11px 13px;margin-top:12px}
 .hist-progress-link span{font-size:12px;color:var(--gray)}
-.confirm-overlay{position:fixed;inset:0;z-index:2600;display:none;align-items:center;justify-content:center;
+.confirm-overlay{position:fixed;inset:0;z-index:10050;display:none;align-items:center;justify-content:center;
   padding:22px;background:rgba(0,0,0,.62);backdrop-filter:blur(3px)}
 .confirm-overlay.show{display:flex}
 .confirm-card{width:100%;max-width:340px;background:var(--card);border:1px solid var(--border);border-radius:16px;
@@ -3757,7 +3759,7 @@ const GYM_ONLY_VIEWS=['book','planes','historial','shop'];
 const GYM_APP_URL='/';
 document.querySelectorAll('.brand-name').forEach(el=>{el.textContent=BRAND_NAME;});
 const SUPABASE_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBtcGp0ZXVxanVzYmlkdWV2YndxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc2OTI1NjUsImV4cCI6MjA5MzI2ODU2NX0.XbMzZoo2yqtrD8znLnyo_1zDfrdJAvAPj1lqGOyXnLw';
-const APP_VERSION='20261024-1';
+const APP_VERSION='20261024-2';
 // La pierna va separada en cuádriceps, femorales y pantorrillas: la figura
 // corporal pinta esas tres regiones por separado y el motor de recuperación les
 // da ventanas de descanso distintas. 'Piernas' sigue reconociéndose al leer
