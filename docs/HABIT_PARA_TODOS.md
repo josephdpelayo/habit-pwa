@@ -777,3 +777,19 @@ nuevas.
     validar los recorridos autenticados y el aspecto final con esa cuenta.
   - La foto histórica de 6.4 MB sigue pendiente de migrar a Storage. No se confirma ninguna
     modificación de esa imagen ni del post.
+- **2026-10-23 (6)** — Validación con la cuenta de prueba (`1@habit.app`), versión `20261023-6`.
+  - Hoy, los cinco estados con datos reales: usuario nuevo, agendado (Empezar + Entrenar otra
+    cosa), en curso (Continuar, series, punto azul en la semana), hecho (Ver lo que hiciste, ✓,
+    "1 de 2") y descanso (qué sigue, Entrenar de todos modos). "Tu cuerpo" se despliega.
+  - Semana: añadir rutina a un día con la hoja de elegir (buscador, filtros, ver ejercicios);
+    no duplica la sesión que ya existía ese día. Se deja a propósito sin palomitas: es la
+    distribución habitual, y lo de esta semana está en la tira de Hoy.
+  - Rutinas: biblioteca, ficha, "Asignar a mi semana" / "Duplicar y adaptar", editor y
+    buscador a pantalla completa (encuentra por alias: "sentadilla" → Bulgarian split squat).
+  - Dos arreglos: con la hoja minimizada, el descanso ahora vive en la barra de la sesión (se
+    pone ámbar); antes una barra amarilla aparte tapaba la navegación. Y el título de la
+    ficha de rutina medía 14 px porque `.terms-body h3` le ganaba a `.routine-detail-name`;
+    ahora 30 px.
+  - Nota de pruebas locales: el servidor en 4174 era el `python` que dejó otra sesión, sin
+    encabezados de caché; el navegador servía `app.html` viejo hasta forzar `?fresh=`.
+  - La cuenta de prueba quedó vacía (sin sesiones, semana ni récords).

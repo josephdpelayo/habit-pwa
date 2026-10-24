@@ -6,12 +6,12 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="HABIT">
 <meta name="application-name" content="HABIT">
-<link rel="manifest" href="/manifest.json?v=20261023-5">
-<link rel="apple-touch-icon" sizes="120x120" href="/icons/icon-120.png?v=20261023-5">
-<link rel="apple-touch-icon" sizes="152x152" href="/icons/icon-152.png?v=20261023-5">
-<link rel="apple-touch-icon" sizes="167x167" href="/icons/icon-167.png?v=20261023-5">
-<link rel="apple-touch-icon" sizes="180x180" href="/icons/icon-180.png?v=20261023-5">
-<link rel="icon" type="image/png" sizes="32x32" href="/icons/icon-32.png?v=20261023-5">
+<link rel="manifest" href="/manifest.json?v=20261023-6">
+<link rel="apple-touch-icon" sizes="120x120" href="/icons/icon-120.png?v=20261023-6">
+<link rel="apple-touch-icon" sizes="152x152" href="/icons/icon-152.png?v=20261023-6">
+<link rel="apple-touch-icon" sizes="167x167" href="/icons/icon-167.png?v=20261023-6">
+<link rel="apple-touch-icon" sizes="180x180" href="/icons/icon-180.png?v=20261023-6">
+<link rel="icon" type="image/png" sizes="32x32" href="/icons/icon-32.png?v=20261023-6">
 <title>HABIT</title>
 <!-- Con id a propósito: scripts/check-training.js toma la primera etiqueta script sin
      atributos como el script principal de la app y la compila. -->
@@ -25,7 +25,7 @@
   var crew=/^\/crew(\/|$)/.test(location.pathname);
   window.HABIT_BRAND=crew?'crew':'gym';
   if(!crew)return;
-  var v='20261023-5';
+  var v='20261023-6';
   document.documentElement.classList.add('brand-crew');
   document.title='HABIT Crew';
   document.querySelectorAll('meta[name="apple-mobile-web-app-title"],meta[name="application-name"]')
@@ -40,9 +40,9 @@
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Share+Tech+Mono&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="/skandi-recovery.js?v=20261023-5"></script>
-<script src="/body-figure.js?v=20261023-5"></script>
-<script src="/habit-training.js?v=20261023-5"></script>
+<script src="/skandi-recovery.js?v=20261023-6"></script>
+<script src="/body-figure.js?v=20261023-6"></script>
+<script src="/habit-training.js?v=20261023-6"></script>
 <style>
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
 @media (prefers-reduced-motion:reduce){*,*:before,*:after{scroll-behavior:auto!important;animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}}
@@ -2551,6 +2551,12 @@ body.admin-mode #courtesy-modal label{border-radius:14px!important;border-color:
 #rb-pick-list .ws-pick-item small{font-size:12px;line-height:1.5;margin-top:5px}
 .rb-search-empty{padding:42px 8px;text-align:center;font-size:13px;color:var(--gray);line-height:1.7}
 .rb-search-empty strong{display:block;color:var(--white);font-size:16px;margin-bottom:6px}
+/* Hoja minimizada: la barra de la sesión cuenta el descanso (y cambia de color) en vez de
+   que aparezca otra barra encima de la navegación. */
+.active-session-bar.resting{background:linear-gradient(90deg,#b45309,#92400e)}
+/* La ficha de rutina vive dentro de .terms-body, cuya regla para h3 (14 px, mayúsculas,
+   espaciado) es más específica que .routine-detail-name y le ganaba al título. */
+.terms-body h3.routine-detail-name{font-size:30px;letter-spacing:-1px;line-height:1.12;font-weight:750;text-transform:none;margin:4px 0 0;color:var(--white)}
 </style>
 </head>
 <body>
@@ -3684,7 +3690,7 @@ const GYM_ONLY_VIEWS=['book','planes','historial','shop'];
 const GYM_APP_URL='/';
 document.querySelectorAll('.brand-name').forEach(el=>{el.textContent=BRAND_NAME;});
 const SUPABASE_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBtcGp0ZXVxanVzYmlkdWV2YndxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc2OTI1NjUsImV4cCI6MjA5MzI2ODU2NX0.XbMzZoo2yqtrD8znLnyo_1zDfrdJAvAPj1lqGOyXnLw';
-const APP_VERSION='20261023-5';
+const APP_VERSION='20261023-6';
 // La pierna va separada en cuádriceps, femorales y pantorrillas: la figura
 // corporal pinta esas tres regiones por separado y el motor de recuperación les
 // da ventanas de descanso distintas. 'Piernas' sigue reconociéndose al leer
@@ -12724,8 +12730,7 @@ function hideActiveSessionBar(){
 }
 function tickActiveSessionBar(){
   if(!activeCoachingSession)return;
-  const el=document.getElementById('asb-elapsed');
-  if(el)el.textContent=fmtClock(wsElapsedSec());
+  paintActiveSessionBarClock();
 }
 function parseRestSeconds(restStr){
   if(!restStr)return 0;
@@ -12860,13 +12865,20 @@ function wsUpdateClocks(){
   if(chipRest)chipRest.classList.toggle('resting',rest>0);
   const bar=document.getElementById('ws-rest-bar-fill');
   if(bar)bar.style.width=(wsRestTotal?Math.max(0,Math.min(100,rest/wsRestTotal*100)):0)+'%';
-  // Cuando la hoja está minimizada, el mismo reloj alimenta las barras de
-  // siempre para que el socio no pierda de vista el entreno ni el descanso.
-  set('asb-elapsed',fmtClock(elapsed));
+  // Con la hoja minimizada, el descanso vive dentro de la barra de la sesión (que queda
+  // arriba de la navegación). Antes era una barra amarilla aparte, fija abajo, que tapaba
+  // Inicio, Entrenar y Comunidad mientras corría.
+  paintActiveSessionBarClock();
   const restBar=document.getElementById('rest-timer-bar');
-  const restLbl=document.getElementById('rest-timer-label');
-  if(restLbl)restLbl.textContent='Descanso · '+fmtClock(rest);
-  if(restBar)restBar.style.display=(rest>0&&!wsOpen)?'flex':'none';
+  if(restBar)restBar.style.display='none';
+}
+function paintActiveSessionBarClock(){
+  const el=document.getElementById('asb-elapsed');
+  const bar=document.getElementById('active-session-bar');
+  if(!el)return;
+  const rest=wsRestSec();
+  el.textContent=rest>0?'Descanso · '+fmtClock(rest):fmtClock(wsElapsedSec());
+  if(bar)bar.classList.toggle('resting',rest>0);
 }
 function wsToggleTimerPanel(){
   wsTimerOpen=!wsTimerOpen;
