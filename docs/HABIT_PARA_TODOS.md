@@ -194,7 +194,7 @@ training_profiles                 privada, una fila por usuario (mismo criterio 
 Y un cambio a la **122**: el trigger que asigna las rutinas básicas deja de dárselas a quien se
 registra como `app` (ellos eligen programa en la biblioteca). Los socios del gym siguen igual.
 
-### 4.3 Migración 128 — Biblioteca pública de programas (Fase 1)
+### 4.3 Migración 130 — Biblioteca pública de programas (Fase 1)
 
 Las plantillas del gym ya existen: un `coaching_programs` con `user_id` null (114). Lo que falta es
 que un socio las vea, sepa para quién es cada una y se la pueda aplicar solo.
@@ -216,7 +216,7 @@ start_public_program(p_template_id uuid, p_start_date date)   security definer
 Las rutinas **no se copian**: el programa copiado apunta a las rutinas del gym, igual que las
 básicas. Si el gym mejora "Empuje A", le llega a todos los que siguen el programa.
 
-### 4.4 Migración 129 — Calendario multidisciplina (Fase 2)
+### 4.4 Migración 131 — Calendario multidisciplina (Fase 2)
 
 Es la más delicada: toca las tablas que más código lee. Todo nace con un default que deja lo
 existente igual (`discipline = 'strength'`, `slot = 0`), así que nada cambia hasta que alguien crea
@@ -266,7 +266,7 @@ coaching_programs
 104). HABIT concilia del lado del cliente, igual que `reconcilePlanned()` en Skandi: al cargar la
 semana, una actividad sin enlazar del mismo día y disciplina se enlaza a la fila planeada.
 
-### 4.5 Migración 130 — Calistenia por niveles (Fase 3)
+### 4.5 Migración 132 — Calistenia por niveles (Fase 3)
 
 Los mismos conceptos de Skandi (078/079), en el catálogo de HABIT:
 
@@ -295,13 +295,13 @@ Lastre: revisar cómo lo trata hoy `setStimulusUnits` (memoria `project_injury_p
 antes de agregar una columna; si ya se resuelve con el peso de la serie más el peso corporal, no
 hace falta.
 
-### 4.6 Migración 131 — Check-in diario (Fase 5)
+### 4.6 Migración 133 — Check-in diario (Fase 5)
 
 `skandi_daily_wellness` (085) ya es de la persona. Se revisa si cubre las tres preguntas que usas a
 bordo (sueño, piernas, ganas: bien/normal/mal) y las horas en cama; si no, se agregan columnas ahí,
 no una tabla nueva.
 
-### 4.7 Migración 132 — Tu mudanza (Fase 6)
+### 4.7 Migración 134 — Tu mudanza (Fase 6)
 
 Una migración tuya, con tu correo, como la 106 o la 119:
 
@@ -324,12 +324,12 @@ gruesa, sin contar la creación de contenido.
 | Fase | Qué entrega | Migración | Tamaño | Depende de |
 |---|---|---|---|---|
 | **0** | Entrenar abierto a cualquier cuenta | 127 | M | 120 en producción |
-| **1** | Biblioteca pública de programas | 128 | M + contenido | 0 |
-| **2** | Calendario multidisciplina y cardio | 129 | L | 0 |
-| **3** | Calistenia por niveles | 130 | M | 0 |
+| **1** | Biblioteca pública de programas | 130 | M + contenido | 0 |
+| **2** | Calendario multidisciplina y cardio | 131 | L | 0 |
+| **3** | Calistenia por niveles | 132 | M | 0 |
 | **4** | Strava e Intervals desde HABIT; mandar entrenos al reloj | — | M | 2 |
-| **5** | Carga, readiness, el porqué del día, peso/medidas/fotos | 131 | M | 2 |
-| **6** | Tu mudanza y Skandi a mantenimiento | 132 | M | 2, 3 |
+| **5** | Carga, readiness, el porqué del día, peso/medidas/fotos | 133 | M | 2 |
+| **6** | Tu mudanza y Skandi a mantenimiento | 134 | M | 2, 3 |
 | **7** | Lanzamiento: landing, legal, tiendas, cobro, métricas | — | M + no-código | 0, 1 |
 | **8** | Opcional: nutrición, inglés, comunidad abierta, retos | — | L | 7 |
 
@@ -343,7 +343,7 @@ Lo mínimo para que dejes Skandi al bajar del barco:
 - Fase 4 reducida a un botón: "Sincronizar Intervals" en HABIT que llama la acción
   `intervals-sync` que ya existe en `api/skandi.js`.
 - Fase 6 parcial: tus rutinas (las de Alge y las piernas de gym) y tus dos programas, sin la
-  historia. La historia llega con la 132 completa; mientras, se consulta en Skandi.
+  historia. La historia llega con la 134 completa; mientras, se consulta en Skandi.
 
 La calistenia por niveles (Fase 3) **no** es requisito del hito: un hold se registra en segundos
 desde ya (117). Lo que se pierde unas semanas es la tarjeta de "listo para subir de nivel".
@@ -407,7 +407,7 @@ programas que le sirven, empieza uno y tiene su semana sin haber tocado una ruti
 **Objetivo:** que tu martes (HS + tirón + accesorios **y** Z1) quepa en un solo día de HABIT, con
 cada parte de su coach.
 
-1. Migración 129 (§4.4) y prueba contra una copia de tu semana real (§6).
+1. Migración 131 (§4.4) y prueba contra una copia de tu semana real (§6).
 2. Auditoría de los 30 lugares de `app.html` que leen `coaching_schedule`: cada uno decide qué
    hace con una fila que no es `strength`. Lista en la bitácora, uno por uno.
 3. Entrenar → Hoy: el día muestra sus slots en orden; una sesión de cardio muestra la estructura
@@ -432,7 +432,7 @@ sola enlazada a su día, y el cliente de David que no hace cardio no ve ningún 
 
 1. Extraer de `skandi.html` el módulo puro `training-skills.js` (§4.5); Skandi lo carga y sigue
    igual (prueba: mismos niveles antes y después).
-2. Migración 130 e importación de las escaleras 107/108.
+2. Migración 132 e importación de las escaleras 107/108.
 3. En el entreno: tarjeta de habilidad con el criterio del escalón, calidad 1–10 en lugar de RIR
    cuando `track_quality`, lados alternados para unilaterales, clip opcional por serie.
 4. Progreso → **Habilidades**: curva continua por línea (front lever, planche, HSPU, back lever),
@@ -471,7 +471,7 @@ a otra persona (el coach).
 
 ### Fase 6 — Tu mudanza y Skandi a mantenimiento
 
-- Migración 132 completa (§4.7), con un reporte antes/después: número de sesiones, series, PRs por
+- Migración 134 completa (§4.7), con un reporte antes/después: número de sesiones, series, PRs por
   ejercicio.
 - Skandi: aviso en su Home de que el entrenamiento vive en HABIT, con un enlace. Comida sigue
   igual (D7).
@@ -522,7 +522,7 @@ publicando programas (§10). (La comunidad abierta con moderación ya se hizo: D
 
 ## 6. Tu semana, escrita en HABIT
 
-El ejemplo que valida el modelo: si esto no cabe, la 129 está mal diseñada.
+El ejemplo que valida el modelo: si esto no cabe, la 131 está mal diseñada.
 
 **Dos programas activos, uno por pista:**
 
@@ -541,7 +541,7 @@ El ejemplo que valida el modelo: si esto no cabe, la 129 está mal diseñada.
 | Sáb | Q · calidad · *Carlos* | HS + ½ empuje · *Alge* | |
 | Dom | Movilidad · *Alge* | L · largo · *Carlos* | |
 
-Lo que este ejemplo exige y por qué está en la 129:
+Lo que este ejemplo exige y por qué está en la 131:
 
 - **Dos sesiones el mismo día de coaches distintos** → `slot` en las tres tablas.
 - **Dos programas activos sin pisarse** → `track`.
@@ -793,3 +793,7 @@ nuevas.
   - Nota de pruebas locales: el servidor en 4174 era el `python` que dejó otra sesión, sin
     encabezados de caché; el navegador servía `app.html` viejo hasta forzar `?fresh=`.
   - La cuenta de prueba quedó vacía (sin sesiones, semana ni récords).
+- **2026-10-24** — **Numeración de migraciones corrida en dos.** La 128 la ocupó la moderación de
+  la comunidad y la 129 Retos (`docs/RETOS.md`), las dos ya corridas en Supabase. Las fases de
+  este plan pasan a: Biblioteca pública **130**, Calendario multidisciplina **131**, Calistenia
+  por niveles **132**, Check-in diario **133**, Tu mudanza **134** (§4, §5 y §6 actualizados).
