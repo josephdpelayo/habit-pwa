@@ -351,3 +351,14 @@ Fuera de la Fase 1 a propósito: notificaciones, cronómetro, feed.
   - **No verificado** contra la base real ni en el iPhone (sonido, vibración, Wake Lock).
   - **Orden de despliegue:** cualquiera. Sin la 130 la app funciona igual pero no se crean los
     avisos dentro de la app (el push sí sale).
+- **24 oct 2026** — **130 corrida en Supabase** (la corrió Joseph) y la Fase 2 publicada
+  (`0b6dd77`, versión `20261024-3`, comprobada en `/crew`, `/app`, `/skandi`, `sw.js` y los
+  manifests).
+  - Comprobado contra producción, solo lectura y con la llave pública: existe
+    `user_notifications.challenge_id` (una columna inventada da 42703) y existe
+    `challenge_sort_key` (responde 42501; una función inventada da PGRST202); `anon` sigue sin
+    leer `challenge_standings`.
+  - **No comprobable así:** el trigger `challenge_entry_notify` y la política que impide a la app
+    insertar avisos `challenge_*`. Los confirma la prueba con dos cuentas en el iPhone: registrar
+    en un reto ajeno → al autor le llega «registró su marca en tu reto»; pasar a alguien → «te
+    pasó».
