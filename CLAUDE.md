@@ -290,7 +290,16 @@ a silent overwrite.
   ejercicio se guarda con `id` = su ex_key de hoy para que "La vez pasada" lo encuentre. Un entreno
   abierto hace más de 3 h se pregunta al volver (`wsCheckForgottenSession`) y se cierra sin el RPC,
   terminando en la última serie palomeada (máx. 4 h). Todo cierre pasa por `wsAfterSessionClosed`.
-  `scripts/check-session-edits.js` lo prueba
+  `scripts/check-session-edits.js` lo prueba.
+  La ficha de un ejercicio (`exercise-focus-modal`) se abre **encima** de la hoja: su botón de
+  arriba es «‹ Ejercicios» (`exerciseFocusBack`, vuelve a la hoja en el ejercicio que se veía),
+  no «Pausar» — así decía y nadie encontraba la lista. Pausar la sesión vive en el reloj de la hoja.
+  **El Reloj** (`openClockSheet`, `#clock-sheet`) es aparte del descanso entre series: cronómetro
+  con vueltas, temporizador y intervalos (Tabata/EMOM, 5 s de «Prepárate», 3-2-1 sonoro). Todo
+  contra el reloj de pared y guardado en `localStorage` (`habit_clock_v1`), porque iOS duerme el
+  PWA; un temporizador que terminó con la app dormida no suena tarde al volver. Lo abren los
+  botones `.clk-launch` (botón flotante, ficha, panel de tiempo de la hoja), que muestran la
+  cuenta mientras algo corre
 - `coaching_schedule.session_exercises` — JSONB overlay of exercises swapped in or added during a
   live session. `boards.exercises` is never mutated by a workout; `sessionExerciseList()` in
   `app.html` merges the two and is the single source of the effective exercise list
