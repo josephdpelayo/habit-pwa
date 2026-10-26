@@ -6,12 +6,12 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="HABIT">
 <meta name="application-name" content="HABIT">
-<link rel="manifest" href="/manifest.json?v=20261024-4">
-<link rel="apple-touch-icon" sizes="120x120" href="/icons/icon-120.png?v=20261024-4">
-<link rel="apple-touch-icon" sizes="152x152" href="/icons/icon-152.png?v=20261024-4">
-<link rel="apple-touch-icon" sizes="167x167" href="/icons/icon-167.png?v=20261024-4">
-<link rel="apple-touch-icon" sizes="180x180" href="/icons/icon-180.png?v=20261024-4">
-<link rel="icon" type="image/png" sizes="32x32" href="/icons/icon-32.png?v=20261024-4">
+<link rel="manifest" href="/manifest.json?v=20261026-1">
+<link rel="apple-touch-icon" sizes="120x120" href="/icons/icon-120.png?v=20261026-1">
+<link rel="apple-touch-icon" sizes="152x152" href="/icons/icon-152.png?v=20261026-1">
+<link rel="apple-touch-icon" sizes="167x167" href="/icons/icon-167.png?v=20261026-1">
+<link rel="apple-touch-icon" sizes="180x180" href="/icons/icon-180.png?v=20261026-1">
+<link rel="icon" type="image/png" sizes="32x32" href="/icons/icon-32.png?v=20261026-1">
 <title>HABIT</title>
 <!-- Con id a propósito: scripts/check-training.js toma la primera etiqueta script sin
      atributos como el script principal de la app y la compila. -->
@@ -25,7 +25,7 @@
   var crew=/^\/crew(\/|$)/.test(location.pathname);
   window.HABIT_BRAND=crew?'crew':'gym';
   if(!crew)return;
-  var v='20261024-4';
+  var v='20261026-1';
   document.documentElement.classList.add('brand-crew');
   document.title='HABIT Crew';
   document.querySelectorAll('meta[name="apple-mobile-web-app-title"],meta[name="application-name"]')
@@ -40,9 +40,9 @@
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Share+Tech+Mono&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="/skandi-recovery.js?v=20261024-4"></script>
-<script src="/body-figure.js?v=20261024-4"></script>
-<script src="/habit-training.js?v=20261024-4"></script>
+<script src="/skandi-recovery.js?v=20261026-1"></script>
+<script src="/body-figure.js?v=20261026-1"></script>
+<script src="/habit-training.js?v=20261026-1"></script>
 <style>
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
 @media (prefers-reduced-motion:reduce){*,*:before,*:after{scroll-behavior:auto!important;animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}}
@@ -2344,6 +2344,21 @@ body.admin-mode #courtesy-modal label{border-radius:14px!important;border-color:
 .ws-pick-item small{display:block;color:var(--gray);font-size:11px;margin-top:2px}
 .ws-add-ex{width:100%;border:0;background:transparent;color:#8aa4cc;border-radius:10px;
   padding:12px;font-size:12px;font-weight:650;cursor:pointer}
+.ws-pick-k{font-size:10.5px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:#6b7280;margin:6px 2px 0}
+.ws-pick-item .ws-pick-mark{float:right;color:var(--bl);font-size:11px;font-weight:650;margin-left:8px}
+
+/* Deslizar un ejercicio a la izquierda descubre Cambiar y Quitar. La cabeza se
+   mueve sobre los botones, así que necesita fondo propio. */
+.ws-ex-swipe{position:relative;overflow:hidden;touch-action:pan-y}
+.ws-ex-swipe>.ws-ex-head{position:relative;z-index:1;background:var(--black);transition:transform .22s ease}
+.ws-ex-swipe.dragging>.ws-ex-head{transition:none}
+.ws-ex-acts{position:absolute;top:0;right:0;bottom:0;display:flex;align-items:stretch;gap:6px;padding:6px 0}
+.ws-ex-act{width:76px;border:0;border-radius:12px;font-size:12px;font-weight:700;cursor:pointer;color:#fff}
+.ws-ex-act.swap{background:#1e3a8a}
+.ws-ex-act.remove{background:#7f1d1d}
+.ws-ex-swipe.peek>.ws-ex-head{animation:wsPeek 1.4s ease .5s 1}
+@keyframes wsPeek{0%,100%{transform:translateX(0)}35%,60%{transform:translateX(-96px)}}
+@media (prefers-reduced-motion:reduce){.ws-ex-swipe>.ws-ex-head{transition:none}.ws-ex-swipe.peek>.ws-ex-head{animation:none}}
 
 /* Series compactas: son el dato principal, sin otra tarjeta anidada */
 .workout-sheet .set-tracker{padding:4px 0 0;background:transparent;border:0}
@@ -3784,7 +3799,7 @@ const GYM_ONLY_VIEWS=['book','planes','historial','shop'];
 const GYM_APP_URL='/';
 document.querySelectorAll('.brand-name').forEach(el=>{el.textContent=BRAND_NAME;});
 const SUPABASE_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBtcGp0ZXVxanVzYmlkdWV2YndxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc2OTI1NjUsImV4cCI6MjA5MzI2ODU2NX0.XbMzZoo2yqtrD8znLnyo_1zDfrdJAvAPj1lqGOyXnLw';
-const APP_VERSION='20261024-4';
+const APP_VERSION='20261026-1';
 // La pierna va separada en cuádriceps, femorales y pantorrillas: la figura
 // corporal pinta esas tres regiones por separado y el motor de recuperación les
 // da ventanas de descanso distintas. 'Piernas' sigue reconociéndose al leer
@@ -12561,21 +12576,169 @@ async function finishCoachingSessionSb(){
       error=null;
     }
     if(error)throw error;
-    const idx=coachSchedule.findIndex(r=>r.id===data.id);
-    if(idx>-1)coachSchedule[idx]=data;
-    activeCoachingSession=null;
-    cacheActiveTrainingSession(null);
-    coachSessionSets={};
-    hideActiveSessionBar();
-    closeWorkoutSheet();
-    closeExerciseFocus();
-    renderCoachHoyPanel();
-    if(rutActiveTab==='hoy')renderRutHoy();
-    renderInicioCoachingWidgets();
-    _lastScoresMemo=null;
-    toast('¡Entreno completado!','ok');
-    openWorkoutFeedbackModal(data.id);
+    await wsAfterSessionClosed(data,finishingSession,workoutFeedbackSets,{feedback:true});
   }catch(e){toast('Error al finalizar entreno: '+e.message,'err');}
+}
+// Lo que pasa después de cerrar un entreno, se cierre desde la hoja o desde el
+// aviso de "sigue abierto": soltar la sesión, repintar, ofrecer guardar los
+// cambios del día en la rutina y, si toca, pedir cómo te fue.
+async function wsAfterSessionClosed(data,closedRow,sets,opts){
+  const idx=coachSchedule.findIndex(r=>r.id===data.id);
+  if(idx>-1)coachSchedule[idx]=data;
+  activeCoachingSession=null;
+  cacheActiveTrainingSession(null);
+  coachSessionSets={};
+  hideActiveSessionBar();
+  closeWorkoutSheet();
+  closeExerciseFocus();
+  renderCoachHoyPanel();
+  if(rutActiveTab==='hoy')renderRutHoy();
+  renderInicioCoachingWidgets();
+  _lastScoresMemo=null;
+  wsRecents=null;
+  toast('¡Entreno completado!','ok');
+  try{await wsOfferSaveSessionChanges(closedRow,sets);}
+  catch(e){toast('No se pudieron guardar los cambios en la rutina: '+e.message,'err');}
+  if(opts&&opts.feedback)openWorkoutFeedbackModal(data.id);
+}
+
+// ── Guardar en la rutina lo que cambiaste hoy ─────────────────────────────
+// Cambiar, agregar o quitar un ejercicio vive solo en la sesión
+// (session_exercises), y la rutina no se toca. Pero si lo cambiaste hoy, casi
+// siempre es porque así lo quieres hacer: al cerrar se ofrece dejarlo fijo. Tu
+// rutina se actualiza; la del coach o la del gym no se toca, se guarda una copia
+// tuya con los cambios.
+function wsSessionChanges(row,sets){
+  const overlay=Array.isArray(row.session_exercises)?row.session_exercises:[];
+  if(!overlay.length)return null;
+  const addedKeys=new Set(overlay.filter(o=>o&&o.ex_key&&!o.replaces&&!o.removed).map(o=>o.ex_key));
+  const finalList=sessionExerciseList(row,sets||{}).filter(ex=>!ex._replaced);
+  const board=coachBoardsById[row.board_id];
+  const snapshot=Array.isArray(row.exercise_snapshot)&&row.exercise_snapshot.length?row.exercise_snapshot:((board&&board.exercises)||[]);
+  const swapped=finalList.filter(ex=>ex._swappedFrom).length;
+  const added=finalList.filter(ex=>!ex._swappedFrom&&addedKeys.has(ex._exKey)).length;
+  const removed=Math.max(0,snapshot.length-(finalList.length-added));
+  if(!swapped&&!added&&!removed)return null;
+  return{swapped,added,removed,finalList};
+}
+// El ejercicio de la sesión con la forma de boards.exercises. Su id es la clave
+// con la que hoy se guardaron sus series: así la próxima vez "La vez pasada"
+// encuentra lo de hoy en vez de empezar de cero.
+function wsRoutineExerciseFromSession(ex){
+  const cat=wsCatalogRowFor(ex);
+  const out={...ex};
+  ['_exKey','_swappedFrom','_replaced','ex_key','replaces','removed','metricType','snapshotIndex'].forEach(k=>delete out[k]);
+  out.id=ex._exKey||ex.id||crypto.randomUUID();
+  out.canonicalName=out.canonicalName||out.name;
+  if(cat){
+    out.catalogId=out.catalogId||cat.id||'';
+    out.exerciseKey=out.exerciseKey||cat.slug||'';
+    if(!out.muscleGroup)out.muscleGroup=cat.primary_muscle||'';
+    if(!Array.isArray(out.secondaryMuscleGroups))out.secondaryMuscleGroups=cat.secondary_muscles||[];
+    if(!Array.isArray(out.equipment))out.equipment=cat.equipment||[];
+    if(!out.movementPattern)out.movementPattern=cat.movement_pattern||'';
+  }
+  if(!out.muscles)out.muscles={primary:out.muscleGroup||null,secondary:out.secondaryMuscleGroups||[]};
+  if(!out.video&&out.video_url)out.video=out.video_url;
+  return out;
+}
+async function wsOfferSaveSessionChanges(row,sets){
+  const changes=row&&wsSessionChanges(row,sets);
+  if(!changes)return;
+  const n=changes.swapped+changes.added+changes.removed;
+  if(!navigator.onLine){toast('Sin conexión: los cambios de hoy quedaron solo en este entreno','warn');return;}
+  // "Hoy cambiaste 1 ejercicio, agregaste 2 y quitaste 1": el sustantivo va con
+  // la primera cifra y concuerda con ella.
+  const parts=[['cambiaste',changes.swapped],['agregaste',changes.added],['quitaste',changes.removed]]
+    .filter(p=>p[1]).map((p,i)=>p[0]+' '+p[1]+(i===0?(p[1]===1?' ejercicio':' ejercicios'):''));
+  const lista=parts.length>1?parts.slice(0,-1).join(', ')+' y '+parts[parts.length-1]:parts[0];
+  const board=coachBoardsById[row.board_id]||routineById(row.board_id);
+  const mine=!!(board&&isMyRoutine(board));
+  let body='Hoy '+lista+'.';
+  let choices;
+  if(mine){
+    body+=' ¿Así quieres hacer «'+board.name+'» la próxima vez?';
+    choices=[{key:'save',label:'Guardar en «'+board.name+'»'}];
+  }else if(board){
+    body+=' «'+board.name+'» no es tuya, así que guardo una copia tuya con los cambios.';
+    choices=[{key:'fork',label:'Guardar como rutina mía'}];
+  }else{
+    choices=[{key:'new',label:'Guardar como rutina'}];
+  }
+  const choice=await choiceSheet(body,choices,{title:'¿Guardar los cambios?',cancelLabel:'Solo por hoy'});
+  if(!choice)return;
+  const exercises=changes.finalList.map(wsRoutineExerciseFromSession);
+  const now=new Date().toISOString();
+  if(choice==='save'){
+    const{data,error}=await sb.from('boards').update({exercises,updated_at:now}).eq('id',board.id).eq('owner_id',sbUser.id).select().single();
+    if(error)throw error;
+    coachBoardsById[data.id]=data;
+    toast('«'+board.name+'» quedó actualizada','ok');
+  }else{
+    let name=board?board.name+' (mi versión)':'';
+    if(!board){
+      name=await promptSheet('Ponle nombre para encontrarla en Mis rutinas.',{title:'Guardar como rutina',defaultValue:'Mi entreno',confirmLabel:'Guardar'});
+      if(name==null)return;
+      name=name.trim()||'Mi entreno';
+    }
+    const{data,error}=await sb.from('boards').insert({
+      name,color:MEMBER_ROUTINE_COLOR,exercises,owner_id:sbUser.id,
+      forked_from:board?board.id:null,forked_from_name:board?board.name:null
+    }).select().single();
+    if(error)throw error;
+    coachBoardsById[data.id]=data;
+    toast('«'+name+'» quedó en Mis rutinas','ok');
+  }
+  myRoutinesLoadedAt=0;
+  loadMyRoutinesSb(true).then(()=>{if(rutActiveTab==='rutinas')renderRutRutinas();}).catch(()=>{});
+}
+
+// ── Cerrar bien un entreno ────────────────────────────────────────────────
+// En 90 días, 40 de 89 entrenos se cerraron sin una sola serie palomeada: la
+// gente entrena y al final solo toca "Finalizar". Palomear todo lo que falta
+// como "hice lo planeado" sigue la misma regla que palomear sin escribir
+// (toggleSetDoneSb): lo que escribiste en la fila, si no la marca sembrada de
+// la vez pasada, y si no el objetivo — el piso de un rango, nunca de más.
+// "Al fallo" o "máx" no se suponen. Devuelve cuántas series no se guardaron.
+async function wsMarkPendingAsPlannedSb(atIso){
+  const at=atIso||new Date().toISOString();
+  const jobs=[];
+  Object.keys(coachSessionSets).forEach(exKey=>{
+    const found=findExerciseByExKey(exKey);
+    const ex=found&&found.ex;
+    const metric=ex?(window.HabitTraining?HabitTraining.metricType(ex):(inferTargetType(ex)==='time'?'time':'reps')):'reps';
+    const unit=exerciseWeightUnit(exKey);
+    (coachSessionSets[exKey]||[]).filter(x=>!x.done).forEach(x=>{
+      const rowEl=getSetRowElement(x.id);
+      const patch={done:true,updated_at:at};
+      if(metric==='time'){
+        const tIn=rowEl&&rowEl.querySelector('.set-actual-time-in');
+        const typed=tIn&&tIn.value!==''?parseInt(tIn.value,10):null;
+        const sec=(typed!=null&&!isNaN(typed))?typed
+          :(x.actual_seconds!=null?x.actual_seconds:(window.HabitTraining?HabitTraining.parseSeconds(x.reps_target):null));
+        if(sec)patch.actual_seconds=Math.max(0,sec);
+      }else{
+        const wIn=rowEl&&rowEl.querySelector('.set-weight-in');
+        const rIn=rowEl&&rowEl.querySelector('.set-actual-reps-in');
+        const w=wIn&&wIn.value!==''?parseFloat(wIn.value):null;
+        patch.weight=(w!=null&&!isNaN(w))?(unit==='lb'?Math.round(lbToKg(w)*100)/100:w):(x.weight!=null?x.weight:null);
+        const r=rIn&&rIn.value!==''?parseInt(rIn.value,10):null;
+        patch.actual_reps=(r!=null&&!isNaN(r))?r:(x.actual_reps||defaultRepsFromTarget(x.reps_target));
+      }
+      jobs.push({x,patch});
+    });
+  });
+  const results=await Promise.allSettled(jobs.map(j=>trainingUpdate('coaching_session_sets',j.x.id,j.patch,j.x)));
+  let failed=0;
+  results.forEach((res,i)=>{
+    if(res.status!=='fulfilled'||!res.value){failed++;return;}
+    const data=res.value;
+    const arr=coachSessionSets[data.ex_key]||coachSessionSets[jobs[i].x.ex_key];
+    const k=arr?arr.findIndex(y=>y.id===data.id):-1;
+    if(k>-1)arr[k]=data;
+    logSetToUserScores(data);
+  });
+  return failed;
 }
 function openWorkoutFeedbackModal(scheduleId){
   workoutFeedbackScheduleId=scheduleId;
@@ -12800,6 +12963,7 @@ async function restoreActiveCoachingSessionSb(){
       wsPausedAt=resolved.paused_at?new Date(resolved.paused_at).getTime():0;
       cacheActiveTrainingSession(resolved);showActiveSessionBar();wsStartTicker();
       if(!Object.keys(coachSessionSets).length)await loadSessionSetsSb(resolved.id);
+      setTimeout(()=>wsCheckForgottenSession().catch(e=>console.error('wsCheckForgottenSession:',e)),600);
     }else{coachSessionSets={};cacheActiveTrainingSession(null);}
     updateCoachingNavBadge();
     if(document.getElementById('v-inicio')?.classList.contains('active'))renderInicioCoachingWidgets();
@@ -12816,6 +12980,63 @@ async function restoreActiveCoachingSessionSb(){
       if(navigator.onLine&&!Object.keys(coachSessionSets).length)await loadSessionSetsSb(cached.id);
     }
   }
+}
+// ── Entrenos que se quedaron abiertos ─────────────────────────────────────
+// 11 sesiones seguían "en curso" días después: se entrenó, no se tocó
+// Finalizar, y el entreno nunca contó. Al volver a la app con uno abierto hace
+// más de 3 horas se pregunta una vez por visita. Cerrarlo no pasa por el RPC
+// de finalizar, que mide la duración hasta ahora (serían horas o días): termina
+// en la última serie palomeada, o una hora después de empezar si no hay
+// ninguna, y nunca más de 4 horas.
+const WS_FORGOTTEN_MS=3*3600*1000;
+async function wsCheckForgottenSession(intento){
+  const row=activeCoachingSession;
+  if(!row||!row.started_at||wsOpen)return;
+  if(Date.now()-new Date(row.started_at).getTime()<WS_FORGOTTEN_MS)return;
+  // Al abrir la app la sesión se recupera antes de que la pantalla principal
+  // esté a la vista (términos, carga): se vuelve a intentar unos segundos.
+  if(!document.getElementById('s-main')?.classList.contains('active')
+    ||document.getElementById('confirm-overlay')?.classList.contains('show')){
+    const n=intento||0;
+    if(n<10)setTimeout(()=>wsCheckForgottenSession(n+1).catch(e=>console.error('wsCheckForgottenSession:',e)),1500);
+    return;
+  }
+  const flag='habit_ws_forgotten_'+row.id;
+  try{if(sessionStorage.getItem(flag))return;sessionStorage.setItem(flag,'1');}catch(_){}
+  const all=Object.values(coachSessionSets).flat();
+  const done=all.filter(x=>x.done).length;
+  const hours=Math.floor((Date.now()-new Date(row.started_at).getTime())/3600000);
+  const choice=await choiceSheet(
+    '«'+(row.board_name||'Tu entreno')+'» '+(row.ds===mazToday()?'lleva '+hours+' horas abierto':'sigue abierto desde el '+fmtDS(row.ds))+'.'
+      +(done?' Llevas '+done+' serie'+(done===1?'':'s')+' palomeada'+(done===1?'':'s')+'.':''),
+    done?[{key:'save',label:'Ya terminé, guardarlo'},{key:'resume',label:'Sigo entrenando'},{key:'discard',label:'Descartarlo',danger:true}]
+        :[{key:'planned',label:'Lo hice todo, guardarlo'},{key:'resume',label:'Sigo entrenando'},{key:'discard',label:'Descartarlo',danger:true}],
+    {title:'¿Terminaste este entreno?',cancelLabel:'Ahora no'});
+  if(!choice||choice==='resume'||activeCoachingSession!==row)return;
+  if(choice==='discard'){await cancelCoachingSessionSb({skipConfirm:true});return;}
+  await wsCloseForgottenSessionSb(choice==='planned');
+}
+async function wsCloseForgottenSessionSb(markPlanned){
+  const row=activeCoachingSession;
+  if(!row)return;
+  const started=new Date(row.started_at).getTime();
+  const doneTimes=Object.values(coachSessionSets).flat().filter(x=>x.done)
+    .map(x=>new Date(x.updated_at||0).getTime()).filter(t=>t>started);
+  const end=Math.min(doneTimes.length?Math.max(...doneTimes):started+3600*1000,started+4*3600*1000);
+  const endIso=new Date(end).toISOString();
+  showLoading('Guardando tu entreno...');
+  try{
+    if(markPlanned){
+      const failed=await wsMarkPendingAsPlannedSb(endIso);
+      if(failed){hideLoading();toast('No se pudieron guardar '+failed+' series. Ábrelo y finalízalo desde la hoja.','err');return;}
+    }
+    const sets=JSON.parse(JSON.stringify(coachSessionSets||{}));
+    const paused=Math.max(0,Number(row.paused_seconds)||0);
+    const data=await trainingUpdate('coaching_schedule',row.id,{status:'done',completed_at:endIso,
+      duration_sec:Math.max(0,Math.round((end-started)/1000)-paused),paused_at:null,updated_at:new Date().toISOString()},row);
+    hideLoading();
+    await wsAfterSessionClosed(data,row,sets,{feedback:false});
+  }catch(e){hideLoading();toast('Error al guardar el entreno: '+e.message,'err');}
 }
 function showActiveSessionBar(){
   const bar=document.getElementById('active-session-bar');
@@ -13112,6 +13333,8 @@ function openWorkoutSheet(){
   if(traerALaVista)wsScrollToFocus();
   wsStartTicker();
   wsRepairMissingSetsSb().catch(console.error);
+  wsLoadRecents().catch(()=>{});
+  setTimeout(wsMaybeSwipeHint,900);
 }
 // A media sesión — al volver de minimizar, o al reabrir la app — la hoja
 // dejaba al socio hasta arriba y tenía que buscar por dónde iba entre ocho
@@ -13195,6 +13418,7 @@ function renderWorkoutSheet(){
   // scroll a cero: a media lista, tocar un check haría "saltar" la pantalla al
   // inicio. Se guarda y restaura la posición alrededor del reemplazo.
   const scrollTop=content.scrollTop;
+  _wsSwipeOpen=null;_wsSw=null;
   document.getElementById('ws-bar-title').textContent=activeCoachingSession.board_name||'Entreno';
   document.getElementById('ws-bar-k').textContent=fmtDS(activeCoachingSession.ds);
 
@@ -13232,6 +13456,85 @@ function renderWorkoutSheet(){
 document.addEventListener('click',e=>{
   document.querySelectorAll('details.ws-ex-more[open]').forEach(d=>{if(!d.contains(e.target))d.open=false;});
 });
+
+// ── Deslizar un ejercicio ─────────────────────────────────────────────────
+// Cambiar y Quitar vivían solo en el menú •••, y en 90 días nadie cambió un
+// ejercicio a media sesión. Deslizar la cabeza a la izquierda los descubre sin
+// sumar botones a la hoja. Escucha en el documento porque la hoja se repinta
+// entera con innerHTML; `touch-action: pan-y` deja el scroll vertical al
+// navegador, que manda pointercancel en cuanto el gesto resulta ser scroll.
+// Lo que se abre es el ancho de los botones que tenga ese ejercicio (uno o dos).
+function wsSwipeWidth(el){
+  const acts=el&&el.querySelector(':scope>.ws-ex-acts');
+  return acts?acts.offsetWidth+8:0;
+}
+let _wsSw=null, _wsSwipeOpen=null, _wsSwipeEndedAt=0;
+function wsSwipeSet(el,x){
+  const head=el&&el.querySelector(':scope>.ws-ex-head');
+  if(head)head.style.transform=x?'translateX('+x+'px)':'';
+}
+function wsSwipeClose(){
+  if(_wsSwipeOpen){wsSwipeSet(_wsSwipeOpen,0);_wsSwipeOpen=null;}
+}
+document.addEventListener('pointerdown',e=>{
+  const el=e.target.closest&&e.target.closest('#ws-content .ws-ex-swipe');
+  if(!el||e.button>0||e.target.closest('.ws-ex-acts'))return;
+  if(_wsSwipeOpen&&_wsSwipeOpen!==el)wsSwipeClose();
+  const w=wsSwipeWidth(el);
+  _wsSw={el,w,id:e.pointerId,x0:e.clientX,y0:e.clientY,base:el===_wsSwipeOpen?-w:0,dx:0,mode:null};
+});
+document.addEventListener('pointermove',e=>{
+  const s=_wsSw;
+  if(!s||e.pointerId!==s.id)return;
+  const dx=e.clientX-s.x0, dy=e.clientY-s.y0;
+  if(!s.mode){
+    if(Math.abs(dx)<8&&Math.abs(dy)<8)return;
+    s.mode=Math.abs(dx)>Math.abs(dy)*1.2?'h':'v';
+    if(s.mode==='v'){_wsSw=null;return;}
+    s.el.classList.add('dragging');
+    try{s.el.setPointerCapture(e.pointerId);}catch(_){}
+  }
+  s.dx=dx;
+  wsSwipeSet(s.el,Math.max(-s.w-24,Math.min(0,s.base+dx)));
+});
+function wsSwipeEnd(e){
+  const s=_wsSw;
+  if(!s||e.pointerId!==s.id)return;
+  _wsSw=null;
+  if(s.mode!=='h')return;
+  s.el.classList.remove('dragging');
+  _wsSwipeEndedAt=Date.now();
+  if(e.type!=='pointercancel'&&s.base+s.dx<-s.w/2){
+    wsSwipeSet(s.el,-s.w);
+    _wsSwipeOpen=s.el;
+  }else{
+    wsSwipeSet(s.el,0);
+    if(_wsSwipeOpen===s.el)_wsSwipeOpen=null;
+  }
+}
+document.addEventListener('pointerup',wsSwipeEnd);
+document.addEventListener('pointercancel',wsSwipeEnd);
+// En captura, antes que el onclick de la cabeza: el click que sigue a un
+// deslizamiento no abre la ficha, y tocar la cabeza abierta solo la cierra.
+document.addEventListener('click',e=>{
+  const inSwipe=e.target.closest&&e.target.closest('#ws-content .ws-ex-swipe');
+  if(inSwipe&&Date.now()-_wsSwipeEndedAt<350){e.stopPropagation();e.preventDefault();return;}
+  if(!_wsSwipeOpen||e.target.closest('.ws-ex-acts'))return;
+  if(inSwipe===_wsSwipeOpen){e.stopPropagation();e.preventDefault();}
+  wsSwipeClose();
+},true);
+// La primera vez que alguien abre la hoja, el primer ejercicio se asoma solo
+// para enseñar que debajo hay algo. Una vez por dispositivo.
+function wsMaybeSwipeHint(){
+  if(!wsOpen)return;
+  try{if(localStorage.getItem('habit_ws_swipe_seen')==='1')return;}catch(_){return;}
+  const el=document.querySelector('#ws-content .ws-ex-swipe');
+  if(!el)return;
+  try{localStorage.setItem('habit_ws_swipe_seen','1');}catch(_){}
+  el.classList.add('peek');
+  el.addEventListener('animationend',()=>el.classList.remove('peek'),{once:true});
+  toast('Desliza un ejercicio ← para cambiarlo o quitarlo');
+}
 function wsMarkNextRow(exKey,setIdx){
   wsFocusSet=(exKey&&setIdx!=null)?{exKey,setIdx}:null;
   document.querySelectorAll('#ws-content .set-row.next').forEach(r=>r.classList.remove('next'));
@@ -13277,7 +13580,19 @@ function wsExerciseHtml(ex,i){
     coachTips:ex.coach_tips||ex.coachTips||ex.tips||''};
 
   const plegado=allDone&&!wsExpandedDone.has(exKey);
+  // Un ejercicio ya cambiado a media sesión solo guarda lo que se hizo con él:
+  // no se cambia ni se quita otra vez, así que no se desliza. Tampoco uno ya
+  // completo. Cambiar mueve solo las series que faltan; quitar uno empezado es
+  // terminarlo ahí, y el botón lo dice.
+  const pendingCount=sets.length-doneCount;
+  const swipeActs=ex._replaced?[]:[
+    pendingCount?'<button type="button" class="ws-ex-act swap" tabindex="-1" onclick="wsSwipeClose();wsToggleSwap(&quot;'+esc(exKey)+'&quot;)">Cambiar</button>':'',
+    (pendingCount||!sets.length)?'<button type="button" class="ws-ex-act remove" tabindex="-1" onclick="wsSwipeClose();wsRemoveExercise(&quot;'+esc(exKey)+'&quot;)">'+(doneCount?'Terminar':'Quitar')+'</button>':''
+  ].filter(Boolean);
+  const swipe=swipeActs.length>0;
   let html='<article class="ws-ex'+(allDone?' done':(doneCount?' in-progress':''))+(plegado?' collapsed':'')+'" data-ex-key="'+esc(exKey)+'">'
+    +(swipe?'<div class="ws-ex-swipe" data-ex-key="'+esc(exKey)+'">'
+      +'<div class="ws-ex-acts" aria-hidden="true">'+swipeActs.join('')+'</div>':'')
     +'<div class="ws-ex-head" onclick="openExerciseFocus(this)" data-ex="'+esc(JSON.stringify(exData))+'">'
     +'<div class="ws-ex-num">'+(i+1)+'</div>'
     +'<div class="ws-ex-info">'
@@ -13292,7 +13607,8 @@ function wsExerciseHtml(ex,i){
     +'</div>'
     +(videos.length?'<button class="ws-ex-video" data-video="'+esc(videos[0].url)+'" onclick="event.stopPropagation();openVideoModal(getEmbedUrl(this.dataset.video))" aria-label="Ver video">▶</button>':'')
     +'<span class="ws-ex-badge'+(allDone?' done':'')+'">'+doneCount+'/'+sets.length+'</span>'
-    +'</div>';
+    +'</div>'
+    +(swipe?'</div>':'');
 
   if(!ex._replaced){
     html+='<details class="ws-ex-more"><summary aria-label="Opciones del ejercicio">•••</summary><div class="ws-ex-tools">'
@@ -13350,16 +13666,121 @@ function wsExerciseNode(exKey){
 }
 
 // ── Cambiar / agregar ejercicio en vivo ───────────────────────────────────
-function wsCatalogList(query,excludeKeys){
-  const q=String(query||'').trim().toLowerCase();
-  const rows=exerciseCatalogRows();
-  return rows.filter(e=>!q||(e.name||'').toLowerCase().includes(q)
-      ||(e.aliases||[]).some(a=>String(a).toLowerCase().includes(q))
-      ||(e.primary_muscle||'').toLowerCase().includes(q))
-    .slice(0,25);
+// Búsqueda del catálogo sin importar acentos ni mayúsculas: "extension" encuentra
+// "Extensión", y lo mismo con alias y músculo.
+function wsNorm(v){return String(v||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase();}
+function wsCatalogMatchesQuery(row,query){
+  const q=wsNorm(query).trim();
+  if(!q)return true;
+  return wsNorm(row.name).includes(q)||(row.aliases||[]).some(a=>wsNorm(a).includes(q))||wsNorm(row.primary_muscle).includes(q);
 }
-function wsPickItemHtml(e,onclick){
-  return '<button type="button" class="ws-pick-item" onclick="'+onclick+'">'+esc(e.name)
+// La ficha del catálogo de un ejercicio de la sesión: por id, por slug (el de la
+// rutina o el de su ex_key "cat-…" si se agregó en vivo) y, al final, por nombre.
+function wsCatalogRowFor(ex){
+  if(!ex)return null;
+  const cat=exerciseCatalogRows();
+  const key=String(ex._exKey||ex.ex_key||'').replace(/^cat-/,'').replace(/#\d+$/,'');
+  return (ex.catalogId&&cat.find(c=>c.id===ex.catalogId))
+    ||(ex.exerciseKey&&cat.find(c=>c.slug===ex.exerciseKey))
+    ||(key&&cat.find(c=>c.slug===key))
+    ||findExerciseCatalogMatch(ex.name)||null;
+}
+// Un ejercicio que no está en el catálogo (escrito para una rutina) se compara
+// con lo que trae escrito: sus músculos, su patrón y su equipo.
+function wsRowLikeFromEx(ex){
+  return{name:ex.name,primary_muscle:ex.muscleGroup||'',secondary_muscles:ex.secondaryMuscleGroups||[],
+    movement_pattern:ex.movementPattern||'',equipment:ex.equipment||[],muscle_split:exerciseMuscleSplit(ex)||{}};
+}
+function wsSplitOf(row){
+  if(row.muscle_split&&Object.keys(row.muscle_split).length)return row.muscle_split;
+  return exerciseMuscleSplit({catalogId:row.id,exerciseKey:row.slug,name:row.name})||{};
+}
+// Qué tanto se parecen dos ejercicios. Lo que pesa es repartir el trabajo en
+// los mismos músculos (0 a 1, ×4); el patrón de movimiento, el músculo
+// principal y compartir equipo desempatan. Es un orden, no una ciencia: sirve
+// para que al cambiar banca salgan primero otros empujes de pecho.
+function wsSimilarity(a,b){
+  const sa=wsSplitOf(a), sb2=wsSplitOf(b);
+  const ta=Object.values(sa).reduce((n,v)=>n+(+v||0),0), tb=Object.values(sb2).reduce((n,v)=>n+(+v||0),0);
+  let overlap=0;
+  if(ta&&tb)Object.keys(sa).forEach(k=>{if(sb2[k])overlap+=Math.min(sa[k]/ta,sb2[k]/tb);});
+  let score=overlap*4;
+  if(a.movement_pattern&&a.movement_pattern===b.movement_pattern)score+=2;
+  if(a.primary_muscle&&a.primary_muscle===b.primary_muscle)score+=1;
+  if((a.equipment||[]).some(e=>(b.equipment||[]).includes(e)))score+=.5;
+  return score;
+}
+// Los ejercicios del catálogo que ya están en esta sesión: no se ofrecen otra vez.
+function wsSessionCatalogIds(){
+  const ids=new Set();
+  sessionExerciseList().forEach(ex=>{const r=wsCatalogRowFor(ex);if(r)ids.add(r.id||r.slug);});
+  return ids;
+}
+
+// ── Recientes ─────────────────────────────────────────────────────────────
+// Lo que hiciste en tus últimos entrenos cerrados, con tu última marca. Sale de
+// las series y no de user_scores, que solo guarda las que llevan peso: así
+// también aparecen las dominadas, las lagartijas y los aguantes.
+let wsRecents=null, _wsRecentsAt=0, _wsRecentsPromise=null;
+function wsLoadRecents(force){
+  if(!sbUser)return Promise.resolve([]);
+  if(!force&&wsRecents&&Date.now()-_wsRecentsAt<5*60000)return Promise.resolve(wsRecents);
+  if(_wsRecentsPromise)return _wsRecentsPromise;
+  _wsRecentsPromise=(async()=>{
+    await loadExerciseCatalogSb();
+    const{data:rows,error}=await sb.from('coaching_schedule')
+      .select('id,board_id,exercise_snapshot,session_exercises,completed_at')
+      .eq('user_id',sbUser.id).eq('status','done').order('completed_at',{ascending:false}).limit(12);
+    if(error)throw error;
+    const ids=(rows||[]).map(r=>r.id);
+    const bySchedule={};
+    if(ids.length){
+      const{data:sets,error:setsErr}=await sb.from('coaching_session_sets')
+        .select('schedule_id,ex_key,set_idx,weight,actual_reps,actual_seconds,done').in('schedule_id',ids).eq('done',true);
+      if(setsErr)throw setsErr;
+      (sets||[]).forEach(x=>{
+        const m=bySchedule[x.schedule_id]||(bySchedule[x.schedule_id]={});
+        (m[x.ex_key]||(m[x.ex_key]=[])).push(x);
+      });
+    }
+    const out=[], seen=new Set();
+    (rows||[]).forEach(row=>{
+      const map=bySchedule[row.id]||{};
+      sessionExerciseList(row,map).forEach((ex,i)=>{
+        const done=(map[exerciseKeyForSession(row.board_id,ex,i)]||[]).slice().sort((a,b)=>a.set_idx-b.set_idx);
+        if(!done.length)return;
+        // Solo lo que está en el catálogo se puede agregar a la sesión.
+        const cat=wsCatalogRowFor(ex);
+        if(!cat||seen.has(cat.id||cat.slug))return;
+        seen.add(cat.id||cat.slug);
+        // La mejor serie de ese día (más peso, luego más reps o segundos): la última
+        // suele ser la más cansada y no dice cuánto mueves.
+        const best=done.reduce((a,b)=>((+b.weight||0)-(+a.weight||0)||(+b.actual_reps||0)-(+a.actual_reps||0)||(+b.actual_seconds||0)-(+a.actual_seconds||0))>0?b:a);
+        out.push({row:cat,sets:done.length,reps:ex.reps||'',rest:ex.rest||'',targetRir:parseTargetRir(ex),
+          weight:best.weight,actualReps:best.actual_reps,seconds:best.actual_seconds});
+      });
+    });
+    wsRecents=out.slice(0,12);
+    _wsRecentsAt=Date.now();
+    if(wsAddOpen)wsRenderAddList();
+    if(wsSwapTarget)wsRenderSwapList();
+    return wsRecents;
+  })();
+  _wsRecentsPromise.catch(e=>console.warn('wsLoadRecents:',e)).finally(()=>{_wsRecentsPromise=null;});
+  return _wsRecentsPromise;
+}
+function wsRecentFor(row){
+  return row?(wsRecents||[]).find(r=>(row.id&&r.row.id===row.id)||(r.row.slug&&r.row.slug===row.slug))||null:null;
+}
+function wsRecentMarkText(r){
+  if(!r)return'';
+  const per=r.seconds!=null?r.seconds+' s':(r.actualReps?String(r.actualReps):'');
+  return r.sets+'×'+(per||'?')+(r.weight!=null?' · '+(Math.round(r.weight*10)/10)+' kg':'');
+}
+
+function wsPickItemHtml(e,onclick,mark){
+  return '<button type="button" class="ws-pick-item" onclick="'+onclick+'">'
+    +(mark?'<span class="ws-pick-mark">'+esc(mark)+'</span>':'')+esc(e.name)
     +'<small>'+esc([e.primary_muscle,e.category,(e.equipment||[]).join('/')].filter(Boolean).join(' · '))+'</small></button>';
 }
 function wsToggleSwap(exKey){
@@ -13367,17 +13788,35 @@ function wsToggleSwap(exKey){
   wsSwapQuery='';
   wsAddOpen=false;
   renderWorkoutSheet();
+  if(wsSwapTarget&&!wsRecents)wsLoadRecents().catch(()=>{});
 }
 function wsSwapPanelHtml(exKey){
   if(wsSwapTarget!==exKey)return'';
   return '<div class="ws-swap-panel">'
-    +'<input id="ws-swap-q" class="set-reps-in" style="width:100%;text-align:left;padding:10px 12px" placeholder="Buscar ejercicio…" value="'+esc(wsSwapQuery)+'" oninput="wsRenderSwapList()">'
+    +'<input id="ws-swap-q" class="set-reps-in" style="width:100%;text-align:left;padding:10px 12px" placeholder="Buscar en todo el catálogo…" value="'+esc(wsSwapQuery)+'" oninput="wsRenderSwapList()">'
     +'<div class="ws-swap-list" id="ws-swap-list">'+wsSwapListHtml()+'</div></div>';
 }
+// Sin escribir: los más parecidos al que se cambia. Escribiendo: todo el
+// catálogo que coincida, pero en el mismo orden de parecido.
 function wsSwapListHtml(){
-  const list=wsCatalogList(wsSwapQuery);
-  if(!list.length)return '<div class="empty" style="margin:0">Sin coincidencias.</div>';
-  return list.map(e=>wsPickItemHtml(e,'wsPerformSwap(&quot;'+esc(wsSwapTarget)+'&quot;,&quot;'+esc(e.slug||e.name)+'&quot;)')).join('');
+  const found=findExerciseByExKey(wsSwapTarget);
+  const base=found?(wsCatalogRowFor(found.ex)||wsRowLikeFromEx(found.ex)):null;
+  const inSession=wsSessionCatalogIds();
+  const q=wsSwapQuery.trim();
+  const item=r=>wsPickItemHtml(r,'wsPerformSwap(&quot;'+esc(wsSwapTarget)+'&quot;,&quot;'+esc(r.slug||r.name)+'&quot;)',wsRecentMarkText(wsRecentFor(r)));
+  let ranked=exerciseCatalogRows()
+    .filter(r=>!inSession.has(r.id||r.slug)&&wsCatalogMatchesQuery(r,q))
+    .map(r=>{const sim=base?wsSimilarity(base,r):0;return{r,sim,s:sim+(wsRecentFor(r)?.5:0)};});
+  ranked.sort((a,b)=>b.s-a.s||String(a.r.name).localeCompare(String(b.r.name)));
+  if(!q){
+    // Lo reciente desempata entre parecidos, pero no vuelve parecido lo que no
+    // lo es: un face pull que hiciste ayer no sustituye a la banca.
+    ranked=ranked.filter(x=>x.sim>=1).slice(0,8);
+    if(!ranked.length)return '<div class="empty" style="margin:0">Escribe para buscar en el catálogo.</div>';
+    return '<div class="ws-pick-k">Parecidos</div>'+ranked.map(x=>item(x.r)).join('');
+  }
+  if(!ranked.length)return '<div class="empty" style="margin:0">Sin coincidencias.</div>';
+  return ranked.slice(0,25).map(x=>item(x.r)).join('');
 }
 function wsRenderSwapList(){
   wsSwapQuery=document.getElementById('ws-swap-q')?.value||'';
@@ -13389,6 +13828,7 @@ function wsToggleAdd(){
   wsAddQuery='';
   wsSwapTarget=null;
   renderWorkoutSheet();
+  if(wsAddOpen&&!wsRecents)wsLoadRecents().catch(()=>{});
 }
 function wsAddPanelHtml(){
   if(!wsAddOpen)return'';
@@ -13396,10 +13836,22 @@ function wsAddPanelHtml(){
     +'<input id="ws-add-q" class="set-reps-in" style="width:100%;text-align:left;padding:10px 12px" placeholder="Buscar ejercicio…" value="'+esc(wsAddQuery)+'" oninput="wsRenderAddList()">'
     +'<div class="ws-swap-list" id="ws-add-list">'+wsAddListHtml()+'</div></div>';
 }
+// Sin escribir: lo que has hecho últimamente, con tu última marca, que es casi
+// siempre lo que uno agrega. Escribiendo: el catálogo, con tus recientes arriba.
 function wsAddListHtml(){
-  const list=wsCatalogList(wsAddQuery);
+  const inSession=wsSessionCatalogIds();
+  const q=wsAddQuery.trim();
+  const item=r=>wsPickItemHtml(r,'wsAddExercise(&quot;'+esc(r.slug||r.name)+'&quot;)',wsRecentMarkText(wsRecentFor(r)));
+  if(!q){
+    const rec=(wsRecents||[]).filter(r=>!inSession.has(r.row.id||r.row.slug)).slice(0,8);
+    if(rec.length)return '<div class="ws-pick-k">Recientes</div>'+rec.map(r=>item(r.row)).join('');
+    if(wsRecents===null)return '<div class="ws-pick-k">Buscando tus recientes…</div>';
+    return '<div class="empty" style="margin:0">Escribe para buscar en el catálogo.</div>';
+  }
+  const list=exerciseCatalogRows().filter(r=>!inSession.has(r.id||r.slug)&&wsCatalogMatchesQuery(r,q))
+    .sort((a,b)=>(wsRecentFor(b)?1:0)-(wsRecentFor(a)?1:0)||String(a.name).localeCompare(String(b.name)));
   if(!list.length)return '<div class="empty" style="margin:0">Sin coincidencias.</div>';
-  return list.map(e=>wsPickItemHtml(e,'wsAddExercise(&quot;'+esc(e.slug||e.name)+'&quot;)')).join('');
+  return list.slice(0,25).map(item).join('');
 }
 function wsRenderAddList(){
   wsAddQuery=document.getElementById('ws-add-q')?.value||'';
@@ -13468,7 +13920,10 @@ async function wsPerformSwap(oldExKey,slug){
       .filter(o=>o.replaces!==oldExKey);
     overlay.push(entry);
     await persistSessionExercisesSb(overlay);
-    const prev=await getLastScoreForExKey(newKey);
+    // La marca sale de tus recientes si ya lo hiciste en otra rutina: con la ex_key
+    // "cat-…" de esta sesión, user_scores solo conoce lo que agregaste en vivo.
+    const rec=wsRecentFor(row);
+    const prev=(rec&&(rec.weight!=null||rec.actualReps))?{weight:rec.weight,reps:rec.actualReps}:await getLastScoreForExKey(newKey);
     const moved=[];
     for(let i=0;i<pending.length;i++){
       const s=pending[i];
@@ -13496,11 +13951,15 @@ async function wsAddExercise(slug){
   showLoading('Agregando ejercicio...');
   try{
     const newKey=wsUniqueExKey('cat-'+(row.slug||exerciseSlug(row.name)));
-    const entry={...wsExerciseFromCatalog(row,null),ex_key:newKey};
+    // Si ya lo has hecho, entra como la última vez (series, objetivo y marca),
+    // no con un 3×8-10 genérico que luego hay que corregir serie por serie.
+    const rec=wsRecentFor(row);
+    const template=rec?{sets:String(rec.sets),reps:rec.reps,rest:rec.rest,targetRir:rec.targetRir}:null;
+    const entry={...wsExerciseFromCatalog(row,template),ex_key:newKey};
     const overlay=(Array.isArray(activeCoachingSession.session_exercises)?activeCoachingSession.session_exercises:[]).slice();
     overlay.push(entry);
     await persistSessionExercisesSb(overlay);
-    const prev=await getLastScoreForExKey(newKey);
+    const prev=rec?{weight:rec.weight,reps:rec.actualReps}:await getLastScoreForExKey(newKey);
     const n=exerciseSetCount(entry);
     const rows=[];
     for(let i=0;i<n;i++)rows.push({schedule_id:activeCoachingSession.id,user_id:sbUser.id,ex_key:newKey,set_idx:i,
@@ -13521,7 +13980,25 @@ async function wsRemoveExercise(exKey){
   const found=findExerciseByExKey(exKey);
   const name=found?found.ex.name:'este ejercicio';
   const doneSets=(coachSessionSets[exKey]||[]).filter(s=>s.done);
-  if(doneSets.length){toast('Ya registraste series aquí; borra esas series primero','warn');return;}
+  if(!navigator.onLine){toast('Conéctate para quitar un ejercicio. Tus series sí se guardan sin señal.','warn');return;}
+  // Ya empezado, quitarlo es terminarlo ahí: lo hecho se queda (pasó) y solo se
+  // van las series que faltan. Antes pedía borrar primero lo registrado, que es
+  // justo lo que nadie quiere cuando la máquina se ocupó a la mitad.
+  if(doneSets.length){
+    const pendingIds=(coachSessionSets[exKey]||[]).filter(s=>!s.done).map(s=>s.id);
+    if(!pendingIds.length){toast('Este ejercicio ya está completo','warn');return;}
+    if(!await confirmSheet('Te quedas con las '+doneSets.length+' serie'+(doneSets.length===1?'':'s')+' que hiciste de "'+name+'" y se quita'+(pendingIds.length===1?' la que falta':'n las '+pendingIds.length+' que faltan')+'. Tu rutina no cambia.',
+      {title:'¿Terminar este ejercicio aquí?',confirmLabel:'Terminar aquí'}))return;
+    showLoading('Quitando...');
+    try{
+      const{error}=await sb.from('coaching_session_sets').delete().in('id',pendingIds);
+      if(error)throw error;
+      coachSessionSets[exKey]=doneSets;
+      hideLoading();
+      renderWorkoutSheet();
+    }catch(e){hideLoading();toast('Error: '+e.message,'err');}
+    return;
+  }
   if(!await confirmSheet('¿Quitar "'+name+'" de este entreno? Tu rutina no cambia.'))return;
   showLoading('Quitando...');
   try{
@@ -13558,13 +14035,33 @@ async function wsFinishWorkout(btnEl){
   if(wsFinishing)return;
   const allSets=Object.values(coachSessionSets).flat();
   const pending=allSets.filter(s=>!s.done).length;
-  if(pending&&!await confirmSheet(
-      'Te faltan '+pending+' serie'+(pending===1?'':'s')+' por palomear. Se guarda solo lo que ya registraste.',
-      {title:'¿Finalizar ya?',confirmLabel:'Finalizar',cancelLabel:'Seguir entrenando'}))return;
+  const done=allSets.length-pending;
+  // Con series sin palomear, la primera opción es la que casi siempre es
+  // verdad: las hiciste y no las marcaste.
+  let markRest=false;
+  if(pending){
+    const choice=await choiceSheet(
+      done?'Te faltan '+pending+' serie'+(pending===1?'':'s')+' por palomear.'
+          :'No palomeaste ninguna serie. Si hiciste el entreno, guárdalo con un toque.',
+      done?[{key:'rest',label:'Hice también las que faltan'},{key:'as-is',label:'Finalizar con lo registrado'}]
+          // Sin una sola serie no hay "finalizar vacío": así se cerraban 40 de 89
+          // entrenos, que contaban como hechos sin dejar nada en Progreso.
+          :[{key:'rest',label:'Hice todo lo planeado'},{key:'discard',label:'No lo hice, descartarlo',danger:true}],
+      {title:'¿Finalizar ya?',cancelLabel:'Seguir entrenando'});
+    if(!choice)return;
+    if(choice==='discard'){await cancelCoachingSessionSb({skipConfirm:true});return;}
+    markRest=choice==='rest';
+  }
   wsFinishing=true;
   const btn=btnEl||document.getElementById('ws-finish-btn');
   if(btn){btn.disabled=true;btn.textContent='Guardando…';}
-  try{await finishCoachingSessionSb();}
+  try{
+    if(markRest){
+      const failed=await wsMarkPendingAsPlannedSb();
+      if(failed){toast(failed===1?'No se pudo guardar 1 serie; revisa y vuelve a finalizar':'No se pudieron guardar '+failed+' series; revisa y vuelve a finalizar','err');renderWorkoutSheet();return;}
+    }
+    await finishCoachingSessionSb();
+  }
   finally{
     wsFinishing=false;
     if(btn&&document.body.contains(btn)){btn.disabled=false;btn.textContent='Finalizar entreno';}

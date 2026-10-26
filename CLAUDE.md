@@ -273,6 +273,24 @@ a silent overwrite.
   lo traen; borrar una serie y "Marcar todas" viven en el menú ••• del ejercicio, no junto a cada
   palomita. Sin descanso escrito, 90 s (`DEFAULT_REST_SEC`), salvo calentamiento y movilidad,
   como barra ancha (`ws-rest-strip`). Asistencia (WhatsApp) vive en Perfil, no en Entrenar
+- **Cambiar, agregar y cerrar un entreno** (bloque 1 del análisis de uso, oct 2026: en 90 días
+  nadie cambió un ejercicio a media sesión y 40 de 89 entrenos se cerraron sin una serie). Deslizar
+  la cabeza de un ejercicio a la izquierda descubre Cambiar / Quitar (`.ws-ex-swipe`, gesto por
+  delegación en el documento porque la hoja se repinta con `innerHTML`; el ••• sigue igual). Solo
+  salen los botones que aplican: Cambiar si quedan series, y Quitar pasa a **Terminar** en un
+  ejercicio empezado — borra solo las series pendientes y deja las hechas, sin tocar el overlay.
+  Cambiar ordena el catálogo por parecido (`wsSimilarity`: reparto de músculos, patrón, equipo;
+  haber hecho un ejercicio hace poco desempata, pero no cuenta para el umbral de «parecido»);
+  Agregar muestra primero **Recientes** (`wsLoadRecents`), sacados de las series de tus últimos
+  entrenos cerrados y no de `user_scores`, que solo guarda series con peso. Al finalizar con series
+  sin palomear, la primera opción es «Hice todo lo planeado» (`wsMarkPendingAsPlannedSb`, misma
+  regla que palomear sin escribir); con cero series no existe «finalizar vacío», la otra opción
+  es descartarlo. Con cambios en la sesión, `wsOfferSaveSessionChanges` ofrece
+  dejarlos en la rutina (la tuya se actualiza; la del coach o del gym se copia como tuya), y cada
+  ejercicio se guarda con `id` = su ex_key de hoy para que "La vez pasada" lo encuentre. Un entreno
+  abierto hace más de 3 h se pregunta al volver (`wsCheckForgottenSession`) y se cierra sin el RPC,
+  terminando en la última serie palomeada (máx. 4 h). Todo cierre pasa por `wsAfterSessionClosed`.
+  `scripts/check-session-edits.js` lo prueba
 - `coaching_schedule.session_exercises` — JSONB overlay of exercises swapped in or added during a
   live session. `boards.exercises` is never mutated by a workout; `sessionExerciseList()` in
   `app.html` merges the two and is the single source of the effective exercise list
