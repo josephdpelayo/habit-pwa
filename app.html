@@ -6,12 +6,12 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="HABIT">
 <meta name="application-name" content="HABIT">
-<link rel="manifest" href="/manifest.json?v=20261026-3">
-<link rel="apple-touch-icon" sizes="120x120" href="/icons/icon-120.png?v=20261026-3">
-<link rel="apple-touch-icon" sizes="152x152" href="/icons/icon-152.png?v=20261026-3">
-<link rel="apple-touch-icon" sizes="167x167" href="/icons/icon-167.png?v=20261026-3">
-<link rel="apple-touch-icon" sizes="180x180" href="/icons/icon-180.png?v=20261026-3">
-<link rel="icon" type="image/png" sizes="32x32" href="/icons/icon-32.png?v=20261026-3">
+<link rel="manifest" href="/manifest.json?v=20261026-4">
+<link rel="apple-touch-icon" sizes="120x120" href="/icons/icon-120.png?v=20261026-4">
+<link rel="apple-touch-icon" sizes="152x152" href="/icons/icon-152.png?v=20261026-4">
+<link rel="apple-touch-icon" sizes="167x167" href="/icons/icon-167.png?v=20261026-4">
+<link rel="apple-touch-icon" sizes="180x180" href="/icons/icon-180.png?v=20261026-4">
+<link rel="icon" type="image/png" sizes="32x32" href="/icons/icon-32.png?v=20261026-4">
 <title>HABIT</title>
 <!-- Con id a propósito: scripts/check-training.js toma la primera etiqueta script sin
      atributos como el script principal de la app y la compila. -->
@@ -25,7 +25,7 @@
   var crew=/^\/crew(\/|$)/.test(location.pathname);
   window.HABIT_BRAND=crew?'crew':'gym';
   if(!crew)return;
-  var v='20261026-3';
+  var v='20261026-4';
   document.documentElement.classList.add('brand-crew');
   document.title='HABIT Crew';
   document.querySelectorAll('meta[name="apple-mobile-web-app-title"],meta[name="application-name"]')
@@ -40,9 +40,9 @@
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Share+Tech+Mono&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="/skandi-recovery.js?v=20261026-3"></script>
-<script src="/body-figure.js?v=20261026-3"></script>
-<script src="/habit-training.js?v=20261026-3"></script>
+<script src="/skandi-recovery.js?v=20261026-4"></script>
+<script src="/body-figure.js?v=20261026-4"></script>
+<script src="/habit-training.js?v=20261026-4"></script>
 <style>
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
 @media (prefers-reduced-motion:reduce){*,*:before,*:after{scroll-behavior:auto!important;animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}}
@@ -2707,6 +2707,56 @@ body.admin-mode #courtesy-modal label{border-radius:14px!important;border-color:
    espaciado) es más específica que .routine-detail-name y le ganaba al título. */
 .terms-body h3.routine-detail-name{font-size:30px;letter-spacing:-1px;line-height:1.12;font-weight:750;text-transform:none;margin:4px 0 0;color:var(--white)}
 
+/* ── Visor de video y foto (openMediaViewer) y video en la ficha ── */
+.mv-frame{position:relative;width:100%;border-radius:16px;overflow:hidden;background:#000}
+.mv-frame.loading{min-height:160px}
+/* El brillo de carga va DEBAJO del medio (::before): un iframe de YouTube o Drive no
+   siempre avisa que cargó, y taparlo dejaba el video escondido. Fotos y MP4 sí avisan,
+   así que solo esos se ocultan hasta estar listos. */
+.mv-frame.loading::before{content:"";position:absolute;inset:0;pointer-events:none;
+  background:linear-gradient(100deg,transparent 30%,rgba(255,255,255,.07) 50%,transparent 70%) #1b1c20;background-size:220% 100%;animation:mvShimmer 1.1s linear infinite}
+@keyframes mvShimmer{from{background-position:120% 0}to{background-position:-120% 0}}
+.mv-frame .mv-media{display:block;width:100%;border:0;opacity:1;transition:opacity .25s ease}
+.mv-frame.loading img.mv-media,.mv-frame.loading video.mv-media{opacity:0}
+.mv-frame iframe.mv-media{position:absolute;inset:0;height:100%;background:transparent}
+.mv-frame img.mv-media,.mv-frame video.mv-media{height:auto;max-height:62vh;object-fit:contain;margin:0 auto}
+.mv-poster{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.mv-play{position:absolute;left:50%;top:50%;width:64px;height:64px;margin:-32px 0 0 -32px;border:0;border-radius:50%;z-index:2;
+  background:rgba(255,255,255,.94);color:#111;display:flex;align-items:center;justify-content:center;box-shadow:0 10px 30px rgba(0,0,0,.4);cursor:pointer}
+.mv-play svg{width:26px;height:26px;fill:currentColor;margin-left:3px}
+.mv-inline{position:relative;margin-bottom:14px;cursor:pointer}
+.mv-inline .mv-frame img.mv-media,.mv-inline .mv-frame video.mv-media{max-height:34vh}
+.mv-inline .mv-frame[style*="9/16"]{height:min(46vh,420px);width:calc(min(46vh,420px) * 9 / 16);margin:0 auto}
+.mv-expand{position:absolute;top:8px;right:8px;z-index:3;width:36px;height:36px;border:0;border-radius:50%;background:rgba(0,0,0,.5);color:#fff;
+  display:flex;align-items:center;justify-content:center;cursor:pointer}
+.mv-expand svg{width:17px;height:17px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.mv-count{position:absolute;left:8px;bottom:8px;z-index:3;padding:4px 9px;border-radius:999px;background:rgba(0,0,0,.55);color:#fff;font-size:11px;font-weight:700}
+.mv-sheet{position:fixed;inset:0;z-index:10030;display:none;align-items:flex-end;justify-content:center}
+.mv-sheet.open{display:flex}
+.mv-backdrop{position:absolute;inset:0;background:rgba(6,7,9,.7);animation:hbFade .2s ease both}
+.mv-box{position:relative;width:100%;max-width:430px;max-height:94vh;overflow-y:auto;overscroll-behavior:contain;
+  background:var(--dark);border-radius:22px 22px 0 0;padding:6px 14px calc(env(safe-area-inset-bottom,0px) + 18px);
+  box-shadow:0 -20px 60px rgba(0,0,0,.5);animation:hbSheetUp .32s cubic-bezier(.22,1,.36,1) both;transition:transform .2s cubic-bezier(.22,1,.36,1)}
+.mv-sheet.closing .mv-backdrop{animation:mvFadeOut .2s ease both}
+.mv-sheet.closing .mv-box{animation:mvDown .2s ease-in both}
+@keyframes mvFadeOut{to{opacity:0}}
+@keyframes mvDown{to{transform:translateY(100%)}}
+.mv-top{position:relative;display:flex;align-items:center;gap:10px;padding:16px 0 12px;touch-action:none;cursor:grab}
+.mv-grab{position:absolute;top:6px;left:50%;width:38px;height:5px;margin-left:-19px;border-radius:99px;background:rgba(255,255,255,.18)}
+.mv-title{flex:1;min-width:0;font-size:17px;font-weight:750;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.mv-stage .mv-frame{max-width:100%}
+.mv-stage.tall .mv-frame{height:min(64vh,680px);width:calc(min(64vh,680px) * 9 / 16);margin:0 auto}
+.mv-hint{font-size:12px;color:var(--gray);line-height:1.45;margin-top:8px;text-align:center}
+.mv-tabs{display:flex;gap:7px;justify-content:center;flex-wrap:wrap}
+.mv-tabs:not(:empty){margin-top:12px}
+.mv-info:not(:empty){margin-top:16px}
+.mv-meta{font-size:13px;color:var(--gray);margin-bottom:10px}
+.mv-steps{margin:0;padding:0;list-style:none;counter-reset:mv;display:grid;gap:9px}
+.mv-steps li{counter-increment:mv;display:grid;grid-template-columns:24px 1fr;gap:10px;font-size:14px;line-height:1.45;color:var(--gl)}
+.mv-steps li::before{content:counter(mv);width:24px;height:24px;border-radius:8px;background:var(--card2);color:var(--white);font-size:12px;font-weight:800;display:flex;align-items:center;justify-content:center}
+.ws-ex-video,.muscle-ex-play{display:inline-flex;align-items:center;justify-content:center}
+.ws-ex-video svg,.muscle-ex-play svg{width:14px;height:14px;fill:currentColor}
+@media (prefers-reduced-motion:reduce){.mv-frame.loading::before{animation:none}}
 /* ══════════════════════════════════════════════════════════════════════
    HABIT GRAFITO — minimalista y fluido (oct 2026)
    Última capa a propósito: pisa por orden a las anteriores en vez de reescribir
@@ -3684,12 +3734,12 @@ button{transition:transform .14s var(--ease-out),background-color .16s ease,colo
       <h2 id="exercise-focus-name">Ejercicio</h2>
     </div>
     <div class="terms-body exercise-focus-body">
+      <div id="exercise-focus-video"></div>
       <div class="exercise-focus-meta">
         <div id="exercise-focus-detail"></div>
         <div id="exercise-focus-progress" class="exercise-focus-progress"></div>
       </div>
       <div id="exercise-focus-tools" class="ex-focus-tools"></div>
-      <div id="exercise-focus-video"></div>
       <div id="exercise-focus-body"></div>
     </div>
   </div>
@@ -3876,6 +3926,23 @@ button{transition:transform .14s var(--ease-out),background-color .16s ease,colo
   </div>
 </div>
 
+<!-- VISOR DE VIDEO Y FOTO (openMediaViewer) -->
+<div id="media-viewer" class="mv-sheet" role="dialog" aria-modal="true" aria-label="Video del ejercicio">
+  <div class="mv-backdrop" onclick="closeMediaViewer()"></div>
+  <div class="mv-box">
+    <div class="mv-top">
+      <span class="mv-grab" aria-hidden="true"></span>
+      <div class="mv-title" id="mv-title"></div>
+      <button type="button" class="hb-icon-btn" onclick="closeMediaViewer()" aria-label="Cerrar video">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg>
+      </button>
+    </div>
+    <div class="mv-stage" id="mv-stage"></div>
+    <div class="mv-tabs" id="mv-tabs"></div>
+    <div class="mv-info" id="mv-info"></div>
+  </div>
+</div>
+
 <!-- RELOJ: cronómetro, temporizador e intervalos (aparte del descanso entre series) -->
 <div id="clock-sheet" class="clk-sheet" role="dialog" aria-modal="true" aria-label="Reloj">
   <div class="clk-top">
@@ -3952,7 +4019,7 @@ const GYM_ONLY_VIEWS=['book','planes','historial','shop'];
 const GYM_APP_URL='/';
 document.querySelectorAll('.brand-name').forEach(el=>{el.textContent=BRAND_NAME;});
 const SUPABASE_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBtcGp0ZXVxanVzYmlkdWV2YndxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc2OTI1NjUsImV4cCI6MjA5MzI2ODU2NX0.XbMzZoo2yqtrD8znLnyo_1zDfrdJAvAPj1lqGOyXnLw';
-const APP_VERSION='20261026-3';
+const APP_VERSION='20261026-4';
 // La pierna va separada en cuádriceps, femorales y pantorrillas: la figura
 // corporal pinta esas tres regiones por separado y el motor de recuperación les
 // da ventanas de descanso distintas. 'Piernas' sigue reconociéndose al leer
@@ -4826,25 +4893,6 @@ function getVideoHtml(url){
     +'<div class="video-actions"><button class="video-open-btn" data-embed="'+esc(embed)+'" onclick="openVideoModal(this.dataset.embed)">Ver grande</button></div>'
     +(isDrive?'<div class="video-help">Si Drive se queda negro, comparte el video como "Cualquiera con el enlace puede ver".</div>':'');
 }
-function getExerciseFocusVideoHtml(url){
-  const embed=getEmbedUrl(url);
-  if(!embed)return'';
-  // Un GIF pesa poco y se entiende de un vistazo, así que se muestra en la
-  // ficha directo en vez de esconderlo tras un "ábrelo en grande".
-  if(mediaKind(url)!=='embed'){
-    return directMediaHtml(url)
-      +'<div class="exercise-focus-video-foot">'
-      +'<button class="ex-focus-min-btn" onclick="toggleExFocusVideo()">Minimizar</button>'
-      +'<button class="video-open-btn" data-embed="'+esc(String(url).trim())+'" onclick="openVideoModal(this.dataset.embed)">Ver grande</button>'
-      +'</div>';
-  }
-  return '<div class="exercise-video-preview"><div class="exercise-video-preview-icon"><span class="play-tri"></span></div>'
-    +'<div><div class="exercise-video-preview-title">Video de técnica</div><div class="exercise-video-preview-sub">Ábrelo en grande para verlo sin saturar el registro.</div></div></div>'
-    +'<div class="exercise-focus-video-foot">'
-    +'<button class="ex-focus-min-btn" onclick="toggleExFocusVideo()">Minimizar</button>'
-    +'<button class="video-open-btn" data-embed="'+esc(embed)+'" onclick="openVideoModal(this.dataset.embed)">Ver grande</button>'
-    +'</div>';
-}
 function getExerciseVideos(ex){
   let raw=(ex&&ex.videos)||[];
   if(typeof raw==='string'){
@@ -4880,25 +4928,152 @@ function exerciseVideosForWorkout(ex){
   const bestOwn=Math.max(-1,...own.map(v=>videoKindRank(v.url)));
   return videoKindRank(cat)>bestOwn?[{url:cat,title:row.name},...own].slice(0,2):own;
 }
-function openVideoModal(embed){
-  if(!embed)return;
-  const old=document.getElementById('video-modal');
-  if(old)old.remove();
-  const modal=document.createElement('div');
-  modal.id='video-modal';
-  modal.className='video-modal';
-  modal.innerHTML='<div class="video-modal-head"><span>Video</span><button class="video-modal-close" onclick="closeVideoModal()">Cerrar</button></div>'
-    +'<div class="video-modal-frame">'
-    +(mediaKind(embed)!=='embed'
-      ?directMediaHtml(embed)
-      :'<iframe class="video-embed" src="'+esc(embed)+'" allow="autoplay; encrypted-media; picture-in-picture; fullscreen" allowfullscreen referrerpolicy="no-referrer-when-downgrade"></iframe>')
-    +'</div>';
-  document.body.appendChild(modal);
+// ── VISOR DE VIDEO Y FOTO ─────────────────────────────────────────────────
+// Antes: en la ficha, "▶ Video" abría una tarjeta que decía "ábrelo en grande",
+// "Ver grande" abría un marco negro vertical fijo (aunque el video fuera
+// horizontal), sin carga ni animación, y cerrar lo destruía de golpe: tres
+// toques para ver un YouTube. Ahora el video vive arriba de la ficha (la
+// miniatura reproduce ahí mismo al tocarla) y el visor grande es una hoja que
+// sube, respeta la forma del video y muestra la técnica debajo.
+function mediaInfo(url){
+  const s=String(url||'').trim();
+  const kind=mediaKind(s), yt=getYTId(s), drive=getDriveId(s);
+  let poster='';
+  if(yt)poster='https://i.ytimg.com/vi/'+yt+'/hqdefault.jpg';
+  else if(drive)poster='https://drive.google.com/thumbnail?id='+encodeURIComponent(drive)+'&sz=w720';
+  // Los Shorts y los videos del gym en Drive se graban con el teléfono: verticales.
+  const vertical=/\/shorts\//i.test(s)||!!drive;
+  return{url:s,kind,yt,drive,embed:getEmbedUrl(s),poster,ratio:kind==='embed'?(vertical?'9/16':'16/9'):''};
 }
-function closeVideoModal(){
-  const modal=document.getElementById('video-modal');
-  if(modal)modal.remove();
+function mediaPlayerHtml(m,autoplay){
+  if(m.kind==='image')return '<img class="mv-media" src="'+esc(m.url)+'" alt="Demostración del ejercicio" onload="mediaReady(this)" onerror="mediaReady(this)">';
+  if(m.kind==='video')return '<video class="mv-media" src="'+esc(m.url)+'" playsinline muted loop autoplay'+(autoplay?' controls':'')
+    +' preload="auto" onloadeddata="mediaReady(this)" onerror="mediaReady(this)"></video>';
+  // Sin `mute` iOS no deja arrancar solo un iframe; el sonido se activa en el propio reproductor.
+  const src=m.embed+(autoplay&&m.yt?'&autoplay=1&mute=1':'');
+  return '<iframe class="mv-media" src="'+esc(src)+'" allow="autoplay; encrypted-media; picture-in-picture; fullscreen" allowfullscreen'
+    +' referrerpolicy="no-referrer-when-downgrade" onload="mediaReady(this)"></iframe>';
 }
+function mediaReady(el){const f=el&&el.closest('.mv-frame');if(f)f.classList.remove('loading');}
+function mediaFrameHtml(m,inner,extraClass){
+  return '<div class="mv-frame loading'+(extraClass?' '+extraClass:'')+'"'+(m.ratio?' style="aspect-ratio:'+m.ratio+'"':'')+'>'+inner+'</div>';
+}
+const MV_PLAY_ICON='<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5.2v13.6c0 .8.9 1.3 1.6.8l10.2-6.8a1 1 0 0 0 0-1.6L9.6 4.4C8.9 3.9 8 4.4 8 5.2z"/></svg>';
+const MV_EXPAND_ICON='<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M14 4h6v6M10 20H4v-6M20 4l-7 7M4 20l7-7"/></svg>';
+
+// En la ficha: GIF y MP4 corren solos (mudos, en bucle); YouTube y Drive muestran
+// su miniatura y reproducen en el mismo lugar al tocarla.
+function exerciseInlineMediaHtml(videos){
+  if(!videos||!videos.length)return '';
+  const m=mediaInfo(videos[0].url);
+  const expand='<button type="button" class="mv-expand" onclick="event.stopPropagation();openExerciseMediaViewer(0)" aria-label="Ver en grande">'+MV_EXPAND_ICON+'</button>';
+  const more=videos.length>1?'<span class="mv-count">'+videos.length+' videos</span>':'';
+  if(m.kind!=='embed')
+    return '<div class="mv-inline" onclick="openExerciseMediaViewer(0)">'+mediaFrameHtml(m,mediaPlayerHtml(m,false))+expand+more+'</div>';
+  return '<div class="mv-inline" id="mv-inline-embed">'
+    +mediaFrameHtml(m,(m.poster?'<img class="mv-poster" src="'+esc(m.poster)+'" alt="" onload="mediaReady(this)" onerror="mediaReady(this);this.remove()">':'')
+      +'<button type="button" class="mv-play" onclick="mediaPlayInline(this)" aria-label="Reproducir video">'+MV_PLAY_ICON+'</button>','')
+    +expand+more+'</div>';
+}
+function mediaPlayInline(btn){
+  const d=_exFocusData;
+  const frame=btn&&btn.closest('.mv-frame');
+  if(!d||!frame||!d.videos||!d.videos.length)return;
+  const m=mediaInfo(d.videos[0].url);
+  frame.classList.add('loading');
+  frame.innerHTML=mediaPlayerHtml(m,true);
+}
+
+function openExerciseMediaViewer(idx){
+  const d=_exFocusData;
+  if(!d||!d.videos||!d.videos.length)return;
+  // Lo que suene en la ficha se detiene: dos reproductores a la vez es ruido.
+  const inline=document.getElementById('mv-inline-embed');
+  if(inline&&inline.querySelector('iframe'))renderExerciseFocusVideo(true);
+  openMediaViewer(d.videos,{title:d.name,idx,ex:d});
+}
+// Desde la hoja de entreno: el ▶ vive dentro de la cabecera del ejercicio, que ya
+// trae en data-ex todo lo de la ficha (videos, músculos, cómo se hace).
+function openMediaFromHead(btn){
+  let d=null;
+  try{d=JSON.parse(btn.closest('[data-ex]').dataset.ex);}catch(e){}
+  if(!d||!d.videos||!d.videos.length)return;
+  openMediaViewer(d.videos,{title:d.name,ex:d});
+}
+
+let mvState=null;
+function openMediaViewer(videos,opts){
+  const list=(videos||[]).map(v=>typeof v==='string'?{url:v}:v).filter(v=>v&&v.url);
+  if(!list.length)return;
+  opts=opts||{};
+  mvState={list,idx:Math.max(0,Math.min(list.length-1,opts.idx|0)),title:opts.title||'',ex:opts.ex||null};
+  const el=document.getElementById('media-viewer');
+  el.classList.remove('closing');
+  el.classList.add('open');
+  document.getElementById('mv-title').textContent=mvState.title||'Video';
+  mvRender();
+}
+function mvRender(){
+  if(!mvState)return;
+  const m=mediaInfo(mvState.list[mvState.idx].url);
+  const stage=document.getElementById('mv-stage');
+  stage.className='mv-stage'+(m.ratio==='9/16'?' tall':'');
+  stage.innerHTML=mediaFrameHtml(m,mediaPlayerHtml(m,true))
+    +(m.drive?'<div class="mv-hint">¿Se queda en negro? El video de Drive tiene que estar compartido como «Cualquiera con el enlace».</div>':'');
+  const tabs=document.getElementById('mv-tabs');
+  tabs.innerHTML=mvState.list.length>1?mvState.list.map((v,i)=>
+    '<button type="button" class="clk-chip'+(i===mvState.idx?' on':'')+'" onclick="mvGo('+i+')">'+esc(v.title||('Video '+(i+1)))+'</button>').join(''):'';
+  const ex=mvState.ex;
+  let info='';
+  if(ex){
+    const muscles=ex.muscles||ex.primaryMuscle||'';
+    const steps=techniqueLines(ex.instructions||ex.howTo||ex.steps).slice(0,4);
+    if(muscles)info+='<div class="mv-meta">'+esc(muscles)+'</div>';
+    if(steps.length)info+='<ol class="mv-steps">'+steps.map(s=>'<li>'+esc(s)+'</li>').join('')+'</ol>';
+  }
+  document.getElementById('mv-info').innerHTML=info;
+}
+function mvGo(i){if(!mvState)return;mvState.idx=i;mvRender();}
+function closeMediaViewer(){
+  const el=document.getElementById('media-viewer');
+  if(!el||!el.classList.contains('open'))return;
+  el.classList.add('closing');
+  // Se vacía al terminar de bajar: quitar el iframe es lo que detiene el video.
+  setTimeout(()=>{
+    el.classList.remove('open','closing');
+    document.getElementById('mv-stage').innerHTML='';
+    mvState=null;
+  },200);
+}
+// Bajar la hoja desde arriba la cierra, como cualquier hoja de iOS. Solo desde la
+// barra: el video es un iframe y se traga los toques.
+(function(){
+  let y0=null,dy=0;
+  document.addEventListener('pointerdown',e=>{
+    const top=e.target.closest&&e.target.closest('#media-viewer .mv-top');
+    if(!top||e.target.closest('button'))return;
+    y0=e.clientY;dy=0;
+  });
+  document.addEventListener('pointermove',e=>{
+    if(y0==null)return;
+    dy=Math.max(0,e.clientY-y0);
+    const box=document.querySelector('#media-viewer .mv-box');
+    if(box){box.style.transition='none';box.style.transform='translateY('+dy+'px)';}
+  });
+  const end=()=>{
+    if(y0==null)return;
+    const box=document.querySelector('#media-viewer .mv-box');
+    if(box){box.style.transition='';box.style.transform='';}
+    if(dy>90)closeMediaViewer();
+    y0=null;dy=0;
+  };
+  document.addEventListener('pointerup',end);
+  document.addEventListener('pointercancel',end);
+  document.addEventListener('keydown',e=>{if(e.key==='Escape')closeMediaViewer();});
+})();
+// Nombre viejo: lo siguen usando el editor de ejercicios del admin y las vistas previas.
+function openVideoModal(embed){if(embed)openMediaViewer([{url:embed}],{title:'Video'});}
+function closeVideoModal(){closeMediaViewer();}
 
 // ── CONFIRMAR Y PREGUNTAR ─────────────────────────────────────────────────
 // confirm() y prompt() del navegador bloquean el hilo, no se pueden estilar y
@@ -8700,16 +8875,18 @@ function askAboutExercise(exName){
 // ── FICHA DE EJERCICIO (video arriba + historial/nota/asesoría + series) ──
 // Reemplaza los antiguos botones ▶ (video) y ⋯ (más opciones) por una sola
 // ficha completa al tocar el ejercicio — estilo Everfit.
-let _exFocusData=null, _exFocusVideoOpen=false, _editingWorkoutContext=null;
+let _exFocusData=null, _editingWorkoutContext=null;
 function openExerciseFocus(rowEl){
   try{_exFocusData=JSON.parse(rowEl.dataset.ex);}catch(e){return;}
-  _exFocusVideoOpen=!!(_exFocusData.videos&&_exFocusData.videos.length);
   renderExerciseFocusModal();
   document.getElementById('exercise-focus-modal').style.display='flex';
   refreshExerciseFocusFromServer();
 }
 function closeExerciseFocus(){
   document.getElementById('exercise-focus-modal').style.display='none';
+  // Un video oculto sigue sonando: se quita junto con la ficha.
+  const vid=document.getElementById('exercise-focus-video');
+  if(vid){vid.innerHTML='';vid.dataset.src='';}
   _exFocusData=null;
 }
 // Durante un entreno la ficha vive encima de la hoja: volver es cerrarla y quedar en
@@ -8754,28 +8931,24 @@ async function refreshExerciseFocusFromServer(){
   const bodyEl=document.getElementById('exercise-focus-body');
   if(bodyEl)bodyEl.innerHTML=renderExerciseFocusBodyHtml();
 }
-function toggleExFocusVideo(){
-  _exFocusVideoOpen=!_exFocusVideoOpen;
-  renderExerciseFocusVideo();
-  renderExerciseFocusTools();
-}
-function renderExerciseFocusVideo(){
+// El video va siempre arriba de la ficha, sin botón para mostrarlo. No se repinta si
+// ya muestra ese mismo video: la ficha se refresca sola al llegar la rutina del
+// servidor, y eso reiniciaba el YouTube que el socio acababa de poner a correr.
+function renderExerciseFocusVideo(force){
   const d=_exFocusData;
   const el=document.getElementById('exercise-focus-video');
   if(!d||!el)return;
-  if(!_exFocusVideoOpen){el.innerHTML='';return;}
-  const hasVideo=!!(d.videos&&d.videos.length);
-  el.innerHTML=hasVideo
-    ?'<div class="exercise-focus-stage expanded primary-video">'+getExerciseFocusVideoHtml(d.videos[0].url)+'</div>'
-    :'<div class="exercise-focus-stage"><div class="empty" style="margin:0">Este ejercicio no tiene video configurado. Pídele a tu coach que lo agregue desde Socios &gt; Rutinas.</div></div>';
+  const src=(d.videos&&d.videos[0]&&d.videos[0].url)||'';
+  if(!force&&el.dataset.src===src&&(el.innerHTML||!src))return;
+  el.dataset.src=src;
+  el.innerHTML=exerciseInlineMediaHtml(d.videos);
 }
 function renderExerciseFocusTools(){
   const d=_exFocusData;
   const tools=document.getElementById('exercise-focus-tools');
   if(!d||!tools)return;
   tools.innerHTML=
-    '<button class="ex-focus-icon-btn'+(_exFocusVideoOpen?' active':'')+'" onclick="toggleExFocusVideo()">'+(_exFocusVideoOpen?'Ocultar video':'▶ Video')+'</button>'
-    +'<button class="ex-focus-icon-btn" onclick="openExerciseHistoryModal()">Historial</button>'
+    '<button class="ex-focus-icon-btn" onclick="openExerciseHistoryModal()">Historial</button>'
     +'<button class="ex-focus-icon-btn" id="exercise-focus-note-btn" onclick="openExerciseNoteFromFocus()">'+(d.hasNote?'Ver nota':'Nota')+'</button>';
 }
 function techniqueLines(value){
@@ -8964,7 +9137,6 @@ function openActiveCoachingExercise(idx,focusSetIdx){
   if(!exercises.length)return;
   const safeIdx=typeof idx==='number'?Math.max(0,Math.min(exercises.length-1,idx)):getActiveExerciseIndex();
   _exFocusData=buildExerciseFocusData(exercises,safeIdx,activeCoachingSession.board_id,activeCoachingSession.id,focusSetIdx);
-  _exFocusVideoOpen=!!(_exFocusData&&_exFocusData.videos&&_exFocusData.videos.length);
   renderExerciseFocusModal();
   const modal=document.getElementById('exercise-focus-modal');
   if(modal)modal.style.display='flex';
@@ -8978,7 +9150,6 @@ function moveExerciseFocus(delta){
   const exercises=sessionExerciseList();
   const nextIdx=Math.max(0,Math.min(exercises.length-1,_exFocusData.idx+delta));
   _exFocusData=buildExerciseFocusData(exercises,nextIdx,activeCoachingSession.board_id,activeCoachingSession.id,null);
-  _exFocusVideoOpen=!!(_exFocusData&&_exFocusData.videos&&_exFocusData.videos.length);
   renderExerciseFocusModal();
   refreshExerciseFocusFromServer();
 }
@@ -10232,7 +10403,7 @@ function musclePlayBtnHtml(url,nombre){
   if(!url)return '';
   return '<button type="button" class="muscle-ex-play" data-video="'+esc(url)+'"'
     +' aria-label="Ver video de '+esc(nombre||'ejercicio')+'"'
-    +' onclick="openVideoModal(getEmbedUrl(this.dataset.video))">▶</button>';
+    +' data-name="'+esc(nombre||'')+'" onclick="openMediaViewer([this.dataset.video],{title:this.dataset.name})">'+MV_PLAY_ICON+'</button>';
 }
 async function openMuscleDetail(en){
   const row=myRecovery.find(r=>r.name===en)||{name:en,score:100,hoursUntilFresh:0,rested:true};
@@ -14054,7 +14225,7 @@ function wsExerciseHtml(ex,i){
         +(last.reps?' × '+esc(String(last.reps)):'')+'</div>':'')
     +(nextSuggestion?'<div class="ws-ex-last" style="color:var(--green)">'+esc(nextSuggestion)+'</div>':'')
     +'</div>'
-    +(videos.length?'<button class="ws-ex-video" data-video="'+esc(videos[0].url)+'" onclick="event.stopPropagation();openVideoModal(getEmbedUrl(this.dataset.video))" aria-label="Ver video">▶</button>':'')
+    +(videos.length?'<button class="ws-ex-video" onclick="event.stopPropagation();openMediaFromHead(this)" aria-label="Ver video">'+MV_PLAY_ICON+'</button>':'')
     +'<span class="ws-ex-badge'+(allDone?' done':'')+'">'+doneCount+'/'+sets.length+'</span>'
     +'</div>'
     +(swipe?'</div>':'');

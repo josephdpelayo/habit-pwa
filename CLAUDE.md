@@ -345,6 +345,16 @@ a silent overwrite.
   merges. "Posibles repetidos" shows the exact-signature groups plus **parecidos**: names equal but
   for one word or one typo (`sigTokenClose`, edit distance ≤ 1), unless that word marks a variant
   (`EXERCISE_VARIANT_WORDS`: inclinado, tuck, multipower…) — dismissed pairs live in localStorage.
+  **Ver un video o foto** pasa por un solo visor, `openMediaViewer(videos, {title, idx, ex})`
+  (`#media-viewer`): una hoja que sube, respeta la forma del medio (YouTube 16:9; Shorts y
+  Drive 9:16, porque el gym graba con el teléfono; fotos/GIF/MP4 a su tamaño), arranca solo
+  (YouTube con `mute=1`, que es lo único que iOS deja reproducir sin gesto), y abajo muestra
+  músculos y «cómo se hace». En la ficha el video va arriba sin botón para mostrarlo
+  (`exerciseInlineMediaHtml`): GIF/MP4 corren mudos en bucle y YouTube/Drive enseñan su
+  miniatura y reproducen ahí mismo al tocarla. `renderExerciseFocusVideo` no repinta si ya
+  muestra ese video, porque la ficha se refresca sola al llegar la rutina del servidor y eso
+  reiniciaba el reproductor; cerrar la ficha o el visor quita el iframe, que es lo que detiene
+  el sonido. `openVideoModal` queda como alias para el editor del admin.
   During a workout the video is `exerciseVideosForWorkout()`: the routine's own, unless the catalog
   has one of a better kind (YouTube over the GIF the routine copied, anything over nothing), so a
   video changed in Ejercicios reaches the workout without touching every routine
