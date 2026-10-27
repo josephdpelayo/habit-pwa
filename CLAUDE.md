@@ -237,6 +237,13 @@ into Entrenar instead. `coaching_week_templates.created_by` says who set each we
 what lets Entrenar mark a day as "de tu coach" and the coach's panel mark one as set by the
 member; both sides rewrite the whole week on save, so that marking is the only thing preventing
 a silent overwrite.
+**La sección Coaching del socio está apagada** (26 oct 2026: 16 socios la tenían y el último
+mensaje era del 18 sep). Es un interruptor, `COACHING_SECTION_ON = false` en `app.html`, y no un
+borrado: `canAccessCoaching()` lo respeta, y con él se van la pestaña, el chat en vivo, el ayuno de
+Inicio, el botón «Asesoría» de la ficha y las "solicitudes" al coach al editar un día que él puso
+(el socio lo edita directo, porque nadie leería la solicitud). `coaching_beta`, los datos y el
+panel del coach en Admin siguen igual: el coach puede seguir armando semanas y programas, que el
+socio ve en Entrenar. Encenderla de nuevo es poner `true`.
 
 - `coaching_week_templates` / `coaching_programs` / `coaching_program_days` /
   `coaching_program_weeks` — the member's weekly plan (`dow` 0 = Monday) and the programs that

@@ -6,12 +6,12 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="HABIT">
 <meta name="application-name" content="HABIT">
-<link rel="manifest" href="/manifest.json?v=20261026-7">
-<link rel="apple-touch-icon" sizes="120x120" href="/icons/icon-120.png?v=20261026-7">
-<link rel="apple-touch-icon" sizes="152x152" href="/icons/icon-152.png?v=20261026-7">
-<link rel="apple-touch-icon" sizes="167x167" href="/icons/icon-167.png?v=20261026-7">
-<link rel="apple-touch-icon" sizes="180x180" href="/icons/icon-180.png?v=20261026-7">
-<link rel="icon" type="image/png" sizes="32x32" href="/icons/icon-32.png?v=20261026-7">
+<link rel="manifest" href="/manifest.json?v=20261026-8">
+<link rel="apple-touch-icon" sizes="120x120" href="/icons/icon-120.png?v=20261026-8">
+<link rel="apple-touch-icon" sizes="152x152" href="/icons/icon-152.png?v=20261026-8">
+<link rel="apple-touch-icon" sizes="167x167" href="/icons/icon-167.png?v=20261026-8">
+<link rel="apple-touch-icon" sizes="180x180" href="/icons/icon-180.png?v=20261026-8">
+<link rel="icon" type="image/png" sizes="32x32" href="/icons/icon-32.png?v=20261026-8">
 <title>HABIT</title>
 <!-- Con id a propósito: scripts/check-training.js toma la primera etiqueta script sin
      atributos como el script principal de la app y la compila. -->
@@ -25,7 +25,7 @@
   var crew=/^\/crew(\/|$)/.test(location.pathname);
   window.HABIT_BRAND=crew?'crew':'gym';
   if(!crew)return;
-  var v='20261026-7';
+  var v='20261026-8';
   document.documentElement.classList.add('brand-crew');
   document.title='HABIT Crew';
   document.querySelectorAll('meta[name="apple-mobile-web-app-title"],meta[name="application-name"]')
@@ -40,9 +40,9 @@
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Share+Tech+Mono&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="/skandi-recovery.js?v=20261026-7"></script>
-<script src="/body-figure.js?v=20261026-7"></script>
-<script src="/habit-training.js?v=20261026-7"></script>
+<script src="/skandi-recovery.js?v=20261026-8"></script>
+<script src="/body-figure.js?v=20261026-8"></script>
+<script src="/habit-training.js?v=20261026-8"></script>
 <style>
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
 @media (prefers-reduced-motion:reduce){*,*:before,*:after{scroll-behavior:auto!important;animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}}
@@ -4054,7 +4054,7 @@ const GYM_ONLY_VIEWS=['book','planes','historial','shop'];
 const GYM_APP_URL='/';
 document.querySelectorAll('.brand-name').forEach(el=>{el.textContent=BRAND_NAME;});
 const SUPABASE_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBtcGp0ZXVxanVzYmlkdWV2YndxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc2OTI1NjUsImV4cCI6MjA5MzI2ODU2NX0.XbMzZoo2yqtrD8znLnyo_1zDfrdJAvAPj1lqGOyXnLw';
-const APP_VERSION='20261026-7';
+const APP_VERSION='20261026-8';
 // La pierna va separada en cuádriceps, femorales y pantorrillas: la figura
 // corporal pinta esas tres regiones por separado y el motor de recuperación les
 // da ventanas de descanso distintas. 'Piernas' sigue reconociéndose al leer
@@ -4581,7 +4581,7 @@ function notePushAsk(){
   try{localStorage.setItem(PUSH_ASK_KEY,JSON.stringify({n:(log.n||0)+1,at:Date.now()}));}catch(_){}
 }
 const PUSH_ASK_TEXT={
-  booking:'Te avisamos si se libera un lugar, cuando tu membresía esté por vencer y cuando tu coach te escriba.',
+  booking:'Te avisamos si se libera un lugar, cuando tu membresía esté por vencer y cuando cambie tu plan.',
   waitlist:'Así te avisamos en cuanto se libere tu lugar, aunque no tengas la app abierta.'
 };
 async function maybeAskPush(moment){
@@ -4610,7 +4610,7 @@ function renderInicioPushCard(){
   if(off||(st!=='default'&&st!=='install')){el.innerHTML='';return;}
   el.innerHTML='<div class="push-card">'
     +'<div class="push-card-txt"><strong>'+(st==='install'?'Recibe avisos en tu iPhone':'Activa los avisos')+'</strong>'
-    +'<small>'+(st==='install'?'Agrega HABIT a tu pantalla de inicio y te avisamos de tu lugar, tu membresía y tu coach.':'Tu lugar en la lista de espera, tu membresía y los mensajes de tu coach.')+'</small></div>'
+    +'<small>'+(st==='install'?'Agrega HABIT a tu pantalla de inicio y te avisamos de tu lugar y tu membresía.':'Tu lugar en la lista de espera, tu membresía y los cambios a tu plan.')+'</small></div>'
     +'<div class="push-card-acts"><button type="button" class="btn-sm" onclick="enablePush()">'+(st==='install'?'Cómo':'Activar')+'</button>'
     +'<button type="button" class="push-card-x" aria-label="Ocultar" onclick="dismissInicioPushCard()">×</button></div></div>';
 }
@@ -4689,9 +4689,10 @@ async function loadUserData(){
   // reemplaza la biblioteca, la semana ni el progreso de entrenamiento.
   if(rutBtn)rutBtn.style.display='';
   const coachBtn=document.getElementById('coaching-nav-btn');
-  if(coachBtn)coachBtn.style.display=prof.coaching_beta?'':'none';
-  document.body.classList.toggle('member-has-coaching',!!prof.coaching_beta);
-  if(prof.coaching_beta){startChatRealtime();}else{stopChatRealtime();updateCoachingNavBadge();}
+  const hasCoaching=COACHING_SECTION_ON&&!!prof.coaching_beta;
+  if(coachBtn)coachBtn.style.display=hasCoaching?'':'none';
+  document.body.classList.toggle('member-has-coaching',hasCoaching);
+  if(hasCoaching){startChatRealtime();}else{stopChatRealtime();updateCoachingNavBadge();}
   // Entrenar es para todos los socios: una recarga siempre debe recuperar la
   // sesión activa y la semana, aunque el usuario no tenga Coaching habilitado.
   loadActiveCoachingSessionSb().catch(console.error);
@@ -6920,7 +6921,7 @@ function sv(v){
     v='inicio';
   }
   if(v==='coaching'&&!canAccessCoaching()){
-    toast('Coaching disponible solo para socios beta','warn');
+    if(COACHING_SECTION_ON)toast('Coaching disponible solo para socios beta','warn');
     v='inicio';
   }
   document.querySelectorAll('.bnb').forEach((b,i)=>{
@@ -8099,8 +8100,14 @@ function currentEmail(){
 function canAccessShop(){
   return false;
 }
+// La sección Coaching del socio (chat, hábitos, ayuno, seguimiento) está apagada desde el
+// 26 oct 2026: 16 socios la tenían y nadie escribía desde el 18 sep. Todo lo del socio pasa
+// por canAccessCoaching(), así que apagarla es este interruptor y no borrar nada: los datos y
+// coaching_beta se quedan, y el panel del coach en Admin sigue armando semanas y programas,
+// que el socio ve en Entrenar. Volver a encenderla es poner true.
+const COACHING_SECTION_ON=false;
 function canAccessCoaching(){
-  return !!(sbProfile&&sbProfile.coaching_beta);
+  return !!(COACHING_SECTION_ON&&sbProfile&&sbProfile.coaching_beta);
 }
 function showShopAccessGate(isLoggedIn){
   stopReception();
@@ -11297,7 +11304,7 @@ function renderRutSemana(){
       ? 'Tu bloque terminó. Elige otro programa o arma la semana a mano: no se repite solo.'
       : (pgm&&pgm.start_date?'Tu programa organiza el calendario según la semana del bloque.':'Esta distribución se repite cada semana.')
         +' Mover un entreno puntual no cambia estos días.')
-    +(coachSetDays().length?' Los días marcados los puso tu coach; cualquier cambio se envía como solicitud.':'')
+    +(coachSetDays().length&&canAccessCoaching()?' Los días marcados los puso tu coach; cualquier cambio se envía como solicitud.':'')
     +'</p>';
   withScrollKept(el,()=>{el.innerHTML=html;});
 }
@@ -11305,7 +11312,7 @@ function renderRutSemana(){
 async function openWeekDayOptions(dow){
   const current=weekTemplate.find(t=>t.dow===dow&&t.board_id);
   if(!current)return;
-  const request=!!(isCoachSet(current)&&sbProfile&&sbProfile.coaching_beta);
+  const request=!!(isCoachSet(current)&&canAccessCoaching());
   const action=await choiceSheet('Tu '+DOW_LONG[dow]+' habitual',[
     {key:'change',label:request?'Solicitar otra rutina':'Cambiar rutina'},
     {key:'clear',label:request?'Solicitar día libre':'Dejar el día libre',danger:!request}
@@ -11328,7 +11335,7 @@ async function setWeekDay(dow,boardId){
   const b=routineById(boardId);
   if(!b)return;
   const current=weekTemplate.find(t=>t.dow===dow);
-  if(current&&isCoachSet(current)&&sbProfile&&sbProfile.coaching_beta){
+  if(current&&isCoachSet(current)&&canAccessCoaching()){
     await requestCoachWeekChange(dow,current,b);closeDayPickerModal();return;
   }
   try{
@@ -11345,7 +11352,7 @@ async function setWeekDay(dow,boardId){
 
 async function clearWeekDay(dow){
   const current=weekTemplate.find(t=>t.dow===dow);
-  if(current&&isCoachSet(current)&&sbProfile&&sbProfile.coaching_beta){
+  if(current&&isCoachSet(current)&&canAccessCoaching()){
     await requestCoachWeekChange(dow,current,null);closeDayPickerModal();return;
   }
   // La ✕ está pegada al nombre del día, que también se toca, y no borraba solo
