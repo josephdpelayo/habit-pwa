@@ -6,12 +6,12 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="HABIT">
 <meta name="application-name" content="HABIT">
-<link rel="manifest" href="/manifest.json?v=20261026-6">
-<link rel="apple-touch-icon" sizes="120x120" href="/icons/icon-120.png?v=20261026-6">
-<link rel="apple-touch-icon" sizes="152x152" href="/icons/icon-152.png?v=20261026-6">
-<link rel="apple-touch-icon" sizes="167x167" href="/icons/icon-167.png?v=20261026-6">
-<link rel="apple-touch-icon" sizes="180x180" href="/icons/icon-180.png?v=20261026-6">
-<link rel="icon" type="image/png" sizes="32x32" href="/icons/icon-32.png?v=20261026-6">
+<link rel="manifest" href="/manifest.json?v=20261026-7">
+<link rel="apple-touch-icon" sizes="120x120" href="/icons/icon-120.png?v=20261026-7">
+<link rel="apple-touch-icon" sizes="152x152" href="/icons/icon-152.png?v=20261026-7">
+<link rel="apple-touch-icon" sizes="167x167" href="/icons/icon-167.png?v=20261026-7">
+<link rel="apple-touch-icon" sizes="180x180" href="/icons/icon-180.png?v=20261026-7">
+<link rel="icon" type="image/png" sizes="32x32" href="/icons/icon-32.png?v=20261026-7">
 <title>HABIT</title>
 <!-- Con id a propósito: scripts/check-training.js toma la primera etiqueta script sin
      atributos como el script principal de la app y la compila. -->
@@ -25,7 +25,7 @@
   var crew=/^\/crew(\/|$)/.test(location.pathname);
   window.HABIT_BRAND=crew?'crew':'gym';
   if(!crew)return;
-  var v='20261026-6';
+  var v='20261026-7';
   document.documentElement.classList.add('brand-crew');
   document.title='HABIT Crew';
   document.querySelectorAll('meta[name="apple-mobile-web-app-title"],meta[name="application-name"]')
@@ -40,9 +40,9 @@
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Share+Tech+Mono&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="/skandi-recovery.js?v=20261026-6"></script>
-<script src="/body-figure.js?v=20261026-6"></script>
-<script src="/habit-training.js?v=20261026-6"></script>
+<script src="/skandi-recovery.js?v=20261026-7"></script>
+<script src="/body-figure.js?v=20261026-7"></script>
+<script src="/habit-training.js?v=20261026-7"></script>
 <style>
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
 @media (prefers-reduced-motion:reduce){*,*:before,*:after{scroll-behavior:auto!important;animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}}
@@ -2644,6 +2644,13 @@ body.admin-mode #courtesy-modal label{border-radius:14px!important;border-color:
 .hoy-row strong{font-size:14px}
 .hoy-row small{font-size:12.5px;color:var(--gray)}
 .hoy-row i{font-style:normal;color:var(--gray);font-size:16px}
+.push-card{display:flex;align-items:center;gap:12px;border-radius:16px;background:rgba(37,99,235,.12);padding:12px 12px 12px 14px;margin-bottom:12px}
+.push-card-txt{display:flex;flex-direction:column;gap:3px;flex:1;min-width:0}
+.push-card-txt strong{font-size:14px}
+.push-card-txt small{font-size:12.5px;color:var(--gl);line-height:1.4}
+.push-card-acts{display:flex;align-items:center;gap:4px;flex:0 0 auto}
+.push-card-x{background:none;border:0;color:var(--gray);font-size:20px;line-height:1;padding:6px;cursor:pointer}
+.perfil-push-row{display:flex;align-items:center;justify-content:space-between;gap:12px;font-size:13.5px;color:var(--gl)}
 .hoy-routines{margin:0 0 12px}
 .hoy-routines-head{display:flex;align-items:baseline;justify-content:space-between;margin:2px 2px 8px;font-size:12.5px;color:var(--gray)}
 .hoy-routines-head span{color:var(--white);font-weight:700}
@@ -2969,6 +2976,7 @@ button{transition:transform .14s var(--ease-out),background-color .16s ease,colo
   <div id="v-inicio" class="view active">
     <div class="scroll-area">
       <div id="inicio-coach-action"></div>
+      <div id="inicio-push-card"></div>
       <div id="access-main"></div>
       <div class="daily-quote-wrap"></div>
       <div id="inicio-fasting-mini"></div>
@@ -3006,6 +3014,9 @@ button{transition:transform .14s var(--ease-out),background-color .16s ease,colo
         <div class="divider" style="margin:.75rem 0"></div>
         <p class="slbl">Mi entrenamiento</p>
         <button class="btn-ghost perfil-row-btn" onclick="openTrainingOnboarding()"><span>Objetivo, nivel y equipo</span><span id="perfil-training-sum" class="perfil-row-sum"></span></button>
+        <div class="divider" style="margin:.75rem 0"></div>
+        <p class="slbl">Avisos</p>
+        <div id="perfil-push"></div>
         <div id="perfil-blocks-section">
           <div class="divider" style="margin:.75rem 0"></div>
           <p class="slbl">Usuarios bloqueados</p>
@@ -4043,7 +4054,7 @@ const GYM_ONLY_VIEWS=['book','planes','historial','shop'];
 const GYM_APP_URL='/';
 document.querySelectorAll('.brand-name').forEach(el=>{el.textContent=BRAND_NAME;});
 const SUPABASE_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBtcGp0ZXVxanVzYmlkdWV2YndxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc2OTI1NjUsImV4cCI6MjA5MzI2ODU2NX0.XbMzZoo2yqtrD8znLnyo_1zDfrdJAvAPj1lqGOyXnLw';
-const APP_VERSION='20261026-6';
+const APP_VERSION='20261026-7';
 // La pierna va separada en cuádriceps, femorales y pantorrillas: la figura
 // corporal pinta esas tres regiones por separado y el motor de recuperación les
 // da ventanas de descanso distintas. 'Piernas' sigue reconociéndose al leer
@@ -4480,37 +4491,146 @@ function urlBase64ToUint8Array(base64String){
   return Uint8Array.from([...raw].map(c=>c.charCodeAt(0)));
 }
 
-function registerPush(role){
-  if(!('serviceWorker' in navigator)||!('PushManager' in window)||!('Notification' in window))return;
-  if(!sbUser)return;
-  navigator.serviceWorker.register('/sw.js').then(reg=>{
-    const perm=Notification.permission;
-    if(perm==='denied')return;
-    if(perm==='granted'){
-      subscribePush(reg,role);
-    } else {
-      Notification.requestPermission().then(p=>{
-        if(p==='granted') subscribePush(reg,role);
-      }).catch(()=>{});
-    }
-  }).catch(e=>console.warn('SW register failed:',e));
+// Desde el 18 may 2026 ningún socio guardaba su suscripción: un "hard revert" (60da6cc) quitó las
+// llamadas a registerPush() y en oct quedaban 3 (2 socios y el admin). Además la app pedía el
+// permiso sola al entrar, que iOS ignora si no sale de un toque y que en Android aparecía sin
+// explicar para qué; quien decía que no ya no podía volver a activarlos. Ahora:
+// · quien ya dio permiso se suscribe en silencio al entrar (ensurePushSubscription);
+// · el permiso se pide con un toque y en un momento que lo explica: al reservar, al entrar a la
+//   lista de espera, en una tarjeta de Inicio y en Perfil → Avisos (enablePush, maybeAskPush);
+// · en iPhone sin instalar no hay avisos posibles, así que se enseña a agregarla a inicio.
+// Guardar pasa por save_push_subscription (migración 137): una fila por dispositivo.
+function pushStateFor(env){
+  if(env.native)return 'native';                 // la app de la tienda aún no trae avisos
+  if(env.ios&&!env.standalone)return 'install';  // iOS solo avisa a la app agregada a inicio
+  if(!env.supported)return 'unsupported';
+  return env.permission||'default';               // granted / denied / default
 }
-
-function subscribePush(reg,role){
-  if(!sbUser)return;
-  reg.pushManager.getSubscription().then(existing=>{
-    const doSub = existing
-      ? Promise.resolve(existing)
-      : reg.pushManager.subscribe({userVisibleOnly:true,applicationServerKey:urlBase64ToUint8Array(VAPID_PUBLIC_KEY)});
-    doSub.then(sub=>{
-      sb.from('push_subscriptions').upsert({
-        user_id:sbUser.id,
-        role:role||'user',
-        subscription:sub.toJSON(),
-        updated_at:new Date().toISOString()
-      },{onConflict:'user_id'}).then(()=>console.log('Push OK')).catch(()=>{});
-    }).catch(e=>console.warn('Push subscribe failed:',e));
-  }).catch(e=>console.warn('Push getSubscription failed:',e));
+function pushEnv(){
+  const ua=navigator.userAgent||'';
+  let standalone=navigator.standalone===true;
+  try{standalone=standalone||window.matchMedia('(display-mode: standalone)').matches;}catch(_){}
+  return{
+    ios:/iPad|iPhone|iPod/.test(ua)||(navigator.platform==='MacIntel'&&navigator.maxTouchPoints>1),
+    standalone,
+    native:!!(window.Capacitor&&typeof window.Capacitor.isNativePlatform==='function'&&window.Capacitor.isNativePlatform()),
+    supported:'serviceWorker' in navigator&&'PushManager' in window&&'Notification' in window,
+    permission:('Notification' in window)?Notification.permission:'default'
+  };
+}
+function pushState(){return pushStateFor(pushEnv());}
+async function savePushSubscription(sub){
+  const json=sub.toJSON();
+  const{error}=await sb.rpc('save_push_subscription',{p_subscription:json});
+  if(!error)return;
+  if(!/save_push_subscription|schema cache|does not exist/i.test(error.message||''))throw error;
+  // Sin la 137 todavía: la fila de este dispositivo se reemplaza a mano (sin llave única no
+  // hay upsert posible).
+  await sb.from('push_subscriptions').delete().eq('user_id',sbUser.id).eq('subscription->>endpoint',json.endpoint);
+  const ins=await sb.from('push_subscriptions').insert({user_id:sbUser.id,role:(sbProfile&&sbProfile.role)||'user',subscription:json,updated_at:new Date().toISOString()});
+  if(ins.error)throw ins.error;
+}
+let _pushSavedFor='';
+async function ensurePushSubscription(force){
+  if(!sbUser||pushState()!=='granted')return false;
+  if(!force&&_pushSavedFor===sbUser.id)return true;
+  const reg=await Promise.race([navigator.serviceWorker.ready,new Promise((_,rej)=>setTimeout(()=>rej(new Error('El service worker no respondió')),8000))]);
+  const sub=(await reg.pushManager.getSubscription())
+    ||await reg.pushManager.subscribe({userVisibleOnly:true,applicationServerKey:urlBase64ToUint8Array(VAPID_PUBLIC_KEY)});
+  await savePushSubscription(sub);
+  _pushSavedFor=sbUser.id;
+  return true;
+}
+// Siempre desde un toque: iOS solo muestra el permiso si sale de un gesto, así que
+// requestPermission va antes de cualquier await.
+async function enablePush(){
+  const st=pushState();
+  if(st==='install'){await openPushInstallGuide();return false;}
+  if(st==='denied'){
+    toast(pushEnv().ios?'Los avisos están bloqueados. Actívalos en Ajustes → Notificaciones → HABIT.':'Los avisos están bloqueados. Actívalos en los ajustes del sitio (el candado junto a la dirección).','warn');
+    return false;
+  }
+  if(st==='unsupported'||st==='native'){toast('Este dispositivo no puede recibir avisos de la app.','warn');return false;}
+  let perm=Notification.permission;
+  if(perm!=='granted'){
+    try{perm=await Notification.requestPermission();}catch(_){perm=Notification.permission;}
+  }
+  if(perm!=='granted'){refreshPushUi();return false;}
+  try{
+    await ensurePushSubscription(true);
+    toast('Avisos activados','ok');
+  }catch(e){toast('No se pudieron activar los avisos: '+(e.message||e),'err');console.warn('enablePush:',e);}
+  refreshPushUi();
+  return true;
+}
+function openPushInstallGuide(){
+  return confirmSheet('Para recibir avisos en tu iPhone, agrega HABIT a tu pantalla de inicio:\n1. Abajo en Safari, toca Compartir (el cuadro con la flecha ↑).\n2. Elige «Agregar a inicio».\n3. Abre HABIT desde ese icono y activa los avisos.',
+    {title:'Avisos en tu iPhone',confirmLabel:'Entendido',cancelLabel:'Ahora no'});
+}
+// Pedirlo con contexto, pero sin insistir: máximo 3 veces y no más de una por semana.
+// «Activar» desde Perfil o desde la tarjeta no cuenta: ahí lo pidió el socio.
+const PUSH_ASK_KEY='habit_push_ask';
+const PUSH_ASK_MAX=3, PUSH_ASK_GAP_MS=7*864e5;
+function pushAskAllowed(log,now){
+  log=log||{};
+  return (log.n||0)<PUSH_ASK_MAX&&(!log.at||now-log.at>=PUSH_ASK_GAP_MS);
+}
+function readPushAskLog(){try{return JSON.parse(localStorage.getItem(PUSH_ASK_KEY)||'{}')||{};}catch(_){return{};}}
+function notePushAsk(){
+  const log=readPushAskLog();
+  try{localStorage.setItem(PUSH_ASK_KEY,JSON.stringify({n:(log.n||0)+1,at:Date.now()}));}catch(_){}
+}
+const PUSH_ASK_TEXT={
+  booking:'Te avisamos si se libera un lugar, cuando tu membresía esté por vencer y cuando tu coach te escriba.',
+  waitlist:'Así te avisamos en cuanto se libere tu lugar, aunque no tengas la app abierta.'
+};
+async function maybeAskPush(moment){
+  const st=pushState();
+  if(st!=='default'&&st!=='install')return;
+  if(!pushAskAllowed(readPushAskLog(),Date.now()))return;
+  if(document.getElementById('confirm-overlay')?.classList.contains('show'))return;
+  notePushAsk();
+  if(st==='install'){await openPushInstallGuide();return;}
+  const ok=await confirmSheet(PUSH_ASK_TEXT[moment]||PUSH_ASK_TEXT.booking,{title:'¿Te avisamos?',confirmLabel:'Activar avisos',cancelLabel:'Ahora no'});
+  if(ok)await enablePush();
+}
+// Lo mismo en tres lugares: Perfil → Avisos, la tarjeta de Inicio y el banner del admin.
+function pushStatusText(st){
+  return {granted:'Activados en este dispositivo',default:'Desactivados',denied:'Bloqueados en los ajustes del teléfono',
+    install:'Agrega HABIT a tu pantalla de inicio para recibirlos',unsupported:'Este navegador no los admite',
+    native:'Aún no disponibles en esta app'}[st]||'';
+}
+const PUSH_CARD_DISMISS_KEY='habit_push_card_off';
+function renderInicioPushCard(){
+  const el=document.getElementById('inicio-push-card');
+  if(!el)return;
+  const st=pushState();
+  let off=false;
+  try{off=localStorage.getItem(PUSH_CARD_DISMISS_KEY)==='1';}catch(_){}
+  if(off||(st!=='default'&&st!=='install')){el.innerHTML='';return;}
+  el.innerHTML='<div class="push-card">'
+    +'<div class="push-card-txt"><strong>'+(st==='install'?'Recibe avisos en tu iPhone':'Activa los avisos')+'</strong>'
+    +'<small>'+(st==='install'?'Agrega HABIT a tu pantalla de inicio y te avisamos de tu lugar, tu membresía y tu coach.':'Tu lugar en la lista de espera, tu membresía y los mensajes de tu coach.')+'</small></div>'
+    +'<div class="push-card-acts"><button type="button" class="btn-sm" onclick="enablePush()">'+(st==='install'?'Cómo':'Activar')+'</button>'
+    +'<button type="button" class="push-card-x" aria-label="Ocultar" onclick="dismissInicioPushCard()">×</button></div></div>';
+}
+function dismissInicioPushCard(){
+  try{localStorage.setItem(PUSH_CARD_DISMISS_KEY,'1');}catch(_){}
+  renderInicioPushCard();
+}
+function renderPerfilPush(){
+  const el=document.getElementById('perfil-push');
+  if(!el)return;
+  const st=pushState();
+  const action={default:'Activar',install:'Cómo activarlos',denied:'Cómo desbloquear'}[st];
+  el.innerHTML='<div class="perfil-push-row"><span>'+esc(pushStatusText(st))+'</span>'
+    +(action?'<button type="button" class="btn-sm" onclick="enablePush()">'+action+'</button>':'')
+    +'</div>';
+}
+function refreshPushUi(){
+  renderInicioPushCard();
+  renderPerfilPush();
+  if(document.getElementById('s-admin')?.classList.contains('active'))renderPushBanner();
 }
 
 async function sendPush(target,title,body,extra={}){
@@ -4604,7 +4724,8 @@ function showMainSb(){
   });
   document.querySelectorAll('.bnb').forEach((b,i)=>b.classList.toggle('active',i===0));
   updateTopActions('inicio');
-  if('Notification' in window&&Notification.permission==='default')Notification.requestPermission().catch(()=>{});
+  ensurePushSubscription().catch(e=>console.warn('ensurePushSubscription:',e));
+  renderInicioPushCard();
   renderMembershipStatus();
   loadAccessData();
   renderDailyQuote();
@@ -5501,10 +5622,9 @@ function fmtCd(ms){if(ms<=0)return'00:00';const s=Math.floor(ms/1000),h=Math.flo
 function sendNotif(title, body){
   // Browser notifications
   if(!('Notification' in window)) return;
+  // Pedir el permiso aquí lo pedía sin un toque y sin decir para qué; se pide en enablePush.
   if(Notification.permission==='granted'){
     new Notification(title,{body,icon:'/icons/icon-192.png',badge:'/icons/icon-192.png'});
-  } else if(Notification.permission!=='denied'){
-    Notification.requestPermission().then(p=>{if(p==='granted') new Notification(title,{body,icon:'/icons/icon-192.png',badge:'/icons/icon-192.png'});});
   }
 }
 
@@ -6957,6 +7077,7 @@ async function renderPerfil(){
   if(pfPlan)pfPlan.textContent=curUser.plan?[...PLANS.individual,...PLANS.grupal].find(p=>p.id===curUser.plan)?.name||curUser.plan:'Sin plan';
   renderPerfilTrainingSummary();
   renderPerfilBlocks();
+  renderPerfilPush();
   // El staff (admin, recepción) no se borra a sí mismo desde aquí: se quedaría el gym sin
   // quien lo administre por un toque equivocado.
   const acct=document.getElementById('perfil-account-section');
@@ -7629,6 +7750,7 @@ async function doConfirm(){
     addN('Reserva confirmada - '+fmtDS(ds)+' '+timeStr+'. Abre la puerta desde la app al llegar.','success');
     clearSel();
     toast('Reserva confirmada','ok');
+    setTimeout(()=>maybeAskPush('booking').catch(()=>{}),1500);
     renderGuestGroup().catch(console.error);
   }catch(e){
     hideLoading();
@@ -7749,6 +7871,7 @@ async function doWaitlist(){
     hideLoading();
     addN('Lista de espera · '+fmtDS(dk(curDate))+' '+fmtSlot(selStartIdx)+'. Te avisamos si se libera.','warn');
     toast('En lista de espera','warn');clearSel();
+    setTimeout(()=>maybeAskPush('waitlist').catch(()=>{}),1200);
   }catch(e){
     hideLoading();
     if(String(e.code||'').includes('23505')||String(e.message||'').toLowerCase().includes('duplicate')){
@@ -16813,42 +16936,25 @@ async function generateReport(){
 // ADMIN — SUPABASE CONNECTED
 // ═══════════════════════════════════════
 
+// El admin usa el mismo camino que el socio (enablePush / save_push_subscription), y aquí
+// además ve cuántos socios tienen avisos: es el número que dice si los avisos sirven de algo.
 async function renderPushBanner(){
   const el=document.getElementById('push-banner');
-  if(!el||!('Notification' in window)||!('PushManager' in window))return;
-  const perm=Notification.permission;
-  if(perm==='denied'){
-    el.innerHTML='<div style="font-size:11px;color:#ef4444;padding:8px 0">Notificaciones bloqueadas. Actívalas desde Ajustes del celular.</div>';
-    return;
-  }
-  if(perm==='granted'){
-    try{
-      const reg=await navigator.serviceWorker.ready;
-      const sub=await reg.pushManager.getSubscription();
-      if(sub){
-        el.innerHTML='<div style="font-size:11px;color:#22c55e;font-weight:700;letter-spacing:.06em;text-transform:uppercase;padding:8px 0">&#10003; Notificaciones push activas</div>';
-      } else {
-        el.innerHTML='<button class="btn" style="width:100%;margin-bottom:4px" onclick="enableAdminPush()">Reactivar notificaciones push</button>';
-      }
-    }catch(e){
-      el.innerHTML='<button class="btn" style="width:100%;margin-bottom:4px" onclick="enableAdminPush()">Reactivar notificaciones push</button>';
-    }
-    return;
-  }
-  el.innerHTML='<button class="btn" style="width:100%;margin-bottom:4px" onclick="enableAdminPush()">Activar notificaciones push</button>';
-}
-async function enableAdminPush(){
-  if(!('serviceWorker' in navigator)||!('PushManager' in window))return;
-  const perm=await Notification.requestPermission();
-  if(perm!=='granted'){renderPushBanner();return;}
+  if(!el)return;
+  const st=pushState();
+  if(st==='granted')ensurePushSubscription().catch(e=>console.warn('ensurePushSubscription:',e));
+  const mine=st==='granted'
+    ?'<div style="font-size:11px;color:#22c55e;font-weight:700;letter-spacing:.06em;text-transform:uppercase;padding:8px 0">&#10003; Avisos activos en este dispositivo</div>'
+    :st==='denied'
+      ?'<div style="font-size:11px;color:#ef4444;padding:8px 0">Avisos bloqueados. Actívalos desde los ajustes del teléfono.</div>'
+      :'<button class="btn" style="width:100%;margin-bottom:4px" onclick="enablePush()">'+(st==='install'?'Cómo activar avisos en este iPhone':'Activar avisos')+'</button>';
+  el.innerHTML=mine+'<div id="push-stats" style="font-size:12px;color:var(--gray);padding:0 0 8px"></div>';
   try{
-    const reg=await navigator.serviceWorker.ready;
-    const existing=await reg.pushManager.getSubscription();
-    const sub=existing||await reg.pushManager.subscribe({userVisibleOnly:true,applicationServerKey:urlBase64ToUint8Array(VAPID_PUBLIC_KEY)});
-    await sb.from('push_subscriptions').upsert({user_id:sbUser.id,role:'admin',subscription:sub.toJSON(),updated_at:new Date().toISOString()},{onConflict:'user_id'});
-    toast('Notificaciones activadas','ok');
-  }catch(e){toast('Error: '+e.message,'err');console.warn(e);}
-  renderPushBanner();
+    const{data,error}=await sb.rpc('push_subscription_stats').single();
+    if(error)throw error;
+    const box=document.getElementById('push-stats');
+    if(box)box.textContent=(data.members||0)+' socio'+(data.members===1?'':'s')+' con avisos activos ('+(data.devices||0)+' dispositivo'+(data.devices===1?'':'s')+')';
+  }catch(e){console.warn('push_subscription_stats (¿falta la 137?):',e.message||e);}
 }
 async function renderAdmNotifsSb(){
   renderPushBanner();

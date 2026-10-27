@@ -311,6 +311,23 @@ a silent overwrite.
   (`hoyRoutinesHtml`, máx. 8), la entrenada hace poco primero y luego el orden de `myRoutines`;
   tocar una pide confirmar (`hoyStartRoutine`), porque en una fila que se desliza los toques sin
   querer son normales. `scripts/check-hoy.js` lo prueba
+- **Avisos (web push) del socio** (migración 137, oct 2026). Del 18 may al 26 oct 2026 **ningún
+  socio guardó su suscripción**: un "hard revert" (60da6cc) quitó las llamadas a `registerPush()`
+  y quedaban 3 filas. Ahora: `ensurePushSubscription()` suscribe en silencio, al entrar
+  (`showMainSb`, y `renderPushBanner` en el admin), a quien ya dio permiso; el permiso se pide
+  **solo desde un toque** (`enablePush`, que llama `requestPermission` antes de cualquier
+  `await`, porque iOS ignora la petición que no sale de un gesto) y con contexto: tras reservar y
+  al entrar a la lista de espera (`maybeAskPush`, máx. 3 veces y una por semana), la tarjeta de
+  Inicio (`#inicio-push-card`, se oculta con ×) y Perfil → Avisos. Nada más pide el permiso:
+  `sendNotif` ya no lo hace. `pushStateFor()` decide el caso — `install` es un iPhone en Safari
+  sin agregar a inicio, donde iOS no da avisos y lo único útil es enseñar a instalarla
+  (`openPushInstallGuide`); `native` es la app de Capacitor, que aún no los trae (necesita APNs).
+  Guardar pasa por `save_push_subscription()` (137): la llave es el **dispositivo**
+  (`endpoint`, columna generada con índice único), no la persona —antes no había llave y el
+  upsert del admin `on_conflict=user_id` fallaba—; un teléfono que cambia de cuenta pasa la
+  fila a la cuenta nueva (la RLS no deja tocar la ajena) y el `role` lo pone el servidor. La
+  lectura del admin en esa tabla mira `virtus.auth_user_role()`, no el rol de HABIT: el conteo
+  de Admin → Notificaciones sale de `push_subscription_stats()`. `scripts/check-push.js`
   La ficha de un ejercicio (`exercise-focus-modal`) se abre **encima** de la hoja: su botón de
   arriba es «‹ Ejercicios» (`exerciseFocusBack`, vuelve a la hoja en el ejercicio que se veía),
   no «Pausar» — así decía y nadie encontraba la lista. Pausar la sesión vive en el reloj de la hoja.
