@@ -374,6 +374,15 @@ a silent overwrite.
   `loadMyRoutinesSb` asks for the three origins separately (own / assigned / starter) and tags
   `_starterOnly` on every `is_starter` board, assigned or not, which is what splits the member's
   list into "De tu entrenador" and "Rutinas básicas"
+**Estilo grafito** (oct 2026): la última capa de la hoja de estilos de `app.html` («HABIT
+GRAFITO») sube el fondo de negro puro a grafito (`--black:#141518`, `--card`, `--card2`) con los
+mismos colores de marca, y quita bordes: las capas se distinguen por tono. Va al final a propósito,
+para pisar por orden en lugar de reescribir cientos de reglas; un estilo nuevo que pinte un fondo
+debe usar `var(--black)` / `var(--card)`, no `#050505`. Sin `backdrop-filter` en barras y hojas
+(el blur sobre contenido en movimiento tiraba cuadros en iPhone). Pantallas, hojas y modales
+entran con una animación CSS que arranca sola al pasar de `display:none` a visible, así que el JS
+que las abre no cambió y repintar su contenido no la repite. Videos y fotos siguen sobre negro.
+
 **No queda un `confirm()` ni un `prompt()` nativo en `app.html`**: los sustituyen `confirmSheet()`
 y `promptSheet()` (mismo patrón que Skandi en `a6ea2cb`, sin su i18n), que devuelven promesas —
 `if(!confirm(x))` pasó a `if(!await confirmSheet(x))`, y las cinco funciones que no eran `async`

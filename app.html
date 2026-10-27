@@ -6,12 +6,12 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="HABIT">
 <meta name="application-name" content="HABIT">
-<link rel="manifest" href="/manifest.json?v=20261026-2">
-<link rel="apple-touch-icon" sizes="120x120" href="/icons/icon-120.png?v=20261026-2">
-<link rel="apple-touch-icon" sizes="152x152" href="/icons/icon-152.png?v=20261026-2">
-<link rel="apple-touch-icon" sizes="167x167" href="/icons/icon-167.png?v=20261026-2">
-<link rel="apple-touch-icon" sizes="180x180" href="/icons/icon-180.png?v=20261026-2">
-<link rel="icon" type="image/png" sizes="32x32" href="/icons/icon-32.png?v=20261026-2">
+<link rel="manifest" href="/manifest.json?v=20261026-3">
+<link rel="apple-touch-icon" sizes="120x120" href="/icons/icon-120.png?v=20261026-3">
+<link rel="apple-touch-icon" sizes="152x152" href="/icons/icon-152.png?v=20261026-3">
+<link rel="apple-touch-icon" sizes="167x167" href="/icons/icon-167.png?v=20261026-3">
+<link rel="apple-touch-icon" sizes="180x180" href="/icons/icon-180.png?v=20261026-3">
+<link rel="icon" type="image/png" sizes="32x32" href="/icons/icon-32.png?v=20261026-3">
 <title>HABIT</title>
 <!-- Con id a propósito: scripts/check-training.js toma la primera etiqueta script sin
      atributos como el script principal de la app y la compila. -->
@@ -25,7 +25,7 @@
   var crew=/^\/crew(\/|$)/.test(location.pathname);
   window.HABIT_BRAND=crew?'crew':'gym';
   if(!crew)return;
-  var v='20261026-2';
+  var v='20261026-3';
   document.documentElement.classList.add('brand-crew');
   document.title='HABIT Crew';
   document.querySelectorAll('meta[name="apple-mobile-web-app-title"],meta[name="application-name"]')
@@ -40,9 +40,9 @@
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Share+Tech+Mono&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="/skandi-recovery.js?v=20261026-2"></script>
-<script src="/body-figure.js?v=20261026-2"></script>
-<script src="/habit-training.js?v=20261026-2"></script>
+<script src="/skandi-recovery.js?v=20261026-3"></script>
+<script src="/body-figure.js?v=20261026-3"></script>
+<script src="/habit-training.js?v=20261026-3"></script>
 <style>
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
 @media (prefers-reduced-motion:reduce){*,*:before,*:after{scroll-behavior:auto!important;animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}}
@@ -227,7 +227,7 @@ input,select,button,textarea{font-family:'Inter',sans-serif}
 .inicio-coach-go{border-radius:999px;background:rgba(147,197,253,.12);color:#bfdbfe;font-size:10px;font-weight:900;letter-spacing:.08em;text-transform:uppercase;padding:6px 9px;white-space:nowrap}
 .inicio-fasting-mini{position:fixed;z-index:20;right:max(18px,calc((100vw - 430px)/2 + 18px));bottom:calc(104px + env(safe-area-inset-bottom,0px));width:max-content;max-width:calc(100vw - 36px);pointer-events:none}
 #v-inicio:not(.active) .inicio-fasting-mini{display:none}
-.inicio-fast-chip{border:1px solid rgba(255,255,255,.08);border-radius:999px;background:rgba(8,8,8,.72);backdrop-filter:blur(12px);display:flex;align-items:center;gap:7px;padding:6px 9px;box-shadow:0 10px 22px rgba(0,0,0,.24)}
+.inicio-fast-chip{border:1px solid rgba(255,255,255,.08);border-radius:999px;background:rgba(20,21,24,.72);backdrop-filter:blur(12px);display:flex;align-items:center;gap:7px;padding:6px 9px;box-shadow:0 10px 22px rgba(0,0,0,.24)}
 .inicio-fast-chip.is-active{border-color:rgba(96,165,250,.26);background:rgba(37,99,235,.09)}
 .inicio-fast-chip.is-feeding{border-color:rgba(52,211,153,.25);background:rgba(16,185,129,.08)}
 .inicio-fast-label{font-size:8px;font-weight:900;letter-spacing:.12em;text-transform:uppercase;color:#9ca3af}
@@ -802,7 +802,7 @@ input,select,button,textarea{font-family:'Inter',sans-serif}
 .coach-automation-title{font-size:13.5px;font-weight:850;color:var(--white);line-height:1.2}
 .coach-automation-sub{font-size:11.5px;color:#9aa1ad;line-height:1.35;margin-top:4px}
 @media(max-width:380px){.admin-report-hero{grid-template-columns:repeat(2,1fr)}.admin-report-day{grid-template-columns:48px 1fr}.admin-report-pill{justify-self:start;grid-column:2}}
-.coach-cockpit-head{background:#080808;padding-bottom:10px;margin-bottom:4px}
+.coach-cockpit-head{background:var(--black);padding-bottom:10px;margin-bottom:4px}
 .coach-cockpit-top{display:flex;align-items:center;gap:10px;margin-bottom:8px}
 .coach-back-btn{border:1px solid rgba(255,255,255,.1);background:rgba(255,255,255,.055);border-radius:999px;color:var(--white);padding:8px 12px;font-size:12px;font-weight:850;cursor:pointer;white-space:nowrap}
 .coach-client-title{min-width:0;flex:1}
@@ -848,7 +848,7 @@ input,select,button,textarea{font-family:'Inter',sans-serif}
 .coach-hub-tab:active{transform:scale(.98)}
 .coach-hub-tab svg{width:19px;height:19px;stroke-width:1.55}
 .coach-hub-tab.active svg{stroke:var(--white)}
-#v-coaching .scroll-area,#a-coaching-detail .scroll-area{padding:14px;background:linear-gradient(180deg,#0a0a0a 0%,#070707 100%)}
+#v-coaching .scroll-area,#a-coaching-detail .scroll-area{padding:14px;background:var(--black)}
 #v-coaching .btn,#a-coaching-detail .btn{border-radius:12px;min-height:50px;background:linear-gradient(180deg,#f8fafc 0%,#d9e2ee 100%);color:#050505;letter-spacing:0;text-transform:none;font-weight:800;box-shadow:0 10px 28px rgba(255,255,255,.08)}
 #v-coaching .btn:active,#a-coaching-detail .btn:active{transform:translateY(1px);opacity:.92}
 #v-coaching .btn-sm,#a-coaching-detail .btn-sm{border-radius:999px;min-height:34px;padding:8px 12px;background:rgba(255,255,255,.06);border-color:rgba(255,255,255,.12);color:var(--gl);letter-spacing:0;text-transform:none;font-weight:750}
@@ -1154,7 +1154,7 @@ input,select,button,textarea{font-family:'Inter',sans-serif}
 .shop-hero h2{font-size:20px;line-height:1;font-weight:900;letter-spacing:.05em;text-transform:uppercase;margin-bottom:4px}
 .shop-hero p{font-size:11px;color:var(--gl);line-height:1.5}
 .shop-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px}
-.shop-bar{position:sticky;top:-1rem;z-index:8;display:flex;align-items:center;justify-content:space-between;gap:10px;background:rgba(8,8,8,.97);backdrop-filter:blur(16px);border:none;border-bottom:1px solid var(--border);border-radius:0;padding:12px 1rem 10px;margin-bottom:14px;margin-left:-1rem;margin-right:-1rem;margin-top:-1rem}
+.shop-bar{position:sticky;top:-1rem;z-index:8;display:flex;align-items:center;justify-content:space-between;gap:10px;background:rgba(20,21,24,.97);backdrop-filter:blur(16px);border:none;border-bottom:1px solid var(--border);border-radius:0;padding:12px 1rem 10px;margin-bottom:14px;margin-left:-1rem;margin-right:-1rem;margin-top:-1rem}
 .shop-bar-logo{display:flex;align-items:center;gap:8px}
 .shop-bar-logo img{width:26px;height:26px;object-fit:contain;flex-shrink:0}
 .shop-bar-title{font-size:13px;font-weight:900;letter-spacing:.12em;text-transform:uppercase;color:var(--white);line-height:1}
@@ -1288,7 +1288,7 @@ input,select,button,textarea{font-family:'Inter',sans-serif}
 
 /* RECEPTION TV */
 body.reception-mode .app{max-width:none;width:100vw;height:100vh}
-body.reception-mode{background:#050505}
+body.reception-mode{background:var(--black)}
 .reception-screen{background:radial-gradient(circle at 50% -20%,rgba(37,99,235,.18),transparent 46%),var(--black);height:100vh;width:100vw;overflow:hidden}
 .reception-shell{height:100%;display:flex;flex-direction:column;padding:clamp(24px,3vw,48px);gap:clamp(18px,2vw,30px)}
 .reception-top{display:flex;justify-content:center;align-items:center;border-bottom:1px solid rgba(255,255,255,.08);padding-bottom:clamp(18px,2vw,28px)}
@@ -1405,9 +1405,9 @@ body.reception-mode{background:#050505}
   --shadow-soft:0 18px 48px rgba(0,0,0,.28);--shadow-card:0 12px 34px rgba(0,0,0,.24)
 }
 html,body{background:radial-gradient(circle at 50% -18%,rgba(80,112,164,.16),transparent 34%),var(--black)}
-.app{background:linear-gradient(180deg,#080808 0%,#050505 100%);color:var(--white)}
+.app{background:var(--black);color:var(--white)}
 .scroll-area{padding:14px;background:linear-gradient(180deg,rgba(255,255,255,.012),transparent 18%)}
-.hdr{background:rgba(8,8,8,.92);backdrop-filter:blur(18px);border-bottom:1px solid var(--hairline);padding-left:14px;padding-right:14px}
+.hdr{background:rgba(20,21,24,.92);backdrop-filter:blur(18px);border-bottom:1px solid var(--hairline);padding-left:14px;padding-right:14px}
 .ltxt{letter-spacing:.06em}.lsub{color:var(--bl);letter-spacing:.12em}
 .top-actions{gap:8px}
 .top-action{width:38px;height:38px;border-radius:12px;border-color:var(--hairline);background:var(--surface);color:var(--gl);transition:background .16s,transform .16s,border-color .16s}
@@ -1415,7 +1415,7 @@ html,body{background:radial-gradient(circle at 50% -18%,rgba(80,112,164,.16),tra
 .top-action:active{transform:scale(.96)}
 .logout-btn{border-radius:999px;padding:8px 10px;text-transform:none;letter-spacing:0;color:var(--gray)}
 .logout-btn:active{background:var(--surface)}
-.bnav{background:rgba(11,11,12,.96);backdrop-filter:blur(18px);border-top:1px solid var(--hairline)}
+.bnav{background:rgba(20,21,24,.96);backdrop-filter:blur(18px);border-top:1px solid var(--hairline)}
 .bnav-inner{gap:4px;padding:6px 8px 0}
 .bnb{min-width:74px;border-radius:16px;padding:10px 7px 8px;font-size:9.5px;letter-spacing:0;text-transform:none;color:#7f8794;transition:background .16s,color .16s,transform .16s}
 .bnb.active{background:var(--surface-2);color:var(--white)}
@@ -1450,7 +1450,7 @@ html,body{background:radial-gradient(circle at 50% -18%,rgba(80,112,164,.16),tra
 .brow-meta,.hsub,.next-sub{color:var(--gray);line-height:1.45}
 
 /* Auth */
-#s-auth .scroll-area{padding:28px 22px;background:radial-gradient(circle at 50% 6%,rgba(127,176,255,.16),transparent 36%),linear-gradient(180deg,#070707,#050505)}
+#s-auth .scroll-area{padding:28px 22px;background:radial-gradient(circle at 50% 6%,rgba(127,176,255,.16),transparent 36%),var(--black)}
 .auth-logo{margin-bottom:26px}
 .auth-brand{font-size:38px;letter-spacing:.08em}
 .auth-sub{letter-spacing:.14em;color:var(--gray)}
@@ -1472,7 +1472,7 @@ html,body{background:radial-gradient(circle at 50% -18%,rgba(80,112,164,.16),tra
 .slot-badge{border-radius:999px;text-transform:none;letter-spacing:0}
 .sel-strip,.warn-box,.cred-box,.sbox{border-radius:12px}
 .conf-panel{padding:0 14px 14px}
-#v-book>div[style*="border-top"]{background:rgba(8,8,8,.95)!important;backdrop-filter:blur(18px);border-top-color:var(--hairline)!important}
+#v-book>div[style*="border-top"]{background:rgba(20,21,24,.95)!important;backdrop-filter:blur(18px);border-top-color:var(--hairline)!important}
 
 /* Memberships and profile */
 .ptype-row{gap:8px}
@@ -1490,22 +1490,22 @@ html,body{background:radial-gradient(circle at 50% -18%,rgba(80,112,164,.16),tra
 .reaction-btn{border-color:var(--hairline);background:rgba(255,255,255,.035);text-transform:none}
 .reaction-btn.active{border-color:rgba(127,176,255,.45);background:rgba(37,99,235,.14);color:var(--white)}
 .comment-form input{border-radius:999px;border-color:var(--hairline);background:rgba(255,255,255,.052)}
-.chat-thread{padding:14px;background:linear-gradient(180deg,#080808,#050505)}
+.chat-thread{padding:14px;background:var(--black)}
 .chat-day-divider{background:var(--surface);color:var(--gray)}
 .chat-bubble{border-radius:18px;padding:10px 13px}
 .chat-row.mine .chat-bubble{background:linear-gradient(180deg,#3478f6,#1d4ed8);border-bottom-right-radius:7px}
 .chat-row.theirs .chat-bubble{background:rgba(255,255,255,.06);border-color:var(--hairline);border-bottom-left-radius:7px}
-.chat-composer{background:rgba(11,11,12,.96);border-top-color:var(--hairline);padding:10px 12px calc(env(safe-area-inset-bottom,0px) + 10px)}
+.chat-composer{background:rgba(20,21,24,.96);border-top-color:var(--hairline);padding:10px 12px calc(env(safe-area-inset-bottom,0px) + 10px)}
 .chat-attach-btn,.chat-mic-btn,.chat-send-btn{border-radius:13px}
 .chat-text-input{border-radius:16px;border-color:var(--hairline);background:rgba(255,255,255,.06)}
-.shop-bar{background:rgba(8,8,8,.95);border-bottom-color:var(--hairline)}
+.shop-bar{background:rgba(20,21,24,.95);border-bottom-color:var(--hairline)}
 .shop-card{overflow:hidden}
 .shop-add{border-radius:10px;text-transform:none;letter-spacing:0}
 .qty-step{border-radius:10px;border-color:var(--hairline)}
 .checkout-block,.shop-cart,.shop-form,.address-box,.delivery-card{border-radius:14px;border-color:var(--hairline);background:rgba(255,255,255,.04)}
 
 /* Admin */
-#s-admin .hdr{min-height:72px;background:linear-gradient(180deg,rgba(11,11,12,.98),rgba(8,8,8,.92));box-shadow:0 10px 30px rgba(0,0,0,.2);gap:8px}
+#s-admin .hdr{min-height:72px;background:linear-gradient(180deg,rgba(20,21,24,.98),rgba(20,21,24,.92));box-shadow:0 10px 30px rgba(0,0,0,.2);gap:8px}
 #s-admin .logo-wrap{min-width:0;border-radius:14px;padding:6px 8px;margin-left:-8px;cursor:pointer;transition:background .16s,box-shadow .16s,transform .16s}
 #s-admin .logo-wrap.active{background:rgba(255,255,255,.075);box-shadow:inset 0 0 0 1px rgba(255,255,255,.075)}
 #s-admin .logo-wrap:active{transform:scale(.985)}
@@ -1513,8 +1513,8 @@ html,body{background:radial-gradient(circle at 50% -18%,rgba(80,112,164,.16),tra
 #s-admin .ltxt{font-size:18px}
 #s-admin .lsub{font-size:8px}
 #s-admin .logout-btn{flex-shrink:0;padding:8px 4px}
-#s-admin .scroll-area{padding:14px;background:linear-gradient(180deg,#080808,#050505)}
-.adm-nav{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:6px;padding:9px;background:rgba(11,11,12,.96);border-bottom-color:var(--hairline);overflow:visible}
+#s-admin .scroll-area{padding:14px;background:var(--black)}
+.adm-nav{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:6px;padding:9px;background:rgba(20,21,24,.96);border-bottom-color:var(--hairline);overflow:visible}
 .adm-tab,.fin-subtab{border-radius:999px;border:none;padding:9px 5px;text-transform:none;letter-spacing:0;background:transparent;color:var(--gray);min-height:36px;min-width:0;width:100%;line-height:1.1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .adm-tab{display:flex;align-items:center;justify-content:center;gap:5px}
 .adm-tab svg{width:15px;height:15px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;flex-shrink:0}
@@ -1614,7 +1614,7 @@ html,body,.app,input,select,button,textarea{font-family:var(--font-ui);font-opti
 #v-rutinas .ex-detail{font-size:11.5px;color:#8f97a5;line-height:1.4;margin-top:5px}
 #v-rutinas .ex-note{border-left:2px solid rgba(245,158,11,.45);padding-left:8px;margin-top:7px;color:#c6a55c;font-style:normal}
 #v-rutinas .badge{border-radius:999px;padding:7px 10px;font-size:11px}
-#v-coaching .scroll-area{background:#080808;padding-left:12px;padding-right:12px}
+#v-coaching .scroll-area{background:var(--black);padding-left:12px;padding-right:12px}
 #v-coaching .board-card{border-radius:14px;background:rgba(255,255,255,.026);border-color:rgba(255,255,255,.065);box-shadow:none;margin-bottom:10px}
 #v-coaching .board-hdr{padding:12px 13px;background:transparent;border-bottom-color:rgba(255,255,255,.055)}
 #v-coaching .board-body{padding:12px}
@@ -1644,12 +1644,12 @@ body.workout-sheet-open .support-fab{left:max(14px,calc((100vw - 430px)/2 + 14px
 
 /* Admin workstation layout */
 @media(min-width:900px){
-body.admin-mode{background:#050506}
-body.admin-mode .app{max-width:none;width:100vw;height:100vh;height:100dvh;background:#050506}
+body.admin-mode{background:var(--black)}
+body.admin-mode .app{max-width:none;width:100vw;height:100vh;height:100dvh;background:var(--black)}
 body.admin-mode #s-admin.screen.active{display:grid;grid-template-columns:278px minmax(0,1fr);grid-template-rows:auto 1fr;height:100%;background:
   radial-gradient(circle at 78% -18%,rgba(37,99,235,.16),transparent 34%),
-  linear-gradient(180deg,#080809 0%,#050506 100%)}
-body.admin-mode #s-admin .hdr{grid-column:1;grid-row:1;min-height:0;align-self:stretch;display:flex;flex-direction:column;align-items:stretch;gap:14px;padding:26px 18px 16px;background:rgba(9,9,10,.92);border-right:1px solid rgba(255,255,255,.08);border-bottom:0;box-shadow:none}
+  var(--black)}
+body.admin-mode #s-admin .hdr{grid-column:1;grid-row:1;min-height:0;align-self:stretch;display:flex;flex-direction:column;align-items:stretch;gap:14px;padding:26px 18px 16px;background:rgba(20,21,24,.92);border-right:1px solid rgba(255,255,255,.08);border-bottom:0;box-shadow:none}
 body.admin-mode #s-admin .logo-wrap{width:100%;margin:0;padding:10px 11px;border-radius:16px}
 body.admin-mode #s-admin .header-logo-img{width:34px;height:34px}
 body.admin-mode #s-admin .ltxt{font-size:21px}
@@ -1657,7 +1657,7 @@ body.admin-mode #s-admin .lsub{font-size:9px;color:#9dbfff}
 body.admin-mode #s-admin .admin-top-actions{display:grid;grid-template-columns:repeat(5,1fr);gap:8px;margin:0}
 body.admin-mode #s-admin .admin-icon-action{width:100%;height:42px;border-radius:14px}
 body.admin-mode #s-admin .logout-btn{margin:0;width:100%;border:1px solid rgba(255,255,255,.08);background:rgba(255,255,255,.035);padding:11px 12px;text-align:center}
-body.admin-mode #s-admin .adm-nav{grid-column:1;grid-row:2;display:flex;flex-direction:column;align-self:stretch;gap:7px;padding:4px 18px 24px;background:rgba(9,9,10,.92);border-right:1px solid rgba(255,255,255,.08);border-bottom:0}
+body.admin-mode #s-admin .adm-nav{grid-column:1;grid-row:2;display:flex;flex-direction:column;align-self:stretch;gap:7px;padding:4px 18px 24px;background:rgba(20,21,24,.92);border-right:1px solid rgba(255,255,255,.08);border-bottom:0}
 body.admin-mode #s-admin .adm-tab{display:flex;align-items:center;justify-content:flex-start;width:100%;min-height:44px;border-radius:14px;padding:0 13px;font-size:13px;color:#9aa1ad}
 body.admin-mode #s-admin .adm-tab svg{width:18px;height:18px}
 body.admin-mode #s-admin .adm-tab.active{background:linear-gradient(180deg,rgba(37,99,235,.22),rgba(37,99,235,.12));color:#fff;box-shadow:inset 0 0 0 1px rgba(127,176,255,.2)}
@@ -1979,7 +1979,7 @@ body.admin-mode #a-boards .assign-row{border-bottom-color:rgba(255,255,255,.06)!
 body.admin-mode #user-profile-view .brow{margin-bottom:0}
 body.admin-mode #edit-user-modal>div,
 body.admin-mode #membership-grant-modal>div,
-body.admin-mode #courtesy-modal>div{border-radius:20px 20px 0 0!important;border-color:rgba(255,255,255,.09)!important;background:#0b0b0d!important}
+body.admin-mode #courtesy-modal>div{border-radius:20px 20px 0 0!important;border-color:rgba(255,255,255,.09)!important;background:var(--dark)!important}
 body.admin-mode #edit-user-modal input,
 body.admin-mode #edit-user-modal select,
 body.admin-mode #edit-user-modal textarea,
@@ -2007,7 +2007,7 @@ body.admin-mode #courtesy-modal label{border-radius:14px!important;border-color:
   body.admin-mode #a-coaching>#coaching-command-center{grid-column:2;grid-row:2;position:sticky;top:10px}
   body.admin-mode #a-coaching .coach-admin-kpis{grid-template-columns:repeat(2,minmax(0,1fr))}
   body.admin-mode #a-coaching-detail{max-width:1180px!important}
-  body.admin-mode #a-coaching-detail .coach-cockpit-head{position:sticky;top:-10px;z-index:8;padding:10px 0 12px;background:linear-gradient(180deg,#080809 82%,rgba(8,8,9,0));backdrop-filter:blur(16px)}
+  body.admin-mode #a-coaching-detail .coach-cockpit-head{position:sticky;top:-10px;z-index:8;padding:10px 0 12px;background:linear-gradient(180deg,#141518 82%,rgba(20,21,24,0));backdrop-filter:blur(16px)}
   body.admin-mode #a-coaching-detail .admin-plan-grid{grid-template-columns:minmax(0,1.25fr) minmax(320px,.75fr);align-items:start}
   body.admin-mode #a-coaching-detail #coach-plan-program{grid-column:1/-1;grid-row:1}
   body.admin-mode #a-coaching-detail #coach-plan-week{grid-column:1;grid-row:2/span 2;position:sticky;top:112px}
@@ -2103,7 +2103,7 @@ body.admin-mode #courtesy-modal label{border-radius:14px!important;border-color:
   #s-admin .adm-mobile-logout{display:block;width:100%;min-height:44px;margin-top:8px;border:1px solid rgba(239,68,68,.22);border-radius:13px;background:rgba(239,68,68,.07);color:#f19a9a;font-size:12px;font-weight:780;cursor:pointer}
   .adm-mobile-backdrop{position:fixed;z-index:10001;inset:0;display:block;border:0;background:rgba(0,0,0,.66);backdrop-filter:blur(4px);opacity:0;pointer-events:none;transition:opacity .18s ease}
   .adm-mobile-backdrop.show{opacity:1;pointer-events:auto}
-  body.admin-mode #s-admin .admin-mobile-quick-nav{position:fixed;z-index:9998;left:0;right:0;bottom:0;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:4px;padding:7px 10px calc(7px + env(safe-area-inset-bottom,0px));border-top:1px solid rgba(255,255,255,.08);background:rgba(10,10,11,.96);backdrop-filter:blur(18px);box-shadow:0 -14px 34px rgba(0,0,0,.32)}
+  body.admin-mode #s-admin .admin-mobile-quick-nav{position:fixed;z-index:9998;left:0;right:0;bottom:0;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:4px;padding:7px 10px calc(7px + env(safe-area-inset-bottom,0px));border-top:1px solid rgba(255,255,255,.08);background:rgba(20,21,24,.96);backdrop-filter:blur(18px);box-shadow:0 -14px 34px rgba(0,0,0,.32)}
   .admin-mobile-quick-item{position:relative;min-height:54px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;border:0;border-radius:14px;background:transparent;color:#858e9c;font-size:9.5px;font-weight:760;cursor:pointer}
   .admin-mobile-quick-item.active{background:rgba(255,255,255,.075);color:#fff}
   .admin-mobile-quick-icon{font-size:18px;line-height:1;color:currentColor}
@@ -2112,7 +2112,7 @@ body.admin-mode #courtesy-modal label{border-radius:14px!important;border-color:
   body.admin-mode #a-slots .admin-page-head,body.admin-mode #a-users .admin-page-head{margin-bottom:10px}
   body.admin-mode #a-slots .admin-page-kicker,body.admin-mode #a-users .admin-page-kicker{display:none}
   body.admin-mode #a-slots .admin-page-sub{display:none}
-  body.admin-mode #a-slots .admin-date-rail{position:sticky;top:-10px;z-index:15;margin:0 -4px 10px;padding:8px 4px;background:linear-gradient(180deg,#080809 78%,rgba(8,8,9,.92));backdrop-filter:blur(14px)}
+  body.admin-mode #a-slots .admin-date-rail{position:sticky;top:-10px;z-index:15;margin:0 -4px 10px;padding:8px 4px;background:linear-gradient(180deg,#141518 78%,rgba(20,21,24,.92));backdrop-filter:blur(14px)}
   body.admin-mode #a-slots .admin-agenda-summary{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:7px;margin-bottom:10px!important}
   body.admin-mode #a-slots .admin-agenda-summary .met{min-height:70px;padding:10px}
   body.admin-mode #a-slots .admin-agenda-summary .met-l{font-size:8.5px;white-space:nowrap}
@@ -2142,7 +2142,7 @@ body.admin-mode #courtesy-modal label{border-radius:14px!important;border-color:
   body.admin-mode #a-users .admin-page-sub{display:none}
   body.admin-mode #a-users .admin-page-actions{width:auto;display:flex;gap:6px}
   body.admin-mode #a-users .admin-page-action{width:auto;min-height:36px;padding:0 10px;font-size:10.5px}
-  body.admin-mode #a-users .admin-list-tools{position:sticky;top:-10px;z-index:15;grid-template-columns:minmax(0,1fr) 112px;gap:7px;margin:0 -4px 7px;padding:8px 4px;background:linear-gradient(180deg,#080809 80%,rgba(8,8,9,.94));backdrop-filter:blur(14px)}
+  body.admin-mode #a-users .admin-list-tools{position:sticky;top:-10px;z-index:15;grid-template-columns:minmax(0,1fr) 112px;gap:7px;margin:0 -4px 7px;padding:8px 4px;background:linear-gradient(180deg,#141518 80%,rgba(20,21,24,.94));backdrop-filter:blur(14px)}
   body.admin-mode #a-users .adm-search,body.admin-mode #a-users .admin-select{min-height:43px;font-size:12px;padding:10px 11px}
   body.admin-mode #a-users .admin-filter-strip{margin:0 -2px 5px;padding:0 2px 8px;scrollbar-width:none}
   body.admin-mode #a-users .admin-filter-strip .filter-chip{flex:0 0 auto!important;width:auto!important;min-width:max-content!important;padding:8px 10px;font-size:10px}
@@ -2272,7 +2272,7 @@ body.admin-mode #courtesy-modal label{border-radius:14px!important;border-color:
   max-width:430px;margin:0 auto;font-family:'Inter',sans-serif}
 .workout-sheet.open{display:flex}
 .ws-bar{flex-shrink:0;padding:calc(env(safe-area-inset-top,0px) + 12px) 14px 12px;border-bottom:1px solid var(--hairline);
-  background:rgba(8,8,8,.94);backdrop-filter:blur(18px);display:flex;align-items:center;gap:10px}
+  background:rgba(20,21,24,.94);backdrop-filter:blur(18px);display:flex;align-items:center;gap:10px}
 .ws-bar-info{flex:1;min-width:0}
 .ws-bar-k{font-size:10px;font-weight:800;letter-spacing:.09em;text-transform:uppercase;color:var(--bl)}
 .ws-bar-title{font-size:17px;font-weight:800;margin-top:2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
@@ -2706,6 +2706,110 @@ body.admin-mode #courtesy-modal label{border-radius:14px!important;border-color:
 /* La ficha de rutina vive dentro de .terms-body, cuya regla para h3 (14 px, mayúsculas,
    espaciado) es más específica que .routine-detail-name y le ganaba al título. */
 .terms-body h3.routine-detail-name{font-size:30px;letter-spacing:-1px;line-height:1.12;font-weight:750;text-transform:none;margin:4px 0 0;color:var(--white)}
+
+/* ══════════════════════════════════════════════════════════════════════
+   HABIT GRAFITO — minimalista y fluido (oct 2026)
+   Última capa a propósito: pisa por orden a las anteriores en vez de reescribir
+   cientos de reglas. Mismos colores de marca (azul, verde, ámbar); lo que cambia
+   es el fondo —grafito con capas en lugar de negro puro—, menos líneas (las capas
+   se notan por el tono, no por un borde), y el movimiento.
+   ══════════════════════════════════════════════════════════════════════ */
+:root{
+  --black:#141518;--dark:#18191c;--card:#1e1f23;--card2:#25262b;
+  --border:rgba(255,255,255,.065);--hairline:rgba(255,255,255,.06);
+  --surface:rgba(255,255,255,.05);--surface-2:rgba(255,255,255,.085);
+  --gray:#9a9fa9;--gl:#d0d4db;
+  --shadow-soft:0 18px 44px rgba(0,0,0,.32);--shadow-card:0 10px 28px rgba(0,0,0,.22);
+  --ease-out:cubic-bezier(.22,1,.36,1);
+  --page-bar:rgba(20,21,24,.97)
+}
+html,body{background:var(--black)}
+.app{background:var(--black)}
+.scroll-area{background:transparent}
+body.reception-mode,body.admin-mode,body.admin-mode .app{background:var(--black)}
+
+/* Barras fijas: color sólido en vez de blur. El blur sobre contenido que se mueve
+   es lo que más tira cuadros en iPhone al hacer scroll. */
+.hdr,.bnav,.ws-bar,.shop-bar,#v-book>div[style*="border-top"]{background:var(--page-bar)!important;backdrop-filter:none!important;-webkit-backdrop-filter:none!important}
+.hdr{border-bottom-color:transparent}
+.bnav{border-top-color:var(--hairline)}
+.terms-modal,.exercise-session-modal,.adm-mobile-backdrop{backdrop-filter:none!important;-webkit-backdrop-filter:none!important}
+.terms-modal{background:rgba(6,7,9,.62)}
+.exercise-session-modal{background:var(--black)}
+.terms-box{background:var(--dark);border:0;box-shadow:0 -20px 60px rgba(0,0,0,.45)}
+.terms-hdr{border-bottom-color:var(--hairline)}
+.terms-box.exercise-focus-box{background:var(--black)}
+.terms-box.exercise-focus-box .terms-hdr{background:var(--black);backdrop-filter:none;border-bottom:0}
+.workout-sheet{background:var(--black)}
+.clk-sheet{background:var(--black)}
+
+/* Menos líneas: tarjetas por tono, campos rellenos sin borde. */
+.routine-card,.coach-session-card,.coach-workout-summary,.exercise-focus-tech-card,.exercise-focus-stage,.adm-notif{border-color:transparent;background:var(--card)}
+.routine-ex-pill{border-color:transparent;background:var(--surface-2)}
+.field input,.field select,.field textarea,.adm-search,.adm-date{border-color:transparent;background:var(--card2);box-shadow:none}
+.field input:focus,.field select:focus,.field textarea:focus,.adm-search:focus,.adm-date:focus{border-color:rgba(127,176,255,.5);box-shadow:0 0 0 3px rgba(37,99,235,.14)}
+.empty{border-style:solid;border-color:transparent;background:var(--card)}
+.btn{background:var(--white);box-shadow:none;border-radius:999px;font-weight:750}
+.btn-ghost,.btn-sm{border-color:transparent;background:var(--surface-2)}
+.btn-sm{font-weight:700}
+.top-action{border-color:transparent}
+.auth-tabs{border-color:transparent;background:var(--card)}
+.slbl{color:var(--gray)}
+
+/* Hoja de entreno y ficha */
+.ws-ex{border-bottom-color:var(--hairline)}
+.ws-min,.ws-ex-tool,.ws-timer-toggle,.ws-rest-step,.ws-pick-item{border-color:transparent}
+.ws-pick-item{background:var(--card)}
+.ws-timer-chip,.ws-timer-panel{border-color:transparent;background:var(--card2);backdrop-filter:none;-webkit-backdrop-filter:none}
+.ws-rest-strip{border-color:transparent;background:#1d2a42}
+.ws-rest-strip button{border-color:transparent;background:rgba(255,255,255,.08)}
+.set-tracker{background:var(--card);border-top:0;border-radius:var(--radius-lg)}
+.set-reps-in{border-color:transparent;background:var(--card2);border-radius:10px}
+.set-row.done .set-reps-in{border-color:transparent;background:transparent}
+.set-check{border-color:transparent;background:var(--card2)}
+.set-row.next{background:rgba(127,176,255,.08);box-shadow:none}
+.workout-sheet .set-reps-in,#v-coaching .set-reps-in{background:var(--card2);border-color:transparent}
+.workout-sheet .set-row.done .set-reps-in{background:transparent}
+.workout-sheet .set-check:not(.done),#v-coaching .set-check:not(.done){background:var(--card2);border-color:transparent}
+.workout-sheet .set-tracker-hdr{color:var(--gray)}
+.ws-ex-more[open] .ws-ex-tools{border-color:transparent;background:var(--card2)}
+.hoy-hero{border-color:transparent}
+.hoy-hero.live{border-color:transparent;background:rgba(37,99,235,.12)}
+.training-sync{border-color:transparent}
+.ex-focus-icon-btn{border-color:transparent;background:var(--card);border-radius:999px;font-size:12px}
+.exercise-focus-progress{border-color:transparent;background:var(--surface-2);color:var(--gl);font-weight:700}
+.terms-box.exercise-focus-box .terms-hdr h2,.terms-box.exercise-focus-box .ex-focus-hdr h2{text-transform:none;font-weight:750;letter-spacing:-.01em}
+.exercise-focus-nav .btn,.exercise-focus-nav .btn-sm{border-radius:999px}
+.exercise-focus-nav .finish{background:var(--white)}
+.hb-icon-btn{border-color:transparent;background:var(--surface-2);border-radius:999px}
+.stopwatch-fab{background:var(--card2);border-color:transparent;backdrop-filter:none;-webkit-backdrop-filter:none}
+.clk-seg{border-color:transparent;background:var(--card)}
+.clk-chip,.clk-step,.clk-side{border-color:transparent;background:var(--card)}
+.clk-chip.on{background:rgba(127,176,255,.16)}
+.clk-step button,.clk-fine button{border-color:transparent;background:var(--card2)}
+
+/* ── Movimiento ─────────────────────────────────────────────────────────
+   Las pantallas y hojas se muestran con display:none → flex; una animación CSS
+   arranca sola en ese cambio, así que no hace falta tocar el JS que las abre.
+   Repintar el contenido (innerHTML) no la repite: el contenedor sigue visible. */
+@keyframes hbIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+@keyframes hbFade{from{opacity:0}to{opacity:1}}
+@keyframes hbSheetUp{from{transform:translateY(28px);opacity:.4}to{transform:none;opacity:1}}
+@keyframes hbRise{from{transform:translateY(14px);opacity:0}to{transform:none;opacity:1}}
+.view.active,.screen.active,.adm-section.active{animation:hbIn .24s var(--ease-out) both}
+.terms-modal{animation:hbFade .18s ease both}
+.terms-modal>.terms-box{animation:hbSheetUp .32s var(--ease-out) both}
+.exercise-session-modal>.terms-box{animation:hbRise .26s var(--ease-out) both}
+.workout-sheet.open,.clk-sheet.open{animation:hbRise .3s var(--ease-out) both}
+/* Toque inmediato: sin la espera de doble toque y con respuesta al dedo. */
+button,a,[onclick],input,select,textarea,label{touch-action:manipulation}
+button{transition:transform .14s var(--ease-out),background-color .16s ease,color .16s ease,opacity .16s ease}
+.btn:active:not(:disabled),.btn-sm:active,.btn-ghost:active,.hb-icon-btn:active,.ex-focus-icon-btn:active,.clk-chip:active,.ws-ex-tool:active,.ws-pick-item:active,.top-action:active,.routine-card-actions button:active{transform:scale(.97)}
+.bnb:active,.set-check:active{transform:scale(.94)}
+.ws-content,.scroll-area,.terms-body,.exercise-focus-body,.clk-mid{overscroll-behavior:contain;scroll-behavior:smooth}
+@media (prefers-reduced-motion:reduce){
+  .view.active,.screen.active,.adm-section.active,.terms-modal,.terms-modal>.terms-box,.exercise-session-modal>.terms-box,.workout-sheet.open,.clk-sheet.open{animation:none}
+}
 </style>
 </head>
 <body>
@@ -3848,7 +3952,7 @@ const GYM_ONLY_VIEWS=['book','planes','historial','shop'];
 const GYM_APP_URL='/';
 document.querySelectorAll('.brand-name').forEach(el=>{el.textContent=BRAND_NAME;});
 const SUPABASE_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBtcGp0ZXVxanVzYmlkdWV2YndxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc2OTI1NjUsImV4cCI6MjA5MzI2ODU2NX0.XbMzZoo2yqtrD8znLnyo_1zDfrdJAvAPj1lqGOyXnLw';
-const APP_VERSION='20261026-2';
+const APP_VERSION='20261026-3';
 // La pierna va separada en cuádriceps, femorales y pantorrillas: la figura
 // corporal pinta esas tres regiones por separado y el motor de recuperación les
 // da ventanas de descanso distintas. 'Piernas' sigue reconociéndose al leer
@@ -8695,7 +8799,9 @@ function exerciseProgressionSummary(d){
   const total=(coachSessionSets[d.exKey]||[]).length;
   if(!total)return'';
   const done=sets.length;
-  if(done<total)return 'Completa las series y deja reps reales para calcular el siguiente ajuste.';
+  // Mientras el ejercicio está a medias no hay nada que aconsejar: el aviso de "completa
+  // las series" salía en cada ficha, calentamientos incluidos, y era puro ruido.
+  if(done<total||isWarmupExercise(d))return'';
   const range=targetRepRange(d.reps);
   const reps=sets.map(s=>parseFloat(s.actual_reps)).filter(n=>!isNaN(n));
   const weights=sets.map(s=>parseFloat(s.weight)).filter(n=>!isNaN(n));
@@ -8761,8 +8867,12 @@ function renderExerciseFocusModal(){
   const help=document.getElementById('exercise-focus-help');
   if(help)help.style.display=enSesion&&canAccessCoaching()?'':'none';
   renderExerciseFocusVideo();
-  document.getElementById('exercise-focus-detail').textContent=
-    exerciseDetailParts(d).join(' · ')||'Sin detalle';
+  // En sesión cuentan las series de hoy (se pueden agregar o quitar), no las de la rutina:
+  // decía "1 series" con dos filas abajo.
+  const hoy=enSesion?(coachSessionSets[d.exKey]||[]).length:0;
+  const partes=exerciseDetailParts(hoy?{...d,sets:hoy}:d);
+  if(hoy&&!exercisePyramidSteps(d))partes[0]=hoy+(hoy===1?' serie':' series');
+  document.getElementById('exercise-focus-detail').textContent=partes.join(' · ')||'Sin detalle';
   const progressEl=document.getElementById('exercise-focus-progress');
   if(progressEl)progressEl.textContent=(typeof d.idx==='number'?('Ejercicio '+(d.idx+1)+(activeCoachingSession?'/'+sessionExerciseList().length:'')):'');
   renderExerciseFocusTools();
