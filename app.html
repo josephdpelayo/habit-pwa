@@ -6,12 +6,12 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="HABIT">
 <meta name="application-name" content="HABIT">
-<link rel="manifest" href="/manifest.json?v=20261026-4">
-<link rel="apple-touch-icon" sizes="120x120" href="/icons/icon-120.png?v=20261026-4">
-<link rel="apple-touch-icon" sizes="152x152" href="/icons/icon-152.png?v=20261026-4">
-<link rel="apple-touch-icon" sizes="167x167" href="/icons/icon-167.png?v=20261026-4">
-<link rel="apple-touch-icon" sizes="180x180" href="/icons/icon-180.png?v=20261026-4">
-<link rel="icon" type="image/png" sizes="32x32" href="/icons/icon-32.png?v=20261026-4">
+<link rel="manifest" href="/manifest.json?v=20261026-5">
+<link rel="apple-touch-icon" sizes="120x120" href="/icons/icon-120.png?v=20261026-5">
+<link rel="apple-touch-icon" sizes="152x152" href="/icons/icon-152.png?v=20261026-5">
+<link rel="apple-touch-icon" sizes="167x167" href="/icons/icon-167.png?v=20261026-5">
+<link rel="apple-touch-icon" sizes="180x180" href="/icons/icon-180.png?v=20261026-5">
+<link rel="icon" type="image/png" sizes="32x32" href="/icons/icon-32.png?v=20261026-5">
 <title>HABIT</title>
 <!-- Con id a propósito: scripts/check-training.js toma la primera etiqueta script sin
      atributos como el script principal de la app y la compila. -->
@@ -25,7 +25,7 @@
   var crew=/^\/crew(\/|$)/.test(location.pathname);
   window.HABIT_BRAND=crew?'crew':'gym';
   if(!crew)return;
-  var v='20261026-4';
+  var v='20261026-5';
   document.documentElement.classList.add('brand-crew');
   document.title='HABIT Crew';
   document.querySelectorAll('meta[name="apple-mobile-web-app-title"],meta[name="application-name"]')
@@ -40,9 +40,9 @@
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Share+Tech+Mono&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="/skandi-recovery.js?v=20261026-4"></script>
-<script src="/body-figure.js?v=20261026-4"></script>
-<script src="/habit-training.js?v=20261026-4"></script>
+<script src="/skandi-recovery.js?v=20261026-5"></script>
+<script src="/body-figure.js?v=20261026-5"></script>
+<script src="/habit-training.js?v=20261026-5"></script>
 <style>
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
 @media (prefers-reduced-motion:reduce){*,*:before,*:after{scroll-behavior:auto!important;animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}}
@@ -2707,6 +2707,19 @@ body.admin-mode #courtesy-modal label{border-radius:14px!important;border-color:
    espaciado) es más específica que .routine-detail-name y le ganaba al título. */
 .terms-body h3.routine-detail-name{font-size:30px;letter-spacing:-1px;line-height:1.12;font-weight:750;text-transform:none;margin:4px 0 0;color:var(--white)}
 
+/* Icono de ejercicio (exerciseIconSvg) en lugar del número */
+.ex-ico-svg{width:24px;height:24px;fill:none;stroke:currentColor;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round}
+.ws-ex-num,.ex-num.ex-ico{width:42px;height:42px;border-radius:13px;background:var(--card2);color:var(--gl);margin-top:-2px}
+.ws-ex.in-progress .ws-ex-num{background:rgba(32,212,146,.13);color:var(--green)}
+.ws-ex.done .ws-ex-num{color:var(--gray)}
+.ws-ex-name{display:block}
+.ws-ex-name .ex-superset-mini{margin-right:6px;vertical-align:2px}
+.ws-ex-name .ws-ex-chev{display:inline;white-space:nowrap}
+.ex-num.ex-ico{display:flex;align-items:center;justify-content:center;flex:0 0 auto;font-size:0}
+.ws-pick-item.has-ico{display:flex;align-items:center;gap:11px}
+.ws-pick-ico{flex:0 0 auto;width:36px;height:36px;border-radius:11px;background:var(--card2);color:var(--gl);display:flex;align-items:center;justify-content:center}
+.ws-pick-ico .ex-ico-svg{width:21px;height:21px}
+.ws-pick-txt{flex:1;min-width:0}
 /* ── Visor de video y foto (openMediaViewer) y video en la ficha ── */
 .mv-frame{position:relative;width:100%;border-radius:16px;overflow:hidden;background:#000}
 .mv-frame.loading{min-height:160px}
@@ -4019,7 +4032,7 @@ const GYM_ONLY_VIEWS=['book','planes','historial','shop'];
 const GYM_APP_URL='/';
 document.querySelectorAll('.brand-name').forEach(el=>{el.textContent=BRAND_NAME;});
 const SUPABASE_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBtcGp0ZXVxanVzYmlkdWV2YndxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc2OTI1NjUsImV4cCI6MjA5MzI2ODU2NX0.XbMzZoo2yqtrD8znLnyo_1zDfrdJAvAPj1lqGOyXnLw';
-const APP_VERSION='20261026-4';
+const APP_VERSION='20261026-5';
 // La pierna va separada en cuádriceps, femorales y pantorrillas: la figura
 // corporal pinta esas tres regiones por separado y el motor de recuperación les
 // da ventanas de descanso distintas. 'Piernas' sigue reconociéndose al leer
@@ -4299,6 +4312,34 @@ function parseTargetRir(ex){
   if(raw===''||raw==null)return null;
   const n=parseInt(raw,10);
   return(isNaN(n)||n<0||n>10)?null:n;
+}
+// ── Icono de cada ejercicio ───────────────────────────────────────────────
+// Un pictograma de línea por patrón de movimiento (HabitTraining.exercisePattern),
+// en lugar del número: se reconoce el ejercicio de un vistazo sin leer el nombre.
+// Todos en la misma rejilla de 24 y el mismo trazo, para que se lean como familia.
+const EXERCISE_ICONS={
+  pull:'<path d="M3 3h18"/><path d="M8 3l2.6 6.2M16 3l-2.6 6.2"/><circle cx="12" cy="8.6" r="1.8"/><path d="M12 11.2v5.4M12 16.6l-1.6 4.6M12 16.6l1.6 4.6"/>',
+  row:'<circle cx="5" cy="8" r="1.8"/><path d="M6.8 9.2l7.6 2.8M14.4 12l.4 9M14.4 12l3.2 9M9 10l.3 5"/><path d="M6.8 15.4h5M6.8 14v2.8M11.8 14v2.8"/>',
+  pushup:'<circle cx="5" cy="10.6" r="1.9"/><path d="M7 12.2l14 6.6M8.6 13l.2 6.8M3 20.2h18"/>',
+  dip:'<path d="M4.5 11v10M19.5 11v10"/><path d="M12 8.6l-7.5 2.4M12 8.6l7.5 2.4"/><circle cx="12" cy="5.4" r="1.8"/><path d="M12 7.6v7M12 14.6l-1 3.8 2.8 1.6"/>',
+  bench:'<path d="M4 17h14M6.5 17v3.5M15.5 17v3.5"/><circle cx="4.6" cy="14" r="1.7"/><path d="M6.6 14H15l3.5 2.5v4M10 14V7.8"/><path d="M6 7.8h8M6 6.2v3.2M14 6.2v3.2"/>',
+  overhead:'<path d="M3.5 4h17M3.5 2v4M20.5 2v4"/><path d="M8 4l2.4 6M16 4l-2.4 6"/><circle cx="12" cy="8.4" r="1.6"/><path d="M12 10.6v5M12 15.6l-2.2 5M12 15.6l2.2 5M7 21h10"/>',
+  handstand:'<path d="M4 21h16"/><path d="M8.6 21l2.6-5.4M15.4 21l-2.6-5.4"/><circle cx="12" cy="18.4" r="1.5"/><path d="M12 15.6V8.6M12 8.6l-2 -5.6M12 8.6l2-5.6"/>',
+  lever:'<path d="M3 4h18M8 4v5.4"/><circle cx="5.6" cy="10.6" r="1.7"/><path d="M8 10.6h13"/>',
+  planche:'<path d="M3 20.5h18"/><path d="M9 20.5v-6.8"/><circle cx="5.4" cy="12.6" r="1.7"/><path d="M7.2 13h13.3"/>',
+  squat:'<path d="M5 6.6h14M5 5v3.2M19 5v3.2"/><circle cx="12" cy="4" r="1.7"/><path d="M12 6.6l-1.2 6.6 5 2-1 5.6M13.2 21h3"/>',
+  hinge:'<circle cx="5.8" cy="7.6" r="1.9"/><path d="M7.6 9l7.6 2.4M15.2 11.4l.6 4.8-.6 4.8M9.2 9.8l.2 6.4"/><circle cx="9.4" cy="18.5" r="2.4"/><path d="M3 21h18"/>',
+  core:'<path d="M2.5 20.3h19"/><circle cx="4.6" cy="12.6" r="1.8"/><path d="M6.2 14l6 5.4 3.8-5.6 4 5.8"/>',
+  arms:'<path d="M3 15.2c2.6-3.6 6.8-3.9 8.7-.6L11.2 8.6"/><path d="M3 20.2h9.6a3 3 0 0 0 2.9-2.3l1.3-9.3"/><path d="M10.4 8.6h7.2V5.6a1.8 1.8 0 0 0-1.8-1.8h-3.6a1.8 1.8 0 0 0-1.8 1.8z"/>',
+  cardio:'<circle cx="14.6" cy="4" r="1.8"/><path d="M13.6 6.6L11 13M12.8 8.4l3.6 1.8 1.8-2M12.8 8.4l-3.4 1.6-1 3M11 13l4.2 2.6-1 4.6M11 13l-3 3.6H5"/>',
+  mobility:'<path d="M19.5 12a7.5 7.5 0 1 1-2.2-5.3"/><path d="M19.6 3.8v3.6H16"/><circle cx="12" cy="12" r="1.7"/>',
+  strength:'<path d="M5 12h14"/><path d="M7 8.5v7M17 8.5v7M4 10.2v3.6M20 10.2v3.6"/>'
+};
+function exerciseIconSvg(ex){
+  const pat=window.HabitTraining&&HabitTraining.exercisePattern
+    ?HabitTraining.exercisePattern({name:ex&&ex.name,muscles:exerciseMuscleLabel(ex)||'',primary_muscle:ex&&(ex.primary_muscle||ex.primaryMuscle),category:ex&&ex.category})
+    :'strength';
+  return '<svg class="ex-ico-svg" viewBox="0 0 24 24" aria-hidden="true">'+(EXERCISE_ICONS[pat]||EXERCISE_ICONS.strength)+'</svg>';
 }
 function exerciseMuscleLabel(ex){
   const groups=[ex?.muscleGroup,...(Array.isArray(ex?.secondaryMuscleGroups)?ex.secondaryMuscleGroups:[])].filter(Boolean);
@@ -9968,7 +10009,7 @@ function renderExerciseListHtml(exercises,keyPrefix,boardId,sessionCtx){
     const isActionable=!!sessionCtx;
     return '<div class="exercise-detail'+(isActionable?'':' static')+'"'+(isActionable?' onclick="openExerciseFocus(this)" data-ex="'+esc(JSON.stringify(exData))+'"':'')+'>'
       +'<div class="exercise-detail-head" style="display:flex;align-items:center;gap:10px">'
-      +'<div class="ex-num">'+(i+1)+'</div>'
+      +'<div class="ex-num ex-ico">'+exerciseIconSvg(ex)+'</div>'
       +'<div class="ex-body"><div class="ex-name">'+(groupLabel?'<span class="ex-superset-mini">'+esc(groupLabel)+'</span>':'')+esc(ex.name)+'</div>'
       +'<div class="ex-detail">'+exerciseDetailParts(ex).map(esc).join(' · ')+(exerciseMuscleLabel(ex)?' · '+esc(exerciseMuscleLabel(ex)):'')+'</div>'
       +(ex.note||ex.notes||ex.description?'<div class="ex-note">'+esc(ex.note||ex.notes||ex.description)+'</div>':'')
@@ -14214,10 +14255,10 @@ function wsExerciseHtml(ex,i){
     +(swipe?'<div class="ws-ex-swipe" data-ex-key="'+esc(exKey)+'">'
       +'<div class="ws-ex-acts" aria-hidden="true">'+swipeActs.join('')+'</div>':'')
     +'<div class="ws-ex-head" onclick="openExerciseFocus(this)" data-ex="'+esc(JSON.stringify(exData))+'">'
-    +'<div class="ws-ex-num">'+(i+1)+'</div>'
+    +'<div class="ws-ex-num" title="Ejercicio '+(i+1)+'">'+exerciseIconSvg(ex)+'</div>'
     +'<div class="ws-ex-info">'
     +'<div class="ws-ex-name">'+(groupLabel?'<span class="ex-superset-mini">'+esc(groupLabel)+'</span>':'')
-    +esc(ex.name||'Ejercicio')+'<span class="ws-ex-chev">›</span></div>'
+    +esc(ex.name||'Ejercicio')+'<span class="ws-ex-chev"> ›</span></div>'
     +'<div class="ws-ex-meta">'+esc(exerciseDetailParts(ex).join(' · ')||'Sin detalle')+'</div>'
     +(ex._swappedFrom?'<div class="ws-ex-meta" style="color:var(--amber)">Sustituto de esta sesión</div>':'')
     +(ex._replaced?'<div class="ws-ex-meta" style="color:var(--gray)">Cambiado a media sesión</div>':'')
@@ -14399,9 +14440,10 @@ function wsRecentMarkText(r){
 }
 
 function wsPickItemHtml(e,onclick,mark){
-  return '<button type="button" class="ws-pick-item" onclick="'+onclick+'">'
+  return '<button type="button" class="ws-pick-item has-ico" onclick="'+onclick+'">'
+    +'<span class="ws-pick-ico">'+exerciseIconSvg(e)+'</span><span class="ws-pick-txt">'
     +(mark?'<span class="ws-pick-mark">'+esc(mark)+'</span>':'')+esc(e.name)
-    +'<small>'+esc([e.primary_muscle,e.category,(e.equipment||[]).join('/')].filter(Boolean).join(' · '))+'</small></button>';
+    +'<small>'+esc([e.primary_muscle,e.category,(e.equipment||[]).join('/')].filter(Boolean).join(' · '))+'</small></span></button>';
 }
 function wsToggleSwap(exKey){
   wsSwapTarget=wsSwapTarget===exKey?null:exKey;

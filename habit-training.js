@@ -150,9 +150,52 @@
     });
   }
 
+  // Patrón de movimiento de un ejercicio, para su icono. Va por el nombre (en español
+  // o en inglés, como llega del catálogo de Skandi) y solo si el nombre no dice nada
+  // cae a los músculos. El orden importa: lo específico gana a lo genérico, así que
+  // "Pike push up" es press arriba y no flexión, "remadora" es cardio y no remo, y
+  // "Retracción escapular en flexión (calentamiento)" es flexión y no movilidad.
+  // "Plancha" es plank (abdomen); el skill es "planche".
+  const PATTERN_RULES = [
+    ['handstand', /parada de manos|handstand|\bpino\b|hspu|wall walk|caminata en (la )?pared/],
+    ['cardio', /remadora|ergometr|concept ?2|\bbici|bike|assault|cinta|correr|carrera|\brun\b|running|trote|caminar|caminata|\bwalk|saltar (la )?cuerda|comba|jumping jack|burpee|climber|escalador|sprint|cardio|eliptic|ski ?erg|trineo|sled|shuttle/],
+    // Las variantes del front lever casi nunca dicen "lever": press, half, tuck.
+    ['lever', /front lever|back lever|front (press|tuck)|half press|tuck advanced|touch tuck|skin the cat|dragon flag|human flag|bandera/],
+    ['planche', /planche|90 grados|90 degree|maltese/],
+    ['pull', /dominad|pull ?-?ups?\b|chin ?-?ups?\b|muscle ?-?ups?\b|jalon|lat ?pull|colgad|dead ?hang|\bhang\b/],
+    ['row', /\bremo\b|\brows?\b|face ?pull|australian|invertid|serrucho|pull ?over|pullover/],
+    ['overhead', /pike|\bpica\b|press militar|press (de )?hombros?|overhead|militar|arnold|elevacion(es)? (lateral|frontal)|lateral raise|front raise|push press|jerk|landmine press|z ?press/],
+    ['dip', /\bfondos?\b|\bdips?\b/],
+    ['bench', /press (de |en )?banca|bench|press (de )?pecho|press (inclinado|declinado)|aperturas?|\bfly\b|flyes|cruce de poleas|pec ?deck|chest press/],
+    ['hinge', /peso muerto|deadlift|\brdl\b|rumano|hip thrust|empuje de cadera|puente( de)? gluteo|glute bridge|good ?morning|buenos dias|swing|hiperextension|nordic|nordico|curl femoral|leg curl|patada de gluteo|kickback de gluteo/],
+    ['squat', /sentadilla|squat|zancada|lunge|estocada|split|bulgara|prensa|leg press|pistol|step ?-?up|subida al cajon|box jump|salto al cajon|sissy|extension de (cuadriceps|piernas)|leg extension|wall sit|pantorrilla|gemelo|talones|calf/],
+    // "Flexión" también es la de una articulación: esa no es una lagartija.
+    ['mobility', /flexion de (cadera|rodilla|muneca|tobillo)|flexores de cadera/],
+    ['pushup', /flexion|lagartija|push ?-?ups?\b|pushup/],
+    ['core', /abdominal|crunch|plancha|plank|hollow|l-?sit|elevacion(es)? de (piernas|rodillas)|leg raise|knee raise|rueda|ab ?wheel|russian|rusa|oblicu|dead ?bug|bicho muerto|pallof|v-?ups?\b|toes to bar|sit ?-?ups?\b|\bcore\b|bird ?dog|superman/],
+    ['arms', /curl|bicep|tricep|rompecraneo|skull|press frances|patada de tricep|martillo|hammer|antebrazo|muneca|wrist|farmer|granjero/],
+    ['mobility', /calentamiento|movilidad|mobility|estiramiento|stretch|warm ?-?up|entrada en calor|rotacion|circulos|foam|rodillo|respiracion|escapular|scapular/]
+  ];
+  const MUSCLE_RULES = [
+    ['squat', /pierna|cuadricep|gluteo|isquio|femoral|pantorrilla|leg|quad|glute|hamstring|calf/],
+    ['row', /espalda|dorsal|trapecio|back|lats?\b|trap/],
+    ['bench', /pecho|pectoral|chest/],
+    ['overhead', /hombro|deltoid|shoulder/],
+    ['core', /abdomen|abdominal|core|oblicu|\babs?\b/],
+    ['arms', /bicep|tricep|brazo|antebrazo|arm|forearm/]
+  ];
+  const plain = s => String(s || '').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '');
+  function exercisePattern(ex) {
+    const name = plain(ex && ex.name);
+    for (const [key, re] of PATTERN_RULES) if (re.test(name)) return key;
+    const muscles = plain([ex && ex.muscles, ex && ex.primary_muscle, ex && ex.primaryMuscle, ex && ex.category].filter(Boolean).join(' '));
+    for (const [key, re] of MUSCLE_RULES) if (re.test(muscles)) return key;
+    return 'strength';
+  }
+
   const api = {
     MAX_ENTRIES, keyOf, mergeEntries, applyPending, isRetryable,
-    metricType, parseSeconds, estimated1RM, sortScores, weeklyStreak,
+    metricType, parseSeconds, estimated1RM, sortScores, weeklyStreak, exercisePattern,
     list, enqueue, remove, bump
   };
 

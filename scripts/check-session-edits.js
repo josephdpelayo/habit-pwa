@@ -65,7 +65,7 @@ const h=new Function('catalog',`
   };
 `)(catalog);
 
-const names=html=>[...html.matchAll(/class="ws-pick-item"[^>]*>(?:<span class="ws-pick-mark">[^<]*<\/span>)?([^<]+)</g)].map(m=>m[1]);
+const names=html=>[...html.matchAll(/class="ws-pick-txt">(?:<span class="ws-pick-mark">[^<]*<\/span>)?([^<]+)</g)].map(m=>m[1]);
 
 // ── Parecidos ─────────────────────────────────────────────────────────────
 const board={id:'b1',name:'Empuje',owner_id:'me',exercises:[

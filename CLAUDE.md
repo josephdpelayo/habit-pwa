@@ -300,6 +300,15 @@ a silent overwrite.
   PWA; un temporizador que terminó con la app dormida no suena tarde al volver. Lo abren los
   botones `.clk-launch` (botón flotante, ficha, panel de tiempo de la hoja), que muestran la
   cuenta mientras algo corre
+- **Icono de cada ejercicio** en lugar del número (hoja de entreno, lista de la rutina, Cambiar /
+  Agregar): `HabitTraining.exercisePattern(ex)` en `habit-training.js` decide el patrón de
+  movimiento por el nombre —en español o en inglés— y solo si el nombre no dice nada cae a los
+  músculos; `EXERCISE_ICONS` en `app.html` dibuja uno por patrón (línea de 1.6 en rejilla de 24).
+  **El orden de las reglas es la lógica**: lo específico gana, así que «Pike push up» y «de pica»
+  son press arriba, «remadora» es cardio, «Retracción escapular en flexión (calentamiento)» es
+  flexión y no movilidad, «plancha» es abdomen pero «planche» es planche, y las variantes del
+  front lever que no dicen "lever" (front press, half press, touch tuck) son lever.
+  `scripts/check-training.js` lo prueba con nombres reales de las rutinas
 - `coaching_schedule.session_exercises` — JSONB overlay of exercises swapped in or added during a
   live session. `boards.exercises` is never mutated by a workout; `sessionExerciseList()` in
   `app.html` merges the two and is the single source of the effective exercise list

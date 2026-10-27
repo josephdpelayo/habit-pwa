@@ -21,6 +21,33 @@ assert.deepEqual(training.applyPending(mergedAgain, 'coaching_session_sets', [{i
 assert.equal(training.weeklyStreak(['2026-08-24','2026-08-31'], '2026-09-07', '2026-08-31'), 2);
 assert.equal(training.weeklyStreak(['2026-08-31','2026-09-07'], '2026-09-07', '2026-08-31'), 2);
 
+// Icono por patrón de movimiento: lo específico gana a lo genérico.
+const pat = name => training.exercisePattern({name});
+assert.equal(pat('Dominadas pronas'), 'pull');
+assert.equal(pat('Fondos en paralelas'), 'dip');
+assert.equal(pat('Pike push up'), 'overhead');
+assert.equal(pat('Flexiones de pica'), 'overhead');
+assert.equal(pat('Retracción-protracción escapular en flexión (calentamiento)'), 'pushup');
+assert.equal(pat('Calentamiento: entrada en calor y movilidad'), 'mobility');
+assert.equal(pat('Remadora 500 m'), 'cardio');
+assert.equal(pat('Remo con mancuerna'), 'row');
+assert.equal(pat('Plancha frontal'), 'core');
+assert.equal(pat('Tuck planche'), 'planche');
+assert.equal(pat('Flexiones lean planche'), 'planche');
+assert.equal(pat('Aguante de 90 grados'), 'planche');
+assert.equal(pat('Front press + negativa + aguante'), 'lever');
+assert.equal(pat('Touch tuck advanced'), 'lever');
+assert.equal(pat('Flexiones de pino libre'), 'handstand');
+assert.equal(pat('Retracciones escapulares colgado (calentamiento)'), 'pull');
+assert.equal(pat('Abdominal en banco declinado'), 'core');
+assert.equal(pat('Press de banca'), 'bench');
+assert.equal(pat('Curl femoral'), 'hinge');
+assert.equal(pat('Curl de bíceps'), 'arms');
+assert.equal(pat('Flexión de cadera con banda'), 'mobility');
+assert.equal(pat('Parada de manos contra la pared'), 'handstand');
+assert.equal(training.exercisePattern({name: 'Ejercicio X', primary_muscle: 'Cuádriceps'}), 'squat');
+assert.equal(training.exercisePattern({name: 'Ejercicio X'}), 'strength');
+
 assert.match(migration, /idx_coaching_schedule_one_active/);
 assert.match(migration, /start_training_session/);
 assert.match(migration, /exercise_snapshot/);
