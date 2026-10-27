@@ -29,7 +29,8 @@ const source = [
   between('function hoyHeroHtml(', '// ── SEMANA'),
   between('async function loadSessionSetsSb(', 'async function hydrateSessionSetDefaults('),
   between('let _activeCoachingSessionLoad=', 'function showActiveSessionBar('),
-  between('async function renderRutHub(', '// Un socio tiene tres orígenes de rutina:')
+  between('async function renderRutHub(', '// Un socio tiene tres orígenes de rutina:'),
+  between('const DOOR_TRAIN_KEY=', 'async function doorTrainingPrompt(')
 ].join('\n');
 
 const makeHarness = new Function(`
@@ -42,20 +43,24 @@ const makeHarness = new Function(`
   let coachWeekStart='2026-10-19', coachSchedule=[], coachBoardsById={};
   let activeCoachingSession=null, coachSessionSets={}, hoyBodyOpen=false, myRecovery=[];
   let sbUser={id:'member'}, wsPausedMs=0, wsPausedAt=0;
-  let rutActiveTab='hoy', myRoutinesLoadedAt=1, recoveryLoadedAt=Date.now();
+  let rutActiveTab='hoy', myRoutinesLoadedAt=1, recoveryLoadedAt=Date.now(), myRoutines=[];
+  const routineById=id=>myRoutines.find(b=>b.id===id)||coachBoardsById[id]||null;
+  const routineColor=b=>(b&&b.color)||'#2563eb';
+  const fmtDS=ds=>ds, dsFromIsoMaz=iso=>String(iso||'').slice(0,10);
   const RECOVERY_TTL_MS=60000;
   const panel={innerHTML:''};
   const document={getElementById:id=>id==='rut-hoy-content'?panel:null};
   const window={};
   const navigator={onLine:true};
-  let cached=null, activeResult={data:null}, setsResult={data:[]};
+  let cached=null, activeResult={data:null}, setsResult={data:[]}, recentResult={data:[]};
   let activeRead=()=>activeResult;
   const calls={active:0,sets:0,errors:[]};
-  const console={error:(...args)=>calls.errors.push(args)};
+  const console={error:(...args)=>calls.errors.push(args),warn:()=>{}};
   const sb={from:table=>{
     const chain={select:()=>chain,eq:()=>chain,order:()=>chain,limit:()=>chain};
     chain.maybeSingle=async()=>{calls.active++;return activeRead();};
     chain.then=(resolve,reject)=>{
+      if(table==='coaching_schedule')return Promise.resolve(recentResult).then(resolve,reject);
       if(table!=='coaching_session_sets')throw new Error('Unexpected table '+table);
       calls.sets++;
       return Promise.resolve(setsResult).then(resolve,reject);
@@ -83,9 +88,14 @@ const makeHarness = new Function(`
       if('activeRead' in state)activeRead=state.activeRead;
       if('online' in state)navigator.onLine=state.online;
       if('bodyOpen' in state)hoyBodyOpen=state.bodyOpen;
+      if('routines' in state)myRoutines=state.routines;
+      if('recent' in state){hoyRecentSessions=state.recent;recentResult={data:state.recent};}
     },
     render:()=>{renderRutHoy();return panel.innerHTML;},
     week:hoyWeekHtml,
+    order:hoyRoutineOrder,
+    repeatable:hoyRepeatable,
+    doorChoices:doorTrainChoices,
     restore:loadActiveCoachingSessionSb,
     hub:renderRutHub,
     html:()=>panel.innerHTML,
@@ -211,6 +221,56 @@ async function run() {
   h.set({schedule:[session('escaped','scheduled',{board_name:'<img onerror="alert(1)">'})],boards:{b1:board}});
   html=h.render();
   check(!html.includes('<img onerror=')&&html.includes('&lt;img'), 'routine names are escaped');
+
+  // Repetir el último: cuando hoy no hay nada agendado, lo más corto es repetirlo.
+  const doneRow=(id,extra={})=>({id,status:'done',ds:'2026-10-21',board_id:'b1',board_name:'Fuerza',board_color:'#123456',
+    completed_at:'2026-10-21T15:00:00Z',duration_sec:2760,session_exercises:[],...extra});
+  h=makeHarness();
+  h.set({recent:[doneRow('d1')]});
+  html=h.render();
+  check(html.includes('Fuerza')&&html.includes('hoyRepeatLast()')&&html.includes('>Repetir<'), 'no plan with history offers to repeat the last workout');
+  check(html.includes('Lo último que hiciste, el miércoles · 46 min'), 'repeat card says when and how long');
+  check(html.includes('Elegir otra cosa')&&!html.includes('Empieza a entrenar'), 'repeat card keeps the picker one tap away');
+  h.set({schedule:[session('next','scheduled',{ds:'2026-10-24',board_name:'Pierna'})]});
+  html=h.render();
+  check(html.includes('Descanso')&&html.includes('Repetir Fuerza')&&html.includes('Entrenar otra cosa'), 'rest day offers repeat as the optional workout');
+  const emptyFree=doneRow('free0',{board_id:null,board_name:'Entreno libre'});
+  const free=doneRow('free1',{board_id:null,board_name:'Entreno libre',session_exercises:[{ex_key:'cat-dominadas',name:'Dominadas'}]});
+  check(h.repeatable([emptyFree,free])===free, 'an empty free workout is skipped, one with exercises can be repeated');
+  check(h.repeatable([doneRow('gone',{board_id:null,session_exercises:[{replaces:'a',removed:true}]})])===null, 'a free workout with only removals has nothing to repeat');
+  h.set({schedule:[session('done','done')]});
+  check(!h.render().includes('hoyRepeatLast()'), 'a day already trained shows what was done, not repeat');
+
+  // Tus rutinas en Hoy: la reciente primero, la de la tarjeta no se repite.
+  const rt=(id,name)=>({id,name,color:'#2563eb',exercises:[{id:id+'e',name:'Ej',sets:3,reps:'10'}]});
+  const routines=[rt('mine','Mía'),rt('coach','Coach'),rt('basic','Básica')];
+  h=makeHarness();
+  check(h.order(routines,[doneRow('x',{board_id:'basic'})],null).map(b=>b.id).join()==='basic,mine,coach', 'recently trained routine goes first, then the usual order');
+  check(h.order(routines,[],'mine').map(b=>b.id).join()==='coach,basic', 'the routine already on the card is not repeated');
+  check(h.order(Array.from({length:12},(_,i)=>rt('r'+i,'R'+i)),[],null).length===8, 'the row is capped');
+  h.set({routines,schedule:[session('scheduled','scheduled',{board_id:'mine'})],boards:{mine:routines[0]}});
+  html=h.render();
+  check(html.includes('Tus rutinas')&&html.includes('hoyStartRoutine(&quot;coach&quot;)')&&!html.includes('hoyStartRoutine(&quot;mine&quot;)'), 'Hoy lists the other routines');
+  check(html.includes('1 ejercicio · ~')&&html.includes('Ver todas'), 'routine chips describe themselves and link to the full list');
+  h.set({schedule:[],boards:{},recent:[doneRow('d',{board_id:'coach',board_name:'Coach'})]});
+  html=h.render();
+  check(html.includes('hoyRepeatLast()')&&!html.includes('hoyStartRoutine(&quot;coach&quot;)')&&html.includes('hoyStartRoutine(&quot;mine&quot;)'), 'the routine offered to repeat is not repeated in the row');
+  h.set({active:live,sets});
+  check(!h.render().includes('hoy-routines'), 'no routine row while a workout is live');
+  h=makeHarness();
+  check(!h.render().includes('hoy-routines'), 'no routine row without routines');
+
+  // De la puerta al entreno.
+  h=makeHarness();
+  let door=h.doorChoices({pending:[session('p1','scheduled',{board_name:'Empuje',board_id:'e'})],last:doneRow('d',{board_id:'t',board_name:'Tirón'})});
+  check(door.body==='Hoy toca Empuje.'&&door.choices.map(c=>c.key).join()==='s:p1,repeat,pick', 'door offers today first, then repeat, then other');
+  check(door.choices[0].label==='Empuje ▶'&&door.choices[2].label==='Otra cosa', 'door labels are short');
+  door=h.doorChoices({pending:[session('p1','scheduled',{board_id:'t'})],last:doneRow('d',{board_id:'t'})});
+  check(!door.choices.some(c=>c.key==='repeat'), 'repeat is not offered when it is the same as today');
+  door=h.doorChoices({});
+  check(door.choices.length===1&&door.choices[0].label==='Elegir qué entrenar', 'a member with no history just picks');
+  door=h.doorChoices({active:live,pending:[session('p1','scheduled')]});
+  check(door.choices.length===1&&door.choices[0].key==='resume', 'a live workout is resumed, not doubled');
 
   console.log('HABIT Hoy: '+checks+' assertions OK');
 }

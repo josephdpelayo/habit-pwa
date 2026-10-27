@@ -1,7 +1,7 @@
 // HABIT Training Hub — Service Worker
 // Push notifications + app shell caching
 
-const CACHE_VERSION = '20261026-5'; // keep in sync with APP_VERSION in app.html
+const CACHE_VERSION = '20261026-6'; // keep in sync with APP_VERSION in app.html
 const CACHE = `habit-${CACHE_VERSION}`;
 
 // Librerías compartidas con Skandi Fit: la app no arranca sin ellas, así que
@@ -150,11 +150,21 @@ self.addEventListener('push', e => {
 
 self.addEventListener('notificationclick', e => {
   e.notification.close();
+  // Una notificación con url propia lleva a un lugar de la app (la del teclado,
+  // «¿Qué entrenas hoy?», trae /app?entrenar=1). Si HABIT ya está abierta se le
+  // avisa a esa ventana —no a la de Skandi ni a la de la tele— en lugar de recargarla.
+  const url = (e.notification.data && e.notification.data.url) || '/';
+  const deep = url !== '/';
   e.waitUntil(
     self.clients.matchAll({ type: 'window', includeUncontrolled: true }).then(clients => {
-      const c = clients.find(c => c.url.includes(self.location.origin));
-      if (c) return c.focus();
-      return self.clients.openWindow('/app.html');
+      const c = deep
+        ? clients.find(c => c.url.startsWith(self.location.origin) && !/^\/(skandi|competencia)/.test(new URL(c.url).pathname))
+        : clients.find(c => c.url.includes(self.location.origin));
+      if (c) {
+        if (deep) c.postMessage({ type: 'habit-notification-click', url });
+        return c.focus();
+      }
+      return self.clients.openWindow(deep ? url : '/app.html');
     })
   );
 });

@@ -20,6 +20,43 @@ async function sendAdminPush(title, body, tag) {
   }
 }
 
+// La puerta es la señal de que el socio ya llegó, y es cuando decide qué entrena:
+// la primera vez que entra con su reserva le llega «¿Qué entrenas hoy?», que abre
+// la app en Entrenar (?entrenar=1, ver doorTrainingPrompt en app.html). Solo si
+// tiene notificaciones activadas y aún no entrenó hoy; cuesta una consulta en
+// paralelo para quien no las tiene, porque el teclado espera esta respuesta.
+const TRAINING_PUSH_TIMEOUT_MS = 1200;
+
+async function sendTrainingPush(profile, booking) {
+  const [subs, today, last] = await Promise.all([
+    supabase.from('push_subscriptions').select('id').eq('user_id', profile.id).limit(1),
+    supabase.from('coaching_schedule').select('board_name,status')
+      .eq('user_id', profile.id).eq('ds', booking.ds).order('created_at', { ascending: true }).limit(10),
+    supabase.from('coaching_schedule').select('board_name')
+      .eq('user_id', profile.id).eq('status', 'done').order('completed_at', { ascending: false }).limit(1).maybeSingle(),
+  ]);
+  if (!subs.data || !subs.data.length) return;
+  const rows = today.data || [];
+  if (rows.some(r => r.status === 'done' || r.status === 'in_progress')) return;
+  const next = rows.find(r => r.status === 'scheduled');
+  const lastName = last.data && last.data.board_name;
+  const body = next ? `Hoy toca ${next.board_name}. Toca para empezar.`
+    : lastName ? `¿Repites ${lastName}? Toca para elegir.`
+    : 'Toca para elegir tu rutina y registrar tu entreno.';
+  const url = process.env.SUPABASE_URL;
+  const key = process.env.SUPABASE_SERVICE_ROLE_KEY;
+  if (!url || !key) return;
+  await fetch(`${url}/functions/v1/send-push`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${key}` },
+    body: JSON.stringify({ target: `user:${profile.id}`, title: '¿Qué entrenas hoy?', body, tag: 'door-train', url: '/app?entrenar=1' }),
+  });
+}
+
+function withTimeout(promise, ms) {
+  return Promise.race([promise, new Promise(resolve => setTimeout(resolve, ms))]);
+}
+
 function normalizeCode(value) {
   return String(value || '').replace(/\D/g, '');
 }
@@ -29,7 +66,7 @@ function getAccessToken(req) {
   return bearer || String(req.headers['x-habit-access-key'] || '').trim();
 }
 
-async function maybeLogAccess(profile, booking, code) {
+async function maybeLogAccess(profile, booking, code, window) {
   const { data: lastLog } = await supabase
     .from('access_log')
     .select('accessed_at')
@@ -40,6 +77,11 @@ async function maybeLogAccess(profile, booking, code) {
 
   const lastMs = lastLog && lastLog.accessed_at ? new Date(lastLog.accessed_at).getTime() : 0;
   if (Date.now() - lastMs < LOG_THROTTLE_MS) return false;
+
+  // Primera entrada de esta reserva: el último registro es de antes de que abriera.
+  const training = window && lastMs < window.opensMs
+    ? withTimeout(sendTrainingPush(profile, booking).catch(e => console.warn('sendTrainingPush error:', e.message)), TRAINING_PUSH_TIMEOUT_MS)
+    : null;
 
   const label = slotLabel(booking);
   await supabase.from('access_log').insert({
@@ -55,6 +97,7 @@ async function maybeLogAccess(profile, booking, code) {
   });
 
   sendAdminPush('⌨️ Acceso teclado', `${profile.name} · ${code}# · ${label}`, 'door-keypad').catch(() => {});
+  await training;
 
   return true;
 }
@@ -113,7 +156,7 @@ module.exports = async function handler(req, res) {
     for (const booking of bookings || []) {
       const window = accessWindow(booking);
       if (nowMs >= window.opensMs && nowMs <= window.closesMs) {
-        const logged = await maybeLogAccess(profile, booking, code);
+        const logged = await maybeLogAccess(profile, booking, code, window);
         return res.status(200).json({
           ok: true,
           allow: true,

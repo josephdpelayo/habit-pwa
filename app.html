@@ -6,12 +6,12 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="HABIT">
 <meta name="application-name" content="HABIT">
-<link rel="manifest" href="/manifest.json?v=20261026-5">
-<link rel="apple-touch-icon" sizes="120x120" href="/icons/icon-120.png?v=20261026-5">
-<link rel="apple-touch-icon" sizes="152x152" href="/icons/icon-152.png?v=20261026-5">
-<link rel="apple-touch-icon" sizes="167x167" href="/icons/icon-167.png?v=20261026-5">
-<link rel="apple-touch-icon" sizes="180x180" href="/icons/icon-180.png?v=20261026-5">
-<link rel="icon" type="image/png" sizes="32x32" href="/icons/icon-32.png?v=20261026-5">
+<link rel="manifest" href="/manifest.json?v=20261026-6">
+<link rel="apple-touch-icon" sizes="120x120" href="/icons/icon-120.png?v=20261026-6">
+<link rel="apple-touch-icon" sizes="152x152" href="/icons/icon-152.png?v=20261026-6">
+<link rel="apple-touch-icon" sizes="167x167" href="/icons/icon-167.png?v=20261026-6">
+<link rel="apple-touch-icon" sizes="180x180" href="/icons/icon-180.png?v=20261026-6">
+<link rel="icon" type="image/png" sizes="32x32" href="/icons/icon-32.png?v=20261026-6">
 <title>HABIT</title>
 <!-- Con id a propósito: scripts/check-training.js toma la primera etiqueta script sin
      atributos como el script principal de la app y la compila. -->
@@ -25,7 +25,7 @@
   var crew=/^\/crew(\/|$)/.test(location.pathname);
   window.HABIT_BRAND=crew?'crew':'gym';
   if(!crew)return;
-  var v='20261026-5';
+  var v='20261026-6';
   document.documentElement.classList.add('brand-crew');
   document.title='HABIT Crew';
   document.querySelectorAll('meta[name="apple-mobile-web-app-title"],meta[name="application-name"]')
@@ -40,9 +40,9 @@
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Share+Tech+Mono&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="/skandi-recovery.js?v=20261026-5"></script>
-<script src="/body-figure.js?v=20261026-5"></script>
-<script src="/habit-training.js?v=20261026-5"></script>
+<script src="/skandi-recovery.js?v=20261026-6"></script>
+<script src="/body-figure.js?v=20261026-6"></script>
+<script src="/habit-training.js?v=20261026-6"></script>
 <style>
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
 @media (prefers-reduced-motion:reduce){*,*:before,*:after{scroll-behavior:auto!important;animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}}
@@ -2644,6 +2644,17 @@ body.admin-mode #courtesy-modal label{border-radius:14px!important;border-color:
 .hoy-row strong{font-size:14px}
 .hoy-row small{font-size:12.5px;color:var(--gray)}
 .hoy-row i{font-style:normal;color:var(--gray);font-size:16px}
+.hoy-routines{margin:0 0 12px}
+.hoy-routines-head{display:flex;align-items:baseline;justify-content:space-between;margin:2px 2px 8px;font-size:12.5px;color:var(--gray)}
+.hoy-routines-head span{color:var(--white);font-weight:700}
+.hoy-routines-head button{background:none;border:0;padding:4px 0;color:var(--gl);font:inherit;font-weight:600;cursor:pointer}
+.hoy-routines-scroll{display:flex;gap:8px;overflow-x:auto;scroll-snap-type:x proximity;-webkit-overflow-scrolling:touch;scrollbar-width:none}
+.hoy-routines-scroll::-webkit-scrollbar{display:none}
+.hoy-rt{flex:0 0 auto;width:156px;scroll-snap-align:start;display:flex;flex-direction:column;align-items:flex-start;gap:4px;text-align:left;border:0;border-radius:14px;background:var(--card);padding:12px;color:var(--white);cursor:pointer;font:inherit}
+.hoy-rt:active{background:var(--card2)}
+.hoy-rt-name{display:flex;align-items:center;gap:7px;min-width:0;width:100%}
+.hoy-rt-name strong{font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.hoy-rt small{font-size:12px;color:var(--gray)}
 .hoy-body{margin-top:0}
 /* Rutinas: una biblioteca tranquila, detalle y búsqueda a pantalla completa. */
 .routine-library-head{display:flex;align-items:center;justify-content:space-between;gap:12px;margin:4px 0 22px}
@@ -4032,7 +4043,7 @@ const GYM_ONLY_VIEWS=['book','planes','historial','shop'];
 const GYM_APP_URL='/';
 document.querySelectorAll('.brand-name').forEach(el=>{el.textContent=BRAND_NAME;});
 const SUPABASE_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBtcGp0ZXVxanVzYmlkdWV2YndxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc2OTI1NjUsImV4cCI6MjA5MzI2ODU2NX0.XbMzZoo2yqtrD8znLnyo_1zDfrdJAvAPj1lqGOyXnLw';
-const APP_VERSION='20261026-5';
+const APP_VERSION='20261026-6';
 // La pierna va separada en cuádriceps, femorales y pantorrillas: la figura
 // corporal pinta esas tres regiones por separado y el motor de recuperación les
 // da ventanas de descanso distintas. 'Piernas' sigue reconociéndose al leer
@@ -4604,7 +4615,7 @@ function showMainSb(){
   refreshChatUnreadBadge();
   startUserNotifRealtime();
   startTimer();
-  
+  handleTrainDeepLink();
 }
 
 function checkExpiryPush(){
@@ -5590,6 +5601,7 @@ async function requestDoorOpen(btn){
     toast(out.message||'Apertura solicitada','ok');
     addN(out.location_exempt?'Apertura solicitada · ubicacion omitida':'Apertura solicitada · distancia '+(out.distance_m||0)+' m','success');
     if(btn)btn.textContent='Abierta 5s';
+    setTimeout(()=>doorTrainingPrompt('door').catch(e=>console.error('doorTrainingPrompt:',e)),1200);
   }catch(e){
     const code=e&&e.code;
     const reason=e&&e.reason;
@@ -5618,6 +5630,66 @@ async function requestDoorOpen(btn){
       btn.textContent=oldTxt||'Abrir puerta';
     }
   }
+}
+
+// ── De la puerta al entreno ──────────────────────────────────
+// Abrir la puerta es la señal segura de que el socio ya está en el gym, y es justo
+// cuando decide qué entrena: 53 socios reservaban y solo 16 registraban su entreno.
+// Al abrir desde la app se le pregunta aquí mismo; al entrar con el teclado le llega
+// la notificación (api/validate-access-code.js), que abre la app con ?entrenar=1.
+// Desde la puerta, una vez al día y nunca si ya entrenó o tiene uno en curso; desde
+// la notificación siempre, porque la tocó él.
+const DOOR_TRAIN_KEY='habit_door_train_';
+function doorTrainChoices(o){
+  const{pending=[],last=null,active=null,doneToday=false}=o||{};
+  if(active)return{body:'Tienes '+(active.board_name||'un entreno')+' en curso.',
+    choices:[{key:'resume',label:'Continuar '+(active.board_name||'entreno')}]};
+  const choices=pending.slice(0,2).map(r=>({key:'s:'+r.id,label:(r.board_name||'Entreno')+' ▶'}));
+  if(last&&!pending.some(r=>r.board_id&&r.board_id===last.board_id))
+    choices.push({key:'repeat',label:'Repetir '+(last.board_name||'el último')});
+  choices.push({key:'pick',label:choices.length?'Otra cosa':'Elegir qué entrenar'});
+  const body=pending.length?'Hoy toca '+pending.slice(0,2).map(r=>r.board_name||'entreno').join(' y ')+'.'
+    :doneToday?'Ya entrenaste hoy. ¿Otra sesión?':'';
+  return{body,choices};
+}
+async function doorTrainingPrompt(source){
+  if(IS_CREW||!sbUser||!curUser)return;
+  if(!document.getElementById('s-main')?.classList.contains('active'))return;
+  const today=mazToday();
+  const key=DOOR_TRAIN_KEY+sbUser.id;
+  if(source!=='push'){
+    try{if(localStorage.getItem(key)===today)return;}catch(_){}
+  }
+  await Promise.all([
+    loadCoachWeekDataSb(false),
+    loadMyRoutinesSb(false),
+    loadRecentSessionsSb(false).catch(()=>[]),
+    loadActiveCoachingSessionSb()
+  ]);
+  const rows=coachSchedule.filter(r=>r.ds===today);
+  const doneToday=rows.some(r=>r.status==='done');
+  if(source!=='push'&&(doneToday||activeCoachingSession))return;
+  // Otro aviso abierto (el de un entreno olvidado) gana: dos hojas encimadas no se leen.
+  if(document.getElementById('confirm-overlay')?.classList.contains('show'))return;
+  try{localStorage.setItem(key,today);}catch(_){}
+  const{body,choices}=doorTrainChoices({pending:rows.filter(r=>r.status==='scheduled'),
+    last:hoyRepeatable(hoyRecentSessions),active:activeCoachingSession,doneToday});
+  const pick=await choiceSheet(body,choices,{title:'¿Qué entrenas hoy?',cancelLabel:'Ahora no'});
+  if(!pick)return;
+  sv('rutinas');
+  rutTab('hoy');
+  if(pick==='resume')openWorkoutSheet();
+  else if(pick==='repeat')hoyRepeatLast();
+  else if(pick==='pick')openCoachBoardPicker('start');
+  else if(pick.startsWith('s:'))startCoachingSessionSb(pick.slice(2));
+}
+function handleTrainDeepLink(){
+  const params=new URLSearchParams(location.search);
+  if(params.get('entrenar')!=='1')return;
+  params.delete('entrenar');
+  const q=params.toString();
+  history.replaceState({},'',location.pathname+(q?'?'+q:'')+location.hash);
+  setTimeout(()=>doorTrainingPrompt('push').catch(e=>console.error('doorTrainingPrompt:',e)),700);
 }
 
 // ── GUEST PASSES ─────────────────────────────────────────────
@@ -9363,11 +9435,12 @@ function sessionExerciseList(scheduleRow,setsMap){
   const replacedBy={};
   overlay.forEach(o=>{if(o&&o.replaces)replacedBy[o.replaces]=o;});
   const out=[];
-  base.forEach((ex,i)=>{
-    const exKey=ex.id||(row.board_id+'_idx_'+i);
-    // Cambiar de ejercicio dos veces seguidas encadena entradas (la de C dice
-    // que reemplaza a B, y la de B que reemplaza a A), así que se recorre la
-    // cadena completa en vez de resolver un solo nivel.
+  // Cambiar de ejercicio dos veces seguidas encadena entradas (la de C dice
+  // que reemplaza a B, y la de B que reemplaza a A), así que se recorre la
+  // cadena completa en vez de resolver un solo nivel. Vale igual para uno de la
+  // rutina que para uno agregado hoy: antes la cadena solo se seguía en los de
+  // la rutina, y en un entreno libre cambiar un ejercicio lo dejaba igual.
+  const follow=(ex,exKey)=>{
     let currentKey=exKey, current={...ex,_exKey:exKey}, guard=0;
     while(guard++<20){
       const sub=replacedBy[currentKey];
@@ -9382,8 +9455,9 @@ function sessionExerciseList(scheduleRow,setsMap){
       current={...sub,_exKey:currentKey,_swappedFrom:exKey};
     }
     if(current)out.push(current);
-  });
-  overlay.filter(o=>o&&!o.replaces&&!o.removed&&o.ex_key).forEach(o=>out.push({...o,_exKey:o.ex_key}));
+  };
+  base.forEach((ex,i)=>follow(ex,ex.id||(row.board_id+'_idx_'+i)));
+  overlay.filter(o=>o&&!o.replaces&&!o.removed&&o.ex_key).forEach(o=>follow(o,o.ex_key));
   return out;
 }
 function buildTrainingExerciseSnapshot(scheduleRow){
@@ -10084,6 +10158,7 @@ async function renderRutHub(){
       loadMyRoutinesSb(false),
       tab==='hoy'?loadCoachWeekDataSb(false):null,
       tab==='hoy'?loadActiveCoachingSessionSb():null,
+      tab==='hoy'?loadRecentSessionsSb(false).catch(()=>[]):null,
       tab==='semana'?loadWeekPlanSb(false):null
     ]);
   }catch(e){
@@ -10882,13 +10957,23 @@ function renderRutHoy(){
   }else{
     // Sin nada hoy: si hay semana armada es descanso, y se dice qué sigue; si no hay nada,
     // es alguien empezando y la única acción es elegir qué entrenar.
+    // Con algo hecho antes, la acción más corta es repetirlo: un toque y estás entrenando.
     const hasPlan=coachSchedule.length>0;
+    const last=hoyRepeatable(hoyRecentSessions);
     if(hasPlan){
       const next=coachSchedule.filter(r=>r.ds>today&&r.status==='scheduled').sort((a,b)=>a.ds.localeCompare(b.ds))[0];
       const nextDow=next?(dateObjFromDS(next.ds).getUTCDay()+6)%7:null;
       html+=hoyHeroHtml({k:'Hoy · '+dayLabel,title:'Descanso',
         meta:next?'Lo que sigue: '+DOW_LONG[nextDow]+' · '+next.board_name:'Recuperar también es parte del plan.',
-        cta:'<button class="btn-ghost hoy-cta" onclick="openCoachBoardPicker(&quot;start&quot;)">Entrenar de todos modos</button>'});
+        cta:last
+          ?'<button class="btn-ghost hoy-cta" onclick="hoyRepeatLast()">Repetir '+esc(last.board_name||'el último')+'</button>'
+          :'<button class="btn-ghost hoy-cta" onclick="openCoachBoardPicker(&quot;start&quot;)">Entrenar de todos modos</button>',
+        alt:last?['Entrenar otra cosa','openCoachBoardPicker(&quot;start&quot;)']:null});
+    }else if(last){
+      html+=hoyHeroHtml({k:'Hoy · '+dayLabel,title:last.board_name||'Entreno libre',dot:last.board_color,
+        meta:hoyLastMeta(last,today),
+        cta:'<button class="btn hoy-cta" onclick="hoyRepeatLast()">Repetir</button>',
+        alt:['Elegir otra cosa','openCoachBoardPicker(&quot;start&quot;)']});
     }else{
       html+=hoyHeroHtml({k:'Hoy · '+dayLabel,title:'Empieza a entrenar',
         meta:'Elige una rutina o entrena libre. Cada serie que palomeas queda en tu progreso.',
@@ -10902,9 +10987,133 @@ function renderRutHoy(){
       +'<span class="hoy-also-name">'+esc(row.board_name)+'</span>'
       +'<button class="btn-sm" onclick="startCoachingSessionSb(&quot;'+row.id+'&quot;)">Empezar</button></div>';
   });
+  // La rutina que ya está en la tarjeta (la de hoy, o la que se ofrece repetir) no se repite abajo.
+  const heroBoardId=pending.length?pending[0].board_id:(!doneRows.length?(hoyRepeatable(hoyRecentSessions)||{}).board_id:null);
+  if(!active)html+=hoyRoutinesHtml(heroBoardId);
   html+=hoyWeekHtml();
   html+=hoyRowsHtml();
   el.innerHTML=html;
+}
+
+// ── Lo último que entrenaste ──────────────────────────────────────────────
+// La cabecera de tus entrenos cerrados más recientes (sin series): dice qué repetir
+// cuando hoy no hay nada agendado, y en qué orden van tus rutinas en Hoy — la que
+// hiciste hace poco, primero. Se pide junto con lo demás de Hoy, sin detenerlo.
+let hoyRecentSessions=null,_hoyRecentAt=0,_hoyRecentPromise=null;
+function loadRecentSessionsSb(force){
+  if(!sbUser)return Promise.resolve([]);
+  if(!force&&hoyRecentSessions&&Date.now()-_hoyRecentAt<60000)return Promise.resolve(hoyRecentSessions);
+  if(_hoyRecentPromise)return _hoyRecentPromise;
+  _hoyRecentPromise=(async()=>{
+    const{data,error}=await sb.from('coaching_schedule')
+      .select('id,ds,board_id,board_name,board_color,session_exercises,completed_at,duration_sec')
+      .eq('user_id',sbUser.id).eq('status','done').order('completed_at',{ascending:false}).limit(20);
+    if(error)throw error;
+    hoyRecentSessions=data||[];
+    _hoyRecentAt=Date.now();
+    return hoyRecentSessions;
+  })();
+  _hoyRecentPromise.catch(e=>console.warn('loadRecentSessionsSb:',e)).finally(()=>{_hoyRecentPromise=null;});
+  return _hoyRecentPromise;
+}
+// Un entreno libre al que no se le agregó nada no hay cómo repetirlo.
+function hoyRepeatable(rows){
+  return (rows||[]).find(r=>r&&(r.board_id||(Array.isArray(r.session_exercises)&&r.session_exercises.some(o=>o&&o.ex_key&&!o.replaces&&!o.removed))))||null;
+}
+function hoyWhenLabel(ds,today){
+  const diff=Math.round((dateObjFromDS(today)-dateObjFromDS(ds))/86400000);
+  if(diff<=0)return 'hoy';
+  if(diff===1)return 'ayer';
+  if(diff<7)return 'el '+DOW_LONG[(dateObjFromDS(ds).getUTCDay()+6)%7];
+  return 'el '+fmtDS(ds);
+}
+function hoyLastMeta(r,today){
+  const mins=r.duration_sec?Math.round(r.duration_sec/60):0;
+  return 'Lo último que hiciste, '+hoyWhenLabel(r.ds||dsFromIsoMaz(r.completed_at),today)+(mins?' · '+mins+' min':'');
+}
+function hoyRepeatLast(){
+  const last=hoyRepeatable(hoyRecentSessions);
+  if(!last){openCoachBoardPicker('start');return;}
+  return repeatSessionSb(last);
+}
+// Repetir es la rutina de ese día, no sus cambios: si cambiaste algo y lo quisiste
+// fijo, ya quedó en la rutina al cerrar (wsOfferSaveSessionChanges); si dijiste «Solo
+// por hoy», era solo por ese día. Un entreno libre no tiene rutina detrás, así que se
+// copian los ejercicios que le agregaste, con su misma clave: así "La vez pasada"
+// trae tus pesos.
+async function repeatSessionSb(last){
+  if(last.board_id){
+    let b=routineById(last.board_id);
+    if(!b){
+      const{data}=await sb.from('boards').select('id,name,color,owner_id,exercises').eq('id',last.board_id).maybeSingle();
+      if(!data){toast('Esa rutina ya no existe. Elige otra.','warn');openCoachBoardPicker('start');return;}
+      b=data;coachBoardsById[b.id]=b;
+    }
+    return startWorkoutFromBoardSb(b.id,b.name||last.board_name,routineColor(b));
+  }
+  if(activeCoachingSession){
+    toast('Ya tienes un entreno en curso: '+activeCoachingSession.board_name+'. Termínalo o cancélalo primero.','warn');
+    return;
+  }
+  try{
+    const added=(last.session_exercises||[]).filter(o=>o&&o.ex_key&&!o.replaces&&!o.removed);
+    const chain=(last.session_exercises||[]).filter(o=>o&&o.replaces);
+    const{data,error}=await sb.from('coaching_schedule').insert({user_id:sbUser.id,board_id:null,
+      board_name:last.board_name||'Entreno libre',board_color:last.board_color||'#0ea5e9',
+      ds:mazToday(),created_by:sbUser.id,session_exercises:added.concat(chain)}).select().single();
+    if(error)throw error;
+    coachSchedule.push(data);
+    await startCoachingSessionSb(data.id);
+  }catch(e){toast('Error al iniciar: '+e.message,'err');}
+}
+
+// ── Tus rutinas, a un toque desde Hoy ─────────────────────────────────────
+// Vivían solo en la tercera pestaña de Entrenar, y por eso había socios que creían
+// no tener ninguna. Aquí van en una fila que se desliza: la que hiciste hace poco
+// primero, después las tuyas, las de tu coach y las básicas (el orden de myRoutines).
+// La que ya está en la tarjeta de hoy no se repite.
+const HOY_ROUTINES_MAX=8;
+function hoyRoutineOrder(routines,recent,excludeId){
+  const lastAt={};
+  (recent||[]).forEach(r=>{if(r&&r.board_id&&!lastAt[r.board_id])lastAt[r.board_id]=r.completed_at||r.ds||'';});
+  return (routines||[])
+    .map((b,i)=>({b,i}))
+    .filter(x=>x.b&&x.b.id!==excludeId)
+    .sort((x,y)=>{
+      const a=lastAt[x.b.id]||'', c=lastAt[y.b.id]||'';
+      if(a!==c)return a&&c?c.localeCompare(a):(a?-1:1);
+      return x.i-y.i;
+    })
+    .map(x=>x.b)
+    .slice(0,HOY_ROUTINES_MAX);
+}
+function hoyRoutinesHtml(excludeId){
+  const list=hoyRoutineOrder(myRoutines,hoyRecentSessions,excludeId);
+  if(!list.length)return '';
+  return '<section class="hoy-routines" aria-label="Tus rutinas">'
+    +'<div class="hoy-routines-head"><span>Tus rutinas</span><button type="button" onclick="rutTab(&quot;rutinas&quot;)">Ver todas ›</button></div>'
+    +'<div class="hoy-routines-scroll">'
+    +list.map(b=>{
+      const meta=routineTodayMeta(b);
+      return '<button type="button" class="hoy-rt" onclick="hoyStartRoutine(&quot;'+esc(b.id)+'&quot;)">'
+        +'<span class="hoy-rt-name"><span class="hoy-dot" style="background:'+esc(routineColor(b))+'"></span><strong>'+esc(b.name||'Rutina')+'</strong></span>'
+        +'<small>'+meta.exercises.length+' ejercicio'+(meta.exercises.length===1?'':'s')+' · ~'+meta.duration+' min</small></button>';
+    }).join('')
+    +'</div></section>';
+}
+// Una fila que se desliza recibe toques sin querer: empezar pide un toque más.
+async function hoyStartRoutine(boardId){
+  const b=routineById(boardId);
+  if(!b)return;
+  if(activeCoachingSession){
+    toast('Ya tienes un entreno en curso: '+activeCoachingSession.board_name+'. Termínalo o cancélalo primero.','warn');
+    return;
+  }
+  const meta=routineTodayMeta(b);
+  const names=meta.exercises.slice(0,4).map(ex=>ex.name).filter(Boolean).join(', ');
+  const ok=await confirmSheet(meta.exercises.length+' ejercicios · ~'+meta.duration+' min'+(names?'\n'+names+(meta.exercises.length>4?'…':''):''),
+    {title:b.name||'Rutina',confirmLabel:'Empezar',cancelLabel:'Ahora no'});
+  if(ok)startWorkoutFromBoardSb(b.id,b.name,routineColor(b));
 }
 
 // ── SEMANA ────────────────────────────────────────────────────────────────
@@ -13242,6 +13451,7 @@ async function finishCoachingSessionSb(){
 async function wsAfterSessionClosed(data,closedRow,sets,opts){
   const idx=coachSchedule.findIndex(r=>r.id===data.id);
   if(idx>-1)coachSchedule[idx]=data;
+  if(hoyRecentSessions&&data&&data.id)hoyRecentSessions=[data,...hoyRecentSessions.filter(r=>r.id!==data.id)];
   activeCoachingSession=null;
   cacheActiveTrainingSession(null);
   coachSessionSets={};
@@ -22722,6 +22932,13 @@ if('serviceWorker' in navigator){
     if(swRefreshing)return;
     swRefreshing=true;
     window.location.reload();
+  });
+  // Tocar una notificación con la app ya abierta: el service worker avisa aquí en vez
+  // de recargar (ver notificationclick en sw.js).
+  navigator.serviceWorker.addEventListener('message',e=>{
+    const d=e.data||{};
+    if(d.type==='habit-notification-click'&&String(d.url||'').includes('entrenar=1'))
+      doorTrainingPrompt('push').catch(err=>console.error('doorTrainingPrompt:',err));
   });
   // El teclado en iOS/Android encoge el viewport dinámico (100dvh) y el
   // nav inferior, al ser un flex-item normal (no fixed), se aprieta entre

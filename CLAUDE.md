@@ -290,7 +290,27 @@ a silent overwrite.
   ejercicio se guarda con `id` = su ex_key de hoy para que "La vez pasada" lo encuentre. Un entreno
   abierto hace más de 3 h se pregunta al volver (`wsCheckForgottenSession`) y se cierra sin el RPC,
   terminando en la última serie palomeada (máx. 4 h). Todo cierre pasa por `wsAfterSessionClosed`.
-  `scripts/check-session-edits.js` lo prueba.
+  `scripts/check-session-edits.js` lo prueba. Un `replaces` se sigue igual sobre un ejercicio de
+  la rutina que sobre uno agregado hoy (`sessionExerciseList`): antes solo en los de la rutina, y
+  en un entreno libre cambiar un ejercicio lo dejaba igual
+- **Empezar a entrenar** (bloque 2, oct 2026: 53 socios reservaban y solo 16 registraban).
+  **La puerta pregunta «¿Qué entrenas hoy?»**: abrirla desde la app (`requestDoorOpen` →
+  `doorTrainingPrompt('door')`) saca una hoja con lo de hoy, «Repetir …» y «Otra cosa»
+  (`doorTrainChoices`), una vez al día y nunca si ya entrenó o tiene uno en curso. Entrar con
+  el teclado manda la misma pregunta como notificación (`sendTrainingPush` en
+  `api/validate-access-code.js`, solo en la primera entrada de la reserva, solo a quien tiene
+  `push_subscriptions` —eran 3 socios en oct 2026— y con tope de 1.2 s, porque el teclado espera
+  esa respuesta para abrir). La notificación lleva `url: '/app?entrenar=1'`: `notificationclick`
+  en `sw.js` abre esa url o, con HABIT ya abierta, le manda `habit-notification-click` por
+  `postMessage`; `handleTrainDeepLink()` (al final de `showMainSb`) y ese mensaje llaman
+  `doorTrainingPrompt('push')`, que pregunta siempre. **«Repetir el último»** en Hoy cuando no hay
+  nada agendado (`hoyRepeatable` sobre `loadRecentSessionsSb`, los últimos 20 entrenos cerrados
+  sin series): repetir es **la rutina, no sus cambios** —lo que se quiso fijo ya se guardó al
+  cerrar—, y un entreno libre se repite copiando los ejercicios agregados con su misma `ex_key`
+  para que "La vez pasada" traiga los pesos. **Tus rutinas en Hoy**: una fila que se desliza
+  (`hoyRoutinesHtml`, máx. 8), la entrenada hace poco primero y luego el orden de `myRoutines`;
+  tocar una pide confirmar (`hoyStartRoutine`), porque en una fila que se desliza los toques sin
+  querer son normales. `scripts/check-hoy.js` lo prueba
   La ficha de un ejercicio (`exercise-focus-modal`) se abre **encima** de la hoja: su botón de
   arriba es «‹ Ejercicios» (`exerciseFocusBack`, vuelve a la hoja en el ejercicio que se veía),
   no «Pausar» — así decía y nadie encontraba la lista. Pausar la sesión vive en el reloj de la hoja.

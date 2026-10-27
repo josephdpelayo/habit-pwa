@@ -135,6 +135,15 @@ const c2=h.changes(twice,{});
 assert.deepEqual({swapped:c2.swapped,added:c2.added,removed:c2.removed},{swapped:1,added:0,removed:0});
 assert.equal(c2.finalList[0].name,'Push up');
 
+// En un entreno libre, cambiar un ejercicio agregado lo reemplaza (antes se quedaba igual).
+const freeSwap={id:'s9',board_id:null,exercise_snapshot:[],session_exercises:[
+  {name:'Dominadas',catalogId:'c-pull',ex_key:'cat-dominadas'},
+  {name:'Remo',catalogId:'c-row',ex_key:'cat-remo',replaces:'cat-dominadas'},
+  {name:'Fondos',catalogId:'c-dip',ex_key:'cat-fondos'},
+  {replaces:'cat-fondos',removed:true}]};
+const c3=h.changes(freeSwap,{});
+assert.deepEqual(c3.finalList.map(e=>e.name),['Remo'],'el agregado cambiado se ve como el nuevo, y el quitado no se ve');
+
 // ── Hice todo lo planeado ─────────────────────────────────────────────────
 h.setHabitTraining({metricType:ex=>/s$|:/.test(String(ex.reps))?'time':'reps',parseSeconds:t=>{const m=String(t).match(/^(\d+)s$/);return m?+m[1]:null;}});
 const live={id:'s3',board_id:'b2',exercise_snapshot:[],session_exercises:[]};
