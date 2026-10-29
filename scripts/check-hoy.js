@@ -94,6 +94,8 @@ const makeHarness = new Function(`
     render:()=>{renderRutHoy();return panel.innerHTML;},
     week:hoyWeekHtml,
     order:hoyRoutineOrder,
+    missed:hoyMissedRows,
+    missedText:hoyMissedText,
     repeatable:hoyRepeatable,
     doorChoices:doorTrainChoices,
     restore:loadActiveCoachingSessionSb,
@@ -259,6 +261,25 @@ async function run() {
   check(!h.render().includes('hoy-routines'), 'no routine row while a workout is live');
   h=makeHarness();
   check(!h.render().includes('hoy-routines'), 'no routine row without routines');
+
+  // Lo que se pasó esta semana: hacerlo hoy u omitirlo; la semana pasada no cuenta.
+  const past=(id,ds,name,extra={})=>session(id,'scheduled',{ds,board_name:name,...extra});
+  h=makeHarness();
+  const sched=[past('lun','2026-10-19','Empuje'),past('mie','2026-10-21','Tirón'),past('old','2026-10-14','Pierna'),
+    past('started','2026-10-20','Fuerza',{started_at:'2026-10-20T15:00:00Z'}),session('skipd','skipped',{ds:'2026-10-22'}),
+    past('fut','2026-10-24','Pierna')];
+  check(h.missed(sched,'2026-10-23','2026-10-19').map(r=>r.id).join()==='mie,lun', 'missed days are this week only, newest first, never started');
+  check(h.missedText([past('mie','2026-10-21','Tirón')],'2026-10-23')==='Te faltó Tirón, el miércoles.', 'one missed day names it and when');
+  check(h.missedText(h.missed(sched,'2026-10-23','2026-10-19'),'2026-10-23')==='Esta semana te faltaron Empuje y Tirón. ¿Haces Tirón hoy?', 'several missed days offer the newest');
+  check(h.missedText([past('a','2026-10-21','Tirón'),past('b','2026-10-20','Tirón')],'2026-10-23').startsWith('Esta semana te faltaron 2 de Tirón'), 'repeated names are counted, not listed');
+  h.set({schedule:sched});
+  html=h.render();
+  check(html.includes('hoyMissedToday(&quot;mie&quot;)')&&html.includes('hoySkipMissed()'), 'Hoy offers to do the missed day today or skip it');
+  h.set({schedule:[past('mie','2026-10-21','Tirón')],active:live,sets});
+  check(!h.render().includes('hoy-missed'), 'no missed line during a live workout');
+  h=makeHarness();
+  h.set({schedule:[past('old','2026-10-14','Pierna')]});
+  check(!h.render().includes('hoy-missed'), 'last week does not follow you');
 
   // De la puerta al entreno.
   h=makeHarness();

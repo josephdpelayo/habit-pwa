@@ -317,7 +317,16 @@ socio ve en Entrenar. Encenderla de nuevo es poner `true`.
   para que "La vez pasada" traiga los pesos. **Tus rutinas en Hoy**: una fila que se desliza
   (`hoyRoutinesHtml`, máx. 8), la entrenada hace poco primero y luego el orden de `myRoutines`;
   tocar una pide confirmar (`hoyStartRoutine`), porque en una fila que se desliza los toques sin
-  querer son normales. `scripts/check-hoy.js` lo prueba
+  querer son normales. `scripts/check-hoy.js` lo prueba.
+  **Lo que se pasó esta semana** (`hoyMissedHtml`): un día de esta semana que nadie empezó sale
+  en Hoy con «Hacer hoy» y «Omitir»; la semana pasada no se arrastra. «Hacer hoy» **no mueve la
+  fila** —`ensure_coaching_week_from_template` borra lo estampado por la base que ya no cae en
+  su día y vuelve a estampar el hueco, así que lo movido desaparecía y reaparecía en su día
+  (por eso `moveMissedWorkoutToTodaySb`, de Coaching, no se usa aquí)—: crea uno propio para
+  hoy y deja el original en `skipped`, que conserva `base_template_dow` y ocupa su hueco.
+  El 29 oct 2026 se cerraron a mano los 9 entrenos `in_progress` empezados antes del 20 oct y
+  sin una serie hecha (ago–oct): quedaron `skipped` **con `started_at`**, que es lo que los
+  distingue de un descanso normal si hubiera que revertirlo
 - **Avisos (web push) del socio** (migración 137, oct 2026). Del 18 may al 26 oct 2026 **ningún
   socio guardó su suscripción**: un "hard revert" (60da6cc) quitó las llamadas a `registerPush()`
   y quedaban 3 filas. Ahora: `ensurePushSubscription()` suscribe en silencio, al entrar

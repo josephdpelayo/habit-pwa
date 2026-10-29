@@ -6,12 +6,12 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="HABIT">
 <meta name="application-name" content="HABIT">
-<link rel="manifest" href="/manifest.json?v=20261026-8">
-<link rel="apple-touch-icon" sizes="120x120" href="/icons/icon-120.png?v=20261026-8">
-<link rel="apple-touch-icon" sizes="152x152" href="/icons/icon-152.png?v=20261026-8">
-<link rel="apple-touch-icon" sizes="167x167" href="/icons/icon-167.png?v=20261026-8">
-<link rel="apple-touch-icon" sizes="180x180" href="/icons/icon-180.png?v=20261026-8">
-<link rel="icon" type="image/png" sizes="32x32" href="/icons/icon-32.png?v=20261026-8">
+<link rel="manifest" href="/manifest.json?v=20261029-1">
+<link rel="apple-touch-icon" sizes="120x120" href="/icons/icon-120.png?v=20261029-1">
+<link rel="apple-touch-icon" sizes="152x152" href="/icons/icon-152.png?v=20261029-1">
+<link rel="apple-touch-icon" sizes="167x167" href="/icons/icon-167.png?v=20261029-1">
+<link rel="apple-touch-icon" sizes="180x180" href="/icons/icon-180.png?v=20261029-1">
+<link rel="icon" type="image/png" sizes="32x32" href="/icons/icon-32.png?v=20261029-1">
 <title>HABIT</title>
 <!-- Con id a propósito: scripts/check-training.js toma la primera etiqueta script sin
      atributos como el script principal de la app y la compila. -->
@@ -25,7 +25,7 @@
   var crew=/^\/crew(\/|$)/.test(location.pathname);
   window.HABIT_BRAND=crew?'crew':'gym';
   if(!crew)return;
-  var v='20261026-8';
+  var v='20261029-1';
   document.documentElement.classList.add('brand-crew');
   document.title='HABIT Crew';
   document.querySelectorAll('meta[name="apple-mobile-web-app-title"],meta[name="application-name"]')
@@ -40,9 +40,9 @@
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Share+Tech+Mono&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="/skandi-recovery.js?v=20261026-8"></script>
-<script src="/body-figure.js?v=20261026-8"></script>
-<script src="/habit-training.js?v=20261026-8"></script>
+<script src="/skandi-recovery.js?v=20261029-1"></script>
+<script src="/body-figure.js?v=20261029-1"></script>
+<script src="/habit-training.js?v=20261029-1"></script>
 <style>
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
 @media (prefers-reduced-motion:reduce){*,*:before,*:after{scroll-behavior:auto!important;animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}}
@@ -2651,6 +2651,10 @@ body.admin-mode #courtesy-modal label{border-radius:14px!important;border-color:
 .push-card-acts{display:flex;align-items:center;gap:4px;flex:0 0 auto}
 .push-card-x{background:none;border:0;color:var(--gray);font-size:20px;line-height:1;padding:6px;cursor:pointer}
 .perfil-push-row{display:flex;align-items:center;justify-content:space-between;gap:12px;font-size:13.5px;color:var(--gl)}
+.hoy-missed{display:flex;align-items:center;gap:10px;border-radius:14px;background:var(--card);padding:10px 12px;margin-bottom:12px}
+.hoy-missed-txt{flex:1;min-width:0;font-size:13.5px;color:var(--gl);line-height:1.4}
+.hoy-missed-acts{display:flex;align-items:center;gap:2px;flex:0 0 auto}
+.hoy-missed-skip{background:none;border:0;color:var(--gray);font:inherit;font-size:13.5px;font-weight:600;padding:8px;cursor:pointer}
 .hoy-routines{margin:0 0 12px}
 .hoy-routines-head{display:flex;align-items:baseline;justify-content:space-between;margin:2px 2px 8px;font-size:12.5px;color:var(--gray)}
 .hoy-routines-head span{color:var(--white);font-weight:700}
@@ -4054,7 +4058,7 @@ const GYM_ONLY_VIEWS=['book','planes','historial','shop'];
 const GYM_APP_URL='/';
 document.querySelectorAll('.brand-name').forEach(el=>{el.textContent=BRAND_NAME;});
 const SUPABASE_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBtcGp0ZXVxanVzYmlkdWV2YndxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc2OTI1NjUsImV4cCI6MjA5MzI2ODU2NX0.XbMzZoo2yqtrD8znLnyo_1zDfrdJAvAPj1lqGOyXnLw';
-const APP_VERSION='20261026-8';
+const APP_VERSION='20261029-1';
 // La pierna va separada en cuádriceps, femorales y pantorrillas: la figura
 // corporal pinta esas tres regiones por separado y el motor de recuperación les
 // da ventanas de descanso distintas. 'Piernas' sigue reconociéndose al leer
@@ -11119,10 +11123,66 @@ function renderRutHoy(){
   });
   // La rutina que ya está en la tarjeta (la de hoy, o la que se ofrece repetir) no se repite abajo.
   const heroBoardId=pending.length?pending[0].board_id:(!doneRows.length?(hoyRepeatable(hoyRecentSessions)||{}).board_id:null);
+  if(!active)html+=hoyMissedHtml(today);
   if(!active)html+=hoyRoutinesHtml(heroBoardId);
   html+=hoyWeekHtml();
   html+=hoyRowsHtml();
   el.innerHTML=html;
+}
+
+// ── Lo que se pasó esta semana ────────────────────────────────────────────
+// Un día que no se hizo se quedaba como un punto gris en la semana, sin nada que hacer con
+// él: «Mover a hoy» y «Descanso» solo existían en Coaching, que el socio ya no ve. Aquí se
+// ofrece hacerlo hoy u omitirlo. Solo esta semana: la que sigue empieza limpia.
+// «Hacer hoy» NO mueve la fila: ensure_coaching_week_from_template borra lo estampado por la
+// semana base que ya no cae en su día y vuelve a estampar el hueco, así que un entreno movido
+// desaparecía hoy y reaparecía en su día. Se crea uno nuevo para hoy (propio, no estampado) y
+// el que se pasó queda 'skipped', que conserva su base_template_dow y ocupa su hueco a propósito.
+function hoyMissedRows(schedule,today,weekStart){
+  return (schedule||[]).filter(r=>r&&r.ds<today&&(!weekStart||r.ds>=weekStart)&&r.status==='scheduled'&&!r.started_at)
+    .sort((a,b)=>b.ds.localeCompare(a.ds));
+}
+function hoyMissedText(rows,today){
+  const last=rows[0];
+  if(rows.length===1)return 'Te faltó '+(last.board_name||'un entreno')+', '+hoyWhenLabel(last.ds,today)+'.';
+  const names=[...new Set(rows.slice().reverse().map(r=>r.board_name||'Entreno'))]; // en orden de la semana
+  const list=names.length===1?rows.length+' de '+names[0]:names.slice(0,-1).join(', ')+' y '+names[names.length-1];
+  return 'Esta semana te faltaron '+list+'. ¿Haces '+(last.board_name||'el último')+' hoy?';
+}
+function hoyMissedHtml(today){
+  const rows=hoyMissedRows(coachSchedule,today,coachWeekStart);
+  if(!rows.length)return '';
+  return '<div class="hoy-missed"><span class="hoy-missed-txt">'+esc(hoyMissedText(rows,today))+'</span>'
+    +'<span class="hoy-missed-acts"><button type="button" class="btn-sm" onclick="hoyMissedToday(&quot;'+esc(rows[0].id)+'&quot;)">Hacer hoy</button>'
+    +'<button type="button" class="hoy-missed-skip" onclick="hoySkipMissed()">Omitir</button></span></div>';
+}
+async function hoyMissedToday(id){
+  const row=coachSchedule.find(r=>r.id===id);
+  if(!row)return;
+  try{
+    const ins=await sb.from('coaching_schedule').insert({user_id:sbUser.id,board_id:row.board_id,board_name:row.board_name,
+      board_color:row.board_color,ds:mazToday(),created_by:sbUser.id}).select().single();
+    if(ins.error)throw ins.error;
+    coachSchedule.push(ins.data);
+    const upd=await sb.from('coaching_schedule').update({status:'skipped'}).eq('id',id).eq('user_id',sbUser.id).select().single();
+    if(upd.error)throw upd.error;
+    const i=coachSchedule.findIndex(r=>r.id===id);
+    if(i>-1)coachSchedule[i]=upd.data;
+    renderRutHoy();
+    toast((row.board_name||'Entreno')+' queda para hoy','ok');
+  }catch(e){renderRutHoy();toast('No se pudo pasar a hoy: '+e.message,'err');}
+}
+async function hoySkipMissed(){
+  const rows=hoyMissedRows(coachSchedule,mazToday(),coachWeekStart);
+  if(!rows.length)return;
+  try{
+    const{data,error}=await sb.from('coaching_schedule').update({status:'skipped'})
+      .in('id',rows.map(r=>r.id)).eq('user_id',sbUser.id).select();
+    if(error)throw error;
+    (data||[]).forEach(d=>{const i=coachSchedule.findIndex(r=>r.id===d.id);if(i>-1)coachSchedule[i]=d;});
+    renderRutHoy();
+    toast(rows.length===1?'Omitido':rows.length+' omitidos','ok');
+  }catch(e){toast('No se pudo omitir: '+e.message,'err');}
 }
 
 // ── Lo último que entrenaste ──────────────────────────────────────────────
