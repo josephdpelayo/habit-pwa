@@ -53,7 +53,25 @@ assert.ok(sig.lockup.logo.x >= 0 && sig.lockup.logo.x + sig.lockup.width <= sig.
 assert.ok(sig.sub.y <= sig.height, 'MAKE IT A HABIT cabe');
 assert.equal(sig.lockup.word.text, 'HABIT');
 
-assert.deepEqual(Object.keys(S.COLORS), ['blanco', 'negro'], 'solo blanco y negro');
+// Colores: blanco y negro primero; cada uno con la tinta que se lee encima (el recibo, el
+// carnet), y uno libre se resuelve igual. Lo que no es un color cae en blanco.
+assert.deepEqual(S.PALETTE.slice(0, 2).map((c) => c.key), ['blanco', 'negro'], 'blanco y negro primero');
+assert.ok(S.PALETTE.length >= 10, 'más de diez colores');
+assert.equal(new Set(S.PALETTE.map((c) => c.hex)).size, S.PALETTE.length, 'sin colores repetidos');
+for (const c of S.PALETTE) {
+  const pal = S.resolveColor(c.key);
+  assert.equal(pal.fg, c.hex);
+  assert.ok(S.contrast(pal.fg, pal.ink) >= 3, c.key + ': su tinta se lee (3:1)');
+}
+assert.deepEqual(S.resolveColor('blanco'), { fg: '#ffffff', ink: '#0b0b0b' }, 'como antes');
+assert.deepEqual(S.resolveColor('negro'), { fg: '#0b0b0b', ink: '#ffffff' }, 'como antes');
+assert.equal(S.resolveColor('azul').ink, '#ffffff', 'sobre azul, blanco');
+assert.equal(S.resolveColor('lima').ink, '#0b0b0b', 'sobre lima, negro');
+assert.deepEqual(S.resolveColor('#FF00AA'), { fg: '#ff00aa', ink: '#ffffff' }, 'un color libre');
+for (const bad of ['', 'morado', 'constructor', '#12345', 'red']) {
+  assert.equal(S.resolveColor(bad).fg, '#ffffff', `«${bad}» no es un color: blanco`);
+}
+assert.ok(Math.abs(S.contrast('#ffffff', '#000000') - 21) < 0.01, 'contraste WCAG');
 
 // Sello: la vuelta cierra exacta (el espacio se reparte), las letras van en orden alrededor
 // del círculo y caben en el lienzo; un texto largo baja de tamaño.
@@ -65,7 +83,10 @@ for (const text of ['MAKE IT A HABIT · 31.10.26 · ', 'MAKE IT A HABIT · ENTRE
   assert.ok(L.chars[L.chars.length - 1].angle < Math.PI * 2, 'termina antes de cerrar la vuelta');
   assert.ok(L.radius + L.size * 0.55 <= L.width / 2, 'las letras caben en el lienzo');
   assert.ok(L.size >= 30 && L.size <= 120, 'tamaño de letra en rango');
-  assert.ok(L.logo.size < L.radius * 2 - L.size * 2, 'el logo no toca las letras');
+  // Lo que se ve del logo es su tinta (el PNG trae margen), no su cuadro.
+  const ink = L.logo.size * S.LOGO_INK;
+  assert.ok(ink < L.radius * 2 - L.size * 2, 'el logo no toca las letras');
+  assert.ok(ink > L.radius * 0.9, 'el logo llena el centro del sello, no queda chiquito');
 }
 assert.ok(S.sealLayout('MAKE IT A HABIT · ENTRENO Nº 47 · SEMANA 6 · LEG 2 · ', measure).size
   <= S.sealLayout('MAKE IT A HABIT · ', measure).size, 'el texto largo no crece');

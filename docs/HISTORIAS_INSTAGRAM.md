@@ -34,7 +34,13 @@ Los stickers van en **HABIT y en HABIT Crew** (pedido de Joseph, 31 oct). HABIT 
 
 **Una sola fuente: Inter, la de HABIT**, con el **logo original** (`/icons/logo-original.png`).
 La variedad sale de cómo se trata la letra, no de cambiar de fuente: peso (de 150 a 900),
-itálica, espaciado, contorno, repetición, tamaño. **Blanco o negro**, nunca otro color.
+itálica, espaciado, contorno, repetición, tamaño. **Un solo color por sticker**: era blanco o
+negro, y desde el 1 nov (Joseph: «poder escoger entre varios más colores, para darle
+versatilidad») se elige de una paleta de 12 —blanco, negro, crema, azul, cielo, lima, verde,
+amarillo, naranja, rojo, rosa, lila; azul, verde, rojo y lila son los de la marca— o uno libre
+con el selector del teléfono. Lo que va dentro de una forma rellena (recibo, carnet, cinta,
+globo) lleva la tinta de `inkFor()`: blanco si contrasta 3:1 con el color (WCAG, letra grande),
+si no negro.
 
 Reglas: un dato héroe (o dos); si hacen falta más de tres renglones, son dos stickers; el
 logotipo es el de HABIT Crew, como el encabezado de Crew: logo + HABIT en 800 espaciado .1em +
@@ -189,3 +195,13 @@ mejor serie, músculos (con palabras, sin dibujo del cuerpo), récords, nº de e
   - De paso, Contorno: Inter variable trae contornos encimados dentro del 4 y el trazo los
     dibujaba; ahora se traza al doble y se borra el relleno (queda solo el borde). Y la coma de
     «4,320» ya no toca la unidad.
+- **2026-11-01 — Más colores** (versión `20261101-3`). Joseph: «también para poder cambiar el
+  color del sticker, no solo blanco y negro… para darle versatilidad».
+  - `PALETTE` con 12 colores y uno libre (`<input type="color">` dentro del último círculo, que
+    se pinta al dejar de moverlo). Los colores pasaron de la cabeza de la galería a una fila que
+    se desliza debajo del sticker.
+  - La tinta de las formas rellenas ya no es «el contrario del blanco»: `inkFor()` elige blanco
+    o negro por contraste, y la prueba revisa que cada color de la paleta llegue a 3:1.
+  - El fondo de la vista previa también se elige por contraste: oscuro para los colores claros,
+    claro para los oscuros.
+  - Se recuerda el último color, también uno libre (`habit_sticker_color`: la clave o `#rrggbb`).

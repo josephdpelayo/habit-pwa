@@ -13,9 +13,10 @@
 //               elevationM, avgHr, kcal, effort, number }
 //   week    — tu semana: { count, durationSec, distanceM, days:[7 × 0/1, lunes primero], weekStart,
 //             streak }
-// Cada sticker es un PNG transparente, blanco o negro, en Inter (la fuente de HABIT) con su logo
-// original (/icons/logo-original.png). La galería se desliza de un estilo a otro y su botón
-// Compartir abre la hoja del teléfono (Instagram, WhatsApp, Guardar imagen, Copiar).
+// Cada sticker es un PNG transparente de un solo color (uno de `PALETTE` o uno libre), en Inter
+// (la fuente de HABIT) con su logo original (/icons/logo-original.png). La galería se desliza
+// de un estilo a otro y su botón Compartir abre la hoja del teléfono (Instagram, WhatsApp,
+// Guardar imagen, Copiar).
 //
 // Todos firman como HABIT Crew, también los que salen de HABIT: un sticker es lo que ven los
 // que todavía no tienen la app, y la que pueden bajar es Crew (abierta a cualquiera). Tres
@@ -28,12 +29,32 @@
 (function (global) {
   'use strict';
 
-  const COLORS = { blanco: '#ffffff', negro: '#0b0b0b' };
+  // Los colores del sticker. Blanco y negro primero, los de siempre; luego los de la marca
+  // (azul, verde, rojo, lila) y los que más se ven en historias de entreno. También se puede
+  // elegir uno libre ('#rrggbb'). Lo que va dentro de una forma rellena (el recibo, el carnet,
+  // la cinta) no se elige: es la tinta de `inkFor`.
+  const PALETTE = [
+    { key: 'blanco', label: 'Blanco', hex: '#ffffff' },
+    { key: 'negro', label: 'Negro', hex: '#0b0b0b' },
+    { key: 'crema', label: 'Crema', hex: '#f2e8d5' },
+    { key: 'azul', label: 'Azul', hex: '#2563eb' },
+    { key: 'cielo', label: 'Cielo', hex: '#7cc4ff' },
+    { key: 'lima', label: 'Lima', hex: '#d4ff3a' },
+    { key: 'verde', label: 'Verde', hex: '#10b981' },
+    { key: 'amarillo', label: 'Amarillo', hex: '#ffd60a' },
+    { key: 'naranja', label: 'Naranja', hex: '#ff6b2c' },
+    { key: 'rojo', label: 'Rojo', hex: '#ef4444' },
+    { key: 'rosa', label: 'Rosa', hex: '#ff8fb8' },
+    { key: 'lila', label: 'Lila', hex: '#8b5cf6' }
+  ];
+  const COLORS = Object.fromEntries(PALETTE.map((c) => [c.key, c.hex]));
+  const INK = { dark: '#0b0b0b', light: '#ffffff' };
   const WIDTH = 1080;          // ancho de una historia: el sticker sale nítido a cualquier escala
   const PAD = 72;
   const CAP = 0.73;            // altura de mayúsculas y números de Inter, en em
   const INTER = '"Inter", -apple-system, system-ui, sans-serif';
   const LOGO_SRC = '/icons/logo-original.png';
+  const LOGO_INK = 0.65;        // el PNG del logo trae margen: la tinta es ~65% de su cuadro
   const COLOR_KEY = 'habit_sticker_color';
   // Las apps cargan Inter de 300 a 800 y sin itálicas; los stickers usan de 100 a 900 y la
   // itálica. Se pide al abrir la galería, no al cargar: la app no descarga nada de más.
@@ -46,6 +67,35 @@
   const crewFont = (px) => `600 ${px}px ${INTER}`;
   const CREW_URL = 'habittraininghub.app/crew';
   const F = (weight, px, italic) => `${italic ? 'italic ' : ''}${weight} ${px}px ${INTER}`;
+
+  // ── Color (puro) ─────────────────────────────────────────────────────────
+
+  // Luminancia relativa y contraste, como los define WCAG.
+  function luminance(hex) {
+    const n = parseInt(String(hex).slice(1), 16);
+    const ch = [(n >> 16) & 255, (n >> 8) & 255, n & 255].map((v) => {
+      v /= 255;
+      return v <= 0.03928 ? v / 12.92 : Math.pow((v + 0.055) / 1.055, 2.4);
+    });
+    return 0.2126 * ch[0] + 0.7152 * ch[1] + 0.0722 * ch[2];
+  }
+  function contrast(a, b) {
+    const x = luminance(a), y = luminance(b);
+    return (Math.max(x, y) + 0.05) / (Math.min(x, y) + 0.05);
+  }
+  // La tinta sobre un color: blanco si llega a 3:1 (lo que pide WCAG para letra grande, y la
+  // de los stickers lo es), si no negro. El blanco gana los empates porque sobre azul, rojo o
+  // lila se ve mejor aunque el negro mida un poco más.
+  function inkFor(hex) {
+    return contrast(hex, INK.light) >= 3 ? INK.light : INK.dark;
+  }
+  const isHex = (v) => /^#[0-9a-f]{6}$/i.test(String(v || ''));
+  const paletteHex = (k) => (Object.prototype.hasOwnProperty.call(COLORS, k) ? COLORS[k] : null);
+  // Un color de la paleta (por su clave) o uno libre; cualquier otra cosa, blanco.
+  function resolveColor(key) {
+    const hex = paletteHex(key) || (isHex(key) ? String(key).toLowerCase() : COLORS.blanco);
+    return { fg: hex, ink: inkFor(hex) };
+  }
 
   // ── Disposición (pura) ─────────────────────────────────────────────────
 
@@ -193,7 +243,10 @@
     }
     const radius = radiusFor(px);
     const { spacing, chars } = ringChars(body, radius, sealFont(px), measure);
-    const logo = Math.round(radius * 0.95);
+    // El logo llena ~60% del hueco dentro del anillo (lo que se ve, no su cuadro: con el
+    // margen del PNG, el cuadro de antes dejaba la tinta en un cuarto del sello).
+    const hole = radius - px * CAP / 2;
+    const logo = Math.round(hole * 2 * 0.6 / LOGO_INK);
     return {
       kind: 'sello', width: size, height: size, cx, cy, radius,
       font: sealFont(px), size: px, spacing, chars,
@@ -1262,10 +1315,10 @@
     });
   }
 
-  // El logo viene blanco; para el sticker negro se tiñe en un lienzo aparte (source-in pinta
+  // El logo viene blanco; en cualquier otro color se tiñe en un lienzo aparte (source-in pinta
   // solo donde el logo tiene tinta, y conserva sus bordes suaves).
   function drawLogo(ctx, img, box, color, doc) {
-    if (color === COLORS.blanco) { ctx.drawImage(img, box.x, box.y, box.size, box.size); return; }
+    if (String(color).toLowerCase() === COLORS.blanco) { ctx.drawImage(img, box.x, box.y, box.size, box.size); return; }
     const off = newCanvas(doc, box.size, box.size);
     const o = off.getContext('2d');
     o.drawImage(img, 0, 0, box.size, box.size);
@@ -1293,11 +1346,11 @@
     ctx.closePath();
   }
 
-  // Los trazos de los estilos nuevos. 'fg' es el color del sticker; 'inv', el contrario.
-  function drawOps(ctx, ops, img, fg, doc) {
-    const inv = fg === COLORS.blanco ? COLORS.negro : COLORS.blanco;
+  // Los trazos de los estilos nuevos. 'fg' es el color del sticker; 'inv', la tinta que va
+  // encima de él (`pal.ink`: negro o blanco, la que contraste).
+  function drawOps(ctx, ops, img, pal, doc) {
     ops.forEach((o) => {
-      const color = o.color === 'inv' ? inv : fg;
+      const color = o.color === 'inv' ? pal.ink : pal.fg;
       ctx.save();
       ctx.globalAlpha = o.alpha == null ? 1 : o.alpha;
       ctx.fillStyle = color; ctx.strokeStyle = color;
@@ -1381,15 +1434,15 @@
   function renderSticker(doc, kind, styleId, data, colorKey, logo) {
     const style = (KINDS[kind] || KINDS.quote).styles.find((s) => s.id === styleId);
     if (!style) throw new Error('Estilo desconocido: ' + styleId);
-    const color = COLORS[colorKey] || COLORS.blanco;
+    const pal = resolveColor(colorKey);
     const probe = newCanvas(doc, 1, 1).getContext('2d');
     const L = style.layout(data || {}, canvasMeasure(probe));
     if (!L) throw new Error('El estilo ' + styleId + ' no aplica a estos datos');
     const canvas = newCanvas(doc, L.width, L.height);
     const ctx = canvas.getContext('2d');
-    ctx.fillStyle = color;
-    if (L.ops) drawOps(ctx, L.ops, logo, color, doc);
-    else DRAW[L.kind](ctx, L, logo, color, doc);
+    ctx.fillStyle = pal.fg;
+    if (L.ops) drawOps(ctx, L.ops, logo, pal, doc);
+    else DRAW[L.kind](ctx, L, logo, pal.fg, doc);
     return canvas;
   }
 
@@ -1433,10 +1486,15 @@
 .hs-head{display:flex;align-items:center;gap:12px;padding:16px 16px 6px}
 .hs-title{flex:1;text-align:center;font-size:17px;font-weight:700;margin:0;letter-spacing:0;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .hs-close{background:none;border:0;color:#9aa0aa;font-size:24px;line-height:1;cursor:pointer;padding:4px 6px}
-.hs-colors{display:flex;gap:10px}
-.hs-color{width:24px;height:24px;border-radius:50%;border:1px solid rgba(255,255,255,.28);padding:0;cursor:pointer}
-.hs-color[data-c=blanco]{background:#fff}.hs-color[data-c=negro]{background:#0b0b0b}
+.hs-head-gap{width:26px;flex-shrink:0}
+.hs-colors{display:flex;gap:10px;overflow-x:auto;padding:14px 20px 4px;scrollbar-width:none;-webkit-overflow-scrolling:touch}
+.hs-colors::-webkit-scrollbar{display:none}
+.hs-colors::after{content:'';flex:0 0 8px}
+.hs-color{flex:0 0 30px;width:30px;height:30px;border-radius:50%;border:1px solid rgba(255,255,255,.22);padding:0;margin:0;cursor:pointer;position:relative;box-sizing:border-box}
 .hs-color.on{outline:2px solid #fff;outline-offset:3px}
+.hs-custom{background:conic-gradient(#ef4444,#ffd60a,#d4ff3a,#10b981,#7cc4ff,#2563eb,#8b5cf6,#ff8fb8,#ef4444)}
+.hs-custom.has{background:radial-gradient(circle,var(--c) 0 44%,transparent 46%),conic-gradient(#ef4444,#ffd60a,#d4ff3a,#10b981,#7cc4ff,#2563eb,#8b5cf6,#ff8fb8,#ef4444)}
+.hs-custom input{position:absolute;inset:0;width:100%;height:100%;opacity:0;border:0;padding:0;margin:0;cursor:pointer}
 .hs-body{overflow-y:auto;overscroll-behavior:contain;padding-bottom:10px}
 .hs-sub{text-align:center;font-size:13px;color:#9aa0aa;margin:0 20px 12px;min-height:1px}
 .hs-stage{margin:0 16px;border-radius:20px;overflow:hidden;background:#1f2024}
@@ -1472,7 +1530,7 @@
   let sheet = null, state = null, seq = 0;
 
   function readColor() {
-    try { const c = global.localStorage.getItem(COLOR_KEY); return c === 'negro' ? 'negro' : 'blanco'; } catch (_) { return 'blanco'; }
+    try { const c = global.localStorage.getItem(COLOR_KEY); return paletteHex(c) || isHex(c) ? c : 'blanco'; } catch (_) { return 'blanco'; }
   }
   function saveColor(c) { try { global.localStorage.setItem(COLOR_KEY, c); } catch (_) { /* sin almacenamiento: no pasa nada */ } }
   function say(msg, type) { if (typeof global.toast === 'function') global.toast(msg, type); }
@@ -1494,13 +1552,15 @@
     const el = doc.createElement('div');
     el.className = 'hs-overlay';
     el.innerHTML = '<div class="hs-sheet" role="dialog" aria-modal="true" aria-labelledby="hs-title">'
-      + '<div class="hs-head"><div class="hs-colors" role="radiogroup" aria-label="Color del sticker">'
-      + '<button type="button" class="hs-color" data-c="blanco" aria-label="Blanco"></button>'
-      + '<button type="button" class="hs-color" data-c="negro" aria-label="Negro"></button></div>'
+      + '<div class="hs-head"><span class="hs-head-gap"></span>'
       + '<h2 class="hs-title" id="hs-title"></h2>'
       + '<button type="button" class="hs-close" aria-label="Cerrar">×</button></div>'
       + '<div class="hs-body"><p class="hs-sub"></p>'
       + '<div class="hs-stage"><div class="hs-track"></div></div>'
+      // Los colores, debajo del sticker: con doce y uno libre ya no caben en la cabeza.
+      + '<div class="hs-colors" role="radiogroup" aria-label="Color del sticker">'
+      + PALETTE.map((c) => '<button type="button" class="hs-color" role="radio" data-c="' + c.key + '" aria-label="' + c.label + '" style="background:' + c.hex + '"></button>').join('')
+      + '<label class="hs-color hs-custom" aria-label="Otro color"><input type="color" value="#ff6b2c"></label></div>'
       + '<div class="hs-meta"><span class="hs-label"></span><span class="hs-count"></span></div>'
       + '<div class="hs-thumbs" role="tablist" aria-label="Estilos"></div>'
       + '<div class="hs-actions"><button type="button" class="hs-share-main" disabled>' + SHARE_ICON + 'Compartir</button></div>'
@@ -1510,10 +1570,18 @@
     el.addEventListener('click', (e) => {
       if (e.target === el || e.target.closest('.hs-close')) { close(); return; }
       const c = e.target.closest('.hs-color');
-      if (c) { state.color = c.dataset.c; saveColor(state.color); paint(); return; }
+      if (c && c.dataset.c) { setColor(c.dataset.c); return; }
       const t = e.target.closest('.hs-thumb');
       if (t) { goTo(Number(t.dataset.i)); return; }
       if (e.target.closest('.hs-share-main')) shareCurrent();
+    });
+    // El color libre: el selector del teléfono avisa mientras se mueve; se pinta al detenerse.
+    let colorTimer = 0;
+    el.addEventListener('input', (e) => {
+      if (!e.target.matches('.hs-custom input')) return;
+      const v = e.target.value;
+      clearTimeout(colorTimer);
+      colorTimer = setTimeout(() => setColor(v), 180);
     });
     const track = el.querySelector('.hs-track');
     let raf = 0;
@@ -1570,8 +1638,19 @@
     const kind = KINDS[state.kind] || KINDS.quote;
     sheet.querySelector('.hs-title').textContent = state.title || kind.title;
     sheet.querySelector('.hs-sub').textContent = state.subtitle || '';
-    sheet.querySelectorAll('.hs-color').forEach((b) => b.classList.toggle('on', b.dataset.c === state.color));
-    const light = state.color === 'negro';
+    sheet.querySelectorAll('.hs-color[data-c]').forEach((b) => {
+      const on = b.dataset.c === state.color;
+      b.classList.toggle('on', on); b.setAttribute('aria-checked', on ? 'true' : 'false');
+    });
+    const custom = sheet.querySelector('.hs-custom');
+    const isCustom = !paletteHex(state.color) && isHex(state.color);
+    custom.classList.toggle('on', isCustom);
+    custom.classList.toggle('has', isCustom);
+    if (isCustom) { custom.style.setProperty('--c', state.color); custom.querySelector('input').value = state.color; }
+    // El fondo de la vista previa, el que deje ver el color: oscuro para los claros, claro
+    // para los oscuros.
+    const fg = resolveColor(state.color).fg;
+    const light = contrast(fg, '#d9dbe0') > contrast(fg, '#1f2024');
     sheet.querySelector('.hs-stage').classList.toggle('light', light);
     const track = sheet.querySelector('.hs-track'), thumbs = sheet.querySelector('.hs-thumbs');
     if (!state.styles) {
@@ -1599,13 +1678,20 @@
       catch (e) { console.error('HabitShare ' + s.id + ':', e); continue; }
       if (my !== seq) return; // cambiaron el color o cerraron a media pintura
       const url = URL.createObjectURL(blob);
-      state.items[i] = { blob, url, label: s.label, name: `habit-crew-${state.kind}-${s.id}-${state.color}.png` };
+      state.items[i] = { blob, url, label: s.label, name: `habit-crew-${state.kind}-${s.id}-${String(state.color).replace('#', '')}.png` };
       const slide = track.children[i], thumb = thumbs.children[i];
       const img = slide && slide.querySelector('img');
       if (img) { img.src = url; img.hidden = false; const w = slide.querySelector('.hs-wait'); if (w) w.remove(); }
       if (thumb) thumb.innerHTML = '<img src="' + url + '" alt="">';
       if (i === state.current) setCurrent(i);
     }
+  }
+
+  function setColor(c) {
+    if (!state || c === state.color) return;
+    state.color = c; saveColor(c); paint();
+    const on = sheet.querySelector('.hs-color.on, .hs-custom.on');
+    if (on && on.scrollIntoView) on.scrollIntoView({ block: 'nearest', inline: 'nearest' });
   }
 
   async function shareCurrent() {
@@ -1662,7 +1748,7 @@
   }
 
   const api = {
-    COLORS, WIDTH, KINDS, ACTIVITY_TYPES, SHARE_ICON,
+    COLORS, PALETTE, WIDTH, LOGO_INK, KINDS, ACTIVITY_TYPES, SHARE_ICON, contrast, inkFor, resolveColor,
     wrapText, balancedWrap, spacedWidth, lockupLayout, quoteLayout, signatureLayout, sealLayout, shortDate,
     dayName, thousands, distanceText, clock, minutesText, paceText, workoutFacts, weekFacts, stylesFor,
     ensureFonts, loadLogo, renderSticker, toBlob, shareImage, open, close, chipHtml

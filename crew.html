@@ -6,12 +6,12 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="HABIT">
 <meta name="application-name" content="HABIT">
-<link rel="manifest" href="/manifest.json?v=20261101-2">
-<link rel="apple-touch-icon" sizes="120x120" href="/icons/icon-120.png?v=20261101-2">
-<link rel="apple-touch-icon" sizes="152x152" href="/icons/icon-152.png?v=20261101-2">
-<link rel="apple-touch-icon" sizes="167x167" href="/icons/icon-167.png?v=20261101-2">
-<link rel="apple-touch-icon" sizes="180x180" href="/icons/icon-180.png?v=20261101-2">
-<link rel="icon" type="image/png" sizes="32x32" href="/icons/icon-32.png?v=20261101-2">
+<link rel="manifest" href="/manifest.json?v=20261101-3">
+<link rel="apple-touch-icon" sizes="120x120" href="/icons/icon-120.png?v=20261101-3">
+<link rel="apple-touch-icon" sizes="152x152" href="/icons/icon-152.png?v=20261101-3">
+<link rel="apple-touch-icon" sizes="167x167" href="/icons/icon-167.png?v=20261101-3">
+<link rel="apple-touch-icon" sizes="180x180" href="/icons/icon-180.png?v=20261101-3">
+<link rel="icon" type="image/png" sizes="32x32" href="/icons/icon-32.png?v=20261101-3">
 <title>HABIT</title>
 <!-- Con id a propósito: scripts/check-training.js toma la primera etiqueta script sin
      atributos como el script principal de la app y la compila. -->
@@ -25,7 +25,7 @@
   var crew=/^\/crew(\/|$)/.test(location.pathname);
   window.HABIT_BRAND=crew?'crew':'gym';
   if(!crew)return;
-  var v='20261101-2';
+  var v='20261101-3';
   document.documentElement.classList.add('brand-crew');
   document.title='HABIT Crew';
   document.querySelectorAll('meta[name="apple-mobile-web-app-title"],meta[name="application-name"]')
@@ -40,10 +40,10 @@
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Share+Tech+Mono&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="/skandi-recovery.js?v=20261101-2"></script>
-<script src="/body-figure.js?v=20261101-2"></script>
-<script src="/habit-training.js?v=20261101-2"></script>
-<script src="/habit-share.js?v=20261101-2"></script>
+<script src="/skandi-recovery.js?v=20261101-3"></script>
+<script src="/body-figure.js?v=20261101-3"></script>
+<script src="/habit-training.js?v=20261101-3"></script>
+<script src="/habit-share.js?v=20261101-3"></script>
 <style>
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
 @media (prefers-reduced-motion:reduce){*,*:before,*:after{scroll-behavior:auto!important;animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}}
@@ -4260,7 +4260,7 @@ const GYM_ONLY_VIEWS=['book','planes','historial','shop'];
 const GYM_APP_URL='/';
 document.querySelectorAll('.brand-name').forEach(el=>{el.textContent=BRAND_NAME;});
 const SUPABASE_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBtcGp0ZXVxanVzYmlkdWV2YndxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc2OTI1NjUsImV4cCI6MjA5MzI2ODU2NX0.XbMzZoo2yqtrD8znLnyo_1zDfrdJAvAPj1lqGOyXnLw';
-const APP_VERSION='20261101-2';
+const APP_VERSION='20261101-3';
 // La pierna va separada en cuádriceps, femorales y pantorrillas: la figura
 // corporal pinta esas tres regiones por separado y el motor de recuperación les
 // da ventanas de descanso distintas. 'Piernas' sigue reconociéndose al leer

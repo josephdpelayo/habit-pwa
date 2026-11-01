@@ -59,9 +59,11 @@ The app has four screens (`#s-auth`, `#s-main`, `#s-admin`, `#s-reception`), tog
   en **las dos apps**. Todo vive aquí —el dibujo, la galería (crea su propia hoja y su CSS, clases
   `hs-*`) y compartir— para que HABIT, congelada, solo reciba el `<script>` y una marca: un
   elemento con `data-hs-share="quote"` (+ `data-hs-text`, `data-hs-date`) abre la galería por
-  un solo escucha de clics en el documento. Cada sticker es un PNG transparente, blanco o negro,
-  en Inter con el logo real, y **todos firman como HABIT Crew, también los de HABIT** (Joseph,
-  1 nov 2026: la marca que crece es Crew); la prueba falla si un estilo no dice CREW. La galería se desliza de un estilo a otro (miniaturas para saltar,
+  un solo escucha de clics en el documento. Cada sticker es un PNG transparente de un color
+  (`PALETTE`: 12, blanco y negro primero, o uno libre; la tinta de lo relleno la elige `inkFor()`
+  por contraste), en Inter con el logo real, y **todos firman como HABIT Crew, también los de
+  HABIT** (Joseph, 1 nov 2026: la marca que crece es Crew); la prueba falla si un estilo no dice
+  CREW. La galería se desliza de un estilo a otro (miniaturas para saltar,
   **directo y no suave**: con scroll-snap, un salto suave que se cruza con un sticker recién
   pintado regresa al primero) y un solo botón **Compartir** (`navigator.share` con el archivo;
   sin hoja de compartir, descarga). Tres tipos en `KINDS`: `quote` (11 estilos), `workout` (16;
