@@ -17,6 +17,10 @@
 // original (/icons/logo-original.png). La galería se desliza de un estilo a otro y su botón
 // Compartir abre la hoja del teléfono (Instagram, WhatsApp, Guardar imagen, Copiar).
 //
+// Todos firman como HABIT Crew, también los que salen de HABIT: un sticker es lo que ven los
+// que todavía no tienen la app, y la que pueden bajar es Crew (abierta a cualquiera). Tres
+// estilos hacen de la marca el tema: «Crew» (la palabra enorme), «Carnet» e «Insignia».
+//
 // La disposición de cada estilo es pura y se prueba en Node (scripts/check-share.js): recibe
 // `measure(texto, font)` en lugar de un canvas. Los estilos nuevos se describen como una lista de
 // trazos (`ops`: texto, logo, rectángulo, círculo, línea, polígono) que dibuja `drawOps`; así la
@@ -39,6 +43,8 @@
   const wordFont = (px) => `800 ${px}px ${INTER}`;
   const subFont = (px) => `600 ${px}px ${INTER}`;
   const sealFont = (px) => `700 ${px}px ${INTER}`;
+  const crewFont = (px) => `600 ${px}px ${INTER}`;
+  const CREW_URL = 'habittraininghub.app/crew';
   const F = (weight, px, italic) => `${italic ? 'italic ' : ''}${weight} ${px}px ${INTER}`;
 
   // ── Disposición (pura) ─────────────────────────────────────────────────
@@ -81,19 +87,26 @@
     return chars.reduce((n, c) => n + measure(c), 0) + spacing * Math.max(0, chars.length - 1);
   }
 
-  // El logotipo de HABIT: el logo y la palabra HABIT a su derecha, centrados en `cx`. Mismas
-  // proporciones que el encabezado de la app (logo ≈ 1.75× la altura de la letra, espaciado .1em).
+  // El logotipo de HABIT Crew, como el encabezado de Crew: el logo, HABIT y, sobre la misma
+  // línea base, CREW chico y espaciado (allá 9 px junto a 17 px, .32em; aquí un poco más grande,
+  // porque en una historia el sticker se ve reducido). Centrado en `cx`.
   function lockupLayout(cx, top, wordPx, measure) {
     const spacing = Math.round(wordPx * 0.1);
     const logo = Math.round(wordPx * 1.75);
     const gap = Math.round(wordPx * 0.45);
     const wordW = spacedWidth('HABIT', spacing, (c) => measure(c, wordFont(wordPx)));
-    const width = logo + gap + wordW;
+    const crewPx = Math.round(wordPx * 0.58);
+    const crewSpacing = Math.round(crewPx * 0.32);
+    const crewGap = Math.round(wordPx * 0.42);
+    const crewW = spacedWidth('CREW', crewSpacing, (c) => measure(c, crewFont(crewPx)));
+    const width = logo + gap + wordW + crewGap + crewW;
     const x0 = cx - width / 2;
+    const baseline = top + logo / 2 + wordPx * 0.36;
     return {
       width, height: logo,
       logo: { x: x0, y: top, size: logo },
-      word: { text: 'HABIT', font: wordFont(wordPx), spacing, x: x0 + logo + gap, y: top + logo / 2 + wordPx * 0.36 }
+      word: { text: 'HABIT', font: wordFont(wordPx), spacing, x: x0 + logo + gap, y: baseline },
+      crew: { text: 'CREW', font: crewFont(crewPx), spacing: crewSpacing, x: x0 + logo + gap + wordW + crewGap, y: baseline }
     };
   }
 
@@ -147,6 +160,22 @@
     };
   }
 
+  // Las letras de `body` alrededor de un círculo de radio `radius`, en orden y con el espacio
+  // repartido para que la vuelta cierre exacta.
+  function ringChars(body, radius, font, measure) {
+    const circumference = 2 * Math.PI * radius;
+    const widths = [...body].map((c) => measure(c, font));
+    const total = widths.reduce((a, b) => a + b, 0);
+    const spacing = (circumference - total) / widths.length;
+    let along = 0;
+    const chars = [...body].map((ch, i) => {
+      const mid = along + widths[i] / 2;
+      along += widths[i] + spacing;
+      return { ch, angle: (mid / circumference) * Math.PI * 2 };
+    });
+    return { spacing, chars };
+  }
+
   // Estilo «Sello»: el texto da la vuelta completa alrededor del logo, como un sello. El
   // espacio entre letras se reparte para que la vuelta cierre exacta; si el texto no cabe, la
   // letra baja de tamaño.
@@ -163,16 +192,7 @@
       px = Math.max(30, Math.min(120, Math.round(px * target / Math.max(1, widthAt(px)))));
     }
     const radius = radiusFor(px);
-    const circumference = 2 * Math.PI * radius;
-    const widths = [...body].map((c) => measure(c, sealFont(px)));
-    const total = widths.reduce((a, b) => a + b, 0);
-    const spacing = (circumference - total) / widths.length;
-    let along = 0;
-    const chars = [...body].map((ch, i) => {
-      const mid = along + widths[i] / 2;
-      along += widths[i] + spacing;
-      return { ch, angle: (mid / circumference) * Math.PI * 2 };
-    });
+    const { spacing, chars } = ringChars(body, radius, sealFont(px), measure);
     const logo = Math.round(radius * 0.95);
     return {
       kind: 'sello', width: size, height: size, cx, cy, radius,
@@ -239,9 +259,15 @@
       width: L.width, height: L.height,
       ops: [
         { op: 'logo', x: L.logo.x, y: L.logo.y, size: L.logo.size, color: color || 'fg' },
-        textOp(measure, 'HABIT', L.word.font, { x: L.word.x, y: L.word.y, spacing: L.word.spacing, color: color || 'fg' })
+        textOp(measure, 'HABIT', L.word.font, { x: L.word.x, y: L.word.y, spacing: L.word.spacing, color: color || 'fg' }),
+        textOp(measure, 'CREW', L.crew.font, { x: L.crew.x, y: L.crew.y, spacing: L.crew.spacing, color: color || 'fg' })
       ]
     };
+  }
+
+  // La firma chica de los estilos que no llevan logotipo: HABIT CREW en una línea espaciada.
+  function brandMark(measure, x, y, align) {
+    return textOp(measure, 'HABIT CREW', F(700, 22), { x, y, align: align || 'center', spacing: 10, alpha: 0.8 });
   }
 
   // 31.10.26, para el sello.
@@ -422,6 +448,8 @@
       y += 70;
       ops.push(textOp(measure, (f.day + ' ' + f.date).trim(), F(600, 24), { x: WIDTH / 2, y, align: 'center', spacing: 8, alpha: 0.75 }));
     }
+    y += f.day ? 50 : 70;
+    ops.push(brandMark(measure, WIDTH / 2, y));
     return { kind: 'ligero', width: WIDTH, height: Math.round(y + PAD * 0.9), ops };
   }
 
@@ -446,6 +474,8 @@
       y += 44 + mp * CAP;
       ops.push(textOp(measure, meta, F(600, mp), { x: WIDTH / 2, y, align: 'center', spacing: Math.round(mp * 0.24), alpha: 0.85 }));
     }
+    y += 62;
+    ops.push(brandMark(measure, WIDTH / 2, y));
     return { kind: 'espaciado', width: WIDTH, height: Math.round(y + PAD), ops };
   }
 
@@ -489,9 +519,12 @@
     const label = [f.hero.unit, f.day].filter(Boolean).join(' · ');
     if (label) {
       const lp = fitPx(measure, label, (p) => F(800, p), maxW, 44, 24, 0.26);
-      y += 50 + lp * CAP;
+      // La coma de «4,320» baja de la línea base: con 50 tocaba la unidad.
+      y += (/[,.]/.test(value) ? Math.round(px * 0.2) + 30 : 50) + lp * CAP;
       ops.push(textOp(measure, label, F(800, lp), { x: WIDTH / 2, y, align: 'center', spacing: Math.round(lp * 0.26) }));
     }
+    y += 60;
+    ops.push(brandMark(measure, WIDTH / 2, y));
     return { kind: 'contorno', width: WIDTH, height: Math.round(y + PAD), ops };
   }
 
@@ -513,6 +546,8 @@
       y += 56 + mp * CAP;
       ops.push(textOp(measure, meta, F(600, mp), { x: WIDTH / 2, y, align: 'center', spacing: Math.round(mp * 0.3) }));
     }
+    y += 52;
+    ops.push(brandMark(measure, WIDTH / 2, y));
     return { kind: 'eco', width: WIDTH, height: Math.round(y + PAD), ops };
   }
 
@@ -658,12 +693,16 @@
     const bx = W - PAD - bw, by = PAD;
     const ops = bubbleOps(bx, by, bw, bh, 'right');
     lines.forEach((l, i) => ops.push(textOp(measure, l, F(500, px), { x: bx + padX, y: by + padY + px * 0.78 + i * lineH, color: 'inv' })));
-    const y = by + bh + 58;
+    let y = by + bh + 58;
     ops.push(textOp(measure, 'Entrenado', F(500, 28), { x: W - PAD - 6, y, align: 'right', alpha: 0.65 }));
-    return { kind: 'burbuja', width: W, height: Math.round(y + PAD * 0.7), ops };
+    // Debajo, el logotipo alineado a la derecha, como el globo.
+    y += 40;
+    const lk = lockupOps(measure, W - PAD - 6 - lockupLayout(0, 0, 24, measure).width, y, 24, 'left');
+    ops.push(...lk.ops);
+    return { kind: 'burbuja', width: W, height: Math.round(y + lk.height + PAD * 0.7), ops };
   }
 
-  // «Notificación»: el aviso de HABIT, como si el teléfono te felicitara.
+  // «Notificación»: el aviso de HABIT Crew, como si el teléfono te felicitara.
   function notifLayout(f, measure) {
     const W = 1000, cx0 = 20, cw = W - 40, pad = 36, icon = 96;
     const tx = cx0 + pad + icon + 26, tr = cx0 + cw - pad;
@@ -673,7 +712,7 @@
     inner.push({ op: 'rect', x: cx0 + pad, y: top + pad, w: icon, h: icon, r: 24, color: 'inv' });
     inner.push({ op: 'logo', x: cx0 + pad + 16, y: top + pad + 16, size: icon - 32, color: 'fg' });
     let y = top + pad + 30;
-    inner.push(textOp(measure, 'HABIT', F(600, 28), { x: tx, y, spacing: 2, color: 'inv', alpha: 0.55 }));
+    inner.push(textOp(measure, 'HABIT CREW', F(600, 28), { x: tx, y, spacing: 2, color: 'inv', alpha: 0.55 }));
     inner.push(textOp(measure, 'ahora', F(400, 27), { x: tr, y, align: 'right', color: 'inv', alpha: 0.45 }));
     y += 52;
     inner.push(textOp(measure, 'Entreno completado', F(700, 40), { x: tx, y, color: 'inv' }));
@@ -806,7 +845,7 @@
     return { kind: 'comillas', width: WIDTH, height: Math.round(y + lk.height + PAD * 0.8), ops };
   }
 
-  // «Mínimo»: la frase en 400, entre dos líneas finas, y HABIT con mucho aire.
+  // «Mínimo»: la frase en 400, entre dos líneas finas, y HABIT CREW con mucho aire.
   function quoteMinimalLayout(text, ds, measure) {
     const maxW = 820;
     const ops = [];
@@ -819,7 +858,7 @@
     y += (lines.length - 1) * lineH + 52;
     ops.push({ op: 'line', x1: WIDTH / 2 - 36, y1: y, x2: WIDTH / 2 + 36, y2: y, w: 3 });
     y += 56 + 22 * CAP;
-    const sign = ['HABIT', shortDate(ds)].filter(Boolean).join('  ·  ');
+    const sign = ['HABIT CREW', shortDate(ds)].filter(Boolean).join('  ·  ');
     ops.push(textOp(measure, sign, F(600, 22), { x: WIDTH / 2, y, align: 'center', spacing: 11 }));
     return { kind: 'minimo', width: WIDTH, height: Math.round(y + PAD * 0.8), ops };
   }
@@ -896,6 +935,153 @@
     return { kind: 'racha', width: Math.ceil(wx + wordsW + PAD), height: Math.round(y + lk.height + PAD * 0.8), ops };
   }
 
+  // ── Estilos de la marca: HABIT Crew ─────────────────────────────────────
+
+  // «Crew»: la marca apilada, como en una playera. El logo, HABIT espaciado al ancho exacto de
+  // CREW, y CREW enorme; debajo, el dato (`rows`, un renglón cada uno) o la frase (`para`).
+  function crewStackLayout(measure, o) {
+    const maxW = WIDTH - PAD * 2;
+    const ops = [];
+    let y = PAD;
+    const logo = 92;
+    ops.push({ op: 'logo', x: WIDTH / 2 - logo / 2, y, size: logo });
+    y += logo + 44;
+    const cp = fitPx(measure, 'CREW', (p) => F(900, p), maxW, 330, 160, -0.03);
+    const csp = Math.round(cp * -0.03);
+    const crewW = spacedWidth('CREW', csp, (c) => measure(c, F(900, cp)));
+    const hp = Math.round(cp * 0.2);
+    const habitW = [...'HABIT'].reduce((n, c) => n + measure(c, F(700, hp)), 0);
+    y += hp * CAP;
+    ops.push(textOp(measure, 'HABIT', F(700, hp), { x: WIDTH / 2, y, align: 'center', spacing: Math.max(4, (crewW - habitW) / 4) }));
+    y += 34 + cp * CAP;
+    ops.push(textOp(measure, 'CREW', F(900, cp), { x: WIDTH / 2, y, align: 'center', spacing: csp }));
+    y += 30;
+    if (o.para) {
+      const { size: px, lines } = fitLines(o.para, measure, (p) => F(500, p), [52, 46, 42, 38, 34], maxW, 5);
+      const lh = px * 1.26;
+      y += 34 + px * 0.8;
+      lines.forEach((l, i) => ops.push(textOp(measure, l, F(500, px), { x: WIDTH / 2, y: y + i * lh, align: 'center' })));
+      y += (lines.length - 1) * lh;
+    }
+    (o.rows || []).filter((r) => r && r.text).forEach((r, i) => {
+      const t = fitText(measure, r.text, (p) => F(r.weight, p), maxW, r.max, r.min, r.spacing);
+      y += (i ? 26 : 34) + t.px * CAP;
+      ops.push(textOp(measure, t.text, F(r.weight, t.px), { x: WIDTH / 2, y, align: 'center', spacing: t.spacing, alpha: r.alpha }));
+    });
+    return { kind: 'crew', width: WIDTH, height: Math.round(y + PAD * 0.9), ops };
+  }
+
+  // «Carnet»: la credencial de la crew. Una tarjeta rellena (proporción de tarjeta de banco) con
+  // el logotipo, su chip y el dato grande —o la frase—; abajo, el día y dónde se baja la app.
+  // c: { kicker, value, unit, line, para, foot }.
+  function carnetLayout(measure, c) {
+    const x = 40, w = WIDTH - 80, pad = 64, top = 40;
+    const ix = x + pad, ir = x + w - pad, iw = ir - ix;
+    const body = [];
+    let y = top + 60;
+    const lk = lockupOps(measure, ix, y, 34, 'left', 'inv');
+    body.push(...lk.ops);
+    if (c.kicker) {
+      const k = fitText(measure, c.kicker, (p) => F(600, p), iw - lk.width - 40, 22, 16, 0.26);
+      body.push(textOp(measure, k.text, F(600, k.px), { x: ir, y: y + lk.height / 2 + k.px * 0.36, align: 'right', spacing: k.spacing, color: 'inv', alpha: 0.7 }));
+    }
+    y += lk.height + 46;
+    // El chip, en trazo: lo que hace que se lea como tarjeta.
+    const chipW = 92, chipH = 70;
+    body.push({ op: 'rect', x: ix, y, w: chipW, h: chipH, r: 14, stroke: 3, color: 'inv', alpha: 0.5 });
+    body.push({ op: 'line', x1: ix, y1: y + chipH / 2, x2: ix + chipW, y2: y + chipH / 2, w: 3, color: 'inv', alpha: 0.5 });
+    body.push({ op: 'line', x1: ix + chipW / 2, y1: y, x2: ix + chipW / 2, y2: y + chipH, w: 3, color: 'inv', alpha: 0.5 });
+    y += chipH + 50;
+    if (c.para) {
+      const { size: px, lines } = fitLines(c.para, measure, (p) => F(600, p), [54, 48, 44, 40, 36, 32], iw, 5);
+      const lh = px * 1.22;
+      y += px * 0.8;
+      lines.forEach((l, i) => body.push(textOp(measure, l, F(600, px), { x: ix, y: y + i * lh, color: 'inv' })));
+      y += (lines.length - 1) * lh;
+    } else {
+      const up = 38, usp = Math.round(up * 0.2);
+      const unitW = c.unit ? spacedWidth(c.unit, usp, (ch) => measure(ch, F(700, up))) + 24 : 0;
+      const vp = fitPx(measure, c.value, (p) => F(900, p), iw - unitW, 170, 80, -0.03);
+      const vsp = Math.round(vp * -0.03);
+      y += vp * CAP;
+      body.push(textOp(measure, c.value, F(900, vp), { x: ix, y, spacing: vsp, color: 'inv' }));
+      if (c.unit) {
+        const vw = spacedWidth(c.value, vsp, (ch) => measure(ch, F(900, vp)));
+        body.push(textOp(measure, c.unit, F(700, up), { x: ix + vw + 24, y, spacing: usp, color: 'inv' }));
+      }
+      if (c.line) {
+        const t = fitText(measure, c.line, (p) => F(600, p), iw, 28, 20, 0.14);
+        y += 50 + t.px * CAP;
+        body.push(textOp(measure, t.text, F(600, t.px), { x: ix, y, spacing: t.spacing, color: 'inv', alpha: 0.8 }));
+      }
+    }
+    // Abajo, pegado al borde: la tarjeta guarda su proporción aunque el contenido sea corto.
+    const fp = 22;
+    const bottom = Math.max(top + Math.round(w / 1.586), y + 70 + fp * CAP + 52);
+    const fy = bottom - 52;
+    const urlW = measure(CREW_URL, F(500, fp));
+    body.push(textOp(measure, CREW_URL, F(500, fp), { x: ir, y: fy, align: 'right', color: 'inv', alpha: 0.7 }));
+    if (c.foot) {
+      const f = fitText(measure, c.foot, (p) => F(600, p), iw - urlW - 40, fp, 16, 0.22);
+      body.push(textOp(measure, f.text, F(600, f.px), { x: ix, y: fy, spacing: f.spacing, color: 'inv' }));
+    }
+    const ops = [{ op: 'rect', x, y: top, w, h: bottom - top, r: 52 }, ...body];
+    return { kind: 'carnet', width: WIDTH, height: bottom + top, ops };
+  }
+
+  // «Insignia»: un escudo redondo. Dos anillos, HABIT CREW y el dato dando la vuelta entre ellos,
+  // y dentro el logo con la cifra. La letra del anillo se ajusta para llenar ~80% de la vuelta.
+  function insigniaLayout(measure, ring, value, unit) {
+    const size = 1000, cx = size / 2, cy = size / 2, outer = 474;
+    const body = String(ring).toUpperCase();
+    const widthAt = (px) => [...body].reduce((n, ch) => n + measure(ch, sealFont(px)), 0);
+    const radiusFor = (px) => outer - 28 - px * 0.5;
+    let px = 52;
+    for (let i = 0; i < 3; i++) {
+      px = Math.max(30, Math.min(60, Math.round(px * (2 * Math.PI * radiusFor(px) * 0.8) / Math.max(1, widthAt(px)))));
+    }
+    const radius = radiusFor(px);
+    const inner = radius - px * 0.5 - 28;
+    const ringed = ringChars(body, radius, sealFont(px), measure);
+    const spacing = ringed.spacing;
+    // Que la marca (lo primero del anillo, hasta el primer «·») quede centrada arriba.
+    const head = Math.max(1, body.indexOf(' · ') > 0 ? body.indexOf(' · ') : 1);
+    const turn = (ringed.chars[0].angle + ringed.chars[head - 1].angle) / 2;
+    const chars = ringed.chars.map((ch) => ({ ch: ch.ch, angle: ch.angle - turn }));
+    const ops = [
+      { op: 'circle', cx, cy, r: outer, stroke: 10 },
+      { op: 'circle', cx, cy, r: inner, stroke: 4 },
+      { op: 'arc', cx, cy, radius, font: sealFont(px), px, spacing, chars }
+    ];
+    const maxW = inner * 2 * 0.74;
+    const vp = fitPx(measure, value, (p) => F(900, p), maxW, 230, 90, -0.03);
+    const logo = 84, up = 34;
+    const blockH = logo + 36 + vp * CAP + (unit ? 42 + up * CAP : 0);
+    let y = cy - blockH / 2;
+    ops.push({ op: 'logo', x: cx - logo / 2, y, size: logo });
+    y += logo + 36 + vp * CAP;
+    ops.push(textOp(measure, value, F(900, vp), { x: cx, y, align: 'center', spacing: Math.round(vp * -0.03) }));
+    if (unit) {
+      const u = fitText(measure, unit, (p) => F(700, p), maxW * 0.9, up, 22, 0.3);
+      y += 42 + u.px * CAP;
+      ops.push(textOp(measure, u.text, F(700, u.px), { x: cx, y, align: 'center', spacing: u.spacing }));
+    }
+    return { kind: 'insignia', width: size, height: size, ops };
+  }
+
+  // Lo que dice cada estilo de la marca, por tipo. En un entreno, la línea de abajo lleva lo que
+  // la cifra grande no dijo ya («10.02 KM» arriba, «52:14 · 5:13 /KM» abajo).
+  function workoutRest(f) {
+    const hero = (f.hero.value + ' ' + f.hero.unit).trim();
+    return f.summary.map((s) => s.replace(/ /g, ' ').toUpperCase()).filter((s) => s !== hero);
+  }
+  function workoutRing(f) {
+    const title = f.title.length > 22 ? f.title.slice(0, 21).trim() + '…' : f.title;
+    return ['HABIT CREW', title, f.number ? `ENTRENO Nº ${f.number}` : '', [f.day, f.date].filter(Boolean).join(' ')]
+      .filter(Boolean).join(' · ') + ' · ';
+  }
+  const entrenos = (n) => (n === 1 ? 'ENTRENO' : 'ENTRENOS');
+
   // Los estilos de cada tipo, en el orden en que salen en la galería. `layout` recibe los datos
   // y `measure`; devuelve null cuando a ese entreno le falta lo que el estilo enseña.
   const KINDS = {
@@ -903,6 +1089,13 @@
       title: 'Frase del día',
       styles: [
         { id: 'frase', label: 'Frase', layout: (d, m) => quoteLayout(d.text, m) },
+        { id: 'crew', label: 'Crew', layout: (d, m) => crewStackLayout(m, { para: '“' + cleanQuote(d.text) + '”' }) },
+        {
+          id: 'carnet', label: 'Carnet', layout: (d, m) => carnetLayout(m, {
+            kicker: 'FRASE DEL DÍA', para: '“' + cleanQuote(d.text) + '”',
+            foot: [dayName(d.ds), shortDate(d.ds)].filter(Boolean).join(' ') || 'MAKE IT A HABIT'
+          })
+        },
         { id: 'poster', label: 'Póster', layout: (d, m) => posterLayout(d.text, m) },
         { id: 'italica', label: 'Itálica', layout: (d, m) => quoteItalicLayout(d.text, m) },
         { id: 'cinta', label: 'Cinta', layout: (d, m) => quoteTapeLayout(d.text, m) },
@@ -910,13 +1103,38 @@
         { id: 'comillas', label: 'Comillas', layout: (d, m) => quoteMarksLayout(d.text, m) },
         { id: 'minimo', label: 'Mínimo', layout: (d, m) => quoteMinimalLayout(d.text, d.ds, m) },
         { id: 'logotipo', label: 'Logotipo', layout: (d, m) => signatureLayout(m, 'MAKE IT A HABIT') },
-        { id: 'sello', label: 'Sello', layout: (d, m) => sealLayout('MAKE IT A HABIT · ' + (shortDate(d.ds) ? shortDate(d.ds) + ' · ' : ''), m) }
+        { id: 'sello', label: 'Sello', layout: (d, m) => sealLayout('HABIT CREW · MAKE IT A HABIT · ' + (shortDate(d.ds) ? shortDate(d.ds) + ' · ' : ''), m) }
       ]
     },
     workout: {
       title: 'Tu entreno',
       styles: [
         { id: 'heroe', label: 'Héroe', layout: (d, m) => heroLayout(workoutFacts(d), m) },
+        {
+          id: 'crew', label: 'Crew', layout: (d, m) => {
+            const f = workoutFacts(d);
+            return crewStackLayout(m, { rows: [
+              { text: (f.hero.value + ' ' + f.hero.unit).trim(), weight: 800, max: 84, min: 44, spacing: 0.02 },
+              { text: [f.title.toUpperCase(), f.day].filter(Boolean).join(' · '), weight: 600, max: 30, min: 20, spacing: 0.22, alpha: 0.8 }
+            ] });
+          }
+        },
+        {
+          id: 'carnet', label: 'Carnet', layout: (d, m) => {
+            const f = workoutFacts(d);
+            return carnetLayout(m, {
+              kicker: f.day, value: f.hero.value, unit: f.hero.unit,
+              line: [f.title.toUpperCase(), ...workoutRest(f).slice(0, 2)].join(' · '),
+              foot: [f.number ? `ENTRENO Nº ${f.number}` : '', f.date].filter(Boolean).join(' · ')
+            });
+          }
+        },
+        {
+          id: 'insignia', label: 'Insignia', layout: (d, m) => {
+            const f = workoutFacts(d);
+            return insigniaLayout(m, workoutRing(f), f.hero.value, f.hero.label);
+          }
+        },
         { id: 'datos', label: 'Datos', layout: (d, m) => dataLayout(workoutFacts(d), m) },
         { id: 'recibo', label: 'Recibo', layout: (d, m) => receiptLayout(workoutFacts(d), m) },
         { id: 'ligero', label: 'Ligero', layout: (d, m) => lightLayout(workoutFacts(d), m) },
@@ -930,7 +1148,7 @@
         {
           id: 'sello', label: 'Sello', layout: (d, m) => {
             const f = workoutFacts(d);
-            return sealLayout(`${f.hero.value} ${f.hero.unit} · ${f.date ? f.date + ' · ' : ''}MAKE IT A HABIT · `.replace(/ {2,}/g, ' '), m);
+            return sealLayout(`${f.hero.value} ${f.hero.unit} · ${f.date ? f.date + ' · ' : ''}HABIT CREW · `.replace(/ {2,}/g, ' '), m);
           }
         },
         {
@@ -945,6 +1163,30 @@
       title: 'Tu semana',
       styles: [
         { id: 'semana', label: 'Semana', layout: (d, m) => weekDotsLayout(weekFacts(d), m) },
+        {
+          id: 'crew', label: 'Crew', layout: (d, m) => {
+            const w = weekFacts(d);
+            return crewStackLayout(m, { rows: [
+              { text: `${w.count} ${entrenos(w.count)}`, weight: 800, max: 84, min: 44, spacing: 0.02 },
+              { text: w.meta || 'ESTA SEMANA', weight: 600, max: 30, min: 20, spacing: 0.22, alpha: 0.8 }
+            ] });
+          }
+        },
+        {
+          id: 'carnet', label: 'Carnet', layout: (d, m) => {
+            const w = weekFacts(d);
+            return carnetLayout(m, {
+              kicker: 'MI SEMANA', value: String(w.count), unit: entrenos(w.count), line: w.meta,
+              foot: [w.range, w.streak >= 2 ? `${w.streak} SEMANAS SEGUIDAS` : ''].filter(Boolean).join(' · ')
+            });
+          }
+        },
+        {
+          id: 'insignia', label: 'Insignia', layout: (d, m) => {
+            const w = weekFacts(d);
+            return insigniaLayout(m, ['HABIT CREW', 'ESTA SEMANA', w.range].filter(Boolean).join(' · ') + ' · ', String(w.count), entrenos(w.count));
+          }
+        },
         {
           id: 'heroe', label: 'Héroe', layout: (d, m) => {
             const w = weekFacts(d);
@@ -1036,6 +1278,8 @@
     drawLogo(ctx, img, L.logo, color, doc);
     ctx.font = L.word.font; ctx.textAlign = 'left'; ctx.textBaseline = 'alphabetic';
     drawSpaced(ctx, L.word.text, L.word.x, L.word.y, L.word.spacing);
+    ctx.font = L.crew.font;
+    drawSpaced(ctx, L.crew.text, L.crew.x, L.crew.y, L.crew.spacing);
   }
 
   function roundRectPath(ctx, x, y, w, h, r) {
@@ -1059,10 +1303,19 @@
       ctx.fillStyle = color; ctx.strokeStyle = color;
       if (o.op === 'text') {
         ctx.font = o.font; ctx.textAlign = 'left'; ctx.textBaseline = 'alphabetic';
-        if (o.stroke) { ctx.lineWidth = o.stroke; ctx.lineJoin = 'round'; }
-        if (o.spacing) drawSpaced(ctx, o.text, o.x, o.y, o.spacing, !!o.stroke);
-        else if (o.stroke) ctx.strokeText(o.text, o.x, o.y);
-        else ctx.fillText(o.text, o.x, o.y);
+        const put = (stroke) => {
+          if (o.spacing) drawSpaced(ctx, o.text, o.x, o.y, o.spacing, stroke);
+          else if (stroke) ctx.strokeText(o.text, o.x, o.y);
+          else ctx.fillText(o.text, o.x, o.y);
+        };
+        if (o.stroke) {
+          // Inter variable trae contornos encimados dentro de algunas letras (el 4): trazarlos
+          // dibuja esas líneas. Se traza al doble y se borra el relleno: queda solo el borde.
+          ctx.lineWidth = o.stroke * 2; ctx.lineJoin = 'round';
+          put(true);
+          ctx.globalCompositeOperation = 'destination-out';
+          put(false);
+        } else put(false);
       } else if (o.op === 'logo') {
         drawLogo(ctx, img, o, color, doc);
       } else if (o.op === 'rect') {
@@ -1079,6 +1332,16 @@
         ctx.beginPath();
         o.pts.forEach((p, i) => (i ? ctx.lineTo(p[0], p[1]) : ctx.moveTo(p[0], p[1])));
         ctx.closePath(); ctx.fill();
+      } else if (o.op === 'arc') {
+        // Texto alrededor de un círculo (la «Insignia»), letra por letra como el sello.
+        ctx.font = o.font; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+        o.chars.forEach((c) => {
+          ctx.save();
+          ctx.translate(o.cx, o.cy);
+          ctx.rotate(c.angle);
+          ctx.fillText(c.ch, 0, -o.radius);
+          ctx.restore();
+        });
       }
       ctx.restore();
     });
@@ -1336,7 +1599,7 @@
       catch (e) { console.error('HabitShare ' + s.id + ':', e); continue; }
       if (my !== seq) return; // cambiaron el color o cerraron a media pintura
       const url = URL.createObjectURL(blob);
-      state.items[i] = { blob, url, label: s.label, name: `habit-${state.kind}-${s.id}-${state.color}.png` };
+      state.items[i] = { blob, url, label: s.label, name: `habit-crew-${state.kind}-${s.id}-${state.color}.png` };
       const slide = track.children[i], thumb = thumbs.children[i];
       const img = slide && slide.querySelector('img');
       if (img) { img.src = url; img.hidden = false; const w = slide.querySelector('.hs-wait'); if (w) w.remove(); }

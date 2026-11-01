@@ -36,6 +36,10 @@ for (const q of quotes) {
   const lk = L.lockup;
   assert.ok(lk.logo.y + lk.logo.size <= L.height, 'el logotipo cabe en el lienzo');
   assert.ok(lk.logo.x >= 0 && lk.word.x + measure('HABIT', lk.word.font) <= L.width, 'el logotipo no se sale');
+  assert.equal(lk.crew.text, 'CREW', 'el logotipo es HABIT Crew');
+  assert.ok(lk.crew.x > lk.word.x + measure('HABIT', lk.word.font), 'CREW va después de HABIT');
+  assert.equal(lk.crew.y, lk.word.y, 'sobre la misma línea base');
+  assert.ok(Math.abs(lk.logo.x + lk.width - (lk.crew.x + S.spacedWidth('CREW', lk.crew.spacing, (c) => measure(c, lk.crew.font)))) < 0.5, 'el ancho incluye CREW');
   assert.ok(Math.abs((lk.logo.x + lk.width / 2) - L.width / 2) < 1, 'el logotipo va centrado');
   assert.ok(L.font.includes('Inter') && lk.word.font.startsWith('800'), 'Inter, la fuente de HABIT');
   assert.equal(L.width, 1080);
@@ -80,6 +84,7 @@ function inside(L, name) {
     if (o.op === 'circle') return [o.cx - o.r, o.cy - o.r, o.cx + o.r, o.cy + o.r];
     if (o.op === 'line') return [Math.min(o.x1, o.x2), Math.min(o.y1, o.y2), Math.max(o.x1, o.x2), Math.max(o.y1, o.y2)];
     if (o.op === 'poly') { const xs = o.pts.map((p) => p[0]), ys = o.pts.map((p) => p[1]); return [Math.min(...xs), Math.min(...ys), Math.max(...xs), Math.max(...ys)]; }
+    if (o.op === 'arc') { const r = o.radius + o.px * 0.5; return [o.cx - r, o.cy - r, o.cx + r, o.cy + r]; }
     throw new Error('trazo desconocido ' + o.op);
   };
   L.ops.forEach((o) => {
@@ -87,20 +92,29 @@ function inside(L, name) {
     assert.ok(x0 >= -0.5 && y0 >= -0.5 && x1 <= L.width + 0.5 && y1 <= L.height + 0.5,
       `${name}: «${o.text || o.op}» se sale (${[x0, y0, x1, y1].map(Math.round)} en ${L.width}×${L.height})`);
     if (o.op === 'text') assert.ok(/Inter/.test(o.font), name + ': todo en Inter');
+    if (o.op === 'arc') assert.ok(o.spacing >= 0, name + ': las letras del anillo no se enciman');
   });
+}
+
+// Todos firman como HABIT Crew: el logotipo (con CREW), la firma chica o el texto del sello.
+function saysCrew(L) {
+  if (L.lockup) return L.lockup.crew && L.lockup.crew.text === 'CREW';
+  if (L.chars) return L.chars.map((c) => c.ch).join('').includes('HABIT CREW');
+  return L.ops.some((o) => (o.op === 'text' && /\bCREW\b/.test(o.text)) || (o.op === 'arc' && o.chars.map((c) => c.ch).join('').includes('HABIT CREW')));
 }
 
 // La galería de la frase del día: nueve estilos, y cada uno se dispone con los datos de la frase.
 assert.deepEqual(S.KINDS.quote.styles.map((s) => s.id),
-  ['frase', 'poster', 'italica', 'cinta', 'burbuja', 'comillas', 'minimo', 'logotipo', 'sello']);
+  ['frase', 'crew', 'carnet', 'poster', 'italica', 'cinta', 'burbuja', 'comillas', 'minimo', 'logotipo', 'sello']);
 for (const q of quotes) {
   for (const st of S.KINDS.quote.styles) {
     const L = st.layout({ text: q, ds: '2026-10-31' }, measure);
     assert.ok(L && L.width > 0 && L.height > 0, st.id + ' tiene tamaño');
     assert.equal(L.kind, st.id);
     if (L.ops) inside(L, 'frase/' + st.id);
+    assert.ok(saysCrew(L), 'frase/' + st.id + ' firma como HABIT Crew');
   }
-  const words = (L) => L.ops.filter((o) => o.op === 'text' && o.text !== 'HABIT').map((o) => o.text).join(' ');
+  const words = (L) => L.ops.filter((o) => o.op === 'text' && o.text !== 'HABIT' && o.text !== 'CREW').map((o) => o.text).join(' ');
   for (const id of ['poster', 'cinta']) {
     const L = S.KINDS.quote.styles.find((s) => s.id === id).layout({ text: q }, measure);
     assert.equal(words(L), q.toUpperCase(), id + ' no pierde texto');
@@ -166,8 +180,27 @@ for (const [name, d] of Object.entries(samples)) {
     if (!L) continue;
     assert.equal(L.kind, st.id, name + '/' + st.id);
     if (L.ops) inside(L, name + '/' + st.id);
+    assert.ok(saysCrew(L), name + '/' + st.id + ' firma como HABIT Crew');
   }
 }
+// Los tres de la marca salen con cualquier entreno, aunque solo traiga minutos.
+for (const [name, d] of Object.entries(samples)) {
+  const usable = S.stylesFor('workout', d, measure).map((s) => s.id);
+  ['crew', 'carnet', 'insignia'].forEach((id) => assert.ok(usable.includes(id), name + ' tiene ' + id));
+}
+const carnet = S.KINDS.workout.styles.find((s) => s.id === 'carnet').layout(samples.carrera, measure);
+const carnetText = carnet.ops.filter((o) => o.op === 'text').map((o) => o.text);
+assert.ok(carnetText.includes('habittraininghub.app/crew'), 'el carnet dice dónde se baja Crew');
+assert.ok(carnetText.includes('10.02') && carnetText.includes('KM'), 'y lleva la cifra');
+assert.ok(carnetText.includes('CORRER · 52:14 · 5:13 /KM'), 'abajo, lo que la cifra no dijo');
+assert.ok(carnet.height - 80 >= Math.round((S.WIDTH - 80) / 1.586), 'con proporción de tarjeta');
+const insignia = S.KINDS.workout.styles.find((s) => s.id === 'insignia').layout(samples.rodada, measure);
+const ring = insignia.ops.find((o) => o.op === 'arc').chars.map((c) => c.ch).join('');
+assert.ok(ring.startsWith('HABIT CREW · RODADA') && ring.includes('…'), 'la insignia recorta un nombre larguísimo');
+const crewOps = S.KINDS.workout.styles.find((s) => s.id === 'crew').layout(samples.fuerza, measure).ops.filter((o) => o.op === 'text');
+const [habitOp, crewOp] = crewOps;
+assert.deepEqual([habitOp.text, crewOp.text], ['HABIT', 'CREW']);
+assert.ok(Math.abs(habitOp.w - crewOp.w) < 1, 'HABIT se espacia al ancho exacto de CREW');
 const recibo = S.KINDS.workout.styles.find((s) => s.id === 'recibo').layout(samples.fuerza, measure);
 assert.ok(recibo.ops.some((o) => o.text === 'ENTRENO Nº 12'), 'el recibo lleva el número de entreno');
 assert.ok(recibo.ops.some((o) => o.text && o.text.startsWith('SENTADILLA')), 'y los ejercicios');
@@ -184,6 +217,7 @@ for (const st of S.KINDS.week.styles) {
   assert.ok(L, st.id + ' sale con racha');
   assert.equal(L.kind, st.id);
   inside(L, 'semana/' + st.id);
+  assert.ok(saysCrew(L), 'semana/' + st.id + ' firma como HABIT Crew');
 }
 const dots = S.KINDS.week.styles[0].layout(wk, measure).ops.filter((o) => o.op === 'circle');
 assert.equal(dots.length, 7);

@@ -1,7 +1,8 @@
 # Stickers — que lo que entrenas se pueda subir a Instagram
 
 > Plan del 31 oct 2026, rehecho tres veces ese día con Joseph (ver Bitácora). Fases 1 y 2 hechas
-> (la 2 solo en Crew); la galería ya trae 9 estilos de frase, 13 de entreno y 4 de semana.
+> (la 2 solo en Crew); la galería ya trae 11 estilos de frase, 16 de entreno y 7 de semana, y
+> desde el 1 nov **todos firman como HABIT Crew**.
 > Relacionados: `HABIT_PARA_TODOS.md`, `RETOS.md`.
 
 ## 1. La idea
@@ -24,8 +25,10 @@ Los stickers van en **HABIT y en HABIT Crew** (pedido de Joseph, 31 oct). HABIT 
 - Cada app solo **lo carga y lo llama**: `HabitShare.open({ kind:'quote', … })` con los datos que
   ya tiene. En `app.html` eso son el `<script>` y las llamadas en los puntos de entrada
   (la frase del día, el entreno terminado), sin tocar el resto de la app.
-- La marca cambia sola por app: en HABIT el logotipo dice HABIT; en Crew también HABIT (es la
-  misma marca), y el sticker **Check-in** existe solo en HABIT, que es la que tiene gym.
+- **La firma es HABIT Crew en las dos apps** (Joseph, 1 nov: «que los stickers impulsen la marca
+  HABIT Crew, tanto en la app de HABIT como en HABIT Crew»). Un sticker lo ve gente que todavía
+  no tiene la app, y la que puede bajar es Crew. El sticker **Check-in**, cuando exista, va solo
+  en HABIT, que es la que tiene gym.
 
 ## 3. El estilo
 
@@ -34,7 +37,9 @@ La variedad sale de cómo se trata la letra, no de cambiar de fuente: peso (de 1
 itálica, espaciado, contorno, repetición, tamaño. **Blanco o negro**, nunca otro color.
 
 Reglas: un dato héroe (o dos); si hacen falta más de tres renglones, son dos stickers; el
-logotipo es siempre el de la app (logo + HABIT en 800 espaciado .1em).
+logotipo es el de HABIT Crew, como el encabezado de Crew: logo + HABIT en 800 espaciado .1em +
+CREW en 600, chico (0.58 de HABIT) y espaciado .32em, sobre la misma línea base. Ningún sticker
+sale sin marca: los que no llevan logotipo firman con «HABIT CREW» en una línea espaciada.
 
 ## 4. Catálogo de estilos
 
@@ -63,17 +68,23 @@ mejor serie, músculos (con palabras, sin dibujo del cuerpo), récords, nº de e
 
 ### Lo que hay (1 nov 2026)
 
-- **Frase del día** (9): Frase, Póster (900 en mayúsculas, a la izquierda, con barra), Itálica
+- **De la marca** (en los tres tipos, segundos en la galería después del primero): **Crew** (la
+  marca apilada: el logo, HABIT espaciado al ancho exacto de CREW, y CREW enorme; debajo tu dato
+  o la frase), **Carnet** (una credencial de la crew con proporción de tarjeta: logotipo, chip,
+  la cifra o la frase, y abajo el día y `habittraininghub.app/crew`) e **Insignia** (escudo
+  redondo: HABIT CREW y tu entreno dan la vuelta entre dos anillos, con HABIT CREW centrado
+  arriba; dentro el logo y la cifra; no hay de frase, para eso está el Sello).
+- **Frase del día** (9 + Crew y Carnet): Frase, Póster (900 en mayúsculas, a la izquierda, con barra), Itálica
   (300 itálica), Cinta (cada renglón en su tira), Mensaje (burbuja que te llegó de HABIT),
   Comillas (unas comillas enormes), Mínimo (400 entre dos líneas finas), Logotipo, Sello.
-- **Entreno** (13; uno sin el dato que enseña no sale): Héroe, Datos (tres cifras como en un
+- **Entreno** (13 + los tres de la marca; uno sin el dato que enseña no sale): Héroe, Datos (tres cifras como en un
   reloj), Recibo (ticket con ejercicios, código de barras y Nº de entreno), Ligero (el tiempo en
   Inter 100), Itálica, Contorno, Notificación, Mensaje («10.02 km corridos. 52:14.» con su
   «Entrenado»), Cinta, Espaciado, Eco, Sello, Logotipo. Sirven igual para un entreno de la app
   (series, kilos, ejercicios con su mejor serie) que para una carrera, un nado o una rodada
   registrados a mano (distancia, ritmo, velocidad, FC).
-- **Semana** (4): Semana (cuántos y los siete días como puntos), Héroe, Racha (desde 2 semanas
-  seguidas), Datos.
+- **Semana** (4 + los tres de la marca): Semana (cuántos y los siete días como puntos), Héroe,
+  Racha (desde 2 semanas seguidas), Datos.
 
 ## 5. Compartir
 
@@ -166,3 +177,15 @@ mejor serie, músculos (con palabras, sin dibujo del cuerpo), récords, nº de e
   - Encontrado al probar: con scroll-snap, saltar a un estilo con desplazamiento suave mientras se
     pintaba otro sticker regresaba al primero. El salto ahora es directo, y pintar solo cambia el
     `src` de una imagen que ya estaba.
+- **2026-11-01 — Todos firman como HABIT Crew** (versión `20261101-2`). Joseph: «me gustaría que
+  esto de los stickers impulse la marca HABIT Crew… tanto en la app de HABIT como en HABIT Crew».
+  - El logotipo de todos los stickers pasa de «HABIT» a «HABIT CREW» (CREW chico, como el
+    encabezado de Crew), en las dos apps; la Notificación y el Mínimo dicen HABIT CREW, y los
+    Sellos llevan HABIT CREW en la vuelta.
+  - Ligero, Contorno, Espaciado, Eco y el Mensaje del entreno no traían marca: ahora firman.
+  - Tres estilos de la marca: Crew, Carnet e Insignia (§4). El Carnet lleva
+    `habittraininghub.app/crew`: quien ve la historia sabe dónde se baja.
+  - `scripts/check-share.js` falla si un estilo no dice CREW.
+  - De paso, Contorno: Inter variable trae contornos encimados dentro del 4 y el trazo los
+    dibujaba; ahora se traza al doble y se borra el relleno (queda solo el borde). Y la coma de
+    «4,320» ya no toca la unidad.

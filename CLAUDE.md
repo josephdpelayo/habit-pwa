@@ -60,12 +60,13 @@ The app has four screens (`#s-auth`, `#s-main`, `#s-admin`, `#s-reception`), tog
   `hs-*`) y compartir— para que HABIT, congelada, solo reciba el `<script>` y una marca: un
   elemento con `data-hs-share="quote"` (+ `data-hs-text`, `data-hs-date`) abre la galería por
   un solo escucha de clics en el documento. Cada sticker es un PNG transparente, blanco o negro,
-  en Inter con el logo real. La galería se desliza de un estilo a otro (miniaturas para saltar,
+  en Inter con el logo real, y **todos firman como HABIT Crew, también los de HABIT** (Joseph,
+  1 nov 2026: la marca que crece es Crew); la prueba falla si un estilo no dice CREW. La galería se desliza de un estilo a otro (miniaturas para saltar,
   **directo y no suave**: con scroll-snap, un salto suave que se cruza con un sticker recién
   pintado regresa al primero) y un solo botón **Compartir** (`navigator.share` con el archivo;
-  sin hoja de compartir, descarga). Tres tipos en `KINDS`: `quote` (9 estilos), `workout` (13;
+  sin hoja de compartir, descarga). Tres tipos en `KINDS`: `quote` (11 estilos), `workout` (16;
   `workoutFacts()` pone en palabras un entreno de la app o una carrera/nado/rodada, y el estilo
-  que no tiene qué enseñar devuelve null y no sale) y `week` (4). Una app abre los de entreno con
+  que no tiene qué enseñar devuelve null y no sale) y `week` (7). Una app abre los de entreno con
   `HabitShare.open({kind, data, title, subtitle})`. Los estilos nuevos son listas de trazos
   (`ops`) que dibuja `drawOps`, y `scripts/check-share.js` revisa que ninguno se salga del
   lienzo. `ACTIVITY_TYPES` (palabras de cada tipo de actividad) vive aquí y Crew lo usa. Inter
