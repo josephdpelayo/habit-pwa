@@ -17,7 +17,8 @@ This repo ships **two** front-ends off the same Vercel project and the same Supa
   today's workout, Desde cero / Elegir rutina, the initials button, the new Perfil, folded
   comments, community word filter + Normas, and the Instagram stickers (`habit-share.js`).
   **`app.html` (HABIT, the gym app) is frozen: do not change it unless Joseph asks for that
-  specific change in HABIT.** New work goes to `crew.html`; the `scripts/check-*.js` tests read
+  specific change in HABIT.** What he has asked for so far reaches HABIT as a shared module it
+  only loads: the stickers (`habit-share.js`) and Actividad (`habit-activity.js`). New work goes to `crew.html`; the `scripts/check-*.js` tests read
   `crew.html`. `crew.html` still contains the gym code and decides the brand from the path
   (`#brand-boot` → `IS_CREW`), so at `/crew` it hides everything that is the gym's
   (`GYM_ONLY_VIEWS`: book, planes, historial, shop; the door card, bookings, guest passes;
@@ -74,6 +75,18 @@ The app has four screens (`#s-auth`, `#s-main`, `#s-admin`, `#s-reception`), tog
   lienzo. `ACTIVITY_TYPES` (palabras de cada tipo de actividad) vive aquí y Crew lo usa. Inter
   100–900 e itálica se piden al abrir la galería. Cambiar el módulo sin subir la versión deja a
   los teléfonos con el viejo: el service worker lo sirve cache-first por su URL con `?v=`
+- `habit-activity.js` — **la sección Actividad, en las dos apps** (HABIT la pidió el 1 nov 2026):
+  un contenedor `#actividad-content`, su pestaña y `HabitActivity.render(el)` desde `sv()`. Junta
+  los entrenos de la app, lo registrado a mano (`training_activities`), las sesiones de fuerza de
+  Skandi y su cardio (`skandi_external_activities`, del reloj por Intervals.icu o Strava), y con
+  Intervals conectado se sincroniza sola al abrir (`/api/skandi` `intervals-status` →
+  `intervals-sync`, cada 20 min como mucho). Crea su propia hoja (`.act-overlay`, z-index 10000:
+  debajo de la galería de stickers y de `confirmSheet`) y atiende sus clics con un escucha en el
+  documento por `data-act`. **No es independiente**: usa globales de la app (`APP_GLOBALS`: `sb`,
+  `sbUser`, fechas de Mazatlán, `sessionExerciseList`…), y `scripts/check-activity.js` falla si a
+  alguna de las dos le falta una o si los botones de abajo no van en el orden de la lista que los
+  marca (HABIT los empata por posición). Crew le pasa el cierre de un entreno
+  (`HabitActivity.offerSessionStickers`); HABIT no
 - `manifest.json` / `crew-manifest.json` / `skandi-manifest.json` — one PWA manifest per app. All use `scope: "/"` and are told apart by `id`.
 
 **Version / cache busting**: one version string covers the whole project, because one service worker caches both apps. It lives in `APP_VERSION` (`app.html` **and** `crew.html`), `SKANDI_VERSION` (`skandi.html`) and `CACHE_VERSION` (`sw.js`), plus the `?v=` strings in `index.html`, the three manifests' `start_url`, the `<link>`/`<script>` tags at the top of `app.html`, `crew.html` and `skandi.html`, and the `v` inside the `#brand-boot` script of `app.html` and `crew.html`. Bumping the version is the one change `app.html` still takes. **Changing either app means bumping all of them to the same value** — a stale `CACHE_VERSION` leaves the offline shell frozen at the previous deploy.
@@ -500,17 +513,18 @@ which was the only reason it looked like it duplicated Entrenar's week; nothing 
 places. PRs live in **Progreso** only: Historial used to render them too, with its own
 `user_scores` query, and now keeps what its name promises (reservas y pagos) plus a link.
 
-- **Actividad** (solo Crew, migración 139, `docs/HABIT_PARA_TODOS.md` bitácora del 1 nov 2026):
+- **Actividad** (HABIT y Crew por `habit-activity.js`, migración 139, `docs/HABIT_PARA_TODOS.md`
+  bitácora del 1 nov 2026; además lee Skandi, ver arriba):
   una pestaña con todo lo que entrenas — los entrenos de la app (`coaching_schedule` `done`) y lo
   registrado de fuera en `training_activities` (correr, bici, nadar, caminar, fuerza, cardio,
   yoga, deporte, otro; `ds`, `duration_sec`, `distance_m` —nadar también en metros—, esfuerzo
   1–10 y opcionales). Privada: RLS de cada quien sobre lo suyo. `source` + `external_id` (índice
   único normal, no parcial) son para importar de Strava después sin otra tabla. La lista no pide
-  las series (pesan): `actSessionStickerData` las trae al abrir un entreno. El Nº de cada entreno
-  cuenta también lo anterior a la ventana (`actWindowDays`). Al cerrar un entreno en la app,
-  `wsAfterSessionClosed` abre sus stickers (`offerWorkoutStickers`) en lugar del «¿Cómo te fue?»,
-  que queda para quien tiene coaching. Sin la 139, la sección muestra lo de la app y esconde
-  Registrar
+  las series (pesan): `stickerData()` las trae al abrir un entreno. El Nº de cada entreno cuenta
+  también lo anterior a la ventana (`state.windowDays`) y todas las fuentes. En Crew, al cerrar un
+  entreno, `wsAfterSessionClosed` abre sus stickers (`HabitActivity.offerSessionStickers`) en
+  lugar del «¿Cómo te fue?», que queda para quien tiene coaching. Sin la 139, la sección muestra
+  lo demás y esconde Registrar
 - `posts` / `post_reactions` / `post_comments` — community feed. **Las listas nunca piden
   `img_url` junto con lo demás** (`POST_LIST_COLUMNS` + `attachPostImages()`): las fotos de antes
   de la 017 están en base64 dentro de la tabla (una pesa 6.4 MB y hacía tardar el feed ~6 s), así

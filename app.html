@@ -6,12 +6,12 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="HABIT">
 <meta name="application-name" content="HABIT">
-<link rel="manifest" href="/manifest.json?v=20261101-3">
-<link rel="apple-touch-icon" sizes="120x120" href="/icons/icon-120.png?v=20261101-3">
-<link rel="apple-touch-icon" sizes="152x152" href="/icons/icon-152.png?v=20261101-3">
-<link rel="apple-touch-icon" sizes="167x167" href="/icons/icon-167.png?v=20261101-3">
-<link rel="apple-touch-icon" sizes="180x180" href="/icons/icon-180.png?v=20261101-3">
-<link rel="icon" type="image/png" sizes="32x32" href="/icons/icon-32.png?v=20261101-3">
+<link rel="manifest" href="/manifest.json?v=20261101-4">
+<link rel="apple-touch-icon" sizes="120x120" href="/icons/icon-120.png?v=20261101-4">
+<link rel="apple-touch-icon" sizes="152x152" href="/icons/icon-152.png?v=20261101-4">
+<link rel="apple-touch-icon" sizes="167x167" href="/icons/icon-167.png?v=20261101-4">
+<link rel="apple-touch-icon" sizes="180x180" href="/icons/icon-180.png?v=20261101-4">
+<link rel="icon" type="image/png" sizes="32x32" href="/icons/icon-32.png?v=20261101-4">
 <title>HABIT</title>
 <!-- Con id a propósito: scripts/check-training.js toma la primera etiqueta script sin
      atributos como el script principal de la app y la compila. -->
@@ -25,7 +25,7 @@
   var crew=/^\/crew(\/|$)/.test(location.pathname);
   window.HABIT_BRAND=crew?'crew':'gym';
   if(!crew)return;
-  var v='20261101-3';
+  var v='20261101-4';
   document.documentElement.classList.add('brand-crew');
   document.title='HABIT Crew';
   document.querySelectorAll('meta[name="apple-mobile-web-app-title"],meta[name="application-name"]')
@@ -40,10 +40,11 @@
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Share+Tech+Mono&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="/skandi-recovery.js?v=20261101-3"></script>
-<script src="/body-figure.js?v=20261101-3"></script>
-<script src="/habit-training.js?v=20261101-3"></script>
-<script src="/habit-share.js?v=20261101-3"></script>
+<script src="/skandi-recovery.js?v=20261101-4"></script>
+<script src="/body-figure.js?v=20261101-4"></script>
+<script src="/habit-training.js?v=20261101-4"></script>
+<script src="/habit-share.js?v=20261101-4"></script>
+<script src="/habit-activity.js?v=20261101-4"></script>
 <style>
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
 @media (prefers-reduced-motion:reduce){*,*:before,*:after{scroll-behavior:auto!important;animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}}
@@ -2896,6 +2897,8 @@ button{transition:transform .14s var(--ease-out),background-color .16s ease,colo
 @media (prefers-reduced-motion:reduce){
   .view.active,.screen.active,.adm-section.active,.terms-modal,.terms-modal>.terms-box,.exercise-session-modal>.terms-box,.workout-sheet.open,.clk-sheet.open{animation:none}
 }
+/* Cinco pestañas desde Actividad (1 nov 2026): a 74 px cada una no cabían en 375 px. */
+.bnav-inner>.bnb{min-width:64px}
 </style>
 </head>
 <body>
@@ -3189,6 +3192,11 @@ button{transition:transform .14s var(--ease-out),background-color .16s ease,colo
     <div class="scroll-area"><div id="progreso-content"></div></div>
   </div>
 
+  <!-- ACTIVIDAD: todo lo entrenado, con su sticker (habit-activity.js, igual que en Crew) -->
+  <div id="v-actividad" class="view">
+    <div class="scroll-area"><div id="actividad-content"></div></div>
+  </div>
+
   <!-- HISTORIAL -->
   <div id="v-historial" class="view">
     <div class="scroll-area">
@@ -3239,6 +3247,8 @@ button{transition:transform .14s var(--ease-out),background-color .16s ease,colo
         <svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>Reservar</button>
       <button id="rutinas-nav-btn" class="bnb" onclick="sv('rutinas')">
         <svg viewBox="0 0 24 24"><path d="M6 4h4v16H6zM14 4h4v16h-4zM4 9h2M10 9h4M18 9h2M4 15h2M10 15h4M18 15h2"/></svg>Entrenar</button>
+      <button id="actividad-nav-btn" class="bnb" onclick="sv('actividad')">
+        <svg viewBox="0 0 24 24"><path d="M3 12h4l3-7 4 14 3-7h4"/></svg>Actividad</button>
       <button id="coaching-nav-btn" class="bnb" onclick="sv('coaching')" style="display:none">
         <span id="coaching-nav-badge" class="bnb-badge coach-pending" data-coaching-pending-count></span>
         <svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M3 10h18M8 2v4M16 2v4M8 15l2 2 4-4"/></svg>Coaching</button>
@@ -4059,7 +4069,7 @@ const GYM_ONLY_VIEWS=['book','planes','historial','shop'];
 const GYM_APP_URL='/';
 document.querySelectorAll('.brand-name').forEach(el=>{el.textContent=BRAND_NAME;});
 const SUPABASE_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBtcGp0ZXVxanVzYmlkdWV2YndxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc2OTI1NjUsImV4cCI6MjA5MzI2ODU2NX0.XbMzZoo2yqtrD8znLnyo_1zDfrdJAvAPj1lqGOyXnLw';
-const APP_VERSION='20261101-3';
+const APP_VERSION='20261101-4';
 // La pierna va separada en cuádriceps, femorales y pantorrillas: la figura
 // corporal pinta esas tres regiones por separado y el motor de recuperación les
 // da ventanas de descanso distintas. 'Piernas' sigue reconociéndose al leer
@@ -6862,7 +6872,7 @@ async function loadReceptionSessions(){
 }
 
 // ── NAVIGATION ──
-const ALL_VIEWS=['inicio','book','planes','rutinas','coaching','comunidad','shop','historial','perfil','progreso'];
+const ALL_VIEWS=['inicio','book','planes','rutinas','coaching','comunidad','shop','historial','perfil','progreso','actividad'];
 // Entrenar y la Comunidad ya no están aquí (docs/HABIT_PARA_TODOS.md): cualquier cuenta
 // entrena, registra su progreso y participa en la comunidad, que es la misma en HABIT y en
 // HABIT Crew (D13). Lo único cerrado es reservar, y con eso la puerta. El candado que
@@ -6930,7 +6940,7 @@ function sv(v){
     v='inicio';
   }
   document.querySelectorAll('.bnb').forEach((b,i)=>{
-    const name=['inicio','book','rutinas','coaching','comunidad','shop'][i];
+    const name=['inicio','book','rutinas','actividad','coaching','comunidad','shop'][i];
     b.classList.toggle('active',name===v);
     b.classList.toggle('locked',MEMBER_LOCKED_VIEWS.includes(name)&&!canUseMemberViews());
   });
@@ -6944,6 +6954,7 @@ function sv(v){
   if(v==='planes')renderPlans();
   if(v==='rutinas'){renderRutinas().catch(console.error);}
   if(v==='progreso'){renderProgreso().catch(console.error);}
+  if(v==='actividad'&&window.HabitActivity){HabitActivity.render(document.getElementById('actividad-content'));}
   if(v==='coaching'){renderCoachHub();}
   if(v==='comunidad'){renderCommunityTab();}
   if(v==='shop'){renderShop('shop-content',false);loadShopProducts().then(()=>renderShop('shop-content',false)).catch(()=>{});handleShopReturn();}

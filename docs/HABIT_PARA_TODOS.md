@@ -929,3 +929,30 @@ nuevas.
     nueva de Strava empieza con capacidad de 1 atleta; subirla a 10 es autoservicio en la
     configuración de la API, más de 10 pide la revisión de Strava. Apple Salud necesita la app
     nativa.
+- **2026-11-01** — **Actividad en HABIT también, con Skandi y el reloj** (versión `20261101-4`).
+  Joseph: «falta poder ver entrenamientos ya realizados para compartirlos, y también carrera,
+  natación…» y «también lo tenemos que ver en la app principal de HABIT».
+  - **Por qué no veía nada**: su cuenta tenía 2 entrenos de la app (julio), 0 registrados a mano,
+    10 sesiones de fuerza en Skandi (ago) y 9 carreras/rodadas/nados que Intervals.icu había
+    traído a Skandi (ago–sep). Actividad solo leía los dos primeros. Y Intervals estaba conectado
+    desde el 22 ago, pero la última sincronización era del **7 sep**: Skandi solo trae lo nuevo
+    cuando alguien la abre y toca sincronizar.
+  - **La sección pasó a un módulo, `habit-activity.js`**, igual que los stickers: HABIT (a pedido
+    de Joseph) y Crew lo cargan con un `<script>`, un `#actividad-content` y su pestaña. Crew ya
+    no trae su copia. En HABIT, Actividad va entre Entrenar y Comunidad, y las pestañas bajaron
+    a 64 px de mínimo para que cinco quepan en 375 px. Al cerrar un entreno, el sticker sigue
+    siendo solo de Crew: en HABIT ese flujo no cambió.
+  - **Fuentes nuevas**: los entrenos de fuerza terminados de Skandi (`skandi_sessions`, con sus
+    series y la mejor de cada ejercicio para el sticker) y el cardio de Skandi
+    (`skandi_external_activities`: del reloj por Intervals.icu o Strava, o registrado ahí). Del
+    reloj, `note` es el nombre de la actividad («Malecón 10K») y el tipo crudo afina un «other»
+    (yoga, caminata, deporte). Se ven y se comparten; se corrigen donde nacieron.
+  - **El reloj llega solo**: con Intervals conectado, abrir Actividad pide `intervals-sync`
+    (por `/api/skandi`, sin función nueva) si pasaron más de 20 min, por los días desde la última
+    vez más dos de colchón (máx. 120). Hay una línea «Tu reloj (Intervals.icu) · sincronizado hace
+    …» con «Sincronizar». Conectar Intervals sigue siendo en Skandi.
+  - Encontrado al pasarlo: en el formulario, «Hoy/Ayer» y los atajos de minutos no hacían nada
+    (el repintado volvía a leer la pantalla y pisaba el cambio). Corregido.
+  - `scripts/check-activity.js`: que las dos apps declaren lo que usa el módulo, que los botones
+    de abajo vayan en el orden de su lista (HABIT los empata por posición), y cómo cada fuente se
+    vuelve un renglón.
