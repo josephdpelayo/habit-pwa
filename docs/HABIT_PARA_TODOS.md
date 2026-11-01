@@ -854,3 +854,17 @@ nuevas.
   (`hoyEnsureTraining`), como `startInicioCoachWorkout`. En la hoja, «Entreno libre» pasó a
   llamarse «Desde cero» y ya no sale palomeado. **Arreglo:** abierta antes de que llegaran las
   rutinas, la hoja decía «Todas 0»; ahora las carga y se repinta.
+- **2026-10-31 (4)** — **Barras y Perfil** (versión `20261031-4`).
+  - **Arriba, un solo botón**: tu foto o tus iniciales (`#top-avatar`, `renderTopAvatar`) llevan
+    a Perfil. Eran tres iconos sin texto (tarjeta = Membresía, reloj = Historial, engrane =
+    Perfil). Membresía e Historial pasan a filas de Perfil (sección Gym, solo en HABIT), con la
+    membresía resumida igual que la píldora de arriba.
+  - **Abajo, sin Reservar para quien no puede reservar**: antes salía en gris y llevaba a
+    Membresías con un aviso. Ahora se oculta (`updateBottomNavAccess`, también desde
+    `renderMembershipStatus`, porque el primer `sv('inicio')` corre antes de tener la
+    membresía). Para un socio no cambia nada.
+  - **Perfil ordenado por uso**: nombre y correo bajo la foto (`perfil-info` existía y nunca se
+    llenaba), luego Gym, Mi entrenamiento, Avisos, Comunidad (con Asistencia), Bloqueados;
+    los datos y la contraseña plegados en «Editar mis datos» (`<details>`), y Cuenta al final.
+    Sin «Volver». El botón flotante de Asistencia ya no sale: tapaba las filas de Perfil y ahora
+    es una fila.

@@ -6,12 +6,12 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="HABIT">
 <meta name="application-name" content="HABIT">
-<link rel="manifest" href="/manifest.json?v=20261031-3">
-<link rel="apple-touch-icon" sizes="120x120" href="/icons/icon-120.png?v=20261031-3">
-<link rel="apple-touch-icon" sizes="152x152" href="/icons/icon-152.png?v=20261031-3">
-<link rel="apple-touch-icon" sizes="167x167" href="/icons/icon-167.png?v=20261031-3">
-<link rel="apple-touch-icon" sizes="180x180" href="/icons/icon-180.png?v=20261031-3">
-<link rel="icon" type="image/png" sizes="32x32" href="/icons/icon-32.png?v=20261031-3">
+<link rel="manifest" href="/manifest.json?v=20261031-4">
+<link rel="apple-touch-icon" sizes="120x120" href="/icons/icon-120.png?v=20261031-4">
+<link rel="apple-touch-icon" sizes="152x152" href="/icons/icon-152.png?v=20261031-4">
+<link rel="apple-touch-icon" sizes="167x167" href="/icons/icon-167.png?v=20261031-4">
+<link rel="apple-touch-icon" sizes="180x180" href="/icons/icon-180.png?v=20261031-4">
+<link rel="icon" type="image/png" sizes="32x32" href="/icons/icon-32.png?v=20261031-4">
 <title>HABIT</title>
 <!-- Con id a propósito: scripts/check-training.js toma la primera etiqueta script sin
      atributos como el script principal de la app y la compila. -->
@@ -25,7 +25,7 @@
   var crew=/^\/crew(\/|$)/.test(location.pathname);
   window.HABIT_BRAND=crew?'crew':'gym';
   if(!crew)return;
-  var v='20261031-3';
+  var v='20261031-4';
   document.documentElement.classList.add('brand-crew');
   document.title='HABIT Crew';
   document.querySelectorAll('meta[name="apple-mobile-web-app-title"],meta[name="application-name"]')
@@ -40,9 +40,9 @@
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Share+Tech+Mono&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="/skandi-recovery.js?v=20261031-3"></script>
-<script src="/body-figure.js?v=20261031-3"></script>
-<script src="/habit-training.js?v=20261031-3"></script>
+<script src="/skandi-recovery.js?v=20261031-4"></script>
+<script src="/body-figure.js?v=20261031-4"></script>
+<script src="/habit-training.js?v=20261031-4"></script>
 <style>
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
 @media (prefers-reduced-motion:reduce){*,*:before,*:after{scroll-behavior:auto!important;animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}}
@@ -267,6 +267,7 @@ input,select,button,textarea{font-family:'Inter',sans-serif}
 .guest-save:disabled{opacity:.45;cursor:not-allowed}
 .guest-collapse{margin-top:10px;width:100%;padding:11px;border-radius:6px;border:1px solid var(--border);background:transparent;color:var(--gray);font-size:11px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;cursor:pointer}
 .bnb.locked{opacity:.38}
+.bnb.nav-hidden{display:none!important}
 .locked-panel{background:var(--card);border:1px solid rgba(245,158,11,.45);border-radius:6px;padding:22px 18px;text-align:center;color:var(--gray);line-height:1.5}
 .locked-panel h3{font-size:16px;color:var(--white);letter-spacing:.08em;text-transform:uppercase;margin-bottom:8px}
 .next-box{background:var(--card);border:1px solid var(--border);border-radius:4px;padding:12px 14px;margin-bottom:1rem}
@@ -2589,6 +2590,14 @@ body.admin-mode #courtesy-modal label{border-radius:14px!important;border-color:
 .onb-opt.active{border-color:var(--blue);background:rgba(37,99,235,.16)}
 .onb-footer{display:flex;gap:8px}
 .onb-footer .btn,.onb-footer .btn-ghost{flex:1;margin:0}
+.perfil-name{text-align:center;font-size:18px;font-weight:700;color:var(--white);margin-top:10px}
+.perfil-email{text-align:center;font-size:13px;color:var(--gray);margin-top:2px}
+.perfil-edit>summary{list-style:none;cursor:pointer}
+.perfil-edit>summary::-webkit-details-marker{display:none}
+.perfil-edit[open]>summary{margin-bottom:12px}
+.perfil-edit-body{padding-top:4px}
+.top-avatar{border-radius:50%!important;width:38px;height:38px;padding:0;overflow:hidden;font-size:13px;font-weight:700;letter-spacing:.02em;color:var(--white)}
+.top-avatar img{width:100%;height:100%;object-fit:cover;display:block}
 .perfil-row-btn{display:flex;align-items:center;justify-content:space-between;gap:10px;text-align:left}
 .perfil-row-sum{font-size:12px;color:var(--gray);font-weight:500;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:55%}
 .perfil-delete-btn{color:var(--red);border-color:rgba(255,100,100,.28)}
@@ -2972,9 +2981,9 @@ button{transition:transform .14s var(--ease-out),background-color .16s ease,colo
   <div class="hdr" id="main-hdr-bar">
     <div class="logo-wrap" onclick="sv('inicio')" style="cursor:pointer"><img src="/icons/logo-original.png" style="width:30px;height:30px;object-fit:contain"><div><span class="ltxt">HABIT</span><span class="lsub gym-only">TRAINING HUB</span><span class="lsub crew-only">CREW</span><span id="main-member-pill" class="main-member-pill"></span></div></div>
     <div class="top-actions">
-      <button class="top-action" data-top-view="planes" onclick="sv('planes')" title="Membresía"><svg viewBox="0 0 24 24"><rect x="2" y="5" width="20" height="14" rx="2"/><path d="M2 10h20M6 15h4M14 15h4"/></svg></button>
-      <button class="top-action" data-top-view="historial" onclick="sv('historial')" title="Historial"><svg viewBox="0 0 24 24"><path d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg></button>
-      <button class="top-action" data-top-view="perfil" onclick="sv('perfil')" title="Configurar perfil"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-2 2 2 2 0 01-2-2v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 01-2-2 2 2 0 012-2h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 012-2 2 2 0 012 2v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 012 2 2 2 0 01-2 2h-.09a1.65 1.65 0 00-1.51 1z"/></svg></button>
+      <!-- Un solo botón: tu foto o tus iniciales llevan a Perfil, y desde ahí a la membresía y el
+           historial. Eran tres iconos sin texto (tarjeta, reloj, engrane) que nadie sabía leer. -->
+      <button class="top-action top-avatar" id="top-avatar" data-top-view="perfil" onclick="sv('perfil')" aria-label="Tu perfil"></button>
     </div>
     <!-- «Salir» vivía aquí, a un toque de cerrar la sesión sin querer: ahora está en Perfil. -->
   </div>
@@ -3001,23 +3010,13 @@ button{transition:transform .14s var(--ease-out),background-color .16s ease,colo
       <div class="perfil-section">
         <div class="perfil-avatar" id="perfil-av"></div>
         <div id="perfil-info"></div>
-        <button class="btn-ghost gym-only" onclick="sv('inicio')" style="width:100%;margin-top:8px">Ver mi membresía y visitas →</button>
-        <div class="divider" style="margin:.75rem 0"></div>
-        <p class="slbl">Editar datos</p>
-        <div class="avatar-picker">
-          <button class="btn-sm bblue" onclick="document.getElementById('pf-avatar').click()">Subir foto de perfil</button>
-          <button class="btn-sm bred" id="pf-avatar-clear" onclick="clearProfilePhoto()" style="display:none">Quitar</button>
-          <input type="file" id="pf-avatar" accept="image/*" onchange="previewProfilePhoto(this)">
+        <!-- Lo que se usa va arriba; los datos y la contraseña, plegados abajo (casi nadie los toca). -->
+        <div class="gym-only">
+          <div class="divider" style="margin:.75rem 0"></div>
+          <p class="slbl">Gym</p>
+          <button class="btn-ghost perfil-row-btn" onclick="sv('planes')"><span>Membresía y visitas</span><span id="perfil-plan-sum" class="perfil-row-sum"></span></button>
+          <button class="btn-ghost perfil-row-btn" onclick="sv('historial')" style="margin-top:8px"><span>Historial</span><span class="perfil-row-sum">Reservas y pagos</span></button>
         </div>
-        <div class="field"><label>Nombre</label><input type="text" id="pf-name" placeholder="Tu nombre"></div>
-        <div class="field"><label>Teléfono</label><input type="tel" id="pf-phone" placeholder="+52 55 0000 0000"></div>
-        <div class="divider" style="margin:.75rem 0"></div>
-        <p class="slbl">Cambiar contraseña</p>
-        <div class="field"><label>Contraseña actual</label><input type="password" id="pf-oldpass" placeholder="••••••••"></div>
-        <div class="field"><label>Nueva contraseña</label><input type="password" id="pf-newpass" placeholder="Mínimo 6 caracteres"></div>
-        <div class="field"><label>Confirmar nueva contraseña</label><input type="password" id="pf-newpass2" placeholder="Repite la contraseña"></div>
-        <button class="btn" onclick="savePerfil()">Guardar cambios</button>
-        <button class="btn-ghost" onclick="sv('inicio')" style="margin-top:8px">Volver</button>
         <div class="divider" style="margin:.75rem 0"></div>
         <p class="slbl">Mi entrenamiento</p>
         <button class="btn-ghost perfil-row-btn" onclick="openTrainingOnboarding()"><span>Objetivo, nivel y equipo</span><span id="perfil-training-sum" class="perfil-row-sum"></span></button>
@@ -3027,11 +3026,31 @@ button{transition:transform .14s var(--ease-out),background-color .16s ease,colo
         <div class="divider" style="margin:.75rem 0"></div>
         <p class="slbl">Comunidad</p>
         <button class="btn-ghost perfil-row-btn" onclick="openCommunityRules()"><span>Normas de la comunidad</span><span class="perfil-row-sum">Reportar</span></button>
+        <button class="btn-ghost perfil-row-btn" onclick="openSupportWhatsapp()" style="margin-top:8px"><span>Asistencia</span><span class="perfil-row-sum">WhatsApp</span></button>
         <div id="perfil-blocks-section">
           <div class="divider" style="margin:.75rem 0"></div>
           <p class="slbl">Usuarios bloqueados</p>
           <div id="perfil-blocks"></div>
         </div>
+        <div class="divider" style="margin:.75rem 0"></div>
+        <details class="perfil-edit" id="perfil-edit">
+          <summary class="btn-ghost perfil-row-btn"><span>Editar mis datos</span><span class="perfil-row-sum">Foto, nombre, teléfono, contraseña</span></summary>
+          <div class="perfil-edit-body">
+          <div class="avatar-picker">
+            <button class="btn-sm bblue" onclick="document.getElementById('pf-avatar').click()">Subir foto de perfil</button>
+            <button class="btn-sm bred" id="pf-avatar-clear" onclick="clearProfilePhoto()" style="display:none">Quitar</button>
+            <input type="file" id="pf-avatar" accept="image/*" onchange="previewProfilePhoto(this)">
+          </div>
+          <div class="field"><label>Nombre</label><input type="text" id="pf-name" placeholder="Tu nombre"></div>
+          <div class="field"><label>Teléfono</label><input type="tel" id="pf-phone" placeholder="+52 55 0000 0000"></div>
+          <div class="divider" style="margin:.75rem 0"></div>
+          <p class="slbl">Cambiar contraseña</p>
+          <div class="field"><label>Contraseña actual</label><input type="password" id="pf-oldpass" placeholder="••••••••"></div>
+          <div class="field"><label>Nueva contraseña</label><input type="password" id="pf-newpass" placeholder="Mínimo 6 caracteres"></div>
+          <div class="field"><label>Confirmar nueva contraseña</label><input type="password" id="pf-newpass2" placeholder="Repite la contraseña"></div>
+          <button class="btn" onclick="savePerfil()">Guardar cambios</button>
+          </div>
+        </details>
         <div id="perfil-account-section">
           <div class="divider" style="margin:.75rem 0"></div>
           <p class="slbl">Cuenta</p>
@@ -4100,7 +4119,7 @@ const GYM_ONLY_VIEWS=['book','planes','historial','shop'];
 const GYM_APP_URL='/';
 document.querySelectorAll('.brand-name').forEach(el=>{el.textContent=BRAND_NAME;});
 const SUPABASE_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBtcGp0ZXVxanVzYmlkdWV2YndxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc2OTI1NjUsImV4cCI6MjA5MzI2ODU2NX0.XbMzZoo2yqtrD8znLnyo_1zDfrdJAvAPj1lqGOyXnLw';
-const APP_VERSION='20261031-3';
+const APP_VERSION='20261031-4';
 // La pierna va separada en cuádriceps, femorales y pantorrillas: la figura
 // corporal pinta esas tres regiones por separado y el motor de recuperación les
 // da ventanas de descanso distintas. 'Piernas' sigue reconociéndose al leer
@@ -6949,10 +6968,29 @@ function canUseMemberViews(){
   // acceso (pizarrón, comunidad, etc.) hasta que esa sesión termine.
   return (curUser.bookings||[]).some(b=>!isBookingPast(b));
 }
+const BNAV_VIEWS=['inicio','book','rutinas','coaching','comunidad','shop'];
+// Reservar no se enseña en gris a quien no es socio: era una pestaña que no hacía nada. Las
+// membresías siguen en Inicio («¿Estás en Mazatlán?») y en Perfil. Se llama también al llegar
+// la membresía (renderMembershipStatus): el primer sv('inicio') corre antes de tenerla.
+function updateBottomNavAccess(){
+  document.querySelectorAll('.bnb').forEach((b,i)=>{
+    b.classList.toggle('nav-hidden',MEMBER_LOCKED_VIEWS.includes(BNAV_VIEWS[i])&&!canUseMemberViews());
+  });
+}
 function updateTopActions(v){
   document.querySelectorAll('.top-action[data-top-view]').forEach(btn=>{
     btn.classList.toggle('primary',btn.dataset.topView===v);
   });
+  renderTopAvatar();
+}
+function renderTopAvatar(){
+  const el=document.getElementById('top-avatar');
+  if(!el||!curUser)return;
+  const url=curUser.avatarUrl||'';
+  const key=url+'|'+(curUser.name||'');
+  if(el.dataset.key===key)return;
+  el.dataset.key=key;
+  el.innerHTML=url?'<img src="'+esc(url)+'" alt="">':'<span>'+esc(inits(curUser.name||'?'))+'</span>';
 }
 function supportWhatsappUrl(){
   let context='mi rutina';
@@ -6973,8 +7011,9 @@ function openSupportWhatsapp(){
 function updateSupportFab(v){
   const fab=document.getElementById('support-fab');
   if(!fab)return;
-  // Vivía en Entrenar y tapaba ejercicios y series. En Perfil se encuentra igual.
-  const show=!!sbUser&&v==='perfil';
+  // Vivía en Entrenar y tapaba ejercicios y series; luego en Perfil tapaba sus filas. Ahora es
+  // una fila de Perfil (Comunidad → Asistencia), y el botón flotante ya no sale.
+  const show=false;void v;
   fab.classList.toggle('show',show);
 }
 function sv(v){
@@ -6998,10 +7037,10 @@ function sv(v){
     v='inicio';
   }
   document.querySelectorAll('.bnb').forEach((b,i)=>{
-    const name=['inicio','book','rutinas','coaching','comunidad','shop'][i];
+    const name=BNAV_VIEWS[i];
     b.classList.toggle('active',name===v);
-    b.classList.toggle('locked',MEMBER_LOCKED_VIEWS.includes(name)&&!canUseMemberViews());
   });
+  updateBottomNavAccess();
   updateShopCartBadge();
   updateCoachingNavBadge();
   updateTopActions(v);
@@ -7139,6 +7178,15 @@ async function renderPerfil(){
   }
   const av=document.getElementById('perfil-av');
   if(av)av.innerHTML=curUser.avatarUrl?'<img src="'+esc(curUser.avatarUrl)+'" alt="">':inits(curUser.name||'?');
+  renderTopAvatar();
+  const info=document.getElementById('perfil-info');
+  if(info)info.innerHTML='<div class="perfil-name">'+esc(curUser.name||'')+'</div>'
+    +(sbUser&&sbUser.email?'<div class="perfil-email">'+esc(sbUser.email)+'</div>':'');
+  // Lo mismo que dice la píldora de arriba (visitas, Mensual, Vencida), sin calcularlo otra vez.
+  updateMainMembershipPill();
+  const planSum=document.getElementById('perfil-plan-sum');
+  const pill=document.getElementById('main-member-pill');
+  if(planSum)planSum.textContent=(pill&&pill.textContent)||'Sin membresía';
   const clearBtn=document.getElementById('pf-avatar-clear');
   if(clearBtn)clearBtn.style.display=curUser.avatarUrl?'block':'none';
   const pfName=el.querySelector('#pf-name');
@@ -7434,6 +7482,7 @@ function updateMainMembershipPill(){
 function renderMembershipStatus(){
   const el=document.getElementById('membership-status-wrap');
   updateMainMembershipPill();
+  updateBottomNavAccess();
   if(!el||!curUser)return;
   // En Crew la membresía no se compra ni se muestra: es de la app del gym. Al socio le
   // recuerda dónde reserva; a quien no lo es, lo invita. Se abre aparte porque una app
