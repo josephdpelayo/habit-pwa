@@ -51,4 +51,33 @@ assert.equal(sig.lockup.word.text, 'HABIT');
 
 assert.deepEqual(Object.keys(S.COLORS), ['blanco', 'negro'], 'solo blanco y negro');
 
+// Sello: la vuelta cierra exacta (el espacio se reparte), las letras van en orden alrededor
+// del círculo y caben en el lienzo; un texto largo baja de tamaño.
+for (const text of ['MAKE IT A HABIT · 31.10.26 · ', 'MAKE IT A HABIT · ENTRENO Nº 47 · SEMANA 6 · LEG 2 · ']) {
+  const L = S.sealLayout(text, measure);
+  assert.equal(L.chars.length, [...text].length, 'una posición por letra');
+  assert.ok(L.spacing >= 0, 'las letras no se enciman');
+  assert.ok(L.chars.every((c, i) => i === 0 || c.angle > L.chars[i - 1].angle), 'en orden, sin dar dos vueltas');
+  assert.ok(L.chars[L.chars.length - 1].angle < Math.PI * 2, 'termina antes de cerrar la vuelta');
+  assert.ok(L.radius + L.size * 0.55 <= L.width / 2, 'las letras caben en el lienzo');
+  assert.ok(L.size >= 30 && L.size <= 120, 'tamaño de letra en rango');
+  assert.ok(L.logo.size < L.radius * 2 - L.size * 2, 'el logo no toca las letras');
+}
+assert.ok(S.sealLayout('MAKE IT A HABIT · ENTRENO Nº 47 · SEMANA 6 · LEG 2 · ', measure).size
+  <= S.sealLayout('MAKE IT A HABIT · ', measure).size, 'el texto largo no crece');
+
+assert.equal(S.shortDate('2026-10-31'), '31.10.26');
+assert.equal(S.shortDate(''), '');
+
+// La galería de la frase del día: tres estilos, y cada uno se dispone con los datos de la frase.
+assert.deepEqual(S.KINDS.quote.styles.map((s) => s.id), ['frase', 'logotipo', 'sello']);
+for (const st of S.KINDS.quote.styles) {
+  const L = st.layout({ text: quotes[0], ds: '2026-10-31' }, measure);
+  assert.ok(L.width > 0 && L.height > 0, st.id + ' tiene tamaño');
+  assert.equal(L.kind, st.id);
+}
+const sello = S.KINDS.quote.styles[2].layout({ text: quotes[0], ds: '2026-10-31' }, measure);
+assert.ok(sello.chars.map((c) => c.ch).join('').includes('31.10.26'), 'el sello lleva la fecha');
+assert.ok(S.chipHtml().includes('Compartir'), 'el botón dice Compartir');
+
 console.log('HABIT Stickers: ok');

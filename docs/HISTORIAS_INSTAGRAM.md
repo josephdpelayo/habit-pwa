@@ -1,161 +1,103 @@
 # Stickers — que lo que entrenas se pueda subir a Instagram
 
-> Plan del 31 oct 2026, rehecho el mismo día después de ver cómo lo resuelve AURA. Fase 0
-> hecha (ver Bitácora al final). Relacionados: `HABIT_PARA_TODOS.md` (HABIT Crew, Comunidad), `RETOS.md`.
+> Plan del 31 oct 2026, rehecho tres veces ese día con Joseph (ver Bitácora). Fase 1 hecha, en
+> las dos apps. Relacionados: `HABIT_PARA_TODOS.md`, `RETOS.md`.
 
-## 1. La idea en una línea
+## 1. La idea
 
-Al terminar un entreno, HABIT te da una **galería de stickers** con tus números: textos con fondo
-transparente, en varios estilos tipográficos. **Tocas uno y se copia**; abres tu historia con tu
-foto del gym y lo **pegas encima**. Mantener el dedo lo guarda como imagen.
+Al terminar un entreno (o desde la frase del día, tu semana, un récord), HABIT te da una
+**galería de stickers**: PNG con fondo transparente con tus números. Cada uno tiene su botón
+**Compartir** con el ícono universal de compartir: abre la hoja del teléfono (Instagram,
+WhatsApp, Guardar imagen, Copiar). En Instagram el sticker va encima de tu foto.
 
-No son tarjetas de pantalla completa sino stickers: la foto la pone el usuario (su cara, el gym,
-el espejo), y HABIT pone los números con estilo. Así es como la gente sube historias de verdad, y
-la foto del gym de HABIT sale en cada una sin que lo pidamos.
+Por qué: es la recompensa del entreno (hoy cerrar una sesión termina en un aviso de dos
+segundos) y cada historia enseña HABIT. Gratis para todos. Nada nuevo en el servidor.
 
-**Por qué importa:**
+## 2. En las dos apps
 
-1. **Es la recompensa del entreno.** Hoy cerrar una sesión termina en un aviso de dos segundos.
-2. **Cada historia enseña HABIT.** El sticker lleva el anillo de HABIT y, si se quiere, la
-   dirección de HABIT Crew. Por eso es **gratis para todos**: cobrarlo apagaría justo lo que trae
-   gente.
-3. **Nada nuevo en el servidor.** Todo se dibuja en el teléfono con datos que la app ya tiene.
-   Sin migraciones, sin endpoints.
+Los stickers van en **HABIT y en HABIT Crew** (pedido de Joseph, 31 oct). HABIT está congelada
+(`app.html`, ver `CLAUDE.md`), así que la regla es que **HABIT reciba los stickers y nada más**:
 
-## 2. Lo que aprendimos de AURA (capturas del 31 oct)
+- **Todo vive en `habit-share.js`**: el dibujo, la galería (la hoja, sus estilos, el botón) y
+  compartir. La hoja la crea el propio módulo en el DOM, con su CSS adentro.
+- Cada app solo **lo carga y lo llama**: `HabitShare.open({ kind:'quote', … })` con los datos que
+  ya tiene. En `app.html` eso son el `<script>` y las llamadas en los puntos de entrada
+  (la frase del día, el entreno terminado), sin tocar el resto de la app.
+- La marca cambia sola por app: en HABIT el logotipo dice HABIT; en Crew también HABIT (es la
+  misma marca), y el sticker **Check-in** existe solo en HABIT, que es la que tiene gym.
 
-- Una sola pantalla: arriba **qué entreno** (selector) y **color**; en medio
-  «Toca para copiar · Mantén para guardar»; abajo una **cuadrícula de stickers** sobre fondo
-  oscuro, con pestañas (Actividad / Totales / Equipo).
-- Los stickers son **solo tipografía**: condensada enorme ("133 CAL"), ancha ("SATURDAY"), serif
-  itálica editorial ("Time 24m 15s"), monoespaciada tipo recibo con código de barras, burbujas de
-  mensaje, resaltador, notificación. Algunos tienen variantes (puntitos debajo).
-- Sin ilustraciones del cuerpo. Lo bonito es la tipografía y el aire.
+## 3. El estilo
 
-Lo que **no** copiamos: sus estilos uno por uno ni sus datos (calorías y pulso vienen del reloj;
-HABIT no los tiene). Tomamos el formato y lo hacemos con la identidad de HABIT.
+**Una sola fuente: Inter, la de HABIT**, con el **logo original** (`/icons/logo-original.png`).
+La variedad sale de cómo se trata la letra, no de cambiar de fuente: peso (de 150 a 900),
+itálica, espaciado, contorno, repetición, tamaño. **Blanco o negro**, nunca otro color.
 
-## 3. El estilo HABIT
+Reglas: un dato héroe (o dos); si hacen falta más de tres renglones, son dos stickers; el
+logotipo es siempre el de la app (logo + HABIT en 800 espaciado .1em).
 
-Minimalista y premium, **solo blanco y negro**. Ajustado el 31 oct con Joseph: variedad para cada
-gusto, **menos texto** (uno o dos datos por sticker), **números grandes** y también stickers
-**divertidos**.
+## 4. Catálogo de estilos
 
-| Familia | Para qué | Ejemplo |
-|---|---|---|
-| **Space Grotesk** (la de HABIT) | La marca, etiquetas, el anillo | `HABIT` · `Nº 47` |
-| **Anton** (condensada) | El número héroe | `4,320 KG` |
-| **Archivo Black** (ancha) | El día, la rutina, el grupo muscular | `SÁBADO` · `PIERNA` |
-| **Instrument Serif** itálica | Lo editorial: frase del día, la rutina en grande | *Leg 2.* |
-| **Space Mono** | Fechas, recibos, letra chica | `31.10 // 11:00` |
+Boceto del 31 oct (todos en Inter + logo real):
 
-**Color: blanco o negro**, nada más (dos círculos arriba de la galería). El blanco para fotos
-oscuras, el negro para fotos claras. Sin acento de color: lo que destaca es el tamaño.
-
-**Reglas de cada sticker:** un dato héroe (o dos), lo demás en letra chica o nada. Si un sticker
-necesita más de tres renglones, son dos stickers.
-
-**Músculos sin maniquí.** La figura del cuerpo de la app se queda en la app; como sticker se ve
-como un muñeco de bloques. Los músculos se dicen con tipografía: el grupo en grande (`PIERNA`) y,
-como mucho, los músculos en letra chica.
-
-## 4. Los stickers
-
-Datos que HABIT sí tiene de cada entreno: rutina, día y hora, duración, series, kg movidos,
-ejercicios con su mejor serie, músculos (series × `exerciseMuscleSplit()`), récords del día,
-**número de entreno** (tu entreno nº 47 en HABIT) y racha de semanas.
-
-La galería se ordena por **familias**; cada sticker puede tener **variantes** (puntitos debajo,
-se cambian deslizando): el mismo estilo con otro dato. Así hay muchos sin diseñar cien.
-
-**Pestaña Entreno:**
-
-| Familia | Variantes (cada una un sticker) |
-|---|---|
-| **Héroe** (Anton, enorme) | `4,320 KG` · `52 MIN` · `18 SERIES` · `Nº 47` |
-| **Ancho** (Archivo Black) | `SÁBADO / LEG 2` · `PIERNA` (el grupo muscular del día) · `LEG DAY` |
-| **Editorial** (serif) | *Leg 2.* + «52 minutos» · *Sábado, 11:00* |
-| **Recibo** (mono) | `31.10 // 11:00` + `ENTRENO Nº 47` · los 3 ejercicios con su mejor serie |
-| **Burbuja** | Un mensaje del iPhone en blanco y negro: «Leg 2 listo, 52 min», y debajo **Entrenado** (como el «Entregado» de iMessage) |
-| **Resaltador** | «52 min, 4,320 kg» con el marcador detrás |
-| **Nota** | Una nota adhesiva: «leg 2 ✓ / sentadilla 100 × 5» |
-| **Notificación** | El aviso de HABIT: «Leg 2 completado · 52 min» |
-| **Récord** (solo si hubo) | `PR` en sello + `100 KG × 5` · «nuevo récord en sentadilla» en burbuja |
-
-**Pestaña Semana:** `6` enorme + «semanas seguidas» · los 7 días con puntos · `4 ENTRENOS` ·
-`16.8 T` esta semana.
-
-**Pestaña Frase:** la frase del día en serif itálica · la firma «Make it a habit.» con el anillo.
-
-Cada sticker tiene además la opción **con fondo** (1080 × 1920) para quien no tiene foto.
-
-## 5. Cómo se usa
-
-1. Cierras el entreno → sale **«Entreno terminado»** con tu resumen y **Compartir**. (Sustituye
-   el aviso de hoy; respeta la oferta de guardar cambios en la rutina y el feedback.)
-2. **Compartir** abre la galería: arriba el entreno y los dos colores, la indicación
-   «Toca para copiar · Mantén para guardar», pestañas Entreno / Semana / Frase y la cuadrícula.
-3. **Tocar** copia el sticker (PNG transparente) → en Instagram, al abrir la historia, aparece
-   «Agregar sticker» con lo copiado. **Mantener** abre la hoja del teléfono (Guardar imagen,
-   Instagram, WhatsApp).
-4. También desde: la tarjeta de Hoy cuando ya entrenaste, la frase del día en Inicio, la tira de
-   la semana y Progreso.
-
-Regla: **del entreno terminado a la historia en tres toques** (Compartir → sticker → pegar).
-
-## 6. Decisiones
-
-| # | Decisión | Propuesta | Por qué |
+| # | Estilo | Tratamiento | Ejemplo |
 |---|---|---|---|
-| D1 | ¿Stickers o tarjetas? | **Stickers transparentes**, con opción «con fondo» | Es como se suben historias de verdad, y la foto del usuario hace el resto |
-| D2 | ¿Cómo se dibuja? | **Canvas dibujado a mano**, a 3× para que se vea nítido | Una captura de pantalla sale con la interfaz y distinta en cada teléfono |
-| D3 | ¿Cómo llega a Instagram? | **Copiar** (portapapeles) al tocar; **compartir/guardar** al mantener | Pegar un sticker es el gesto natural de Instagram. Hay que probarlo en tu iPhone (Fase 0) |
-| D4 | ¿Cuerpo dibujado? | **No**: músculos con tipografía | Ver §3 |
-| D5 | ¿Datos personales? | **Nunca el correo**; nombre apagado por defecto; pesos encendidos con interruptor | Hay quien no quiere enseñar cuánto carga |
-| D6 | ¿Marca? | El anillo de HABIT siempre; `habittraininghub.app/crew` en los que tienen espacio | Que se reconozca sin gritar |
-| D7 | ¿Gratis? | **Sí** | Es el canal de crecimiento de Crew |
-| D8 | ¿Dónde vive el código? | `habit-share.js`: la parte de datos es pura (Node) y el dibujo recibe un canvas | La regla del repo: lo que se prueba fuera del navegador no crece `app.html` |
+| 1 | Héroe | 900, apretado | `4,320` + `KG MOVIDOS` espaciado |
+| 2 | Ligero | 150, enorme | `52:14` + *minutos de entreno* |
+| 3 | Espaciado | 300 muy espaciado + 900 | `S Á B A D O` / `LEG 2` |
+| 4 | Itálica | 800 itálica | *Leg day.* |
+| 5 | Contorno | 900 solo trazo | `PR` + `100 KG × 5` |
+| 6 | Eco | la palabra repetida desvaneciéndose | `LEG 2` ×4 |
+| 7 | Logotipo | el logotipo de la app | logo HABIT + `ENTRENO Nº 47` |
+| 8 | Recibo | 500, números tabulares, puntos guía | TIEMPO …… 52 MIN |
+| 9 | Sello | texto en círculo alrededor del logo | MAKE IT A HABIT · ENTRENO Nº 47 |
+| 10 | Burbuja | mensaje del iPhone en blanco y negro | «Leg 2 listo, 52 min» · *Entrenado* |
+| 11 | Notificación | el aviso de HABIT con el logo | «Leg 2 completado» |
+| 12 | Racha | 900 enorme + texto vertical | `6` SEMANAS SEGUIDAS |
+| 13 | Frase | 500 + logotipo chico | la frase del día |
+| 14 | Check-in (solo HABIT) | logotipo + lugar + hora | HABIT · MAZATLÁN · 11:00 |
 
-## 7. Fases
+Cada estilo puede tener **variantes** con otro dato (el Héroe sirve para kg, minutos, series o
+nº de entreno). Datos disponibles: rutina, día y hora, duración, series, kg, ejercicios con su
+mejor serie, músculos (con palabras, sin dibujo del cuerpo), récords, nº de entreno, racha.
 
-**Fase 0 — Probar el camino (medio día).** Dos stickers de la frase del día (serif y firma).
-Valida en tu iPhone con la app instalada: copiar → pegar en Instagram, mantener → guardar,
-fuentes nítidas y fondo transparente. Si copiar no funciona, el plan B es solo guardar/compartir.
+## 5. Compartir
 
-**Fase 1 — Entreno terminado + galería.** La pantalla «Entreno terminado» y la galería con las
-familias Héroe, Ancho, Editorial, Recibo y Burbuja, los dos colores y el interruptor de pesos.
+- Cada sticker lleva su botón **Compartir** con el ícono universal (cuadro con flecha hacia
+  arriba). Abre la hoja del teléfono con el PNG: ahí están Instagram, WhatsApp, Guardar imagen y
+  Copiar. Nada escondido detrás de un toque o de mantener presionado.
+- Si el teléfono no tiene hoja de compartir (computadora), el botón descarga la imagen.
+- La imagen ya está dibujada antes del toque (iPhone solo deja compartir desde un toque y sin
+  esperas largas).
 
-**Fase 2 — El resto.** Resaltador, Nota, Notificación, Récord, la pestaña Semana, las variantes
-de cada familia y la opción «con fondo».
+## 6. Fases
 
-**Fase 3 — Comunidad.** «Publicar en la Comunidad» desde la galería, con el sticker «con fondo»
-como foto (bucket `community-images`).
+1. **Galería en el módulo** (`habit-share.js` crea y maneja la hoja) + botón Compartir + la
+   frase del día con los estilos que apliquen (13 Frase, 7 Logotipo, 9 Sello). Llega a **las dos
+   apps**: en HABIT solo el script y la llamada desde la frase.
+2. **Entreno terminado**: la pantalla de resumen al cerrar una sesión y los estilos de entreno
+   (1–8, 10, 11). En Crew completa; en HABIT, solo el botón que abre los stickers del entreno
+   que acabas de cerrar.
+3. **Récord, racha y check-in**: 5, 12 y 14 (este, al abrir la puerta en HABIT).
+4. **Comunidad** (publicar el sticker con fondo en el feed) y, con la app nativa, mandarlo
+   directo a Historias.
 
-**Fase 4 — App de la tienda (opcional).** Mandar directo a Historias con el esquema de Meta
-(`instagram-stories://`), que necesita la app nativa y un Facebook App ID.
+## 7. ¿Qué más? (ideas para después)
+
+- **Hitos automáticos**: al llegar a 10, 25, 50, 100 entrenos, un sticker especial
+  (`50` enorme + ENTRENOS EN HABIT).
+- **Check-in del gym** (HABIT): al abrir la puerta, «¿Compartes que llegaste?» con el sticker 14.
+  Es el que más enseña el lugar.
+- **Retos**: tu lugar en un reto (`1º` + el nombre del reto).
+- **Resumen del mes / del año**: entrenos, horas, toneladas, tu ejercicio más hecho.
+- **Con fondo**: cada sticker también en 1080 × 1920 grafito, para quien no tiene foto.
 
 ## 8. Detalles técnicos
 
-- **Copiar sin perder el toque.** iPhone solo deja copiar o compartir desde un toque. Se usa
-  `new ClipboardItem({'image/png': promesa})`: el toque llama a copiar al instante y la imagen se
-  termina de dibujar dentro de la promesa. Las vistas previas de la galería ya están dibujadas
-  al abrirla, así que la promesa resuelve en milisegundos.
-- **Fuentes.** `document.fonts.load()` de las cinco familias antes de dibujar; las cuatro nuevas
-  se cargan solo al abrir la galería, no al abrir la app.
-- **Transparencia.** PNG con canal alfa; sin fondo, sin sombras. Para que el blanco se lea sobre
-  una foto clara está el negro. Las burbujas, notas y notificaciones sí llevan su propia caja
-  (blanca con letra negra, o al revés).
-- **Sin imágenes externas en el canvas** (avatar, fotos): bloquean la exportación.
-- **Versión y caché.** `habit-share.js` al `SHELL` de `sw.js` y a todos los `?v=`.
-- **Pruebas.** `scripts/check-share.js`: los datos de cada sticker con sesiones reales (con y sin
-  pesos, entreno libre, pirámide, sin series), el número de entreno, el grupo muscular del día y los
-  porcentajes de músculos (suman 100) y que el correo nunca aparece.
-
-## 9. Preguntas abiertas
-
-1. ¿El nombre de la persona en algún sticker, o nunca?
-2. ¿«Entreno nº 47» cuenta todos los entrenos en HABIT desde siempre (propuesta) o solo los del año?
-3. En la app del gym, ¿la dirección dice HABIT Crew o nada?
+- Canvas a 1080 px de ancho; PNG transparente; el logo se tiñe de negro en el sticker negro.
+- Inter ya la carga la app; antes de dibujar, `document.fonts.load()` de los pesos que se usan.
+- El sello (texto en círculo) se dibuja letra por letra con rotación.
+- `scripts/check-share.js`: disposición de cada estilo (cabe, va centrado, no pierde texto) y
+  que el correo nunca aparece.
 
 ## Bitácora
 
@@ -178,3 +120,16 @@ como foto (bucket `community-images`).
     Instrument Serif. La frase va en Inter 600; la firma es el logotipo de HABIT con MAKE IT A
     HABIT debajo. La tabla de fuentes de §3 queda para las fases siguientes, a revisar con él.
   - **Solo en HABIT Crew** (`crew.html`): la app del gym no tiene stickers.
+- **2026-10-31 — Fase 1** (versión `20261031-8`), en HABIT y HABIT Crew.
+  - `habit-share.js` trae la galería completa: hoja propia (clases `hs-*`, CSS que se inyecta al
+    cargar para que el botón de cada app se vea bien antes de abrir nada), blanco/negro, y por
+    sticker su botón **Compartir** con el ícono universal (`navigator.share` con el PNG). Ya no
+    hay «toca para copiar · mantén para guardar»: la hoja del teléfono trae Copiar y Guardar.
+  - Tres estilos para la frase del día: **Frase**, **Logotipo** y **Sello** (el texto da la vuelta
+    al logo con la fecha; la letra crece hasta llenar ~78% del círculo).
+  - Las apps solo marcan la frase con `data-hs-share` y ponen el botón «Compartir» debajo de ella.
+    En HABIT ese es todo el cambio, más el `<script>`.
+  - Probado en el navegador: los tres estilos en las dos apps, en blanco y negro, y que Compartir
+    entrega un PNG de ~100 KB. Falta el iPhone.
+  - Las frases del día de HABIT ya llevan acentos (las mismas 22 correcciones que Crew), con el
+    visto bueno de Joseph: salen en los stickers.
