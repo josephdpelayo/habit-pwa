@@ -50,6 +50,14 @@ The app has four screens (`#s-auth`, `#s-main`, `#s-admin`, `#s-reception`), tog
 
 - `index.html` — just redirects to `app.html` with a version query string for cache busting
 - `sw.js` — service worker: push notifications + app shell cache. **One registration at scope `/` serves both apps** — two service workers at the root would evict each other, so Skandi registers this same file. Fetch handler: icons and the shared JS modules are cache-first, navigation is network-first (and refreshes the cached shell with what it just fetched), API calls pass through untouched. `shellFor()` picks the offline fallback by path: `/skandi*` → `skandi.html`, `/competencia*` → `competencia.html`, everything else → `app.html` (`/crew` included on purpose: it is the same file). Any new standalone page needs its own line there: the navigation handler stores what it fetched under `shellFor()`, so a page that falls through to `app.html` overwrites the app's offline copy with itself. **Every response the worker stores or hands to a navigation goes through `clean()`**: Vercel answers `/app.html` with a redirect to `/app`, `cache.addAll` stored that as a `redirected` response, and Safari refuses to give one to a navigation — the installed iPhone app opened completely blank (not even the login screen) whenever it fell back to the cache. Saving the offline copy is a side effect that must never replace a page that did arrive from the network.
+- `habit-share.js` — **stickers para historias de Instagram** (`docs/HISTORIAS_INSTAGRAM.md`).
+  PNG transparentes dibujados a mano en canvas, solo blanco o negro: tocar copia
+  (`ClipboardItem` con la *promesa* del PNG, para no perder el toque en Safari), mantener abre
+  el menú nativo de la imagen. La disposición es pura (`quoteLayout`, `balancedWrap`) y la prueba
+  `scripts/check-share.js`; el dibujo y el portapapeles son solo del navegador. Instrument Serif
+  se baja al abrir los stickers, y hay que esperar a que su hoja de estilos cargue antes de
+  `document.fonts.load()`, o el canvas dibuja con Georgia sin avisar. Fase 0: la frase del día
+  (tocarla en Inicio abre `#sticker-sheet`)
 - `manifest.json` / `crew-manifest.json` / `skandi-manifest.json` — one PWA manifest per app. All use `scope: "/"` and are told apart by `id`.
 
 **Version / cache busting**: one version string covers the whole project, because one service worker caches both apps. It lives in `APP_VERSION` (`app.html`), `SKANDI_VERSION` (`skandi.html`) and `CACHE_VERSION` (`sw.js`), plus the `?v=` strings in `index.html`, the three manifests' `start_url`, the `<link>`/`<script>` tags at the top of `app.html` and `skandi.html`, and the `v` inside `app.html`'s `#brand-boot` script. **Changing either app means bumping all of them to the same value** — a stale `CACHE_VERSION` leaves the offline shell frozen at the previous deploy.

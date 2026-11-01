@@ -6,12 +6,12 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="HABIT">
 <meta name="application-name" content="HABIT">
-<link rel="manifest" href="/manifest.json?v=20261031-5">
-<link rel="apple-touch-icon" sizes="120x120" href="/icons/icon-120.png?v=20261031-5">
-<link rel="apple-touch-icon" sizes="152x152" href="/icons/icon-152.png?v=20261031-5">
-<link rel="apple-touch-icon" sizes="167x167" href="/icons/icon-167.png?v=20261031-5">
-<link rel="apple-touch-icon" sizes="180x180" href="/icons/icon-180.png?v=20261031-5">
-<link rel="icon" type="image/png" sizes="32x32" href="/icons/icon-32.png?v=20261031-5">
+<link rel="manifest" href="/manifest.json?v=20261031-6">
+<link rel="apple-touch-icon" sizes="120x120" href="/icons/icon-120.png?v=20261031-6">
+<link rel="apple-touch-icon" sizes="152x152" href="/icons/icon-152.png?v=20261031-6">
+<link rel="apple-touch-icon" sizes="167x167" href="/icons/icon-167.png?v=20261031-6">
+<link rel="apple-touch-icon" sizes="180x180" href="/icons/icon-180.png?v=20261031-6">
+<link rel="icon" type="image/png" sizes="32x32" href="/icons/icon-32.png?v=20261031-6">
 <title>HABIT</title>
 <!-- Con id a propósito: scripts/check-training.js toma la primera etiqueta script sin
      atributos como el script principal de la app y la compila. -->
@@ -25,7 +25,7 @@
   var crew=/^\/crew(\/|$)/.test(location.pathname);
   window.HABIT_BRAND=crew?'crew':'gym';
   if(!crew)return;
-  var v='20261031-5';
+  var v='20261031-6';
   document.documentElement.classList.add('brand-crew');
   document.title='HABIT Crew';
   document.querySelectorAll('meta[name="apple-mobile-web-app-title"],meta[name="application-name"]')
@@ -40,9 +40,10 @@
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Share+Tech+Mono&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="/skandi-recovery.js?v=20261031-5"></script>
-<script src="/body-figure.js?v=20261031-5"></script>
-<script src="/habit-training.js?v=20261031-5"></script>
+<script src="/skandi-recovery.js?v=20261031-6"></script>
+<script src="/body-figure.js?v=20261031-6"></script>
+<script src="/habit-training.js?v=20261031-6"></script>
+<script src="/habit-share.js?v=20261031-6"></script>
 <style>
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
 @media (prefers-reduced-motion:reduce){*,*:before,*:after{scroll-behavior:auto!important;animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}}
@@ -224,6 +225,24 @@ input,select,button,textarea{font-family:'Inter',sans-serif}
 #v-inicio .daily-quote-card{padding:14px 18px 12px;margin:4px 0 14px;border:0;background:none;box-shadow:none}
 #v-inicio .daily-quote-card::before,#v-inicio .daily-quote-card::after{display:none}
 #v-inicio .daily-quote-text{font-size:16px;font-weight:500;line-height:1.35;color:var(--gl);text-shadow:none}
+.daily-quote-card[role=button]{cursor:pointer}
+.daily-quote-share{color:var(--gl);text-decoration:underline;text-underline-offset:3px}
+.sticker-box .terms-hdr{gap:12px}
+.sticker-colors{display:flex;gap:10px;align-items:center}
+.sticker-color{width:22px;height:22px;border-radius:50%;border:1px solid rgba(255,255,255,.25);cursor:pointer;padding:0}
+.sticker-color[data-color=blanco]{background:#fff}
+.sticker-color[data-color=negro]{background:#0b0b0b}
+.sticker-color.is-on{outline:2px solid #fff;outline-offset:3px}
+.sticker-hint{text-align:center;font-size:12px;letter-spacing:.06em;color:var(--gray);margin:2px 0 14px!important}
+.sticker-hint b{color:var(--white);font-weight:600}
+.sticker-grid{display:grid;grid-template-columns:1fr;gap:12px}
+.sticker-tile{border:0;border-radius:16px;background:#1b1c20;min-height:150px;display:flex;align-items:center;justify-content:center;padding:22px;cursor:pointer;position:relative;transition:transform .12s}
+.sticker-tile:active{transform:scale(.98)}
+.sticker-tile.on-light{background:#d9dbe0}
+.sticker-tile img{max-width:100%;max-height:300px;display:block;-webkit-touch-callout:default}
+.sticker-tile.copied::after{content:'Copiado';position:absolute;top:10px;right:12px;font-size:11px;font-weight:600;color:#0b0b0b;background:#fff;border-radius:999px;padding:3px 9px}
+.sticker-tile.on-light.copied::after{color:#fff;background:#0b0b0b}
+.sticker-howto{text-align:center;font-size:12px;color:var(--gray);margin:14px 0 4px!important}
 #v-inicio .daily-quote-footer{margin-top:8px;padding-top:0;border-top:0;font-size:10px}
 .inicio-coach-action{margin:0 0 9px}
 .inicio-coach-btn{width:100%;min-height:44px;border:1px solid rgba(147,197,253,.22);border-radius:14px;background:linear-gradient(135deg,rgba(37,99,235,.16),rgba(16,185,129,.055));color:var(--white);display:grid;grid-template-columns:auto minmax(0,1fr) auto;align-items:center;gap:9px;padding:9px 11px;text-align:left;cursor:pointer;box-shadow:0 10px 24px rgba(0,0,0,.2)}
@@ -3753,6 +3772,26 @@ button{transition:transform .14s var(--ease-out),background-color .16s ease,colo
   </div>
 </div>
 
+<!-- STICKERS para historias de Instagram (habit-share.js, docs/HISTORIAS_INSTAGRAM.md).
+     Tocar copia el PNG transparente; mantener abre el menú nativo de la imagen (Guardar). -->
+<div id="sticker-sheet" class="terms-modal" style="display:none" onclick="if(event.target===this)closeStickerSheet()">
+  <div class="terms-box sticker-box">
+    <div class="terms-hdr">
+      <div class="sticker-colors" role="radiogroup" aria-label="Color del sticker">
+        <button type="button" class="sticker-color is-on" data-color="blanco" aria-label="Blanco" onclick="setStickerColor('blanco')"></button>
+        <button type="button" class="sticker-color" data-color="negro" aria-label="Negro" onclick="setStickerColor('negro')"></button>
+      </div>
+      <h2 id="sticker-title">Frase del día</h2>
+      <button onclick="closeStickerSheet()" aria-label="Cerrar" style="background:none;border:none;color:var(--gray);font-size:22px;cursor:pointer;line-height:1">×</button>
+    </div>
+    <div class="terms-body">
+      <p class="sticker-hint"><b>Toca para copiar</b> · mantén para guardar</p>
+      <div class="sticker-grid" id="sticker-grid"></div>
+      <p class="sticker-howto">Copiado el sticker, abre tu historia en Instagram con tu foto y pégalo.</p>
+    </div>
+  </div>
+</div>
+
 <!-- ONBOARDING: cómo entrena quien llega por la app (training_profiles, migración 127) -->
 <div id="onboarding-modal" class="terms-modal" style="display:none">
   <div class="terms-box">
@@ -4129,7 +4168,7 @@ const GYM_ONLY_VIEWS=['book','planes','historial','shop'];
 const GYM_APP_URL='/';
 document.querySelectorAll('.brand-name').forEach(el=>{el.textContent=BRAND_NAME;});
 const SUPABASE_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBtcGp0ZXVxanVzYmlkdWV2YndxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc2OTI1NjUsImV4cCI6MjA5MzI2ODU2NX0.XbMzZoo2yqtrD8znLnyo_1zDfrdJAvAPj1lqGOyXnLw';
-const APP_VERSION='20261031-5';
+const APP_VERSION='20261031-6';
 // La pierna va separada en cuádriceps, femorales y pantorrillas: la figura
 // corporal pinta esas tres regiones por separado y el motor de recuperación les
 // da ventanas de descanso distintas. 'Piernas' sigue reconociéndose al leer
@@ -4171,36 +4210,36 @@ const EXERCISE_CATALOG_FALLBACK=[
   {name:'Remadora',slug:'remadora',category:'Cardio',primary_muscle:'Full Body',secondary_muscles:['Espalda','Piernas','Core'],equipment:['Remadora'],movement_pattern:'Cardio',default_tracking:'time',difficulty:'basico',aliases:['rowing machine']}
 ];
 const DAILY_QUOTES=[
-  {text:'Haz hoy lo que tu version de manana agradeceria.',action:'Elige una accion pequeña y cumplible antes de buscar motivacion.'},
-  {text:'La disciplina no grita; aparece cuando nadie esta mirando.',action:'Entrena el estandar, no el animo del momento.'},
-  {text:'Controla tu siguiente repeticion. Lo demas se ordena despues.',action:'Pon tu atencion en el proximo paso concreto.'},
-  {text:'Un buen habito es una promesa que cumples en silencio.',action:'Cumple una promesa pequeña antes de pedirte una grande.'},
-  {text:'La incomodidad no es una senal de detenerte; es una senal de presencia.',action:'Respira, ajusta y continua con buena forma.'},
-  {text:'No necesitas un dia perfecto para construir una vida fuerte.',action:'Protege la consistencia aunque el dia venga incompleto.'},
-  {text:'Lo que repites te entrena mas que lo que deseas.',action:'Revisa que tus repeticiones diarias apunten a quien quieres ser.'},
-  {text:'La calma tambien se practica bajo peso.',action:'Mantente firme cuando el esfuerzo suba.'},
+  {text:'Haz hoy lo que tu versión de mañana agradecería.',action:'Elige una accion pequeña y cumplible antes de buscar motivacion.'},
+  {text:'La disciplina no grita; aparece cuando nadie está mirando.',action:'Entrena el estandar, no el animo del momento.'},
+  {text:'Controla tu siguiente repetición. Lo demás se ordena después.',action:'Pon tu atencion en el proximo paso concreto.'},
+  {text:'Un buen hábito es una promesa que cumples en silencio.',action:'Cumple una promesa pequeña antes de pedirte una grande.'},
+  {text:'La incomodidad no es una señal de detenerte; es una señal de presencia.',action:'Respira, ajusta y continua con buena forma.'},
+  {text:'No necesitas un día perfecto para construir una vida fuerte.',action:'Protege la consistencia aunque el dia venga incompleto.'},
+  {text:'Lo que repites te entrena más que lo que deseas.',action:'Revisa que tus repeticiones diarias apunten a quien quieres ser.'},
+  {text:'La calma también se practica bajo peso.',action:'Mantente firme cuando el esfuerzo suba.'},
   {text:'No compitas con la prisa de otros; compite con tu excusa de ayer.',action:'Haz una mejora medible, aunque sea minima.'},
-  {text:'El caracter se forma en la decision que parecia facil posponer.',action:'Haz primero lo importante, antes de negociar contigo.'},
-  {text:'Si cuidas tu rutina, tu rutina cuidara tu direccion.',action:'Define tu hora, tu plan y tu primer movimiento.'},
+  {text:'El carácter se forma en la decisión que parecía fácil posponer.',action:'Haz primero lo importante, antes de negociar contigo.'},
+  {text:'Si cuidas tu rutina, tu rutina cuidará tu dirección.',action:'Define tu hora, tu plan y tu primer movimiento.'},
   {text:'La fuerza empieza cuando dejas de pedir permiso al cansancio.',action:'Distingue fatiga real de resistencia mental.'},
-  {text:'Tu cuerpo escucha lo que haces mas que lo que prometes.',action:'Convierte la intencion en una accion visible.'},
+  {text:'Tu cuerpo escucha lo que haces más que lo que prometes.',action:'Convierte la intencion en una accion visible.'},
   {text:'La excelencia es sencilla: volver, ajustar, repetir.',action:'No persigas perfeccion; persigue regreso constante.'},
-  {text:'Domina lo pequeno y lo grande deja de intimidarte.',action:'Cuida tecnica, respiracion y enfoque durante diez minutos.'},
-  {text:'Cada entrenamiento es una votacion por tu identidad.',action:'Actua como la persona que estas construyendo.'},
+  {text:'Domina lo pequeño y lo grande deja de intimidarte.',action:'Cuida tecnica, respiracion y enfoque durante diez minutos.'},
+  {text:'Cada entrenamiento es una votación por tu identidad.',action:'Actua como la persona que estas construyendo.'},
   {text:'La voluntad se vuelve confiable cuando tiene estructura.',action:'Prepara tu entorno para que hacer lo correcto sea facil.'},
   {text:'No eres tus impulsos; eres la respuesta que eliges.',action:'Pausa un segundo antes de decidir saltarte el habito.'},
-  {text:'Una vida fuerte se edifica con dias que no presumiste.',action:'Haz el trabajo aunque no se vea espectacular.'},
-  {text:'Lo dificil se vuelve manejable cuando lo divides en presencia.',action:'Enfocate solo en la serie, el bloque o la tarea actual.'},
+  {text:'Una vida fuerte se edifica con días que no presumiste.',action:'Haz el trabajo aunque no se vea espectacular.'},
+  {text:'Lo difícil se vuelve manejable cuando lo divides en presencia.',action:'Enfocate solo en la serie, el bloque o la tarea actual.'},
   {text:'Tu paz crece cuando aceptas el esfuerzo que te corresponde.',action:'Haz lo tuyo sin cargar lo que no controlas.'},
   {text:'El progreso respeta a quien aparece con honestidad.',action:'Llega, registra, aprende y vuelve mejor.'},
-  {text:'No desperdicies energia peleando con el dia; usala para dirigirlo.',action:'Elige una prioridad y ejecutala sin drama.'},
-  {text:'La constancia convierte limites en informacion.',action:'Observa que falla y ajusta el sistema, no tu valor.'},
-  {text:'Entrenar tambien es aprender a obedecer a tu mejor criterio.',action:'Sigue el plan antes de seguir el impulso.'},
-  {text:'La paciencia no es lentitud; es fuerza sin desesperacion.',action:'Deja que el proceso acumule resultados.'},
+  {text:'No desperdicies energía peleando con el día; úsala para dirigirlo.',action:'Elige una prioridad y ejecutala sin drama.'},
+  {text:'La constancia convierte límites en información.',action:'Observa que falla y ajusta el sistema, no tu valor.'},
+  {text:'Entrenar también es aprender a obedecer a tu mejor criterio.',action:'Sigue el plan antes de seguir el impulso.'},
+  {text:'La paciencia no es lentitud; es fuerza sin desesperación.',action:'Deja que el proceso acumule resultados.'},
   {text:'Hoy no tienes que conquistar todo. Tienes que no abandonarte.',action:'Termina una cosa que te acerque a tu version fuerte.'},
-  {text:'El habito correcto reduce el ruido de decidir cada dia.',action:'Haz que tu primer paso sea automatico.'},
-  {text:'La mente se vuelve mas clara cuando el cuerpo cumple.',action:'Muévete con intencion antes de esperar claridad perfecta.'},
-  {text:'Tu estandar se revela en lo que haces cuando nadie te exige.',action:'Haz una accion limpia, completa y sin atajos.'},
+  {text:'El hábito correcto reduce el ruido de decidir cada día.',action:'Haz que tu primer paso sea automatico.'},
+  {text:'La mente se vuelve más clara cuando el cuerpo cumple.',action:'Muévete con intencion antes de esperar claridad perfecta.'},
+  {text:'Tu estándar se revela en lo que haces cuando nadie te exige.',action:'Haz una accion limpia, completa y sin atajos.'},
   {text:'La fortaleza es repetir lo correcto hasta que deja de sentirse ajeno.',action:'Dale otra prueba a la persona que estas practicando ser.'}
 ];
 function muscleGroupSelectHtml(id,selected){
@@ -7439,14 +7478,66 @@ function dailyQuoteForDate(ds){
   const dayKey=Math.floor(Date.UTC(parts[0]||2026,(parts[1]||1)-1,parts[2]||1)/86400000);
   return DAILY_QUOTES[Math.abs(dayKey)%DAILY_QUOTES.length];
 }
+// ── Stickers (Fase 0: la frase del día) ──────────────────────────────────
+// Se dibujan al abrir la hoja, así que tocar uno solo entrega una imagen que ya existe: Safari
+// pierde el permiso de copiar si el toque tiene que esperar a que se dibuje.
+let stickerColor='blanco',stickerItems=[],stickerSeq=0;
+const STICKER_COLOR_KEY='habit_sticker_color';
+function openQuoteStickers(){
+  if(!window.HabitShare){toast('No se pudieron cargar los stickers. Recarga la app.','err');return;}
+  try{const c=localStorage.getItem(STICKER_COLOR_KEY);if(c==='negro'||c==='blanco')stickerColor=c;}catch(_){}
+  const modal=document.getElementById('sticker-sheet');
+  if(modal)modal.style.display='flex';
+  renderStickerSheet().catch(e=>{console.error(e);toast('No se pudieron dibujar los stickers','err');});
+}
+function closeStickerSheet(){
+  const modal=document.getElementById('sticker-sheet');
+  if(modal)modal.style.display='none';
+  stickerItems.forEach(it=>URL.revokeObjectURL(it.url));
+  stickerItems=[];
+}
+function setStickerColor(c){
+  stickerColor=c==='negro'?'negro':'blanco';
+  try{localStorage.setItem(STICKER_COLOR_KEY,stickerColor);}catch(_){}
+  renderStickerSheet().catch(console.error);
+}
+async function renderStickerSheet(){
+  const grid=document.getElementById('sticker-grid');
+  if(!grid)return;
+  const seq=++stickerSeq;
+  document.querySelectorAll('.sticker-color').forEach(b=>b.classList.toggle('is-on',b.dataset.color===stickerColor));
+  if(!stickerItems.length)grid.innerHTML='<div class="empty">Preparando stickers…</div>';
+  await HabitShare.ensureFonts(document);
+  const q=dailyQuoteForDate(mazToday());
+  const canvases=[HabitShare.renderQuote(document,q.text,stickerColor),HabitShare.renderSignature(document,stickerColor)];
+  const blobs=await Promise.all(canvases.map(c=>HabitShare.toBlob(c)));
+  if(seq!==stickerSeq)return; // cambiaron el color a media pintura
+  stickerItems.forEach(it=>URL.revokeObjectURL(it.url));
+  stickerItems=blobs.map((blob,i)=>({blob,url:URL.createObjectURL(blob),name:['habit-frase','habit-firma'][i]+'-'+stickerColor+'.png'}));
+  const light=stickerColor==='negro';
+  grid.innerHTML=stickerItems.map((it,i)=>'<button type="button" class="sticker-tile'+(light?' on-light':'')+'" onclick="copySticker('+i+',this)" aria-label="Copiar sticker">'
+    +'<img src="'+it.url+'" alt="Sticker '+(i+1)+'"></button>').join('');
+}
+async function copySticker(i,btn){
+  const it=stickerItems[i];
+  if(!it)return;
+  const how=await HabitShare.copyOrShare(Promise.resolve(it.blob),it.name);
+  if(how==='copied'){
+    document.querySelectorAll('.sticker-tile.copied').forEach(t=>t.classList.remove('copied'));
+    if(btn)btn.classList.add('copied');
+    toast('Copiado. Abre tu historia en Instagram y pégalo.','ok');
+  }else if(how==='downloaded')toast('Imagen guardada','ok');
+}
 function renderDailyQuote(){
   const els=document.querySelectorAll('.daily-quote-wrap');
   if(!els.length)return;
   const ds=mazToday();
   const q=dailyQuoteForDate(ds);
-  const html='<section class="daily-quote-card" aria-label="Frase del dia">'+
+  // Tocarla abre sus stickers para Instagram (habit-share.js, docs/HISTORIAS_INSTAGRAM.md).
+  const html='<section class="daily-quote-card" role="button" tabindex="0" aria-label="Frase del día: crear sticker" onclick="openQuoteStickers()">'+
     '<div class="daily-quote-text">“'+esc(q.text)+'”</div>'+
-    '<div class="daily-quote-footer"><span class="daily-quote-date">'+esc(fmtDS(ds))+'</span><span class="daily-quote-sep">•</span><span>@habit.traininghub</span></div>'+
+    '<div class="daily-quote-footer"><span class="daily-quote-date">'+esc(fmtDS(ds))+'</span><span class="daily-quote-sep">•</span><span>@habit.traininghub</span>'+
+    '<span class="daily-quote-sep">•</span><span class="daily-quote-share">Sticker</span></div>'+
   '</section>';
   els.forEach(el=>el.innerHTML=html);
 }
