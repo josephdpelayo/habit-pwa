@@ -6,12 +6,12 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="HABIT">
 <meta name="application-name" content="HABIT">
-<link rel="manifest" href="/manifest.json?v=20261029-1">
-<link rel="apple-touch-icon" sizes="120x120" href="/icons/icon-120.png?v=20261029-1">
-<link rel="apple-touch-icon" sizes="152x152" href="/icons/icon-152.png?v=20261029-1">
-<link rel="apple-touch-icon" sizes="167x167" href="/icons/icon-167.png?v=20261029-1">
-<link rel="apple-touch-icon" sizes="180x180" href="/icons/icon-180.png?v=20261029-1">
-<link rel="icon" type="image/png" sizes="32x32" href="/icons/icon-32.png?v=20261029-1">
+<link rel="manifest" href="/manifest.json?v=20261031-1">
+<link rel="apple-touch-icon" sizes="120x120" href="/icons/icon-120.png?v=20261031-1">
+<link rel="apple-touch-icon" sizes="152x152" href="/icons/icon-152.png?v=20261031-1">
+<link rel="apple-touch-icon" sizes="167x167" href="/icons/icon-167.png?v=20261031-1">
+<link rel="apple-touch-icon" sizes="180x180" href="/icons/icon-180.png?v=20261031-1">
+<link rel="icon" type="image/png" sizes="32x32" href="/icons/icon-32.png?v=20261031-1">
 <title>HABIT</title>
 <!-- Con id a propósito: scripts/check-training.js toma la primera etiqueta script sin
      atributos como el script principal de la app y la compila. -->
@@ -25,7 +25,7 @@
   var crew=/^\/crew(\/|$)/.test(location.pathname);
   window.HABIT_BRAND=crew?'crew':'gym';
   if(!crew)return;
-  var v='20261029-1';
+  var v='20261031-1';
   document.documentElement.classList.add('brand-crew');
   document.title='HABIT Crew';
   document.querySelectorAll('meta[name="apple-mobile-web-app-title"],meta[name="application-name"]')
@@ -40,9 +40,9 @@
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Share+Tech+Mono&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="/skandi-recovery.js?v=20261029-1"></script>
-<script src="/body-figure.js?v=20261029-1"></script>
-<script src="/habit-training.js?v=20261029-1"></script>
+<script src="/skandi-recovery.js?v=20261031-1"></script>
+<script src="/body-figure.js?v=20261031-1"></script>
+<script src="/habit-training.js?v=20261031-1"></script>
 <style>
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
 @media (prefers-reduced-motion:reduce){*,*:before,*:after{scroll-behavior:auto!important;animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}}
@@ -1072,6 +1072,7 @@ input,select,button,textarea{font-family:'Inter',sans-serif}
 .mod-reason strong{color:var(--white);font-weight:700}
 /* Retos (migración 129) */
 .admin-segmented.comm-tabs{grid-template-columns:repeat(2,minmax(0,1fr))}
+.comm-rules-link{display:block;margin:18px auto 8px;background:none;border:0;color:var(--gray);font-size:12px;text-decoration:underline;text-underline-offset:3px;cursor:pointer}
 .retos-bar{display:flex;align-items:center;gap:8px;margin-bottom:12px}
 .retos-chips{display:flex;gap:6px;overflow-x:auto;flex:1;min-width:0;-webkit-overflow-scrolling:touch}
 .retos-bar .btn-sm{min-height:38px;flex-shrink:0}
@@ -3021,6 +3022,9 @@ button{transition:transform .14s var(--ease-out),background-color .16s ease,colo
         <div class="divider" style="margin:.75rem 0"></div>
         <p class="slbl">Avisos</p>
         <div id="perfil-push"></div>
+        <div class="divider" style="margin:.75rem 0"></div>
+        <p class="slbl">Comunidad</p>
+        <button class="btn-ghost perfil-row-btn" onclick="openCommunityRules()"><span>Normas de la comunidad</span><span class="perfil-row-sum">Reportar</span></button>
         <div id="perfil-blocks-section">
           <div class="divider" style="margin:.75rem 0"></div>
           <p class="slbl">Usuarios bloqueados</p>
@@ -3172,6 +3176,7 @@ button{transition:transform .14s var(--ease-out),background-color .16s ease,colo
         </div>
       </div>
       <div id="feed-content"></div>
+      <button class="comm-rules-link" onclick="openCommunityRules()">Normas de la comunidad · reportar</button>
       </div>
     </div>
   </div>
@@ -3648,6 +3653,9 @@ button{transition:transform .14s var(--ease-out),background-color .16s ease,colo
       <p>Entrenas <strong>bajo tu propia responsabilidad</strong>, en el lugar y con el equipo que tú eliges. HABIT Training Hub, sus propietarios y coaches no se hacen responsables de lesiones o daños derivados de entrenar por tu cuenta, con o sin las rutinas y programas de la app.</p>
       <h3>Tus datos</h3>
       <p>Usamos tu nombre, correo y teléfono para tu cuenta, y lo que registras (pesos, repeticiones, tiempos, notas, tu objetivo y tu equipo) para que la app funcione y te muestre tu progreso. No vendemos tus datos ni los compartimos con terceros sin tu consentimiento. Puedes borrar tu cuenta y tus datos desde Perfil en cualquier momento.</p>
+      <h3>Comunidad</h3>
+      <p>Lo que publicas en la Comunidad y en los Retos lo ven las demás cuentas. <strong>No se tolera el contenido ofensivo ni los usuarios abusivos</strong>: insultos, acoso, odio, amenazas, contenido sexual o spam. El texto con palabras ofensivas no se publica, y lo que se reporte se revisa en menos de 24 horas: lo que rompa las <strong>Normas de la comunidad</strong> se borra, y quien insista pierde su cuenta.</p>
+      <p>Puedes reportar o bloquear a cualquiera desde el ⋯ de lo que publica, y escribirnos por WhatsApp al <strong>+52 662 356 2816</strong>.</p>
       <h3>Si después entrenas en el gym</h3>
       <p>Para reservar en HABIT Mazatlán necesitas una membresía. Al comprarla aceptarás el reglamento de las instalaciones.</p>
       <p style="font-size:11px;color:#555;margin-top:1.5rem">Última actualización: Octubre 2026 · HABIT Training Hub · Mazatlán, Sinaloa, México</p>
@@ -3663,6 +3671,8 @@ button{transition:transform .14s var(--ease-out),background-color .16s ease,colo
       <h3>Código de conducta</h3>
       <p>Queda estrictamente <strong>prohibido</strong> el acceso bajo influencia de alcohol o sustancias psicoactivas. El incumplimiento resulta en cancelación inmediata de membresía sin reembolso.</p>
       <p>El <strong>código de acceso es personal e intransferible</strong>. Compartir tu código con terceros constituye una infracción grave que resultará en la cancelación inmediata de la membresía sin reembolso y una <strong>multa de $300 MXN</strong> por cada incidencia detectada.</p>
+      <h3>Comunidad de la app</h3>
+      <p>Lo que publicas en la Comunidad y en los Retos lo ven las demás cuentas. <strong>No se tolera el contenido ofensivo ni los usuarios abusivos</strong>: insultos, acoso, odio, amenazas, contenido sexual o spam. Lo que rompa las <strong>Normas de la comunidad</strong> se borra, y quien insista pierde su cuenta. Puedes reportar o bloquear a cualquiera desde el ⋯ de lo que publica, y escribirnos por WhatsApp al <strong>+52 662 356 2816</strong>.</p>
       <h3>Acceso y horarios</h3>
       <p>El acceso a las instalaciones <strong>solo está permitido durante el horario de tu reserva activa</strong>. Permanecer en las instalaciones fuera de tu tiempo reservado constituye una infracción al reglamento y podrá resultar en suspensión de membresía.</p>
       <p>Las reservas son personales. Se permite máximo una reserva por día por socio.</p>
@@ -3670,14 +3680,43 @@ button{transition:transform .14s var(--ease-out),background-color .16s ease,colo
       <p>Las cancelaciones de reserva deben realizarse con <strong>más de 12 horas de anticipación</strong> para recuperar la visita. Cancelaciones fuera de este plazo no generan reembolso de visita. Las membresías adquiridas no son reembolsables una vez activadas.</p>
       <h3>Privacidad</h3>
       <p>Tus datos personales (nombre, correo, teléfono) serán utilizados únicamente para la gestión de tu membresía y comunicación relacionada con HABIT Training Hub. No serán compartidos con terceros sin tu consentimiento.</p>
-      <p style="font-size:11px;color:#555;margin-top:1.5rem">Última actualización: Mayo 2025 · HABIT Training Hub · Mazatlán, Sinaloa, México</p>
+      <p style="font-size:11px;color:#555;margin-top:1.5rem">Última actualización: Octubre 2026 · HABIT Training Hub · Mazatlán, Sinaloa, México</p>
     </div>
     <div class="terms-footer">
       <label class="terms-check">
         <input type="checkbox" id="terms-check" onchange="updateTermsButton()">
-        <span id="terms-check-label">He leído y acepto el Reglamento y Términos de HABIT Training Hub, incluyendo la exención de responsabilidad por accidentes y mi responsabilidad ante daños al equipo.</span>
+        <span id="terms-check-label">He leído y acepto el Reglamento y Términos de HABIT Training Hub, incluyendo la exención de responsabilidad por accidentes, mi responsabilidad ante daños al equipo y las Normas de la comunidad.</span>
       </label>
       <button class="btn" id="terms-accept-btn" onclick="acceptTerms()" disabled style="opacity:.35">Aceptar y continuar</button>
+    </div>
+  </div>
+</div>
+
+<!-- NORMAS DE LA COMUNIDAD (guideline 1.2 de Apple): qué no se tolera y a quién quejarse -->
+<div id="community-rules-modal" class="terms-modal" style="display:none">
+  <div class="terms-box">
+    <div class="terms-hdr">
+      <h2>Normas de la comunidad</h2>
+      <button onclick="closeCommunityRules(false)" aria-label="Cerrar" style="background:none;border:none;color:var(--gray);font-size:22px;cursor:pointer;line-height:1">×</button>
+    </div>
+    <div class="terms-body">
+      <p>La comunidad es para entrenar juntos: compartir lo que hiciste, animar a otros y competir en los retos. Para que siga así, <strong>no se tolera el contenido ofensivo ni los usuarios abusivos</strong>.</p>
+      <h3>Qué no se publica</h3>
+      <p><strong>Insultos y acoso</strong>, incluidas las burlas por el cuerpo, el nivel o la edad de alguien.</p>
+      <p><strong>Odio</strong>: nada contra nadie por su origen, color de piel, género, orientación, religión o discapacidad.</p>
+      <p><strong>Amenazas</strong>, violencia, o animar a alguien a hacerse daño.</p>
+      <p><strong>Desnudos o contenido sexual</strong>, y fotos de otras personas sin su permiso.</p>
+      <p><strong>Spam</strong>: ventas, publicidad o enlaces que no tienen que ver con entrenar.</p>
+      <h3>Qué hacemos</h3>
+      <p>El texto con palabras ofensivas no se publica. Lo que se reporte lo revisa el equipo de HABIT en <strong>menos de 24 horas</strong>: lo que rompa estas normas se borra, y quien insista pierde su cuenta, sin aviso previo.</p>
+      <h3>Qué puedes hacer tú</h3>
+      <p>Toca el <strong>⋯</strong> de cualquier publicación, comentario, reto o marca para <strong>reportarlo</strong> o <strong>bloquear</strong> a quien lo publicó. Quien bloqueas deja de ver lo tuyo y tú lo suyo, y no se le avisa. Los quitas en Perfil.</p>
+      <p>¿Algo más, o algo urgente? Escríbenos por WhatsApp al <strong>+52 662 356 2816</strong>.</p>
+      <button class="btn-ghost" onclick="openCommunityReportWhatsapp()" style="margin-top:4px">Escribir por WhatsApp</button>
+    </div>
+    <div class="terms-footer">
+      <button class="btn" id="crules-accept" onclick="closeCommunityRules(true)">Acepto las normas</button>
+      <button class="btn" id="crules-ok" onclick="closeCommunityRules(false)">Entendido</button>
     </div>
   </div>
 </div>
@@ -4058,7 +4097,7 @@ const GYM_ONLY_VIEWS=['book','planes','historial','shop'];
 const GYM_APP_URL='/';
 document.querySelectorAll('.brand-name').forEach(el=>{el.textContent=BRAND_NAME;});
 const SUPABASE_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBtcGp0ZXVxanVzYmlkdWV2YndxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc2OTI1NjUsImV4cCI6MjA5MzI2ODU2NX0.XbMzZoo2yqtrD8znLnyo_1zDfrdJAvAPj1lqGOyXnLw';
-const APP_VERSION='20261029-1';
+const APP_VERSION='20261031-1';
 // La pierna va separada en cuádriceps, femorales y pantorrillas: la figura
 // corporal pinta esas tres regiones por separado y el motor de recuperación les
 // da ventanas de descanso distintas. 'Piernas' sigue reconociéndose al leer
@@ -6295,8 +6334,8 @@ function updateTermsButton(){
 // términos de la app (entrenar por tu cuenta). `onAccept` es lo que sigue: crear la cuenta,
 // o el pago de la primera membresía de quien entró por la app (doPay).
 let termsOnAccept=null;
-const TERMS_LABEL_GYM='He leído y acepto el Reglamento y Términos de HABIT Training Hub, incluyendo la exención de responsabilidad por accidentes y mi responsabilidad ante daños al equipo.';
-const TERMS_LABEL_APP='He leído y acepto los Términos de uso de HABIT, incluyendo que entreno bajo mi propia responsabilidad.';
+const TERMS_LABEL_GYM='He leído y acepto el Reglamento y Términos de HABIT Training Hub, incluyendo la exención de responsabilidad por accidentes, mi responsabilidad ante daños al equipo y las Normas de la comunidad.';
+const TERMS_LABEL_APP='He leído y acepto los Términos de uso de HABIT, incluyendo que entreno bajo mi propia responsabilidad y las Normas de la comunidad.';
 function showTerms(kind,onAccept){
   const app=kind==='app';
   termsOnAccept=onAccept||null;
@@ -6344,7 +6383,7 @@ async function doRegister(){
   // permiso —reservar y la puerta los decide la membresía—; decide el reglamento que
   // acepta, si el admin recibe el aviso de socio nuevo y qué ve primero.
   const reg={name,email,phone,pass,joinedAs:IS_CREW?'app':'gym'};
-  showTerms(reg.joinedAs,()=>completeRegister(reg));
+  showTerms(reg.joinedAs,()=>{markCommunityRulesAccepted();completeRegister(reg);});
 }
 async function ensureProfile(reg){
   // El perfil normalmente ya existe: lo crea handle_new_user al hacer signUp, con el
@@ -21659,6 +21698,8 @@ async function createPostSb(){
   const imgData=window._postImgData||(prev&&prev._imgData)||null;
   if(!text&&!imgData){toast('Escribe algo o agrega una foto','err');return;}
   if(text.length>500){toast('Maximo 500 caracteres','err');return;}
+  if(communityTextBlocked(text)){toast(COMMUNITY_TEXT_MSG,'err');return;}
+  if(!await ensureCommunityRules())return;
   showLoading('Publicando...');
   try{
     let imgUrl=null;
@@ -21692,7 +21733,7 @@ async function createPostSb(){
     renderFeedSb();
   }catch(e){
     hideLoading();
-    toast('Error: '+e.message,'err');
+    toast(isCommunityTextError(e)?COMMUNITY_TEXT_MSG:'Error: '+e.message,'err');
   }
 }
 
@@ -21833,6 +21874,8 @@ async function addCommentSb(input){
   const postId=input.dataset.post,ownerId=input.dataset.owner,text=(input.value||'').trim();
   if(!postId||!text)return;
   if(text.length>300){toast('Comentario maximo 300 caracteres','err');return;}
+  if(communityTextBlocked(text)){toast(COMMUNITY_TEXT_MSG,'err');return;}
+  if(!await ensureCommunityRules())return;
   input.disabled=true;
   try{
     const{data:inserted,error}=await sb.from('post_comments').insert({
@@ -21862,7 +21905,7 @@ async function addCommentSb(input){
   }catch(e){
     console.error(e);
     // 42501: la RLS lo rechazó, que en un comentario solo pasa con un bloqueo de por medio (128).
-    toast(e&&e.code==='42501'?'No puedes comentar en esta publicación.':'Error al comentar: '+(e.message||e),'err');
+    toast(isCommunityTextError(e)?COMMUNITY_TEXT_MSG:e&&e.code==='42501'?'No puedes comentar en esta publicación.':'Error al comentar: '+(e.message||e),'err');
   }finally{
     input.disabled=false;
   }
@@ -21928,6 +21971,65 @@ const COMMUNITY_REPORT_REASONS=[
   {key:'sexual',label:'Desnudos o contenido sexual'},
   {key:'otro',label:'Otra cosa'}
 ];
+// El filtro de palabras (138) vive dos veces, como las reglas de reservar: aquí para avisar al
+// instante y en el trigger community_text_guard para decidir. La lista es la misma, juntada
+// como la deja la normalización ("zora", no "zorra"), y scripts/check-community-filter.js
+// falla si las dos se separan. Groserías de todos los días no entran: ver la cabecera de la 138.
+const COMMUNITY_BLOCKED_TERMS=[
+  'pendejo','pendeja','pendejos','pendejas','culero','culera','culeros','culeras',
+  'puta','putas','puto','putos','putito','zora','zoras','hijo de puta','hdp',
+  'chinga tu madre','chingatumadre','ctm','malparido','malparida',
+  'maricon','maricones','marica','joto','jotos','mayate','sudaca',
+  'fagot','fagots','fag','fags','niger','nigers','niga','nigas','retard','retards',
+  'bitch','bitches','cunt','cunts','fuck you','motherfucker',
+  'te voy a matar','te vamos a matar','matate','suicidate','ojala te mueras',
+  'kil yourself','kil urself','kys',
+  'porno','porn','xvideos','pornhub','onlyfans'
+];
+const COMMUNITY_TEXT_MSG='Tu texto tiene una palabra que no se permite en la comunidad. Revisa las Normas de la comunidad.';
+function communityTextNormalize(t){
+  const from='áàäâéèëêíìïîóòöôúùüûñ013457@$',to='aaaaeeeeiiiioooouuuunoieastas';
+  return String(t||'').toLowerCase().replace(/./g,ch=>{const i=from.indexOf(ch);return i<0?ch:to[i];})
+    .replace(/[^a-z]+/g,' ').replace(/(.)\1+/g,'$1').trim();
+}
+function communityTextBlocked(t){
+  const s=' '+communityTextNormalize(t)+' ';
+  return COMMUNITY_BLOCKED_TERMS.some(w=>s.includes(' '+w+' '));
+}
+function isCommunityTextError(e){return /COMMUNITY_TEXT_BLOCKED/.test(String((e&&e.message)||e||''));}
+
+// Normas de la comunidad: lo que Apple pide publicar (qué no se tolera y a quién quejarse). Quien
+// se registró después de que los términos las incluyeran ya las aceptó; a quien venía de antes se
+// le piden una vez, la primera vez que publica, comenta o registra algo en un reto.
+const COMMUNITY_RULES_KEY='habit_community_rules_v1';
+const COMMUNITY_REPORT_WHATSAPP='https://wa.me/526623562816?text='+encodeURIComponent('Hola HABIT, quiero reportar algo de la comunidad.');
+let communityRulesResolve=null;
+function communityRulesAccepted(){try{return localStorage.getItem(COMMUNITY_RULES_KEY)==='1';}catch(_){return false;}}
+function markCommunityRulesAccepted(){try{localStorage.setItem(COMMUNITY_RULES_KEY,'1');}catch(_){}}
+function openCommunityRules(opts){
+  const accept=!!(opts&&opts.accept);
+  const modal=document.getElementById('community-rules-modal');
+  if(!modal)return Promise.resolve(true);
+  document.getElementById('crules-accept').style.display=accept?'':'none';
+  document.getElementById('crules-ok').style.display=accept?'none':'';
+  const body=modal.querySelector('.terms-body');if(body)body.scrollTop=0;
+  modal.style.display='flex';
+  return new Promise(res=>{communityRulesResolve=res;});
+}
+function closeCommunityRules(ok){
+  const modal=document.getElementById('community-rules-modal');
+  if(modal)modal.style.display='none';
+  if(ok)markCommunityRulesAccepted();
+  const res=communityRulesResolve;communityRulesResolve=null;
+  if(res)res(!!ok);
+}
+async function ensureCommunityRules(){
+  if(sbProfile&&sbProfile.role==='admin')return true;
+  if(communityRulesAccepted())return true;
+  return openCommunityRules({accept:true});
+}
+function openCommunityReportWhatsapp(){window.open(COMMUNITY_REPORT_WHATSAPP,'_blank','noopener');}
+
 // Lo que se puede reportar: publicaciones y comentarios (128), retos y sus marcas (129).
 const COMMUNITY_ITEM_KINDS={
   post:{noun:'publicación',title:'Publicación de ',ask:'¿Qué pasa con esta publicación?'},
@@ -22236,6 +22338,7 @@ function isMissingRetosTable(e){
 function retoError(e){
   const msg=String((e&&e.message)||e||'');
   if(isMissingRetosTable(e))return'Retos todavía no está disponible.';
+  if(isCommunityTextError(e))return COMMUNITY_TEXT_MSG;
   if(/CHALLENGE_CLOSED/.test(msg))return'Este reto no está abierto: todavía no empieza o ya terminó.';
   if(/CHALLENGE_BAD_SCORE/.test(msg))return'Revisa tu marca: falta un dato o pasa del límite de tiempo.';
   if(/CHALLENGE_BAD_DATES/.test(msg))return'Revisa las fechas: empieza entre hoy y dentro de 30 días, y no puede terminar en el pasado.';
@@ -22626,6 +22729,8 @@ async function saveRetoForm(){
   // el reto ya tiene marcas el trigger compara campo por campo.
   if(c)Object.keys(payload).forEach(k=>{if(payload[k]===c[k])delete payload[k];});
   if(c&&!Object.keys(payload).length){retoBack();return;}
+  if(communityTextBlocked(payload.title)||communityTextBlocked(payload.description)){toast(COMMUNITY_TEXT_MSG,'err');return;}
+  if(!await ensureCommunityRules())return;
   showLoading(c?'Guardando...':'Publicando...');
   try{
     if(c){
@@ -22733,6 +22838,8 @@ async function saveRetoScore(){
   let proof=((document.getElementById('rs-proof')||{}).value||'').trim();
   if(proof&&!/^https?:\/\//i.test(proof))proof='https://'+proof;
   row.proof_url=proof||null;
+  if(communityTextBlocked(row.note)){toast(COMMUNITY_TEXT_MSG,'err');return;}
+  if(!await ensureCommunityRules())return;
   // Un update manda todas las columnas del tipo (las que no se usan en null) para que una marca
   // corregida no arrastre datos de la anterior.
   const full={rounds:null,reps:null,time_sec:null,load_kg:null,finished:null,...row};

@@ -801,3 +801,25 @@ nuevas.
   `docs/RETOS.md`). Las fases de este plan quedan en 131 (Biblioteca), 132 (Calendario), 133
   (Calistenia), 134 (Check-in) y 135 (Tu mudanza). Para no volver a correrlas, cada fase toma su
   número cuando se escribe su migración, no antes.
+- **2026-10-31** — **Lo que faltaba de la guideline 1.2 para HABIT Crew** (versión `20261031-1`).
+  - **Filtro de palabras, migración 138** (`138_community_word_filter.sql`): el trigger
+    `community_text_guard` rechaza con `COMMUNITY_TEXT_BLOCKED` el texto de posts, comentarios,
+    retos (título y descripción) y notas de marcas que traiga una palabra de
+    `community_blocked_terms()`: insultos dirigidos, homofóbicos y racistas, amenazas y suicidio,
+    porno. Las groserías de todos los días ("pinche", "verga") no entran a propósito. Normaliza
+    acentos, números disfrazados de letras y letras repetidas, y busca la palabra entera
+    ("computadora" y "disputa" pasan). Solo revisa el texto que cambió: las reacciones de un post
+    viejo siguen funcionando. La app hace la misma revisión antes de mandar
+    (`communityTextBlocked`); `scripts/check-community-filter.js` falla si las dos listas se
+    separan. Probada en PGlite (insert, update sin tocar el texto, notas de marcas).
+  - **Normas de la comunidad** (`#community-rules-modal`): qué no se publica, que lo reportado se
+    revisa en menos de 24 h, cómo reportar y bloquear, y el contacto (WhatsApp de asistencia,
+    +52 662 356 2816). Se abren desde Perfil → Comunidad y desde el pie del feed. Quien se
+    registró antes las acepta una vez, al publicar, comentar o registrar algo en un reto por
+    primera vez (`ensureCommunityRules`, en localStorage; el admin no).
+  - **Términos**: los de la app y el reglamento del gym traen ahora una sección de Comunidad
+    ("no se tolera el contenido ofensivo ni los usuarios abusivos") y la casilla nombra las
+    Normas. Registrarse las da por aceptadas.
+  - **Falta:** correr la **138** en el SQL Editor (sin ella solo filtra la app), alguien que
+    atienda los reportes a tiempo, y la app nativa de Crew (otro bundle id en Capacitor; el
+    `www/` de iOS está desactualizado).

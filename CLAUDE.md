@@ -508,6 +508,12 @@ places. PRs live in **Progreso** only: Historial used to render them too, with i
   el admin solo ve "Bloquear", porque él borra), Perfil → Usuarios bloqueados
   (`renderPerfilBlocks`, que se esconde si falta la 128) y Admin → Comunidad arriba del feed
   (`renderAdminReports`, agrupado por lo reportado; el badge suma posts nuevos + pendientes)
+  **Filtro de palabras** (migración 138): el trigger `community_text_guard` rechaza con
+  `COMMUNITY_TEXT_BLOCKED` el texto de posts, comentarios, retos y notas de marcas con una
+  palabra de `community_blocked_terms()`; la app revisa lo mismo antes (`communityTextBlocked`).
+  La lista vive dos veces y `scripts/check-community-filter.js` falla si se separan. Las
+  **Normas de la comunidad** (`#community-rules-modal`, Perfil y pie del feed) son el contacto
+  publicado que pide Apple, y se aceptan una vez antes de publicar (`ensureCommunityRules`)
 - **Retos** (migración 129, `docs/RETOS.md`): `challenges` (un reto: título, el WOD escrito,
   `score_type` amrap / for_time / max_reps / max_load / max_time, fechas) y `challenge_entries`
   (**una marca por persona y reto**, que se corrige mientras esté abierto). Cualquier cuenta crea
