@@ -15,6 +15,8 @@ const h=new Function('catalog',`
   const rbSyncFromDom=()=>{},renderRoutineBuilder=()=>{},hideTrainingDialog=()=>{},showTrainingDialog=()=>{};
   const routineExercises=b=>b.exercises||[],routineTodayMeta=b=>({duration:30,equipment:[]});
   const exerciseSetCount=ex=>Number(ex.sets)||3,exerciseTargetLabel=ex=>ex.reps||'';
+  const exerciseIconSvg=()=>'<svg></svg>';
+  ${source('const EX_NAME_KEEP_UPPER=', 'function exerciseIconSvg(')}
   let board={id:'b',name:'Routine <test>',owner_id:'me',exercises:catalog.slice(0,8).map(e=>({...e,sets:3,reps:'8-10'}))};
   const routineById=()=>board,isMyRoutine=b=>b.owner_id==='me';
   ${source('function wsPickItemHtml(', 'function wsToggleSwap(')}
@@ -54,4 +56,13 @@ assert.match(detail,/Eliminar rutina/);
 const coach=h.detail(false);
 assert.match(coach,/Duplicar y adaptar/);
 assert.doesNotMatch(coach,/Eliminar rutina|Editar rutina/);
+// Los nombres en MAYÚSCULAS de las rutinas del gym se muestran normales; lo que ya trae
+// minúsculas, o una sigla como RDL, se respeta.
+const exDisplayName=new Function(source('const EX_NAME_KEEP_UPPER=', 'function exerciseIconSvg(')+'return exDisplayName;')();
+assert.equal(exDisplayName('REMO CON MANCUERNA BANCA HORIZONTAL'),'Remo con mancuerna banca horizontal');
+assert.equal(exDisplayName('JALON AGARRE ABIERTO/CERRADO'),'Jalon agarre abierto/cerrado');
+assert.equal(exDisplayName('RDL CON BARRA'),'RDL con barra');
+assert.equal(exDisplayName('Press inclinado'),'Press inclinado');
+assert.equal(exDisplayName('Pike push up'),'Pike push up');
+assert.equal(exDisplayName(''),'');
 console.log('HABIT Rutinas: 21 assertions OK');

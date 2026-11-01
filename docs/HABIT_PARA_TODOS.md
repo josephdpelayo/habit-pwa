@@ -868,3 +868,18 @@ nuevas.
     los datos y la contraseña plegados en «Editar mis datos» (`<details>`), y Cuenta al final.
     Sin «Volver». El botón flotante de Asistencia ya no sale: tapaba las filas de Perfil y ahora
     es una fila.
+- **2026-10-31 (5)** — **Arreglos rápidos de UX** (versión `20261031-5`).
+  - **Arreglo:** llegar a Entrenar con otra pestaña ya elegida (Inicio → «Armar mi semana», el
+    final del onboarding) pintaba esa pestaña con Hoy marcado: pantalla en blanco.
+    `renderRutinas` ahora sincroniza las pestañas (`syncRutTabs`).
+  - **Progreso sin entrenos**: en lugar de seis ceros y cajas vacías, una tarjeta «Empieza con
+    tu primer entreno» con Desde cero / Elegir rutina. El texto de récords ya no habla de un
+    botón 💪 que no existe, «0k kg movidos» pasó a «0», y la barra de abajo marca Entrenar.
+  - **Comunidad**: los comentarios se pliegan tras «💬 Comentar» (o el número) en lugar de
+    abrir la caja en cada publicación; las fechas dicen «hace 3 h», «ayer», «5 may»
+    (`timeAgoEs`) en lugar de «179d».
+  - **Nombres de ejercicio**: los que se escribieron en MAYÚSCULAS se muestran normales
+    (`exDisplayName`, solo al mostrar; respeta lo que ya trae minúsculas y siglas como RDL) en la
+    ficha de rutina, la hoja de entreno y la tarjeta de Hoy. La ficha de rutina usa el icono del
+    ejercicio en lugar de 01, 02…, y dice «1 serie».
+  - **La frase del día** en Inicio, más chica y sin tarjeta; el dashboard del admin no cambia.

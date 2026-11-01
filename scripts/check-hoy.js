@@ -26,6 +26,7 @@ const source = [
   between('function routineTodayMeta(', 'function nextExerciseSuggestion('),
   between('function sessionExerciseList(', 'function buildTrainingExerciseSnapshot('),
   between('function exerciseKeyForSession(', 'function isSetPending('),
+  between('const EX_NAME_KEEP_UPPER=', 'function exerciseIconSvg('),
   between('function hoyHeroHtml(', '// ── SEMANA'),
   between('async function loadSessionSetsSb(', 'async function hydrateSessionSetDefaults('),
   between('let _activeCoachingSessionLoad=', 'function showActiveSessionBar('),

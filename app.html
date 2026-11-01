@@ -6,12 +6,12 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="HABIT">
 <meta name="application-name" content="HABIT">
-<link rel="manifest" href="/manifest.json?v=20261031-4">
-<link rel="apple-touch-icon" sizes="120x120" href="/icons/icon-120.png?v=20261031-4">
-<link rel="apple-touch-icon" sizes="152x152" href="/icons/icon-152.png?v=20261031-4">
-<link rel="apple-touch-icon" sizes="167x167" href="/icons/icon-167.png?v=20261031-4">
-<link rel="apple-touch-icon" sizes="180x180" href="/icons/icon-180.png?v=20261031-4">
-<link rel="icon" type="image/png" sizes="32x32" href="/icons/icon-32.png?v=20261031-4">
+<link rel="manifest" href="/manifest.json?v=20261031-5">
+<link rel="apple-touch-icon" sizes="120x120" href="/icons/icon-120.png?v=20261031-5">
+<link rel="apple-touch-icon" sizes="152x152" href="/icons/icon-152.png?v=20261031-5">
+<link rel="apple-touch-icon" sizes="167x167" href="/icons/icon-167.png?v=20261031-5">
+<link rel="apple-touch-icon" sizes="180x180" href="/icons/icon-180.png?v=20261031-5">
+<link rel="icon" type="image/png" sizes="32x32" href="/icons/icon-32.png?v=20261031-5">
 <title>HABIT</title>
 <!-- Con id a propósito: scripts/check-training.js toma la primera etiqueta script sin
      atributos como el script principal de la app y la compila. -->
@@ -25,7 +25,7 @@
   var crew=/^\/crew(\/|$)/.test(location.pathname);
   window.HABIT_BRAND=crew?'crew':'gym';
   if(!crew)return;
-  var v='20261031-4';
+  var v='20261031-5';
   document.documentElement.classList.add('brand-crew');
   document.title='HABIT Crew';
   document.querySelectorAll('meta[name="apple-mobile-web-app-title"],meta[name="application-name"]')
@@ -40,9 +40,9 @@
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Share+Tech+Mono&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="/skandi-recovery.js?v=20261031-4"></script>
-<script src="/body-figure.js?v=20261031-4"></script>
-<script src="/habit-training.js?v=20261031-4"></script>
+<script src="/skandi-recovery.js?v=20261031-5"></script>
+<script src="/body-figure.js?v=20261031-5"></script>
+<script src="/habit-training.js?v=20261031-5"></script>
 <style>
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
 @media (prefers-reduced-motion:reduce){*,*:before,*:after{scroll-behavior:auto!important;animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}}
@@ -219,6 +219,12 @@ input,select,button,textarea{font-family:'Inter',sans-serif}
 .daily-quote-footer{position:relative;z-index:1;width:100%;max-width:280px;margin-top:16px;padding-top:12px;border-top:1px solid rgba(255,255,255,.08);display:flex;align-items:center;justify-content:center;gap:10px;color:var(--green);font-size:11px;font-weight:800;letter-spacing:.1em;text-transform:uppercase}
 .daily-quote-date{color:var(--gray);letter-spacing:.08em;white-space:nowrap}
 .daily-quote-sep{color:var(--gray);opacity:.5}
+/* En Inicio la frase acompaña, no manda: ocupaba casi media pantalla. El dashboard del admin
+   la sigue mostrando grande. */
+#v-inicio .daily-quote-card{padding:14px 18px 12px;margin:4px 0 14px;border:0;background:none;box-shadow:none}
+#v-inicio .daily-quote-card::before,#v-inicio .daily-quote-card::after{display:none}
+#v-inicio .daily-quote-text{font-size:16px;font-weight:500;line-height:1.35;color:var(--gl);text-shadow:none}
+#v-inicio .daily-quote-footer{margin-top:8px;padding-top:0;border-top:0;font-size:10px}
 .inicio-coach-action{margin:0 0 9px}
 .inicio-coach-btn{width:100%;min-height:44px;border:1px solid rgba(147,197,253,.22);border-radius:14px;background:linear-gradient(135deg,rgba(37,99,235,.16),rgba(16,185,129,.055));color:var(--white);display:grid;grid-template-columns:auto minmax(0,1fr) auto;align-items:center;gap:9px;padding:9px 11px;text-align:left;cursor:pointer;box-shadow:0 10px 24px rgba(0,0,0,.2)}
 .inicio-coach-icon{width:28px;height:28px;border-radius:10px;background:rgba(147,197,253,.11);display:flex;align-items:center;justify-content:center;color:#bfdbfe;flex-shrink:0}
@@ -1045,6 +1051,8 @@ input,select,button,textarea{font-family:'Inter',sans-serif}
 .reaction-btn{display:flex;align-items:center;gap:4px;padding:9px 13px;border:1px solid var(--border);border-radius:99px;font-size:12px;cursor:pointer;background:transparent;color:var(--gray)}
 .reaction-btn.active{border-color:var(--blue);background:rgba(37,99,235,.12);color:var(--bl)}
 .post-comments{border-top:1px solid var(--border);padding:10px 14px;background:rgba(255,255,255,.015)}
+.post-comments.collapsed{display:none}
+.post-cmt-btn{margin-left:auto;background:none;border:0;color:var(--gray);font-size:13px;font-weight:600;padding:6px 4px;cursor:pointer}
 .comment-row{display:flex;gap:8px;margin-bottom:8px}
 .comment-av{width:24px;height:24px;border-radius:50%;background:var(--bdim);border:1px solid var(--blue);display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;color:var(--bl);flex-shrink:0;overflow:hidden}
 .comment-body{flex:1;min-width:0}
@@ -2720,6 +2728,8 @@ body.admin-mode #courtesy-modal label{border-radius:14px!important;border-color:
 .routine-detail-stats small{display:block;color:var(--gray);font-size:11px;margin-top:4px}
 .routine-detail-exercises{list-style:none;margin:0;padding:0}
 .routine-detail-exercises li{display:flex;gap:14px;padding:17px 0;border-bottom:1px solid var(--border);align-items:flex-start}
+.routine-detail-ico{width:34px;height:34px;border-radius:11px;background:var(--card2);color:var(--gl);display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:-2px}
+.routine-detail-ico .ex-ico-svg{width:20px;height:20px}
 .routine-detail-number{color:var(--gray);font-size:11px;font-variant-numeric:tabular-nums;padding-top:3px;width:20px;flex-shrink:0}
 .routine-detail-exercises strong{font-size:14px;font-weight:600;line-height:1.45;display:block}
 .routine-detail-exercises small{font-size:12px;line-height:1.5;color:var(--gray);display:block;margin-top:4px}
@@ -4119,7 +4129,7 @@ const GYM_ONLY_VIEWS=['book','planes','historial','shop'];
 const GYM_APP_URL='/';
 document.querySelectorAll('.brand-name').forEach(el=>{el.textContent=BRAND_NAME;});
 const SUPABASE_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBtcGp0ZXVxanVzYmlkdWV2YndxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc2OTI1NjUsImV4cCI6MjA5MzI2ODU2NX0.XbMzZoo2yqtrD8znLnyo_1zDfrdJAvAPj1lqGOyXnLw';
-const APP_VERSION='20261031-4';
+const APP_VERSION='20261031-5';
 // La pierna va separada en cuádriceps, femorales y pantorrillas: la figura
 // corporal pinta esas tres regiones por separado y el motor de recuperación les
 // da ventanas de descanso distintas. 'Piernas' sigue reconociéndose al leer
@@ -4388,7 +4398,7 @@ function exerciseTargetLabel(ex){
 }
 function exerciseDetailParts(ex){
   const steps=exercisePyramidSteps(ex);
-  const sets=steps?steps.length+' series':(ex?.sets?ex.sets+' series':null);
+  const sets=steps?steps.length+' series':(ex?.sets?ex.sets+(Number(ex.sets)===1?' serie':' series'):null);
   return [sets,exerciseTargetLabel(ex)||null,ex?.rest?ex.rest+' descanso':null,
     parseTargetRir(ex)!=null?'RIR '+parseTargetRir(ex):null].filter(Boolean);
 }
@@ -4422,6 +4432,22 @@ const EXERCISE_ICONS={
   mobility:'<path d="M19.5 12a7.5 7.5 0 1 1-2.2-5.3"/><path d="M19.6 3.8v3.6H16"/><circle cx="12" cy="12" r="1.7"/>',
   strength:'<path d="M5 12h14"/><path d="M7 8.5v7M17 8.5v7M4 10.2v3.6M20 10.2v3.6"/>'
 };
+// Las rutinas del gym se escribieron en MAYÚSCULAS («REMO CON MANCUERNA BANCA HORIZONTAL») y así
+// cuestan leerse. Solo para mostrar: el nombre guardado no cambia. Un nombre que ya trae
+// minúsculas se respeta tal cual.
+const EX_NAME_KEEP_UPPER=new Set(['RDL','KB','TRX','DB','BB','HIIT','HIT','EMOM','AMRAP','SL']);
+function exDisplayName(name){
+  const n=String(name||'');
+  if(!/[A-ZÁÉÍÓÚÑ]{2}/.test(n)||/[a-záéíóúñ]/.test(n))return n;
+  let first=true;
+  return n.split(/(\s+|\/|-)/).map(tok=>{
+    if(!/[A-ZÁÉÍÓÚÑ]/.test(tok))return tok;
+    if(EX_NAME_KEEP_UPPER.has(tok)){first=false;return tok;}
+    const low=tok.toLowerCase();
+    if(first){first=false;return low.charAt(0).toUpperCase()+low.slice(1);}
+    return low;
+  }).join('');
+}
 function exerciseIconSvg(ex){
   const pat=window.HabitTraining&&HabitTraining.exercisePattern
     ?HabitTraining.exercisePattern({name:ex&&ex.name,muscles:exerciseMuscleLabel(ex)||'',primary_muscle:ex&&(ex.primary_muscle||ex.primaryMuscle),category:ex&&ex.category})
@@ -4967,6 +4993,20 @@ function linkifyText(v){
 }
 function avatarHtml(name,url,cls){
   return '<div class="'+cls+'">'+(url?'<img src="'+esc(url)+'" alt="">':inits(name||'?'))+'</div>';
+}
+// Para la comunidad: "hace 3 h", "ayer", "12 may". "179d" había que traducirlo.
+function timeAgoEs(ts){
+  const d=new Date(ts),m=Math.floor((Date.now()-d)/60000);
+  if(!Number.isFinite(m))return'';
+  if(m<1)return'Ahora';
+  if(m<60)return'hace '+m+' min';
+  const h=Math.floor(m/60);
+  if(h<24)return'hace '+h+' h';
+  const days=Math.floor(h/24);
+  if(days===1)return'ayer';
+  if(days<7)return'hace '+days+' días';
+  const sameYear=d.getFullYear()===new Date().getFullYear();
+  return d.getDate()+' '+MO[d.getMonth()]+(sameYear?'':' '+d.getFullYear());
 }
 const timeSince=ts=>{const m=Math.floor((Date.now()-new Date(ts))/60000);if(m<1)return'Ahora';if(m<60)return m+'m';const h=Math.floor(m/60);if(h<24)return h+'h';return Math.floor(h/24)+'d';};
 const daysUntil=iso=>{if(!iso)return null;return Math.ceil((new Date(iso)-Date.now())/86400000);};
@@ -7036,9 +7076,11 @@ function sv(v){
     if(COACHING_SECTION_ON)toast('Coaching disponible solo para socios beta','warn');
     v='inicio';
   }
+  // Progreso es parte de Entrenar: la barra lo dice, en lugar de no marcar nada.
+  const navV=v==='progreso'?'rutinas':v;
   document.querySelectorAll('.bnb').forEach((b,i)=>{
     const name=BNAV_VIEWS[i];
-    b.classList.toggle('active',name===v);
+    b.classList.toggle('active',name===navV);
   });
   updateBottomNavAccess();
   updateShopCartBadge();
@@ -8819,7 +8861,7 @@ function renderPrCardsInto(containerEl,chartsRegistry,scoreRows,unit,canvasPrefi
   Object.values(chartsRegistry).forEach(c=>{try{c.destroy();}catch(_){}});
   Object.keys(chartsRegistry).forEach(k=>delete chartsRegistry[k]);
   if(!scoreRows.length){
-    containerEl.innerHTML='<div class="empty">Sin pesos registrados aun.<br>Usa el botón 💪 en tus ejercicios para empezar.</div>';
+    containerEl.innerHTML='<div class="empty">Tus récords salen aquí cuando registras pesos en un entreno.</div>';
     return;
   }
   const exMap={};
@@ -10310,7 +10352,7 @@ function renderExerciseListHtml(exercises,keyPrefix,boardId,sessionCtx){
     return '<div class="exercise-detail'+(isActionable?'':' static')+'"'+(isActionable?' onclick="openExerciseFocus(this)" data-ex="'+esc(JSON.stringify(exData))+'"':'')+'>'
       +'<div class="exercise-detail-head" style="display:flex;align-items:center;gap:10px">'
       +'<div class="ex-num ex-ico">'+exerciseIconSvg(ex)+'</div>'
-      +'<div class="ex-body"><div class="ex-name">'+(groupLabel?'<span class="ex-superset-mini">'+esc(groupLabel)+'</span>':'')+esc(ex.name)+'</div>'
+      +'<div class="ex-body"><div class="ex-name">'+(groupLabel?'<span class="ex-superset-mini">'+esc(groupLabel)+'</span>':'')+esc(exDisplayName(ex.name))+'</div>'
       +'<div class="ex-detail">'+exerciseDetailParts(ex).map(esc).join(' · ')+(exerciseMuscleLabel(ex)?' · '+esc(exerciseMuscleLabel(ex)):'')+'</div>'
       +(ex.note||ex.notes||ex.description?'<div class="ex-note">'+esc(ex.note||ex.notes||ex.description)+'</div>':'')
       +'</div>'
@@ -10331,7 +10373,7 @@ function renderWorkoutEditListHtml(exercises,boardId,scheduleId){
     return '<div class="exercise-detail edit-workout-exercise">'
       +'<div class="exercise-detail-head" style="display:flex;align-items:center;gap:10px">'
       +'<div class="ex-num">'+(i+1)+'</div>'
-      +'<div class="ex-body"><div class="ex-name">'+(groupLabel?'<span class="ex-superset-mini">'+esc(groupLabel)+'</span>':'')+esc(ex.name)+'</div>'
+      +'<div class="ex-body"><div class="ex-name">'+(groupLabel?'<span class="ex-superset-mini">'+esc(groupLabel)+'</span>':'')+esc(exDisplayName(ex.name))+'</div>'
       +'<div class="ex-detail">'+exerciseDetailParts(ex).map(esc).join(' · ')+(exerciseMuscleLabel(ex)?' · '+esc(exerciseMuscleLabel(ex)):'')+'</div>'
       +(ex.note||ex.notes||ex.description?'<div class="ex-note">'+esc(ex.note||ex.notes||ex.description)+'</div>':'')
       +'</div>'
@@ -10360,13 +10402,16 @@ let myProgramDays=[];
 let weekPlanLoadedAt=0;
 let expandedRoutineCards=new Set();
 
-function rutTab(t){
-  rutActiveTab=t;
+function syncRutTabs(t){
   document.querySelectorAll('.rut-hub-tab').forEach(b=>b.classList.toggle('active',b.dataset.rtab===t));
   ['hoy','semana','rutinas'].forEach(x=>{
     const el=document.getElementById('rut-panel-'+x);
     if(el)el.classList.toggle('active',x===t);
   });
+}
+function rutTab(t){
+  rutActiveTab=t;
+  syncRutTabs(t);
   renderRutHub().catch(console.error);
 }
 
@@ -10893,7 +10938,7 @@ function progresoStatsHtml(d){
     +'<div class="tu-stat"><div class="tu-stat-n">'+progresoStreak(d.done)+'</div><div class="tu-stat-l">Semanas seguidas</div></div>'
     +'<div class="tu-stat"><div class="tu-stat-n">'+d.sets.length+'</div><div class="tu-stat-l">Series</div></div>'
     +'<div class="tu-stat"><div class="tu-stat-n">'+totalMin+'</div><div class="tu-stat-l">Minutos</div></div>'
-    +'<div class="tu-stat"><div class="tu-stat-n">'+Math.round(progresoTotalVolume(d)/1000)+'k</div><div class="tu-stat-l">kg movidos</div></div>'
+    +'<div class="tu-stat"><div class="tu-stat-n">'+(v=>v>=1000?Math.round(v/1000)+'k':Math.round(v))(progresoTotalVolume(d))+'</div><div class="tu-stat-l">kg movidos</div></div>'
     +'</div>';
 }
 function setVolumeKg(s){
@@ -11041,7 +11086,14 @@ async function renderProgreso(){
   el.innerHTML='<div style="display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:12px">'
       +'<select aria-label="Periodo de progreso" onchange="setProgresoRange(this.value)" style="background:var(--card);color:var(--white);border:1px solid var(--border);border-radius:6px;padding:8px"><option value="28" '+(PROGRESO_LOOKBACK_DAYS===28?'selected':'')+'>4 semanas</option><option value="56" '+(PROGRESO_LOOKBACK_DAYS===56?'selected':'')+'>8 semanas</option><option value="84" '+(PROGRESO_LOOKBACK_DAYS===84?'selected':'')+'>12 semanas</option></select>'
       +'<button class="btn-sm" onclick="sv(&quot;rutinas&quot;)">Volver a Entrenar</button></div>'
-    +progresoStatsHtml(d)
+    // Sin un solo entreno eran seis ceros y tres cajas vacías: una tarjeta que diga qué sigue.
+    +((!d.done.length&&!d.sets.length)
+      ?'<section class="hoy-hero prog-empty"><div class="hoy-k">Tu progreso</div>'
+        +'<div class="hoy-title"><span>Empieza con tu primer entreno</span></div>'
+        +'<div class="hoy-meta">Cada serie que palomeas suma aquí: entrenos por semana, volumen por músculo y tus récords.</div>'
+        +hoyStartRowHtml(true)+'</section>'
+        +'<div id="progreso-prs"></div>'
+      :progresoStatsHtml(d)
     +'<div class="divider"></div><p class="slbl">Volumen por músculo · 4 semanas</p>'
     +progresoVolumeHtml(d)
     +'<div class="divider"></div><p class="slbl">Tus ejercicios</p>'
@@ -11049,7 +11101,7 @@ async function renderProgreso(){
       +'placeholder="Buscar un ejercicio…" value="'+esc(_progresoQuery)+'" oninput="renderProgresoExerciseList()">'
     +'<div class="ws-swap-list" id="progreso-ex-list" style="max-height:none">'+progresoExerciseListHtml(d)+'</div>'
     +'<div class="divider"></div><p class="slbl">Tus PRs</p>'
-    +'<div id="progreso-prs"></div>';
+    +'<div id="progreso-prs"></div>');
 
   // Las tarjetas de PR son las mismas de Coaching → Tú, alimentadas por user_scores.
   try{
@@ -11189,7 +11241,7 @@ function hoyTopHtml(opts){
     const done=Object.values(coachSessionSets).reduce((n,l)=>n+(Array.isArray(l)?l.filter(s=>s.done).length:0),0);
     const nextEx=sessionExerciseList().find((ex,i)=>(coachSessionSets[exerciseKeyForSession(active.board_id,ex,i)]||[]).some(s=>!s.done));
     html+=hoyHeroHtml({live:true,k:'En curso',title:active.board_name||'Entreno',dot:active.board_color,
-      meta:total?done+' de '+total+' series'+(nextEx?' · Sigue: '+(nextEx.name||'ejercicio'):''):'Retoma tu sesión donde la dejaste.',
+      meta:total?done+' de '+total+' series'+(nextEx?' · Sigue: '+(exDisplayName(nextEx.name)||'ejercicio'):''):'Retoma tu sesión donde la dejaste.',
       extra:'<div class="hoy-sync"><span class="training-sync'+trainingSyncClass()+'" data-training-sync>'+trainingSyncText()+'</span></div>',
       cta:'<button class="btn hoy-cta" onclick="openWorkoutSheet()">Continuar</button>'});
   }else if(pending.length){
@@ -11908,8 +11960,8 @@ function openRoutineDetail(boardId){
     +'<div><strong>'+series+'</strong><small>series</small></div><div><strong>'+(exercises.length?'~'+meta.duration:'—')+'</strong><small>minutos</small></div></div>'
     +(meta.equipment.length?'<p class="routine-detail-note" style="margin:0 0 18px">'+esc(meta.equipment.join(' · '))+'</p>':'')
     +'<p class="routine-library-label">Tu recorrido</p>'
-    +(exercises.length?'<ol class="routine-detail-exercises">'+exercises.map((ex,i)=>'<li><span class="routine-detail-number">'+String(i+1).padStart(2,'0')+'</span><div><strong>'+esc(ex.name||'Ejercicio')+'</strong><small>'
-      +esc([exerciseSetCount(ex)+' series',exerciseTargetLabel(ex),ex.rest?'Descanso '+ex.rest:'',ex.supersetGroup?'Superserie '+ex.supersetGroup:''].filter(Boolean).join(' · '))+'</small></div></li>').join('')+'</ol>'
+    +(exercises.length?'<ol class="routine-detail-exercises">'+exercises.map((ex,i)=>'<li><span class="routine-detail-ico" title="Ejercicio '+(i+1)+'">'+exerciseIconSvg(ex)+'</span><div><strong>'+esc(exDisplayName(ex.name)||'Ejercicio')+'</strong><small>'
+      +esc([exerciseSetCount(ex)+(exerciseSetCount(ex)===1?' serie':' series'),exerciseTargetLabel(ex),ex.rest?'Descanso '+ex.rest:'',ex.supersetGroup?'Superserie '+ex.supersetGroup:''].filter(Boolean).join(' · '))+'</small></div></li>').join('')+'</ol>'
       :'<div class="routine-library-empty">Agrega el primer ejercicio para empezar a entrenar.</div>')
     +'<div class="routine-detail-tools">'
     +'<button class="routine-detail-tool" onclick="closeRoutineDetail();openAddRoutineToWeek(&quot;'+esc(b.id)+'&quot;)">Asignar a mi semana <span aria-hidden="true">↗</span></button>'
@@ -12291,6 +12343,9 @@ async function saveRoutineSb(){
 
 // sv('rutinas') sigue llamando aquí; el hub decide qué pestaña pintar.
 async function renderRutinas(){
+  // Quien llega con rutActiveTab ya puesto (Inicio → «Armar mi semana», el onboarding) pintaba
+  // esa pestaña mientras la visible seguía siendo Hoy: pantalla en blanco.
+  syncRutTabs(rutActiveTab);
   await renderRutHub();
 }
 
@@ -14791,7 +14846,7 @@ function wsExerciseHtml(ex,i){
     +'<div class="ws-ex-num" title="Ejercicio '+(i+1)+'">'+exerciseIconSvg(ex)+'</div>'
     +'<div class="ws-ex-info">'
     +'<div class="ws-ex-name">'+(groupLabel?'<span class="ex-superset-mini">'+esc(groupLabel)+'</span>':'')
-    +esc(ex.name||'Ejercicio')+'<span class="ws-ex-chev"> ›</span></div>'
+    +esc(exDisplayName(ex.name)||'Ejercicio')+'<span class="ws-ex-chev"> ›</span></div>'
     +'<div class="ws-ex-meta">'+esc(exerciseDetailParts(ex).join(' · ')||'Sin detalle')+'</div>'
     +(ex._swappedFrom?'<div class="ws-ex-meta" style="color:var(--amber)">Sustituto de esta sesión</div>':'')
     +(ex._replaced?'<div class="ws-ex-meta" style="color:var(--gray)">Cambiado a media sesión</div>':'')
@@ -21916,12 +21971,12 @@ async function renderFeedSb(){
       const commentsHtml=comments.length
         ? comments.map(c=>'<div class="comment-row">'
           +avatarHtml(c.user_name,avatarMap[c.user_id],'comment-av')
-          +'<div class="comment-body"><div class="comment-meta">'+esc(c.user_name)+'<span class="comment-time">'+timeSince(c.created_at)+'</span></div>'
+          +'<div class="comment-body"><div class="comment-meta">'+esc(c.user_name)+'<span class="comment-time">'+timeAgoEs(c.created_at)+'</span></div>'
           +'<div class="comment-text">'+esc(c.text_content)+'</div></div>'
           +communityMoreBtn('comment',c.id,c.user_id,c.user_name)
           +(isAdmin?'<button data-cid="'+esc(c.id)+'" onclick="deleteCommentSb(this.dataset.cid)" style="background:none;border:none;color:var(--red);cursor:pointer;font-size:14px;padding:4px">Eliminar</button>':'')
           +'</div>').join('')
-        : '<div style="font-size:12px;color:var(--gray);margin-bottom:8px">Sin comentarios aun.</div>';
+        : '';
       const div=document.createElement('div');div.className='post-card';
       const rxBtns=[{k:'fire',e:'🔥'},{k:'clap',e:'👏'},{k:'heart',e:'❤️'}].map(r=>
         '<button class="reaction-btn'+(myReactions.has(r.k)?' active':'')+'" data-post="'+post.id+'" data-type="'+r.k+'" onclick="toggleReactionSb(this)">'
@@ -21929,14 +21984,15 @@ async function renderFeedSb(){
       div.innerHTML=
         '<div class="post-hdr">'
         +avatarHtml(post.user_name,avatarMap[post.user_id],'post-av')
-        +'<div style="flex:1"><div class="post-user">'+esc(post.user_name)+'</div><div class="post-time">'+timeSince(post.created_at)+'</div></div>'
+        +'<div style="flex:1"><div class="post-user">'+esc(post.user_name)+'</div><div class="post-time">'+timeAgoEs(post.created_at)+'</div></div>'
         +communityMoreBtn('post',post.id,post.user_id,post.user_name)
         +(isAdmin?'<button data-pid="'+post.id+'" onclick="deletePostSb(this.dataset.pid)" style="background:none;border:none;color:var(--red);cursor:pointer;font-size:18px;padding:4px">🗑</button>':'')
         +'</div>'
         +(post.text_content?'<div class="post-body">'+esc(post.text_content)+'</div>':'')
         +postImageHtml(post)
-        +'<div class="post-reactions">'+rxBtns+'<span style="margin-left:auto;font-size:12px;color:var(--gray);align-self:center">'+comments.length+' coment.</span></div>'
-        +'<div class="post-comments">'+commentsHtml
+        // Los comentarios se pliegan: sin ninguno, la caja abierta en cada publicación era ruido.
+        +'<div class="post-reactions">'+rxBtns+'<button type="button" class="post-cmt-btn" data-n="'+comments.length+'" onclick="togglePostComments(this)">'+postCmtLabel(comments.length)+'</button></div>'
+        +'<div class="post-comments'+(comments.length?'':' collapsed')+'">'+commentsHtml
         +'<div class="comment-form"><input type="text" maxlength="300" data-post="'+esc(post.id)+'" data-owner="'+esc(post.user_id)+'" placeholder="Escribe un comentario..." onkeydown="if(event.key===&quot;Enter&quot;)addCommentSb(this)">'
         +'<button class="btn-sm bblue" data-post="'+esc(post.id)+'" data-owner="'+esc(post.user_id)+'" onclick="addCommentSb(this.previousElementSibling)">Enviar</button></div>'
         +'</div>';
@@ -21945,6 +22001,13 @@ async function renderFeedSb(){
   }catch(e){el.innerHTML='<div class="empty">Error cargando comunidad. Revisa que el SQL de comentarios este aplicado.</div>';console.error(e);}
 }
 
+function postCmtLabel(n){return '💬 '+(n?n:'Comentar');}
+function togglePostComments(btn){
+  const box=btn.closest('.post-card')?.querySelector('.post-comments');
+  if(!box)return;
+  const open=box.classList.toggle('collapsed')===false;
+  if(open)box.querySelector('.comment-form input')?.focus();
+}
 async function toggleReactionSb(btn){
   const postId=btn.dataset.post,type=btn.dataset.type;
   const wasActive=btn.classList.contains('active');
@@ -21987,8 +22050,6 @@ async function addCommentSb(input){
     // append in-place without full re-fetch
     const commentSection=input.closest('.post-comments');
     if(commentSection){
-      const emptyEl=commentSection.querySelector('[style*="Sin comentarios"]');
-      if(emptyEl)emptyEl.remove();
       const row=document.createElement('div');row.className='comment-row';
       row.innerHTML=avatarHtml(curUser.name,curUser.avatarUrl||'','comment-av')
         +'<div class="comment-body"><div class="comment-meta">'+esc(curUser.name)+'<span class="comment-time">ahora</span></div>'
@@ -21996,11 +22057,8 @@ async function addCommentSb(input){
       const form=commentSection.querySelector('.comment-form');
       commentSection.insertBefore(row,form);
       // update comment counter on post-reactions bar
-      const rxBar=commentSection.previousElementSibling;
-      if(rxBar){
-        const counter=rxBar.querySelector('span[style*="coment"]');
-        if(counter){const n=parseInt(counter.textContent)||0;counter.textContent=(n+1)+' coment.';}
-      }
+      const counter=commentSection.closest('.post-card')?.querySelector('.post-cmt-btn');
+      if(counter){const n=(parseInt(counter.dataset.n,10)||0)+1;counter.dataset.n=n;counter.textContent=postCmtLabel(n);}
     }
   }catch(e){
     console.error(e);
@@ -22373,7 +22431,7 @@ async function renderAdminFeed(){
       div.innerHTML=
         '<div class="post-hdr">'
         +avatarHtml(post.user_name,avatarMap[post.user_id],'post-av')
-        +'<div style="flex:1"><div class="post-user">'+esc(post.user_name||'Usuario')+'</div><div class="post-time">'+timeSince(post.created_at)+'</div></div>'
+        +'<div style="flex:1"><div class="post-user">'+esc(post.user_name||'Usuario')+'</div><div class="post-time">'+timeAgoEs(post.created_at)+'</div></div>'
         +'<button data-pid="'+post.id+'" onclick="deletePostSb(this.dataset.pid)" style="background:none;border:none;color:var(--red);cursor:pointer;font-size:18px;padding:4px">🗑</button>'
         +'</div>'
         +(post.text_content?'<div class="post-body">'+esc(post.text_content)+'</div>':'')
