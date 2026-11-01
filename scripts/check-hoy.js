@@ -121,7 +121,7 @@ const check=(condition,message)=>{assert.ok(condition,message);checks++;};
 async function run() {
   let h=makeHarness();
   let html=h.render();
-  check(html.includes('Empieza a entrenar')&&html.includes('Elegir qué entrenar'), 'new member can choose training');
+  check(html.includes('Empieza a entrenar')&&html.includes('hoyStartFree()')&&html.includes('hoyPickRoutine()')&&html.includes('hoy-start-row main'), 'new member starts from scratch or picks a routine');
   check(html.includes('Armar mi semana')&&html.includes('Sin plan'), 'new member can build a week');
   check((html.match(/class="hoy-day /g)||[]).length===7, 'week shows seven days');
   check(!html.includes('body detail')&&html.includes('aria-expanded="false"'), 'body starts collapsed');
@@ -133,6 +133,7 @@ async function run() {
   html=h.render();
   check(html.includes('2 ejercicios · ~15 min · de tu coach'), 'scheduled card describes real routine and coach');
   check(html.includes('startCoachingSessionSb(&quot;scheduled&quot;)'), 'scheduled CTA starts its session');
+  check(html.includes('hoyStartFree()')&&html.includes('hoyPickRoutine()')&&!html.includes('hoy-start-row main'), 'a scheduled day still offers scratch and the library, as secondary');
   check(isFriday('planned').test(html)&&html.includes('0 de 1'), 'scheduled day is pending');
 
   const live=session('live','in_progress',{exercise_snapshot:board.exercises});
@@ -157,7 +158,7 @@ async function run() {
   h.set({schedule:[session('next','scheduled',{ds:'2026-10-24',board_name:'Pierna'})]});
   html=h.render();
   check(html.includes('Descanso')&&html.includes('Lo que sigue: sábado · Pierna'), 'rest day shows the next scheduled workout');
-  check(html.includes('Entrenar de todos modos'), 'rest day keeps optional training available');
+  check(html.includes('hoy-start-row main')&&html.includes('Desde cero'), 'rest day keeps optional training available, from scratch or the library');
   h.set({schedule:[session('skip','skipped')]});
   html=h.render();
   check(html.includes('Recuperar también es parte del plan.')&&!html.includes('Empieza a entrenar'), 'an intentionally skipped day is rest, not a new member');
@@ -232,10 +233,10 @@ async function run() {
   html=h.render();
   check(html.includes('Fuerza')&&html.includes('hoyRepeatLast()')&&html.includes('>Repetir<'), 'no plan with history offers to repeat the last workout');
   check(html.includes('Lo último que hiciste, el miércoles · 46 min'), 'repeat card says when and how long');
-  check(html.includes('Elegir otra cosa')&&!html.includes('Empieza a entrenar'), 'repeat card keeps the picker one tap away');
+  check(html.includes('Desde cero')&&html.includes('Elegir rutina')&&!html.includes('Empieza a entrenar'), 'repeat card keeps scratch and the library one tap away');
   h.set({schedule:[session('next','scheduled',{ds:'2026-10-24',board_name:'Pierna'})]});
   html=h.render();
-  check(html.includes('Descanso')&&html.includes('Repetir Fuerza')&&html.includes('Entrenar otra cosa'), 'rest day offers repeat as the optional workout');
+  check(html.includes('Descanso')&&html.includes('Repetir Fuerza')&&html.includes('Desde cero'), 'rest day offers repeat as the optional workout');
   const emptyFree=doneRow('free0',{board_id:null,board_name:'Entreno libre'});
   const free=doneRow('free1',{board_id:null,board_name:'Entreno libre',session_exercises:[{ex_key:'cat-dominadas',name:'Dominadas'}]});
   check(h.repeatable([emptyFree,free])===free, 'an empty free workout is skipped, one with exercises can be repeated');

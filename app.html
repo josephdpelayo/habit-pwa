@@ -6,12 +6,12 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="HABIT">
 <meta name="application-name" content="HABIT">
-<link rel="manifest" href="/manifest.json?v=20261031-2">
-<link rel="apple-touch-icon" sizes="120x120" href="/icons/icon-120.png?v=20261031-2">
-<link rel="apple-touch-icon" sizes="152x152" href="/icons/icon-152.png?v=20261031-2">
-<link rel="apple-touch-icon" sizes="167x167" href="/icons/icon-167.png?v=20261031-2">
-<link rel="apple-touch-icon" sizes="180x180" href="/icons/icon-180.png?v=20261031-2">
-<link rel="icon" type="image/png" sizes="32x32" href="/icons/icon-32.png?v=20261031-2">
+<link rel="manifest" href="/manifest.json?v=20261031-3">
+<link rel="apple-touch-icon" sizes="120x120" href="/icons/icon-120.png?v=20261031-3">
+<link rel="apple-touch-icon" sizes="152x152" href="/icons/icon-152.png?v=20261031-3">
+<link rel="apple-touch-icon" sizes="167x167" href="/icons/icon-167.png?v=20261031-3">
+<link rel="apple-touch-icon" sizes="180x180" href="/icons/icon-180.png?v=20261031-3">
+<link rel="icon" type="image/png" sizes="32x32" href="/icons/icon-32.png?v=20261031-3">
 <title>HABIT</title>
 <!-- Con id a propósito: scripts/check-training.js toma la primera etiqueta script sin
      atributos como el script principal de la app y la compila. -->
@@ -25,7 +25,7 @@
   var crew=/^\/crew(\/|$)/.test(location.pathname);
   window.HABIT_BRAND=crew?'crew':'gym';
   if(!crew)return;
-  var v='20261031-2';
+  var v='20261031-3';
   document.documentElement.classList.add('brand-crew');
   document.title='HABIT Crew';
   document.querySelectorAll('meta[name="apple-mobile-web-app-title"],meta[name="application-name"]')
@@ -40,9 +40,9 @@
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Share+Tech+Mono&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="/skandi-recovery.js?v=20261031-2"></script>
-<script src="/body-figure.js?v=20261031-2"></script>
-<script src="/habit-training.js?v=20261031-2"></script>
+<script src="/skandi-recovery.js?v=20261031-3"></script>
+<script src="/body-figure.js?v=20261031-3"></script>
+<script src="/habit-training.js?v=20261031-3"></script>
 <style>
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
 @media (prefers-reduced-motion:reduce){*,*:before,*:after{scroll-behavior:auto!important;animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}}
@@ -2627,6 +2627,11 @@ body.admin-mode #courtesy-modal label{border-radius:14px!important;border-color:
 .hoy-meta{font-size:13.5px;color:var(--gray);line-height:1.45}
 .hoy-sync{margin-top:8px}
 .hoy-hero .hoy-cta{width:100%;margin-top:16px;min-height:52px;font-size:16px}
+.hoy-start-row{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px}
+.hoy-start-row button{min-height:46px;font-size:15px;display:flex;align-items:center;justify-content:center;gap:6px;margin:0}
+.hoy-start-row.main{margin-top:16px}
+.hoy-start-row.main button{min-height:52px}
+.hoy-start-plus{font-size:18px;font-weight:700;line-height:1}
 .hoy-alt{display:block;width:100%;margin-top:4px;padding:12px;background:none;border:none;color:var(--gl);font-size:14px;font-weight:600;cursor:pointer}
 .hoy-also{display:flex;align-items:center;gap:10px;border:1px solid var(--border);border-radius:14px;background:var(--card);padding:10px 12px;margin-bottom:12px}
 .hoy-also-name{flex:1;min-width:0;font-weight:700;font-size:14px}
@@ -4095,7 +4100,7 @@ const GYM_ONLY_VIEWS=['book','planes','historial','shop'];
 const GYM_APP_URL='/';
 document.querySelectorAll('.brand-name').forEach(el=>{el.textContent=BRAND_NAME;});
 const SUPABASE_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBtcGp0ZXVxanVzYmlkdWV2YndxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc2OTI1NjUsImV4cCI6MjA5MzI2ODU2NX0.XbMzZoo2yqtrD8znLnyo_1zDfrdJAvAPj1lqGOyXnLw';
-const APP_VERSION='20261031-2';
+const APP_VERSION='20261031-3';
 // La pierna va separada en cuádriceps, femorales y pantorrillas: la figura
 // corporal pinta esas tres regiones por separado y el motor de recuperación les
 // da ventanas de descanso distintas. 'Piernas' sigue reconociéndose al leer
@@ -11051,9 +11056,33 @@ function hoyHeroHtml(o){
     +'<div class="hoy-title">'+(o.dot?'<span class="hoy-dot" style="background:'+esc(o.dot)+'"></span>':'')+'<span>'+esc(o.title)+'</span></div>'
     +(o.meta?'<div class="hoy-meta">'+esc(o.meta)+'</div>':'')
     +(o.extra||'')
-    +o.cta
+    +(o.cta||'')
+    +(o.row||'')
     +(o.alt?'<button type="button" class="hoy-alt" onclick="'+o.alt[1]+'">'+esc(o.alt[0])+'</button>':'')
     +'</section>';
+}
+// Entrenar siempre a un toque, haya algo agendado o no: desde cero (sesión vacía, los ejercicios
+// se agregan sobre la marcha) o una rutina de tu biblioteca. `main` = no hay otro botón en la
+// tarjeta, así que estos dos son los grandes.
+function hoyStartRowHtml(main){
+  return '<div class="hoy-start-row'+(main?' main':'')+'">'
+    +'<button type="button" class="'+(main?'btn':'btn-ghost')+'" onclick="hoyStartFree()"><span class="hoy-start-plus">+</span>Desde cero</button>'
+    +'<button type="button" class="btn-ghost" onclick="hoyPickRoutine()">Elegir rutina</button>'
+    +'</div>';
+}
+// Desde Inicio primero se va a Entrenar: la hoja de entreno vive ahí (igual que
+// startInicioCoachWorkout).
+function hoyEnsureTraining(){
+  if(document.getElementById('v-rutinas')?.classList.contains('active'))return false;
+  rutActiveTab='hoy';sv('rutinas');return true;
+}
+function hoyStartFree(){
+  if(hoyEnsureTraining())setTimeout(()=>startFreeWorkoutSb(),80);
+  else startFreeWorkoutSb();
+}
+function hoyPickRoutine(){
+  if(hoyEnsureTraining())setTimeout(()=>openCoachBoardPicker('start'),80);
+  else openCoachBoardPicker('start');
 }
 // La semana en siete puntos: hecho (✓), en curso, agendado (○), se pasó sin hacer (·) o
 // descanso (–). Tocarla lleva a Semana, que es donde se cambia.
@@ -11104,7 +11133,6 @@ function hoyTopHtml(opts){
   const active=activeCoachingSession;
   const pending=todayRows.filter(r=>r.status==='scheduled'&&!(active&&r.id===active.id));
   const doneRows=todayRows.filter(r=>r.status==='done');
-  const other=['Entrenar otra cosa','openCoachBoardPicker(&quot;start&quot;)'];
   let html='';
 
   if(active){
@@ -11124,13 +11152,13 @@ function hoyTopHtml(opts){
     html+=hoyHeroHtml({k:'Hoy · '+dayLabel,title:row.board_name,dot:row.board_color,
       meta:meta.exercises.length+' ejercicios · ~'+meta.duration+' min'+(fromCoach?' · de tu coach':''),
       cta:'<button class="btn hoy-cta" onclick="'+start+'(&quot;'+row.id+'&quot;)">Empezar</button>',
-      alt:other});
+      row:hoyStartRowHtml(false)});
   }else if(doneRows.length){
     const mins=doneRows.reduce((n,r)=>n+(r.duration_sec?Math.round(r.duration_sec/60):0),0);
     html+=hoyHeroHtml({k:'Hoy · '+dayLabel,title:doneRows.map(r=>r.board_name).join(' + '),dot:doneRows[0].board_color,
       meta:'Hecho ✓'+(mins?' · '+mins+' min':''),
       cta:'<button class="btn-ghost hoy-cta" onclick="openEditCompletedWorkoutSb(&quot;'+doneRows[0].id+'&quot;)">Ver lo que hiciste</button>',
-      alt:other});
+      row:hoyStartRowHtml(false)});
   }else{
     // Sin nada hoy: si hay semana armada es descanso, y se dice qué sigue; si no hay nada,
     // es alguien empezando y la única acción es elegir qué entrenar.
@@ -11142,19 +11170,17 @@ function hoyTopHtml(opts){
       const nextDow=next?(dateObjFromDS(next.ds).getUTCDay()+6)%7:null;
       html+=hoyHeroHtml({k:'Hoy · '+dayLabel,title:'Descanso',
         meta:next?'Lo que sigue: '+DOW_LONG[nextDow]+' · '+next.board_name:'Recuperar también es parte del plan.',
-        cta:last
-          ?'<button class="btn-ghost hoy-cta" onclick="hoyRepeatLast()">Repetir '+esc(last.board_name||'el último')+'</button>'
-          :'<button class="btn-ghost hoy-cta" onclick="openCoachBoardPicker(&quot;start&quot;)">Entrenar de todos modos</button>',
-        alt:last?['Entrenar otra cosa','openCoachBoardPicker(&quot;start&quot;)']:null});
+        cta:last?'<button class="btn-ghost hoy-cta" onclick="hoyRepeatLast()">Repetir '+esc(last.board_name||'el último')+'</button>':'',
+        row:hoyStartRowHtml(!last)});
     }else if(last){
       html+=hoyHeroHtml({k:'Hoy · '+dayLabel,title:last.board_name||'Entreno libre',dot:last.board_color,
         meta:hoyLastMeta(last,today),
         cta:'<button class="btn hoy-cta" onclick="hoyRepeatLast()">Repetir</button>',
-        alt:['Elegir otra cosa','openCoachBoardPicker(&quot;start&quot;)']});
+        row:hoyStartRowHtml(false)});
     }else{
       html+=hoyHeroHtml({k:'Hoy · '+dayLabel,title:'Empieza a entrenar',
-        meta:'Elige una rutina o entrena libre. Cada serie que palomeas queda en tu progreso.',
-        cta:'<button class="btn hoy-cta" onclick="openCoachBoardPicker(&quot;start&quot;)">Elegir qué entrenar</button>',
+        meta:'Empieza desde cero y agrega los ejercicios mientras entrenas, o elige una rutina.',
+        row:hoyStartRowHtml(true),
         alt:['Armar mi semana','hoyGoTab(&quot;semana&quot;)']});
     }
   }
@@ -20302,6 +20328,10 @@ function openCoachBoardPicker(mode,dow,ds,programId){
   const m=document.getElementById('coach-board-picker');
   if(m)m.style.display='flex';
   renderCoachBoardPicker();
+  // Abierta desde Inicio (o desde la puerta) las rutinas del socio pueden no haber llegado:
+  // sin esto la hoja decía «Todas 0» a quien tiene nueve.
+  if(coachPickerIsMember()&&!myRoutinesLoadedAt)
+    loadMyRoutinesSb(false).then(()=>{if(m&&m.style.display==='flex')renderCoachBoardPicker();}).catch(console.error);
 }
 function coachPickerSearch(v){coachPicker.query=v||'';renderCoachBoardPicker();}
 function coachPickerFilter(f){coachPicker.filter=f;renderCoachBoardPicker();}
@@ -20387,13 +20417,15 @@ function renderCoachBoardPicker(){
   });
   // La primera fila es la salida sin rutina. Entrenando ahora eso no es
   // descansar, es entrenar por libre: el mismo hueco, otra intención.
-  const noneLabel=coachPicker.mode==='start'?'Entreno libre':'Descanso';
-  const noneSub=coachPicker.mode==='start'?'Empieza sin rutina y ve anotando':'Sin entreno este día';
-  const none='<button class="coach-pick-row'+(current?'':' is-current')+'" onclick="coachPickerChoose(&quot;&quot;)">'
-    +'<span class="coach-pick-dot" style="background:#334155"></span>'
+  const noneLabel=coachPicker.mode==='start'?'Desde cero':'Descanso';
+  const noneSub=coachPicker.mode==='start'?'Agrega los ejercicios mientras entrenas':'Sin entreno este día';
+  // Entrenando ahora no hay nada «elegido» todavía: la palomita diría que Desde cero ya lo está.
+  const noneOn=!current&&coachPicker.mode!=='start';
+  const none='<button class="coach-pick-row'+(noneOn?' is-current':'')+'" onclick="coachPickerChoose(&quot;&quot;)">'
+    +'<span class="coach-pick-dot" style="background:'+(coachPicker.mode==='start'?'#0ea5e9':'#334155')+'"></span>'
     +'<span class="coach-pick-main"><span class="coach-pick-name">'+noneLabel+'</span>'
     +'<span class="coach-pick-sub">'+noneSub+'</span></span>'
-    +(current?'':'<span class="coach-pick-check">✓</span>')+'</button>';
+    +(noneOn?'<span class="coach-pick-check">✓</span>':'')+'</button>';
   const rows=list.map(b=>{
     const on=current===b.id;
     const own=coachPickerIsMember()?isMyRoutine(b):b.owner_id!=null;

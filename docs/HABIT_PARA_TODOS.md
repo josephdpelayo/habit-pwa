@@ -820,8 +820,10 @@ nuevas.
   - **Términos**: los de la app y el reglamento del gym traen ahora una sección de Comunidad
     ("no se tolera el contenido ofensivo ni los usuarios abusivos") y la casilla nombra las
     Normas. Registrarse las da por aceptadas.
-  - **Falta:** correr la **138** en el SQL Editor (sin ella solo filtra la app), alguien que
-    atienda los reportes a tiempo, y la app nativa de Crew (otro bundle id en Capacitor; el
+  - **138 corrida en producción el 31 oct** (conector de Supabase): casos de prueba iguales que
+    en PGlite, trigger en las cuatro tablas, y una escritura de prueba revertida que confirmó que
+    rechaza el texto y deja pasar un update que no lo toca.
+  - **Falta:** alguien que atienda los reportes a tiempo, y la app nativa de Crew (otro bundle id en Capacitor; el
     `www/` de iOS está desactualizado).
 - **2026-10-31 (2)** — **Más simple de usar** (versión `20261031-2`). Por ahora entran amigos, así
   que lo que estorba se quita:
@@ -842,3 +844,13 @@ nuevas.
     pintar muestra «Cargando…».
   - **El login ya no se asoma al abrir**: con una sesión guardada, `initApp` cubre la pantalla
     mientras la restaura en lugar de mostrar el formulario detrás.
+- **2026-10-31 (3)** — **Entrenar siempre a un toque** (versión `20261031-3`). La tarjeta de hoy
+  (Inicio y Entrenar → Hoy) lleva dos botones en todos sus estados salvo con un entreno en curso:
+  **+ Desde cero** (`hoyStartFree` → `startFreeWorkoutSb`: sesión vacía, los ejercicios se agregan
+  en la hoja con «Agregar») y **Elegir rutina** (`hoyPickRoutine` → la hoja en modo `start`, con
+  tu biblioteca y su buscador). Sin nada agendado son los botones grandes; con un entreno del día,
+  van debajo de «Empezar». Reemplazan a «Entrenar otra cosa», «Elegir otra cosa», «Entrenar de
+  todos modos» y «Elegir qué entrenar». Desde Inicio primero se pasa a Entrenar
+  (`hoyEnsureTraining`), como `startInicioCoachWorkout`. En la hoja, «Entreno libre» pasó a
+  llamarse «Desde cero» y ya no sale palomeado. **Arreglo:** abierta antes de que llegaran las
+  rutinas, la hoja decía «Todas 0»; ahora las carga y se repinta.
