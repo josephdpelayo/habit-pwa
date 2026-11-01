@@ -69,15 +69,125 @@ assert.ok(S.sealLayout('MAKE IT A HABIT · ENTRENO Nº 47 · SEMANA 6 · LEG 2 �
 assert.equal(S.shortDate('2026-10-31'), '31.10.26');
 assert.equal(S.shortDate(''), '');
 
-// La galería de la frase del día: tres estilos, y cada uno se dispone con los datos de la frase.
-assert.deepEqual(S.KINDS.quote.styles.map((s) => s.id), ['frase', 'logotipo', 'sello']);
-for (const st of S.KINDS.quote.styles) {
-  const L = st.layout({ text: quotes[0], ds: '2026-10-31' }, measure);
-  assert.ok(L.width > 0 && L.height > 0, st.id + ' tiene tamaño');
-  assert.equal(L.kind, st.id);
+
+// Todo trazo dentro del lienzo: texto (de su altura de mayúsculas a su descenso), logos,
+// rectángulos, círculos, líneas y polígonos.
+function inside(L, name) {
+  const box = (o) => {
+    if (o.op === 'text') return [o.x, o.y - o.px * 0.75, o.x + o.w, o.y + o.px * 0.25];
+    if (o.op === 'logo') return [o.x, o.y, o.x + o.size, o.y + o.size];
+    if (o.op === 'rect') return [o.x, o.y, o.x + o.w, o.y + o.h];
+    if (o.op === 'circle') return [o.cx - o.r, o.cy - o.r, o.cx + o.r, o.cy + o.r];
+    if (o.op === 'line') return [Math.min(o.x1, o.x2), Math.min(o.y1, o.y2), Math.max(o.x1, o.x2), Math.max(o.y1, o.y2)];
+    if (o.op === 'poly') { const xs = o.pts.map((p) => p[0]), ys = o.pts.map((p) => p[1]); return [Math.min(...xs), Math.min(...ys), Math.max(...xs), Math.max(...ys)]; }
+    throw new Error('trazo desconocido ' + o.op);
+  };
+  L.ops.forEach((o) => {
+    const [x0, y0, x1, y1] = box(o);
+    assert.ok(x0 >= -0.5 && y0 >= -0.5 && x1 <= L.width + 0.5 && y1 <= L.height + 0.5,
+      `${name}: «${o.text || o.op}» se sale (${[x0, y0, x1, y1].map(Math.round)} en ${L.width}×${L.height})`);
+    if (o.op === 'text') assert.ok(/Inter/.test(o.font), name + ': todo en Inter');
+  });
 }
-const sello = S.KINDS.quote.styles[2].layout({ text: quotes[0], ds: '2026-10-31' }, measure);
+
+// La galería de la frase del día: nueve estilos, y cada uno se dispone con los datos de la frase.
+assert.deepEqual(S.KINDS.quote.styles.map((s) => s.id),
+  ['frase', 'poster', 'italica', 'cinta', 'burbuja', 'comillas', 'minimo', 'logotipo', 'sello']);
+for (const q of quotes) {
+  for (const st of S.KINDS.quote.styles) {
+    const L = st.layout({ text: q, ds: '2026-10-31' }, measure);
+    assert.ok(L && L.width > 0 && L.height > 0, st.id + ' tiene tamaño');
+    assert.equal(L.kind, st.id);
+    if (L.ops) inside(L, 'frase/' + st.id);
+  }
+  const words = (L) => L.ops.filter((o) => o.op === 'text' && o.text !== 'HABIT').map((o) => o.text).join(' ');
+  for (const id of ['poster', 'cinta']) {
+    const L = S.KINDS.quote.styles.find((s) => s.id === id).layout({ text: q }, measure);
+    assert.equal(words(L), q.toUpperCase(), id + ' no pierde texto');
+  }
+}
+const sello = S.KINDS.quote.styles.find((s) => s.id === 'sello').layout({ text: quotes[0], ds: '2026-10-31' }, measure);
 assert.ok(sello.chars.map((c) => c.ch).join('').includes('31.10.26'), 'el sello lleva la fecha');
 assert.ok(S.chipHtml().includes('Compartir'), 'el botón dice Compartir');
+
+// ── Entrenos ─────────────────────────────────────────────────────────────
+assert.equal(S.clock(3134), '52:14');
+assert.equal(S.clock(4325), '1:12:05');
+assert.equal(S.minutesText(3134), '52 MIN');
+assert.equal(S.minutesText(4320), '1 H 12 MIN');
+assert.equal(S.thousands(4320), '4,320');
+assert.equal(S.distanceText('run', 10020), '10.02');
+assert.equal(S.distanceText('bike', 42300), '42.3');
+assert.equal(S.distanceText('swim', 1500), '1,500', 'nadar va en metros');
+assert.equal(S.paceText('run', 3134, 10020), '5:13 /KM');
+assert.equal(S.paceText('swim', 2280, 1500), '2:32 /100 M');
+assert.equal(S.paceText('bike', 5710, 42300), '26.7 KM/H');
+assert.equal(S.paceText('strength', 3000, 0), '');
+assert.equal(S.dayName('2026-10-31'), 'SÁBADO');
+
+const samples = {
+  carrera: { type: 'run', title: 'Correr', ds: '2026-10-31', durationSec: 3134, distanceM: 10020, number: 47 },
+  fuerza: {
+    type: 'strength', title: 'Leg 2', ds: '2026-10-30', durationSec: 3134, sets: 18, volumeKg: 4320, number: 12,
+    exercises: [{ name: 'Sentadilla trasera', best: '100 kg × 5' }, { name: 'Peso muerto rumano con mancuernas pesadas', best: '32 kg × 10' }, { name: 'Extensión de cuádriceps', best: '45 kg × 12' }]
+  },
+  nado: { type: 'swim', ds: '2026-10-29', durationSec: 2280, distanceM: 1500 },
+  yoga: { type: 'yoga', ds: '2026-10-28', durationSec: 2700 },
+  rodada: { type: 'bike', title: 'Rodada larguísima por el malecón hasta Cerritos y de regreso', ds: '2026-10-27', durationSec: 5710, distanceM: 42300, elevationM: 210, avgHr: 148, effort: 7 },
+  libre: { type: 'strength', title: 'Entreno libre', ds: '2026-10-26', durationSec: 1800 }
+};
+const F = Object.fromEntries(Object.entries(samples).map(([k, d]) => [k, S.workoutFacts(d)]));
+assert.deepEqual([F.carrera.hero.value, F.carrera.hero.unit], ['10.02', 'KM'], 'una carrera presume sus kilómetros');
+assert.deepEqual([F.fuerza.hero.value, F.fuerza.hero.label], ['4,320', 'KG MOVIDOS'], 'la fuerza, sus kilos');
+assert.deepEqual([F.nado.hero.value, F.nado.hero.unit], ['1,500', 'M']);
+assert.deepEqual([F.yoga.hero.value, F.yoga.hero.label], ['45', 'MINUTOS'], 'sin distancia ni series, los minutos');
+assert.equal(F.nado.title, 'Nado', 'sin nombre, el nombre del tipo');
+assert.equal(F.fuerza.bubble.replace(/\u00a0/g, ' '), 'Leg 2, listo. 52 min y 18 series.');
+assert.ok(F.fuerza.bubble.includes('52\u00a0min'), 'la cifra va pegada a su unidad');
+assert.equal(F.carrera.bubble.replace(/\u00a0/g, ' '), '10.02 km corridos. 52:14.');
+assert.deepEqual(F.yoga.light, { value: '45', sub: 'minutos de yoga' }, 'lo registrado a mano no inventa segundos');
+assert.deepEqual(F.carrera.light, { value: '52:14', sub: 'corriendo' });
+const aMano = S.workoutFacts({ type: 'run', durationSec: 3120, distanceM: 10020 });
+assert.equal(aMano.summary[1].replace(/\u00a0/g, ' '), '52 min', 'en minutos cerrados no inventa «52:00»');
+assert.equal(aMano.bubble.replace(/\u00a0/g, ' '), '10.02 km corridos. 52 min.');
+assert.equal(aMano.stats.find((x) => x.label === 'TIEMPO').value, '52 MIN');
+assert.equal(F.carrera.stats.find((x) => x.label === 'TIEMPO').value, '52:14', 'con segundos, como reloj');
+assert.deepEqual(F.carrera.trio.map((t) => t.label), ['KM', 'TIEMPO', 'MIN/KM']);
+assert.ok(F.fuerza.summary.length <= 3);
+assert.equal(S.workoutFacts({ type: 'strength', distanceM: 5000, durationSec: 600 }).dist, 0, 'la fuerza no lleva distancia');
+
+const ids = S.KINDS.workout.styles.map((s) => s.id);
+assert.equal(new Set(ids).size, ids.length, 'cada estilo con su id');
+for (const [name, d] of Object.entries(samples)) {
+  const usable = S.stylesFor('workout', d, measure).map((s) => s.id);
+  assert.ok(usable.length >= 10, name + ': al menos diez estilos');
+  for (const st of S.KINDS.workout.styles) {
+    const L = st.layout(d, measure);
+    if (!L) continue;
+    assert.equal(L.kind, st.id, name + '/' + st.id);
+    if (L.ops) inside(L, name + '/' + st.id);
+  }
+}
+const recibo = S.KINDS.workout.styles.find((s) => s.id === 'recibo').layout(samples.fuerza, measure);
+assert.ok(recibo.ops.some((o) => o.text === 'ENTRENO Nº 12'), 'el recibo lleva el número de entreno');
+assert.ok(recibo.ops.some((o) => o.text && o.text.startsWith('SENTADILLA')), 'y los ejercicios');
+const rb1 = JSON.stringify(S.KINDS.workout.styles.find((s) => s.id === 'recibo').layout(samples.fuerza, measure));
+assert.equal(rb1, JSON.stringify(recibo), 'el código de barras es siempre el mismo para el mismo entreno');
+
+// ── La semana ────────────────────────────────────────────────────────────
+const wk = { count: 4, durationSec: 12000, distanceM: 21400, days: [1, 0, 1, 0, 1, 1, 0], weekStart: '2026-10-26', streak: 6 };
+const wf = S.weekFacts(wk);
+assert.equal(wf.range, '26.10 – 01.11');
+assert.equal(wf.meta, '3 H 20 MIN · 21.4 KM');
+for (const st of S.KINDS.week.styles) {
+  const L = st.layout(wk, measure);
+  assert.ok(L, st.id + ' sale con racha');
+  assert.equal(L.kind, st.id);
+  inside(L, 'semana/' + st.id);
+}
+const dots = S.KINDS.week.styles[0].layout(wk, measure).ops.filter((o) => o.op === 'circle');
+assert.equal(dots.length, 7);
+assert.equal(dots.filter((o) => !o.stroke).length, 4, 'un punto lleno por día entrenado');
+assert.equal(S.KINDS.week.styles.find((s) => s.id === 'racha').layout({ count: 1, streak: 1 }, measure), null, 'una semana no es racha');
 
 console.log('HABIT Stickers: ok');

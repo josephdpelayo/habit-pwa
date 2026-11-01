@@ -60,11 +60,17 @@ The app has four screens (`#s-auth`, `#s-main`, `#s-admin`, `#s-reception`), tog
   `hs-*`) y compartir— para que HABIT, congelada, solo reciba el `<script>` y una marca: un
   elemento con `data-hs-share="quote"` (+ `data-hs-text`, `data-hs-date`) abre la galería por
   un solo escucha de clics en el documento. Cada sticker es un PNG transparente, blanco o negro,
-  en Inter con el logo real, y trae su botón **Compartir** (`navigator.share` con el archivo;
-  sin hoja de compartir, descarga). Los estilos de cada tipo están en `KINDS` y su disposición es
-  pura (`quoteLayout`, `signatureLayout`, `sealLayout`), probada por `scripts/check-share.js`.
-  Cambiar el módulo sin subir la versión deja a los teléfonos con el viejo: el service worker lo
-  sirve cache-first por su URL con `?v=`
+  en Inter con el logo real. La galería se desliza de un estilo a otro (miniaturas para saltar,
+  **directo y no suave**: con scroll-snap, un salto suave que se cruza con un sticker recién
+  pintado regresa al primero) y un solo botón **Compartir** (`navigator.share` con el archivo;
+  sin hoja de compartir, descarga). Tres tipos en `KINDS`: `quote` (9 estilos), `workout` (13;
+  `workoutFacts()` pone en palabras un entreno de la app o una carrera/nado/rodada, y el estilo
+  que no tiene qué enseñar devuelve null y no sale) y `week` (4). Una app abre los de entreno con
+  `HabitShare.open({kind, data, title, subtitle})`. Los estilos nuevos son listas de trazos
+  (`ops`) que dibuja `drawOps`, y `scripts/check-share.js` revisa que ninguno se salga del
+  lienzo. `ACTIVITY_TYPES` (palabras de cada tipo de actividad) vive aquí y Crew lo usa. Inter
+  100–900 e itálica se piden al abrir la galería. Cambiar el módulo sin subir la versión deja a
+  los teléfonos con el viejo: el service worker lo sirve cache-first por su URL con `?v=`
 - `manifest.json` / `crew-manifest.json` / `skandi-manifest.json` — one PWA manifest per app. All use `scope: "/"` and are told apart by `id`.
 
 **Version / cache busting**: one version string covers the whole project, because one service worker caches both apps. It lives in `APP_VERSION` (`app.html` **and** `crew.html`), `SKANDI_VERSION` (`skandi.html`) and `CACHE_VERSION` (`sw.js`), plus the `?v=` strings in `index.html`, the three manifests' `start_url`, the `<link>`/`<script>` tags at the top of `app.html`, `crew.html` and `skandi.html`, and the `v` inside the `#brand-boot` script of `app.html` and `crew.html`. Bumping the version is the one change `app.html` still takes. **Changing either app means bumping all of them to the same value** — a stale `CACHE_VERSION` leaves the offline shell frozen at the previous deploy.
@@ -491,6 +497,17 @@ which was the only reason it looked like it duplicated Entrenar's week; nothing 
 places. PRs live in **Progreso** only: Historial used to render them too, with its own
 `user_scores` query, and now keeps what its name promises (reservas y pagos) plus a link.
 
+- **Actividad** (solo Crew, migración 139, `docs/HABIT_PARA_TODOS.md` bitácora del 1 nov 2026):
+  una pestaña con todo lo que entrenas — los entrenos de la app (`coaching_schedule` `done`) y lo
+  registrado de fuera en `training_activities` (correr, bici, nadar, caminar, fuerza, cardio,
+  yoga, deporte, otro; `ds`, `duration_sec`, `distance_m` —nadar también en metros—, esfuerzo
+  1–10 y opcionales). Privada: RLS de cada quien sobre lo suyo. `source` + `external_id` (índice
+  único normal, no parcial) son para importar de Strava después sin otra tabla. La lista no pide
+  las series (pesan): `actSessionStickerData` las trae al abrir un entreno. El Nº de cada entreno
+  cuenta también lo anterior a la ventana (`actWindowDays`). Al cerrar un entreno en la app,
+  `wsAfterSessionClosed` abre sus stickers (`offerWorkoutStickers`) en lugar del «¿Cómo te fue?»,
+  que queda para quien tiene coaching. Sin la 139, la sección muestra lo de la app y esconde
+  Registrar
 - `posts` / `post_reactions` / `post_comments` — community feed. **Las listas nunca piden
   `img_url` junto con lo demás** (`POST_LIST_COLUMNS` + `attachPostImages()`): las fotos de antes
   de la 017 están en base64 dentro de la tabla (una pesa 6.4 MB y hacía tardar el feed ~6 s), así

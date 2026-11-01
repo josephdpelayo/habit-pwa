@@ -909,3 +909,23 @@ nuevas.
   - **Tarjetas sin borde** (la invitación al gym, la semana, las filas de Hoy).
   - Los colores se quedan (Joseph no la quiere monocromática): el azul de CREW, el verde del @ y el
     color de cada rutina.
+- **2026-11-01** — **Actividad: todo lo que entrenas, con su sticker** (versión `20261101-1`,
+  migración 139). Joseph: «aunque no use la app para entrenar, en la app poder ver mis
+  entrenamientos realizados… correr, nadar, bici, fuerza fuera de la app… y compartir sticker».
+  - **Una pestaña nueva en Crew, Actividad** (entre Entrenar y Comunidad): arriba «esta semana»
+    (cuántos, tiempo, km, semanas seguidas y los siete días) con «Compartir mi semana»; debajo,
+    por mes, los entrenos de la app (`coaching_schedule` hechos) y lo registrado de fuera
+    (`training_activities`, 139), cada uno con su botón de compartir. Filtros por tipo cuando hay
+    más de uno. Tocar uno abre su ficha (cifras, ejercicios con su mejor serie, notas) con
+    «Compartir sticker»; lo registrado a mano se edita o se borra ahí.
+  - **Registrar** es tipo (9, con icono y color) + cuánto duró (con atajos de 20 min a 1 h 30) +
+    distancia si aplica; nombre, «¿qué tal estuvo?» (Suave / Normal / Duro / Al máximo → 3/5/8/10)
+    y «Más datos» (FC, calorías, desnivel, notas) son opcionales. Al guardar abre los stickers.
+  - **Al cerrar un entreno en la app salen sus stickers** («Entreno terminado») en lugar del
+    «¿Cómo te fue?» del coach, que solo ve quien tiene coaching (`canAccessCoaching`).
+  - Sin la 139 corrida, la sección muestra lo de la app y esconde Registrar.
+  - Lo de fuera hoy se registra a mano. `source` + `external_id` dejan la puerta abierta a
+    **Strava** sin otra tabla (ya existe la integración de Skandi, `api/skandi.js`). Ojo: una app
+    nueva de Strava empieza con capacidad de 1 atleta; subirla a 10 es autoservicio en la
+    configuración de la API, más de 10 pide la revisión de Strava. Apple Salud necesita la app
+    nativa.

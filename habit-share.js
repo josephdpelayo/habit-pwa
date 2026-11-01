@@ -6,33 +6,47 @@
 //
 //   <section data-hs-share="quote" data-hs-text="…" data-hs-date="2026-10-31"> … </section>
 //
-// Tocar ese elemento abre la galería con los estilos de ese tipo. Cada sticker es un PNG
-// transparente, blanco o negro, con la fuente de HABIT (Inter) y su logo original
-// (/icons/logo-original.png); cada uno trae su botón Compartir, que abre la hoja del teléfono
-// (Instagram, WhatsApp, Guardar imagen, Copiar).
+// o lo abre ella misma: HabitShare.open({ kind:'workout', data:{…} }). Tres tipos:
+//   quote   — la frase del día: { text, ds }
+//   workout — un entreno, de la app o de fuera (correr, bici, nadar…):
+//             { type, title, ds, durationSec, distanceM, sets, volumeKg, exercises:[{name,best}],
+//               elevationM, avgHr, kcal, effort, number }
+//   week    — tu semana: { count, durationSec, distanceM, days:[7 × 0/1, lunes primero], weekStart,
+//             streak }
+// Cada sticker es un PNG transparente, blanco o negro, en Inter (la fuente de HABIT) con su logo
+// original (/icons/logo-original.png). La galería se desliza de un estilo a otro y su botón
+// Compartir abre la hoja del teléfono (Instagram, WhatsApp, Guardar imagen, Copiar).
 //
 // La disposición de cada estilo es pura y se prueba en Node (scripts/check-share.js): recibe
-// `measure(texto, font)` en lugar de un canvas. El dibujo y la hoja son solo del navegador.
+// `measure(texto, font)` en lugar de un canvas. Los estilos nuevos se describen como una lista de
+// trazos (`ops`: texto, logo, rectángulo, círculo, línea, polígono) que dibuja `drawOps`; así la
+// prueba revisa que nada se salga del lienzo sin dibujar nada.
 (function (global) {
   'use strict';
 
   const COLORS = { blanco: '#ffffff', negro: '#0b0b0b' };
   const WIDTH = 1080;          // ancho de una historia: el sticker sale nítido a cualquier escala
   const PAD = 72;
+  const CAP = 0.73;            // altura de mayúsculas y números de Inter, en em
   const INTER = '"Inter", -apple-system, system-ui, sans-serif';
   const LOGO_SRC = '/icons/logo-original.png';
   const COLOR_KEY = 'habit_sticker_color';
+  // Las apps cargan Inter de 300 a 800 y sin itálicas; los stickers usan de 100 a 900 y la
+  // itálica. Se pide al abrir la galería, no al cargar: la app no descarga nada de más.
+  const FONT_HREF = 'https://fonts.googleapis.com/css2?family=Inter:ital,wght@0,100..900;1,100..900&display=swap';
 
   const quoteFont = (px) => `600 ${px}px ${INTER}`;
   const wordFont = (px) => `800 ${px}px ${INTER}`;
   const subFont = (px) => `600 ${px}px ${INTER}`;
   const sealFont = (px) => `700 ${px}px ${INTER}`;
+  const F = (weight, px, italic) => `${italic ? 'italic ' : ''}${weight} ${px}px ${INTER}`;
 
   // ── Disposición (pura) ─────────────────────────────────────────────────
 
   // Renglones de a lo más `maxWidth`, palabra por palabra.
   function wrapText(text, maxWidth, measure) {
-    const words = String(text || '').trim().split(/\s+/).filter(Boolean);
+    // Solo los espacios normales parten: un espacio duro (\u00a0) mantiene «52 min» junto.
+    const words = String(text || '').trim().split(/[ \t\n]+/).filter(Boolean);
     const lines = [];
     let line = '';
     words.forEach((w) => {
@@ -83,20 +97,25 @@
     };
   }
 
+  // La frase en renglones parejos, con el tamaño más grande que no pase de `maxLines`. Los
+  // renglones siempre se calculan con el tamaño que se queda: si ninguno cabe (una frase
+  // larguísima), se usa el más chico con sus propios renglones.
+  function fitLines(text, measure, fontFn, sizes, maxWidth, maxLines) {
+    let size = sizes[0], lines = [];
+    for (const px of sizes) {
+      size = px;
+      lines = balancedWrap(text, maxWidth, (s) => measure(s, fontFn(px)));
+      if (lines.length <= maxLines) break;
+    }
+    return { size, lines };
+  }
+
   // Estilo «Frase»: la frase centrada y en renglones parejos; debajo el logotipo chico. Una
   // frase larga baja de tamaño en lugar de pasar de cinco renglones.
   function quoteLayout(text, measure) {
     const quote = '“' + String(text || '').trim() + '”';
     const inner = WIDTH - PAD * 2;
-    // Los renglones siempre se calculan con el tamaño que se queda: si ninguno baja de cinco
-    // renglones (una frase larguísima), se usa el más chico con sus propios renglones.
-    const SIZES = [76, 70, 64, 58, 52, 46, 40];
-    let size = SIZES[0], lines = [];
-    for (const px of SIZES) {
-      size = px;
-      lines = balancedWrap(quote, inner, (s) => measure(s, quoteFont(px)));
-      if (lines.length <= 5) break;
-    }
+    const { size, lines } = fitLines(quote, measure, quoteFont, [76, 70, 64, 58, 52, 46, 40], inner, 5);
     const lineH = Math.round(size * 1.22);
     const top = PAD;
     const textBottom = top + lineH * lines.length;
@@ -113,13 +132,13 @@
   // Estilo «Logotipo»: el logotipo de HABIT en grande y una línea espaciada debajo.
   function signatureLayout(measure, subText) {
     const wordPx = 112;
-    const probe = lockupLayout(0, PAD, wordPx, measure);
-    const width = Math.ceil(probe.width + PAD * 2);
-    const cx = width / 2;
-    const lockup = lockupLayout(cx, PAD, wordPx, measure);
     const subPx = 30, subSpacing = Math.round(subPx * 0.22);
     const text = String(subText || 'MAKE IT A HABIT').toUpperCase();
     const subW = spacedWidth(text, subSpacing, (c) => measure(c, subFont(subPx)));
+    const probe = lockupLayout(0, PAD, wordPx, measure);
+    const width = Math.ceil(Math.max(probe.width, subW) + PAD * 2);
+    const cx = width / 2;
+    const lockup = lockupLayout(cx, PAD, wordPx, measure);
     const subY = lockup.logo.y + lockup.height + 44 + subPx;
     return {
       kind: 'logotipo', width, height: Math.ceil(subY + PAD * 0.8),
@@ -162,20 +181,786 @@
     };
   }
 
+  // ── Trazos: lo que comparten los estilos nuevos ──────────────────────────
+
+  // Un texto ya colocado: `x` es su borde izquierdo y `w` su ancho, para que la prueba sepa
+  // dónde queda sin dibujarlo. color: 'fg' (el del sticker) o 'inv' (el contrario, para lo que
+  // va dentro de una forma rellena).
+  function textOp(measure, text, font, o) {
+    const spacing = o.spacing || 0;
+    const w = spacing ? spacedWidth(text, spacing, (c) => measure(c, font)) : measure(text, font);
+    let x = o.x;
+    if (o.align === 'center') x = o.x - w / 2;
+    else if (o.align === 'right') x = o.x - w;
+    return { op: 'text', text, font, x, y: o.y, w, px: pxOf(font), spacing, color: o.color || 'fg', alpha: o.alpha, stroke: o.stroke };
+  }
+  function pxOf(font) { const m = String(font).match(/(\d+(?:\.\d+)?)px/); return m ? Number(m[1]) : 0; }
+
+  // El tamaño más grande (de `maxPx` a `minPx`) con el que `text` cabe en `maxW`.
+  function fitPx(measure, text, fontFn, maxW, maxPx, minPx, spacingEm) {
+    const widthAt = (px) => {
+      const sp = Math.round(px * (spacingEm || 0));
+      return sp ? spacedWidth(text, sp, (c) => measure(c, fontFn(px))) : measure(text, fontFn(px));
+    };
+    let px = maxPx;
+    const w0 = widthAt(px);
+    if (w0 > maxW) px = Math.max(minPx, Math.floor(maxPx * maxW / w0));
+    while (px > minPx && widthAt(px) > maxW) px -= 2;
+    return px;
+  }
+
+  // Recorta con «…» lo que no cabe en `maxW`.
+  function clip(measure, text, font, maxW) {
+    let t = String(text || '');
+    if (measure(t, font) <= maxW) return t;
+    while (t.length > 1 && measure(t + '…', font) > maxW) t = t.slice(0, -1);
+    return t.trim() + '…';
+  }
+
+  // El tamaño que cabe y, si ni el más chico alcanza (un nombre larguísimo), el texto recortado.
+  function fitText(measure, text, fontFn, maxW, maxPx, minPx, spacingEm) {
+    const px = fitPx(measure, text, fontFn, maxW, maxPx, minPx, spacingEm);
+    const sp = Math.round(px * (spacingEm || 0));
+    const width = (t) => (sp ? spacedWidth(t, sp, (c) => measure(c, fontFn(px))) : measure(t, fontFn(px)));
+    let t = String(text || '');
+    if (width(t) > maxW) {
+      while (t.length > 1 && width(t + '…') > maxW) t = t.slice(0, -1);
+      t = t.trim() + '…';
+    }
+    return { px, text: t, spacing: sp };
+  }
+
+  // El logotipo como trazos: centrado en `x`, o empezando en `x` con align 'left'.
+  function lockupOps(measure, x, top, wordPx, align, color) {
+    const probe = lockupLayout(0, top, wordPx, measure);
+    const cx = align === 'left' ? x + probe.width / 2 : x;
+    const L = lockupLayout(cx, top, wordPx, measure);
+    return {
+      width: L.width, height: L.height,
+      ops: [
+        { op: 'logo', x: L.logo.x, y: L.logo.y, size: L.logo.size, color: color || 'fg' },
+        textOp(measure, 'HABIT', L.word.font, { x: L.word.x, y: L.word.y, spacing: L.word.spacing, color: color || 'fg' })
+      ]
+    };
+  }
+
   // 31.10.26, para el sello.
   function shortDate(ds) {
     const m = String(ds || '').match(/^(\d{4})-(\d{2})-(\d{2})$/);
     return m ? `${m[3]}.${m[2]}.${m[1].slice(2)}` : '';
   }
+  const DAYS = ['DOMINGO', 'LUNES', 'MARTES', 'MIÉRCOLES', 'JUEVES', 'VIERNES', 'SÁBADO'];
+  function dayName(ds) {
+    const m = String(ds || '').match(/^(\d{4})-(\d{2})-(\d{2})$/);
+    return m ? DAYS[new Date(Date.UTC(+m[1], +m[2] - 1, +m[3])).getUTCDay()] : '';
+  }
 
-  // Los estilos de cada tipo, en el orden en que salen en la galería.
+  // ── Los datos de un entreno ──────────────────────────────────────────────
+
+  // Los tipos de actividad. Crew los usa también para su lista y su formulario: una sola fuente
+  // para las palabras. `label` es el botón («Correr»), `noun` el nombre de una sin nombre
+  // («Carrera.» se lee mejor en un sticker que «Correr.»), `dist` en qué se mide la distancia
+  // (nadar va en metros).
+  const ACTIVITY_TYPES = {
+    run:      { label: 'Correr',  noun: 'Carrera',   verb: 'corriendo', past: 'corridos',  dist: 'km' },
+    bike:     { label: 'Bici',    noun: 'Rodada',    verb: 'en bici',   past: 'en bici',   dist: 'km' },
+    swim:     { label: 'Nadar',   noun: 'Nado',      verb: 'nadando',   past: 'nadados',   dist: 'm' },
+    walk:     { label: 'Caminar', noun: 'Caminata',  verb: 'caminando', past: 'caminados', dist: 'km' },
+    strength: { label: 'Fuerza',  noun: 'Fuerza',    verb: 'de entreno' },
+    cardio:   { label: 'Cardio',  noun: 'Cardio',    verb: 'de cardio' },
+    yoga:     { label: 'Yoga',    noun: 'Yoga',      verb: 'de yoga' },
+    sport:    { label: 'Deporte', noun: 'Deporte',   verb: 'jugando' },
+    other:    { label: 'Otro',    noun: 'Entreno',   verb: 'de entreno' }
+  };
+
+  const pad2 = (n) => String(n).padStart(2, '0');
+  function thousands(n) { return String(Math.round(Number(n) || 0)).replace(/\B(?=(\d{3})+(?!\d))/g, ','); }
+  // 10.02 (correr), 42.3 (bici), 1,500 (nadar, en metros).
+  function distanceText(type, m) {
+    if (!(m > 0)) return '';
+    if (type === 'swim') return thousands(m);
+    return (m / 1000).toFixed(type === 'bike' ? 1 : 2);
+  }
+  const distanceUnit = (type) => (type === 'swim' ? 'M' : 'KM');
+  // 52:14, 1:12:05.
+  function clock(sec) {
+    sec = Math.max(0, Math.round(Number(sec) || 0));
+    const h = Math.floor(sec / 3600), m = Math.floor((sec % 3600) / 60), s = sec % 60;
+    return h ? `${h}:${pad2(m)}:${pad2(s)}` : `${m}:${pad2(s)}`;
+  }
+  // 52 MIN, 1 H 12 MIN.
+  function minutesText(sec) {
+    const min = Math.round((Number(sec) || 0) / 60);
+    if (min < 60) return `${min} MIN`;
+    const h = Math.floor(min / 60), r = min % 60;
+    return r ? `${h} H ${r} MIN` : `${h} H`;
+  }
+  // 5:12 /KM al correr o caminar, 1:45 /100 M al nadar, 28.4 KM/H en bici.
+  function paceText(type, sec, m) {
+    if (!(sec > 0) || !(m > 0)) return '';
+    if (type === 'run' || type === 'walk') return clock(sec / (m / 1000)) + ' /KM';
+    if (type === 'swim') return clock(sec / (m / 100)) + ' /100 M';
+    if (type === 'bike') return (m / 1000 / (sec / 3600)).toFixed(1) + ' KM/H';
+    return '';
+  }
+
+  // Todo lo que los estilos dicen de un entreno, ya en palabras: el dato héroe, las cifras, la
+  // frase de la burbuja. Un estilo que no tiene qué mostrar (sin tiempo no hay «Ligero») no sale.
+  function workoutFacts(d) {
+    d = d || {};
+    const type = ACTIVITY_TYPES[d.type] ? d.type : 'strength';
+    const T = ACTIVITY_TYPES[type];
+    const dur = d.durationSec > 0 ? Math.round(d.durationSec) : 0;
+    const dist = T.dist && d.distanceM > 0 ? Math.round(d.distanceM) : 0;
+    const sets = d.sets > 0 ? Math.round(d.sets) : 0;
+    const vol = d.volumeKg > 0 ? Math.round(d.volumeKg) : 0;
+    const title = String(d.title || '').trim().slice(0, 60) || T.noun;
+    const exercises = (Array.isArray(d.exercises) ? d.exercises : []).filter((e) => e && e.name).slice(0, 4);
+    const distT = distanceText(type, dist), unit = distanceUnit(type);
+    const pace = paceText(type, dur, dist);
+
+    let hero;
+    if (dist) hero = { value: distT, unit, label: type === 'swim' ? 'METROS' : 'KILÓMETROS' };
+    else if (vol) hero = { value: thousands(vol), unit: 'KG', label: 'KG MOVIDOS' };
+    else if (sets) hero = { value: String(sets), unit: 'SERIES', label: 'SERIES' };
+    else if (dur) hero = { value: String(Math.round(dur / 60)), unit: 'MIN', label: 'MINUTOS' };
+    else hero = { value: '1', unit: '', label: 'ENTRENO' };
+
+    const stats = [];
+    if (dist) stats.push({ label: 'DISTANCIA', value: distT + ' ' + unit });
+    // Con segundos (un reloj, la app) el tiempo va como reloj; en minutos cerrados (registrado a
+    // mano), «52 MIN»: «52:00» se ve inventado.
+    const durShort = dur % 60 ? clock(dur) : minutesText(dur);
+    if (dur) stats.push({ label: 'TIEMPO', value: durShort });
+    if (pace) stats.push({ label: type === 'bike' ? 'VELOCIDAD' : 'RITMO', value: pace });
+    if (sets) stats.push({ label: 'SERIES', value: String(sets) });
+    if (vol) stats.push({ label: 'VOLUMEN', value: thousands(vol) + ' KG' });
+    if (d.elevationM > 0) stats.push({ label: 'DESNIVEL', value: thousands(d.elevationM) + ' M' });
+    if (d.avgHr > 0) stats.push({ label: 'FC PROMEDIO', value: Math.round(d.avgHr) + ' LPM' });
+    if (d.kcal > 0) stats.push({ label: 'KCAL', value: thousands(d.kcal) });
+    if (d.effort > 0) stats.push({ label: 'ESFUERZO', value: Math.round(d.effort) + '/10' });
+
+    // Tres cifras para «Datos»: lo que se ve en un reloj al terminar.
+    const trio = [];
+    if (dist) trio.push({ value: distT, label: type === 'swim' ? 'METROS' : 'KM' });
+    if (dur) trio.push({ value: dur % 60 ? clock(dur) : minutesText(dur).toLowerCase(), label: 'TIEMPO' });
+    if (pace) trio.push({ value: pace.replace(/ .*$/, ''), label: type === 'bike' ? 'KM/H' : (type === 'swim' ? 'MIN/100 M' : 'MIN/KM') });
+    if (sets) trio.push({ value: String(sets), label: 'SERIES' });
+    if (vol) trio.push({ value: thousands(vol), label: 'KG' });
+    if (exercises.length && trio.length < 3) trio.push({ value: String(d.exerciseCount || exercises.length), label: 'EJERCICIOS' });
+    if (d.avgHr > 0) trio.push({ value: String(Math.round(d.avgHr)), label: 'LPM' });
+    if (d.effort > 0) trio.push({ value: Math.round(d.effort) + '/10', label: 'ESFUERZO' });
+
+    // «52 min · 18 series · 4,320 kg», «10.02 km · 52:14 · 5:12 /km».
+    // Cada cifra va pegada a su unidad con un espacio duro: «52 min» nunca se parte en dos
+    // renglones.
+    const NB = '\u00a0';
+    const parts = [];
+    if (dist) parts.push(distT + NB + unit.toLowerCase());
+    const durWords = minutesText(dur).toLowerCase().replace(/ /g, NB);
+    if (dur) parts.push(dist && dur % 60 ? clock(dur) : durWords);
+    if (pace) parts.push(pace.toLowerCase().replace(/ /g, NB));
+    if (sets) parts.push(sets + NB + (sets === 1 ? 'serie' : 'series'));
+    if (vol) parts.push(thousands(vol) + NB + 'kg');
+    const summary = parts.slice(0, 3);
+
+    // La burbuja se lee como un mensaje: «10.02 km corridos. 52:14.» / «Leg 2, listo. 52 min y 18 series.»
+    let bubble;
+    if (dist) bubble = `${distT}${NB}${unit.toLowerCase()} ${T.past}.` + (dur ? ` ${dur % 60 ? clock(dur) : durWords}.` : '');
+    else {
+      const rest = parts.slice(0, 2);
+      bubble = `${title}, listo.` + (rest.length ? ' ' + rest.join(' y ').replace(/^./, (c) => c.toUpperCase()) + '.' : '');
+    }
+
+    // «Ligero»: el tiempo enorme y en qué se fue. Lo registrado a mano llega en minutos
+    // cerrados, y «52:00» se ve inventado: va «52» + «minutos corriendo».
+    let light = null;
+    if (dur) {
+      if (dur % 60) light = { value: clock(dur), sub: T.verb };
+      else if (dur < 3600) light = { value: String(dur / 60), sub: (dur === 60 ? 'minuto ' : 'minutos ') + T.verb };
+      else light = { value: `${Math.floor(dur / 3600)}:${pad2((dur % 3600) / 60)}`, sub: 'horas ' + T.verb };
+    }
+
+    return {
+      type, typeLabel: T.label, title, ds: d.ds || '', day: dayName(d.ds), date: shortDate(d.ds),
+      dur, dist, sets, vol, pace, hero, stats, trio: trio.slice(0, 3), summary, bubble, light,
+      exercises, number: d.number > 0 ? Math.round(d.number) : 0
+    };
+  }
+
+  // ── Estilos del entreno ──────────────────────────────────────────────────
+
+  // «Héroe»: una cifra enorme, apretada, y qué es.
+  function heroLayout(f, measure, kind, label) {
+    const maxW = WIDTH - PAD * 2;
+    const value = f.hero.value;
+    const px = fitPx(measure, value, (p) => F(900, p), maxW, 340, 120, -0.035);
+    const ops = [];
+    let y = PAD + px * CAP;
+    ops.push(textOp(measure, value, F(900, px), { x: WIDTH / 2, y, align: 'center', spacing: Math.round(px * -0.035) }));
+    const lp = 36;
+    y += 46 + lp * CAP;
+    ops.push(textOp(measure, label || f.hero.label, F(700, lp), { x: WIDTH / 2, y, align: 'center', spacing: Math.round(lp * 0.34) }));
+    y += 70;
+    const lk = lockupOps(measure, WIDTH / 2, y, 26, 'center');
+    ops.push(...lk.ops);
+    return { kind: kind || 'heroe', width: WIDTH, height: Math.round(y + lk.height + PAD * 0.8), ops };
+  }
+
+  // «Ligero»: el tiempo en Inter 100, enorme, y en itálica en qué se fue.
+  function lightLayout(f, measure) {
+    if (!f.light) return null;
+    const maxW = WIDTH - PAD * 2;
+    const px = fitPx(measure, f.light.value, (p) => F(100, p), maxW, 330, 140, -0.02);
+    const ops = [];
+    let y = PAD + px * CAP;
+    ops.push(textOp(measure, f.light.value, F(100, px), { x: WIDTH / 2, y, align: 'center', spacing: Math.round(px * -0.02) }));
+    const sp = 54;
+    y += 40 + sp * 0.8;
+    ops.push(textOp(measure, f.light.sub, F(300, sp, true), { x: WIDTH / 2, y, align: 'center' }));
+    if (f.day) {
+      y += 70;
+      ops.push(textOp(measure, (f.day + ' ' + f.date).trim(), F(600, 24), { x: WIDTH / 2, y, align: 'center', spacing: 8, alpha: 0.75 }));
+    }
+    return { kind: 'ligero', width: WIDTH, height: Math.round(y + PAD * 0.9), ops };
+  }
+
+  // «Espaciado»: el día con mucho aire, la rutina en 900 y una línea de cifras.
+  function spacedLayout(f, measure) {
+    const maxW = WIDTH - PAD * 2;
+    const ops = [];
+    let y = PAD;
+    if (f.day) {
+      const dp = 44;
+      y += dp * CAP;
+      ops.push(textOp(measure, f.day, F(300, dp), { x: WIDTH / 2, y, align: 'center', spacing: Math.round(dp * 0.55) }));
+      y += 40;
+    }
+    const tt = fitText(measure, f.title.toUpperCase(), (p) => F(900, p), maxW, 150, 64, -0.01);
+    const tp = tt.px;
+    y += tp * 0.92;
+    ops.push(textOp(measure, tt.text, F(900, tp), { x: WIDTH / 2, y, align: 'center', spacing: tt.spacing }));
+    const meta = f.summary.slice(0, 2).join(' · ').toUpperCase();
+    if (meta) {
+      const mp = fitPx(measure, meta, (p) => F(600, p), maxW, 30, 20, 0.24);
+      y += 44 + mp * CAP;
+      ops.push(textOp(measure, meta, F(600, mp), { x: WIDTH / 2, y, align: 'center', spacing: Math.round(mp * 0.24), alpha: 0.85 }));
+    }
+    return { kind: 'espaciado', width: WIDTH, height: Math.round(y + PAD), ops };
+  }
+
+  // «Itálica»: «Leg day.» en 800 itálica, con sus cifras debajo.
+  function italicLayout(f, measure) {
+    const maxW = WIDTH - PAD * 2;
+    const text = /[.!?]$/.test(f.title) ? f.title : f.title + '.';
+    let px = fitPx(measure, text, (p) => F(800, p, true), maxW, 180, 96, -0.02);
+    let lines = [text];
+    if (measure(text, F(800, px, true)) > maxW) {
+      const r = fitLines(text, measure, (p) => F(800, p, true), [120, 108, 96, 86, 76], maxW, 3);
+      px = r.size; lines = r.lines;
+    }
+    const ops = [];
+    let y = PAD + px * 0.8;
+    lines.forEach((l, i) => {
+      ops.push(textOp(measure, l, F(800, px, true), { x: WIDTH / 2, y: y + i * px * 1.02, align: 'center' }));
+    });
+    y += (lines.length - 1) * px * 1.02;
+    const meta = f.summary.join(' · ');
+    if (meta) {
+      const mp = fitPx(measure, meta, (p) => F(500, p), maxW, 38, 24);
+      y += 50 + mp * 0.8;
+      ops.push(textOp(measure, meta, F(500, mp), { x: WIDTH / 2, y, align: 'center', alpha: 0.9 }));
+    }
+    y += 56;
+    const lk = lockupOps(measure, WIDTH / 2, y, 24, 'center');
+    ops.push(...lk.ops);
+    return { kind: 'italica', width: WIDTH, height: Math.round(y + lk.height + PAD * 0.8), ops };
+  }
+
+  // «Contorno»: la cifra solo en trazo, y su unidad sólida.
+  function outlineLayout(f, measure) {
+    const maxW = WIDTH - PAD * 2;
+    const value = f.hero.value;
+    const px = fitPx(measure, value, (p) => F(900, p), maxW, 360, 130);
+    const ops = [];
+    let y = PAD + px * CAP;
+    // Sin espaciado negativo: letra por letra, los trazos se enciman y el contorno se ensucia.
+    ops.push(textOp(measure, value, F(900, px), { x: WIDTH / 2, y, align: 'center', stroke: Math.max(3, Math.round(px * 0.016)) }));
+    const label = [f.hero.unit, f.day].filter(Boolean).join(' · ');
+    if (label) {
+      const lp = fitPx(measure, label, (p) => F(800, p), maxW, 44, 24, 0.26);
+      y += 50 + lp * CAP;
+      ops.push(textOp(measure, label, F(800, lp), { x: WIDTH / 2, y, align: 'center', spacing: Math.round(lp * 0.26) }));
+    }
+    return { kind: 'contorno', width: WIDTH, height: Math.round(y + PAD), ops };
+  }
+
+  // «Eco»: el nombre repetido, desvaneciéndose hacia abajo.
+  function echoLayout(f, measure) {
+    const maxW = WIDTH - PAD * 2;
+    const tt = fitText(measure, f.title.toUpperCase(), (p) => F(900, p), maxW, 170, 72, -0.02);
+    const px = tt.px;
+    const ops = [];
+    const alphas = [1, 0.5, 0.26, 0.13, 0.06];
+    let y = PAD + px * CAP;
+    alphas.forEach((a, i) => {
+      ops.push(textOp(measure, tt.text, F(900, px), { x: WIDTH / 2, y: y + i * px * 0.9, align: 'center', spacing: tt.spacing, alpha: a }));
+    });
+    y += (alphas.length - 1) * px * 0.9;
+    const meta = [f.summary.slice(0, 2).join(' · ').toUpperCase(), f.date].filter(Boolean).join(' · ');
+    if (meta) {
+      const mp = fitPx(measure, meta, (p) => F(600, p), maxW, 26, 18, 0.3);
+      y += 56 + mp * CAP;
+      ops.push(textOp(measure, meta, F(600, mp), { x: WIDTH / 2, y, align: 'center', spacing: Math.round(mp * 0.3) }));
+    }
+    return { kind: 'eco', width: WIDTH, height: Math.round(y + PAD), ops };
+  }
+
+  // «Datos»: el logotipo y la fecha arriba, el nombre, y tres cifras como en un reloj.
+  function dataLayout(f, measure, opts) {
+    const trio = (opts && opts.trio) || f.trio;
+    if (!trio || !trio.length) return null;
+    const ops = [];
+    const lk = lockupOps(measure, PAD, PAD, 24, 'left');
+    ops.push(...lk.ops);
+    const corner = opts && 'corner' in opts ? opts.corner : [f.day, f.date].filter(Boolean).join(' ');
+    if (corner) {
+      ops.push(textOp(measure, corner, F(600, 22), { x: WIDTH - PAD, y: PAD + lk.height / 2 + 22 * 0.36, align: 'right', spacing: 5, alpha: 0.8 }));
+    }
+    let y = PAD + lk.height + 46;
+    const title = (opts && opts.title) || f.title;
+    const tt = fitText(measure, title, (p) => F(800, p), WIDTH - PAD * 2, 60, 40);
+    y += tt.px * 0.8;
+    ops.push(textOp(measure, tt.text, F(800, tt.px), { x: PAD, y }));
+    y += 52;
+    const colW = (WIDTH - PAD * 2) / trio.length;
+    const vp = Math.min(...trio.map((t) => fitPx(measure, t.value, (p) => F(800, p), colW - 52, 104, 40, -0.02)));
+    const top = y;
+    y += vp * CAP;
+    trio.forEach((t, i) => {
+      const x = PAD + colW * i;
+      if (i) ops.push({ op: 'line', x1: x - 26, y1: top - 6, x2: x - 26, y2: y + 56, w: 2, alpha: 0.3 });
+      ops.push(textOp(measure, t.value, F(800, vp), { x, y, spacing: Math.round(vp * -0.02) }));
+      ops.push(textOp(measure, clip(measure, t.label, F(600, 22), colW - 28), F(600, 22), { x, y: y + 48, spacing: 4, alpha: 0.7 }));
+    });
+    y += 48;
+    return { kind: 'datos', width: WIDTH, height: Math.round(y + PAD * 0.8), ops };
+  }
+
+  // Dientes de papel: el borde de un recibo recién cortado.
+  function zigzag(x0, x1, y, depth, tooth, down) {
+    const pts = [];
+    const n = Math.max(2, Math.round((x1 - x0) / tooth));
+    const step = (x1 - x0) / n;
+    for (let i = 0; i <= n; i++) pts.push([x0 + i * step, i % 2 ? y + (down ? depth : -depth) : y]);
+    return pts;
+  }
+
+  // Un renglón de recibo: etiqueta, puntos guía y la cifra a la derecha.
+  function receiptRow(measure, label, value, y, x0, x1, fl, fv) {
+    const vw = measure(value, fv);
+    const l = clip(measure, label, fl, x1 - x0 - vw - 60);
+    const lw = measure(l, fl);
+    const ops = [textOp(measure, l, fl, { x: x0, y, color: 'inv' }), textOp(measure, value, fv, { x: x1, y, align: 'right', color: 'inv' })];
+    const dot = '.', dw = measure(dot, fl) + 7;
+    const from = x0 + lw + 14, to = x1 - vw - 14;
+    const n = Math.floor((to - from) / dw);
+    if (n > 1) ops.push(textOp(measure, dot.repeat(n), fl, { x: to - n * dw + 7, y, spacing: 7, color: 'inv', alpha: 0.5 }));
+    return ops;
+  }
+
+  // Un código de barras que siempre es el mismo para el mismo entreno.
+  function barcode(seed, x0, y, w, h) {
+    let s = 0;
+    for (const c of String(seed || 'HABIT')) s = (s * 31 + c.charCodeAt(0)) >>> 0;
+    const rnd = () => { s = (s * 1103515245 + 12345) >>> 0; return (s >>> 8) / 16777216; };
+    const ops = [];
+    let x = x0;
+    while (x < x0 + w - 4) {
+      const bw = 2 + Math.floor(rnd() * 4) * 2;
+      if (x + bw > x0 + w) break;
+      ops.push({ op: 'rect', x, y, w: bw, h, color: 'inv' });
+      x += bw + 3 + Math.floor(rnd() * 3) * 2;
+    }
+    return ops;
+  }
+
+  // «Recibo»: el entreno como ticket de papel, con su código de barras.
+  function receiptLayout(f, measure) {
+    const W = 860, px0 = 34, x0 = px0 + 52, x1 = W - px0 - 52;
+    const cw = x1 - x0;
+    const ops = [];
+    const body = [];
+    let y = 40 + 58;
+    const lk = lockupOps(measure, W / 2, y, 38, 'center', 'inv');
+    body.push(...lk.ops);
+    y += lk.height + 52;
+    const head = f.number ? `ENTRENO Nº ${f.number}` : 'ENTRENO';
+    body.push(textOp(measure, head, F(700, 26), { x: W / 2, y, align: 'center', spacing: 7, color: 'inv' }));
+    if (f.day) {
+      y += 40;
+      body.push(textOp(measure, f.day + ' ' + f.date, F(500, 24), { x: W / 2, y, align: 'center', spacing: 5, color: 'inv', alpha: 0.75 }));
+    }
+    const rule = () => { y += 34; body.push({ op: 'line', x1: x0, y1: y, x2: x1, y2: y, w: 2.5, dash: [10, 8], color: 'inv', alpha: 0.6 }); y += 22; };
+    rule();
+    y += 30;
+    // El nombre y su tipo; sin nombre propio, el tipo ya es el nombre y no se repite.
+    body.push(...(f.title === ACTIVITY_TYPES[f.type].noun
+      ? receiptRow(measure, 'ACTIVIDAD', f.title.toUpperCase(), y, x0, x1, F(600, 24), F(800, 32))
+      : receiptRow(measure, f.title.toUpperCase(), f.typeLabel.toUpperCase(), y, x0, x1, F(800, 32), F(600, 24))));
+    f.exercises.forEach((e) => {
+      y += 46;
+      body.push(...receiptRow(measure, String(e.name).toUpperCase(), String(e.best || '—').toUpperCase(), y, x0, x1, F(500, 25), F(700, 25)));
+    });
+    rule();
+    f.stats.slice(0, 5).forEach((s, i) => {
+      y += i ? 46 : 28;
+      body.push(...receiptRow(measure, s.label, s.value, y, x0, x1, F(500, 25), F(700, 25)));
+    });
+    rule();
+    y += 36;
+    body.push(...receiptRow(measure, 'TOTAL', (f.hero.value + ' ' + f.hero.unit).trim(), y, x0, x1, F(900, 36), F(900, 36)));
+    y += 46;
+    body.push(...barcode(f.title + f.ds + f.hero.value, x0 + 40, y, cw - 80, 92));
+    y += 92 + 50;
+    body.push(textOp(measure, 'MAKE IT A HABIT', F(600, 22), { x: W / 2, y, align: 'center', spacing: 9, color: 'inv' }));
+    y += 50;
+    const top = 40, bottom = y;
+    const pts = [
+      ...zigzag(px0, W - px0, top, 12, 26, false),
+      ...zigzag(px0, W - px0, bottom, 12, 26, true).reverse()
+    ];
+    ops.push({ op: 'poly', pts, color: 'fg' }, ...body);
+    return { kind: 'recibo', width: W, height: Math.round(bottom + 40), ops };
+  }
+
+  // Un globo de mensaje: el rectángulo redondo y su colita. `side` 'right' es un mensaje que
+  // mandaste (el entreno), 'left' uno que te llegó (la frase).
+  function bubbleOps(x, y, w, h, side) {
+    const r = Math.min(52, h / 2);
+    const ops = [{ op: 'rect', x, y, w, h, r, color: 'fg' }];
+    const by = y + h;
+    ops.push(side === 'right'
+      ? { op: 'poly', pts: [[x + w - 62, by - 30], [x + w + 16, by + 6], [x + w - 18, by - 44]], color: 'fg' }
+      : { op: 'poly', pts: [[x + 62, by - 30], [x - 16, by + 6], [x + 18, by - 44]], color: 'fg' });
+    return ops;
+  }
+
+  // «Burbuja»: el entreno como un mensaje de iPhone, en blanco y negro, con su «Entrenado».
+  function bubbleLayout(f, measure) {
+    const maxText = 760, padX = 50, padY = 38;
+    const { size: px, lines } = fitLines(f.bubble, measure, (p) => F(500, p), [60, 54, 48, 44], maxText, 4);
+    const lineH = px * 1.24;
+    const textW = Math.max(...lines.map((l) => measure(l, F(500, px))));
+    const bw = Math.ceil(textW + padX * 2);
+    const bh = Math.ceil(padY * 2 + px * 0.78 + (lines.length - 1) * lineH + px * 0.22);
+    const W = Math.max(bw + PAD * 2, 600);
+    const bx = W - PAD - bw, by = PAD;
+    const ops = bubbleOps(bx, by, bw, bh, 'right');
+    lines.forEach((l, i) => ops.push(textOp(measure, l, F(500, px), { x: bx + padX, y: by + padY + px * 0.78 + i * lineH, color: 'inv' })));
+    const y = by + bh + 58;
+    ops.push(textOp(measure, 'Entrenado', F(500, 28), { x: W - PAD - 6, y, align: 'right', alpha: 0.65 }));
+    return { kind: 'burbuja', width: W, height: Math.round(y + PAD * 0.7), ops };
+  }
+
+  // «Notificación»: el aviso de HABIT, como si el teléfono te felicitara.
+  function notifLayout(f, measure) {
+    const W = 1000, cx0 = 20, cw = W - 40, pad = 36, icon = 96;
+    const tx = cx0 + pad + icon + 26, tr = cx0 + cw - pad;
+    const ops = [];
+    const top = 20;
+    const inner = [];
+    inner.push({ op: 'rect', x: cx0 + pad, y: top + pad, w: icon, h: icon, r: 24, color: 'inv' });
+    inner.push({ op: 'logo', x: cx0 + pad + 16, y: top + pad + 16, size: icon - 32, color: 'fg' });
+    let y = top + pad + 30;
+    inner.push(textOp(measure, 'HABIT', F(600, 28), { x: tx, y, spacing: 2, color: 'inv', alpha: 0.55 }));
+    inner.push(textOp(measure, 'ahora', F(400, 27), { x: tr, y, align: 'right', color: 'inv', alpha: 0.45 }));
+    y += 52;
+    inner.push(textOp(measure, 'Entreno completado', F(700, 40), { x: tx, y, color: 'inv' }));
+    const body = [f.title, ...f.summary].join(' · ');
+    // Dos renglones como el aviso de iOS; lo que no cabe termina en «…».
+    const all = wrapText(body, tr - tx, (s) => measure(s, F(500, 34)));
+    const lines = all.length > 2 ? [all[0], clip(measure, all.slice(1).join(' '), F(500, 34), tr - tx)] : all;
+    lines.forEach((l) => {
+      y += 48;
+      inner.push(textOp(measure, l, F(500, 34), { x: tx, y, color: 'inv', alpha: 0.82 }));
+    });
+    const h = Math.max(y + 34 - top, icon + pad * 2);
+    ops.push({ op: 'rect', x: cx0, y: top, w: cw, h, r: 48, color: 'fg' }, ...inner);
+    return { kind: 'notif', width: W, height: Math.round(top + h + 20), ops };
+  }
+
+  // «Cinta»: cada dato en su tira, como cinta de rotulador; se escalonan para que se vea
+  // pegado a mano.
+  function tapeLayout(lines, measure, kind, opts) {
+    const maxW = WIDTH - PAD * 2 - 120;
+    const fontFn = (p) => F(800, p);
+    const px = Math.min(...lines.map((l) => fitPx(measure, l, fontFn, maxW, (opts && opts.maxPx) || 76, 40, 0.04)));
+    lines = lines.map((l) => fitText(measure, l, () => fontFn(px), maxW, px, px, 0.04).text);
+    const padX = Math.round(px * 0.42), bandH = Math.round(px * 1.36), gap = 14;
+    const shift = (opts && opts.shift) || [-34, 40, -14, 28, -40, 18, -24];
+    const ops = [];
+    let y = PAD;
+    lines.forEach((l, i) => {
+      const sp = Math.round(px * 0.04);
+      const tw = spacedWidth(l, sp, (c) => measure(c, fontFn(px)));
+      const bw = tw + padX * 2;
+      const cx = WIDTH / 2 + (shift[i % shift.length] || 0);
+      const bx = Math.max(PAD / 2, Math.min(WIDTH - PAD / 2 - bw, cx - bw / 2));
+      ops.push({ op: 'rect', x: bx, y, w: bw, h: bandH, r: 6, color: 'fg' });
+      ops.push(textOp(measure, l, fontFn(px), { x: bx + padX, y: y + (bandH + px * CAP) / 2, spacing: sp, color: 'inv' }));
+      y += bandH + gap;
+    });
+    y += 30;
+    const lk = lockupOps(measure, WIDTH / 2, y, 26, 'center');
+    ops.push(...lk.ops);
+    return { kind: kind || 'cinta', width: WIDTH, height: Math.round(y + lk.height + PAD * 0.8), ops };
+  }
+
+  function workoutTape(f, measure) {
+    const lines = [f.title.toUpperCase(), ...f.summary.slice(0, 2).map((s) => s.toUpperCase()), f.day].filter(Boolean).slice(0, 4);
+    return tapeLayout(lines, measure, 'cinta');
+  }
+
+  // ── Estilos de la frase del día ─────────────────────────────────────────
+
+  function cleanQuote(text) { return String(text || '').trim(); }
+
+  // «Póster»: la frase en mayúsculas 900, alineada a la izquierda, con una barra y el logotipo.
+  function posterLayout(text, measure) {
+    const t = cleanQuote(text).toUpperCase();
+    const maxW = WIDTH - PAD * 2;
+    const { size: px, lines } = fitLines(t, measure, (p) => F(900, p), [124, 110, 98, 88, 78, 68, 60, 52], maxW, 6);
+    const lineH = px * 0.98;
+    const ops = [];
+    let y = PAD + px * 0.92;
+    lines.forEach((l, i) => ops.push(textOp(measure, l, F(900, px), { x: PAD, y: y + i * lineH })));
+    y += (lines.length - 1) * lineH + 52;
+    ops.push({ op: 'rect', x: PAD, y, w: 150, h: 14, color: 'fg' });
+    y += 14 + 48;
+    const lk = lockupOps(measure, PAD, y, 28, 'left');
+    ops.push(...lk.ops);
+    return { kind: 'poster', width: WIDTH, height: Math.round(y + lk.height + PAD * 0.8), ops };
+  }
+
+  // «Itálica» de la frase: Inter 300 itálica, ligera, centrada.
+  function quoteItalicLayout(text, measure) {
+    const q = '“' + cleanQuote(text) + '”';
+    const maxW = WIDTH - PAD * 2;
+    const { size: px, lines } = fitLines(q, measure, (p) => F(300, p, true), [82, 74, 66, 58, 52, 46, 40], maxW, 5);
+    const lineH = px * 1.22;
+    const ops = [];
+    let y = PAD + px * 0.85;
+    lines.forEach((l, i) => ops.push(textOp(measure, l, F(300, px, true), { x: WIDTH / 2, y: y + i * lineH, align: 'center' })));
+    y += (lines.length - 1) * lineH + 64;
+    const lk = lockupOps(measure, WIDTH / 2, y, 26, 'center');
+    ops.push(...lk.ops);
+    return { kind: 'italica', width: WIDTH, height: Math.round(y + lk.height + PAD * 0.8), ops };
+  }
+
+  // «Cinta» de la frase: cada renglón en su tira.
+  function quoteTapeLayout(text, measure) {
+    const t = cleanQuote(text).toUpperCase();
+    const maxW = WIDTH - PAD * 2 - 140;
+    // Se parte con el mismo espaciado con el que se dibuja: si no, un renglón justo se recorta.
+    const spaced = (str, font) => spacedWidth(str, Math.round(pxOf(font) * 0.04), (c) => measure(c, font));
+    const { size, lines } = fitLines(t, spaced, (p) => F(800, p), [62, 56, 50, 46, 42], maxW, 7);
+    return tapeLayout(lines, measure, 'cinta', { maxPx: size, shift: [-22, 26, -10, 18, -26, 12, -16] });
+  }
+
+  // «Mensaje»: la frase como un mensaje que te llegó de HABIT.
+  function quoteBubbleLayout(text, measure) {
+    const maxText = 780, padX = 48, padY = 38;
+    const { size: px, lines } = fitLines(cleanQuote(text), measure, (p) => F(500, p), [56, 50, 46, 42, 38], maxText, 7);
+    const lineH = px * 1.26;
+    const textW = Math.max(...lines.map((l) => measure(l, F(500, px))));
+    const bw = Math.ceil(textW + padX * 2);
+    const bh = Math.ceil(padY * 2 + px * 0.78 + (lines.length - 1) * lineH + px * 0.22);
+    const bx = PAD, by = PAD;
+    const ops = bubbleOps(bx, by, bw, bh, 'left');
+    lines.forEach((l, i) => ops.push(textOp(measure, l, F(500, px), { x: bx + padX, y: by + padY + px * 0.78 + i * lineH, color: 'inv' })));
+    const y = by + bh + 40;
+    const lk = lockupOps(measure, PAD + 8, y, 24, 'left');
+    ops.push(...lk.ops);
+    const W = Math.ceil(Math.max(bx + bw, PAD + 8 + lk.width) + PAD);
+    return { kind: 'burbuja', width: W, height: Math.round(y + lk.height + PAD * 0.7), ops };
+  }
+
+  // «Comillas»: unas comillas enormes y la frase debajo, a la izquierda.
+  function quoteMarksLayout(text, measure) {
+    const maxW = WIDTH - PAD * 2;
+    const ops = [];
+    const qp = 320;
+    // Las comillas de Inter ocupan de la altura de mayúsculas (0.73 em) a ~0.45 em sobre la
+    // línea base: el renglón siguiente empieza donde terminan, no en su línea base.
+    const qy = PAD + qp * CAP;
+    ops.push(textOp(measure, '“', F(900, qp), { x: PAD - qp * 0.04, y: qy }));
+    let y = qy - qp * 0.42 + 50;
+    const { size: px, lines } = fitLines(cleanQuote(text), measure, (p) => F(600, p), [68, 62, 56, 50, 44, 40], maxW, 6);
+    const lineH = px * 1.2;
+    y += px * 0.8;
+    lines.forEach((l, i) => ops.push(textOp(measure, l, F(600, px), { x: PAD, y: y + i * lineH })));
+    y += (lines.length - 1) * lineH + 60;
+    const lk = lockupOps(measure, PAD, y, 26, 'left');
+    ops.push(...lk.ops);
+    return { kind: 'comillas', width: WIDTH, height: Math.round(y + lk.height + PAD * 0.8), ops };
+  }
+
+  // «Mínimo»: la frase en 400, entre dos líneas finas, y HABIT con mucho aire.
+  function quoteMinimalLayout(text, ds, measure) {
+    const maxW = 820;
+    const ops = [];
+    let y = PAD;
+    ops.push({ op: 'line', x1: WIDTH / 2 - 36, y1: y, x2: WIDTH / 2 + 36, y2: y, w: 3 });
+    const { size: px, lines } = fitLines(cleanQuote(text), measure, (p) => F(400, p), [52, 48, 44, 40, 36, 32], maxW, 7);
+    const lineH = px * 1.36;
+    y += 56 + px * 0.8;
+    lines.forEach((l, i) => ops.push(textOp(measure, l, F(400, px), { x: WIDTH / 2, y: y + i * lineH, align: 'center' })));
+    y += (lines.length - 1) * lineH + 52;
+    ops.push({ op: 'line', x1: WIDTH / 2 - 36, y1: y, x2: WIDTH / 2 + 36, y2: y, w: 3 });
+    y += 56 + 22 * CAP;
+    const sign = ['HABIT', shortDate(ds)].filter(Boolean).join('  ·  ');
+    ops.push(textOp(measure, sign, F(600, 22), { x: WIDTH / 2, y, align: 'center', spacing: 11 }));
+    return { kind: 'minimo', width: WIDTH, height: Math.round(y + PAD * 0.8), ops };
+  }
+
+  // ── Estilos de la semana ────────────────────────────────────────────────
+
+  function weekFacts(d) {
+    d = d || {};
+    const count = Math.max(0, Math.round(d.count || 0));
+    const days = Array.from({ length: 7 }, (_, i) => !!(d.days && d.days[i]));
+    const dur = d.durationSec > 0 ? Math.round(d.durationSec) : 0;
+    const dist = d.distanceM > 0 ? Math.round(d.distanceM) : 0;
+    const parts = [];
+    if (dur) parts.push(minutesText(dur));
+    if (dist) parts.push((dist / 1000).toFixed(1) + ' KM');
+    const m = String(d.weekStart || '').match(/^(\d{4})-(\d{2})-(\d{2})$/);
+    let range = '';
+    if (m) {
+      const a = new Date(Date.UTC(+m[1], +m[2] - 1, +m[3])), b = new Date(a.getTime() + 6 * 86400000);
+      const f = (x) => pad2(x.getUTCDate()) + '.' + pad2(x.getUTCMonth() + 1);
+      range = f(a) + ' – ' + f(b);
+    }
+    return { count, days, dur, dist, meta: parts.join(' · '), range, streak: Math.max(0, Math.round(d.streak || 0)) };
+  }
+
+  // «Semana»: cuántas veces, y los siete días como puntos.
+  function weekDotsLayout(w, measure) {
+    const ops = [];
+    let y = PAD + 30 * CAP;
+    ops.push(textOp(measure, 'ESTA SEMANA', F(600, 30), { x: WIDTH / 2, y, align: 'center', spacing: 11 }));
+    const px = 300;
+    y += 40 + px * CAP;
+    ops.push(textOp(measure, String(w.count), F(900, px), { x: WIDTH / 2, y, align: 'center', spacing: -10 }));
+    y += 48 + 36 * CAP;
+    ops.push(textOp(measure, w.count === 1 ? 'ENTRENO' : 'ENTRENOS', F(700, 36), { x: WIDTH / 2, y, align: 'center', spacing: 12 }));
+    const r = 32, step = 104, x0 = WIDTH / 2 - step * 3;
+    y += 70 + r;
+    'LMMJVSD'.split('').forEach((letter, i) => {
+      const cx = x0 + step * i;
+      ops.push(w.days[i]
+        ? { op: 'circle', cx, cy: y, r, color: 'fg' }
+        : { op: 'circle', cx, cy: y, r: r - 2, stroke: 4, color: 'fg', alpha: 0.45 });
+      ops.push(textOp(measure, letter, F(600, 24), { x: cx, y: y + r + 44, align: 'center', alpha: 0.7 }));
+    });
+    y += r + 44;
+    if (w.meta) {
+      y += 64;
+      ops.push(textOp(measure, w.meta, F(600, 28), { x: WIDTH / 2, y, align: 'center', spacing: 6, alpha: 0.85 }));
+    }
+    y += 56;
+    const lk = lockupOps(measure, WIDTH / 2, y, 26, 'center');
+    ops.push(...lk.ops);
+    return { kind: 'semana', width: WIDTH, height: Math.round(y + lk.height + PAD * 0.8), ops };
+  }
+
+  // «Racha»: el número de semanas seguidas, enorme, con sus palabras apiladas al lado.
+  function streakLayout(w, measure) {
+    if (w.streak < 2) return null;
+    const ops = [];
+    const value = String(w.streak);
+    const px = fitPx(measure, value, (p) => F(900, p), 520, 380, 200, -0.04);
+    const nw = spacedWidth(value, Math.round(px * -0.04), (c) => measure(c, F(900, px)));
+    const base = PAD + px * CAP;
+    ops.push(textOp(measure, value, F(900, px), { x: PAD, y: base, spacing: Math.round(px * -0.04) }));
+    const words = ['SEMANAS', 'SEGUIDAS', 'ENTRENANDO'];
+    const wp = Math.round(px * CAP / 3.6);
+    const wx = PAD + nw + 44;
+    const step = (px * CAP - wp * CAP) / (words.length - 1);
+    words.forEach((t, i) => ops.push(textOp(measure, t, F(800, wp), { x: wx, y: base - px * CAP + wp * CAP + i * step, spacing: Math.round(wp * 0.08) })));
+    const wordsW = Math.max(...words.map((t) => spacedWidth(t, Math.round(wp * 0.08), (c) => measure(c, F(800, wp)))));
+    let y = base + 64;
+    const lk = lockupOps(measure, PAD, y, 26, 'left');
+    ops.push(...lk.ops);
+    return { kind: 'racha', width: Math.ceil(wx + wordsW + PAD), height: Math.round(y + lk.height + PAD * 0.8), ops };
+  }
+
+  // Los estilos de cada tipo, en el orden en que salen en la galería. `layout` recibe los datos
+  // y `measure`; devuelve null cuando a ese entreno le falta lo que el estilo enseña.
   const KINDS = {
     quote: {
       title: 'Frase del día',
       styles: [
         { id: 'frase', label: 'Frase', layout: (d, m) => quoteLayout(d.text, m) },
+        { id: 'poster', label: 'Póster', layout: (d, m) => posterLayout(d.text, m) },
+        { id: 'italica', label: 'Itálica', layout: (d, m) => quoteItalicLayout(d.text, m) },
+        { id: 'cinta', label: 'Cinta', layout: (d, m) => quoteTapeLayout(d.text, m) },
+        { id: 'burbuja', label: 'Mensaje', layout: (d, m) => quoteBubbleLayout(d.text, m) },
+        { id: 'comillas', label: 'Comillas', layout: (d, m) => quoteMarksLayout(d.text, m) },
+        { id: 'minimo', label: 'Mínimo', layout: (d, m) => quoteMinimalLayout(d.text, d.ds, m) },
         { id: 'logotipo', label: 'Logotipo', layout: (d, m) => signatureLayout(m, 'MAKE IT A HABIT') },
         { id: 'sello', label: 'Sello', layout: (d, m) => sealLayout('MAKE IT A HABIT · ' + (shortDate(d.ds) ? shortDate(d.ds) + ' · ' : ''), m) }
+      ]
+    },
+    workout: {
+      title: 'Tu entreno',
+      styles: [
+        { id: 'heroe', label: 'Héroe', layout: (d, m) => heroLayout(workoutFacts(d), m) },
+        { id: 'datos', label: 'Datos', layout: (d, m) => dataLayout(workoutFacts(d), m) },
+        { id: 'recibo', label: 'Recibo', layout: (d, m) => receiptLayout(workoutFacts(d), m) },
+        { id: 'ligero', label: 'Ligero', layout: (d, m) => lightLayout(workoutFacts(d), m) },
+        { id: 'italica', label: 'Itálica', layout: (d, m) => italicLayout(workoutFacts(d), m) },
+        { id: 'contorno', label: 'Contorno', layout: (d, m) => outlineLayout(workoutFacts(d), m) },
+        { id: 'notif', label: 'Notificación', layout: (d, m) => notifLayout(workoutFacts(d), m) },
+        { id: 'burbuja', label: 'Mensaje', layout: (d, m) => bubbleLayout(workoutFacts(d), m) },
+        { id: 'cinta', label: 'Cinta', layout: (d, m) => workoutTape(workoutFacts(d), m) },
+        { id: 'espaciado', label: 'Espaciado', layout: (d, m) => spacedLayout(workoutFacts(d), m) },
+        { id: 'eco', label: 'Eco', layout: (d, m) => echoLayout(workoutFacts(d), m) },
+        {
+          id: 'sello', label: 'Sello', layout: (d, m) => {
+            const f = workoutFacts(d);
+            return sealLayout(`${f.hero.value} ${f.hero.unit} · ${f.date ? f.date + ' · ' : ''}MAKE IT A HABIT · `.replace(/ {2,}/g, ' '), m);
+          }
+        },
+        {
+          id: 'logotipo', label: 'Logotipo', layout: (d, m) => {
+            const f = workoutFacts(d);
+            return signatureLayout(m, f.number ? `ENTRENO Nº ${f.number}` : `${f.hero.value} ${f.hero.unit} · ${f.day || 'MAKE IT A HABIT'}`);
+          }
+        }
+      ]
+    },
+    week: {
+      title: 'Tu semana',
+      styles: [
+        { id: 'semana', label: 'Semana', layout: (d, m) => weekDotsLayout(weekFacts(d), m) },
+        {
+          id: 'heroe', label: 'Héroe', layout: (d, m) => {
+            const w = weekFacts(d);
+            return heroLayout({ hero: { value: String(w.count), label: '' } }, m, 'heroe', w.count === 1 ? 'ENTRENO ESTA SEMANA' : 'ENTRENOS ESTA SEMANA');
+          }
+        },
+        { id: 'racha', label: 'Racha', layout: (d, m) => streakLayout(weekFacts(d), m) },
+        {
+          id: 'datos', label: 'Datos', layout: (d, m) => {
+            const w = weekFacts(d);
+            const trio = [{ value: String(w.count), label: w.count === 1 ? 'ENTRENO' : 'ENTRENOS' }];
+            if (w.dur) trio.push({ value: clock(w.dur).replace(/:\d\d$/, '') + (w.dur >= 3600 ? '' : "'"), label: w.dur >= 3600 ? 'HORAS' : 'MINUTOS' });
+            if (w.dist) trio.push({ value: (w.dist / 1000).toFixed(1), label: 'KM' });
+            return dataLayout({}, m, { trio, title: 'Mi semana', corner: w.range });
+          }
+        }
       ]
     }
   };
@@ -183,15 +968,22 @@
   // ── Dibujo (navegador) ─────────────────────────────────────────────────
 
   let fontsReady = null;
-  // Inter ya la carga cada app (Google Fonts), pero puede no haber terminado: sin esperar, el
-  // canvas dibuja con la fuente del sistema y no avisa.
+  // Inter ya la carga cada app (Google Fonts), pero sin los pesos 100–200, el 900 ni la itálica,
+  // y puede no haber terminado: sin esperar, el canvas dibuja con la fuente del sistema y no avisa.
   function ensureFonts(doc) {
     if (fontsReady) return fontsReady;
     doc = doc || global.document;
-    const wanted = [quoteFont(76), wordFont(112), subFont(30), sealFont(66)];
-    const load = doc.fonts && doc.fonts.load
-      ? Promise.all(wanted.map((f) => doc.fonts.load(f, 'HABIT“”áé·')))
-      : Promise.resolve();
+    let sheetReady = Promise.resolve();
+    if (doc.head && !doc.getElementById('hs-inter')) {
+      const link = doc.createElement('link');
+      link.id = 'hs-inter'; link.rel = 'stylesheet'; link.href = FONT_HREF;
+      sheetReady = new Promise((r) => { link.onload = r; link.onerror = r; });
+      doc.head.appendChild(link);
+    }
+    const wanted = [F(100, 80), F(300, 60), F(300, 60, true), F(400, 40), F(500, 40), F(600, 40), F(700, 40), F(800, 40), F(800, 80, true), F(900, 80)];
+    const load = sheetReady.then(() => (doc.fonts && doc.fonts.load
+      ? Promise.all(wanted.map((f) => doc.fonts.load(f, 'HABIT0123456789“”áéíóúÁÉÍÓÚñÑ·:/.,Nº')))
+      : null));
     const timeout = new Promise((r) => setTimeout(r, 3500));
     fontsReady = Promise.race([load, timeout]).catch(() => {}).then(() => true);
     return fontsReady;
@@ -220,9 +1012,12 @@
     return (text, font) => { ctx.font = font; return ctx.measureText(text).width; };
   }
 
-  function drawSpaced(ctx, text, x, y, spacing) {
+  function drawSpaced(ctx, text, x, y, spacing, stroke) {
     let cx = x;
-    [...text].forEach((c) => { ctx.fillText(c, cx, y); cx += ctx.measureText(c).width + spacing; });
+    [...text].forEach((c) => {
+      if (stroke) ctx.strokeText(c, cx, y); else ctx.fillText(c, cx, y);
+      cx += ctx.measureText(c).width + spacing;
+    });
   }
 
   // El logo viene blanco; para el sticker negro se tiñe en un lienzo aparte (source-in pinta
@@ -241,6 +1036,52 @@
     drawLogo(ctx, img, L.logo, color, doc);
     ctx.font = L.word.font; ctx.textAlign = 'left'; ctx.textBaseline = 'alphabetic';
     drawSpaced(ctx, L.word.text, L.word.x, L.word.y, L.word.spacing);
+  }
+
+  function roundRectPath(ctx, x, y, w, h, r) {
+    r = Math.max(0, Math.min(r || 0, w / 2, h / 2));
+    ctx.beginPath();
+    ctx.moveTo(x + r, y);
+    ctx.arcTo(x + w, y, x + w, y + h, r);
+    ctx.arcTo(x + w, y + h, x, y + h, r);
+    ctx.arcTo(x, y + h, x, y, r);
+    ctx.arcTo(x, y, x + w, y, r);
+    ctx.closePath();
+  }
+
+  // Los trazos de los estilos nuevos. 'fg' es el color del sticker; 'inv', el contrario.
+  function drawOps(ctx, ops, img, fg, doc) {
+    const inv = fg === COLORS.blanco ? COLORS.negro : COLORS.blanco;
+    ops.forEach((o) => {
+      const color = o.color === 'inv' ? inv : fg;
+      ctx.save();
+      ctx.globalAlpha = o.alpha == null ? 1 : o.alpha;
+      ctx.fillStyle = color; ctx.strokeStyle = color;
+      if (o.op === 'text') {
+        ctx.font = o.font; ctx.textAlign = 'left'; ctx.textBaseline = 'alphabetic';
+        if (o.stroke) { ctx.lineWidth = o.stroke; ctx.lineJoin = 'round'; }
+        if (o.spacing) drawSpaced(ctx, o.text, o.x, o.y, o.spacing, !!o.stroke);
+        else if (o.stroke) ctx.strokeText(o.text, o.x, o.y);
+        else ctx.fillText(o.text, o.x, o.y);
+      } else if (o.op === 'logo') {
+        drawLogo(ctx, img, o, color, doc);
+      } else if (o.op === 'rect') {
+        roundRectPath(ctx, o.x, o.y, o.w, o.h, o.r);
+        if (o.stroke) { ctx.lineWidth = o.stroke; ctx.stroke(); } else ctx.fill();
+      } else if (o.op === 'circle') {
+        ctx.beginPath(); ctx.arc(o.cx, o.cy, o.r, 0, Math.PI * 2);
+        if (o.stroke) { ctx.lineWidth = o.stroke; ctx.stroke(); } else ctx.fill();
+      } else if (o.op === 'line') {
+        ctx.lineWidth = o.w || 2; ctx.lineCap = 'round';
+        if (o.dash) ctx.setLineDash(o.dash);
+        ctx.beginPath(); ctx.moveTo(o.x1, o.y1); ctx.lineTo(o.x2, o.y2); ctx.stroke();
+      } else if (o.op === 'poly') {
+        ctx.beginPath();
+        o.pts.forEach((p, i) => (i ? ctx.lineTo(p[0], p[1]) : ctx.moveTo(p[0], p[1])));
+        ctx.closePath(); ctx.fill();
+      }
+      ctx.restore();
+    });
   }
 
   const DRAW = {
@@ -267,6 +1108,12 @@
     }
   };
 
+  // Los estilos que sí tienen qué mostrar con estos datos.
+  function stylesFor(kind, data, measure) {
+    const K = KINDS[kind] || KINDS.quote;
+    return K.styles.filter((s) => { try { return !!s.layout(data || {}, measure); } catch (_) { return false; } });
+  }
+
   // Un sticker: un canvas transparente del tamaño justo. `logo` es la imagen ya cargada.
   function renderSticker(doc, kind, styleId, data, colorKey, logo) {
     const style = (KINDS[kind] || KINDS.quote).styles.find((s) => s.id === styleId);
@@ -274,10 +1121,12 @@
     const color = COLORS[colorKey] || COLORS.blanco;
     const probe = newCanvas(doc, 1, 1).getContext('2d');
     const L = style.layout(data || {}, canvasMeasure(probe));
+    if (!L) throw new Error('El estilo ' + styleId + ' no aplica a estos datos');
     const canvas = newCanvas(doc, L.width, L.height);
     const ctx = canvas.getContext('2d');
     ctx.fillStyle = color;
-    DRAW[style.id](ctx, L, logo, color, doc);
+    if (L.ops) drawOps(ctx, L.ops, logo, color, doc);
+    else DRAW[L.kind](ctx, L, logo, color, doc);
     return canvas;
   }
 
@@ -312,32 +1161,45 @@
   const SHARE_ICON = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v12"/><path d="M8 7l4-4 4 4"/><path d="M7 10H6a2 2 0 0 0-2 2v7a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-7a2 2 0 0 0-2-2h-1"/></svg>';
 
   // Arriba de todo lo de las dos apps (sus hojas llegan a 10000; sus avisos van más arriba).
+  // Con muchos estilos, una lista era un scroll larguísimo: ahora se desliza de uno a otro,
+  // con miniaturas debajo para saltar, y un solo botón Compartir para el que se ve.
   const CSS = `
 .hs-overlay{position:fixed;inset:0;z-index:10040;background:rgba(6,7,9,.66);display:none;align-items:flex-end;justify-content:center;font-family:${INTER}}
 .hs-overlay.open{display:flex;animation:hsFade .18s ease both}
-.hs-sheet{width:100%;max-width:480px;max-height:90vh;background:#141518;color:#f4f5f7;border-radius:22px 22px 0 0;display:flex;flex-direction:column;overflow:hidden;animation:hsUp .3s cubic-bezier(.2,.8,.2,1) both;padding-bottom:env(safe-area-inset-bottom,0px)}
-.hs-head{display:flex;align-items:center;gap:12px;padding:16px 16px 12px}
-.hs-title{flex:1;text-align:center;font-size:17px;font-weight:700;margin:0;letter-spacing:0}
+.hs-sheet{width:100%;max-width:480px;max-height:94vh;background:#141518;color:#f4f5f7;border-radius:22px 22px 0 0;display:flex;flex-direction:column;overflow:hidden;animation:hsUp .3s cubic-bezier(.2,.8,.2,1) both;padding-bottom:env(safe-area-inset-bottom,0px)}
+.hs-head{display:flex;align-items:center;gap:12px;padding:16px 16px 6px}
+.hs-title{flex:1;text-align:center;font-size:17px;font-weight:700;margin:0;letter-spacing:0;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .hs-close{background:none;border:0;color:#9aa0aa;font-size:24px;line-height:1;cursor:pointer;padding:4px 6px}
 .hs-colors{display:flex;gap:10px}
 .hs-color{width:24px;height:24px;border-radius:50%;border:1px solid rgba(255,255,255,.28);padding:0;cursor:pointer}
 .hs-color[data-c=blanco]{background:#fff}.hs-color[data-c=negro]{background:#0b0b0b}
 .hs-color.on{outline:2px solid #fff;outline-offset:3px}
-.hs-body{overflow-y:auto;padding:4px 16px 20px;overscroll-behavior:contain}
-.hs-hint{text-align:center;font-size:13px;color:#9aa0aa;margin:0 0 14px}
-.hs-grid{display:grid;gap:12px}
-.hs-tile{background:#1f2024;border-radius:18px;padding:22px 18px 14px;display:flex;flex-direction:column;align-items:center;gap:14px}
-.hs-tile.light{background:#d9dbe0}
-.hs-tile img{display:block;max-width:100%;max-height:260px}
-.hs-row{width:100%;display:flex;align-items:center;justify-content:space-between}
-.hs-label{font-size:12px;color:#7d828c;font-weight:600;letter-spacing:.04em}
-.hs-tile.light .hs-label{color:#5a5e66}
-.hs-share{display:inline-flex;align-items:center;gap:7px;border:0;border-radius:999px;background:#fff;color:#0b0b0b;font:600 14px ${INTER};padding:9px 16px 9px 13px;cursor:pointer}
-.hs-tile.light .hs-share{background:#0b0b0b;color:#fff}
-.hs-share svg,.hs-chip svg{width:17px;height:17px;fill:none;stroke:currentColor;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round}
-.hs-share:active{transform:scale(.97)}
+.hs-body{overflow-y:auto;overscroll-behavior:contain;padding-bottom:10px}
+.hs-sub{text-align:center;font-size:13px;color:#9aa0aa;margin:0 20px 12px;min-height:1px}
+.hs-stage{margin:0 16px;border-radius:20px;overflow:hidden;background:#1f2024}
+.hs-stage.light,.hs-thumb.light{background:#d9dbe0}
+.hs-track{display:flex;overflow-x:auto;scroll-snap-type:x mandatory;scrollbar-width:none;-webkit-overflow-scrolling:touch;overscroll-behavior-x:contain}
+.hs-track::-webkit-scrollbar,.hs-thumbs::-webkit-scrollbar{display:none}
+.hs-slide{flex:0 0 100%;scroll-snap-align:center;scroll-snap-stop:always;height:min(44vh,340px);display:flex;align-items:center;justify-content:center;padding:24px;box-sizing:border-box}
+.hs-slide img{display:block;max-width:100%;max-height:100%;object-fit:contain}
+.hs-slide img[hidden]{display:none}
+.hs-slide .hs-wait{padding:0}
+.hs-meta{display:flex;align-items:baseline;justify-content:space-between;margin:12px 22px 10px;font-size:13px}
+.hs-label{font-weight:700;color:#f4f5f7;letter-spacing:.02em}
+.hs-count{color:#7d828c;font-variant-numeric:tabular-nums}
+.hs-thumbs{display:flex;gap:8px;overflow-x:auto;padding:4px 16px;scrollbar-width:none}
+.hs-thumb{flex:0 0 54px;height:54px;border-radius:12px;background:#1f2024;border:0;padding:7px;cursor:pointer;opacity:.55;transition:opacity .15s}
+.hs-thumb.on{opacity:1;outline:2px solid #fff;outline-offset:2px}
+.hs-thumb img{display:block;width:100%;height:100%;object-fit:contain}
+.hs-actions{padding:14px 16px 4px}
+.hs-share-main{width:100%;display:flex;align-items:center;justify-content:center;gap:9px;border:0;border-radius:999px;background:#fff;color:#0b0b0b;font:700 16px ${INTER};padding:15px 18px;cursor:pointer}
+.hs-share-main:disabled{opacity:.45;cursor:default}
+.hs-share-main:active:not(:disabled){transform:scale(.98)}
+.hs-share-main svg,.hs-chip svg{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round}
+.hs-hint{text-align:center;font-size:12px;line-height:1.45;color:#8a8f99;margin:10px 24px 8px}
 .hs-wait{padding:40px 0;text-align:center;color:#9aa0aa;font-size:13px}
 .hs-chip{display:inline-flex;align-items:center;gap:6px;color:inherit;font-weight:600;cursor:pointer}
+.hs-chip svg{width:17px;height:17px}
 .hs-chip-row{position:relative;z-index:1;display:flex;justify-content:center;margin-top:12px;font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:#d7dae0}
 [data-hs-share]{cursor:pointer}
 @keyframes hsFade{from{opacity:0}to{opacity:1}}
@@ -351,6 +1213,7 @@
   }
   function saveColor(c) { try { global.localStorage.setItem(COLOR_KEY, c); } catch (_) { /* sin almacenamiento: no pasa nada */ } }
   function say(msg, type) { if (typeof global.toast === 'function') global.toast(msg, type); }
+  const escHtml = (s) => String(s == null ? '' : s).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 
   // Los estilos entran al cargar, no al abrir la galería: el botón Compartir de cada app (el
   // ícono, el cursor) se pinta antes de que nadie abra nada.
@@ -373,66 +1236,135 @@
       + '<button type="button" class="hs-color" data-c="negro" aria-label="Negro"></button></div>'
       + '<h2 class="hs-title" id="hs-title"></h2>'
       + '<button type="button" class="hs-close" aria-label="Cerrar">×</button></div>'
-      + '<div class="hs-body"><p class="hs-hint">Compártelo en tu historia de Instagram: el fondo es transparente, va encima de tu foto.</p>'
-      + '<div class="hs-grid"></div></div></div>';
+      + '<div class="hs-body"><p class="hs-sub"></p>'
+      + '<div class="hs-stage"><div class="hs-track"></div></div>'
+      + '<div class="hs-meta"><span class="hs-label"></span><span class="hs-count"></span></div>'
+      + '<div class="hs-thumbs" role="tablist" aria-label="Estilos"></div>'
+      + '<div class="hs-actions"><button type="button" class="hs-share-main" disabled>' + SHARE_ICON + 'Compartir</button></div>'
+      + '<p class="hs-hint">Desliza para ver los estilos. En Compartir, toca <b>Copiar</b> y pégalo en tu historia: el fondo es transparente, va encima de tu foto.</p>'
+      + '</div></div>';
     doc.body.appendChild(el);
     el.addEventListener('click', (e) => {
       if (e.target === el || e.target.closest('.hs-close')) { close(); return; }
       const c = e.target.closest('.hs-color');
       if (c) { state.color = c.dataset.c; saveColor(state.color); paint(); return; }
-      const b = e.target.closest('.hs-share');
-      if (b) shareTile(Number(b.dataset.i));
+      const t = e.target.closest('.hs-thumb');
+      if (t) { goTo(Number(t.dataset.i)); return; }
+      if (e.target.closest('.hs-share-main')) shareCurrent();
     });
-    doc.addEventListener('keydown', (e) => { if (e.key === 'Escape' && el.classList.contains('open')) close(); });
+    const track = el.querySelector('.hs-track');
+    let raf = 0;
+    track.addEventListener('scroll', () => {
+      if (raf) return;
+      raf = global.requestAnimationFrame(() => {
+        raf = 0;
+        const w = track.clientWidth || 1;
+        setCurrent(Math.round(track.scrollLeft / w));
+      });
+    }, { passive: true });
+    doc.addEventListener('keydown', (e) => {
+      if (!el.classList.contains('open')) return;
+      if (e.key === 'Escape') close();
+      else if (e.key === 'ArrowRight') goTo(state.current + 1);
+      else if (e.key === 'ArrowLeft') goTo(state.current - 1);
+    });
     sheet = el;
     return el;
   }
 
   function freeItems() {
-    if (state && state.items) state.items.forEach((it) => it && URL.revokeObjectURL(it.url));
+    if (state && state.items) state.items.forEach((it) => it && it.url && URL.revokeObjectURL(it.url));
   }
 
-  // Dibuja todos los estilos antes de mostrarlos: así el botón Compartir entrega una imagen que
-  // ya existe, y el iPhone no pierde el toque esperando.
+  function setCurrent(i) {
+    if (!state || !state.styles) return;
+    i = Math.max(0, Math.min(state.styles.length - 1, i));
+    state.current = i;
+    const s = state.styles[i];
+    sheet.querySelector('.hs-label').textContent = s ? s.label : '';
+    sheet.querySelector('.hs-count').textContent = state.styles.length ? (i + 1) + ' / ' + state.styles.length : '';
+    sheet.querySelectorAll('.hs-thumb').forEach((b, j) => { b.classList.toggle('on', j === i); b.setAttribute('aria-selected', j === i ? 'true' : 'false'); });
+    const on = sheet.querySelector('.hs-thumb.on');
+    if (on && on.scrollIntoView) on.scrollIntoView({ block: 'nearest', inline: 'nearest' });
+    sheet.querySelector('.hs-share-main').disabled = !(state.items && state.items[i]);
+  }
+
+  // El salto desde una miniatura es directo, no animado: con scroll-snap, un deslizamiento
+  // suave que se cruza con un sticker recién pintado se regresa al estilo de donde salió.
+  function goTo(i) {
+    if (!state || !state.styles) return;
+    i = Math.max(0, Math.min(state.styles.length - 1, i));
+    const track = sheet.querySelector('.hs-track');
+    track.scrollLeft = i * track.clientWidth;
+    setCurrent(i);
+  }
+
+  // Dibuja los estilos uno por uno y los va poniendo: el primero sale en cuanto está, y el
+  // botón Compartir de cada uno entrega una imagen que ya existe (el iPhone no espera).
   async function paint() {
     const doc = global.document;
     const my = ++seq;
     const kind = KINDS[state.kind] || KINDS.quote;
-    sheet.querySelector('.hs-title').textContent = kind.title;
+    sheet.querySelector('.hs-title').textContent = state.title || kind.title;
+    sheet.querySelector('.hs-sub').textContent = state.subtitle || '';
     sheet.querySelectorAll('.hs-color').forEach((b) => b.classList.toggle('on', b.dataset.c === state.color));
-    const grid = sheet.querySelector('.hs-grid');
-    if (!state.items) grid.innerHTML = '<div class="hs-wait">Preparando stickers…</div>';
+    const light = state.color === 'negro';
+    sheet.querySelector('.hs-stage').classList.toggle('light', light);
+    const track = sheet.querySelector('.hs-track'), thumbs = sheet.querySelector('.hs-thumbs');
+    if (!state.styles) {
+      const probe = newCanvas(doc, 1, 1).getContext('2d');
+      state.styles = stylesFor(state.kind, state.data, canvasMeasure(probe));
+      // Cada lámina nace con su <img>: pintar un sticker solo le cambia el src, sin mover nada.
+      track.innerHTML = state.styles.map((s) => '<div class="hs-slide"><img alt="Sticker ' + escHtml(s.label) + '" hidden><div class="hs-wait">Preparando…</div></div>').join('');
+      thumbs.innerHTML = state.styles.map((s, i) => '<button type="button" class="hs-thumb" role="tab" data-i="' + i + '" aria-label="' + escHtml(s.label) + '"></button>').join('');
+      goTo(state.current || 0);
+    }
+    thumbs.querySelectorAll('.hs-thumb').forEach((t) => t.classList.toggle('light', light));
     let logo;
     try { [, logo] = await Promise.all([ensureFonts(doc), loadLogo()]); }
-    catch (e) { grid.innerHTML = '<div class="hs-wait">No se pudo cargar el logo. Revisa tu conexión.</div>'; return; }
-    const items = [];
-    for (const s of kind.styles) {
-      const blob = await toBlob(renderSticker(doc, state.kind, s.id, state.data, state.color, logo));
-      items.push({ blob, url: URL.createObjectURL(blob), label: s.label, name: `habit-${s.id}-${state.color}.png` });
-    }
-    if (my !== seq) { items.forEach((it) => URL.revokeObjectURL(it.url)); return; } // cambiaron el color a media pintura
+    catch (e) { track.innerHTML = '<div class="hs-slide"><div class="hs-wait">No se pudo cargar el logo. Revisa tu conexión.</div></div>'; return; }
+    if (my !== seq) return;
     freeItems();
-    state.items = items;
-    const light = state.color === 'negro';
-    grid.innerHTML = items.map((it, i) => '<div class="hs-tile' + (light ? ' light' : '') + '">'
-      + '<img src="' + it.url + '" alt="Sticker ' + it.label + '">'
-      + '<div class="hs-row"><span class="hs-label">' + it.label + '</span>'
-      + '<button type="button" class="hs-share" data-i="' + i + '">' + SHARE_ICON + 'Compartir</button></div></div>').join('');
+    state.items = state.styles.map(() => null);
+    setCurrent(state.current);
+    // El que se ve primero, luego los demás.
+    const order = state.styles.map((_, i) => i).sort((a, b) => Math.abs(a - state.current) - Math.abs(b - state.current));
+    for (const i of order) {
+      const s = state.styles[i];
+      let blob;
+      try { blob = await toBlob(renderSticker(doc, state.kind, s.id, state.data, state.color, logo)); }
+      catch (e) { console.error('HabitShare ' + s.id + ':', e); continue; }
+      if (my !== seq) return; // cambiaron el color o cerraron a media pintura
+      const url = URL.createObjectURL(blob);
+      state.items[i] = { blob, url, label: s.label, name: `habit-${state.kind}-${s.id}-${state.color}.png` };
+      const slide = track.children[i], thumb = thumbs.children[i];
+      const img = slide && slide.querySelector('img');
+      if (img) { img.src = url; img.hidden = false; const w = slide.querySelector('.hs-wait'); if (w) w.remove(); }
+      if (thumb) thumb.innerHTML = '<img src="' + url + '" alt="">';
+      if (i === state.current) setCurrent(i);
+    }
   }
 
-  async function shareTile(i) {
-    const it = state && state.items && state.items[i];
+  async function shareCurrent() {
+    const it = state && state.items && state.items[state.current];
     if (!it) return;
     const how = await shareImage(it.blob, it.name);
     if (how === 'downloaded') say('Imagen guardada', 'ok');
   }
 
-  // Abre la galería. kind: 'quote' (por ahora). data: { text, ds }.
+  // Abre la galería. kind: 'quote' | 'workout' | 'week'; data: lo de ese tipo (arriba);
+  // title y subtitle, opcionales, para la cabeza de la hoja.
   function open(opts) {
     const doc = global.document;
+    opts = opts || {};
     buildSheet(doc);
     freeItems();
-    state = { kind: (opts && opts.kind) || 'quote', data: (opts && opts.data) || {}, color: readColor(), items: null };
+    seq++;
+    state = {
+      kind: KINDS[opts.kind] ? opts.kind : 'quote', data: opts.data || {}, color: readColor(),
+      title: opts.title || '', subtitle: opts.subtitle || '', items: null, styles: null, current: 0,
+      onClose: typeof opts.onClose === 'function' ? opts.onClose : null
+    };
     sheet.classList.add('open');
     state.bodyOverflow = doc.body.style.overflow;
     doc.body.style.overflow = 'hidden';
@@ -444,8 +1376,10 @@
     sheet.classList.remove('open');
     global.document.body.style.overflow = (state && state.bodyOverflow) || '';
     freeItems();
-    if (state) state.items = null;
+    const done = state && state.onClose;
+    if (state) { state.items = null; state.styles = null; state.onClose = null; }
     seq++;
+    if (done) done();
   }
 
   // El botón que cada app pone junto a lo que se comparte (la frase del día…).
@@ -465,8 +1399,9 @@
   }
 
   const api = {
-    COLORS, WIDTH, KINDS,
+    COLORS, WIDTH, KINDS, ACTIVITY_TYPES, SHARE_ICON,
     wrapText, balancedWrap, spacedWidth, lockupLayout, quoteLayout, signatureLayout, sealLayout, shortDate,
+    dayName, thousands, distanceText, clock, minutesText, paceText, workoutFacts, weekFacts, stylesFor,
     ensureFonts, loadLogo, renderSticker, toBlob, shareImage, open, close, chipHtml
   };
   if (typeof module !== 'undefined' && module.exports) module.exports = api;

@@ -1,7 +1,8 @@
 # Stickers — que lo que entrenas se pueda subir a Instagram
 
-> Plan del 31 oct 2026, rehecho tres veces ese día con Joseph (ver Bitácora). Fase 1 hecha, en
-> las dos apps. Relacionados: `HABIT_PARA_TODOS.md`, `RETOS.md`.
+> Plan del 31 oct 2026, rehecho tres veces ese día con Joseph (ver Bitácora). Fases 1 y 2 hechas
+> (la 2 solo en Crew); la galería ya trae 9 estilos de frase, 13 de entreno y 4 de semana.
+> Relacionados: `HABIT_PARA_TODOS.md`, `RETOS.md`.
 
 ## 1. La idea
 
@@ -60,11 +61,26 @@ Cada estilo puede tener **variantes** con otro dato (el Héroe sirve para kg, mi
 nº de entreno). Datos disponibles: rutina, día y hora, duración, series, kg, ejercicios con su
 mejor serie, músculos (con palabras, sin dibujo del cuerpo), récords, nº de entreno, racha.
 
+### Lo que hay (1 nov 2026)
+
+- **Frase del día** (9): Frase, Póster (900 en mayúsculas, a la izquierda, con barra), Itálica
+  (300 itálica), Cinta (cada renglón en su tira), Mensaje (burbuja que te llegó de HABIT),
+  Comillas (unas comillas enormes), Mínimo (400 entre dos líneas finas), Logotipo, Sello.
+- **Entreno** (13; uno sin el dato que enseña no sale): Héroe, Datos (tres cifras como en un
+  reloj), Recibo (ticket con ejercicios, código de barras y Nº de entreno), Ligero (el tiempo en
+  Inter 100), Itálica, Contorno, Notificación, Mensaje («10.02 km corridos. 52:14.» con su
+  «Entrenado»), Cinta, Espaciado, Eco, Sello, Logotipo. Sirven igual para un entreno de la app
+  (series, kilos, ejercicios con su mejor serie) que para una carrera, un nado o una rodada
+  registrados a mano (distancia, ritmo, velocidad, FC).
+- **Semana** (4): Semana (cuántos y los siete días como puntos), Héroe, Racha (desde 2 semanas
+  seguidas), Datos.
+
 ## 5. Compartir
 
-- Cada sticker lleva su botón **Compartir** con el ícono universal (cuadro con flecha hacia
-  arriba). Abre la hoja del teléfono con el PNG: ahí están Instagram, WhatsApp, Guardar imagen y
-  Copiar. Nada escondido detrás de un toque o de mantener presionado.
+- La galería se **desliza** de un estilo a otro, con miniaturas debajo para saltar, y un solo
+  botón **Compartir** (ícono universal) para el que se ve. Abre la hoja del teléfono con el PNG:
+  ahí están Instagram, WhatsApp, Guardar imagen y Copiar. El truco para ponerlo encima de tu
+  foto: **Copiar** y pegarlo en la historia.
 - Si el teléfono no tiene hoja de compartir (computadora), el botón descarga la imagen.
 - La imagen ya está dibujada antes del toque (iPhone solo deja compartir desde un toque y sin
   esperas largas).
@@ -74,9 +90,9 @@ mejor serie, músculos (con palabras, sin dibujo del cuerpo), récords, nº de e
 1. **Galería en el módulo** (`habit-share.js` crea y maneja la hoja) + botón Compartir + la
    frase del día con los estilos que apliquen (13 Frase, 7 Logotipo, 9 Sello). Llega a **las dos
    apps**: en HABIT solo el script y la llamada desde la frase.
-2. **Entreno terminado**: la pantalla de resumen al cerrar una sesión y los estilos de entreno
-   (1–8, 10, 11). En Crew completa; en HABIT, solo el botón que abre los stickers del entreno
-   que acabas de cerrar.
+2. **Entreno terminado** ✓ (Crew): al cerrar una sesión salen sus stickers, y la pestaña
+   Actividad tiene los de cada entreno (de la app o registrado de fuera) y los de tu semana. En
+   HABIT falta: sería solo el botón que abre los stickers del entreno que acabas de cerrar.
 3. **Récord, racha y check-in**: 5, 12 y 14 (este, al abrir la puerta en HABIT).
 4. **Comunidad** (publicar el sticker con fondo en el feed) y, con la app nativa, mandarlo
    directo a Historias.
@@ -96,8 +112,13 @@ mejor serie, músculos (con palabras, sin dibujo del cuerpo), récords, nº de e
 - Canvas a 1080 px de ancho; PNG transparente; el logo se tiñe de negro en el sticker negro.
 - Inter ya la carga la app; antes de dibujar, `document.fonts.load()` de los pesos que se usan.
 - El sello (texto en círculo) se dibuja letra por letra con rotación.
-- `scripts/check-share.js`: disposición de cada estilo (cabe, va centrado, no pierde texto) y
-  que el correo nunca aparece.
+- Los estilos nuevos se describen como trazos (`ops`: texto, logo, rectángulo, círculo, línea,
+  polígono) que dibuja `drawOps`; `scripts/check-share.js` revisa con cada tipo de entreno que
+  ningún trazo se salga del lienzo, que la frase no pierda texto, los formatos (10.02 km, 5:13
+  /km, 1,500 m, 26.7 km/h) y que el código de barras sea siempre el mismo para el mismo entreno.
+- Inter de 100 a 900 y su itálica se piden a Google Fonts **al abrir la galería** (`#hs-inter`):
+  las apps solo cargan de 300 a 800.
+- Cada cifra va pegada a su unidad con un espacio duro («52 min» no se parte en dos renglones).
 
 ## Bitácora
 
@@ -133,3 +154,15 @@ mejor serie, músculos (con palabras, sin dibujo del cuerpo), récords, nº de e
     entrega un PNG de ~100 KB. Falta el iPhone.
   - Las frases del día de HABIT ya llevan acentos (las mismas 22 correcciones que Crew), con el
     visto bueno de Joseph: salen en los stickers.
+- **2026-11-01 — Fase 2 y más estilos** (versión `20261101-1`). Joseph: «se ven aesthetic, me
+  gustaron, demos más opciones».
+  - Seis estilos más para la frase (Póster, Itálica, Cinta, Mensaje, Comillas, Mínimo), trece de
+    entreno y cuatro de semana (lista en §4).
+  - La galería pasó de lista a carrusel: con 13 estilos la lista era un scroll eterno.
+  - En Crew: la pestaña **Actividad** (ver `HABIT_PARA_TODOS.md`, bitácora del 1 nov) y los
+    stickers al cerrar un entreno.
+  - HABIT recibe los estilos nuevos de la frase y el carrusel (vienen en `habit-share.js`), sin
+    cambios en `app.html` más que la versión.
+  - Encontrado al probar: con scroll-snap, saltar a un estilo con desplazamiento suave mientras se
+    pintaba otro sticker regresaba al primero. El salto ahora es directo, y pintar solo cambia el
+    `src` de una imagen que ya estaba.
