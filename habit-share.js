@@ -2,7 +2,8 @@
 //
 // Un sticker es un PNG con fondo transparente, dibujado a mano en un canvas: tocarlo lo copia y
 // en Instagram se pega encima de tu foto; mantenerlo lo guarda (el menú nativo de la imagen).
-// Blanco o negro, nada más.
+// Blanco o negro, nada más. La marca es la de la app: el logo de /icons/logo-original.png (no un
+// anillo dibujado) y la palabra HABIT en Inter 800 espaciada, como en el encabezado.
 //
 // La disposición (qué renglones, de qué tamaño, dónde) es pura y se prueba en Node
 // (scripts/check-share.js): recibe `measure(texto, font)` en lugar de un canvas. El dibujo y el
@@ -13,12 +14,12 @@
   const COLORS = { blanco: '#ffffff', negro: '#0b0b0b' };
   const WIDTH = 1080;          // ancho de una historia: el sticker sale nítido a cualquier escala
   const PAD = 72;
-  const SERIF = '"Instrument Serif", Georgia, serif';
-  const BRAND = '"Space Grotesk", "Inter", system-ui, sans-serif';
-  const FONT_CSS = 'https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&display=swap';
+  const INTER = '"Inter", -apple-system, system-ui, sans-serif';
+  const LOGO_SRC = '/icons/logo-original.png';
 
-  const serifFont = (px) => `italic 400 ${px}px ${SERIF}`;
-  const brandFont = (px) => `500 ${px}px ${BRAND}`;
+  const quoteFont = (px) => `600 ${px}px ${INTER}`;
+  const wordFont = (px) => `800 ${px}px ${INTER}`;
+  const subFont = (px) => `600 ${px}px ${INTER}`;
 
   // Renglones de a lo más `maxWidth`, palabra por palabra.
   function wrapText(text, maxWidth, measure) {
@@ -57,95 +58,117 @@
     return chars.reduce((n, c) => n + measure(c), 0) + spacing * Math.max(0, chars.length - 1);
   }
 
-  // Frase del día: la frase en serif itálica, centrada y pareja; debajo el anillo y
-  // MAKE IT A HABIT. Una frase larga baja de tamaño en lugar de pasar de cinco renglones.
+  // El logotipo de HABIT: el logo y la palabra HABIT a su derecha, centrados en `cx`. Mismas
+  // proporciones que el encabezado de la app (logo ≈ 1.75× la altura de la letra, espaciado .1em).
+  function lockupLayout(cx, top, wordPx, measure) {
+    const spacing = Math.round(wordPx * 0.1);
+    const logo = Math.round(wordPx * 1.75);
+    const gap = Math.round(wordPx * 0.45);
+    const wordW = spacedWidth('HABIT', spacing, (c) => measure(c, wordFont(wordPx)));
+    const width = logo + gap + wordW;
+    const x0 = cx - width / 2;
+    return {
+      width, height: logo,
+      logo: { x: x0, y: top, size: logo },
+      word: { text: 'HABIT', font: wordFont(wordPx), spacing, x: x0 + logo + gap, y: top + logo / 2 + wordPx * 0.36 }
+    };
+  }
+
+  // Frase del día: la frase en Inter, centrada y en renglones parejos; debajo el logotipo.
+  // Una frase larga baja de tamaño en lugar de pasar de cinco renglones.
   function quoteLayout(text, measure) {
     const quote = '“' + String(text || '').trim() + '”';
     const inner = WIDTH - PAD * 2;
     // Los renglones siempre se calculan con el tamaño que se queda: si ninguno baja de cinco
     // renglones (una frase larguísima), se usa el más chico con sus propios renglones.
-    const SIZES = [92, 84, 76, 68, 60, 54, 48];
+    const SIZES = [76, 70, 64, 58, 52, 46, 40];
     let size = SIZES[0], lines = [];
     for (const px of SIZES) {
       size = px;
-      lines = balancedWrap(quote, inner, (s) => measure(s, serifFont(px)));
+      lines = balancedWrap(quote, inner, (s) => measure(s, quoteFont(px)));
       if (lines.length <= 5) break;
     }
-    const lineH = Math.round(size * 1.16);
-    const sigSize = 30, sigSpacing = Math.round(sigSize * 0.16), ringR = 15;
-    const sigText = 'MAKE IT A HABIT';
-    const sigTextW = spacedWidth(sigText, sigSpacing, (c) => measure(c, brandFont(sigSize)));
-    const sigW = ringR * 2 + 18 + sigTextW;
+    const lineH = Math.round(size * 1.22);
     const top = PAD;
     const textBottom = top + lineH * lines.length;
-    const sigY = textBottom + 64;
+    const lockup = lockupLayout(WIDTH / 2, textBottom + 56, 30, measure);
     return {
-      kind: 'quote',
-      width: WIDTH,
-      height: Math.round(sigY + ringR * 2 + PAD),
-      font: serifFont(size), size, lineH,
+      kind: 'quote', width: WIDTH,
+      height: Math.round(lockup.logo.y + lockup.height + PAD),
+      font: quoteFont(size), size, lineH,
       lines: lines.map((t, i) => ({ text: t, x: WIDTH / 2, y: top + lineH * i + size })),
-      sig: {
-        text: sigText, font: brandFont(sigSize), spacing: sigSpacing,
-        ring: { cx: (WIDTH - sigW) / 2 + ringR, cy: sigY + ringR, r: ringR, line: 7 },
-        textX: (WIDTH - sigW) / 2 + ringR * 2 + 18, textY: sigY + ringR + sigSize * 0.36
-      }
+      lockup
     };
   }
 
-  // La firma: el anillo y «Make it a habit.» en serif itálica, en una línea.
+  // La firma: el logotipo de HABIT en grande y MAKE IT A HABIT debajo.
   function signatureLayout(measure) {
-    const text = 'Make it a habit.';
-    const size = 120, ringR = 44, gap = 34;
-    const textW = measure(text, serifFont(size));
-    const width = Math.ceil(PAD + ringR * 2 + gap + textW + PAD);
-    const height = Math.ceil(PAD + size * 1.2 + PAD * 0.6);
-    const cy = height / 2;
+    const wordPx = 112;
+    const lockup = lockupLayout(0, PAD, wordPx, measure);
+    const width = Math.ceil(lockup.width + PAD * 2);
+    const cx = width / 2;
+    const placed = lockupLayout(cx, PAD, wordPx, measure);
+    const subPx = 30, subSpacing = Math.round(subPx * 0.22);
+    const subText = 'MAKE IT A HABIT';
+    const subW = spacedWidth(subText, subSpacing, (c) => measure(c, subFont(subPx)));
+    const subY = placed.logo.y + placed.height + 44 + subPx;
     return {
-      kind: 'signature', width, height,
-      ring: { cx: PAD + ringR, cy, r: ringR, line: 20 },
-      text, font: serifFont(size), textX: PAD + ringR * 2 + gap, textY: cy + size * 0.32
+      kind: 'signature', width, height: Math.ceil(subY + PAD * 0.8),
+      lockup: placed,
+      sub: { text: subText, font: subFont(subPx), spacing: subSpacing, x: cx - subW / 2, y: subY }
     };
   }
 
   // ── Navegador ──────────────────────────────────────────────────────────
 
   let fontsReady = null;
-  // Instrument Serif solo se baja al abrir los stickers, no al abrir la app. Sin esperar a que
-  // cargue, el canvas dibuja con la fuente del sistema y no avisa.
+  // Inter ya la carga la app (Google Fonts, 300–800), pero puede no haber terminado: sin esperar,
+  // el canvas dibuja con la fuente del sistema y no avisa.
   function ensureFonts(doc) {
     if (fontsReady) return fontsReady;
     doc = doc || global.document;
-    // Primero la hoja de estilos: pedir la fuente antes de que la hoja la declare resuelve al
-    // instante sin bajar nada, y el sticker sale con Georgia.
-    let link = doc.querySelector('link[data-habit-share-fonts]');
-    const cssReady = new Promise((resolve) => {
-      if (link && link.sheet) return resolve();
-      if (!link) {
-        link = doc.createElement('link');
-        link.rel = 'stylesheet'; link.href = FONT_CSS; link.setAttribute('data-habit-share-fonts', '1');
-        doc.head.appendChild(link);
-      }
-      link.addEventListener('load', () => resolve(), { once: true });
-      link.addEventListener('error', () => resolve(), { once: true });
-    });
-    const wanted = [serifFont(92), brandFont(30)];
-    const load = cssReady.then(() => (doc.fonts && doc.fonts.load
-      ? Promise.all(wanted.map((f) => doc.fonts.load(f, 'Aa“”áé')))
-      : null));
+    const wanted = [quoteFont(76), wordFont(112), subFont(30)];
+    const load = doc.fonts && doc.fonts.load
+      ? Promise.all(wanted.map((f) => doc.fonts.load(f, 'HABIT“”áé')))
+      : Promise.resolve();
     const timeout = new Promise((r) => setTimeout(r, 3500));
     fontsReady = Promise.race([load, timeout]).catch(() => {}).then(() => true);
     return fontsReady;
+  }
+
+  // El logo es el PNG blanco del encabezado (mismo origen, así que no "ensucia" el canvas).
+  let logoReady = null;
+  function loadLogo() {
+    if (logoReady) return logoReady;
+    logoReady = new Promise((resolve, reject) => {
+      const img = new global.Image();
+      img.onload = () => resolve(img);
+      img.onerror = () => { logoReady = null; reject(new Error('No se pudo cargar el logo')); };
+      img.src = LOGO_SRC;
+    });
+    return logoReady;
   }
 
   function canvasMeasure(ctx) {
     return (text, font) => { ctx.font = font; return ctx.measureText(text).width; };
   }
 
-  function drawRing(ctx, ring, color) {
-    ctx.beginPath();
-    ctx.arc(ring.cx, ring.cy, ring.r - ring.line / 2, 0, Math.PI * 2);
-    ctx.strokeStyle = color; ctx.lineWidth = ring.line; ctx.stroke();
+  // El logo viene blanco; para el sticker negro se tiñe en un lienzo aparte (source-in pinta
+  // solo donde el logo tiene tinta, y conserva sus bordes suaves).
+  function drawLogo(ctx, img, box, color, doc) {
+    if (color === COLORS.blanco) { ctx.drawImage(img, box.x, box.y, box.size, box.size); return; }
+    const off = newCanvas(doc, box.size, box.size);
+    const o = off.getContext('2d');
+    o.drawImage(img, 0, 0, box.size, box.size);
+    o.globalCompositeOperation = 'source-in';
+    o.fillStyle = color; o.fillRect(0, 0, box.size, box.size);
+    ctx.drawImage(off, box.x, box.y);
+  }
+
+  function drawLockup(ctx, L, img, color, doc) {
+    drawLogo(ctx, img, L.logo, color, doc);
+    ctx.font = L.word.font; ctx.textAlign = 'left'; ctx.textBaseline = 'alphabetic';
+    drawSpaced(ctx, L.word.text, L.word.x, L.word.y, L.word.spacing);
   }
 
   function drawSpaced(ctx, text, x, y, spacing) {
@@ -159,8 +182,9 @@
     return c;
   }
 
-  // Cada render devuelve un canvas transparente del tamaño justo del sticker.
-  function renderQuote(doc, text, colorKey) {
+  // Cada render devuelve un canvas transparente del tamaño justo del sticker. `logo` es la
+  // imagen ya cargada (loadLogo): dibujar no espera nada.
+  function renderQuote(doc, text, colorKey, logo) {
     const color = COLORS[colorKey] || COLORS.blanco;
     const probe = newCanvas(doc, 1, 1).getContext('2d');
     const L = quoteLayout(text, canvasMeasure(probe));
@@ -169,22 +193,20 @@
     ctx.fillStyle = color; ctx.textBaseline = 'alphabetic';
     ctx.font = L.font; ctx.textAlign = 'center';
     L.lines.forEach((l) => ctx.fillText(l.text, l.x, l.y));
-    drawRing(ctx, L.sig.ring, color);
-    ctx.font = L.sig.font; ctx.textAlign = 'left';
-    drawSpaced(ctx, L.sig.text, L.sig.textX, L.sig.textY, L.sig.spacing);
+    drawLockup(ctx, L.lockup, logo, color, doc);
     return canvas;
   }
 
-  function renderSignature(doc, colorKey) {
+  function renderSignature(doc, colorKey, logo) {
     const color = COLORS[colorKey] || COLORS.blanco;
     const probe = newCanvas(doc, 1, 1).getContext('2d');
     const L = signatureLayout(canvasMeasure(probe));
     const canvas = newCanvas(doc, L.width, L.height);
     const ctx = canvas.getContext('2d');
     ctx.fillStyle = color;
-    drawRing(ctx, L.ring, color);
-    ctx.font = L.font; ctx.textAlign = 'left'; ctx.textBaseline = 'alphabetic';
-    ctx.fillText(L.text, L.textX, L.textY);
+    drawLockup(ctx, L.lockup, logo, color, doc);
+    ctx.font = L.sub.font; ctx.textAlign = 'left';
+    drawSpaced(ctx, L.sub.text, L.sub.x, L.sub.y, L.sub.spacing);
     return canvas;
   }
 
@@ -228,8 +250,8 @@
 
   const api = {
     COLORS, WIDTH,
-    wrapText, balancedWrap, spacedWidth, quoteLayout, signatureLayout,
-    ensureFonts, renderQuote, renderSignature, toBlob, copyOrShare, shareImage
+    wrapText, balancedWrap, spacedWidth, lockupLayout, quoteLayout, signatureLayout,
+    ensureFonts, loadLogo, renderQuote, renderSignature, toBlob, copyOrShare, shareImage
   };
   if (typeof module !== 'undefined' && module.exports) module.exports = api;
   global.HabitShare = api;

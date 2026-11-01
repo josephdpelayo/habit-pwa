@@ -883,3 +883,14 @@ nuevas.
     ficha de rutina, la hoja de entreno y la tarjeta de Hoy. La ficha de rutina usa el icono del
     ejercicio en lugar de 01, 02…, y dice «1 serie».
   - **La frase del día** en Inicio, más chica y sin tarjeta; el dashboard del admin no cambia.
+- **2026-10-31 (6)** — **HABIT y HABIT Crew, cada una en su archivo** (versión `20261031-7`).
+  Todo lo de hoy (moderación y Normas, registro de 3 campos, Inicio con el entreno de hoy, Desde
+  cero, barras y Perfil, arreglos rápidos, stickers) había cambiado también la app del gym, porque
+  las dos eran el mismo `app.html`. Joseph pidió que HABIT quedara como antes y sin cambios: ahora
+  `app.html` es el de `7618bef` (solo cambian los números de versión) y **Crew vive en
+  `crew.html`**, que se sirve en `/crew` por `cleanUrls` (se quitó la reescritura `/crew` → `/app`).
+  `sw.js` le da su propia copia offline. Esto deja atrás la D11 («un código»): una mejora a
+  Entrenar ya no llega sola a HABIT. **HABIT está congelada**; lo nuevo va a `crew.html`.
+  - Lo que sigue aplicando a las dos, porque vive en la base: el filtro de palabras de la 138. En
+    HABIT un texto bloqueado sale como el error crudo `COMMUNITY_TEXT_BLOCKED` (su app no lo
+    traduce).

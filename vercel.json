@@ -6,10 +6,6 @@
       "destination": "/app.html"
     },
     {
-      "source": "/crew",
-      "destination": "/app"
-    },
-    {
       "source": "/api/strava/callback",
       "destination": "/api/skandi?action=strava-callback"
     },

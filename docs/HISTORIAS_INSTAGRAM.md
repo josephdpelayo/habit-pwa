@@ -171,3 +171,10 @@ como foto (bucket `community-images`).
     negro. **Falta probar en el iPhone:** copiar → pegar en una historia de Instagram, y mantener
     → Guardar en Fotos. El navegador de prueba no da permiso de portapapeles y cayó al plan B
     (descargar).
+- **2026-10-31 — Ajustes de Joseph tras probarlo en su iPhone** (versión `20261031-7`).
+  - **El logo real**: los stickers dibujan `/icons/logo-original.png` (el del encabezado), teñido
+    de negro en el sticker negro; ya no un anillo dibujado.
+  - **La fuente de HABIT**: Inter, como el logotipo (HABIT en 800 espaciado), en lugar de
+    Instrument Serif. La frase va en Inter 600; la firma es el logotipo de HABIT con MAKE IT A
+    HABIT debajo. La tabla de fuentes de §3 queda para las fases siguientes, a revisar con él.
+  - **Solo en HABIT Crew** (`crew.html`): la app del gym no tiene stickers.

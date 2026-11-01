@@ -4,7 +4,7 @@ const assert = require('node:assert/strict');
 const fs = require('node:fs');
 const path = require('node:path');
 
-const app = fs.readFileSync(path.join(__dirname, '../app.html'), 'utf8');
+const app = fs.readFileSync(path.join(__dirname, '../crew.html'), 'utf8');
 function between(start, end) {
   const first = app.indexOf(start);
   const last = app.indexOf(end, first);

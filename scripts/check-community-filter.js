@@ -1,11 +1,11 @@
-// El filtro de palabras de la comunidad vive dos veces: en app.html para avisar al instante y en
+// El filtro de palabras de la comunidad vive dos veces: en crew.html para avisar al instante y en
 // el trigger de la migración 138 para decidir. Esto falla si las dos listas se separan, y prueba
 // la normalización de la app con los mismos casos con que se probó la 138 en Postgres.
 const assert = require('node:assert/strict');
 const fs = require('node:fs');
 const path = require('node:path');
 
-const app = fs.readFileSync(path.join(__dirname, '../app.html'), 'utf8');
+const app = fs.readFileSync(path.join(__dirname, '../crew.html'), 'utf8');
 const sql = fs.readFileSync(path.join(__dirname, '../migrations/138_community_word_filter.sql'), 'utf8');
 function between(src, start, end) {
   const first = src.indexOf(start);
@@ -20,7 +20,7 @@ const h = new Function(`
 
 const sqlArray = between(sql, 'select array[', ']\n$$');
 const sqlTerms = [...sqlArray.replace(/--.*$/gm, '').matchAll(/'([^']*)'/g)].map(m => m[1]);
-assert.deepEqual([...h.COMMUNITY_BLOCKED_TERMS].sort(), [...sqlTerms].sort(), 'misma lista en app.html y en la 138');
+assert.deepEqual([...h.COMMUNITY_BLOCKED_TERMS].sort(), [...sqlTerms].sort(), 'misma lista en crew.html y en la 138');
 for (const w of h.COMMUNITY_BLOCKED_TERMS)
   assert.equal(h.communityTextNormalize(w), w, `«${w}» está escrito ya normalizado (juntado)`);
 

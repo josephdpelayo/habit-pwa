@@ -1,7 +1,7 @@
 // Exercise production routine search, detail rendering and selection using local fixtures.
 const assert=require('node:assert/strict');
 const fs=require('node:fs');
-const app=fs.readFileSync(require('node:path').join(__dirname,'../app.html'),'utf8');
+const app=fs.readFileSync(require('node:path').join(__dirname,'../crew.html'),'utf8');
 function source(a,b){const start=app.indexOf(a),end=app.indexOf(b,start);assert.ok(start>=0&&end>start);return app.slice(start,end);}
 const catalog=Array.from({length:30},(_,i)=>({id:'ex'+i,slug:'ex'+i,name:'Ejercicio '+i,primary_muscle:'Espalda',aliases:[],equipment:[]}));
 catalog.push({id:'press',slug:'press',name:'Press inclinado',primary_muscle:'Pecho',aliases:['Incline press'],equipment:['Mancuernas'],video_url:'https://example.com/demo.mp4'});

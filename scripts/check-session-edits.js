@@ -3,7 +3,7 @@
 // funciones de app.html tal cual, con Supabase y el DOM simulados.
 const assert=require('node:assert/strict');
 const fs=require('node:fs');
-const app=fs.readFileSync(require('node:path').join(__dirname,'../app.html'),'utf8');
+const app=fs.readFileSync(require('node:path').join(__dirname,'../crew.html'),'utf8');
 function source(a,b){const start=app.indexOf(a),end=app.indexOf(b,start);assert.ok(start>=0&&end>start,'no encontré '+a);return app.slice(start,end);}
 
 const catalog=[

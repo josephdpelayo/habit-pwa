@@ -2,7 +2,7 @@ const assert = require('node:assert/strict');
 const fs = require('node:fs');
 const training = require('../habit-training');
 
-const app = fs.readFileSync('app.html', 'utf8');
+const app = fs.readFileSync('crew.html', 'utf8');
 const migration = fs.readFileSync('migrations/117_training_reliability_and_admin.sql', 'utf8');
 
 assert.equal(training.metricType({repsType: 'time'}), 'time');

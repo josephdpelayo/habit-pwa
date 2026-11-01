@@ -6,12 +6,12 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="HABIT">
 <meta name="application-name" content="HABIT">
-<link rel="manifest" href="/manifest.json?v=20261031-6">
-<link rel="apple-touch-icon" sizes="120x120" href="/icons/icon-120.png?v=20261031-6">
-<link rel="apple-touch-icon" sizes="152x152" href="/icons/icon-152.png?v=20261031-6">
-<link rel="apple-touch-icon" sizes="167x167" href="/icons/icon-167.png?v=20261031-6">
-<link rel="apple-touch-icon" sizes="180x180" href="/icons/icon-180.png?v=20261031-6">
-<link rel="icon" type="image/png" sizes="32x32" href="/icons/icon-32.png?v=20261031-6">
+<link rel="manifest" href="/manifest.json?v=20261031-7">
+<link rel="apple-touch-icon" sizes="120x120" href="/icons/icon-120.png?v=20261031-7">
+<link rel="apple-touch-icon" sizes="152x152" href="/icons/icon-152.png?v=20261031-7">
+<link rel="apple-touch-icon" sizes="167x167" href="/icons/icon-167.png?v=20261031-7">
+<link rel="apple-touch-icon" sizes="180x180" href="/icons/icon-180.png?v=20261031-7">
+<link rel="icon" type="image/png" sizes="32x32" href="/icons/icon-32.png?v=20261031-7">
 <title>HABIT</title>
 <!-- Con id a propósito: scripts/check-training.js toma la primera etiqueta script sin
      atributos como el script principal de la app y la compila. -->
@@ -25,7 +25,7 @@
   var crew=/^\/crew(\/|$)/.test(location.pathname);
   window.HABIT_BRAND=crew?'crew':'gym';
   if(!crew)return;
-  var v='20261031-6';
+  var v='20261031-7';
   document.documentElement.classList.add('brand-crew');
   document.title='HABIT Crew';
   document.querySelectorAll('meta[name="apple-mobile-web-app-title"],meta[name="application-name"]')
@@ -40,10 +40,9 @@
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Share+Tech+Mono&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="/skandi-recovery.js?v=20261031-6"></script>
-<script src="/body-figure.js?v=20261031-6"></script>
-<script src="/habit-training.js?v=20261031-6"></script>
-<script src="/habit-share.js?v=20261031-6"></script>
+<script src="/skandi-recovery.js?v=20261031-7"></script>
+<script src="/body-figure.js?v=20261031-7"></script>
+<script src="/habit-training.js?v=20261031-7"></script>
 <style>
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
 @media (prefers-reduced-motion:reduce){*,*:before,*:after{scroll-behavior:auto!important;animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}}
@@ -220,30 +219,6 @@ input,select,button,textarea{font-family:'Inter',sans-serif}
 .daily-quote-footer{position:relative;z-index:1;width:100%;max-width:280px;margin-top:16px;padding-top:12px;border-top:1px solid rgba(255,255,255,.08);display:flex;align-items:center;justify-content:center;gap:10px;color:var(--green);font-size:11px;font-weight:800;letter-spacing:.1em;text-transform:uppercase}
 .daily-quote-date{color:var(--gray);letter-spacing:.08em;white-space:nowrap}
 .daily-quote-sep{color:var(--gray);opacity:.5}
-/* En Inicio la frase acompaña, no manda: ocupaba casi media pantalla. El dashboard del admin
-   la sigue mostrando grande. */
-#v-inicio .daily-quote-card{padding:14px 18px 12px;margin:4px 0 14px;border:0;background:none;box-shadow:none}
-#v-inicio .daily-quote-card::before,#v-inicio .daily-quote-card::after{display:none}
-#v-inicio .daily-quote-text{font-size:16px;font-weight:500;line-height:1.35;color:var(--gl);text-shadow:none}
-.daily-quote-card[role=button]{cursor:pointer}
-.daily-quote-share{color:var(--gl);text-decoration:underline;text-underline-offset:3px}
-.sticker-box .terms-hdr{gap:12px}
-.sticker-colors{display:flex;gap:10px;align-items:center}
-.sticker-color{width:22px;height:22px;border-radius:50%;border:1px solid rgba(255,255,255,.25);cursor:pointer;padding:0}
-.sticker-color[data-color=blanco]{background:#fff}
-.sticker-color[data-color=negro]{background:#0b0b0b}
-.sticker-color.is-on{outline:2px solid #fff;outline-offset:3px}
-.sticker-hint{text-align:center;font-size:12px;letter-spacing:.06em;color:var(--gray);margin:2px 0 14px!important}
-.sticker-hint b{color:var(--white);font-weight:600}
-.sticker-grid{display:grid;grid-template-columns:1fr;gap:12px}
-.sticker-tile{border:0;border-radius:16px;background:#1b1c20;min-height:150px;display:flex;align-items:center;justify-content:center;padding:22px;cursor:pointer;position:relative;transition:transform .12s}
-.sticker-tile:active{transform:scale(.98)}
-.sticker-tile.on-light{background:#d9dbe0}
-.sticker-tile img{max-width:100%;max-height:300px;display:block;-webkit-touch-callout:default}
-.sticker-tile.copied::after{content:'Copiado';position:absolute;top:10px;right:12px;font-size:11px;font-weight:600;color:#0b0b0b;background:#fff;border-radius:999px;padding:3px 9px}
-.sticker-tile.on-light.copied::after{color:#fff;background:#0b0b0b}
-.sticker-howto{text-align:center;font-size:12px;color:var(--gray);margin:14px 0 4px!important}
-#v-inicio .daily-quote-footer{margin-top:8px;padding-top:0;border-top:0;font-size:10px}
 .inicio-coach-action{margin:0 0 9px}
 .inicio-coach-btn{width:100%;min-height:44px;border:1px solid rgba(147,197,253,.22);border-radius:14px;background:linear-gradient(135deg,rgba(37,99,235,.16),rgba(16,185,129,.055));color:var(--white);display:grid;grid-template-columns:auto minmax(0,1fr) auto;align-items:center;gap:9px;padding:9px 11px;text-align:left;cursor:pointer;box-shadow:0 10px 24px rgba(0,0,0,.2)}
 .inicio-coach-icon{width:28px;height:28px;border-radius:10px;background:rgba(147,197,253,.11);display:flex;align-items:center;justify-content:center;color:#bfdbfe;flex-shrink:0}
@@ -292,7 +267,6 @@ input,select,button,textarea{font-family:'Inter',sans-serif}
 .guest-save:disabled{opacity:.45;cursor:not-allowed}
 .guest-collapse{margin-top:10px;width:100%;padding:11px;border-radius:6px;border:1px solid var(--border);background:transparent;color:var(--gray);font-size:11px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;cursor:pointer}
 .bnb.locked{opacity:.38}
-.bnb.nav-hidden{display:none!important}
 .locked-panel{background:var(--card);border:1px solid rgba(245,158,11,.45);border-radius:6px;padding:22px 18px;text-align:center;color:var(--gray);line-height:1.5}
 .locked-panel h3{font-size:16px;color:var(--white);letter-spacing:.08em;text-transform:uppercase;margin-bottom:8px}
 .next-box{background:var(--card);border:1px solid var(--border);border-radius:4px;padding:12px 14px;margin-bottom:1rem}
@@ -1070,8 +1044,6 @@ input,select,button,textarea{font-family:'Inter',sans-serif}
 .reaction-btn{display:flex;align-items:center;gap:4px;padding:9px 13px;border:1px solid var(--border);border-radius:99px;font-size:12px;cursor:pointer;background:transparent;color:var(--gray)}
 .reaction-btn.active{border-color:var(--blue);background:rgba(37,99,235,.12);color:var(--bl)}
 .post-comments{border-top:1px solid var(--border);padding:10px 14px;background:rgba(255,255,255,.015)}
-.post-comments.collapsed{display:none}
-.post-cmt-btn{margin-left:auto;background:none;border:0;color:var(--gray);font-size:13px;font-weight:600;padding:6px 4px;cursor:pointer}
 .comment-row{display:flex;gap:8px;margin-bottom:8px}
 .comment-av{width:24px;height:24px;border-radius:50%;background:var(--bdim);border:1px solid var(--blue);display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;color:var(--bl);flex-shrink:0;overflow:hidden}
 .comment-body{flex:1;min-width:0}
@@ -1100,7 +1072,6 @@ input,select,button,textarea{font-family:'Inter',sans-serif}
 .mod-reason strong{color:var(--white);font-weight:700}
 /* Retos (migración 129) */
 .admin-segmented.comm-tabs{grid-template-columns:repeat(2,minmax(0,1fr))}
-.comm-rules-link{display:block;margin:18px auto 8px;background:none;border:0;color:var(--gray);font-size:12px;text-decoration:underline;text-underline-offset:3px;cursor:pointer}
 .retos-bar{display:flex;align-items:center;gap:8px;margin-bottom:12px}
 .retos-chips{display:flex;gap:6px;overflow-x:auto;flex:1;min-width:0;-webkit-overflow-scrolling:touch}
 .retos-bar .btn-sm{min-height:38px;flex-shrink:0}
@@ -2591,12 +2562,9 @@ body.admin-mode #courtesy-modal label{border-radius:14px!important;border-color:
 /* HABIT Crew: el mismo app.html con otra marca (clase brand-crew en <html>, puesta en el <head>). */
 .crew-only{display:none!important}
 .brand-crew .crew-only{display:block!important}
-.brand-crew span.crew-only{display:inline!important}
 .brand-crew .gym-only{display:none!important}
 .brand-crew .top-action[data-top-view="planes"],.brand-crew .top-action[data-top-view="historial"]{display:none}
 .brand-crew .bnav .bnb.gym-nav{display:none}
-.reg-terms{font-size:12px;line-height:1.5;color:var(--gray);margin:10px 0 0;text-align:center}
-.reg-terms a{color:var(--gl);text-decoration:underline;text-underline-offset:2px}
 .reg-other-app{font-size:12px;line-height:1.5;color:var(--gray);margin:12px 0 0;text-align:center}
 .reg-other-app a{color:var(--white);font-weight:700}
 .app-gym-invite{display:flex;align-items:center;gap:12px;padding:14px;margin-bottom:16px;border:1px solid var(--hairline);border-radius:var(--radius-md);background:var(--surface)}
@@ -2617,14 +2585,6 @@ body.admin-mode #courtesy-modal label{border-radius:14px!important;border-color:
 .onb-opt.active{border-color:var(--blue);background:rgba(37,99,235,.16)}
 .onb-footer{display:flex;gap:8px}
 .onb-footer .btn,.onb-footer .btn-ghost{flex:1;margin:0}
-.perfil-name{text-align:center;font-size:18px;font-weight:700;color:var(--white);margin-top:10px}
-.perfil-email{text-align:center;font-size:13px;color:var(--gray);margin-top:2px}
-.perfil-edit>summary{list-style:none;cursor:pointer}
-.perfil-edit>summary::-webkit-details-marker{display:none}
-.perfil-edit[open]>summary{margin-bottom:12px}
-.perfil-edit-body{padding-top:4px}
-.top-avatar{border-radius:50%!important;width:38px;height:38px;padding:0;overflow:hidden;font-size:13px;font-weight:700;letter-spacing:.02em;color:var(--white)}
-.top-avatar img{width:100%;height:100%;object-fit:cover;display:block}
 .perfil-row-btn{display:flex;align-items:center;justify-content:space-between;gap:10px;text-align:left}
 .perfil-row-sum{font-size:12px;color:var(--gray);font-weight:500;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:55%}
 .perfil-delete-btn{color:var(--red);border-color:rgba(255,100,100,.28)}
@@ -2663,11 +2623,6 @@ body.admin-mode #courtesy-modal label{border-radius:14px!important;border-color:
 .hoy-meta{font-size:13.5px;color:var(--gray);line-height:1.45}
 .hoy-sync{margin-top:8px}
 .hoy-hero .hoy-cta{width:100%;margin-top:16px;min-height:52px;font-size:16px}
-.hoy-start-row{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px}
-.hoy-start-row button{min-height:46px;font-size:15px;display:flex;align-items:center;justify-content:center;gap:6px;margin:0}
-.hoy-start-row.main{margin-top:16px}
-.hoy-start-row.main button{min-height:52px}
-.hoy-start-plus{font-size:18px;font-weight:700;line-height:1}
 .hoy-alt{display:block;width:100%;margin-top:4px;padding:12px;background:none;border:none;color:var(--gl);font-size:14px;font-weight:600;cursor:pointer}
 .hoy-also{display:flex;align-items:center;gap:10px;border:1px solid var(--border);border-radius:14px;background:var(--card);padding:10px 12px;margin-bottom:12px}
 .hoy-also-name{flex:1;min-width:0;font-weight:700;font-size:14px}
@@ -2747,8 +2702,6 @@ body.admin-mode #courtesy-modal label{border-radius:14px!important;border-color:
 .routine-detail-stats small{display:block;color:var(--gray);font-size:11px;margin-top:4px}
 .routine-detail-exercises{list-style:none;margin:0;padding:0}
 .routine-detail-exercises li{display:flex;gap:14px;padding:17px 0;border-bottom:1px solid var(--border);align-items:flex-start}
-.routine-detail-ico{width:34px;height:34px;border-radius:11px;background:var(--card2);color:var(--gl);display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:-2px}
-.routine-detail-ico .ex-ico-svg{width:20px;height:20px}
 .routine-detail-number{color:var(--gray);font-size:11px;font-variant-numeric:tabular-nums;padding-top:3px;width:20px;flex-shrink:0}
 .routine-detail-exercises strong{font-size:14px;font-weight:600;line-height:1.45;display:block}
 .routine-detail-exercises small{font-size:12px;line-height:1.5;color:var(--gray);display:block;margin-top:4px}
@@ -2970,6 +2923,8 @@ button{transition:transform .14s var(--ease-out),background-color .16s ease,colo
     <div id="ar" style="display:none">
       <div class="field"><label>Nombre completo</label><input type="text" id="rn" placeholder="Tu nombre" autocomplete="name"></div>
       <div class="field"><label>Correo</label><input type="email" id="re" placeholder="tu@correo.com" autocomplete="email"></div>
+      <div class="field"><label>Confirmar correo</label><input type="email" id="re2" placeholder="Repite tu correo"></div>
+      <div class="field"><label>Teléfono</label><input type="tel" id="rph" placeholder="+52 55 0000 0000" autocomplete="tel"></div>
       <div class="field">
         <label>Contraseña</label>
         <div style="position:relative">
@@ -2977,10 +2932,14 @@ button{transition:transform .14s var(--ease-out),background-color .16s ease,colo
           <button type="button" onclick="togglePw('rp','eye1')" style="position:absolute;right:0;top:0;height:100%;width:44px;background:none;border:none;cursor:pointer;color:var(--gray);font-size:16px" id="eye1">👁</button>
         </div>
       </div>
+      <div class="field">
+        <label>Confirmar contraseña</label>
+        <div style="position:relative">
+          <input type="password" id="rp2" placeholder="Repite tu contraseña" autocomplete="new-password" style="padding-right:44px">
+          <button type="button" onclick="togglePw('rp2','eye2')" style="position:absolute;right:0;top:0;height:100%;width:44px;background:none;border:none;cursor:pointer;color:var(--gray);font-size:16px" id="eye2">👁</button>
+        </div>
+      </div>
       <button class="btn" onclick="doRegister()">Crear cuenta</button>
-      <!-- Tres campos y ya: el teléfono se agrega en Perfil, y el ojo de la contraseña reemplaza
-           a "confirmar". Aceptar es crear la cuenta; los términos se leen desde aquí. -->
-      <p class="reg-terms">Al crear tu cuenta aceptas los <a href="#" onclick="readTerms(IS_CREW?'app':'gym');return false"><span class="gym-only">Términos y el Reglamento</span><span class="crew-only">Términos de uso</span></a> y las <a href="#" onclick="openCommunityRules();return false">Normas de la comunidad</a>.</p>
       <div class="install-hint">Al terminar tu registro te mostraremos como guardar <span class="brand-name">HABIT</span> en tu inicio y abrirla como app.</div>
       <!-- Cada app manda a la otra a quien llegó a la equivocada. La cuenta es la misma. -->
       <p class="reg-other-app gym-only">¿Entrenas por tu cuenta, fuera del gym? <a href="/crew">Usa HABIT Crew</a>: gratis, sin membresía, con la misma cuenta.</p>
@@ -3010,26 +2969,26 @@ button{transition:transform .14s var(--ease-out),background-color .16s ease,colo
   <div class="hdr" id="main-hdr-bar">
     <div class="logo-wrap" onclick="sv('inicio')" style="cursor:pointer"><img src="/icons/logo-original.png" style="width:30px;height:30px;object-fit:contain"><div><span class="ltxt">HABIT</span><span class="lsub gym-only">TRAINING HUB</span><span class="lsub crew-only">CREW</span><span id="main-member-pill" class="main-member-pill"></span></div></div>
     <div class="top-actions">
-      <!-- Un solo botón: tu foto o tus iniciales llevan a Perfil, y desde ahí a la membresía y el
-           historial. Eran tres iconos sin texto (tarjeta, reloj, engrane) que nadie sabía leer. -->
-      <button class="top-action top-avatar" id="top-avatar" data-top-view="perfil" onclick="sv('perfil')" aria-label="Tu perfil"></button>
+      <button class="top-action" data-top-view="planes" onclick="sv('planes')" title="Membresía"><svg viewBox="0 0 24 24"><rect x="2" y="5" width="20" height="14" rx="2"/><path d="M2 10h20M6 15h4M14 15h4"/></svg></button>
+      <button class="top-action" data-top-view="historial" onclick="sv('historial')" title="Historial"><svg viewBox="0 0 24 24"><path d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg></button>
+      <button class="top-action" data-top-view="perfil" onclick="sv('perfil')" title="Configurar perfil"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-2 2 2 2 0 01-2-2v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 01-2-2 2 2 0 012-2h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 012-2 2 2 0 012 2v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 012 2 2 2 0 01-2 2h-.09a1.65 1.65 0 00-1.51 1z"/></svg></button>
     </div>
-    <!-- «Salir» vivía aquí, a un toque de cerrar la sesión sin querer: ahora está en Perfil. -->
+    <button class="logout-btn" onclick="doLogout()">Salir</button>
   </div>
 
   <!-- INICIO -->
   <div id="v-inicio" class="view active">
     <div class="scroll-area">
-      <div id="access-main"></div>
-      <div id="inicio-coach-action" class="inicio-hoy"></div>
+      <div id="inicio-coach-action"></div>
       <div id="inicio-push-card"></div>
+      <div id="access-main"></div>
+      <div class="daily-quote-wrap"></div>
       <div id="inicio-fasting-mini"></div>
       <div id="guest-group-wrap"></div>
       <div id="active-bookings-wrap"></div>
       <div id="membership-status-wrap"></div>
       <div id="inicio-retos"></div>
       <div id="notif-wrap"></div>
-      <div class="daily-quote-wrap"></div>
     </div>
   </div>
 
@@ -3039,52 +2998,38 @@ button{transition:transform .14s var(--ease-out),background-color .16s ease,colo
       <div class="perfil-section">
         <div class="perfil-avatar" id="perfil-av"></div>
         <div id="perfil-info"></div>
-        <!-- Lo que se usa va arriba; los datos y la contraseña, plegados abajo (casi nadie los toca). -->
-        <div class="gym-only">
-          <div class="divider" style="margin:.75rem 0"></div>
-          <p class="slbl">Gym</p>
-          <button class="btn-ghost perfil-row-btn" onclick="sv('planes')"><span>Membresía y visitas</span><span id="perfil-plan-sum" class="perfil-row-sum"></span></button>
-          <button class="btn-ghost perfil-row-btn" onclick="sv('historial')" style="margin-top:8px"><span>Historial</span><span class="perfil-row-sum">Reservas y pagos</span></button>
+        <button class="btn-ghost gym-only" onclick="sv('inicio')" style="width:100%;margin-top:8px">Ver mi membresía y visitas →</button>
+        <div class="divider" style="margin:.75rem 0"></div>
+        <p class="slbl">Editar datos</p>
+        <div class="avatar-picker">
+          <button class="btn-sm bblue" onclick="document.getElementById('pf-avatar').click()">Subir foto de perfil</button>
+          <button class="btn-sm bred" id="pf-avatar-clear" onclick="clearProfilePhoto()" style="display:none">Quitar</button>
+          <input type="file" id="pf-avatar" accept="image/*" onchange="previewProfilePhoto(this)">
         </div>
+        <div class="field"><label>Nombre</label><input type="text" id="pf-name" placeholder="Tu nombre"></div>
+        <div class="field"><label>Teléfono</label><input type="tel" id="pf-phone" placeholder="+52 55 0000 0000"></div>
+        <div class="divider" style="margin:.75rem 0"></div>
+        <p class="slbl">Cambiar contraseña</p>
+        <div class="field"><label>Contraseña actual</label><input type="password" id="pf-oldpass" placeholder="••••••••"></div>
+        <div class="field"><label>Nueva contraseña</label><input type="password" id="pf-newpass" placeholder="Mínimo 6 caracteres"></div>
+        <div class="field"><label>Confirmar nueva contraseña</label><input type="password" id="pf-newpass2" placeholder="Repite la contraseña"></div>
+        <button class="btn" onclick="savePerfil()">Guardar cambios</button>
+        <button class="btn-ghost" onclick="sv('inicio')" style="margin-top:8px">Volver</button>
         <div class="divider" style="margin:.75rem 0"></div>
         <p class="slbl">Mi entrenamiento</p>
         <button class="btn-ghost perfil-row-btn" onclick="openTrainingOnboarding()"><span>Objetivo, nivel y equipo</span><span id="perfil-training-sum" class="perfil-row-sum"></span></button>
         <div class="divider" style="margin:.75rem 0"></div>
         <p class="slbl">Avisos</p>
         <div id="perfil-push"></div>
-        <div class="divider" style="margin:.75rem 0"></div>
-        <p class="slbl">Comunidad</p>
-        <button class="btn-ghost perfil-row-btn" onclick="openCommunityRules()"><span>Normas de la comunidad</span><span class="perfil-row-sum">Reportar</span></button>
-        <button class="btn-ghost perfil-row-btn" onclick="openSupportWhatsapp()" style="margin-top:8px"><span>Asistencia</span><span class="perfil-row-sum">WhatsApp</span></button>
         <div id="perfil-blocks-section">
           <div class="divider" style="margin:.75rem 0"></div>
           <p class="slbl">Usuarios bloqueados</p>
           <div id="perfil-blocks"></div>
         </div>
-        <div class="divider" style="margin:.75rem 0"></div>
-        <details class="perfil-edit" id="perfil-edit">
-          <summary class="btn-ghost perfil-row-btn"><span>Editar mis datos</span><span class="perfil-row-sum">Foto, nombre, teléfono, contraseña</span></summary>
-          <div class="perfil-edit-body">
-          <div class="avatar-picker">
-            <button class="btn-sm bblue" onclick="document.getElementById('pf-avatar').click()">Subir foto de perfil</button>
-            <button class="btn-sm bred" id="pf-avatar-clear" onclick="clearProfilePhoto()" style="display:none">Quitar</button>
-            <input type="file" id="pf-avatar" accept="image/*" onchange="previewProfilePhoto(this)">
-          </div>
-          <div class="field"><label>Nombre</label><input type="text" id="pf-name" placeholder="Tu nombre"></div>
-          <div class="field"><label>Teléfono</label><input type="tel" id="pf-phone" placeholder="+52 55 0000 0000"></div>
-          <div class="divider" style="margin:.75rem 0"></div>
-          <p class="slbl">Cambiar contraseña</p>
-          <div class="field"><label>Contraseña actual</label><input type="password" id="pf-oldpass" placeholder="••••••••"></div>
-          <div class="field"><label>Nueva contraseña</label><input type="password" id="pf-newpass" placeholder="Mínimo 6 caracteres"></div>
-          <div class="field"><label>Confirmar nueva contraseña</label><input type="password" id="pf-newpass2" placeholder="Repite la contraseña"></div>
-          <button class="btn" onclick="savePerfil()">Guardar cambios</button>
-          </div>
-        </details>
         <div id="perfil-account-section">
           <div class="divider" style="margin:.75rem 0"></div>
           <p class="slbl">Cuenta</p>
-          <button class="btn-ghost" onclick="confirmLogout()">Cerrar sesión</button>
-          <button class="btn-ghost perfil-delete-btn" onclick="deleteMyAccount()" style="margin-top:8px">Borrar mi cuenta</button>
+          <button class="btn-ghost perfil-delete-btn" onclick="deleteMyAccount()">Borrar mi cuenta</button>
           <p class="perfil-delete-hint">Borra tu cuenta, tus rutinas, tu historial de entrenamiento y tu progreso. No se puede deshacer.</p>
         </div>
       </div>
@@ -3227,7 +3172,6 @@ button{transition:transform .14s var(--ease-out),background-color .16s ease,colo
         </div>
       </div>
       <div id="feed-content"></div>
-      <button class="comm-rules-link" onclick="openCommunityRules()">Normas de la comunidad · reportar</button>
       </div>
     </div>
   </div>
@@ -3704,9 +3648,6 @@ button{transition:transform .14s var(--ease-out),background-color .16s ease,colo
       <p>Entrenas <strong>bajo tu propia responsabilidad</strong>, en el lugar y con el equipo que tú eliges. HABIT Training Hub, sus propietarios y coaches no se hacen responsables de lesiones o daños derivados de entrenar por tu cuenta, con o sin las rutinas y programas de la app.</p>
       <h3>Tus datos</h3>
       <p>Usamos tu nombre, correo y teléfono para tu cuenta, y lo que registras (pesos, repeticiones, tiempos, notas, tu objetivo y tu equipo) para que la app funcione y te muestre tu progreso. No vendemos tus datos ni los compartimos con terceros sin tu consentimiento. Puedes borrar tu cuenta y tus datos desde Perfil en cualquier momento.</p>
-      <h3>Comunidad</h3>
-      <p>Lo que publicas en la Comunidad y en los Retos lo ven las demás cuentas. <strong>No se tolera el contenido ofensivo ni los usuarios abusivos</strong>: insultos, acoso, odio, amenazas, contenido sexual o spam. El texto con palabras ofensivas no se publica, y lo que se reporte se revisa en menos de 24 horas: lo que rompa las <strong>Normas de la comunidad</strong> se borra, y quien insista pierde su cuenta.</p>
-      <p>Puedes reportar o bloquear a cualquiera desde el ⋯ de lo que publica, y escribirnos por WhatsApp al <strong>+52 662 356 2816</strong>.</p>
       <h3>Si después entrenas en el gym</h3>
       <p>Para reservar en HABIT Mazatlán necesitas una membresía. Al comprarla aceptarás el reglamento de las instalaciones.</p>
       <p style="font-size:11px;color:#555;margin-top:1.5rem">Última actualización: Octubre 2026 · HABIT Training Hub · Mazatlán, Sinaloa, México</p>
@@ -3722,8 +3663,6 @@ button{transition:transform .14s var(--ease-out),background-color .16s ease,colo
       <h3>Código de conducta</h3>
       <p>Queda estrictamente <strong>prohibido</strong> el acceso bajo influencia de alcohol o sustancias psicoactivas. El incumplimiento resulta en cancelación inmediata de membresía sin reembolso.</p>
       <p>El <strong>código de acceso es personal e intransferible</strong>. Compartir tu código con terceros constituye una infracción grave que resultará en la cancelación inmediata de la membresía sin reembolso y una <strong>multa de $300 MXN</strong> por cada incidencia detectada.</p>
-      <h3>Comunidad de la app</h3>
-      <p>Lo que publicas en la Comunidad y en los Retos lo ven las demás cuentas. <strong>No se tolera el contenido ofensivo ni los usuarios abusivos</strong>: insultos, acoso, odio, amenazas, contenido sexual o spam. Lo que rompa las <strong>Normas de la comunidad</strong> se borra, y quien insista pierde su cuenta. Puedes reportar o bloquear a cualquiera desde el ⋯ de lo que publica, y escribirnos por WhatsApp al <strong>+52 662 356 2816</strong>.</p>
       <h3>Acceso y horarios</h3>
       <p>El acceso a las instalaciones <strong>solo está permitido durante el horario de tu reserva activa</strong>. Permanecer en las instalaciones fuera de tu tiempo reservado constituye una infracción al reglamento y podrá resultar en suspensión de membresía.</p>
       <p>Las reservas son personales. Se permite máximo una reserva por día por socio.</p>
@@ -3731,63 +3670,14 @@ button{transition:transform .14s var(--ease-out),background-color .16s ease,colo
       <p>Las cancelaciones de reserva deben realizarse con <strong>más de 12 horas de anticipación</strong> para recuperar la visita. Cancelaciones fuera de este plazo no generan reembolso de visita. Las membresías adquiridas no son reembolsables una vez activadas.</p>
       <h3>Privacidad</h3>
       <p>Tus datos personales (nombre, correo, teléfono) serán utilizados únicamente para la gestión de tu membresía y comunicación relacionada con HABIT Training Hub. No serán compartidos con terceros sin tu consentimiento.</p>
-      <p style="font-size:11px;color:#555;margin-top:1.5rem">Última actualización: Octubre 2026 · HABIT Training Hub · Mazatlán, Sinaloa, México</p>
+      <p style="font-size:11px;color:#555;margin-top:1.5rem">Última actualización: Mayo 2025 · HABIT Training Hub · Mazatlán, Sinaloa, México</p>
     </div>
     <div class="terms-footer">
       <label class="terms-check">
         <input type="checkbox" id="terms-check" onchange="updateTermsButton()">
-        <span id="terms-check-label">He leído y acepto el Reglamento y Términos de HABIT Training Hub, incluyendo la exención de responsabilidad por accidentes, mi responsabilidad ante daños al equipo y las Normas de la comunidad.</span>
+        <span id="terms-check-label">He leído y acepto el Reglamento y Términos de HABIT Training Hub, incluyendo la exención de responsabilidad por accidentes y mi responsabilidad ante daños al equipo.</span>
       </label>
       <button class="btn" id="terms-accept-btn" onclick="acceptTerms()" disabled style="opacity:.35">Aceptar y continuar</button>
-    </div>
-  </div>
-</div>
-
-<!-- NORMAS DE LA COMUNIDAD (guideline 1.2 de Apple): qué no se tolera y a quién quejarse -->
-<div id="community-rules-modal" class="terms-modal" style="display:none">
-  <div class="terms-box">
-    <div class="terms-hdr">
-      <h2>Normas de la comunidad</h2>
-      <button onclick="closeCommunityRules(false)" aria-label="Cerrar" style="background:none;border:none;color:var(--gray);font-size:22px;cursor:pointer;line-height:1">×</button>
-    </div>
-    <div class="terms-body">
-      <p>La comunidad es para entrenar juntos: compartir lo que hiciste, animar a otros y competir en los retos. Para que siga así, <strong>no se tolera el contenido ofensivo ni los usuarios abusivos</strong>.</p>
-      <h3>Qué no se publica</h3>
-      <p><strong>Insultos y acoso</strong>, incluidas las burlas por el cuerpo, el nivel o la edad de alguien.</p>
-      <p><strong>Odio</strong>: nada contra nadie por su origen, color de piel, género, orientación, religión o discapacidad.</p>
-      <p><strong>Amenazas</strong>, violencia, o animar a alguien a hacerse daño.</p>
-      <p><strong>Desnudos o contenido sexual</strong>, y fotos de otras personas sin su permiso.</p>
-      <p><strong>Spam</strong>: ventas, publicidad o enlaces que no tienen que ver con entrenar.</p>
-      <h3>Qué hacemos</h3>
-      <p>El texto con palabras ofensivas no se publica. Lo que se reporte lo revisa el equipo de HABIT en <strong>menos de 24 horas</strong>: lo que rompa estas normas se borra, y quien insista pierde su cuenta, sin aviso previo.</p>
-      <h3>Qué puedes hacer tú</h3>
-      <p>Toca el <strong>⋯</strong> de cualquier publicación, comentario, reto o marca para <strong>reportarlo</strong> o <strong>bloquear</strong> a quien lo publicó. Quien bloqueas deja de ver lo tuyo y tú lo suyo, y no se le avisa. Los quitas en Perfil.</p>
-      <p>¿Algo más, o algo urgente? Escríbenos por WhatsApp al <strong>+52 662 356 2816</strong>.</p>
-      <button class="btn-ghost" onclick="openCommunityReportWhatsapp()" style="margin-top:4px">Escribir por WhatsApp</button>
-    </div>
-    <div class="terms-footer">
-      <button class="btn" id="crules-accept" onclick="closeCommunityRules(true)">Acepto las normas</button>
-      <button class="btn" id="crules-ok" onclick="closeCommunityRules(false)">Entendido</button>
-    </div>
-  </div>
-</div>
-
-<!-- STICKERS para historias de Instagram (habit-share.js, docs/HISTORIAS_INSTAGRAM.md).
-     Tocar copia el PNG transparente; mantener abre el menú nativo de la imagen (Guardar). -->
-<div id="sticker-sheet" class="terms-modal" style="display:none" onclick="if(event.target===this)closeStickerSheet()">
-  <div class="terms-box sticker-box">
-    <div class="terms-hdr">
-      <div class="sticker-colors" role="radiogroup" aria-label="Color del sticker">
-        <button type="button" class="sticker-color is-on" data-color="blanco" aria-label="Blanco" onclick="setStickerColor('blanco')"></button>
-        <button type="button" class="sticker-color" data-color="negro" aria-label="Negro" onclick="setStickerColor('negro')"></button>
-      </div>
-      <h2 id="sticker-title">Frase del día</h2>
-      <button onclick="closeStickerSheet()" aria-label="Cerrar" style="background:none;border:none;color:var(--gray);font-size:22px;cursor:pointer;line-height:1">×</button>
-    </div>
-    <div class="terms-body">
-      <p class="sticker-hint"><b>Toca para copiar</b> · mantén para guardar</p>
-      <div class="sticker-grid" id="sticker-grid"></div>
-      <p class="sticker-howto">Copiado el sticker, abre tu historia en Instagram con tu foto y pégalo.</p>
     </div>
   </div>
 </div>
@@ -4168,7 +4058,7 @@ const GYM_ONLY_VIEWS=['book','planes','historial','shop'];
 const GYM_APP_URL='/';
 document.querySelectorAll('.brand-name').forEach(el=>{el.textContent=BRAND_NAME;});
 const SUPABASE_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBtcGp0ZXVxanVzYmlkdWV2YndxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc2OTI1NjUsImV4cCI6MjA5MzI2ODU2NX0.XbMzZoo2yqtrD8znLnyo_1zDfrdJAvAPj1lqGOyXnLw';
-const APP_VERSION='20261031-6';
+const APP_VERSION='20261031-7';
 // La pierna va separada en cuádriceps, femorales y pantorrillas: la figura
 // corporal pinta esas tres regiones por separado y el motor de recuperación les
 // da ventanas de descanso distintas. 'Piernas' sigue reconociéndose al leer
@@ -4210,36 +4100,36 @@ const EXERCISE_CATALOG_FALLBACK=[
   {name:'Remadora',slug:'remadora',category:'Cardio',primary_muscle:'Full Body',secondary_muscles:['Espalda','Piernas','Core'],equipment:['Remadora'],movement_pattern:'Cardio',default_tracking:'time',difficulty:'basico',aliases:['rowing machine']}
 ];
 const DAILY_QUOTES=[
-  {text:'Haz hoy lo que tu versión de mañana agradecería.',action:'Elige una accion pequeña y cumplible antes de buscar motivacion.'},
-  {text:'La disciplina no grita; aparece cuando nadie está mirando.',action:'Entrena el estandar, no el animo del momento.'},
-  {text:'Controla tu siguiente repetición. Lo demás se ordena después.',action:'Pon tu atencion en el proximo paso concreto.'},
-  {text:'Un buen hábito es una promesa que cumples en silencio.',action:'Cumple una promesa pequeña antes de pedirte una grande.'},
-  {text:'La incomodidad no es una señal de detenerte; es una señal de presencia.',action:'Respira, ajusta y continua con buena forma.'},
-  {text:'No necesitas un día perfecto para construir una vida fuerte.',action:'Protege la consistencia aunque el dia venga incompleto.'},
-  {text:'Lo que repites te entrena más que lo que deseas.',action:'Revisa que tus repeticiones diarias apunten a quien quieres ser.'},
-  {text:'La calma también se practica bajo peso.',action:'Mantente firme cuando el esfuerzo suba.'},
+  {text:'Haz hoy lo que tu version de manana agradeceria.',action:'Elige una accion pequeña y cumplible antes de buscar motivacion.'},
+  {text:'La disciplina no grita; aparece cuando nadie esta mirando.',action:'Entrena el estandar, no el animo del momento.'},
+  {text:'Controla tu siguiente repeticion. Lo demas se ordena despues.',action:'Pon tu atencion en el proximo paso concreto.'},
+  {text:'Un buen habito es una promesa que cumples en silencio.',action:'Cumple una promesa pequeña antes de pedirte una grande.'},
+  {text:'La incomodidad no es una senal de detenerte; es una senal de presencia.',action:'Respira, ajusta y continua con buena forma.'},
+  {text:'No necesitas un dia perfecto para construir una vida fuerte.',action:'Protege la consistencia aunque el dia venga incompleto.'},
+  {text:'Lo que repites te entrena mas que lo que deseas.',action:'Revisa que tus repeticiones diarias apunten a quien quieres ser.'},
+  {text:'La calma tambien se practica bajo peso.',action:'Mantente firme cuando el esfuerzo suba.'},
   {text:'No compitas con la prisa de otros; compite con tu excusa de ayer.',action:'Haz una mejora medible, aunque sea minima.'},
-  {text:'El carácter se forma en la decisión que parecía fácil posponer.',action:'Haz primero lo importante, antes de negociar contigo.'},
-  {text:'Si cuidas tu rutina, tu rutina cuidará tu dirección.',action:'Define tu hora, tu plan y tu primer movimiento.'},
+  {text:'El caracter se forma en la decision que parecia facil posponer.',action:'Haz primero lo importante, antes de negociar contigo.'},
+  {text:'Si cuidas tu rutina, tu rutina cuidara tu direccion.',action:'Define tu hora, tu plan y tu primer movimiento.'},
   {text:'La fuerza empieza cuando dejas de pedir permiso al cansancio.',action:'Distingue fatiga real de resistencia mental.'},
-  {text:'Tu cuerpo escucha lo que haces más que lo que prometes.',action:'Convierte la intencion en una accion visible.'},
+  {text:'Tu cuerpo escucha lo que haces mas que lo que prometes.',action:'Convierte la intencion en una accion visible.'},
   {text:'La excelencia es sencilla: volver, ajustar, repetir.',action:'No persigas perfeccion; persigue regreso constante.'},
-  {text:'Domina lo pequeño y lo grande deja de intimidarte.',action:'Cuida tecnica, respiracion y enfoque durante diez minutos.'},
-  {text:'Cada entrenamiento es una votación por tu identidad.',action:'Actua como la persona que estas construyendo.'},
+  {text:'Domina lo pequeno y lo grande deja de intimidarte.',action:'Cuida tecnica, respiracion y enfoque durante diez minutos.'},
+  {text:'Cada entrenamiento es una votacion por tu identidad.',action:'Actua como la persona que estas construyendo.'},
   {text:'La voluntad se vuelve confiable cuando tiene estructura.',action:'Prepara tu entorno para que hacer lo correcto sea facil.'},
   {text:'No eres tus impulsos; eres la respuesta que eliges.',action:'Pausa un segundo antes de decidir saltarte el habito.'},
-  {text:'Una vida fuerte se edifica con días que no presumiste.',action:'Haz el trabajo aunque no se vea espectacular.'},
-  {text:'Lo difícil se vuelve manejable cuando lo divides en presencia.',action:'Enfocate solo en la serie, el bloque o la tarea actual.'},
+  {text:'Una vida fuerte se edifica con dias que no presumiste.',action:'Haz el trabajo aunque no se vea espectacular.'},
+  {text:'Lo dificil se vuelve manejable cuando lo divides en presencia.',action:'Enfocate solo en la serie, el bloque o la tarea actual.'},
   {text:'Tu paz crece cuando aceptas el esfuerzo que te corresponde.',action:'Haz lo tuyo sin cargar lo que no controlas.'},
   {text:'El progreso respeta a quien aparece con honestidad.',action:'Llega, registra, aprende y vuelve mejor.'},
-  {text:'No desperdicies energía peleando con el día; úsala para dirigirlo.',action:'Elige una prioridad y ejecutala sin drama.'},
-  {text:'La constancia convierte límites en información.',action:'Observa que falla y ajusta el sistema, no tu valor.'},
-  {text:'Entrenar también es aprender a obedecer a tu mejor criterio.',action:'Sigue el plan antes de seguir el impulso.'},
-  {text:'La paciencia no es lentitud; es fuerza sin desesperación.',action:'Deja que el proceso acumule resultados.'},
+  {text:'No desperdicies energia peleando con el dia; usala para dirigirlo.',action:'Elige una prioridad y ejecutala sin drama.'},
+  {text:'La constancia convierte limites en informacion.',action:'Observa que falla y ajusta el sistema, no tu valor.'},
+  {text:'Entrenar tambien es aprender a obedecer a tu mejor criterio.',action:'Sigue el plan antes de seguir el impulso.'},
+  {text:'La paciencia no es lentitud; es fuerza sin desesperacion.',action:'Deja que el proceso acumule resultados.'},
   {text:'Hoy no tienes que conquistar todo. Tienes que no abandonarte.',action:'Termina una cosa que te acerque a tu version fuerte.'},
-  {text:'El hábito correcto reduce el ruido de decidir cada día.',action:'Haz que tu primer paso sea automatico.'},
-  {text:'La mente se vuelve más clara cuando el cuerpo cumple.',action:'Muévete con intencion antes de esperar claridad perfecta.'},
-  {text:'Tu estándar se revela en lo que haces cuando nadie te exige.',action:'Haz una accion limpia, completa y sin atajos.'},
+  {text:'El habito correcto reduce el ruido de decidir cada dia.',action:'Haz que tu primer paso sea automatico.'},
+  {text:'La mente se vuelve mas clara cuando el cuerpo cumple.',action:'Muévete con intencion antes de esperar claridad perfecta.'},
+  {text:'Tu estandar se revela en lo que haces cuando nadie te exige.',action:'Haz una accion limpia, completa y sin atajos.'},
   {text:'La fortaleza es repetir lo correcto hasta que deja de sentirse ajeno.',action:'Dale otra prueba a la persona que estas practicando ser.'}
 ];
 function muscleGroupSelectHtml(id,selected){
@@ -4437,7 +4327,7 @@ function exerciseTargetLabel(ex){
 }
 function exerciseDetailParts(ex){
   const steps=exercisePyramidSteps(ex);
-  const sets=steps?steps.length+' series':(ex?.sets?ex.sets+(Number(ex.sets)===1?' serie':' series'):null);
+  const sets=steps?steps.length+' series':(ex?.sets?ex.sets+' series':null);
   return [sets,exerciseTargetLabel(ex)||null,ex?.rest?ex.rest+' descanso':null,
     parseTargetRir(ex)!=null?'RIR '+parseTargetRir(ex):null].filter(Boolean);
 }
@@ -4471,22 +4361,6 @@ const EXERCISE_ICONS={
   mobility:'<path d="M19.5 12a7.5 7.5 0 1 1-2.2-5.3"/><path d="M19.6 3.8v3.6H16"/><circle cx="12" cy="12" r="1.7"/>',
   strength:'<path d="M5 12h14"/><path d="M7 8.5v7M17 8.5v7M4 10.2v3.6M20 10.2v3.6"/>'
 };
-// Las rutinas del gym se escribieron en MAYÚSCULAS («REMO CON MANCUERNA BANCA HORIZONTAL») y así
-// cuestan leerse. Solo para mostrar: el nombre guardado no cambia. Un nombre que ya trae
-// minúsculas se respeta tal cual.
-const EX_NAME_KEEP_UPPER=new Set(['RDL','KB','TRX','DB','BB','HIIT','HIT','EMOM','AMRAP','SL']);
-function exDisplayName(name){
-  const n=String(name||'');
-  if(!/[A-ZÁÉÍÓÚÑ]{2}/.test(n)||/[a-záéíóúñ]/.test(n))return n;
-  let first=true;
-  return n.split(/(\s+|\/|-)/).map(tok=>{
-    if(!/[A-ZÁÉÍÓÚÑ]/.test(tok))return tok;
-    if(EX_NAME_KEEP_UPPER.has(tok)){first=false;return tok;}
-    const low=tok.toLowerCase();
-    if(first){first=false;return low.charAt(0).toUpperCase()+low.slice(1);}
-    return low;
-  }).join('');
-}
 function exerciseIconSvg(ex){
   const pat=window.HabitTraining&&HabitTraining.exercisePattern
     ?HabitTraining.exercisePattern({name:ex&&ex.name,muscles:exerciseMuscleLabel(ex)||'',primary_muscle:ex&&(ex.primary_muscle||ex.primaryMuscle),category:ex&&ex.category})
@@ -4883,20 +4757,7 @@ function checkExpiryPush(){
 async function initApp(){
   document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
   const authEl=document.getElementById('s-auth');
-  // Con una sesión guardada el login no se muestra mientras se restaura: se asomaba detrás de
-  // «Cargando tu cuenta» y parecía que la app había cerrado la sesión. Sin sesión, sí.
-  let stored=false;
-  try{stored=Object.keys(localStorage).some(k=>/^sb-.*-auth-token$/.test(k));}catch(_){}
-  const showAuth=()=>{
-    const ov=document.getElementById('loading-overlay');
-    if(ov)ov.style.background='rgba(10,10,10,.9)';
-    if(authEl&&!document.querySelector('.screen.active'))authEl.classList.add('active');
-  };
-  if(stored){
-    showLoading('Cargando tu cuenta...');
-    const ov=document.getElementById('loading-overlay');
-    if(ov)ov.style.background='var(--black)';
-  }else showAuth();
+  if(authEl)authEl.classList.add('active');
   try{
     const p=sb.auth.getSession();
     const t=new Promise((_,rej)=>setTimeout(()=>rej(new Error('timeout')),5000));
@@ -4904,14 +4765,12 @@ async function initApp(){
     if(result.data&&result.data.session){
       sbUser=result.data.session.user;
       if(isPasswordRecoveryUrl()){
-        hideLoading();showAuth();
         showResetPasswordModal();
         return;
       }
       showLoading('Cargando tu cuenta...');
       await loadUserData();
       hideLoading();
-      {const ov=document.getElementById('loading-overlay');if(ov)ov.style.background='rgba(10,10,10,.9)';}
       if(isPublicShopUrl()){
         if(canAccessShop()){showPublicShop();handleShopReturn();}
         else showShopAccessGate(true);
@@ -4926,11 +4785,10 @@ async function initApp(){
         handleStripeReturn();
         
       }
-    }else{hideLoading();showAuth();}
+    }
     if(isPublicShopUrl())showShopAccessGate(false);
   }catch(e){
     hideLoading();
-    showAuth();
     console.log('No session:',e.message);
     if(isPublicShopUrl())showShopAccessGate(false);
   }
@@ -5032,20 +4890,6 @@ function linkifyText(v){
 }
 function avatarHtml(name,url,cls){
   return '<div class="'+cls+'">'+(url?'<img src="'+esc(url)+'" alt="">':inits(name||'?'))+'</div>';
-}
-// Para la comunidad: "hace 3 h", "ayer", "12 may". "179d" había que traducirlo.
-function timeAgoEs(ts){
-  const d=new Date(ts),m=Math.floor((Date.now()-d)/60000);
-  if(!Number.isFinite(m))return'';
-  if(m<1)return'Ahora';
-  if(m<60)return'hace '+m+' min';
-  const h=Math.floor(m/60);
-  if(h<24)return'hace '+h+' h';
-  const days=Math.floor(h/24);
-  if(days===1)return'ayer';
-  if(days<7)return'hace '+days+' días';
-  const sameYear=d.getFullYear()===new Date().getFullYear();
-  return d.getDate()+' '+MO[d.getMonth()]+(sameYear?'':' '+d.getFullYear());
 }
 const timeSince=ts=>{const m=Math.floor((Date.now()-new Date(ts))/60000);if(m<1)return'Ahora';if(m<60)return m+'m';const h=Math.floor(m/60);if(h<24)return h+'h';return Math.floor(h/24)+'d';};
 const daysUntil=iso=>{if(!iso)return null;return Math.ceil((new Date(iso)-Date.now())/86400000);};
@@ -6451,8 +6295,8 @@ function updateTermsButton(){
 // términos de la app (entrenar por tu cuenta). `onAccept` es lo que sigue: crear la cuenta,
 // o el pago de la primera membresía de quien entró por la app (doPay).
 let termsOnAccept=null;
-const TERMS_LABEL_GYM='He leído y acepto el Reglamento y Términos de HABIT Training Hub, incluyendo la exención de responsabilidad por accidentes, mi responsabilidad ante daños al equipo y las Normas de la comunidad.';
-const TERMS_LABEL_APP='He leído y acepto los Términos de uso de HABIT, incluyendo que entreno bajo mi propia responsabilidad y las Normas de la comunidad.';
+const TERMS_LABEL_GYM='He leído y acepto el Reglamento y Términos de HABIT Training Hub, incluyendo la exención de responsabilidad por accidentes y mi responsabilidad ante daños al equipo.';
+const TERMS_LABEL_APP='He leído y acepto los Términos de uso de HABIT, incluyendo que entreno bajo mi propia responsabilidad.';
 function showTerms(kind,onAccept){
   const app=kind==='app';
   termsOnAccept=onAccept||null;
@@ -6474,15 +6318,7 @@ function showTerms(kind,onAccept){
 function closeTerms(){
   const modal=document.getElementById('terms-modal');
   if(modal)modal.style.display='none';
-  const foot=modal&&modal.querySelector('.terms-footer');
-  if(foot)foot.style.display='';
   termsOnAccept=null;
-}
-// Solo leer: desde el registro, donde aceptar es crear la cuenta.
-function readTerms(kind){
-  showTerms(kind,null);
-  const foot=document.querySelector('#terms-modal .terms-footer');
-  if(foot)foot.style.display='none';
 }
 function acceptTerms(){
   const chk=document.getElementById('terms-check');
@@ -6496,19 +6332,19 @@ function acceptTerms(){
 async function doRegister(){
   const name=document.getElementById('rn').value.trim();
   const email=document.getElementById('re').value.trim();
-  const phone=((document.getElementById('rph')||{}).value||'').trim();
+  const email2=(document.getElementById('re2')||{value:email}).value.trim();
+  const phone=document.getElementById('rph').value.trim();
   const pass=document.getElementById('rp').value;
-  if(!name||!email||!pass){toast('Escribe tu nombre, correo y contraseña','err');return;}
-  if(!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)){toast('Revisa tu correo','err');return;}
-  if(pass.length<6){toast('La contraseña necesita al menos 6 caracteres','err');return;}
+  const pass2=(document.getElementById('rp2')||{value:pass}).value;
+  if(!name||!email||!pass){toast('Completa todos los campos','err');return;}
+  if(email2&&email!==email2){toast('Los correos no coinciden','err');return;}
+  if(pass2&&pass!==pass2){toast('Las contrasenas no coinciden','err');return;}
   // Por dónde entra (127) lo dice la app en la que se registra: quien se registra en
   // HABIT es del gym, quien se registra en HABIT Crew entrena por su cuenta. No es un
   // permiso —reservar y la puerta los decide la membresía—; decide el reglamento que
   // acepta, si el admin recibe el aviso de socio nuevo y qué ve primero.
-  // Crear la cuenta es aceptar los términos (la línea bajo el botón lo dice y los abre).
   const reg={name,email,phone,pass,joinedAs:IS_CREW?'app':'gym'};
-  markCommunityRulesAccepted();
-  completeRegister(reg);
+  showTerms(reg.joinedAs,()=>completeRegister(reg));
 }
 async function ensureProfile(reg){
   // El perfil normalmente ya existe: lo crea handle_new_user al hacer signUp, con el
@@ -6554,10 +6390,9 @@ async function completeRegister(reg){
     if(isApp){
       // Sin push al admin: quien entrena por su cuenta no es un socio nuevo del gym. Se
       // cuenta en el dashboard (Usuarios de la app).
-      // El onboarding es opcional (Perfil → Mi entrenamiento): se entra directo a entrenar.
-      addN('Bienvenido/a a '+BRAND_NAME+'. Elige una rutina básica y empieza.','success');
+      addN('Bienvenido/a a '+BRAND_NAME+'. Cuéntanos cómo entrenas y te dejamos listo para empezar.','success');
       showMainSb();
-      setTimeout(showInstallGuide,350);
+      openTrainingOnboarding({afterSignup:true});
     }else{
       sendPush('admin','👤 Nuevo socio',curUser.name+' se registró · código '+curUser.accessCode,{tag:'new-member'});
       addN('Bienvenido/a a HABIT. Tu acceso se activa desde la app durante tu reserva.','success');
@@ -6600,6 +6435,7 @@ function isMissingTrainingProfiles(error){
   return !!error&&/training_profiles|schema cache|does not exist|PGRST205|42P01/i.test((error.message||'')+' '+(error.code||''));
 }
 async function loadTrainingProfileSb(){
+  const suppress=onboardingSuppressed;
   onboardingSuppressed=false;
   if(!sbUser)return null;
   const{data,error}=await sb.from('training_profiles').select('*').eq('user_id',sbUser.id).maybeSingle();
@@ -6607,7 +6443,7 @@ async function loadTrainingProfileSb(){
   if(error){if(!isMissingTrainingProfiles(error))console.warn('training_profiles:',error.message);return null;}
   trainingProfile=data||null;
   renderPerfilTrainingSummary();
-  // El onboarding ya no se abre solo: es opcional y vive en Perfil → Mi entrenamiento.
+  if(!suppress&&!onboardingDismissed&&curUser&&curUser.joinedAs==='app'&&!(data&&data.onboarded_at))openTrainingOnboarding();
   return trainingProfile;
 }
 function openTrainingOnboarding(opts){
@@ -6751,9 +6587,6 @@ async function deleteMyAccount(){
     hideLoading();
     toast(e.message||'No se pudo borrar la cuenta','err');
   }
-}
-async function confirmLogout(){
-  if(await confirmSheet('Para volver a entrar necesitarás tu correo y contraseña.',{title:'¿Cerrar sesión?',confirmLabel:'Cerrar sesión'}))doLogout();
 }
 async function doLogout(){
   curUser=null;sbUser=null;sbProfile=null;
@@ -7047,29 +6880,10 @@ function canUseMemberViews(){
   // acceso (pizarrón, comunidad, etc.) hasta que esa sesión termine.
   return (curUser.bookings||[]).some(b=>!isBookingPast(b));
 }
-const BNAV_VIEWS=['inicio','book','rutinas','coaching','comunidad','shop'];
-// Reservar no se enseña en gris a quien no es socio: era una pestaña que no hacía nada. Las
-// membresías siguen en Inicio («¿Estás en Mazatlán?») y en Perfil. Se llama también al llegar
-// la membresía (renderMembershipStatus): el primer sv('inicio') corre antes de tenerla.
-function updateBottomNavAccess(){
-  document.querySelectorAll('.bnb').forEach((b,i)=>{
-    b.classList.toggle('nav-hidden',MEMBER_LOCKED_VIEWS.includes(BNAV_VIEWS[i])&&!canUseMemberViews());
-  });
-}
 function updateTopActions(v){
   document.querySelectorAll('.top-action[data-top-view]').forEach(btn=>{
     btn.classList.toggle('primary',btn.dataset.topView===v);
   });
-  renderTopAvatar();
-}
-function renderTopAvatar(){
-  const el=document.getElementById('top-avatar');
-  if(!el||!curUser)return;
-  const url=curUser.avatarUrl||'';
-  const key=url+'|'+(curUser.name||'');
-  if(el.dataset.key===key)return;
-  el.dataset.key=key;
-  el.innerHTML=url?'<img src="'+esc(url)+'" alt="">':'<span>'+esc(inits(curUser.name||'?'))+'</span>';
 }
 function supportWhatsappUrl(){
   let context='mi rutina';
@@ -7090,9 +6904,8 @@ function openSupportWhatsapp(){
 function updateSupportFab(v){
   const fab=document.getElementById('support-fab');
   if(!fab)return;
-  // Vivía en Entrenar y tapaba ejercicios y series; luego en Perfil tapaba sus filas. Ahora es
-  // una fila de Perfil (Comunidad → Asistencia), y el botón flotante ya no sale.
-  const show=false;void v;
+  // Vivía en Entrenar y tapaba ejercicios y series. En Perfil se encuentra igual.
+  const show=!!sbUser&&v==='perfil';
   fab.classList.toggle('show',show);
 }
 function sv(v){
@@ -7115,13 +6928,11 @@ function sv(v){
     if(COACHING_SECTION_ON)toast('Coaching disponible solo para socios beta','warn');
     v='inicio';
   }
-  // Progreso es parte de Entrenar: la barra lo dice, en lugar de no marcar nada.
-  const navV=v==='progreso'?'rutinas':v;
   document.querySelectorAll('.bnb').forEach((b,i)=>{
-    const name=BNAV_VIEWS[i];
-    b.classList.toggle('active',name===navV);
+    const name=['inicio','book','rutinas','coaching','comunidad','shop'][i];
+    b.classList.toggle('active',name===v);
+    b.classList.toggle('locked',MEMBER_LOCKED_VIEWS.includes(name)&&!canUseMemberViews());
   });
-  updateBottomNavAccess();
   updateShopCartBadge();
   updateCoachingNavBadge();
   updateTopActions(v);
@@ -7259,15 +7070,6 @@ async function renderPerfil(){
   }
   const av=document.getElementById('perfil-av');
   if(av)av.innerHTML=curUser.avatarUrl?'<img src="'+esc(curUser.avatarUrl)+'" alt="">':inits(curUser.name||'?');
-  renderTopAvatar();
-  const info=document.getElementById('perfil-info');
-  if(info)info.innerHTML='<div class="perfil-name">'+esc(curUser.name||'')+'</div>'
-    +(sbUser&&sbUser.email?'<div class="perfil-email">'+esc(sbUser.email)+'</div>':'');
-  // Lo mismo que dice la píldora de arriba (visitas, Mensual, Vencida), sin calcularlo otra vez.
-  updateMainMembershipPill();
-  const planSum=document.getElementById('perfil-plan-sum');
-  const pill=document.getElementById('main-member-pill');
-  if(planSum)planSum.textContent=(pill&&pill.textContent)||'Sin membresía';
   const clearBtn=document.getElementById('pf-avatar-clear');
   if(clearBtn)clearBtn.style.display=curUser.avatarUrl?'block':'none';
   const pfName=el.querySelector('#pf-name');
@@ -7283,10 +7085,8 @@ async function renderPerfil(){
   renderPerfilPush();
   // El staff (admin, recepción) no se borra a sí mismo desde aquí: se quedaría el gym sin
   // quien lo administre por un toque equivocado.
-  // Cerrar sesión sí, para todos.
-  const staff=!!(curUser.role&&curUser.role!=='user');
-  document.querySelectorAll('#perfil-account-section .perfil-delete-btn,#perfil-account-section .perfil-delete-hint')
-    .forEach(el=>{el.style.display=staff?'none':'';});
+  const acct=document.getElementById('perfil-account-section');
+  if(acct)acct.style.display=(curUser.role&&curUser.role!=='user')?'none':'';
 }
 function prepareSquareImage(file,size=420,quality=.86){
   return new Promise((resolve,reject)=>{
@@ -7478,71 +7278,38 @@ function dailyQuoteForDate(ds){
   const dayKey=Math.floor(Date.UTC(parts[0]||2026,(parts[1]||1)-1,parts[2]||1)/86400000);
   return DAILY_QUOTES[Math.abs(dayKey)%DAILY_QUOTES.length];
 }
-// ── Stickers (Fase 0: la frase del día) ──────────────────────────────────
-// Se dibujan al abrir la hoja, así que tocar uno solo entrega una imagen que ya existe: Safari
-// pierde el permiso de copiar si el toque tiene que esperar a que se dibuje.
-let stickerColor='blanco',stickerItems=[],stickerSeq=0;
-const STICKER_COLOR_KEY='habit_sticker_color';
-function openQuoteStickers(){
-  if(!window.HabitShare){toast('No se pudieron cargar los stickers. Recarga la app.','err');return;}
-  try{const c=localStorage.getItem(STICKER_COLOR_KEY);if(c==='negro'||c==='blanco')stickerColor=c;}catch(_){}
-  const modal=document.getElementById('sticker-sheet');
-  if(modal)modal.style.display='flex';
-  renderStickerSheet().catch(e=>{console.error(e);toast('No se pudieron dibujar los stickers','err');});
-}
-function closeStickerSheet(){
-  const modal=document.getElementById('sticker-sheet');
-  if(modal)modal.style.display='none';
-  stickerItems.forEach(it=>URL.revokeObjectURL(it.url));
-  stickerItems=[];
-}
-function setStickerColor(c){
-  stickerColor=c==='negro'?'negro':'blanco';
-  try{localStorage.setItem(STICKER_COLOR_KEY,stickerColor);}catch(_){}
-  renderStickerSheet().catch(console.error);
-}
-async function renderStickerSheet(){
-  const grid=document.getElementById('sticker-grid');
-  if(!grid)return;
-  const seq=++stickerSeq;
-  document.querySelectorAll('.sticker-color').forEach(b=>b.classList.toggle('is-on',b.dataset.color===stickerColor));
-  if(!stickerItems.length)grid.innerHTML='<div class="empty">Preparando stickers…</div>';
-  await HabitShare.ensureFonts(document);
-  const q=dailyQuoteForDate(mazToday());
-  const canvases=[HabitShare.renderQuote(document,q.text,stickerColor),HabitShare.renderSignature(document,stickerColor)];
-  const blobs=await Promise.all(canvases.map(c=>HabitShare.toBlob(c)));
-  if(seq!==stickerSeq)return; // cambiaron el color a media pintura
-  stickerItems.forEach(it=>URL.revokeObjectURL(it.url));
-  stickerItems=blobs.map((blob,i)=>({blob,url:URL.createObjectURL(blob),name:['habit-frase','habit-firma'][i]+'-'+stickerColor+'.png'}));
-  const light=stickerColor==='negro';
-  grid.innerHTML=stickerItems.map((it,i)=>'<button type="button" class="sticker-tile'+(light?' on-light':'')+'" onclick="copySticker('+i+',this)" aria-label="Copiar sticker">'
-    +'<img src="'+it.url+'" alt="Sticker '+(i+1)+'"></button>').join('');
-}
-async function copySticker(i,btn){
-  const it=stickerItems[i];
-  if(!it)return;
-  const how=await HabitShare.copyOrShare(Promise.resolve(it.blob),it.name);
-  if(how==='copied'){
-    document.querySelectorAll('.sticker-tile.copied').forEach(t=>t.classList.remove('copied'));
-    if(btn)btn.classList.add('copied');
-    toast('Copiado. Abre tu historia en Instagram y pégalo.','ok');
-  }else if(how==='downloaded')toast('Imagen guardada','ok');
-}
 function renderDailyQuote(){
   const els=document.querySelectorAll('.daily-quote-wrap');
   if(!els.length)return;
   const ds=mazToday();
   const q=dailyQuoteForDate(ds);
-  // Tocarla abre sus stickers para Instagram (habit-share.js, docs/HISTORIAS_INSTAGRAM.md).
-  const html='<section class="daily-quote-card" role="button" tabindex="0" aria-label="Frase del día: crear sticker" onclick="openQuoteStickers()">'+
+  const html='<section class="daily-quote-card" aria-label="Frase del dia">'+
     '<div class="daily-quote-text">“'+esc(q.text)+'”</div>'+
-    '<div class="daily-quote-footer"><span class="daily-quote-date">'+esc(fmtDS(ds))+'</span><span class="daily-quote-sep">•</span><span>@habit.traininghub</span>'+
-    '<span class="daily-quote-sep">•</span><span class="daily-quote-share">Sticker</span></div>'+
+    '<div class="daily-quote-footer"><span class="daily-quote-date">'+esc(fmtDS(ds))+'</span><span class="daily-quote-sep">•</span><span>@habit.traininghub</span></div>'+
   '</section>';
   els.forEach(el=>el.innerHTML=html);
 }
 // El entreno de hoy, arriba de todo en Inicio. Era solo para clientes de Coaching, pero la
 // semana es de Entrenar y Entrenar es de todos: cualquiera con algo agendado hoy lo ve aquí.
+function inicioCoachActionHtml(){
+  if(!coachWeekStart)return '';
+  const today=mazToday();
+  const active=activeCoachingSession;
+  const next=coachSchedule.find(r=>r.ds===today&&r.status==='scheduled');
+  const row=active||next;
+  // Quien entrena por su cuenta no tiene puerta ni reservas que ver en Inicio: sin nada
+  // agendado, la entrada es elegir qué entrenar.
+  if(!row)return (IS_CREW||isAppOnly())?inicioStartTrainingHtml():'';
+  const isActive=!!active;
+  const title=esc(row.board_name||'Entreno');
+  const cta=isActive?'Continuar':'Iniciar';
+  const action=isActive?'goToActiveSession()':'startInicioCoachWorkout(&quot;'+esc(row.id)+'&quot;)';
+  return '<div class="inicio-coach-action"><button type="button" class="inicio-coach-btn" onclick="'+action+'">'
+    +'<span class="inicio-coach-icon"><svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M3 10h18M8 2v4M16 2v4M8 15l2 2 4-4"/></svg></span>'
+    +'<span class="inicio-coach-title">'+title+'</span>'
+    +'<span class="inicio-coach-go">'+cta+'</span>'
+    +'</button></div>';
+}
 function inicioFastingMiniHtml(){
   if(!canAccessCoaching())return '';
   const log=loadFastingLog();
@@ -7559,6 +7326,20 @@ function inicioFastingMiniHtml(){
     +'<span class="inicio-fast-label">'+label+'</span><span class="inicio-fast-time" id="inicio-fasting-time">'+esc(time)+'</span>'
     +'</div></div>';
 }
+function inicioStartTrainingHtml(){
+  return '<div class="inicio-coach-action"><button type="button" class="inicio-coach-btn" onclick="startInicioFreeTraining()">'
+    +'<span class="inicio-coach-icon"><svg viewBox="0 0 24 24"><path d="M6 4h4v16H6zM14 4h4v16h-4zM4 9h2M10 9h4M18 9h2M4 15h2M10 15h4M18 15h2"/></svg></span>'
+    +'<span class="inicio-coach-title">Entrenar hoy</span>'
+    +'<span class="inicio-coach-go">Elegir</span>'
+    +'</button></div>';
+}
+function openGymApp(){
+  window.open(GYM_APP_URL,'_blank','noopener');
+}
+function startInicioFreeTraining(){
+  rutActiveTab='hoy';
+  sv('rutinas');
+}
 function renderInicioCoachingWidgets(){
   const actionEl=document.getElementById('inicio-coach-action');
   const fastEl=document.getElementById('inicio-fasting-mini');
@@ -7570,13 +7351,8 @@ function renderInicioCoachingWidgets(){
     loadCoachWeekDataSb(false).then(()=>{if(coachWeekStart)renderInicioCoachingWidgets();}).catch(console.error);
     return;
   }
-  // Inicio abre con lo de hoy: la misma tarjeta que Entrenar → Hoy, para no tener que buscarla.
-  if(actionEl)actionEl.innerHTML=hoyTopHtml({start:'startInicioCoachWorkout'}).html;
+  if(actionEl)actionEl.innerHTML=inicioCoachActionHtml();
   if(fastEl&&canAccessCoaching())fastEl.innerHTML=inicioFastingMiniHtml();
-  // «Repetir el último» necesita los entrenos recientes; si aún no llegan, se repinta al llegar.
-  if(!hoyRecentSessions)loadRecentSessionsSb(false).then(()=>{
-    if(document.getElementById('v-inicio')?.classList.contains('active'))renderInicioCoachingWidgets();
-  }).catch(()=>{});
 }
 function startInicioCoachWorkout(id){
   rutActiveTab='hoy';
@@ -7615,7 +7391,6 @@ function updateMainMembershipPill(){
 function renderMembershipStatus(){
   const el=document.getElementById('membership-status-wrap');
   updateMainMembershipPill();
-  updateBottomNavAccess();
   if(!el||!curUser)return;
   // En Crew la membresía no se compra ni se muestra: es de la app del gym. Al socio le
   // recuerda dónde reserva; a quien no lo es, lo invita. Se abre aparte porque una app
@@ -8952,7 +8727,7 @@ function renderPrCardsInto(containerEl,chartsRegistry,scoreRows,unit,canvasPrefi
   Object.values(chartsRegistry).forEach(c=>{try{c.destroy();}catch(_){}});
   Object.keys(chartsRegistry).forEach(k=>delete chartsRegistry[k]);
   if(!scoreRows.length){
-    containerEl.innerHTML='<div class="empty">Tus récords salen aquí cuando registras pesos en un entreno.</div>';
+    containerEl.innerHTML='<div class="empty">Sin pesos registrados aun.<br>Usa el botón 💪 en tus ejercicios para empezar.</div>';
     return;
   }
   const exMap={};
@@ -10443,7 +10218,7 @@ function renderExerciseListHtml(exercises,keyPrefix,boardId,sessionCtx){
     return '<div class="exercise-detail'+(isActionable?'':' static')+'"'+(isActionable?' onclick="openExerciseFocus(this)" data-ex="'+esc(JSON.stringify(exData))+'"':'')+'>'
       +'<div class="exercise-detail-head" style="display:flex;align-items:center;gap:10px">'
       +'<div class="ex-num ex-ico">'+exerciseIconSvg(ex)+'</div>'
-      +'<div class="ex-body"><div class="ex-name">'+(groupLabel?'<span class="ex-superset-mini">'+esc(groupLabel)+'</span>':'')+esc(exDisplayName(ex.name))+'</div>'
+      +'<div class="ex-body"><div class="ex-name">'+(groupLabel?'<span class="ex-superset-mini">'+esc(groupLabel)+'</span>':'')+esc(ex.name)+'</div>'
       +'<div class="ex-detail">'+exerciseDetailParts(ex).map(esc).join(' · ')+(exerciseMuscleLabel(ex)?' · '+esc(exerciseMuscleLabel(ex)):'')+'</div>'
       +(ex.note||ex.notes||ex.description?'<div class="ex-note">'+esc(ex.note||ex.notes||ex.description)+'</div>':'')
       +'</div>'
@@ -10464,7 +10239,7 @@ function renderWorkoutEditListHtml(exercises,boardId,scheduleId){
     return '<div class="exercise-detail edit-workout-exercise">'
       +'<div class="exercise-detail-head" style="display:flex;align-items:center;gap:10px">'
       +'<div class="ex-num">'+(i+1)+'</div>'
-      +'<div class="ex-body"><div class="ex-name">'+(groupLabel?'<span class="ex-superset-mini">'+esc(groupLabel)+'</span>':'')+esc(exDisplayName(ex.name))+'</div>'
+      +'<div class="ex-body"><div class="ex-name">'+(groupLabel?'<span class="ex-superset-mini">'+esc(groupLabel)+'</span>':'')+esc(ex.name)+'</div>'
       +'<div class="ex-detail">'+exerciseDetailParts(ex).map(esc).join(' · ')+(exerciseMuscleLabel(ex)?' · '+esc(exerciseMuscleLabel(ex)):'')+'</div>'
       +(ex.note||ex.notes||ex.description?'<div class="ex-note">'+esc(ex.note||ex.notes||ex.description)+'</div>':'')
       +'</div>'
@@ -10493,24 +10268,20 @@ let myProgramDays=[];
 let weekPlanLoadedAt=0;
 let expandedRoutineCards=new Set();
 
-function syncRutTabs(t){
+function rutTab(t){
+  rutActiveTab=t;
   document.querySelectorAll('.rut-hub-tab').forEach(b=>b.classList.toggle('active',b.dataset.rtab===t));
   ['hoy','semana','rutinas'].forEach(x=>{
     const el=document.getElementById('rut-panel-'+x);
     if(el)el.classList.toggle('active',x===t);
   });
-}
-function rutTab(t){
-  rutActiveTab=t;
-  syncRutTabs(t);
   renderRutHub().catch(console.error);
 }
 
 async function renderRutHub(){
   if(!sbUser)return;
   const panel=document.getElementById('rut-'+(rutActiveTab==='rutinas'?'content':rutActiveTab+'-content'));
-  // Un panel que nunca se pintó (Semana la primera vez) no se queda en blanco mientras llega.
-  if(panel&&(!myRoutinesLoadedAt||!panel.innerHTML.trim()))panel.innerHTML='<div class="empty">Cargando…</div>';
+  if(panel&&!myRoutinesLoadedAt)panel.innerHTML='<div class="empty">Cargando…</div>';
   // Rutinas, semana y plan van juntos: no dependen entre sí, y en fila sumaban más de
   // un segundo de "Cargando…" en cada visita. La figura del cuerpo (la más pesada: el
   // catálogo de ejercicios más tus series de dos semanas) ya no detiene la pantalla:
@@ -10532,8 +10303,6 @@ async function renderRutHub(){
     renderRutHoy();
     const fresh=recoveryLoadedAt&&Date.now()-recoveryLoadedAt<RECOVERY_TTL_MS;
     if(!fresh)loadMyRecoverySb(false).then(()=>{if(rutActiveTab==='hoy')renderRutHoy();}).catch(console.error);
-    // Semana se adelanta en segundo plano: tocarla después ya no espera a la red.
-    loadWeekPlanSb(false).catch(()=>{});
   }
   if(tab==='semana')renderRutSemana();
   if(tab==='rutinas')renderRutRutinas();
@@ -11029,7 +10798,7 @@ function progresoStatsHtml(d){
     +'<div class="tu-stat"><div class="tu-stat-n">'+progresoStreak(d.done)+'</div><div class="tu-stat-l">Semanas seguidas</div></div>'
     +'<div class="tu-stat"><div class="tu-stat-n">'+d.sets.length+'</div><div class="tu-stat-l">Series</div></div>'
     +'<div class="tu-stat"><div class="tu-stat-n">'+totalMin+'</div><div class="tu-stat-l">Minutos</div></div>'
-    +'<div class="tu-stat"><div class="tu-stat-n">'+(v=>v>=1000?Math.round(v/1000)+'k':Math.round(v))(progresoTotalVolume(d))+'</div><div class="tu-stat-l">kg movidos</div></div>'
+    +'<div class="tu-stat"><div class="tu-stat-n">'+Math.round(progresoTotalVolume(d)/1000)+'k</div><div class="tu-stat-l">kg movidos</div></div>'
     +'</div>';
 }
 function setVolumeKg(s){
@@ -11177,14 +10946,7 @@ async function renderProgreso(){
   el.innerHTML='<div style="display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:12px">'
       +'<select aria-label="Periodo de progreso" onchange="setProgresoRange(this.value)" style="background:var(--card);color:var(--white);border:1px solid var(--border);border-radius:6px;padding:8px"><option value="28" '+(PROGRESO_LOOKBACK_DAYS===28?'selected':'')+'>4 semanas</option><option value="56" '+(PROGRESO_LOOKBACK_DAYS===56?'selected':'')+'>8 semanas</option><option value="84" '+(PROGRESO_LOOKBACK_DAYS===84?'selected':'')+'>12 semanas</option></select>'
       +'<button class="btn-sm" onclick="sv(&quot;rutinas&quot;)">Volver a Entrenar</button></div>'
-    // Sin un solo entreno eran seis ceros y tres cajas vacías: una tarjeta que diga qué sigue.
-    +((!d.done.length&&!d.sets.length)
-      ?'<section class="hoy-hero prog-empty"><div class="hoy-k">Tu progreso</div>'
-        +'<div class="hoy-title"><span>Empieza con tu primer entreno</span></div>'
-        +'<div class="hoy-meta">Cada serie que palomeas suma aquí: entrenos por semana, volumen por músculo y tus récords.</div>'
-        +hoyStartRowHtml(true)+'</section>'
-        +'<div id="progreso-prs"></div>'
-      :progresoStatsHtml(d)
+    +progresoStatsHtml(d)
     +'<div class="divider"></div><p class="slbl">Volumen por músculo · 4 semanas</p>'
     +progresoVolumeHtml(d)
     +'<div class="divider"></div><p class="slbl">Tus ejercicios</p>'
@@ -11192,7 +10954,7 @@ async function renderProgreso(){
       +'placeholder="Buscar un ejercicio…" value="'+esc(_progresoQuery)+'" oninput="renderProgresoExerciseList()">'
     +'<div class="ws-swap-list" id="progreso-ex-list" style="max-height:none">'+progresoExerciseListHtml(d)+'</div>'
     +'<div class="divider"></div><p class="slbl">Tus PRs</p>'
-    +'<div id="progreso-prs"></div>');
+    +'<div id="progreso-prs"></div>';
 
   // Las tarjetas de PR son las mismas de Coaching → Tú, alimentadas por user_scores.
   try{
@@ -11248,33 +11010,9 @@ function hoyHeroHtml(o){
     +'<div class="hoy-title">'+(o.dot?'<span class="hoy-dot" style="background:'+esc(o.dot)+'"></span>':'')+'<span>'+esc(o.title)+'</span></div>'
     +(o.meta?'<div class="hoy-meta">'+esc(o.meta)+'</div>':'')
     +(o.extra||'')
-    +(o.cta||'')
-    +(o.row||'')
+    +o.cta
     +(o.alt?'<button type="button" class="hoy-alt" onclick="'+o.alt[1]+'">'+esc(o.alt[0])+'</button>':'')
     +'</section>';
-}
-// Entrenar siempre a un toque, haya algo agendado o no: desde cero (sesión vacía, los ejercicios
-// se agregan sobre la marcha) o una rutina de tu biblioteca. `main` = no hay otro botón en la
-// tarjeta, así que estos dos son los grandes.
-function hoyStartRowHtml(main){
-  return '<div class="hoy-start-row'+(main?' main':'')+'">'
-    +'<button type="button" class="'+(main?'btn':'btn-ghost')+'" onclick="hoyStartFree()"><span class="hoy-start-plus">+</span>Desde cero</button>'
-    +'<button type="button" class="btn-ghost" onclick="hoyPickRoutine()">Elegir rutina</button>'
-    +'</div>';
-}
-// Desde Inicio primero se va a Entrenar: la hoja de entreno vive ahí (igual que
-// startInicioCoachWorkout).
-function hoyEnsureTraining(){
-  if(document.getElementById('v-rutinas')?.classList.contains('active'))return false;
-  rutActiveTab='hoy';sv('rutinas');return true;
-}
-function hoyStartFree(){
-  if(hoyEnsureTraining())setTimeout(()=>startFreeWorkoutSb(),80);
-  else startFreeWorkoutSb();
-}
-function hoyPickRoutine(){
-  if(hoyEnsureTraining())setTimeout(()=>openCoachBoardPicker('start'),80);
-  else openCoachBoardPicker('start');
 }
 // La semana en siete puntos: hecho (✓), en curso, agendado (○), se pasó sin hacer (·) o
 // descanso (–). Tocarla lleva a Semana, que es donde se cambia.
@@ -11313,11 +11051,9 @@ function hoyRowsHtml(){
     +'<span><strong>Tu progreso</strong><small>Récords, volumen y cada ejercicio</small></span><i>›</i></button>'
     +'</div>';
 }
-// La tarjeta de hoy (y las demás sesiones del día). Es la misma en Entrenar → Hoy y arriba de
-// Inicio, porque abrir la app es para entrenar: `start` es con qué función se empieza una
-// sesión (desde Inicio, startInicioCoachWorkout, que primero lleva a Entrenar).
-function hoyTopHtml(opts){
-  const start=(opts&&opts.start)||'startCoachingSessionSb';
+function renderRutHoy(){
+  const el=document.getElementById('rut-hoy-content');
+  if(!el)return;
   const today=mazToday();
   const dow=(dateObjFromDS(today).getUTCDay()+6)%7;
   const dayLabel=DOW_LONG[dow].charAt(0).toUpperCase()+DOW_LONG[dow].slice(1)+' '+parseInt(today.slice(8),10);
@@ -11325,6 +11061,7 @@ function hoyTopHtml(opts){
   const active=activeCoachingSession;
   const pending=todayRows.filter(r=>r.status==='scheduled'&&!(active&&r.id===active.id));
   const doneRows=todayRows.filter(r=>r.status==='done');
+  const other=['Entrenar otra cosa','openCoachBoardPicker(&quot;start&quot;)'];
   let html='';
 
   if(active){
@@ -11332,7 +11069,7 @@ function hoyTopHtml(opts){
     const done=Object.values(coachSessionSets).reduce((n,l)=>n+(Array.isArray(l)?l.filter(s=>s.done).length:0),0);
     const nextEx=sessionExerciseList().find((ex,i)=>(coachSessionSets[exerciseKeyForSession(active.board_id,ex,i)]||[]).some(s=>!s.done));
     html+=hoyHeroHtml({live:true,k:'En curso',title:active.board_name||'Entreno',dot:active.board_color,
-      meta:total?done+' de '+total+' series'+(nextEx?' · Sigue: '+(exDisplayName(nextEx.name)||'ejercicio'):''):'Retoma tu sesión donde la dejaste.',
+      meta:total?done+' de '+total+' series'+(nextEx?' · Sigue: '+(nextEx.name||'ejercicio'):''):'Retoma tu sesión donde la dejaste.',
       extra:'<div class="hoy-sync"><span class="training-sync'+trainingSyncClass()+'" data-training-sync>'+trainingSyncText()+'</span></div>',
       cta:'<button class="btn hoy-cta" onclick="openWorkoutSheet()">Continuar</button>'});
   }else if(pending.length){
@@ -11343,14 +11080,14 @@ function hoyTopHtml(opts){
     const fromCoach=isCoachSet(row)||(row.generated_from_base&&row.created_by&&sbUser&&row.created_by!==sbUser.id);
     html+=hoyHeroHtml({k:'Hoy · '+dayLabel,title:row.board_name,dot:row.board_color,
       meta:meta.exercises.length+' ejercicios · ~'+meta.duration+' min'+(fromCoach?' · de tu coach':''),
-      cta:'<button class="btn hoy-cta" onclick="'+start+'(&quot;'+row.id+'&quot;)">Empezar</button>',
-      row:hoyStartRowHtml(false)});
+      cta:'<button class="btn hoy-cta" onclick="startCoachingSessionSb(&quot;'+row.id+'&quot;)">Empezar</button>',
+      alt:other});
   }else if(doneRows.length){
     const mins=doneRows.reduce((n,r)=>n+(r.duration_sec?Math.round(r.duration_sec/60):0),0);
     html+=hoyHeroHtml({k:'Hoy · '+dayLabel,title:doneRows.map(r=>r.board_name).join(' + '),dot:doneRows[0].board_color,
       meta:'Hecho ✓'+(mins?' · '+mins+' min':''),
       cta:'<button class="btn-ghost hoy-cta" onclick="openEditCompletedWorkoutSb(&quot;'+doneRows[0].id+'&quot;)">Ver lo que hiciste</button>',
-      row:hoyStartRowHtml(false)});
+      alt:other});
   }else{
     // Sin nada hoy: si hay semana armada es descanso, y se dice qué sigue; si no hay nada,
     // es alguien empezando y la única acción es elegir qué entrenar.
@@ -11362,45 +11099,32 @@ function hoyTopHtml(opts){
       const nextDow=next?(dateObjFromDS(next.ds).getUTCDay()+6)%7:null;
       html+=hoyHeroHtml({k:'Hoy · '+dayLabel,title:'Descanso',
         meta:next?'Lo que sigue: '+DOW_LONG[nextDow]+' · '+next.board_name:'Recuperar también es parte del plan.',
-        cta:last?'<button class="btn-ghost hoy-cta" onclick="hoyRepeatLast()">Repetir '+esc(last.board_name||'el último')+'</button>':'',
-        row:hoyStartRowHtml(!last)});
+        cta:last
+          ?'<button class="btn-ghost hoy-cta" onclick="hoyRepeatLast()">Repetir '+esc(last.board_name||'el último')+'</button>'
+          :'<button class="btn-ghost hoy-cta" onclick="openCoachBoardPicker(&quot;start&quot;)">Entrenar de todos modos</button>',
+        alt:last?['Entrenar otra cosa','openCoachBoardPicker(&quot;start&quot;)']:null});
     }else if(last){
       html+=hoyHeroHtml({k:'Hoy · '+dayLabel,title:last.board_name||'Entreno libre',dot:last.board_color,
         meta:hoyLastMeta(last,today),
         cta:'<button class="btn hoy-cta" onclick="hoyRepeatLast()">Repetir</button>',
-        row:hoyStartRowHtml(false)});
+        alt:['Elegir otra cosa','openCoachBoardPicker(&quot;start&quot;)']});
     }else{
       html+=hoyHeroHtml({k:'Hoy · '+dayLabel,title:'Empieza a entrenar',
-        meta:'Empieza desde cero y agrega los ejercicios mientras entrenas, o elige una rutina.',
-        row:hoyStartRowHtml(true),
-        alt:['Armar mi semana','hoyGoTab(&quot;semana&quot;)']});
+        meta:'Elige una rutina o entrena libre. Cada serie que palomeas queda en tu progreso.',
+        cta:'<button class="btn hoy-cta" onclick="openCoachBoardPicker(&quot;start&quot;)">Elegir qué entrenar</button>',
+        alt:['Armar mi semana','rutTab(&quot;semana&quot;)']});
     }
   }
   // Más de una sesión hoy (fuerza y carrera, mañana y tarde): las demás, en una línea cada una.
   pending.slice(active?0:1).forEach(row=>{
     html+='<div class="hoy-also"><span class="hoy-dot" style="background:'+esc(row.board_color||'#2563eb')+'"></span>'
       +'<span class="hoy-also-name">'+esc(row.board_name)+'</span>'
-      +'<button class="btn-sm" onclick="'+start+'(&quot;'+row.id+'&quot;)">Empezar</button></div>';
+      +'<button class="btn-sm" onclick="startCoachingSessionSb(&quot;'+row.id+'&quot;)">Empezar</button></div>';
   });
   // La rutina que ya está en la tarjeta (la de hoy, o la que se ofrece repetir) no se repite abajo.
   const heroBoardId=pending.length?pending[0].board_id:(!doneRows.length?(hoyRepeatable(hoyRecentSessions)||{}).board_id:null);
-  // Lo que se pasó solo se ofrece si hoy no hay nada que hacer: con un entreno agendado (o ya
-  // hecho) eran dos sugerencias para el mismo día.
-  const free=!active&&!pending.length&&!doneRows.length;
-  return {html,heroBoardId,active,free,today};
-}
-function hoyGoTab(t){
-  if(!document.getElementById('v-rutinas')?.classList.contains('active')){rutActiveTab=t;sv('rutinas');return;}
-  rutTab(t);
-}
-function renderRutHoy(){
-  const el=document.getElementById('rut-hoy-content');
-  if(!el)return;
-  const top=hoyTopHtml();
-  const today=top.today;
-  let html=top.html;
-  if(top.free)html+=hoyMissedHtml(today);
-  if(!top.active)html+=hoyRoutinesHtml(top.heroBoardId);
+  if(!active)html+=hoyMissedHtml(today);
+  if(!active)html+=hoyRoutinesHtml(heroBoardId);
   html+=hoyWeekHtml();
   html+=hoyRowsHtml();
   el.innerHTML=html;
@@ -12051,8 +11775,8 @@ function openRoutineDetail(boardId){
     +'<div><strong>'+series+'</strong><small>series</small></div><div><strong>'+(exercises.length?'~'+meta.duration:'—')+'</strong><small>minutos</small></div></div>'
     +(meta.equipment.length?'<p class="routine-detail-note" style="margin:0 0 18px">'+esc(meta.equipment.join(' · '))+'</p>':'')
     +'<p class="routine-library-label">Tu recorrido</p>'
-    +(exercises.length?'<ol class="routine-detail-exercises">'+exercises.map((ex,i)=>'<li><span class="routine-detail-ico" title="Ejercicio '+(i+1)+'">'+exerciseIconSvg(ex)+'</span><div><strong>'+esc(exDisplayName(ex.name)||'Ejercicio')+'</strong><small>'
-      +esc([exerciseSetCount(ex)+(exerciseSetCount(ex)===1?' serie':' series'),exerciseTargetLabel(ex),ex.rest?'Descanso '+ex.rest:'',ex.supersetGroup?'Superserie '+ex.supersetGroup:''].filter(Boolean).join(' · '))+'</small></div></li>').join('')+'</ol>'
+    +(exercises.length?'<ol class="routine-detail-exercises">'+exercises.map((ex,i)=>'<li><span class="routine-detail-number">'+String(i+1).padStart(2,'0')+'</span><div><strong>'+esc(ex.name||'Ejercicio')+'</strong><small>'
+      +esc([exerciseSetCount(ex)+' series',exerciseTargetLabel(ex),ex.rest?'Descanso '+ex.rest:'',ex.supersetGroup?'Superserie '+ex.supersetGroup:''].filter(Boolean).join(' · '))+'</small></div></li>').join('')+'</ol>'
       :'<div class="routine-library-empty">Agrega el primer ejercicio para empezar a entrenar.</div>')
     +'<div class="routine-detail-tools">'
     +'<button class="routine-detail-tool" onclick="closeRoutineDetail();openAddRoutineToWeek(&quot;'+esc(b.id)+'&quot;)">Asignar a mi semana <span aria-hidden="true">↗</span></button>'
@@ -12434,9 +12158,6 @@ async function saveRoutineSb(){
 
 // sv('rutinas') sigue llamando aquí; el hub decide qué pestaña pintar.
 async function renderRutinas(){
-  // Quien llega con rutActiveTab ya puesto (Inicio → «Armar mi semana», el onboarding) pintaba
-  // esa pestaña mientras la visible seguía siendo Hoy: pantalla en blanco.
-  syncRutTabs(rutActiveTab);
   await renderRutHub();
 }
 
@@ -14937,7 +14658,7 @@ function wsExerciseHtml(ex,i){
     +'<div class="ws-ex-num" title="Ejercicio '+(i+1)+'">'+exerciseIconSvg(ex)+'</div>'
     +'<div class="ws-ex-info">'
     +'<div class="ws-ex-name">'+(groupLabel?'<span class="ex-superset-mini">'+esc(groupLabel)+'</span>':'')
-    +esc(exDisplayName(ex.name)||'Ejercicio')+'<span class="ws-ex-chev"> ›</span></div>'
+    +esc(ex.name||'Ejercicio')+'<span class="ws-ex-chev"> ›</span></div>'
     +'<div class="ws-ex-meta">'+esc(exerciseDetailParts(ex).join(' · ')||'Sin detalle')+'</div>'
     +(ex._swappedFrom?'<div class="ws-ex-meta" style="color:var(--amber)">Sustituto de esta sesión</div>':'')
     +(ex._replaced?'<div class="ws-ex-meta" style="color:var(--gray)">Cambiado a media sesión</div>':'')
@@ -20523,10 +20244,6 @@ function openCoachBoardPicker(mode,dow,ds,programId){
   const m=document.getElementById('coach-board-picker');
   if(m)m.style.display='flex';
   renderCoachBoardPicker();
-  // Abierta desde Inicio (o desde la puerta) las rutinas del socio pueden no haber llegado:
-  // sin esto la hoja decía «Todas 0» a quien tiene nueve.
-  if(coachPickerIsMember()&&!myRoutinesLoadedAt)
-    loadMyRoutinesSb(false).then(()=>{if(m&&m.style.display==='flex')renderCoachBoardPicker();}).catch(console.error);
 }
 function coachPickerSearch(v){coachPicker.query=v||'';renderCoachBoardPicker();}
 function coachPickerFilter(f){coachPicker.filter=f;renderCoachBoardPicker();}
@@ -20612,15 +20329,13 @@ function renderCoachBoardPicker(){
   });
   // La primera fila es la salida sin rutina. Entrenando ahora eso no es
   // descansar, es entrenar por libre: el mismo hueco, otra intención.
-  const noneLabel=coachPicker.mode==='start'?'Desde cero':'Descanso';
-  const noneSub=coachPicker.mode==='start'?'Agrega los ejercicios mientras entrenas':'Sin entreno este día';
-  // Entrenando ahora no hay nada «elegido» todavía: la palomita diría que Desde cero ya lo está.
-  const noneOn=!current&&coachPicker.mode!=='start';
-  const none='<button class="coach-pick-row'+(noneOn?' is-current':'')+'" onclick="coachPickerChoose(&quot;&quot;)">'
-    +'<span class="coach-pick-dot" style="background:'+(coachPicker.mode==='start'?'#0ea5e9':'#334155')+'"></span>'
+  const noneLabel=coachPicker.mode==='start'?'Entreno libre':'Descanso';
+  const noneSub=coachPicker.mode==='start'?'Empieza sin rutina y ve anotando':'Sin entreno este día';
+  const none='<button class="coach-pick-row'+(current?'':' is-current')+'" onclick="coachPickerChoose(&quot;&quot;)">'
+    +'<span class="coach-pick-dot" style="background:#334155"></span>'
     +'<span class="coach-pick-main"><span class="coach-pick-name">'+noneLabel+'</span>'
     +'<span class="coach-pick-sub">'+noneSub+'</span></span>'
-    +(noneOn?'<span class="coach-pick-check">✓</span>':'')+'</button>';
+    +(current?'':'<span class="coach-pick-check">✓</span>')+'</button>';
   const rows=list.map(b=>{
     const on=current===b.id;
     const own=coachPickerIsMember()?isMyRoutine(b):b.owner_id!=null;
@@ -21944,8 +21659,6 @@ async function createPostSb(){
   const imgData=window._postImgData||(prev&&prev._imgData)||null;
   if(!text&&!imgData){toast('Escribe algo o agrega una foto','err');return;}
   if(text.length>500){toast('Maximo 500 caracteres','err');return;}
-  if(communityTextBlocked(text)){toast(COMMUNITY_TEXT_MSG,'err');return;}
-  if(!await ensureCommunityRules())return;
   showLoading('Publicando...');
   try{
     let imgUrl=null;
@@ -21979,7 +21692,7 @@ async function createPostSb(){
     renderFeedSb();
   }catch(e){
     hideLoading();
-    toast(isCommunityTextError(e)?COMMUNITY_TEXT_MSG:'Error: '+e.message,'err');
+    toast('Error: '+e.message,'err');
   }
 }
 
@@ -22062,12 +21775,12 @@ async function renderFeedSb(){
       const commentsHtml=comments.length
         ? comments.map(c=>'<div class="comment-row">'
           +avatarHtml(c.user_name,avatarMap[c.user_id],'comment-av')
-          +'<div class="comment-body"><div class="comment-meta">'+esc(c.user_name)+'<span class="comment-time">'+timeAgoEs(c.created_at)+'</span></div>'
+          +'<div class="comment-body"><div class="comment-meta">'+esc(c.user_name)+'<span class="comment-time">'+timeSince(c.created_at)+'</span></div>'
           +'<div class="comment-text">'+esc(c.text_content)+'</div></div>'
           +communityMoreBtn('comment',c.id,c.user_id,c.user_name)
           +(isAdmin?'<button data-cid="'+esc(c.id)+'" onclick="deleteCommentSb(this.dataset.cid)" style="background:none;border:none;color:var(--red);cursor:pointer;font-size:14px;padding:4px">Eliminar</button>':'')
           +'</div>').join('')
-        : '';
+        : '<div style="font-size:12px;color:var(--gray);margin-bottom:8px">Sin comentarios aun.</div>';
       const div=document.createElement('div');div.className='post-card';
       const rxBtns=[{k:'fire',e:'🔥'},{k:'clap',e:'👏'},{k:'heart',e:'❤️'}].map(r=>
         '<button class="reaction-btn'+(myReactions.has(r.k)?' active':'')+'" data-post="'+post.id+'" data-type="'+r.k+'" onclick="toggleReactionSb(this)">'
@@ -22075,15 +21788,14 @@ async function renderFeedSb(){
       div.innerHTML=
         '<div class="post-hdr">'
         +avatarHtml(post.user_name,avatarMap[post.user_id],'post-av')
-        +'<div style="flex:1"><div class="post-user">'+esc(post.user_name)+'</div><div class="post-time">'+timeAgoEs(post.created_at)+'</div></div>'
+        +'<div style="flex:1"><div class="post-user">'+esc(post.user_name)+'</div><div class="post-time">'+timeSince(post.created_at)+'</div></div>'
         +communityMoreBtn('post',post.id,post.user_id,post.user_name)
         +(isAdmin?'<button data-pid="'+post.id+'" onclick="deletePostSb(this.dataset.pid)" style="background:none;border:none;color:var(--red);cursor:pointer;font-size:18px;padding:4px">🗑</button>':'')
         +'</div>'
         +(post.text_content?'<div class="post-body">'+esc(post.text_content)+'</div>':'')
         +postImageHtml(post)
-        // Los comentarios se pliegan: sin ninguno, la caja abierta en cada publicación era ruido.
-        +'<div class="post-reactions">'+rxBtns+'<button type="button" class="post-cmt-btn" data-n="'+comments.length+'" onclick="togglePostComments(this)">'+postCmtLabel(comments.length)+'</button></div>'
-        +'<div class="post-comments'+(comments.length?'':' collapsed')+'">'+commentsHtml
+        +'<div class="post-reactions">'+rxBtns+'<span style="margin-left:auto;font-size:12px;color:var(--gray);align-self:center">'+comments.length+' coment.</span></div>'
+        +'<div class="post-comments">'+commentsHtml
         +'<div class="comment-form"><input type="text" maxlength="300" data-post="'+esc(post.id)+'" data-owner="'+esc(post.user_id)+'" placeholder="Escribe un comentario..." onkeydown="if(event.key===&quot;Enter&quot;)addCommentSb(this)">'
         +'<button class="btn-sm bblue" data-post="'+esc(post.id)+'" data-owner="'+esc(post.user_id)+'" onclick="addCommentSb(this.previousElementSibling)">Enviar</button></div>'
         +'</div>';
@@ -22092,13 +21804,6 @@ async function renderFeedSb(){
   }catch(e){el.innerHTML='<div class="empty">Error cargando comunidad. Revisa que el SQL de comentarios este aplicado.</div>';console.error(e);}
 }
 
-function postCmtLabel(n){return '💬 '+(n?n:'Comentar');}
-function togglePostComments(btn){
-  const box=btn.closest('.post-card')?.querySelector('.post-comments');
-  if(!box)return;
-  const open=box.classList.toggle('collapsed')===false;
-  if(open)box.querySelector('.comment-form input')?.focus();
-}
 async function toggleReactionSb(btn){
   const postId=btn.dataset.post,type=btn.dataset.type;
   const wasActive=btn.classList.contains('active');
@@ -22128,8 +21833,6 @@ async function addCommentSb(input){
   const postId=input.dataset.post,ownerId=input.dataset.owner,text=(input.value||'').trim();
   if(!postId||!text)return;
   if(text.length>300){toast('Comentario maximo 300 caracteres','err');return;}
-  if(communityTextBlocked(text)){toast(COMMUNITY_TEXT_MSG,'err');return;}
-  if(!await ensureCommunityRules())return;
   input.disabled=true;
   try{
     const{data:inserted,error}=await sb.from('post_comments').insert({
@@ -22141,6 +21844,8 @@ async function addCommentSb(input){
     // append in-place without full re-fetch
     const commentSection=input.closest('.post-comments');
     if(commentSection){
+      const emptyEl=commentSection.querySelector('[style*="Sin comentarios"]');
+      if(emptyEl)emptyEl.remove();
       const row=document.createElement('div');row.className='comment-row';
       row.innerHTML=avatarHtml(curUser.name,curUser.avatarUrl||'','comment-av')
         +'<div class="comment-body"><div class="comment-meta">'+esc(curUser.name)+'<span class="comment-time">ahora</span></div>'
@@ -22148,13 +21853,16 @@ async function addCommentSb(input){
       const form=commentSection.querySelector('.comment-form');
       commentSection.insertBefore(row,form);
       // update comment counter on post-reactions bar
-      const counter=commentSection.closest('.post-card')?.querySelector('.post-cmt-btn');
-      if(counter){const n=(parseInt(counter.dataset.n,10)||0)+1;counter.dataset.n=n;counter.textContent=postCmtLabel(n);}
+      const rxBar=commentSection.previousElementSibling;
+      if(rxBar){
+        const counter=rxBar.querySelector('span[style*="coment"]');
+        if(counter){const n=parseInt(counter.textContent)||0;counter.textContent=(n+1)+' coment.';}
+      }
     }
   }catch(e){
     console.error(e);
     // 42501: la RLS lo rechazó, que en un comentario solo pasa con un bloqueo de por medio (128).
-    toast(isCommunityTextError(e)?COMMUNITY_TEXT_MSG:e&&e.code==='42501'?'No puedes comentar en esta publicación.':'Error al comentar: '+(e.message||e),'err');
+    toast(e&&e.code==='42501'?'No puedes comentar en esta publicación.':'Error al comentar: '+(e.message||e),'err');
   }finally{
     input.disabled=false;
   }
@@ -22220,65 +21928,6 @@ const COMMUNITY_REPORT_REASONS=[
   {key:'sexual',label:'Desnudos o contenido sexual'},
   {key:'otro',label:'Otra cosa'}
 ];
-// El filtro de palabras (138) vive dos veces, como las reglas de reservar: aquí para avisar al
-// instante y en el trigger community_text_guard para decidir. La lista es la misma, juntada
-// como la deja la normalización ("zora", no "zorra"), y scripts/check-community-filter.js
-// falla si las dos se separan. Groserías de todos los días no entran: ver la cabecera de la 138.
-const COMMUNITY_BLOCKED_TERMS=[
-  'pendejo','pendeja','pendejos','pendejas','culero','culera','culeros','culeras',
-  'puta','putas','puto','putos','putito','zora','zoras','hijo de puta','hdp',
-  'chinga tu madre','chingatumadre','ctm','malparido','malparida',
-  'maricon','maricones','marica','joto','jotos','mayate','sudaca',
-  'fagot','fagots','fag','fags','niger','nigers','niga','nigas','retard','retards',
-  'bitch','bitches','cunt','cunts','fuck you','motherfucker',
-  'te voy a matar','te vamos a matar','matate','suicidate','ojala te mueras',
-  'kil yourself','kil urself','kys',
-  'porno','porn','xvideos','pornhub','onlyfans'
-];
-const COMMUNITY_TEXT_MSG='Tu texto tiene una palabra que no se permite en la comunidad. Revisa las Normas de la comunidad.';
-function communityTextNormalize(t){
-  const from='áàäâéèëêíìïîóòöôúùüûñ013457@$',to='aaaaeeeeiiiioooouuuunoieastas';
-  return String(t||'').toLowerCase().replace(/./g,ch=>{const i=from.indexOf(ch);return i<0?ch:to[i];})
-    .replace(/[^a-z]+/g,' ').replace(/(.)\1+/g,'$1').trim();
-}
-function communityTextBlocked(t){
-  const s=' '+communityTextNormalize(t)+' ';
-  return COMMUNITY_BLOCKED_TERMS.some(w=>s.includes(' '+w+' '));
-}
-function isCommunityTextError(e){return /COMMUNITY_TEXT_BLOCKED/.test(String((e&&e.message)||e||''));}
-
-// Normas de la comunidad: lo que Apple pide publicar (qué no se tolera y a quién quejarse). Quien
-// se registró después de que los términos las incluyeran ya las aceptó; a quien venía de antes se
-// le piden una vez, la primera vez que publica, comenta o registra algo en un reto.
-const COMMUNITY_RULES_KEY='habit_community_rules_v1';
-const COMMUNITY_REPORT_WHATSAPP='https://wa.me/526623562816?text='+encodeURIComponent('Hola HABIT, quiero reportar algo de la comunidad.');
-let communityRulesResolve=null;
-function communityRulesAccepted(){try{return localStorage.getItem(COMMUNITY_RULES_KEY)==='1';}catch(_){return false;}}
-function markCommunityRulesAccepted(){try{localStorage.setItem(COMMUNITY_RULES_KEY,'1');}catch(_){}}
-function openCommunityRules(opts){
-  const accept=!!(opts&&opts.accept);
-  const modal=document.getElementById('community-rules-modal');
-  if(!modal)return Promise.resolve(true);
-  document.getElementById('crules-accept').style.display=accept?'':'none';
-  document.getElementById('crules-ok').style.display=accept?'none':'';
-  const body=modal.querySelector('.terms-body');if(body)body.scrollTop=0;
-  modal.style.display='flex';
-  return new Promise(res=>{communityRulesResolve=res;});
-}
-function closeCommunityRules(ok){
-  const modal=document.getElementById('community-rules-modal');
-  if(modal)modal.style.display='none';
-  if(ok)markCommunityRulesAccepted();
-  const res=communityRulesResolve;communityRulesResolve=null;
-  if(res)res(!!ok);
-}
-async function ensureCommunityRules(){
-  if(sbProfile&&sbProfile.role==='admin')return true;
-  if(communityRulesAccepted())return true;
-  return openCommunityRules({accept:true});
-}
-function openCommunityReportWhatsapp(){window.open(COMMUNITY_REPORT_WHATSAPP,'_blank','noopener');}
-
 // Lo que se puede reportar: publicaciones y comentarios (128), retos y sus marcas (129).
 const COMMUNITY_ITEM_KINDS={
   post:{noun:'publicación',title:'Publicación de ',ask:'¿Qué pasa con esta publicación?'},
@@ -22522,7 +22171,7 @@ async function renderAdminFeed(){
       div.innerHTML=
         '<div class="post-hdr">'
         +avatarHtml(post.user_name,avatarMap[post.user_id],'post-av')
-        +'<div style="flex:1"><div class="post-user">'+esc(post.user_name||'Usuario')+'</div><div class="post-time">'+timeAgoEs(post.created_at)+'</div></div>'
+        +'<div style="flex:1"><div class="post-user">'+esc(post.user_name||'Usuario')+'</div><div class="post-time">'+timeSince(post.created_at)+'</div></div>'
         +'<button data-pid="'+post.id+'" onclick="deletePostSb(this.dataset.pid)" style="background:none;border:none;color:var(--red);cursor:pointer;font-size:18px;padding:4px">🗑</button>'
         +'</div>'
         +(post.text_content?'<div class="post-body">'+esc(post.text_content)+'</div>':'')
@@ -22587,7 +22236,6 @@ function isMissingRetosTable(e){
 function retoError(e){
   const msg=String((e&&e.message)||e||'');
   if(isMissingRetosTable(e))return'Retos todavía no está disponible.';
-  if(isCommunityTextError(e))return COMMUNITY_TEXT_MSG;
   if(/CHALLENGE_CLOSED/.test(msg))return'Este reto no está abierto: todavía no empieza o ya terminó.';
   if(/CHALLENGE_BAD_SCORE/.test(msg))return'Revisa tu marca: falta un dato o pasa del límite de tiempo.';
   if(/CHALLENGE_BAD_DATES/.test(msg))return'Revisa las fechas: empieza entre hoy y dentro de 30 días, y no puede terminar en el pasado.';
@@ -22978,8 +22626,6 @@ async function saveRetoForm(){
   // el reto ya tiene marcas el trigger compara campo por campo.
   if(c)Object.keys(payload).forEach(k=>{if(payload[k]===c[k])delete payload[k];});
   if(c&&!Object.keys(payload).length){retoBack();return;}
-  if(communityTextBlocked(payload.title)||communityTextBlocked(payload.description)){toast(COMMUNITY_TEXT_MSG,'err');return;}
-  if(!await ensureCommunityRules())return;
   showLoading(c?'Guardando...':'Publicando...');
   try{
     if(c){
@@ -23087,8 +22733,6 @@ async function saveRetoScore(){
   let proof=((document.getElementById('rs-proof')||{}).value||'').trim();
   if(proof&&!/^https?:\/\//i.test(proof))proof='https://'+proof;
   row.proof_url=proof||null;
-  if(communityTextBlocked(row.note)){toast(COMMUNITY_TEXT_MSG,'err');return;}
-  if(!await ensureCommunityRules())return;
   // Un update manda todas las columnas del tipo (las que no se usan en null) para que una marca
   // corregida no arrastre datos de la anterior.
   const full={rounds:null,reps:null,time_sec:null,load_kg:null,finished:null,...row};

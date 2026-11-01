@@ -9,16 +9,21 @@ HABIT Training Hub — a PWA for a gym in Mazatlán, Mexico. Members book traini
 This repo ships **two** front-ends off the same Vercel project and the same Supabase database:
 
 - **HABIT Training Hub** (`app.html`, served at `/`) — the gym: bookings, payments, door access, coaching.
-- **HABIT Crew** (the same `app.html`, served at `/crew` by a rewrite in `vercel.json`) — training and
-  the community, open to anyone. The rewrite's destination is **`/app`, not `/app.html`**: with
-  `cleanUrls` Vercel publishes `app.html` as `/app`, and a rewrite to `/app.html` answers 404 (the
-  old `/` → `/app.html` rule never ran either — a real file, `index.html`, wins over a rewrite). Not a separate file: a script in `<head>` (`#brand-boot`) sets
-  `window.HABIT_BRAND` from the path before the browser reads the manifest and icons, swaps them
-  to `crew-manifest.json` / `icons/crew-*`, and puts `brand-crew` on `<html>`; the main script
-  reads it as `IS_CREW`. Crew hides everything that is the gym's (`GYM_ONLY_VIEWS`: book, planes,
-  historial, shop; the door card, bookings, guest passes and their timers; admin/reception
-  routing — staff enter Crew as members). Markup that differs carries `gym-only` / `crew-only`.
-  One account works in both because it is one database. See `docs/HABIT_PARA_TODOS.md` D11–D13
+- **HABIT Crew** (`crew.html`, served at `/crew` by `cleanUrls`) — training and the community, open
+  to anyone. **Since 31 oct 2026 it is its own file.** Until then Crew was `app.html` itself,
+  rewritten to `/crew`; that day every UX change landed in both apps, and Joseph asked for HABIT to
+  stay exactly as it was. So `app.html` was restored to `7618bef` (only the version strings
+  differ) and `crew.html` is the copy that carries everything since: 3-field signup, Inicio with
+  today's workout, Desde cero / Elegir rutina, the initials button, the new Perfil, folded
+  comments, community word filter + Normas, and the Instagram stickers (`habit-share.js`).
+  **`app.html` (HABIT, the gym app) is frozen: do not change it unless Joseph asks for that
+  specific change in HABIT.** New work goes to `crew.html`; the `scripts/check-*.js` tests read
+  `crew.html`. `crew.html` still contains the gym code and decides the brand from the path
+  (`#brand-boot` → `IS_CREW`), so at `/crew` it hides everything that is the gym's
+  (`GYM_ONLY_VIEWS`: book, planes, historial, shop; the door card, bookings, guest passes;
+  admin/reception routing — staff enter Crew as members). Markup that differs carries
+  `gym-only` / `crew-only`. One account works in both because it is one database. See
+  `docs/HABIT_PARA_TODOS.md` D11–D13
 - **Skandi Fit** (`skandi.html`, served at `/skandi`) — a separate training app for the crew of the
   Skandi Nomad (a DOF vessel). Shares `profiles` and `auth.users` with HABIT, and shares two pure JS
   modules (`skandi-recovery.js`, `body-figure.js`), but has its own tables (`skandi_*`), its own
@@ -49,7 +54,7 @@ A single ~5500-line file containing all HTML, CSS, and JavaScript. There is no f
 The app has four screens (`#s-auth`, `#s-main`, `#s-admin`, `#s-reception`), toggled by adding/removing the `.active` CSS class. Within `#s-main`, tabs are toggled via `.view.active`. Admin has its own tab system via `admTab()`.
 
 - `index.html` — just redirects to `app.html` with a version query string for cache busting
-- `sw.js` — service worker: push notifications + app shell cache. **One registration at scope `/` serves both apps** — two service workers at the root would evict each other, so Skandi registers this same file. Fetch handler: icons and the shared JS modules are cache-first, navigation is network-first (and refreshes the cached shell with what it just fetched), API calls pass through untouched. `shellFor()` picks the offline fallback by path: `/skandi*` → `skandi.html`, `/competencia*` → `competencia.html`, everything else → `app.html` (`/crew` included on purpose: it is the same file). Any new standalone page needs its own line there: the navigation handler stores what it fetched under `shellFor()`, so a page that falls through to `app.html` overwrites the app's offline copy with itself. **Every response the worker stores or hands to a navigation goes through `clean()`**: Vercel answers `/app.html` with a redirect to `/app`, `cache.addAll` stored that as a `redirected` response, and Safari refuses to give one to a navigation — the installed iPhone app opened completely blank (not even the login screen) whenever it fell back to the cache. Saving the offline copy is a side effect that must never replace a page that did arrive from the network.
+- `sw.js` — service worker: push notifications + app shell cache. **One registration at scope `/` serves both apps** — two service workers at the root would evict each other, so Skandi registers this same file. Fetch handler: icons and the shared JS modules are cache-first, navigation is network-first (and refreshes the cached shell with what it just fetched), API calls pass through untouched. `shellFor()` picks the offline fallback by path: `/skandi*` → `skandi.html`, `/competencia*` → `competencia.html`, `/crew*` → `crew.html`, everything else → `app.html`. Any new standalone page needs its own line there: the navigation handler stores what it fetched under `shellFor()`, so a page that falls through to `app.html` overwrites the app's offline copy with itself. **Every response the worker stores or hands to a navigation goes through `clean()`**: Vercel answers `/app.html` with a redirect to `/app`, `cache.addAll` stored that as a `redirected` response, and Safari refuses to give one to a navigation — the installed iPhone app opened completely blank (not even the login screen) whenever it fell back to the cache. Saving the offline copy is a side effect that must never replace a page that did arrive from the network.
 - `habit-share.js` — **stickers para historias de Instagram** (`docs/HISTORIAS_INSTAGRAM.md`).
   PNG transparentes dibujados a mano en canvas, solo blanco o negro: tocar copia
   (`ClipboardItem` con la *promesa* del PNG, para no perder el toque en Safari), mantener abre
@@ -60,7 +65,7 @@ The app has four screens (`#s-auth`, `#s-main`, `#s-admin`, `#s-reception`), tog
   (tocarla en Inicio abre `#sticker-sheet`)
 - `manifest.json` / `crew-manifest.json` / `skandi-manifest.json` — one PWA manifest per app. All use `scope: "/"` and are told apart by `id`.
 
-**Version / cache busting**: one version string covers the whole project, because one service worker caches both apps. It lives in `APP_VERSION` (`app.html`), `SKANDI_VERSION` (`skandi.html`) and `CACHE_VERSION` (`sw.js`), plus the `?v=` strings in `index.html`, the three manifests' `start_url`, the `<link>`/`<script>` tags at the top of `app.html` and `skandi.html`, and the `v` inside `app.html`'s `#brand-boot` script. **Changing either app means bumping all of them to the same value** — a stale `CACHE_VERSION` leaves the offline shell frozen at the previous deploy.
+**Version / cache busting**: one version string covers the whole project, because one service worker caches both apps. It lives in `APP_VERSION` (`app.html` **and** `crew.html`), `SKANDI_VERSION` (`skandi.html`) and `CACHE_VERSION` (`sw.js`), plus the `?v=` strings in `index.html`, the three manifests' `start_url`, the `<link>`/`<script>` tags at the top of `app.html`, `crew.html` and `skandi.html`, and the `v` inside the `#brand-boot` script of `app.html` and `crew.html`. Bumping the version is the one change `app.html` still takes. **Changing either app means bumping all of them to the same value** — a stale `CACHE_VERSION` leaves the offline shell frozen at the previous deploy.
 
 ### Frontend (`skandi.html`)
 Same architecture as `app.html` — a single ~4,500-line vanilla-JS file, Supabase from CDN, no build

@@ -28,13 +28,16 @@ const quotes = [
 for (const q of quotes) {
   const L = S.quoteLayout(q, measure);
   assert.ok(L.lines.length >= 1 && L.lines.length <= 5, `«${q.slice(0, 20)}…» en 1–5 renglones`);
-  assert.ok(L.size >= 48 && L.size <= 92, 'tamaño de letra en rango');
+  assert.ok(L.size >= 40 && L.size <= 76, 'tamaño de letra en rango');
   assert.equal(L.font.includes(L.size + 'px'), true, 'los renglones son del tamaño que se dibuja');
   const inner = S.WIDTH - 72 * 2;
   L.lines.forEach((l) => assert.ok(measure(l.text, L.font) <= inner + 0.5, 'ningún renglón se sale'));
   assert.equal(L.lines.map((l) => l.text).join(' '), '“' + q + '”', 'no se pierde ni se agrega texto');
-  assert.ok(L.sig.ring.cy + L.sig.ring.r <= L.height, 'la firma cabe en el lienzo');
-  assert.ok(L.sig.ring.cx - L.sig.ring.r >= 0, 'la firma no se sale por la izquierda');
+  const lk = L.lockup;
+  assert.ok(lk.logo.y + lk.logo.size <= L.height, 'el logotipo cabe en el lienzo');
+  assert.ok(lk.logo.x >= 0 && lk.word.x + measure('HABIT', lk.word.font) <= L.width, 'el logotipo no se sale');
+  assert.ok(Math.abs((lk.logo.x + lk.width / 2) - L.width / 2) < 1, 'el logotipo va centrado');
+  assert.ok(L.font.includes('Inter') && lk.word.font.startsWith('800'), 'Inter, la fuente de HABIT');
   assert.equal(L.width, 1080);
 }
 const long = S.quoteLayout(quotes[2], measure);
@@ -42,8 +45,9 @@ const short = S.quoteLayout(quotes[1], measure);
 assert.ok(long.size < short.size, 'la frase larga baja de tamaño');
 
 const sig = S.signatureLayout(measure);
-assert.ok(sig.textX + measure(sig.text, sig.font) <= sig.width, 'la firma cabe');
-assert.ok(sig.ring.cy + sig.ring.r <= sig.height, 'el anillo cabe');
+assert.ok(sig.lockup.logo.x >= 0 && sig.lockup.logo.x + sig.lockup.width <= sig.width + 0.5, 'la firma cabe a lo ancho');
+assert.ok(sig.sub.y <= sig.height, 'MAKE IT A HABIT cabe');
+assert.equal(sig.lockup.word.text, 'HABIT');
 
 assert.deepEqual(Object.keys(S.COLORS), ['blanco', 'negro'], 'solo blanco y negro');
 
