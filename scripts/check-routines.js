@@ -65,4 +65,11 @@ assert.equal(exDisplayName('RDL CON BARRA'),'RDL con barra');
 assert.equal(exDisplayName('Press inclinado'),'Press inclinado');
 assert.equal(exDisplayName('Pike push up'),'Pike push up');
 assert.equal(exDisplayName(''),'');
+// Las rutinas son títulos: cada palabra con mayúscula inicial, menos las cortas («de», «con»).
+const routineName=new Function(source('const EX_NAME_KEEP_UPPER=', 'function exerciseIconSvg(')+'return routineName;')();
+assert.equal(routineName('DAY 1 KB MARCIN'),'Day 1 KB Marcin');
+assert.equal(routineName('FULL BODY'),'Full Body');
+assert.equal(routineName('HIT + CORE'),'HIT + Core');
+assert.equal(routineName('PIERNA DE FUERZA'),'Pierna de Fuerza');
+assert.equal(routineName('Leg day'),'Leg day','lo que ya trae minúsculas se respeta');
 console.log('HABIT Rutinas: 21 assertions OK');

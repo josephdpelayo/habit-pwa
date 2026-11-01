@@ -6,12 +6,12 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="HABIT">
 <meta name="application-name" content="HABIT">
-<link rel="manifest" href="/manifest.json?v=20261031-8">
-<link rel="apple-touch-icon" sizes="120x120" href="/icons/icon-120.png?v=20261031-8">
-<link rel="apple-touch-icon" sizes="152x152" href="/icons/icon-152.png?v=20261031-8">
-<link rel="apple-touch-icon" sizes="167x167" href="/icons/icon-167.png?v=20261031-8">
-<link rel="apple-touch-icon" sizes="180x180" href="/icons/icon-180.png?v=20261031-8">
-<link rel="icon" type="image/png" sizes="32x32" href="/icons/icon-32.png?v=20261031-8">
+<link rel="manifest" href="/manifest.json?v=20261031-9">
+<link rel="apple-touch-icon" sizes="120x120" href="/icons/icon-120.png?v=20261031-9">
+<link rel="apple-touch-icon" sizes="152x152" href="/icons/icon-152.png?v=20261031-9">
+<link rel="apple-touch-icon" sizes="167x167" href="/icons/icon-167.png?v=20261031-9">
+<link rel="apple-touch-icon" sizes="180x180" href="/icons/icon-180.png?v=20261031-9">
+<link rel="icon" type="image/png" sizes="32x32" href="/icons/icon-32.png?v=20261031-9">
 <title>HABIT</title>
 <!-- Con id a propósito: scripts/check-training.js toma la primera etiqueta script sin
      atributos como el script principal de la app y la compila. -->
@@ -25,7 +25,7 @@
   var crew=/^\/crew(\/|$)/.test(location.pathname);
   window.HABIT_BRAND=crew?'crew':'gym';
   if(!crew)return;
-  var v='20261031-8';
+  var v='20261031-9';
   document.documentElement.classList.add('brand-crew');
   document.title='HABIT Crew';
   document.querySelectorAll('meta[name="apple-mobile-web-app-title"],meta[name="application-name"]')
@@ -40,10 +40,10 @@
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Share+Tech+Mono&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="/skandi-recovery.js?v=20261031-8"></script>
-<script src="/body-figure.js?v=20261031-8"></script>
-<script src="/habit-training.js?v=20261031-8"></script>
-<script src="/habit-share.js?v=20261031-8"></script>
+<script src="/skandi-recovery.js?v=20261031-9"></script>
+<script src="/body-figure.js?v=20261031-9"></script>
+<script src="/habit-training.js?v=20261031-9"></script>
+<script src="/habit-share.js?v=20261031-9"></script>
 <style>
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
 @media (prefers-reduced-motion:reduce){*,*:before,*:after{scroll-behavior:auto!important;animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}}
@@ -2924,6 +2924,32 @@ button{transition:transform .14s var(--ease-out),background-color .16s ease,colo
 @media (prefers-reduced-motion:reduce){
   .view.active,.screen.active,.adm-section.active,.terms-modal,.terms-modal>.terms-box,.exercise-session-modal>.terms-box,.workout-sheet.open,.clk-sheet.open{animation:none}
 }
+
+/* ── HABIT CREW · EDITORIAL (31 oct 2026) ────────────────────────────────────────────────
+   Va al final para pisar por orden. Una sola fuente (Inter, la del logotipo), más aire y menos
+   cajas dentro de cajas. Los colores de la marca se quedan (el azul, el verde, el color de cada
+   rutina): Joseph no quiere la app monocromática. */
+.daily-quote-text{font-family:'Inter',-apple-system,sans-serif;letter-spacing:-.015em}
+.brand-crew .logo-wrap .lsub.crew-only{font-size:9px;font-weight:600;letter-spacing:.32em;margin-left:5px}
+/* La tarjeta de hoy, editorial: la fecha chica y espaciada, la rutina en grande, sin caja. El
+   entreno en curso conserva su caja azul: es lo único que tiene que llamar la atención. */
+.hoy-hero{background:transparent;border:0;padding:4px 2px 8px;margin-bottom:20px}
+.hoy-hero.live{padding:18px 16px 12px;border-radius:20px}
+.hoy-k{font-size:11px;font-weight:600;letter-spacing:.24em;text-transform:uppercase;color:var(--gray)}
+.hoy-title{font-size:40px;font-weight:900;letter-spacing:-.045em;line-height:1.02;margin:10px 0 8px;gap:12px;align-items:center}
+.hoy-title .hoy-dot{width:12px;height:12px}
+.hoy-meta{font-size:14px}
+.hoy-hero .hoy-cta{margin-top:20px}
+/* Desde cero / Elegir rutina bajo «Empezar»: texto, no cajas. Sin otro botón arriba, siguen
+   siendo botones (son la acción). */
+.hoy-start-row:not(.main){display:flex;justify-content:center;gap:30px;margin-top:10px}
+.hoy-start-row:not(.main) button{background:none;border:0;box-shadow:none;min-height:42px;padding:0 4px;color:var(--gl);font-size:15px;font-weight:600}
+/* Un solo estilo de tarjeta: sin borde, el tono las separa. */
+.app-gym-invite,.hoy-week,.hoy-row,.hoy-rows{border:0}
+/* La semana: hecho (verde con ✓), en curso, pendiente (aro), se pasó (aro tenue punteado),
+   descanso (nada). Antes eran puntitos y guiones casi invisibles. */
+.hoy-day.missed i{box-shadow:none;border:1.5px dashed rgba(255,255,255,.2)}
+.hoy-day.rest i{opacity:0}
 </style>
 </head>
 <body>
@@ -4130,7 +4156,7 @@ const GYM_ONLY_VIEWS=['book','planes','historial','shop'];
 const GYM_APP_URL='/';
 document.querySelectorAll('.brand-name').forEach(el=>{el.textContent=BRAND_NAME;});
 const SUPABASE_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBtcGp0ZXVxanVzYmlkdWV2YndxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc2OTI1NjUsImV4cCI6MjA5MzI2ODU2NX0.XbMzZoo2yqtrD8znLnyo_1zDfrdJAvAPj1lqGOyXnLw';
-const APP_VERSION='20261031-8';
+const APP_VERSION='20261031-9';
 // La pierna va separada en cuádriceps, femorales y pantorrillas: la figura
 // corporal pinta esas tres regiones por separado y el motor de recuperación les
 // da ventanas de descanso distintas. 'Piernas' sigue reconociéndose al leer
@@ -4447,6 +4473,23 @@ function exDisplayName(name){
     const low=tok.toLowerCase();
     if(first){first=false;return low.charAt(0).toUpperCase()+low.slice(1);}
     return low;
+  }).join('');
+}
+// Las rutinas del gym también se escribieron en MAYÚSCULAS («DAY 1 KB MARCIN»). Un nombre de
+// rutina es un título, así que va con cada palabra en mayúscula inicial («Day 1 KB Marcin»), no
+// en minúsculas como un ejercicio; las siglas se respetan. Solo para mostrar.
+function routineName(name){
+  const n=String(name||'');
+  if(!/[A-ZÁÉÍÓÚÑ]{2}/.test(n)||/[a-záéíóúñ]/.test(n))return n;
+  const small=new Set(['de','del','con','y','a','en','la','el','para']);
+  let first=true;
+  return n.split(/(\s+|\/|-)/).map(tok=>{
+    if(!/[A-ZÁÉÍÓÚÑ]/.test(tok))return tok;
+    if(EX_NAME_KEEP_UPPER.has(tok)){first=false;return tok;}
+    const low=tok.toLowerCase();
+    const out=(!first&&small.has(low))?low:low.charAt(0).toUpperCase()+low.slice(1);
+    first=false;
+    return out;
   }).join('');
 }
 function exerciseIconSvg(ex){
@@ -11158,7 +11201,7 @@ function toggleHoyBody(){
 function hoyHeroHtml(o){
   return '<section class="hoy-hero'+(o.live?' live':'')+'">'
     +'<div class="hoy-k">'+esc(o.k)+'</div>'
-    +'<div class="hoy-title">'+(o.dot?'<span class="hoy-dot" style="background:'+esc(o.dot)+'"></span>':'')+'<span>'+esc(o.title)+'</span></div>'
+    +'<div class="hoy-title">'+(o.dot?'<span class="hoy-dot" style="background:'+esc(o.dot)+'"></span>':'')+'<span>'+esc(routineName(o.title))+'</span></div>'
     +(o.meta?'<div class="hoy-meta">'+esc(o.meta)+'</div>':'')
     +(o.extra||'')
     +(o.cta||'')
@@ -11205,7 +11248,7 @@ function hoyWeekHtml(){
     else if(rows.length&&rows.every(r=>r.status==='done'))st='done';
     if(rows.length)planned++;
     if(st==='done')done++;
-    const mark={done:'✓',live:'●',planned:'',missed:'·',rest:'–'}[st];
+    const mark={done:'✓',live:'●',planned:'',missed:'',rest:''}[st];
     const what=rows.map(r=>r.board_name).join(' + ')||'Descanso';
     return '<span class="hoy-day '+st+(ds===today?' today':'')+'" title="'+esc(DOW_SHORT[i]+': '+what)+'"><b>'+letter+'</b><i>'+mark+'</i></span>';
   }).join('');
@@ -11292,7 +11335,7 @@ function hoyTopHtml(opts){
   // Más de una sesión hoy (fuerza y carrera, mañana y tarde): las demás, en una línea cada una.
   pending.slice(active?0:1).forEach(row=>{
     html+='<div class="hoy-also"><span class="hoy-dot" style="background:'+esc(row.board_color||'#2563eb')+'"></span>'
-      +'<span class="hoy-also-name">'+esc(row.board_name)+'</span>'
+      +'<span class="hoy-also-name">'+esc(routineName(row.board_name))+'</span>'
       +'<button class="btn-sm" onclick="'+start+'(&quot;'+row.id+'&quot;)">Empezar</button></div>';
   });
   // La rutina que ya está en la tarjeta (la de hoy, o la que se ofrece repetir) no se repite abajo.
@@ -11334,7 +11377,7 @@ function hoyMissedRows(schedule,today,weekStart){
 function hoyMissedText(rows,today){
   const last=rows[0];
   if(rows.length===1)return 'Te faltó '+(last.board_name||'un entreno')+', '+hoyWhenLabel(last.ds,today)+'.';
-  const names=[...new Set(rows.slice().reverse().map(r=>r.board_name||'Entreno'))]; // en orden de la semana
+  const names=[...new Set(rows.slice().reverse().map(r=>routineName(r.board_name)||'Entreno'))]; // en orden de la semana
   const list=names.length===1?rows.length+' de '+names[0]:names.slice(0,-1).join(', ')+' y '+names[names.length-1];
   return 'Esta semana te faltaron '+list+'. ¿Haces '+(last.board_name||'el último')+' hoy?';
 }
@@ -11475,7 +11518,7 @@ function hoyRoutinesHtml(excludeId){
     +list.map(b=>{
       const meta=routineTodayMeta(b);
       return '<button type="button" class="hoy-rt" onclick="hoyStartRoutine(&quot;'+esc(b.id)+'&quot;)">'
-        +'<span class="hoy-rt-name"><span class="hoy-dot" style="background:'+esc(routineColor(b))+'"></span><strong>'+esc(b.name||'Rutina')+'</strong></span>'
+        +'<span class="hoy-rt-name"><span class="hoy-dot" style="background:'+esc(routineColor(b))+'"></span><strong>'+esc(routineName(b.name)||'Rutina')+'</strong></span>'
         +'<small>'+meta.exercises.length+' ejercicio'+(meta.exercises.length===1?'':'s')+' · ~'+meta.duration+' min</small></button>';
     }).join('')
     +'</div></section>';
@@ -11540,7 +11583,7 @@ function renderRutSemana(){
       const meta=[exCount?exCount+' ejercicio'+(exCount===1?'':'s'):'',fromCoach?'De tu coach':''].filter(Boolean).join(' · ')||'Cambiar rutina';
       html+='<li class="'+cls+'"><button type="button" class="week-day-main" onclick="openDayPicker('+d+')" aria-label="Cambiar rutina del '+DOW_LONG[d]+': '+esc(name)+'">'
         +dayLabel+'<span class="week-day-info"><span class="week-day-name"><span class="week-dot" style="background:'+esc(dot)+'" aria-hidden="true"></span>'
-        +'<span class="week-day-name-text">'+esc(name)+'</span></span>'
+        +'<span class="week-day-name-text">'+esc(routineName(name))+'</span></span>'
         +'<span class="week-day-meta'+(fromCoach?' from-coach':'')+'">'+esc(meta)+'</span></span></button>'
         +'<button type="button" class="week-day-edit" onclick="openWeekDayOptions('+d+')" aria-label="Opciones para el '+DOW_LONG[d]+'" aria-haspopup="dialog">···</button></li>';
     }
@@ -11946,7 +11989,7 @@ function routineCardHtml(b){
   const days=weekTemplate.filter(t=>t.board_id===b.id).map(t=>DOW_SHORT[t.dow]);
   return '<button type="button" class="routine-list-row" onclick="openRoutineDetail(&quot;'+esc(b.id)+'&quot;)">'
     +'<span class="routine-list-mark" style="background:'+esc(routineColor(b))+'" aria-hidden="true"></span>'
-    +'<span class="routine-list-copy"><strong>'+esc(b.name)+'</strong><small>'
+    +'<span class="routine-list-copy"><strong>'+esc(routineName(b.name))+'</strong><small>'
     +exercises.length+' ejercicio'+(exercises.length===1?'':'s')+(exercises.length?' · ~'+meta.duration+' min':'')
     +(days.length?' · '+esc(days.join(', ')):'')+'</small></span>'
     +'<span class="routine-list-arrow" aria-hidden="true">›</span></button>';
@@ -11958,7 +12001,7 @@ function openRoutineDetail(boardId){
   const series=exercises.reduce((n,ex)=>n+(exerciseSetCount(ex)||0),0);
   document.getElementById('routine-detail-body').innerHTML=
     '<div class="routine-detail-origin">'+(mine?'Creada por ti':b._starterOnly?'HABIT · Básica':'De tu entrenador')+'</div>'
-    +'<h3 class="routine-detail-name">'+esc(b.name)+'</h3>'
+    +'<h3 class="routine-detail-name">'+esc(routineName(b.name))+'</h3>'
     +(b.forked_from_name?'<p class="routine-detail-note">Adaptada de '+esc(b.forked_from_name)+'</p>':'')
     +'<div class="routine-detail-stats"><div><strong>'+exercises.length+'</strong><small>ejercicios</small></div>'
     +'<div><strong>'+series+'</strong><small>series</small></div><div><strong>'+(exercises.length?'~'+meta.duration:'—')+'</strong><small>minutos</small></div></div>'
@@ -13082,7 +13125,7 @@ function renderEditWorkoutModalBody(){
   if(!_editingWorkoutContext)return;
   const{row,exercises}= _editingWorkoutContext;
   document.getElementById('edit-workout-modal-body').innerHTML=
-    '<div class="edit-workout-summary"><div class="edit-workout-title">'+esc(row.board_name)+'</div><div class="edit-workout-date">'+fmtDS(row.ds)+'</div></div>'
+    '<div class="edit-workout-summary"><div class="edit-workout-title">'+esc(routineName(row.board_name))+'</div><div class="edit-workout-date">'+fmtDS(row.ds)+'</div></div>'
     +'<div class="edit-workout-hint">Edita peso, reps y series directamente aqui. Los cambios se guardan al cambiar cada campo o marcar la serie.</div>'
     +renderWorkoutEditListHtml(exercises,row.board_id,row.id)
     +'<button class="btn-sm bred" style="width:100%;margin-top:10px" onclick="deleteCompletedWorkoutSb(&quot;'+row.id+'&quot;)">Eliminar este entreno</button>';
@@ -14672,7 +14715,7 @@ function renderWorkoutSheet(){
   // inicio. Se guarda y restaura la posición alrededor del reemplazo.
   const scrollTop=content.scrollTop;
   _wsSwipeOpen=null;_wsSw=null;
-  document.getElementById('ws-bar-title').textContent=activeCoachingSession.board_name||'Entreno';
+  document.getElementById('ws-bar-title').textContent=routineName(activeCoachingSession.board_name)||'Entreno';
   document.getElementById('ws-bar-k').textContent=fmtDS(activeCoachingSession.ds);
 
   // Si la hoja se abrió antes de que llegaran las series, la que sigue se resuelve aquí.
@@ -20542,7 +20585,7 @@ function renderCoachBoardPicker(){
     return '<div class="coach-pick-item'+(on?' is-current':'')+'">'
       +'<button class="coach-pick-row" onclick="coachPickerChoose(&quot;'+esc(b.id)+'&quot;)">'
         +'<span class="coach-pick-dot" style="background:'+esc(own?MEMBER_ROUTINE_COLOR:(b.color||'#2563eb'))+'"></span>'
-        +'<span class="coach-pick-main"><span class="coach-pick-name">'+esc(b.name)+coachPickerTags(b)+'</span>'
+        +'<span class="coach-pick-main"><span class="coach-pick-name">'+esc(routineName(b.name))+coachPickerTags(b)+'</span>'
         +'<span class="coach-pick-sub">'+esc(coachBoardSummaryLine(b))+'</span></span>'
         +(on?'<span class="coach-pick-check">✓</span>':'')
       +'</button>'

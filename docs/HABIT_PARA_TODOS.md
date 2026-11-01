@@ -894,3 +894,18 @@ nuevas.
   - Lo que sigue aplicando a las dos, porque vive en la base: el filtro de palabras de la 138. En
     HABIT un texto bloqueado sale como el error crudo `COMMUNITY_TEXT_BLOCKED` (su app no lo
     traduce).
+- **2026-10-31 (7)** — **Crew más editorial** (versión `20261031-9`, solo `crew.html`). Una capa
+  al final de la hoja de estilos («HABIT CREW · EDITORIAL») y tres cambios de JS:
+  - **Una sola fuente**: la frase del día pasa de Space Grotesk a Inter, como todo lo demás.
+  - **La tarjeta de hoy sin caja** (Inicio y Entrenar): la fecha chica, en mayúsculas y
+    espaciada; la rutina en 40 px / 900; «Desde cero» y «Elegir rutina» como texto bajo «Empezar»
+    (siguen siendo botones grandes cuando no hay nada agendado). El entreno en curso conserva su
+    caja azul.
+  - **Nombres de rutina** con mayúscula inicial (`routineName`: «DAY 1 KB MARCIN» → «Day 1 KB
+    Marcin», respeta siglas y lo que ya trae minúsculas) en Hoy, la biblioteca, la ficha, Semana,
+    la hoja de elegir, la barra del entreno y la edición de un entreno hecho.
+  - **La semana**: el descanso ya no lleva guion (vacío) y lo que se pasó es un aro punteado tenue,
+    distinto del pendiente.
+  - **Tarjetas sin borde** (la invitación al gym, la semana, las filas de Hoy).
+  - Los colores se quedan (Joseph no la quiere monocromática): el azul de CREW, el verde del @ y el
+    color de cada rutina.
