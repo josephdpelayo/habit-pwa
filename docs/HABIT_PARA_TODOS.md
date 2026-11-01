@@ -823,3 +823,22 @@ nuevas.
   - **Falta:** correr la **138** en el SQL Editor (sin ella solo filtra la app), alguien que
     atienda los reportes a tiempo, y la app nativa de Crew (otro bundle id en Capacitor; el
     `www/` de iOS está desactualizado).
+- **2026-10-31 (2)** — **Más simple de usar** (versión `20261031-2`). Por ahora entran amigos, así
+  que lo que estorba se quita:
+  - **Registro en tres campos**: nombre, correo y contraseña (con el ojo para verla). Sin
+    "confirmar correo", "confirmar contraseña" ni teléfono (se agrega en Perfil), y sin la hoja de
+    términos con casilla: una línea bajo el botón dice que crear la cuenta es aceptarlos y abre
+    los Términos y las Normas para leerlos (`readTerms`).
+  - **Onboarding opcional**: ya no se abre al registrarse ni al entrar; vive en Perfil → Mi
+    entrenamiento. Al registrarse en Crew se entra directo a Inicio.
+  - **Inicio abre con lo de hoy**: la misma tarjeta de Entrenar → Hoy (`hoyTopHtml`, con
+    `startInicioCoachWorkout` para empezar), debajo de la puerta; la frase del día pasa al final.
+    Sustituye al botón chico de Inicio (`inicioCoachActionHtml`, borrado).
+  - **Hoy sin doble sugerencia**: «Esta semana te faltaron…» solo sale si hoy no hay nada
+    agendado, en curso ni hecho.
+  - **«Salir» pasa a Perfil → Cuenta**, con confirmación (`confirmLogout`); estaba a un toque en
+    la barra de arriba. El staff también lo ve (solo se le oculta "Borrar mi cuenta").
+  - **Semana sin pantalla en blanco**: se adelanta en segundo plano al abrir Hoy, y un panel sin
+    pintar muestra «Cargando…».
+  - **El login ya no se asoma al abrir**: con una sesión guardada, `initApp` cubre la pantalla
+    mientras la restaura en lugar de mostrar el formulario detrás.

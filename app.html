@@ -6,12 +6,12 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="HABIT">
 <meta name="application-name" content="HABIT">
-<link rel="manifest" href="/manifest.json?v=20261031-1">
-<link rel="apple-touch-icon" sizes="120x120" href="/icons/icon-120.png?v=20261031-1">
-<link rel="apple-touch-icon" sizes="152x152" href="/icons/icon-152.png?v=20261031-1">
-<link rel="apple-touch-icon" sizes="167x167" href="/icons/icon-167.png?v=20261031-1">
-<link rel="apple-touch-icon" sizes="180x180" href="/icons/icon-180.png?v=20261031-1">
-<link rel="icon" type="image/png" sizes="32x32" href="/icons/icon-32.png?v=20261031-1">
+<link rel="manifest" href="/manifest.json?v=20261031-2">
+<link rel="apple-touch-icon" sizes="120x120" href="/icons/icon-120.png?v=20261031-2">
+<link rel="apple-touch-icon" sizes="152x152" href="/icons/icon-152.png?v=20261031-2">
+<link rel="apple-touch-icon" sizes="167x167" href="/icons/icon-167.png?v=20261031-2">
+<link rel="apple-touch-icon" sizes="180x180" href="/icons/icon-180.png?v=20261031-2">
+<link rel="icon" type="image/png" sizes="32x32" href="/icons/icon-32.png?v=20261031-2">
 <title>HABIT</title>
 <!-- Con id a propósito: scripts/check-training.js toma la primera etiqueta script sin
      atributos como el script principal de la app y la compila. -->
@@ -25,7 +25,7 @@
   var crew=/^\/crew(\/|$)/.test(location.pathname);
   window.HABIT_BRAND=crew?'crew':'gym';
   if(!crew)return;
-  var v='20261031-1';
+  var v='20261031-2';
   document.documentElement.classList.add('brand-crew');
   document.title='HABIT Crew';
   document.querySelectorAll('meta[name="apple-mobile-web-app-title"],meta[name="application-name"]')
@@ -40,9 +40,9 @@
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Share+Tech+Mono&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="/skandi-recovery.js?v=20261031-1"></script>
-<script src="/body-figure.js?v=20261031-1"></script>
-<script src="/habit-training.js?v=20261031-1"></script>
+<script src="/skandi-recovery.js?v=20261031-2"></script>
+<script src="/body-figure.js?v=20261031-2"></script>
+<script src="/habit-training.js?v=20261031-2"></script>
 <style>
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
 @media (prefers-reduced-motion:reduce){*,*:before,*:after{scroll-behavior:auto!important;animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}}
@@ -2563,9 +2563,12 @@ body.admin-mode #courtesy-modal label{border-radius:14px!important;border-color:
 /* HABIT Crew: el mismo app.html con otra marca (clase brand-crew en <html>, puesta en el <head>). */
 .crew-only{display:none!important}
 .brand-crew .crew-only{display:block!important}
+.brand-crew span.crew-only{display:inline!important}
 .brand-crew .gym-only{display:none!important}
 .brand-crew .top-action[data-top-view="planes"],.brand-crew .top-action[data-top-view="historial"]{display:none}
 .brand-crew .bnav .bnb.gym-nav{display:none}
+.reg-terms{font-size:12px;line-height:1.5;color:var(--gray);margin:10px 0 0;text-align:center}
+.reg-terms a{color:var(--gl);text-decoration:underline;text-underline-offset:2px}
 .reg-other-app{font-size:12px;line-height:1.5;color:var(--gray);margin:12px 0 0;text-align:center}
 .reg-other-app a{color:var(--white);font-weight:700}
 .app-gym-invite{display:flex;align-items:center;gap:12px;padding:14px;margin-bottom:16px;border:1px solid var(--hairline);border-radius:var(--radius-md);background:var(--surface)}
@@ -2924,8 +2927,6 @@ button{transition:transform .14s var(--ease-out),background-color .16s ease,colo
     <div id="ar" style="display:none">
       <div class="field"><label>Nombre completo</label><input type="text" id="rn" placeholder="Tu nombre" autocomplete="name"></div>
       <div class="field"><label>Correo</label><input type="email" id="re" placeholder="tu@correo.com" autocomplete="email"></div>
-      <div class="field"><label>Confirmar correo</label><input type="email" id="re2" placeholder="Repite tu correo"></div>
-      <div class="field"><label>Teléfono</label><input type="tel" id="rph" placeholder="+52 55 0000 0000" autocomplete="tel"></div>
       <div class="field">
         <label>Contraseña</label>
         <div style="position:relative">
@@ -2933,14 +2934,10 @@ button{transition:transform .14s var(--ease-out),background-color .16s ease,colo
           <button type="button" onclick="togglePw('rp','eye1')" style="position:absolute;right:0;top:0;height:100%;width:44px;background:none;border:none;cursor:pointer;color:var(--gray);font-size:16px" id="eye1">👁</button>
         </div>
       </div>
-      <div class="field">
-        <label>Confirmar contraseña</label>
-        <div style="position:relative">
-          <input type="password" id="rp2" placeholder="Repite tu contraseña" autocomplete="new-password" style="padding-right:44px">
-          <button type="button" onclick="togglePw('rp2','eye2')" style="position:absolute;right:0;top:0;height:100%;width:44px;background:none;border:none;cursor:pointer;color:var(--gray);font-size:16px" id="eye2">👁</button>
-        </div>
-      </div>
       <button class="btn" onclick="doRegister()">Crear cuenta</button>
+      <!-- Tres campos y ya: el teléfono se agrega en Perfil, y el ojo de la contraseña reemplaza
+           a "confirmar". Aceptar es crear la cuenta; los términos se leen desde aquí. -->
+      <p class="reg-terms">Al crear tu cuenta aceptas los <a href="#" onclick="readTerms(IS_CREW?'app':'gym');return false"><span class="gym-only">Términos y el Reglamento</span><span class="crew-only">Términos de uso</span></a> y las <a href="#" onclick="openCommunityRules();return false">Normas de la comunidad</a>.</p>
       <div class="install-hint">Al terminar tu registro te mostraremos como guardar <span class="brand-name">HABIT</span> en tu inicio y abrirla como app.</div>
       <!-- Cada app manda a la otra a quien llegó a la equivocada. La cuenta es la misma. -->
       <p class="reg-other-app gym-only">¿Entrenas por tu cuenta, fuera del gym? <a href="/crew">Usa HABIT Crew</a>: gratis, sin membresía, con la misma cuenta.</p>
@@ -2974,22 +2971,22 @@ button{transition:transform .14s var(--ease-out),background-color .16s ease,colo
       <button class="top-action" data-top-view="historial" onclick="sv('historial')" title="Historial"><svg viewBox="0 0 24 24"><path d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg></button>
       <button class="top-action" data-top-view="perfil" onclick="sv('perfil')" title="Configurar perfil"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-2 2 2 2 0 01-2-2v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 01-2-2 2 2 0 012-2h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 012-2 2 2 0 012 2v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 012 2 2 2 0 01-2 2h-.09a1.65 1.65 0 00-1.51 1z"/></svg></button>
     </div>
-    <button class="logout-btn" onclick="doLogout()">Salir</button>
+    <!-- «Salir» vivía aquí, a un toque de cerrar la sesión sin querer: ahora está en Perfil. -->
   </div>
 
   <!-- INICIO -->
   <div id="v-inicio" class="view active">
     <div class="scroll-area">
-      <div id="inicio-coach-action"></div>
-      <div id="inicio-push-card"></div>
       <div id="access-main"></div>
-      <div class="daily-quote-wrap"></div>
+      <div id="inicio-coach-action" class="inicio-hoy"></div>
+      <div id="inicio-push-card"></div>
       <div id="inicio-fasting-mini"></div>
       <div id="guest-group-wrap"></div>
       <div id="active-bookings-wrap"></div>
       <div id="membership-status-wrap"></div>
       <div id="inicio-retos"></div>
       <div id="notif-wrap"></div>
+      <div class="daily-quote-wrap"></div>
     </div>
   </div>
 
@@ -3033,7 +3030,8 @@ button{transition:transform .14s var(--ease-out),background-color .16s ease,colo
         <div id="perfil-account-section">
           <div class="divider" style="margin:.75rem 0"></div>
           <p class="slbl">Cuenta</p>
-          <button class="btn-ghost perfil-delete-btn" onclick="deleteMyAccount()">Borrar mi cuenta</button>
+          <button class="btn-ghost" onclick="confirmLogout()">Cerrar sesión</button>
+          <button class="btn-ghost perfil-delete-btn" onclick="deleteMyAccount()" style="margin-top:8px">Borrar mi cuenta</button>
           <p class="perfil-delete-hint">Borra tu cuenta, tus rutinas, tu historial de entrenamiento y tu progreso. No se puede deshacer.</p>
         </div>
       </div>
@@ -4097,7 +4095,7 @@ const GYM_ONLY_VIEWS=['book','planes','historial','shop'];
 const GYM_APP_URL='/';
 document.querySelectorAll('.brand-name').forEach(el=>{el.textContent=BRAND_NAME;});
 const SUPABASE_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBtcGp0ZXVxanVzYmlkdWV2YndxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc2OTI1NjUsImV4cCI6MjA5MzI2ODU2NX0.XbMzZoo2yqtrD8znLnyo_1zDfrdJAvAPj1lqGOyXnLw';
-const APP_VERSION='20261031-1';
+const APP_VERSION='20261031-2';
 // La pierna va separada en cuádriceps, femorales y pantorrillas: la figura
 // corporal pinta esas tres regiones por separado y el motor de recuperación les
 // da ventanas de descanso distintas. 'Piernas' sigue reconociéndose al leer
@@ -4796,7 +4794,20 @@ function checkExpiryPush(){
 async function initApp(){
   document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
   const authEl=document.getElementById('s-auth');
-  if(authEl)authEl.classList.add('active');
+  // Con una sesión guardada el login no se muestra mientras se restaura: se asomaba detrás de
+  // «Cargando tu cuenta» y parecía que la app había cerrado la sesión. Sin sesión, sí.
+  let stored=false;
+  try{stored=Object.keys(localStorage).some(k=>/^sb-.*-auth-token$/.test(k));}catch(_){}
+  const showAuth=()=>{
+    const ov=document.getElementById('loading-overlay');
+    if(ov)ov.style.background='rgba(10,10,10,.9)';
+    if(authEl&&!document.querySelector('.screen.active'))authEl.classList.add('active');
+  };
+  if(stored){
+    showLoading('Cargando tu cuenta...');
+    const ov=document.getElementById('loading-overlay');
+    if(ov)ov.style.background='var(--black)';
+  }else showAuth();
   try{
     const p=sb.auth.getSession();
     const t=new Promise((_,rej)=>setTimeout(()=>rej(new Error('timeout')),5000));
@@ -4804,12 +4815,14 @@ async function initApp(){
     if(result.data&&result.data.session){
       sbUser=result.data.session.user;
       if(isPasswordRecoveryUrl()){
+        hideLoading();showAuth();
         showResetPasswordModal();
         return;
       }
       showLoading('Cargando tu cuenta...');
       await loadUserData();
       hideLoading();
+      {const ov=document.getElementById('loading-overlay');if(ov)ov.style.background='rgba(10,10,10,.9)';}
       if(isPublicShopUrl()){
         if(canAccessShop()){showPublicShop();handleShopReturn();}
         else showShopAccessGate(true);
@@ -4824,10 +4837,11 @@ async function initApp(){
         handleStripeReturn();
         
       }
-    }
+    }else{hideLoading();showAuth();}
     if(isPublicShopUrl())showShopAccessGate(false);
   }catch(e){
     hideLoading();
+    showAuth();
     console.log('No session:',e.message);
     if(isPublicShopUrl())showShopAccessGate(false);
   }
@@ -6357,7 +6371,15 @@ function showTerms(kind,onAccept){
 function closeTerms(){
   const modal=document.getElementById('terms-modal');
   if(modal)modal.style.display='none';
+  const foot=modal&&modal.querySelector('.terms-footer');
+  if(foot)foot.style.display='';
   termsOnAccept=null;
+}
+// Solo leer: desde el registro, donde aceptar es crear la cuenta.
+function readTerms(kind){
+  showTerms(kind,null);
+  const foot=document.querySelector('#terms-modal .terms-footer');
+  if(foot)foot.style.display='none';
 }
 function acceptTerms(){
   const chk=document.getElementById('terms-check');
@@ -6371,19 +6393,19 @@ function acceptTerms(){
 async function doRegister(){
   const name=document.getElementById('rn').value.trim();
   const email=document.getElementById('re').value.trim();
-  const email2=(document.getElementById('re2')||{value:email}).value.trim();
-  const phone=document.getElementById('rph').value.trim();
+  const phone=((document.getElementById('rph')||{}).value||'').trim();
   const pass=document.getElementById('rp').value;
-  const pass2=(document.getElementById('rp2')||{value:pass}).value;
-  if(!name||!email||!pass){toast('Completa todos los campos','err');return;}
-  if(email2&&email!==email2){toast('Los correos no coinciden','err');return;}
-  if(pass2&&pass!==pass2){toast('Las contrasenas no coinciden','err');return;}
+  if(!name||!email||!pass){toast('Escribe tu nombre, correo y contraseña','err');return;}
+  if(!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)){toast('Revisa tu correo','err');return;}
+  if(pass.length<6){toast('La contraseña necesita al menos 6 caracteres','err');return;}
   // Por dónde entra (127) lo dice la app en la que se registra: quien se registra en
   // HABIT es del gym, quien se registra en HABIT Crew entrena por su cuenta. No es un
   // permiso —reservar y la puerta los decide la membresía—; decide el reglamento que
   // acepta, si el admin recibe el aviso de socio nuevo y qué ve primero.
+  // Crear la cuenta es aceptar los términos (la línea bajo el botón lo dice y los abre).
   const reg={name,email,phone,pass,joinedAs:IS_CREW?'app':'gym'};
-  showTerms(reg.joinedAs,()=>{markCommunityRulesAccepted();completeRegister(reg);});
+  markCommunityRulesAccepted();
+  completeRegister(reg);
 }
 async function ensureProfile(reg){
   // El perfil normalmente ya existe: lo crea handle_new_user al hacer signUp, con el
@@ -6429,9 +6451,10 @@ async function completeRegister(reg){
     if(isApp){
       // Sin push al admin: quien entrena por su cuenta no es un socio nuevo del gym. Se
       // cuenta en el dashboard (Usuarios de la app).
-      addN('Bienvenido/a a '+BRAND_NAME+'. Cuéntanos cómo entrenas y te dejamos listo para empezar.','success');
+      // El onboarding es opcional (Perfil → Mi entrenamiento): se entra directo a entrenar.
+      addN('Bienvenido/a a '+BRAND_NAME+'. Elige una rutina básica y empieza.','success');
       showMainSb();
-      openTrainingOnboarding({afterSignup:true});
+      setTimeout(showInstallGuide,350);
     }else{
       sendPush('admin','👤 Nuevo socio',curUser.name+' se registró · código '+curUser.accessCode,{tag:'new-member'});
       addN('Bienvenido/a a HABIT. Tu acceso se activa desde la app durante tu reserva.','success');
@@ -6474,7 +6497,6 @@ function isMissingTrainingProfiles(error){
   return !!error&&/training_profiles|schema cache|does not exist|PGRST205|42P01/i.test((error.message||'')+' '+(error.code||''));
 }
 async function loadTrainingProfileSb(){
-  const suppress=onboardingSuppressed;
   onboardingSuppressed=false;
   if(!sbUser)return null;
   const{data,error}=await sb.from('training_profiles').select('*').eq('user_id',sbUser.id).maybeSingle();
@@ -6482,7 +6504,7 @@ async function loadTrainingProfileSb(){
   if(error){if(!isMissingTrainingProfiles(error))console.warn('training_profiles:',error.message);return null;}
   trainingProfile=data||null;
   renderPerfilTrainingSummary();
-  if(!suppress&&!onboardingDismissed&&curUser&&curUser.joinedAs==='app'&&!(data&&data.onboarded_at))openTrainingOnboarding();
+  // El onboarding ya no se abre solo: es opcional y vive en Perfil → Mi entrenamiento.
   return trainingProfile;
 }
 function openTrainingOnboarding(opts){
@@ -6626,6 +6648,9 @@ async function deleteMyAccount(){
     hideLoading();
     toast(e.message||'No se pudo borrar la cuenta','err');
   }
+}
+async function confirmLogout(){
+  if(await confirmSheet('Para volver a entrar necesitarás tu correo y contraseña.',{title:'¿Cerrar sesión?',confirmLabel:'Cerrar sesión'}))doLogout();
 }
 async function doLogout(){
   curUser=null;sbUser=null;sbProfile=null;
@@ -7124,8 +7149,10 @@ async function renderPerfil(){
   renderPerfilPush();
   // El staff (admin, recepción) no se borra a sí mismo desde aquí: se quedaría el gym sin
   // quien lo administre por un toque equivocado.
-  const acct=document.getElementById('perfil-account-section');
-  if(acct)acct.style.display=(curUser.role&&curUser.role!=='user')?'none':'';
+  // Cerrar sesión sí, para todos.
+  const staff=!!(curUser.role&&curUser.role!=='user');
+  document.querySelectorAll('#perfil-account-section .perfil-delete-btn,#perfil-account-section .perfil-delete-hint')
+    .forEach(el=>{el.style.display=staff?'none':'';});
 }
 function prepareSquareImage(file,size=420,quality=.86){
   return new Promise((resolve,reject)=>{
@@ -7330,25 +7357,6 @@ function renderDailyQuote(){
 }
 // El entreno de hoy, arriba de todo en Inicio. Era solo para clientes de Coaching, pero la
 // semana es de Entrenar y Entrenar es de todos: cualquiera con algo agendado hoy lo ve aquí.
-function inicioCoachActionHtml(){
-  if(!coachWeekStart)return '';
-  const today=mazToday();
-  const active=activeCoachingSession;
-  const next=coachSchedule.find(r=>r.ds===today&&r.status==='scheduled');
-  const row=active||next;
-  // Quien entrena por su cuenta no tiene puerta ni reservas que ver en Inicio: sin nada
-  // agendado, la entrada es elegir qué entrenar.
-  if(!row)return (IS_CREW||isAppOnly())?inicioStartTrainingHtml():'';
-  const isActive=!!active;
-  const title=esc(row.board_name||'Entreno');
-  const cta=isActive?'Continuar':'Iniciar';
-  const action=isActive?'goToActiveSession()':'startInicioCoachWorkout(&quot;'+esc(row.id)+'&quot;)';
-  return '<div class="inicio-coach-action"><button type="button" class="inicio-coach-btn" onclick="'+action+'">'
-    +'<span class="inicio-coach-icon"><svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M3 10h18M8 2v4M16 2v4M8 15l2 2 4-4"/></svg></span>'
-    +'<span class="inicio-coach-title">'+title+'</span>'
-    +'<span class="inicio-coach-go">'+cta+'</span>'
-    +'</button></div>';
-}
 function inicioFastingMiniHtml(){
   if(!canAccessCoaching())return '';
   const log=loadFastingLog();
@@ -7365,20 +7373,6 @@ function inicioFastingMiniHtml(){
     +'<span class="inicio-fast-label">'+label+'</span><span class="inicio-fast-time" id="inicio-fasting-time">'+esc(time)+'</span>'
     +'</div></div>';
 }
-function inicioStartTrainingHtml(){
-  return '<div class="inicio-coach-action"><button type="button" class="inicio-coach-btn" onclick="startInicioFreeTraining()">'
-    +'<span class="inicio-coach-icon"><svg viewBox="0 0 24 24"><path d="M6 4h4v16H6zM14 4h4v16h-4zM4 9h2M10 9h4M18 9h2M4 15h2M10 15h4M18 15h2"/></svg></span>'
-    +'<span class="inicio-coach-title">Entrenar hoy</span>'
-    +'<span class="inicio-coach-go">Elegir</span>'
-    +'</button></div>';
-}
-function openGymApp(){
-  window.open(GYM_APP_URL,'_blank','noopener');
-}
-function startInicioFreeTraining(){
-  rutActiveTab='hoy';
-  sv('rutinas');
-}
 function renderInicioCoachingWidgets(){
   const actionEl=document.getElementById('inicio-coach-action');
   const fastEl=document.getElementById('inicio-fasting-mini');
@@ -7390,8 +7384,13 @@ function renderInicioCoachingWidgets(){
     loadCoachWeekDataSb(false).then(()=>{if(coachWeekStart)renderInicioCoachingWidgets();}).catch(console.error);
     return;
   }
-  if(actionEl)actionEl.innerHTML=inicioCoachActionHtml();
+  // Inicio abre con lo de hoy: la misma tarjeta que Entrenar → Hoy, para no tener que buscarla.
+  if(actionEl)actionEl.innerHTML=hoyTopHtml({start:'startInicioCoachWorkout'}).html;
   if(fastEl&&canAccessCoaching())fastEl.innerHTML=inicioFastingMiniHtml();
+  // «Repetir el último» necesita los entrenos recientes; si aún no llegan, se repinta al llegar.
+  if(!hoyRecentSessions)loadRecentSessionsSb(false).then(()=>{
+    if(document.getElementById('v-inicio')?.classList.contains('active'))renderInicioCoachingWidgets();
+  }).catch(()=>{});
 }
 function startInicioCoachWorkout(id){
   rutActiveTab='hoy';
@@ -10320,7 +10319,8 @@ function rutTab(t){
 async function renderRutHub(){
   if(!sbUser)return;
   const panel=document.getElementById('rut-'+(rutActiveTab==='rutinas'?'content':rutActiveTab+'-content'));
-  if(panel&&!myRoutinesLoadedAt)panel.innerHTML='<div class="empty">Cargando…</div>';
+  // Un panel que nunca se pintó (Semana la primera vez) no se queda en blanco mientras llega.
+  if(panel&&(!myRoutinesLoadedAt||!panel.innerHTML.trim()))panel.innerHTML='<div class="empty">Cargando…</div>';
   // Rutinas, semana y plan van juntos: no dependen entre sí, y en fila sumaban más de
   // un segundo de "Cargando…" en cada visita. La figura del cuerpo (la más pesada: el
   // catálogo de ejercicios más tus series de dos semanas) ya no detiene la pantalla:
@@ -10342,6 +10342,8 @@ async function renderRutHub(){
     renderRutHoy();
     const fresh=recoveryLoadedAt&&Date.now()-recoveryLoadedAt<RECOVERY_TTL_MS;
     if(!fresh)loadMyRecoverySb(false).then(()=>{if(rutActiveTab==='hoy')renderRutHoy();}).catch(console.error);
+    // Semana se adelanta en segundo plano: tocarla después ya no espera a la red.
+    loadWeekPlanSb(false).catch(()=>{});
   }
   if(tab==='semana')renderRutSemana();
   if(tab==='rutinas')renderRutRutinas();
@@ -11090,9 +11092,11 @@ function hoyRowsHtml(){
     +'<span><strong>Tu progreso</strong><small>Récords, volumen y cada ejercicio</small></span><i>›</i></button>'
     +'</div>';
 }
-function renderRutHoy(){
-  const el=document.getElementById('rut-hoy-content');
-  if(!el)return;
+// La tarjeta de hoy (y las demás sesiones del día). Es la misma en Entrenar → Hoy y arriba de
+// Inicio, porque abrir la app es para entrenar: `start` es con qué función se empieza una
+// sesión (desde Inicio, startInicioCoachWorkout, que primero lleva a Entrenar).
+function hoyTopHtml(opts){
+  const start=(opts&&opts.start)||'startCoachingSessionSb';
   const today=mazToday();
   const dow=(dateObjFromDS(today).getUTCDay()+6)%7;
   const dayLabel=DOW_LONG[dow].charAt(0).toUpperCase()+DOW_LONG[dow].slice(1)+' '+parseInt(today.slice(8),10);
@@ -11119,7 +11123,7 @@ function renderRutHoy(){
     const fromCoach=isCoachSet(row)||(row.generated_from_base&&row.created_by&&sbUser&&row.created_by!==sbUser.id);
     html+=hoyHeroHtml({k:'Hoy · '+dayLabel,title:row.board_name,dot:row.board_color,
       meta:meta.exercises.length+' ejercicios · ~'+meta.duration+' min'+(fromCoach?' · de tu coach':''),
-      cta:'<button class="btn hoy-cta" onclick="startCoachingSessionSb(&quot;'+row.id+'&quot;)">Empezar</button>',
+      cta:'<button class="btn hoy-cta" onclick="'+start+'(&quot;'+row.id+'&quot;)">Empezar</button>',
       alt:other});
   }else if(doneRows.length){
     const mins=doneRows.reduce((n,r)=>n+(r.duration_sec?Math.round(r.duration_sec/60):0),0);
@@ -11151,19 +11155,34 @@ function renderRutHoy(){
       html+=hoyHeroHtml({k:'Hoy · '+dayLabel,title:'Empieza a entrenar',
         meta:'Elige una rutina o entrena libre. Cada serie que palomeas queda en tu progreso.',
         cta:'<button class="btn hoy-cta" onclick="openCoachBoardPicker(&quot;start&quot;)">Elegir qué entrenar</button>',
-        alt:['Armar mi semana','rutTab(&quot;semana&quot;)']});
+        alt:['Armar mi semana','hoyGoTab(&quot;semana&quot;)']});
     }
   }
   // Más de una sesión hoy (fuerza y carrera, mañana y tarde): las demás, en una línea cada una.
   pending.slice(active?0:1).forEach(row=>{
     html+='<div class="hoy-also"><span class="hoy-dot" style="background:'+esc(row.board_color||'#2563eb')+'"></span>'
       +'<span class="hoy-also-name">'+esc(row.board_name)+'</span>'
-      +'<button class="btn-sm" onclick="startCoachingSessionSb(&quot;'+row.id+'&quot;)">Empezar</button></div>';
+      +'<button class="btn-sm" onclick="'+start+'(&quot;'+row.id+'&quot;)">Empezar</button></div>';
   });
   // La rutina que ya está en la tarjeta (la de hoy, o la que se ofrece repetir) no se repite abajo.
   const heroBoardId=pending.length?pending[0].board_id:(!doneRows.length?(hoyRepeatable(hoyRecentSessions)||{}).board_id:null);
-  if(!active)html+=hoyMissedHtml(today);
-  if(!active)html+=hoyRoutinesHtml(heroBoardId);
+  // Lo que se pasó solo se ofrece si hoy no hay nada que hacer: con un entreno agendado (o ya
+  // hecho) eran dos sugerencias para el mismo día.
+  const free=!active&&!pending.length&&!doneRows.length;
+  return {html,heroBoardId,active,free,today};
+}
+function hoyGoTab(t){
+  if(!document.getElementById('v-rutinas')?.classList.contains('active')){rutActiveTab=t;sv('rutinas');return;}
+  rutTab(t);
+}
+function renderRutHoy(){
+  const el=document.getElementById('rut-hoy-content');
+  if(!el)return;
+  const top=hoyTopHtml();
+  const today=top.today;
+  let html=top.html;
+  if(top.free)html+=hoyMissedHtml(today);
+  if(!top.active)html+=hoyRoutinesHtml(top.heroBoardId);
   html+=hoyWeekHtml();
   html+=hoyRowsHtml();
   el.innerHTML=html;
