@@ -6,12 +6,12 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="HABIT">
 <meta name="application-name" content="HABIT">
-<link rel="manifest" href="/manifest.json?v=20261102-4">
-<link rel="apple-touch-icon" sizes="120x120" href="/icons/icon-120.png?v=20261102-4">
-<link rel="apple-touch-icon" sizes="152x152" href="/icons/icon-152.png?v=20261102-4">
-<link rel="apple-touch-icon" sizes="167x167" href="/icons/icon-167.png?v=20261102-4">
-<link rel="apple-touch-icon" sizes="180x180" href="/icons/icon-180.png?v=20261102-4">
-<link rel="icon" type="image/png" sizes="32x32" href="/icons/icon-32.png?v=20261102-4">
+<link rel="manifest" href="/manifest.json?v=20261102-5">
+<link rel="apple-touch-icon" sizes="120x120" href="/icons/icon-120.png?v=20261102-5">
+<link rel="apple-touch-icon" sizes="152x152" href="/icons/icon-152.png?v=20261102-5">
+<link rel="apple-touch-icon" sizes="167x167" href="/icons/icon-167.png?v=20261102-5">
+<link rel="apple-touch-icon" sizes="180x180" href="/icons/icon-180.png?v=20261102-5">
+<link rel="icon" type="image/png" sizes="32x32" href="/icons/icon-32.png?v=20261102-5">
 <title>HABIT</title>
 <!-- Con id a propósito: scripts/check-training.js toma la primera etiqueta script sin
      atributos como el script principal de la app y la compila. -->
@@ -25,7 +25,7 @@
   var crew=/^\/crew(\/|$)/.test(location.pathname);
   window.HABIT_BRAND=crew?'crew':'gym';
   if(!crew)return;
-  var v='20261102-4';
+  var v='20261102-5';
   document.documentElement.classList.add('brand-crew');
   document.title='HABIT Crew';
   document.querySelectorAll('meta[name="apple-mobile-web-app-title"],meta[name="application-name"]')
@@ -40,12 +40,12 @@
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Share+Tech+Mono&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="/skandi-recovery.js?v=20261102-4"></script>
-<script src="/body-figure.js?v=20261102-4"></script>
-<script src="/habit-training.js?v=20261102-4"></script>
-<script src="/habit-share.js?v=20261102-4"></script>
-<script src="/habit-activity.js?v=20261102-4"></script>
-<script src="/habit-skills.js?v=20261102-4"></script>
+<script src="/skandi-recovery.js?v=20261102-5"></script>
+<script src="/body-figure.js?v=20261102-5"></script>
+<script src="/habit-training.js?v=20261102-5"></script>
+<script src="/habit-share.js?v=20261102-5"></script>
+<script src="/habit-activity.js?v=20261102-5"></script>
+<script src="/habit-skills.js?v=20261102-5"></script>
 <style>
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
 @media (prefers-reduced-motion:reduce){*,*:before,*:after{scroll-behavior:auto!important;animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}}
@@ -2976,7 +2976,9 @@ button{transition:transform .14s var(--ease-out),background-color .16s ease,colo
 .sk-level{font-size:10.5px;font-weight:800;color:var(--purple);letter-spacing:.04em;font-variant-numeric:tabular-nums}
 
 /* La hoja de la escalera. Debajo del visor de video (10000), que se abre desde dentro. */
-.sk-sheet{position:fixed;inset:0;z-index:9990;display:none}
+/* El color va aquí y no se hereda: la hoja vive fuera de las pantallas y el body no tiene
+   color, así que el título del skill y el nombre de tu escalón salían negros sobre negro. */
+.sk-sheet{position:fixed;inset:0;z-index:9990;display:none;color:var(--white)}
 .sk-sheet.open{display:block}
 .sk-sheet .sk-backdrop{position:absolute;inset:0;background:rgba(0,0,0,.72)}
 .sk-box{position:absolute;left:0;right:0;bottom:0;max-height:94vh;max-width:430px;margin:0 auto;background:var(--black);border-radius:20px 20px 0 0;display:flex;flex-direction:column;overflow:hidden;animation:skUp .26s cubic-bezier(.22,1,.36,1)}
@@ -3014,6 +3016,19 @@ button{transition:transform .14s var(--ease-out),background-color .16s ease,colo
 .sk-coach-hd{font-size:10px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;color:var(--amber)}
 .sk-coach .field{margin:0}
 .sk-upload{font-size:11px;color:var(--gray);line-height:1.4}
+/* Sin coach (migración 144): elegir en qué escalón vas, entrenarlo y subir tú. Al elegir, la
+   escalera entera se vuelve botones y una barra fija dice qué está pasando; sin ella, tocar
+   un escalón abría su video y elegir no se distinguía de mirar. */
+.sk-actions{display:flex;flex-direction:column}
+.sk-actions .btn{min-height:46px;font-size:14px}
+.sk-hint{font-size:12px;color:var(--gl);line-height:1.45}
+.sk-owner{color:var(--gray);letter-spacing:.06em}
+.sk-pick-bar{position:sticky;top:0;z-index:2;display:flex;align-items:center;gap:10px;background:var(--purple);color:#fff;border-radius:12px;padding:10px 12px;margin:4px 0 8px;font-size:12.5px;font-weight:800;line-height:1.3}
+.sk-pick-bar span{flex:1}
+.sk-pick-bar button{background:rgba(0,0,0,.25);color:#fff;border:0;border-radius:999px;padding:6px 11px;font-size:11.5px;font-weight:800;cursor:pointer}
+.sk-ladder.picking .sk-rung{opacity:1;box-shadow:inset 0 0 0 1.5px rgba(139,92,246,.32)}
+.sk-ladder.picking .sk-rung.current{box-shadow:inset 0 0 0 1.5px rgba(139,92,246,.7)}
+.sk-leave{background:none;border:0;color:var(--red);font-size:12px;font-weight:700;padding:12px 0 0;cursor:pointer;text-align:left}
 
 /* Los cues del coach en la hoja de entreno: estaban solo en la lista de la rutina y
    desaparecían justo al entrenar, que es cuando se leen. Numerados a propósito, para
@@ -4257,7 +4272,7 @@ const GYM_ONLY_VIEWS=['book','planes','historial','shop'];
 const GYM_APP_URL='/';
 document.querySelectorAll('.brand-name').forEach(el=>{el.textContent=BRAND_NAME;});
 const SUPABASE_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBtcGp0ZXVxanVzYmlkdWV2YndxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc2OTI1NjUsImV4cCI6MjA5MzI2ODU2NX0.XbMzZoo2yqtrD8znLnyo_1zDfrdJAvAPj1lqGOyXnLw';
-const APP_VERSION='20261102-4';
+const APP_VERSION='20261102-5';
 // La pierna va separada en cuádriceps, femorales y pantorrillas: la figura
 // corporal pinta esas tres regiones por separado y el motor de recuperación les
 // da ventanas de descanso distintas. 'Piernas' sigue reconociéndose al leer
@@ -12538,18 +12553,20 @@ async function startWorkoutFromBoardSb(boardId,boardName,boardColor){
 // trabajo abre vacía. A partir de ahí es el mismo motor de "agregar ejercicio
 // en vivo" (wsAddExercise, session_exercises) el que la va llenando — no hace
 // falta ningún camino especial más allá de este insert.
-async function startFreeWorkoutSb(){
+// `name` le pone nombre al entreno (entrenar un escalón desde Skills lo llama como el skill,
+// que es como sale después en Actividad); sin él es «Entreno libre».
+async function startFreeWorkoutSb(name){
   if(activeCoachingSession){
     toast('Ya tienes un entreno en curso: '+activeCoachingSession.board_name+'. Termínalo o cancélalo primero.','warn');
     return;
   }
   const today=mazToday();
   try{
-    const{data,error}=await sb.from('coaching_schedule').insert({user_id:sbUser.id,board_id:null,board_name:'Entreno libre',board_color:'#0ea5e9',ds:today,created_by:sbUser.id}).select().single();
+    const{data,error}=await sb.from('coaching_schedule').insert({user_id:sbUser.id,board_id:null,board_name:name||'Entreno libre',board_color:'#0ea5e9',ds:today,created_by:sbUser.id}).select().single();
     if(error)throw error;
     coachSchedule.push(data);
     await startCoachingSessionSb(data.id);
-    toast('¡Entreno libre iniciado! 💪','ok');
+    toast(name?'¡Entreno iniciado! 💪':'¡Entreno libre iniciado! 💪','ok');
   }catch(e){toast('Error al iniciar: '+e.message,'err');}
 }
 
@@ -13988,6 +14005,8 @@ async function wsAfterSessionClosed(data,closedRow,sets,opts){
   activeCoachingSession=null;
   cacheActiveTrainingSession(null);
   coachSessionSets={};
+  // La escalera cuenta las series de este entreno: que no espere al minuto de caché.
+  skillMarks=null;
   hideActiveSessionBar();
   closeWorkoutSheet();
   closeExerciseFocus();
@@ -15278,11 +15297,17 @@ function wsCatalogRowBySlug(slug){
 // Construye el objeto de ejercicio con el mismo shape que boards.exercises,
 // heredando series/reps/descanso del ejercicio que sustituye para que el
 // suplente entre con el mismo trabajo planeado.
+// Un aguante del catálogo entra como aguante: sin repsType, metricType() lo leía como
+// repeticiones y la hoja pedía kg y reps para un front lever. Y del ejercicio que sustituye
+// solo hereda el objetivo si también es de tiempo: «8-10» no es un objetivo de plancha.
 function wsExerciseFromCatalog(row,template){
+  const timed=row.default_tracking==='time';
+  const tplReps=template&&template.reps;
   return {
     name:row.name,
     sets:(template&&template.sets)||'3',
-    reps:(template&&template.reps)||(row.default_tracking==='time'?'0:30':'8-10'),
+    reps:timed?(tplReps&&inferTargetType(template)==='time'?tplReps:'0:30'):(tplReps||'8-10'),
+    ...(timed?{repsType:'time'}:{}),
     rest:(template&&template.rest)||'90s',
     targetRir:template?parseTargetRir(template):null,
     supersetGroup:(template&&template.supersetGroup)||'',
@@ -15357,7 +15382,9 @@ async function wsPerformSwap(oldExKey,slug){
   }catch(e){hideLoading();toast('Error al cambiar: '+e.message,'err');}
 }
 
-async function wsAddExercise(slug){
+// `opts.template` fija series, objetivo y descanso (entrenar un escalón entra con su
+// estándar, no con lo que hiciste la última vez).
+async function wsAddExercise(slug,opts){
   const row=wsCatalogRowBySlug(slug);
   if(!row||!activeCoachingSession)return;
   showLoading('Agregando ejercicio...');
@@ -15366,16 +15393,18 @@ async function wsAddExercise(slug){
     // Si ya lo has hecho, entra como la última vez (series, objetivo y marca),
     // no con un 3×8-10 genérico que luego hay que corregir serie por serie.
     const rec=wsRecentFor(row);
-    const template=rec?{sets:String(rec.sets),reps:rec.reps,rest:rec.rest,targetRir:rec.targetRir}:null;
+    const template=(opts&&opts.template)||(rec?{sets:String(rec.sets),reps:rec.reps,rest:rec.rest,targetRir:rec.targetRir}:null);
     const entry={...wsExerciseFromCatalog(row,template),ex_key:newKey};
     const overlay=(Array.isArray(activeCoachingSession.session_exercises)?activeCoachingSession.session_exercises:[]).slice();
     overlay.push(entry);
     await persistSessionExercisesSb(overlay);
     const prev=rec?{weight:rec.weight,reps:rec.actualReps}:await getLastScoreForExKey(newKey);
+    // Un aguante no arrastra kilos ni repeticiones de la vez pasada: su marca son segundos.
+    const timed=(window.HabitTraining?HabitTraining.metricType(entry):inferTargetType(entry))==='time';
     const n=exerciseSetCount(entry);
     const rows=[];
     for(let i=0;i<n;i++)rows.push({schedule_id:activeCoachingSession.id,user_id:sbUser.id,ex_key:newKey,set_idx:i,
-      reps_target:repsTargetForSet(entry,i),weight:prev.weight!=null?prev.weight:null,actual_reps:prev.reps||null,done:false});
+      reps_target:repsTargetForSet(entry,i),weight:!timed&&prev.weight!=null?prev.weight:null,actual_reps:timed?null:(prev.reps||null),done:false});
     const{data,error}=await sb.from('coaching_session_sets').insert(rows).select();
     if(error)throw error;
     coachSessionSets[newKey]=(data||[]).sort((a,b)=>a.set_idx-b.set_idx);
@@ -23583,7 +23612,9 @@ initApp();
 const SKILL_COPY={
   es:{tab:'Skills',mine:'Tus skills',explore:'Escaleras de calistenia',
       exploreSub:'Cómo se construye cada skill, escalón por escalón',
-      mineSub:'Tu escalón lo mueve tu coach',
+      exploreFirst:'Elige una y marca en qué escalón vas',
+      mineSub:'Dónde vas y qué te falta',
+      rungsCount:'{n} escalones',
       noSkills:'Todavía no hay escaleras cargadas.',
       yourRung:'Tu escalón',level:'Nivel',best:'Tu mejor marca',noMark:'Sin marca registrada',
       standard:'Para subir',sets:'series',secs:'s',reps:'reps',
@@ -23592,7 +23623,20 @@ const SKILL_COPY={
       ready:'Ya cumples el estándar de este escalón. Grábate y mándale el video a tu coach.',
       almost:'La última vez cumpliste el estándar. Repítelo y ya es escalón nuevo.',
       final:'Último escalón de la línea.',
-      noRung:'Tu coach todavía no te ha puesto un escalón en esta línea.',
+      noRung:'Todavía no marcas en qué escalón vas.',
+      pickHint:'Elige el más difícil que ya haces limpio, aunque no llegues a su estándar. Si dudas entre dos, el de abajo.',
+      pickBtn:'Elegir mi escalón',pickBar:'Toca el escalón en el que vas',pickCancel:'Cancelar',
+      pickTitle:'¿Empiezas aquí?',pickBody:'{name}. Lo puedes cambiar cuando quieras.',pickOk:'Empiezo aquí',
+      selfSaved:'Listo: vas en {name}',saveErr:'No se pudo guardar tu escalón',
+      byYou:'lo elegiste tú',byCoach:'lo puso tu coach',
+      train:'Entrenar este escalón',trainAdd:'Agregar a mi entreno',trainThere:'Ya está en tu entreno',
+      readySelf:'Cumpliste el estándar dos sesiones seguidas: ya puedes subir.',
+      almostSelf:'La última vez cumpliste el estándar. Repítelo y ya puedes subir.',
+      levelUp:'Subir a {name}',levelTitle:'¿Subes de escalón?',
+      levelBody:'Cumpliste el estándar de {name} dos sesiones seguidas. El siguiente es {next}.',
+      change:'Cambiar escalón',leave:'Quitar esta línea de mis skills',leaveTitle:'¿Quitar esta línea?',
+      leaveBody:'Tus series se quedan. Solo dejas de marcar en qué escalón vas.',leaveOk:'Quitar',
+      coachBySelf:'lo eligió por su cuenta',
       cues:'Qué mirar',critLabel:'Limpio en este escalón',
       coachPanel:'Coach',coachSearch:'Buscar alumno por nombre',
       coachSet:'Poner escalón',coachNoteLabel:'Qué le falta (lo lee el alumno)',
@@ -23600,7 +23644,9 @@ const SKILL_COPY={
       upload:'Subir animación',uploadHint:'GIF o MP4 corto, máx. 15 MB. Se ve en bucle y sin sonido.'},
   en:{tab:'Skills',mine:'Your skills',explore:'Calisthenics ladders',
       exploreSub:'How each skill is built, rung by rung',
-      mineSub:'Your coach moves your rung',
+      exploreFirst:'Pick one and mark which rung you are on',
+      mineSub:'Where you are and what is next',
+      rungsCount:'{n} rungs',
       noSkills:'No ladders loaded yet.',
       yourRung:'Your rung',level:'Level',best:'Your best mark',noMark:'No mark logged yet',
       standard:'To level up',sets:'sets',secs:'s',reps:'reps',
@@ -23609,7 +23655,20 @@ const SKILL_COPY={
       ready:'You already meet this rung’s standard. Film it and send your coach the video.',
       almost:'You met the standard last time. Do it again and the rung is yours.',
       final:'Final rank of the line.',
-      noRung:'Your coach has not set you a rung on this line yet.',
+      noRung:'You have not marked which rung you are on yet.',
+      pickHint:'Pick the hardest one you already do clean, even if you are short of its standard. If torn between two, take the lower one.',
+      pickBtn:'Pick my rung',pickBar:'Tap the rung you are on',pickCancel:'Cancel',
+      pickTitle:'Start here?',pickBody:'{name}. You can change it whenever you want.',pickOk:'Start here',
+      selfSaved:'Done: you are on {name}',saveErr:'Could not save your rung',
+      byYou:'you picked it',byCoach:'set by your coach',
+      train:'Train this rung',trainAdd:'Add to my workout',trainThere:'Already in your workout',
+      readySelf:'You met the standard two sessions in a row: you can move up.',
+      almostSelf:'You met the standard last time. Do it again and you can move up.',
+      levelUp:'Move up to {name}',levelTitle:'Move up a rung?',
+      levelBody:'You met the {name} standard two sessions in a row. Next is {next}.',
+      change:'Change rung',leave:'Remove this line from my skills',leaveTitle:'Remove this line?',
+      leaveBody:'Your sets stay. You just stop marking which rung you are on.',leaveOk:'Remove',
+      coachBySelf:'picked it on their own',
       cues:'What to watch',critLabel:'Clean on this rung',
       coachPanel:'Coach',coachSearch:'Search a student by name',
       coachSet:'Set rung',coachNoteLabel:'What they still need (the student reads this)',
@@ -23618,9 +23677,14 @@ const SKILL_COPY={
 };
 const skLang=()=>'es';
 const sk=k=>(SKILL_COPY[skLang()]||SKILL_COPY.es)[k]||'';
+// Las frases con un nombre adentro llevan {name}: el orden de las palabras no es el mismo en
+// los dos idiomas, así que el hueco va en el texto y no pegado a mano.
+const skf=(k,vars)=>sk(k).replace(/\{(\w+)\}/g,(_,v)=>(vars&&vars[v]!=null?String(vars[v]):''));
+const rungLabel=r=>(r?(exDisplayName(r.name)||r.name):'');
 
 let coachSkills=[], mySkillRanks={}, skillsLoadedAt=0, skillMarks=null, skillMarksAt=0;
 let skillOpenSlug=null, skillCoachStudent=null, skillCoachResults=[], _rungIndexAt=0, _rungIndex=null;
+let skillPickMode=false;
 const SKILLS_TTL_MS=60000;
 const skillIsCoach=()=>!!(sbProfile&&sbProfile.role==='admin');
 const skillName=s=>(skLang()==='en'?(s.name_en||s.name_es):(s.name_es||s.name_en))||s.slug;
@@ -23673,13 +23737,21 @@ function rungForExercise(ex){
 // La marca de cada línea sale de las series que el alumno ya registró. ex_key de una serie es
 // el id del ejercicio DENTRO de su rutina, no el slug del catálogo, así que el puente son sus
 // propias rutinas: de ahí salen los ex_key que corresponden a cada escalón.
+// El otro puente es la llave "cat-<slug>" de lo agregado en vivo (wsAddExercise), que es como
+// entra un escalón entrenado desde la escalera: sin ella, esas series no le contaban a nadie.
 async function loadSkillMarksSb(force){
   if(!force&&skillMarks&&Date.now()-skillMarksAt<SKILLS_TTL_MS)return skillMarks;
-  const keyToRung={};
+  const keyToRung={}, rungBySlug={};
   (myRoutines||[]).forEach(b=>(b.exercises||[]).forEach(ex=>{
     const rung=rungForExercise(ex);
     if(rung&&ex.id)keyToRung[ex.id]=rung;
   }));
+  Object.values(rungIndex().bySlug).forEach(r=>{
+    rungBySlug[r.slug]=r;
+    keyToRung['cat-'+r.slug]=keyToRung['cat-'+r.slug]||r;
+    keyToRung['cat-'+r.slug+'#2']=keyToRung['cat-'+r.slug+'#2']||r;
+  });
+  const rungOfKey=k=>keyToRung[k]||rungBySlug[HabitSkills.catalogSlugFromExKey(k)]||null;
   const keys=Object.keys(keyToRung);
   skillMarks={};skillMarksAt=Date.now();
   if(!keys.length||!sbUser)return skillMarks;
@@ -23692,7 +23764,7 @@ async function loadSkillMarksSb(force){
   // más vieja, que es como readiness() espera leerlas.
   const perRung={};
   (data||[]).forEach(row=>{
-    const rung=keyToRung[row.ex_key];
+    const rung=rungOfKey(row.ex_key);
     if(!rung)return;
     const bucket=perRung[rung.slug]||(perRung[rung.slug]={rung,sessions:new Map()});
     const sid=row.schedule_id||('x'+row.ex_key);
@@ -23740,7 +23812,7 @@ async function renderRutSkills(){
   }
   if(rest.length){
     html+='<div class="sk-strip"><div class="sk-strip-hd"><h3>'+esc(mine.length?sk('explore'):sk('mine'))+'</h3>'
-      +'<span>'+esc(sk('exploreSub'))+'</span></div>'
+      +'<span>'+esc(mine.length?sk('exploreSub'):sk('exploreFirst'))+'</span></div>'
       +'<div class="sk-row">'+rest.map(skillCardHtml).join('')+'</div></div>';
   }
   withScrollKept(el.parentElement,()=>{el.innerHTML=html;});
@@ -23767,14 +23839,14 @@ function skillCardHtml(skill){
       ?'<div class="sk-card-rung">'+esc(exDisplayName(rung.name)||rung.name)+'</div>'
        +'<div class="sk-bar"><i style="width:'+pct+'%"></i></div>'
        +'<div class="sk-level">'+esc(target?fmtMark(rung,mark)+' / '+fmtMark(rung,target):sk('final'))+'</div>'
-      :'<div class="sk-card-rung">'+esc(String(rungs.length))+' escalones</div>')
+      :'<div class="sk-card-rung">'+esc(skf('rungsCount',{n:rungs.length}))+'</div>')
     +'</div></button>';
 }
 
 // ---- La hoja de la escalera -----------------------------------------------------------------
 
 async function openSkillSheet(slug){
-  skillOpenSlug=slug;skillCoachStudent=null;skillCoachResults=[];
+  skillOpenSlug=slug;skillCoachStudent=null;skillCoachResults=[];skillPickMode=false;
   const el=document.getElementById('skill-sheet');
   if(!el)return;
   el.classList.add('open');
@@ -23788,7 +23860,7 @@ function closeSkillSheet(){
   // Un video oculto sigue corriendo: se quita con la hoja.
   const body=document.getElementById('skill-sheet-body');
   if(body)body.innerHTML='';
-  skillOpenSlug=null;skillCoachStudent=null;
+  skillOpenSlug=null;skillCoachStudent=null;skillPickMode=false;
 }
 
 function renderSkillSheet(){
@@ -23802,32 +23874,60 @@ function renderSkillSheet(){
   let html='';
   if(skill.animation_url)html+='<div class="sk-hero">'+skillAnimHtml(skill.animation_url)+'</div>';
   if(skillSummary(skill))html+='<p class="sk-summary">'+esc(skillSummary(skill))+'</p>';
+  const owner=HabitSkills.rungOwner(mineRow);
   html+=skillMineHtml(skill,rungs,rank,mineRow);
-  html+='<div class="sk-ladder-hd">'+esc(sk('ladder'))+'</div>';
-  html+='<div class="sk-ladder">'+rungs.map(r=>skillRungHtml(skill,rungs,r,rank)).join('')+'</div>';
+  if(skillPickMode)html+='<div class="sk-pick-bar"><span>'+esc(sk('pickBar'))+'</span>'
+    +'<button type="button" onclick="skillCancelPick()">'+esc(sk('pickCancel'))+'</button></div>';
+  else html+='<div class="sk-ladder-hd">'+esc(sk('ladder'))+'</div>';
+  html+='<div class="sk-ladder'+(skillPickMode?' picking':'')+'" id="sk-ladder">'
+    +rungs.map(r=>skillRungHtml(skill,rungs,r,rank)).join('')+'</div>';
+  if(skillPickMode&&owner==='self')html+='<button type="button" class="sk-leave" onclick="skillSelfLeave()">'+esc(sk('leave'))+'</button>';
   if(skillIsCoach())html+=skillCoachHtml(skill,rungs);
   body.innerHTML=html;
 }
 
+// Tres casos, según quién puso la fila (habit-skills.js rungOwner, migración 144):
+//   · nadie: la línea está libre y se elige dónde empezar;
+//   · el alumno: la mueve él, y cuando cumple el estándar sube él;
+//   · su coach: como en la 141 — el aviso es para grabarse y mandarle el video.
+// Entrenar el escalón se ofrece en los dos últimos: tener el escalón y no tener cómo
+// entrenarlo era la otra mitad de por qué la pestaña no llevaba a ningún lado.
 function skillMineHtml(skill,rungs,rank,mineRow){
-  if(!rank)return '<div class="sk-mine"><div class="sk-mine-meta">'+esc(sk('noRung'))+'</div></div>';
+  const owner=HabitSkills.rungOwner(mineRow);
+  if(!rank)return '<div class="sk-mine">'
+    +'<div class="sk-mine-name">'+esc(sk('noRung'))+'</div>'
+    +'<div class="sk-hint">'+esc(sk('pickHint'))+'</div>'
+    +(skillPickMode?'':'<div class="sk-actions"><button type="button" class="btn" onclick="skillStartPick()">'+esc(sk('pickBtn'))+'</button></div>')
+    +'</div>';
   const rung=HabitSkills.rungAt(rungs,rank);
   if(!rung)return '';
   const{mark,sessions}=markFor(skill.slug,rank);
   const pct=Math.round(HabitSkills.rungProgress(rungs,rank,mark)*100);
-  const ready=HabitSkills.readiness(rungs,rank,sessions);
+  // La sesión en curso no entra en el estándar: a medias rompería la racha que ya llevaba.
+  const closed=sessions.filter(s=>!activeCoachingSession||s.id!==activeCoachingSession.id);
+  const ready=HabitSkills.readiness(rungs,rank,closed);
   const target=Number(rung.progression_target)||0;
+  const next=HabitSkills.nextRung(rungs,rank);
+  const self=owner==='self';
+  const inSession=!!activeCoachingSession;
   return '<div class="sk-mine">'
-    +'<div class="sk-mine-kicker">'+esc(sk('yourRung'))+' · '+rank+'/'+HabitSkills.topRank(rungs)+'</div>'
-    +'<div class="sk-mine-name">'+esc(exDisplayName(rung.name)||rung.name)+'</div>'
+    +'<div class="sk-mine-kicker">'+esc(sk('yourRung'))+' · '+rank+'/'+HabitSkills.topRank(rungs)
+    +' <span class="sk-owner">· '+esc(self?sk('byYou'):sk('byCoach'))+'</span></div>'
+    +'<div class="sk-mine-name">'+esc(rungLabel(rung))+'</div>'
     +(rungCriteria(rung)?'<div class="sk-rung-crit">'+esc(rungCriteria(rung))+'</div>':'')
     +'<div class="sk-bar"><i style="width:'+pct+'%"></i></div>'
     +'<div class="sk-mine-meta">'+(mark?esc(sk('best'))+' '+esc(fmtMark(rung,mark)):esc(sk('noMark')))
     +(target?' · '+esc(sk('standard'))+' '+(rung.progression_target_sets||1)+' '+esc(sk('sets'))+' × '+esc(fmtMark(rung,target)):' · '+esc(sk('final')))
     +'</div>'
-    +(ready.ready?'<div class="sk-ready">'+esc(sk('ready'))+'</div>'
-      :(ready.lastQualified&&!ready.final?'<div class="sk-ready">'+esc(sk('almost'))+'</div>':''))
+    +(ready.ready?'<div class="sk-ready">'+esc(self?sk('readySelf'):sk('ready'))+'</div>'
+      :(ready.lastQualified&&!ready.final?'<div class="sk-ready">'+esc(self?sk('almostSelf'):sk('almost'))+'</div>':''))
     +(mineRow&&mineRow.coach_note?'<div class="sk-mine-note"><b>'+esc(sk('coachNote'))+':</b> '+esc(mineRow.coach_note)+'</div>':'')
+    +(skillPickMode?'':'<div class="sk-actions">'
+      +(self&&ready.ready&&next?'<button type="button" class="btn" onclick="skillSelfLevelUp()">'+esc(skf('levelUp',{name:rungLabel(next)}))+'</button>':'')
+      +'<button type="button" class="'+(self&&ready.ready&&next?'btn-ghost':'btn')+'" onclick="skillTrainRung('+rank+')">'
+      +esc(inSession?sk('trainAdd'):sk('train'))+'</button>'
+      +(self?'<button type="button" class="btn-ghost" onclick="skillStartPick()">'+esc(sk('change'))+'</button>':'')
+      +'</div>')
     +'</div>';
 }
 
@@ -23837,8 +23937,10 @@ function skillRungHtml(skill,rungs,rung,myRank){
   const stateLabel=state==='passed'?sk('passed'):(state==='current'?sk('current'):(state==='next'?sk('next'):''));
   const target=Number(rung.progression_target)||0;
   const initials=String(r);
+  // Eligiendo, tocar un escalón es elegirlo; si no, abre su animación y su ficha.
+  const tap=skillPickMode?'skillSelfPick('+r+')':'openRungMedia(&quot;'+esc(skill.slug)+'&quot;,'+r+')';
   return '<button type="button" class="sk-rung'+(state?' '+state:'')+'" '
-    +'onclick="openRungMedia(&quot;'+esc(skill.slug)+'&quot;,'+r+')">'
+    +'onclick="'+tap+'">'
     +'<span class="sk-rung-thumb">'+skillAnimHtml(rung.animation_url,'<span class="sk-rung-n">'+esc(initials)+'</span>')+'</span>'
     +'<span class="sk-rung-info">'
     +'<span class="sk-rung-name">'+r+'. '+esc(exDisplayName(rung.name)||rung.name)+'</span>'
@@ -23871,6 +23973,101 @@ function openRungMedia(slug,rank){
   }});
 }
 
+// ---- Sin coach: el alumno elige, entrena y sube (migración 144) ------------------------------
+
+function skillStartPick(){
+  skillPickMode=true;
+  renderSkillSheet();
+  document.getElementById('sk-ladder')?.scrollIntoView({block:'nearest'});
+}
+function skillCancelPick(){skillPickMode=false;renderSkillSheet();}
+
+// set_by = el propio alumno es lo que hace la fila suya; la RLS de la 144 rechaza el upsert
+// si la fila ya la había puesto su coach, así que aquí no hace falta revisarlo antes.
+async function skillSaveOwnRank(slug,rank){
+  const{data,error}=await sb.from('coach_student_skills').upsert({
+    user_id:sbUser.id,skill_slug:slug,rank,coach_note:null,set_by:sbUser.id,updated_at:new Date().toISOString()
+  },{onConflict:'user_id,skill_slug'}).select().single();
+  if(error)throw error;
+  mySkillRanks[slug]=data;
+  return data;
+}
+async function skillSaveOwnRankUi(rank,okKey){
+  const slug=skillOpenSlug;
+  const rung=HabitSkills.rungAt(skillRungs(slug),rank);
+  showLoading();
+  try{await skillSaveOwnRank(slug,rank);}
+  catch(e){hideLoading();toast(sk('saveErr')+': '+(e.message||e),'err');return false;}
+  hideLoading();
+  skillPickMode=false;
+  toast(skf(okKey||'selfSaved',{name:rungLabel(rung)}),'ok');
+  if(skillOpenSlug===slug)renderSkillSheet();
+  renderRutSkills();
+  return true;
+}
+
+async function skillSelfPick(rank){
+  const rung=HabitSkills.rungAt(skillRungs(skillOpenSlug),rank);
+  if(!rung)return;
+  if(!await confirmSheet(skf('pickBody',{name:rungLabel(rung)}),{title:sk('pickTitle'),confirmLabel:sk('pickOk')}))return;
+  await skillSaveOwnRankUi(rank);
+}
+
+// Subir solo se ofrece con el estándar cumplido, pero quien sube es la persona: la app nunca
+// mueve el escalón sola, ni aquí.
+async function skillSelfLevelUp(){
+  const row=mySkillRanks[skillOpenSlug];
+  if(HabitSkills.rungOwner(row)!=='self')return;
+  const rungs=skillRungs(skillOpenSlug);
+  const cur=HabitSkills.rungAt(rungs,row.rank), next=HabitSkills.nextRung(rungs,row.rank);
+  if(!cur||!next)return;
+  const nextName=rungLabel(next);
+  if(!await confirmSheet(skf('levelBody',{name:rungLabel(cur),next:nextName}),
+    {title:sk('levelTitle'),confirmLabel:skf('levelUp',{name:nextName})}))return;
+  await skillSaveOwnRankUi(Number(next.progression_rank));
+}
+
+async function skillSelfLeave(){
+  const slug=skillOpenSlug, row=mySkillRanks[slug];
+  if(HabitSkills.rungOwner(row)!=='self')return;
+  if(!await confirmSheet(sk('leaveBody'),{title:sk('leaveTitle'),confirmLabel:sk('leaveOk'),danger:true}))return;
+  showLoading();
+  // Con .select(), una RLS que no deja borrar devuelve cero filas en vez de un falso éxito.
+  const{data,error}=await sb.from('coach_student_skills').delete().eq('id',row.id).select('id');
+  hideLoading();
+  if(error||!(data||[]).length){toast(sk('saveErr')+(error?': '+(error.message||error):''),'err');return;}
+  delete mySkillRanks[slug];
+  skillPickMode=false;
+  renderSkillSheet();
+  renderRutSkills();
+}
+
+// Entrenar un escalón es un entreno libre con ese ejercicio, o el ejercicio agregado al
+// entreno que ya está abierto. Entra con el estándar del escalón como objetivo
+// (HabitSkills.rungWorkout) y con la llave "cat-<slug>" de siempre, así que "La vez pasada"
+// y la escalera encuentran las series sin nada nuevo en la base.
+async function skillTrainRung(rank){
+  const slug=skillOpenSlug;
+  const skill=coachSkills.find(s=>s.slug===slug);
+  const rungs=skillRungs(slug);
+  const rung=HabitSkills.rungAt(rungs,rank);
+  const plan=HabitSkills.rungWorkout(rungs,rank);
+  if(!skill||!rung||!plan)return;
+  if(activeCoachingSession&&sessionExerciseList().some(ex=>rungForExercise(ex)===rung)){
+    closeSkillSheet();
+    openWorkoutSheet();
+    toast(sk('trainThere'),'ok');
+    return;
+  }
+  closeSkillSheet();
+  if(!activeCoachingSession){
+    await startFreeWorkoutSb(skillName(skill));
+    if(!activeCoachingSession)return;
+  }else openWorkoutSheet();
+  await wsAddExercise(rung.slug,{template:plan});
+  skillMarks=null;
+}
+
 // ---- El coach, en la misma hoja --------------------------------------------------------------
 
 function skillCoachHtml(skill,rungs){
@@ -23883,7 +24080,7 @@ function skillCoachHtml(skill,rungs){
     +'<div id="sk-coach-results">'+skillCoachResultsHtml()+'</div>'
     +(st?'<div class="field"><label>'+esc(sk('coachNoteLabel'))+'</label>'
         +'<textarea id="sk-coach-note" rows="2">'+esc(st.note||'')+'</textarea></div>'
-        +'<div class="sk-upload">'+esc(st.name)+(st.rank?' · '+esc(sk('yourRung'))+' '+st.rank:'')+'</div>'
+        +'<div class="sk-upload">'+esc(st.name)+(st.rank?' · '+esc(sk('yourRung'))+' '+st.rank:'')+(st.bySelf?' · '+esc(sk('coachBySelf')):'')+'</div>'
         +'<div class="sk-ladder">'+rungs.map(r=>
           '<button type="button" class="sk-rung'+(Number(r.progression_rank)===Number(st.rank)?' current':'')+'" '
           +'onclick="skillCoachSetRank('+Number(r.progression_rank)+')">'
@@ -23933,7 +24130,8 @@ function skillCoachRepaintResults(){
 
 async function skillCoachPick(id,name){
   const{data}=await sb.from('coach_student_skills').select('*').eq('user_id',id).eq('skill_slug',skillOpenSlug).maybeSingle();
-  skillCoachStudent={id,name,rank:data?Number(data.rank):0,note:data?(data.coach_note||''):''};
+  skillCoachStudent={id,name,rank:data?Number(data.rank):0,note:data?(data.coach_note||''):'',
+    bySelf:HabitSkills.rungOwner(data)==='self'};
   skillCoachResults=[];
   renderSkillSheet();
 }
@@ -23949,7 +24147,8 @@ async function skillCoachSetRank(rank){
   },{onConflict:'user_id,skill_slug'});
   hideLoading();
   if(error){toast('No se pudo guardar: '+(error.message||error),'err');return;}
-  skillCoachStudent={...st,rank,note:note||''};
+  // Al ponerlo el coach, la línea pasa a ser suya (set_by = él) y el alumno ya no la mueve.
+  skillCoachStudent={...st,rank,note:note||'',bySelf:st.id===sbUser.id};
   // Si el coach se lo puso a sí mismo, su propia escalera cambió.
   if(st.id===sbUser.id)await loadSkillsSb(true);
   toast(sk('coachSaved'),'ok');

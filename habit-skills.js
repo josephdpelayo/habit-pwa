@@ -3,8 +3,9 @@
 // Módulo puro: sin DOM y sin Supabase, igual que skandi-recovery.js, para poder ejercitarlo
 // desde Node (scripts/check-skills.js). Trae a HABIT el motor de las migraciones 078/079 de
 // Skandi, con una diferencia que no es un detalle: **aquí nada sube de escalón solo.**
-// readiness() dice "ya cumple el estándar" y el coach decide, porque la forma de un front
-// lever la juzga quien ve el video, no quien lo hace. Ver migración 141.
+// readiness() dice "ya cumple el estándar" y decide una persona: el coach, porque la forma
+// de un front lever la juzga quien ve el video (migración 141), o el propio alumno cuando
+// entrena sin coach y la línea la eligió él (migración 144, rungOwner()).
 //
 // Depende de HabitTraining (metricType, parseSeconds) y lo busca en cada llamada, así que el
 // orden de los <script> no importa. En Node, el test carga habit-training.js primero.
@@ -115,6 +116,55 @@
     return out;
   }
 
+  // ---- Quién mueve el escalón --------------------------------------------------------------
+
+  // Migración 144: una fila de coach_student_skills es del alumno si la puso él
+  // (set_by = user_id) y de su coach si la puso otra persona. Sin fila, la línea está libre y
+  // el alumno elige dónde empieza. Un set_by en null (se borró la cuenta del coach) cuenta como
+  // del coach, igual que en la RLS: de solo lectura, porque no se sabe quién la decidió.
+  function rungOwner(row) {
+    if (!row) return 'none';
+    return row.set_by && row.set_by === row.user_id ? 'self' : 'coach';
+  }
+
+  // ---- Entrenar un escalón -----------------------------------------------------------------
+
+  // Lo que entra en la hoja al tocar «Entrenar este escalón»: el estándar del escalón como
+  // objetivo de cada serie, para que cumplirlo en la hoja sea exactamente lo que readiness()
+  // cuenta. Al menos RUNG_MIN_SETS series, porque el estándar de algunos escalones es una sola
+  // (45 s de colgado invertido) y un entreno de una serie no es práctica. El descanso es el de
+  // trabajo de skill, más largo que los 90 s de la hoja: un aguante al límite pide recuperar.
+  const RUNG_MIN_SETS = 3;
+  const RUNG_REST_SEC = 120;
+
+  function rungWorkout(list, rank) {
+    const rung = rungAt(list, rank);
+    if (!rung) return null;
+    const idx = list.indexOf(rung);
+    const unit = markUnit(rung);
+    // El último escalón no tiene objetivo propio: hereda el del anterior, como en skillLevel().
+    const target = Number(rung.progression_target)
+      || Number(list[idx - 1] && list[idx - 1].progression_target)
+      || (unit === 'time' ? 10 : 5);
+    const plan = {
+      sets: String(Math.max(RUNG_MIN_SETS, Number(rung.progression_target_sets) || 1)),
+      reps: unit === 'time' ? target + 's' : String(target),
+      rest: RUNG_REST_SEC + 's'
+    };
+    if (unit === 'time') plan.repsType = 'time';
+    return plan;
+  }
+
+  // Un ejercicio agregado en vivo desde el catálogo guarda sus series con ex_key "cat-<slug>"
+  // (y "#2", "#3" si se repite en la misma sesión; wsUniqueExKey en crew.html). Esa llave es
+  // estable entre sesiones, así que también es el puente entre una serie y su escalón cuando
+  // el ejercicio no viene de una rutina guardada, que es justo el caso de quien entrena el
+  // escalón desde la escalera.
+  function catalogSlugFromExKey(exKey) {
+    const m = String(exKey == null ? '' : exKey).match(/^cat-(.+?)(?:#\d+)?$/);
+    return m ? m[1] : null;
+  }
+
   // ---- Cues --------------------------------------------------------------------------------
 
   // Las "Indicaciones" de un ejercicio son un solo campo de texto (boards.exercises[].note),
@@ -152,10 +202,11 @@
   }
 
   const api = {
-    CUE_MAX, CUE_LEN,
+    CUE_MAX, CUE_LEN, RUNG_MIN_SETS, RUNG_REST_SEC,
     rungs, rungAt, topRank, nextRung, isFinalRung,
     markUnit, setMark, bestMark,
     skillLevel, rungProgress, readiness,
+    rungOwner, rungWorkout, catalogSlugFromExKey,
     cueList, animationKind
   };
 

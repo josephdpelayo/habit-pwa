@@ -102,8 +102,18 @@ The app has four screens (`#s-auth`, `#s-main`, `#s-admin`, `#s-reception`), tog
   **Diferencia de fondo con Skandi: aquí nada sube de escalón solo.** HABIT no tiene nota de
   calidad por serie y la forma de un front lever la juzga quien ve el video, así que `readiness`
   le avisa al alumno que ya cumple para que lo grabe, y **el coach mueve el escalón**
-  (`coach_student_skills`, escritura solo de admin; un trigger lo historia en
-  `coach_skill_events`). Cada escalón **es un ejercicio del `exercise_catalog`** —así entra en
+  (`coach_student_skills`; un trigger lo historia en `coach_skill_events`). **Sin coach, lo
+  mueve el alumno** (migración 144): `set_by` decide de quién es la fila (`rungOwner()`) —puesta
+  por él, la elige, la sube y la quita él; puesta por otra persona, es del coach y la RLS no le
+  deja tocarla (el USING del update mira la fila como estaba, que es lo que frena un upsert),
+  ni escribir `coach_note`. Subir sigue siendo una persona tocando un botón cuando `readiness`
+  dice que cumple, nunca la app sola. **Entrenar este escalón** (`skillTrainRung`) es un
+  entreno libre con el nombre del skill, o el ejercicio agregado al que está abierto, con el
+  estándar como objetivo (`rungWorkout`: mín. 3 series, 120 s de descanso); entra por
+  `wsAddExercise` con su llave `cat-<slug>`, que `loadSkillMarksSb` también lee
+  (`catalogSlugFromExKey`) — antes un escalón agregado en vivo no le contaba a la escalera. Y
+  `wsExerciseFromCatalog` pone `repsType:'time'` a un aguante del catálogo: sin él la hoja pedía
+  kg y reps para un front lever. Cada escalón **es un ejercicio del `exercise_catalog`** —así entra en
   rutinas, se le registran series y tiene ficha— con `progression_group/rank/target/
   target_sets/criteria` encima. La **animación** (`animation_url`, GIF o MP4 corto en bucle,
   bucket público `skill-media`) es columna aparte de `video_url` a propósito: `videoKindRank`

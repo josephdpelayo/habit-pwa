@@ -8,7 +8,9 @@
 //      tipo "0:30", porque las dos formas viven en la base;
 //   4. que los cues se partan en puntos numerables sin numerar lo que es una sola frase;
 //   5. que la migración y la app no se separen: los escalones que la migración marca tienen
-//      que existir como ejercicios, y crew.html tiene que cargar el módulo.
+//      que existir como ejercicios, y crew.html tiene que cargar el módulo;
+//   6. que sin coach el alumno mueva SOLO lo que eligió él (144): lo que puso el coach no lo
+//      toca, y entrenar un escalón desde la escalera deja series que la escalera sí encuentra.
 const assert = require('node:assert/strict');
 const fs = require('node:fs');
 
@@ -129,6 +131,39 @@ assert.equal(Skills.animationKind('https://youtube.com/watch?v=abc'), null,
 assert.equal(Skills.animationKind(''), null);
 assert.equal(Skills.animationKind(null), null);
 
+// ── 6b. Sin coach (migración 144) ──────────────────────────────────────────
+// Quién manda en una fila lo dice set_by, la misma regla que la RLS.
+assert.equal(Skills.rungOwner(null), 'none', 'sin fila, la línea está libre');
+assert.equal(Skills.rungOwner({user_id: 'u1', set_by: 'u1', rank: 2}), 'self');
+assert.equal(Skills.rungOwner({user_id: 'u1', set_by: 'coach', rank: 2}), 'coach');
+assert.equal(Skills.rungOwner({user_id: 'u1', set_by: null, rank: 2}), 'coach',
+  'un coach borrado deja set_by en null: la fila sigue siendo de solo lectura');
+
+// Entrenar un escalón: su estándar como objetivo, con al menos RUNG_MIN_SETS series.
+assert.deepEqual(Skills.rungWorkout(fl, 2), {sets: '3', reps: '15s', rest: '120s', repsType: 'time'});
+assert.equal(Skills.rungWorkout(fl, 1).sets, String(Skills.RUNG_MIN_SETS),
+  'un estándar de una sola serie no hace un entreno de una serie');
+assert.equal(Skills.rungWorkout(fl, 1).reps, '45s');
+assert.equal(Skills.rungWorkout(fl, 4).reps, '10s', 'el último escalón entrena con el objetivo del anterior');
+assert.equal(Skills.rungWorkout(fl, 9), null);
+const repsLine = Skills.rungs([
+  {slug: 'r1', progression_group: 'mu', progression_rank: 1, progression_target: 8, progression_target_sets: 2, default_tracking: 'reps'},
+  {slug: 'r2', progression_group: 'mu', progression_rank: 2, progression_target: null, progression_target_sets: 1, default_tracking: 'reps'}
+], 'mu');
+assert.deepEqual(Skills.rungWorkout(repsLine, 1), {sets: '3', reps: '8', rest: '120s'},
+  'uno de repeticiones no lleva repsType de tiempo');
+assert.equal(Skills.rungWorkout(repsLine, 2).reps, '8');
+// Lo que cumple en la hoja es lo que cuenta readiness(): el objetivo de la serie se lee
+// igual que el estándar.
+assert.equal(global.HabitTraining.parseSeconds(Skills.rungWorkout(fl, 2).reps), fl[1].progression_target);
+
+// La llave de un ejercicio agregado en vivo lleva de vuelta a su escalón.
+assert.equal(Skills.catalogSlugFromExKey('cat-front-lever-tuck'), 'front-lever-tuck');
+assert.equal(Skills.catalogSlugFromExKey('cat-front-lever-tuck#2'), 'front-lever-tuck',
+  'el mismo ejercicio dos veces en una sesión sigue siendo el mismo escalón');
+assert.equal(Skills.catalogSlugFromExKey('ex_123'), null, 'una llave de rutina no es del catálogo');
+assert.equal(Skills.catalogSlugFromExKey(null), null);
+
 // ── 7. La migración y la app no se separan ─────────────────────────────────
 // Cada escalón que la migración marca tiene que existir como ejercicio: o lo trajo la 071, o
 // lo inserta la propia 141. Un escalón sin ejercicio deja un hueco invisible en la escalera.
@@ -178,10 +213,28 @@ for (const grp of byGroup.keys()) {
   assert.ok(migration.includes(`('${grp}','`), `coach_skills no tiene la línea ${grp}`);
 }
 
-// El escalón lo mueve el coach: la tabla del alumno no le da permiso de escritura a él mismo.
+// En la 141 el escalón lo mueve el coach: la tabla del alumno no le da permiso de escritura.
 assert.match(migration, /create policy "Students read own skills"[\s\S]{0,200}for select/,
   'el alumno solo LEE su escalón');
 assert.doesNotMatch(migration, /create policy "Students manage own skills"/);
+
+// La 144 le abre al alumno SOLO las filas que puso él. Cada política de escritura pide
+// set_by = auth.uid(), y la de update lo pide también en USING —la fila como estaba—, que es
+// lo que impide pisar con un upsert un escalón que puso el coach.
+const selfMig = fs.readFileSync('migrations/144_self_coached_skills.sql', 'utf8');
+const policies = [...selfMig.matchAll(/create policy "([^"]+)"\s+on public\.coach_student_skills for (\w+)([\s\S]*?);/g)]
+  .map(m => ({name: m[1], cmd: m[2], body: m[3]}));
+assert.deepEqual(policies.map(p => p.cmd).sort(), ['delete', 'insert', 'update'], 'la 144 abre insert, update y delete');
+for (const p of policies) {
+  assert.match(p.body, /auth\.uid\(\) = user_id and set_by = auth\.uid\(\)/, `${p.name}: solo lo suyo y puesto por él`);
+}
+const upd = policies.find(p => p.cmd === 'update');
+assert.match(upd.body, /using \(auth\.uid\(\) = user_id and set_by = auth\.uid\(\)\)/,
+  'update: USING mira quién puso la fila, o el alumno pisaría al coach');
+for (const p of policies.filter(x => x.cmd !== 'delete')) {
+  assert.match(p.body, /coach_note is null/, `${p.name}: «De tu coach» no lo escribe el alumno`);
+}
+assert.doesNotMatch(selfMig, /for all/, 'nada de un permiso amplio en la tabla del alumno');
 
 // crew.html carga el módulo y el service worker lo cachea: si falta en SHELL, el teléfono se
 // queda con la versión vieja o sin el archivo.
@@ -236,4 +289,4 @@ assert.ok(crewStart >= 0 && crewEnd > crewStart, 'script principal de crew.html 
 new Function(crew.slice(crewStart + '<script>'.length, crewEnd));
 
 
-console.log('HABIT skills: ' + (70 + rungRows.length) + ' aserciones OK (' + rungRows.length + ' escalones, ' + byGroup.size + ' líneas)');
+console.log('HABIT skills: ' + (100 + rungRows.length) + ' aserciones OK (' + rungRows.length + ' escalones, ' + byGroup.size + ' líneas)');

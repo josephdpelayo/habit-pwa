@@ -126,6 +126,7 @@ alumno sin encender nada de lo viejo.
 | **0** | **Nada de código.** Arrancas con 1 o 2 alumnos sobre lo que ya existe: cuenta en Crew, programa armado desde HABIT admin, indicaciones y video pegados en cada ejercicio | Esta semana |
 | **1** | ✅ **Hecho (2 nov 2026)**: los cues numerados en la hoja de entreno, más el criterio de forma del escalón | — |
 | **2** | ✅ **Hecho (2 nov 2026)**: migración 141, `habit-skills.js` + `scripts/check-skills.js`, pestaña Skills, la escalera con animaciones y el panel del coach | — |
+| **2b** | ✅ **Hecho (2 nov 2026)**: entrenar sin coach — elegir tu escalón, entrenarlo con un toque y subir tú cuando cumples el estándar (migración 144) | — |
 | **3** | Portada del bloque en Inicio y la marca de alumno 1:1 | Chico |
 | **4** | *Si lo piden los alumnos*: sticker de «subí de escalón» (`habit-share.js`, `kind:'skill'`) y push de «te toca grabar» | Opcional |
 
@@ -179,7 +180,6 @@ ahorraste la Fase 1.
   `scripts/check-skills.js`) tiene la curva continua, el estándar de dos sesiones seguidas y el
   parseo de cues. En Crew: pestaña **Skills** en Entrenar, la hoja de la escalera (una sola para
   alumno y coach) y los cues numerados + el criterio del escalón en la hoja de entreno.
-  **Falta correr la 141 en Supabase.**
 - **2 nov 2026** — **Las animaciones de las dos primeras escaleras.** 15 SVG animados
   (`skill-anim/`, generados por `scripts/make-skill-anim.py`) para front lever y parada de manos,
   enlazados por la migración 142 y servidos desde el repo, sin bucket. La pose va quieta porque
@@ -192,3 +192,24 @@ ahorraste la Fase 1.
   brazos que se doblan, que es lo que distingue los escalones del muscle-up. Revisadas las 35 en
   el navegador: ahí se vieron y se corrigieron un nórdico que pasaba el ciclo de pie en vez de
   bajando, y un muscle-up negativo que giraba 150° sobre el hombro.
+- **2 nov 2026** — Corridas en Supabase la 140, la 142 y la 143 (la 141 ya estaba). Las 35
+  animaciones y las 7 portadas quedaron enlazadas.
+- **2 nov 2026** — **Entrenar sin coach (Fase 2b).** En Crew nadie tenía escalón (cero filas en
+  `coach_student_skills`), así que la pestaña Skills decía «tu coach todavía no te ha puesto
+  un escalón» en las siete líneas. Ahora:
+  · **Elegir tu escalón**: la escalera se vuelve botones («Toca el escalón en el que vas») con
+    la regla de en cuál empezar: el más difícil que ya haces limpio; si dudas, el de abajo.
+  · **Entrenar este escalón**: un entreno libre con el nombre del skill y el estándar como
+    objetivo (mín. 3 series, 120 s), o el ejercicio agregado al entreno que ya está abierto.
+  · **Subir tú**: con el estándar cumplido dos sesiones seguidas aparece «Subir a …». La app
+    sigue sin mover nada sola; lo que cambió es quién puede tocar el botón.
+  · Lo que puso el coach sigue siendo del coach: migración 144, `set_by` decide de quién es
+    la fila. Si el coach pone un escalón sobre una línea que el alumno eligió, pasa a ser suya.
+  Dos arreglos de paso, que eran la razón de que entrenar un escalón no contara: las series de
+  un ejercicio agregado en vivo (`cat-<slug>`) no llegaban a la escalera, y un aguante agregado
+  desde el catálogo pedía kg y reps en vez de segundos.
+  **La 144 ya corrió en Supabase** y se probó como alumno, en un bloque que se revirtió:
+  elige, sube y hace upsert de lo suyo; no puede escribirse una nota «de tu coach», ni
+  ponerle escalón a otra persona, ni firmar como otro; y una vez que el coach toma la línea,
+  sus update y delete no tocan nada y su upsert falla. El historial registró los cuatro
+  movimientos.
