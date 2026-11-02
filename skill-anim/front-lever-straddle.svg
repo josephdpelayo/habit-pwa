@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="44 -27 214 214" preserveAspectRatio="xMidYMid meet" role="img" aria-label="Front lever straddle">
+  <title>Front lever straddle</title>
+  <line x1="60.0" y1="40.0" x2="242.1" y2="40.0" stroke="rgba(232,233,238,.3)" stroke-width="5" stroke-linecap="round" opacity="1.0"/>
+  <line x1="103.0" y1="40.0" x2="103.0" y2="92.0" stroke="#e8e9ee" stroke-width="7" stroke-linecap="round" opacity="1.0"/>
+  <line x1="117.0" y1="40.0" x2="117.0" y2="92.0" stroke="#e8e9ee" stroke-width="7" stroke-linecap="round" opacity="0.5"/>
+  <circle cx="110.0" cy="40.0" r="6" fill="rgba(232,233,238,.3)"/>
+  <g>
+    <animateTransform attributeName="transform" type="rotate" values="-1.5 110 92;1.5 110 92;-1.5 110 92" keyTimes="0.00;0.50;1.00" dur="5s" repeatCount="indefinite" calcMode="spline" keySplines="0.4 0 0.6 1;0.4 0 0.6 1"/>
+    <line x1="110.0" y1="92.0" x2="158.0" y2="92.0" stroke="#e8e9ee" stroke-width="7" stroke-linecap="round" opacity="1.0"/>
+    <line x1="110.0" y1="92.0" x2="94.0" y2="92.0" stroke="#e8e9ee" stroke-width="6" stroke-linecap="round" opacity="1.0"/>
+    <circle cx="85.0" cy="92.0" r="11" fill="#e8e9ee"/>
+    <line x1="158.0" y1="92.0" x2="194.0" y2="109.5" stroke="#e8e9ee" stroke-width="7" stroke-linecap="round" opacity="1.0"/>
+    <line x1="194.0" y1="109.5" x2="228.1" y2="126.2" stroke="#e8e9ee" stroke-width="7" stroke-linecap="round" opacity="1.0"/>
+    <line x1="158.0" y1="92.0" x2="194.0" y2="74.5" stroke="#e8e9ee" stroke-width="7" stroke-linecap="round" opacity="0.5"/>
+    <line x1="194.0" y1="74.5" x2="228.1" y2="57.8" stroke="#e8e9ee" stroke-width="7" stroke-linecap="round" opacity="0.5"/>
+  </g>
+</svg>

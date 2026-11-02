@@ -119,6 +119,18 @@ The app has four screens (`#s-auth`, `#s-main`, `#s-admin`, `#s-reception`), tog
   hoja de entreno — antes `.ex-note` solo salía en la lista de la rutina y desaparecía justo al
   entrenar. `scripts/check-skills.js` lo prueba y, de paso, **compila el script principal de
   `crew.html`**, que no lo hacía nadie
+- `skill-anim/*.svg` + `scripts/make-skill-anim.py` — **el dibujo de cada escalón** de front
+  lever y parada de manos (migración 142, que los enlaza en `animation_url` **solo donde está
+  vacío**: el video que suba el coach manda). SVG animados con SMIL, que dentro de un `<img>`
+  corren solos, pesan 4 KB y se ven nítidos lo mismo a 58 px que a tamaño de hoja; se sirven
+  desde el repo, sin pasar por el bucket. Tres cosas del generador que no hay que deshacer: la
+  figura se dibuja **ya en su posición** (la animación es solo lo de encima, así el script sabe
+  dónde cae cada articulación), **la pose está quieta** —en una escalera se comparan ocho
+  posiciones de un vistazo y ocho figuras repitiendo la entrada las dejan todas a mitad de
+  camino— salvo donde el movimiento ES el ejercicio (el jalón de talón, el traspaso de peso), y
+  el **viewBox se calcula y se cuadra solo**: un colgado invertido ocupa alto y un front lever
+  ocupa ancho, y la miniatura es 1:1 con `object-fit:cover`, que a un lienzo alto le cortaría
+  las piernas
 - `habit-activity.js` — **la sección Actividad, en las dos apps** (HABIT la pidió el 1 nov 2026):
   un contenedor `#actividad-content`, su pestaña y `HabitActivity.render(el)` desde `sv()`. Junta
   los entrenos de la app, lo registrado a mano (`training_activities`), las sesiones de fuerza de

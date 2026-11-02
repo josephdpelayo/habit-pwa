@@ -180,3 +180,9 @@ ahorraste la Fase 1.
   parseo de cues. En Crew: pestaña **Skills** en Entrenar, la hoja de la escalera (una sola para
   alumno y coach) y los cues numerados + el criterio del escalón en la hoja de entreno.
   **Falta correr la 141 en Supabase.**
+- **2 nov 2026** — **Las animaciones de las dos primeras escaleras.** 15 SVG animados
+  (`skill-anim/`, generados por `scripts/make-skill-anim.py`) para front lever y parada de manos,
+  enlazados por la migración 142 y servidos desde el repo, sin bucket. La pose va quieta porque
+  en una escalera se comparan ocho posiciones de un vistazo; solo se mueve donde el movimiento es
+  el ejercicio. Revisadas en el navegador a tamaño de hoja y a 58 px. El video real de cada
+  escalón las pisa en cuanto se suba desde Admin: la 142 solo escribe donde está vacío.

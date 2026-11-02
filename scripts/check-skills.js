@@ -122,6 +122,8 @@ assert.ok(Skills.cueList('x'.repeat(400))[0].length <= Skills.CUE_LEN, 'un cue l
 assert.equal(Skills.animationKind('https://x/y/front-lever.gif'), 'image');
 assert.equal(Skills.animationKind('https://x/y/front-lever.mp4'), 'video');
 assert.equal(Skills.animationKind('https://x/y/a.webm?v=2'), 'video');
+assert.equal(Skills.animationKind('/skill-anim/front-lever-tuck.svg'), 'image',
+  'un SVG animado corre solo dentro de un <img>, sin JS');
 assert.equal(Skills.animationKind('https://youtube.com/watch?v=abc'), null,
   'un embed no es una animación: una que hay que tocar no enseña la posición');
 assert.equal(Skills.animationKind(''), null);
@@ -185,6 +187,36 @@ assert.doesNotMatch(migration, /create policy "Students manage own skills"/);
 // queda con la versión vieja o sin el archivo.
 assert.match(crew, /habit-skills\.js/, 'crew.html carga habit-skills.js');
 assert.match(fs.readFileSync('sw.js', 'utf8'), /habit-skills\.js/, 'sw.js cachea habit-skills.js');
+
+// ── 8. Las animaciones: migración 142 y archivos, en sincronía ─────────────
+// El dibujo de un escalón vive en dos lados —el SVG en el repo y su URL en la migración— y
+// si se separan, la escalera enseña un hueco o un 404. El generador los produce a la vez;
+// esto falla si alguien borra uno sin el otro.
+const anim = fs.readFileSync('migrations/142_skill_animations.sql', 'utf8');
+const animSlugs = [...anim.matchAll(/^\s*\('([a-z0-9-]+)'\)[,;]?$/gm)].map(m => m[1]);
+assert.equal(animSlugs.length, 15, 'quince escalones con animación en la 142');
+const animFiles = fs.readdirSync('skill-anim').filter(f => f.endsWith('.svg')).map(f => f.replace(/\.svg$/, ''));
+for (const slug of animSlugs) {
+  assert.ok(animFiles.includes(slug), `la 142 enlaza ${slug}.svg pero el archivo no existe`);
+  const svg = fs.readFileSync(`skill-anim/${slug}.svg`, 'utf8');
+  assert.match(svg, /<animateTransform/, `${slug}.svg no anima: sería una imagen fija`);
+  // Cuadrado, porque la miniatura es 1:1 con object-fit cover y recortaría las piernas.
+  const vb = svg.match(/viewBox="(-?\d+) (-?\d+) (\d+) (\d+)"/);
+  assert.ok(vb, `${slug}.svg sin viewBox`);
+  assert.equal(vb[3], vb[4], `${slug}.svg no es cuadrado: la miniatura lo recortaría`);
+}
+for (const f of animFiles) {
+  assert.ok(animSlugs.includes(f), `skill-anim/${f}.svg no lo enlaza ninguna migración`);
+}
+// Y cada uno tiene que ser un escalón de verdad de una de las dos líneas.
+const ladderSlugs = new Set(rungRows.filter(r => r.grp === 'front-lever' || r.grp === 'handstand').map(r => r.slug));
+for (const slug of animSlugs) {
+  assert.ok(ladderSlugs.has(slug), `${slug} tiene animación pero no es escalón de front-lever ni handstand`);
+}
+assert.equal(ladderSlugs.size, 15, 'las dos líneas suman quince escalones');
+// La 142 nunca pisa una animación que el coach ya subió.
+assert.match(anim, /animation_url is null/, 'la 142 solo escribe donde está vacío');
+
 
 // Compila el script principal de crew.html sin ejecutarlo. Ninguna prueba lo hacía —cada una
 // extrae el trozo que le toca— y crew.html es justo el archivo donde entra todo lo nuevo: un

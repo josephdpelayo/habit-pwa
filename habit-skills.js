@@ -144,7 +144,10 @@
     const raw = String(url == null ? '' : url).trim().toLowerCase().split(/[?#]/)[0];
     if (!raw) return null;
     if (/\.(mp4|webm|mov)$/.test(raw)) return 'video';
-    if (/\.(gif|webp|png|jpe?g|avif)$/.test(raw)) return 'image';
+    // El SVG animado cuenta como imagen: dentro de un <img> corre su propia animación
+    // (SMIL o CSS) sin JavaScript, pesa unos kilobytes y se ve nítido a 58 px igual que a
+    // 1080. Es con lo que nacen las escaleras antes de que haya video real de cada escalón.
+    if (/\.(gif|webp|png|jpe?g|avif|svg)$/.test(raw)) return 'image';
     return null;
   }
 

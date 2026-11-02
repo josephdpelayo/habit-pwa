@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="9 6 226 226" preserveAspectRatio="xMidYMid meet" role="img" aria-label="Parada de manos en pared">
+  <title>Parada de manos en pared</title>
+  <line x1="83.1" y1="210.0" x2="161.7" y2="210.0" stroke="rgba(232,233,238,.3)" stroke-width="5" stroke-linecap="round" opacity="1.0"/>
+  <line x1="146.7" y1="210.0" x2="146.7" y2="21.6" stroke="rgba(232,233,238,.3)" stroke-width="5" stroke-linecap="round" opacity="1.0"/>
+  <line x1="111.0" y1="210.0" x2="116.0" y2="158.0" stroke="#e8e9ee" stroke-width="7" stroke-linecap="round" opacity="1.0"/>
+  <line x1="129.0" y1="210.0" x2="124.0" y2="158.0" stroke="#e8e9ee" stroke-width="7" stroke-linecap="round" opacity="0.5"/>
+  <circle cx="120.0" cy="210.0" r="6" fill="rgba(232,233,238,.3)"/>
+  <g>
+    <animateTransform attributeName="transform" type="rotate" values="-1.5 120 158;1.5 120 158;-1.5 120 158" keyTimes="0.00;0.50;1.00" dur="5s" repeatCount="indefinite" calcMode="spline" keySplines="0.4 0 0.6 1;0.4 0 0.6 1"/>
+    <line x1="120.0" y1="158.0" x2="127.5" y2="110.6" stroke="#e8e9ee" stroke-width="7" stroke-linecap="round" opacity="1.0"/>
+    <line x1="120.0" y1="158.0" x2="117.5" y2="173.8" stroke="#e8e9ee" stroke-width="6" stroke-linecap="round" opacity="1.0"/>
+    <circle cx="116.1" cy="182.7" r="11" fill="#e8e9ee"/>
+    <line x1="127.5" y1="110.6" x2="133.8" y2="71.1" stroke="#e8e9ee" stroke-width="7" stroke-linecap="round" opacity="1.0"/>
+    <line x1="133.8" y1="71.1" x2="139.7" y2="33.6" stroke="#e8e9ee" stroke-width="7" stroke-linecap="round" opacity="1.0"/>
+    <line x1="127.5" y1="110.6" x2="133.8" y2="71.1" stroke="#e8e9ee" stroke-width="7" stroke-linecap="round" opacity="0.5"/>
+    <line x1="133.8" y1="71.1" x2="139.7" y2="33.6" stroke="#e8e9ee" stroke-width="7" stroke-linecap="round" opacity="0.5"/>
+  </g>
+</svg>
