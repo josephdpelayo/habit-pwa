@@ -4,8 +4,40 @@
     {
       "name": "static",
       "runtimeExecutable": "npx",
-      "runtimeArgs": ["-y", "serve", "-l", "4173", "."],
+      "runtimeArgs": [
+        "-y",
+        "serve",
+        "-l",
+        "4173",
+        "."
+      ],
       "port": 4173
+    },
+    {
+      "name": "ios-repro",
+      "runtimeExecutable": "npx",
+      "runtimeArgs": [
+        "-y",
+        "serve",
+        "-l",
+        "4180",
+        "/private/tmp/claude-501/-Users-macjoseph-Downloads-habit-pwa-v2-27/ef6c3bb4-4499-4114-ad81-dfe297e51629/scratchpad/site"
+      ],
+      "port": 4180
+    },
+    {
+      "name": "crew-local",
+      "runtimeExecutable": "npx",
+      "runtimeArgs": [
+        "-y",
+        "serve",
+        "-l",
+        "4174",
+        "-c",
+        ".claude/serve-crew.json",
+        "."
+      ],
+      "port": 4174
     }
   ]
 }

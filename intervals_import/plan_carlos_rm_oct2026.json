@@ -1,0 +1,105 @@
+[
+ {
+  "external_id": "joseph-rm-2026-semana",
+  "category": "NOTE",
+  "start_date_local": "2026-10-19T00:00:00",
+  "name": "Semana a bordo (Running Master)",
+  "description": "Semanas 1-3 de Carlos a bordo, 19 oct - 8 nov. Lun: HS + empuje + cadera. Mar: HS + tiron + Z1. Mie: HS + empuje + accesorios (aqui va el HYROX si esa semana hay). Jue: HS + Z1 + cuadriceps y pantorrilla. Vie: HS + tiron, sin pierna. Sab: HS + calidad + 1/2 empuje. Dom: largo. Si pierdes una sesion de Carlos, no la recuperes al dia siguiente: escribele."
+ },
+ {
+  "external_id": "joseph-rm-2026-2026-10-20-e1",
+  "category": "WORKOUT",
+  "start_date_local": "2026-10-20T00:00:00",
+  "type": "Run",
+  "name": "E1 - Rodaje Z1 40",
+  "description": "Suave de verdad: tienes que poder conversar. Va despues del tiron de Alge. Si la cadera de ayer se nota, quedate en 10.0 km/h. Despues, gemelo y soleo. Cinta al 1% de inclinacion. Manda la velocidad de la cinta, no el ritmo del reloj: al guardar, corrige la distancia en Garmin para que se calibre. Con mar movida: clip de seguridad y 0.3-0.5 km/h menos en lo rapido.\n\n- Suave 10.0-10.3kph 40m 5:50-6:00/km Pace intensity=active"
+ },
+ {
+  "external_id": "joseph-rm-2026-2026-10-22-j1",
+  "category": "WORKOUT",
+  "start_date_local": "2026-10-22T00:00:00",
+  "type": "Run",
+  "name": "J1 - Rodaje Z1 40",
+  "description": "Suave de verdad. Va despues del handstand y antes de la pierna, para que la pantorrilla corra fresca. La pierna de hoy es corta y sin fallo: el sabado es la calidad. Cinta al 1% de inclinacion. Manda la velocidad de la cinta, no el ritmo del reloj: al guardar, corrige la distancia en Garmin para que se calibre. Con mar movida: clip de seguridad y 0.3-0.5 km/h menos en lo rapido.\n\n- Suave 10.0-10.3kph 40m 5:50-6:00/km Pace intensity=active"
+ },
+ {
+  "external_id": "joseph-rm-2026-2026-10-24-q1",
+  "category": "WORKOUT",
+  "start_date_local": "2026-10-24T00:00:00",
+  "type": "Run",
+  "name": "Q1 - Calidad: 3 x 2000 m en Z2, pausa 2'",
+  "description": "Carlos: 15' de calentamiento + 3 x 2000 m en Z2, pausa 2' + 10' de enfriamiento (unos 60 min). Las series van en tiempo a la velocidad media de la zona; en la cinta salen los metros de Carlos. Handstand antes de correr, 1/2 empuje despues. Ayer sin pierna; la del jueves fue corta. Sorbos de isotonica casera (1 bloque) en el calentamiento y en las pausas. Respeta la zona aunque el cuerpo pida mas. Cinta al 1% de inclinacion. Manda la velocidad de la cinta, no el ritmo del reloj: al guardar, corrige la distancia en Garmin para que se calibre. Con mar movida: clip de seguridad y 0.3-0.5 km/h menos en lo rapido.\n\n- Calentamiento Suave 10.0-10.3kph 15m 5:50-6:00/km Pace intensity=warmup\n\n3x\n- Sostenido 12.4-12.6kph 9m35s 4:45-4:50/km Pace intensity=interval\n- Pausa 2m intensity=recovery\n\n- Enfriamiento Suave 10.0-10.3kph 10m 5:50-6:00/km Pace intensity=cooldown"
+ },
+ {
+  "external_id": "joseph-rm-2026-2026-10-25-l1",
+  "category": "WORKOUT",
+  "start_date_local": "2026-10-25T00:00:00",
+  "type": "Run",
+  "name": "L1 - Largo Z1 60",
+  "description": "Largo en Z1 de verdad: nada de acelerar al final. Agua cada 15-20 min. A los 40 min el reloj te avisa: 1 bloque de carbos (35 g de datiles o isotonica casera) sin parar la cinta. Pesate antes y despues: cada kilo perdido son 1-1.5 L por reponer. Cinta al 1% de inclinacion. Manda la velocidad de la cinta, no el ritmo del reloj: al guardar, corrige la distancia en Garmin para que se calibre. Con mar movida: clip de seguridad y 0.3-0.5 km/h menos en lo rapido.\n\n- Suave 10.0-10.3kph 40m 5:50-6:00/km Pace intensity=active\n- Toma carbos y sigue suave 10.0-10.3kph 20m 5:50-6:00/km Pace intensity=active"
+ },
+ {
+  "external_id": "joseph-rm-2026-2026-10-27-e2",
+  "category": "WORKOUT",
+  "start_date_local": "2026-10-27T00:00:00",
+  "type": "Run",
+  "name": "E2 - Rodaje Z1 45",
+  "description": "Suave de verdad: tienes que poder conversar. Va despues del tiron de Alge. Si la cadera de ayer se nota, quedate en 10.0 km/h. Despues, gemelo y soleo. Cinta al 1% de inclinacion. Manda la velocidad de la cinta, no el ritmo del reloj: al guardar, corrige la distancia en Garmin para que se calibre. Con mar movida: clip de seguridad y 0.3-0.5 km/h menos en lo rapido.\n\n- Suave 10.0-10.3kph 45m 5:50-6:00/km Pace intensity=active"
+ },
+ {
+  "external_id": "joseph-rm-2026-2026-10-29-j2",
+  "category": "WORKOUT",
+  "start_date_local": "2026-10-29T00:00:00",
+  "type": "Run",
+  "name": "J2 - Rodaje Z1 45",
+  "description": "Suave de verdad. Va despues del handstand y antes de la pierna, para que la pantorrilla corra fresca. La pierna de hoy es corta y sin fallo: el sabado es la calidad. Cinta al 1% de inclinacion. Manda la velocidad de la cinta, no el ritmo del reloj: al guardar, corrige la distancia en Garmin para que se calibre. Con mar movida: clip de seguridad y 0.3-0.5 km/h menos en lo rapido.\n\n- Suave 10.0-10.3kph 45m 5:50-6:00/km Pace intensity=active"
+ },
+ {
+  "external_id": "joseph-rm-2026-2026-10-31-q2",
+  "category": "WORKOUT",
+  "start_date_local": "2026-10-31T00:00:00",
+  "type": "Run",
+  "name": "Q2 - Calidad: 2 x 3000 m en Z2, pausa 2'30",
+  "description": "Carlos: 15' de calentamiento + 2 x 3000 m en Z2, pausa 2'30 + 10' de enfriamiento (unos 59 min). Las series van en tiempo a la velocidad media de la zona; en la cinta salen los metros de Carlos. Handstand antes de correr, 1/2 empuje despues. Ayer sin pierna; la del jueves fue corta. Sorbos de isotonica casera (1 bloque) en el calentamiento y en las pausas. Respeta la zona aunque el cuerpo pida mas. Cinta al 1% de inclinacion. Manda la velocidad de la cinta, no el ritmo del reloj: al guardar, corrige la distancia en Garmin para que se calibre. Con mar movida: clip de seguridad y 0.3-0.5 km/h menos en lo rapido.\n\n- Calentamiento Suave 10.0-10.3kph 15m 5:50-6:00/km Pace intensity=warmup\n\n2x\n- Sostenido 12.4-12.6kph 14m22s 4:45-4:50/km Pace intensity=interval\n- Pausa 2m30s intensity=recovery\n\n- Enfriamiento Suave 10.0-10.3kph 10m 5:50-6:00/km Pace intensity=cooldown"
+ },
+ {
+  "external_id": "joseph-rm-2026-2026-11-01-l2",
+  "category": "WORKOUT",
+  "start_date_local": "2026-11-01T00:00:00",
+  "type": "Run",
+  "name": "L2 - Largo Z1 65",
+  "description": "Largo en Z1 de verdad: nada de acelerar al final. Agua cada 15-20 min. A los 40 min el reloj te avisa: 1 bloque de carbos (35 g de datiles o isotonica casera) sin parar la cinta. Pesate antes y despues: cada kilo perdido son 1-1.5 L por reponer. Cinta al 1% de inclinacion. Manda la velocidad de la cinta, no el ritmo del reloj: al guardar, corrige la distancia en Garmin para que se calibre. Con mar movida: clip de seguridad y 0.3-0.5 km/h menos en lo rapido.\n\n- Suave 10.0-10.3kph 40m 5:50-6:00/km Pace intensity=active\n- Toma carbos y sigue suave 10.0-10.3kph 25m 5:50-6:00/km Pace intensity=active"
+ },
+ {
+  "external_id": "joseph-rm-2026-2026-11-03-e3",
+  "category": "WORKOUT",
+  "start_date_local": "2026-11-03T00:00:00",
+  "type": "Run",
+  "name": "E3 - Rodaje Z1 45",
+  "description": "Suave de verdad: tienes que poder conversar. Va despues del tiron de Alge. Si la cadera de ayer se nota, quedate en 10.0 km/h. Despues, gemelo y soleo. Cinta al 1% de inclinacion. Manda la velocidad de la cinta, no el ritmo del reloj: al guardar, corrige la distancia en Garmin para que se calibre. Con mar movida: clip de seguridad y 0.3-0.5 km/h menos en lo rapido.\n\n- Suave 10.0-10.3kph 45m 5:50-6:00/km Pace intensity=active"
+ },
+ {
+  "external_id": "joseph-rm-2026-2026-11-05-j3",
+  "category": "WORKOUT",
+  "start_date_local": "2026-11-05T00:00:00",
+  "type": "Run",
+  "name": "J3 - Rodaje Z1 45",
+  "description": "Suave de verdad. Va despues del handstand y antes de la pierna, para que la pantorrilla corra fresca. La pierna de hoy es corta y sin fallo: el sabado es la calidad. Cinta al 1% de inclinacion. Manda la velocidad de la cinta, no el ritmo del reloj: al guardar, corrige la distancia en Garmin para que se calibre. Con mar movida: clip de seguridad y 0.3-0.5 km/h menos en lo rapido.\n\n- Suave 10.0-10.3kph 45m 5:50-6:00/km Pace intensity=active"
+ },
+ {
+  "external_id": "joseph-rm-2026-2026-11-07-q3",
+  "category": "WORKOUT",
+  "start_date_local": "2026-11-07T00:00:00",
+  "type": "Run",
+  "name": "Q3 - Calidad: 6000 m en Z2 + 1000 m en Z3, pausa 3'",
+  "description": "Carlos: 15' de calentamiento + 6000 m en Z2 + 1000 m en Z3, pausa 3' + 10' de enfriamiento (unos 61 min). Las series van en tiempo a la velocidad media de la zona; en la cinta salen los metros de Carlos. Handstand antes de correr, 1/2 empuje despues. Ayer sin pierna; la del jueves fue corta. Sorbos de isotonica casera (1 bloque) en el calentamiento y en las pausas. Respeta la zona aunque el cuerpo pida mas. Cinta al 1% de inclinacion. Manda la velocidad de la cinta, no el ritmo del reloj: al guardar, corrige la distancia en Garmin para que se calibre. Con mar movida: clip de seguridad y 0.3-0.5 km/h menos en lo rapido.\n\n- Calentamiento Suave 10.0-10.3kph 15m 5:50-6:00/km Pace intensity=warmup\n\n- Sostenido 12.4-12.6kph 28m45s 4:45-4:50/km Pace intensity=interval\n- Pausa 3m intensity=recovery\n\n- Exigente 13.3-13.6kph 4m28s 4:25-4:30/km Pace intensity=interval\n\n- Enfriamiento Suave 10.0-10.3kph 10m 5:50-6:00/km Pace intensity=cooldown"
+ },
+ {
+  "external_id": "joseph-rm-2026-2026-11-08-l3",
+  "category": "WORKOUT",
+  "start_date_local": "2026-11-08T00:00:00",
+  "type": "Run",
+  "name": "L3 - Largo Z1 70",
+  "description": "Largo en Z1 de verdad: nada de acelerar al final. Agua cada 15-20 min. A los 40 min el reloj te avisa: 1 bloque de carbos (35 g de datiles o isotonica casera) sin parar la cinta. Pesate antes y despues: cada kilo perdido son 1-1.5 L por reponer. Cinta al 1% de inclinacion. Manda la velocidad de la cinta, no el ritmo del reloj: al guardar, corrige la distancia en Garmin para que se calibre. Con mar movida: clip de seguridad y 0.3-0.5 km/h menos en lo rapido.\n\n- Suave 10.0-10.3kph 40m 5:50-6:00/km Pace intensity=active\n- Toma carbos y sigue suave 10.0-10.3kph 30m 5:50-6:00/km Pace intensity=active"
+ }
+]

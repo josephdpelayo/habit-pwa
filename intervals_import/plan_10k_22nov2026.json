@@ -1,0 +1,193 @@
+[
+ {
+  "external_id": "joseph-10k-2026-2026-10-16-b0",
+  "category": "WORKOUT",
+  "start_date_local": "2026-10-16T00:00:00",
+  "name": "B0 - Bici Z2 muy suave 30 (opcional)",
+  "description": "Opcional: soltar piernas antes del umbral de manana. Muy suave (65-75% FCmax, 124-143), cadencia 85-95, sin resistencia. Si vienes cargado del HYROX, mejor descansa. Esta semana el HYROX va el jueves a 2 rondas, para llegar fresco al test.\n\n- Suave 5m 55-65% HR\n- Rodar 20m 65-75% HR\n- Suelta 5m 55-65% HR",
+  "type": "Ride"
+ },
+ {
+  "external_id": "joseph-10k-2026-2026-10-17-t1",
+  "category": "WORKOUT",
+  "start_date_local": "2026-10-17T00:00:00",
+  "name": "T1 - Test 30 min",
+  "description": "El punto de partida: con esto se fijan las velocidades de umbral y de 10k. Corre 30 min lo mas fuerte que puedas sostener PAREJO (empieza conservador, ultimos 5 min a tope). Anota la distancia de la cinta y, al guardar en el reloj, calibra con esa distancia. La FC media de los ultimos 20 min es tu umbral real. Cinta al 1% de inclinacion. Con mar movida: clip de seguridad y baja 0.5 km/h en lo rapido.\n\nCalentamiento\n- Trote muy suave 15m 65-80% HR\n\nRectas 4x\n- Recta progresiva 20s\n- Trote suave 60s 55-65% HR\n\nTest\n- Parejo 10m\n- Parejo 20m\n\nEnfriamiento\n- Trote muy suave 10m 55-65% HR",
+  "type": "Run"
+ },
+ {
+  "external_id": "joseph-10k-2026-2026-10-18-l0",
+  "category": "WORKOUT",
+  "start_date_local": "2026-10-18T00:00:00",
+  "name": "L0 - Rodaje largo Z2 60",
+  "description": "Largo de verdad en Z2: nada de acelerar al final. La FC tiende a subir con el tiempo (y con el calor del barco): si pasa de 152, baja la cinta, aunque el ritmo se vaya. Hidratate cada 20 min. Cinta al 1% de inclinacion. Con mar movida: clip de seguridad y baja 0.5 km/h en lo rapido.\n\nLargo\n- Trote 60m 65-80% HR",
+  "type": "Run"
+ },
+ {
+  "external_id": "joseph-10k-2026-2026-10-21-e1",
+  "category": "WORKOUT",
+  "start_date_local": "2026-10-21T00:00:00",
+  "name": "E1 - Rodaje Z2 40 + rectas",
+  "description": "Suave de verdad: tienes que poder conversar. Techo 152 ppm, lo ideal 135-148; si subes, baja 0.3 km/h. Sin objetivo de ritmo. Ayer fue HYROX: si hay agujetas, las rectas suaves o fuera. Corre despues del tiron, no antes. Cinta al 1% de inclinacion. Con mar movida: clip de seguridad y baja 0.5 km/h en lo rapido.\n\nRodaje\n- Trote 40m 65-80% HR\n\nRectas 4x\n- Recta progresiva 20s\n- Trote suave 60s 55-65% HR",
+  "type": "Run"
+ },
+ {
+  "external_id": "joseph-10k-2026-2026-10-23-b1",
+  "category": "WORKOUT",
+  "start_date_local": "2026-10-23T00:00:00",
+  "name": "B1 - Bici Z2 muy suave 35 (opcional)",
+  "description": "Opcional: soltar piernas antes del umbral de manana. Muy suave (65-75% FCmax, 124-143), cadencia 85-95, sin resistencia. Si vienes cargado del HYROX, mejor descansa.\n\n- Suave 5m 55-65% HR\n- Rodar 25m 65-75% HR\n- Suelta 5m 55-65% HR",
+  "type": "Ride"
+ },
+ {
+  "external_id": "joseph-10k-2026-2026-10-24-q1",
+  "category": "WORKOUT",
+  "start_date_local": "2026-10-24T00:00:00",
+  "name": "Q1 - Umbral 2x10",
+  "description": "20 min de umbral, el equivalente al primer 4000 de Carlos Rojo. Solo umbral: las pinceladas llegan cerca de la carrera.\nVelocidades: salen del test del 17 oct. Mientras, umbral = RPE 7-8 (frases cortas, sostenible ~1 h) y ritmo 10k un punto mas, sin llegar a tope.\nNo es a tope: gestiona el ritmo y termina entero. Llega 48 h despues del HYROX del jueves: si las piernas pesan, umbral en la parte baja (163-168) o un bloque menos. Handstand antes de correr, 1/2 empuje despues. Cinta al 1% de inclinacion. Con mar movida: clip de seguridad y baja 0.5 km/h en lo rapido.\n\nCalentamiento\n- Trote muy suave 15m 65-80% HR\n\nUmbral 2x\n- Umbral 10m 86-92% HR\n- Trote 2m 55-65% HR\n\nEnfriamiento\n- Trote muy suave 10m 55-65% HR",
+  "type": "Run"
+ },
+ {
+  "external_id": "joseph-10k-2026-2026-10-25-l1",
+  "category": "WORKOUT",
+  "start_date_local": "2026-10-25T00:00:00",
+  "name": "L1 - Rodaje largo Z2 65",
+  "description": "Largo de verdad en Z2: nada de acelerar al final. La FC tiende a subir con el tiempo (y con el calor del barco): si pasa de 152, baja la cinta, aunque el ritmo se vaya. Hidratate cada 20 min. Cinta al 1% de inclinacion. Con mar movida: clip de seguridad y baja 0.5 km/h en lo rapido.\n\nLargo\n- Trote 65m 65-80% HR",
+  "type": "Run"
+ },
+ {
+  "external_id": "joseph-10k-2026-2026-10-28-e2",
+  "category": "WORKOUT",
+  "start_date_local": "2026-10-28T00:00:00",
+  "name": "E2 - Rodaje Z2 40 + rectas",
+  "description": "Suave de verdad: tienes que poder conversar. Techo 152 ppm, lo ideal 135-148; si subes, baja 0.3 km/h. Sin objetivo de ritmo. Ayer fue HYROX: si hay agujetas, las rectas suaves o fuera. Corre despues del tiron, no antes. Cinta al 1% de inclinacion. Con mar movida: clip de seguridad y baja 0.5 km/h en lo rapido.\n\nRodaje\n- Trote 40m 65-80% HR\n\nRectas 4x\n- Recta progresiva 20s\n- Trote suave 60s 55-65% HR",
+  "type": "Run"
+ },
+ {
+  "external_id": "joseph-10k-2026-2026-10-30-b2",
+  "category": "WORKOUT",
+  "start_date_local": "2026-10-30T00:00:00",
+  "name": "B2 - Bici Z2 muy suave 35 (opcional)",
+  "description": "Opcional: soltar piernas antes del umbral de manana. Muy suave (65-75% FCmax, 124-143), cadencia 85-95, sin resistencia. Si vienes cargado del HYROX, mejor descansa.\n\n- Suave 5m 55-65% HR\n- Rodar 25m 65-75% HR\n- Suelta 5m 55-65% HR",
+  "type": "Ride"
+ },
+ {
+  "external_id": "joseph-10k-2026-2026-10-31-q2",
+  "category": "WORKOUT",
+  "start_date_local": "2026-10-31T00:00:00",
+  "name": "Q2 - Umbral 3x8",
+  "description": "24 min de umbral.\nVelocidades: salen del test del 17 oct. Mientras, umbral = RPE 7-8 (frases cortas, sostenible ~1 h) y ritmo 10k un punto mas, sin llegar a tope.\nNo es a tope: gestiona el ritmo y termina entero. Llega 48 h despues del HYROX del jueves: si las piernas pesan, umbral en la parte baja (163-168) o un bloque menos. Handstand antes de correr, 1/2 empuje despues. Cinta al 1% de inclinacion. Con mar movida: clip de seguridad y baja 0.5 km/h en lo rapido.\n\nCalentamiento\n- Trote muy suave 15m 65-80% HR\n\nUmbral 3x\n- Umbral 8m 86-92% HR\n- Trote 2m 55-65% HR\n\nEnfriamiento\n- Trote muy suave 10m 55-65% HR",
+  "type": "Run"
+ },
+ {
+  "external_id": "joseph-10k-2026-2026-11-01-l2",
+  "category": "WORKOUT",
+  "start_date_local": "2026-11-01T00:00:00",
+  "name": "L2 - Rodaje largo Z2 70",
+  "description": "Largo de verdad en Z2: nada de acelerar al final. La FC tiende a subir con el tiempo (y con el calor del barco): si pasa de 152, baja la cinta, aunque el ritmo se vaya. Hidratate cada 20 min. Cinta al 1% de inclinacion. Con mar movida: clip de seguridad y baja 0.5 km/h en lo rapido.\n\nLargo\n- Trote 70m 65-80% HR",
+  "type": "Run"
+ },
+ {
+  "external_id": "joseph-10k-2026-2026-11-04-e3",
+  "category": "WORKOUT",
+  "start_date_local": "2026-11-04T00:00:00",
+  "name": "E3 - Rodaje Z2 45 + rectas",
+  "description": "Suave de verdad: tienes que poder conversar. Techo 152 ppm, lo ideal 135-148; si subes, baja 0.3 km/h. Sin objetivo de ritmo. Ayer fue HYROX: si hay agujetas, las rectas suaves o fuera. Corre despues del tiron, no antes. Cinta al 1% de inclinacion. Con mar movida: clip de seguridad y baja 0.5 km/h en lo rapido.\n\nRodaje\n- Trote 45m 65-80% HR\n\nRectas 4x\n- Recta progresiva 20s\n- Trote suave 60s 55-65% HR",
+  "type": "Run"
+ },
+ {
+  "external_id": "joseph-10k-2026-2026-11-06-b3",
+  "category": "WORKOUT",
+  "start_date_local": "2026-11-06T00:00:00",
+  "name": "B3 - Bici Z2 muy suave 35 (opcional)",
+  "description": "Opcional: soltar piernas antes del umbral de manana. Muy suave (65-75% FCmax, 124-143), cadencia 85-95, sin resistencia. Si vienes cargado del HYROX, mejor descansa.\n\n- Suave 5m 55-65% HR\n- Rodar 25m 65-75% HR\n- Suelta 5m 55-65% HR",
+  "type": "Ride"
+ },
+ {
+  "external_id": "joseph-10k-2026-2026-11-07-q3",
+  "category": "WORKOUT",
+  "start_date_local": "2026-11-07T00:00:00",
+  "name": "Q3 - Umbral 2x15 + pinceladas",
+  "description": "30 min de umbral en dos bloques largos (su 3x4000 adaptado a tu nivel) y 3 x 2 min a ritmo de 10k.\nVelocidades: salen del test del 17 oct. Mientras, umbral = RPE 7-8 (frases cortas, sostenible ~1 h) y ritmo 10k un punto mas, sin llegar a tope.\nNo es a tope: gestiona el ritmo y termina entero. Llega 48 h despues del HYROX del jueves: si las piernas pesan, umbral en la parte baja (163-168) o un bloque menos. Handstand antes de correr, 1/2 empuje despues. Cinta al 1% de inclinacion. Con mar movida: clip de seguridad y baja 0.5 km/h en lo rapido.\n\nCalentamiento\n- Trote muy suave 15m 65-80% HR\n\nUmbral 2x\n- Umbral 15m 86-92% HR\n- Trote 3m 55-65% HR\n\nPinceladas a ritmo de carrera 3x\n- Ritmo carrera 2m\n- Trote 2m 55-65% HR\n\nEnfriamiento\n- Trote muy suave 10m 55-65% HR",
+  "type": "Run"
+ },
+ {
+  "external_id": "joseph-10k-2026-2026-11-08-l3",
+  "category": "WORKOUT",
+  "start_date_local": "2026-11-08T00:00:00",
+  "name": "L3 - Rodaje largo Z2 80",
+  "description": "Largo de verdad en Z2: nada de acelerar al final. La FC tiende a subir con el tiempo (y con el calor del barco): si pasa de 152, baja la cinta, aunque el ritmo se vaya. Hidratate cada 20 min. Cinta al 1% de inclinacion. Con mar movida: clip de seguridad y baja 0.5 km/h en lo rapido.\n\nLargo\n- Trote 80m 65-80% HR",
+  "type": "Run"
+ },
+ {
+  "external_id": "joseph-10k-2026-2026-11-11-e4",
+  "category": "WORKOUT",
+  "start_date_local": "2026-11-11T00:00:00",
+  "name": "E4 - Rodaje Z2 40 + rectas",
+  "description": "Suave de verdad: tienes que poder conversar. Techo 152 ppm, lo ideal 135-148; si subes, baja 0.3 km/h. Sin objetivo de ritmo. Ayer fue HYROX: si hay agujetas, las rectas suaves o fuera. Corre despues del tiron, no antes. Cinta al 1% de inclinacion. Con mar movida: clip de seguridad y baja 0.5 km/h en lo rapido.\n\nRodaje\n- Trote 40m 65-80% HR\n\nRectas 4x\n- Recta progresiva 20s\n- Trote suave 60s 55-65% HR",
+  "type": "Run"
+ },
+ {
+  "external_id": "joseph-10k-2026-2026-11-13-b4",
+  "category": "WORKOUT",
+  "start_date_local": "2026-11-13T00:00:00",
+  "name": "B4 - Bici Z2 muy suave 35 (opcional)",
+  "description": "Opcional: soltar piernas antes del umbral de manana. Muy suave (65-75% FCmax, 124-143), cadencia 85-95, sin resistencia. Si vienes cargado del HYROX, mejor descansa.\n\n- Suave 5m 55-65% HR\n- Rodar 25m 65-75% HR\n- Suelta 5m 55-65% HR",
+  "type": "Ride"
+ },
+ {
+  "external_id": "joseph-10k-2026-2026-11-14-q4",
+  "category": "WORKOUT",
+  "start_date_local": "2026-11-14T00:00:00",
+  "name": "Q4 - Progresivo 12-9-6-3",
+  "description": "Su 4000-3000-2000-1000 en tiempo: los dos primeros a umbral, los dos ultimos a ritmo de 10k. La ultima sesion dura antes de la carrera.\nVelocidades: salen del test del 17 oct. Mientras, umbral = RPE 7-8 (frases cortas, sostenible ~1 h) y ritmo 10k un punto mas, sin llegar a tope.\nNo es a tope: gestiona el ritmo y termina entero. Llega 48 h despues del HYROX del jueves: si las piernas pesan, umbral en la parte baja (163-168) o un bloque menos. Handstand antes de correr, 1/2 empuje despues. Cinta al 1% de inclinacion. Con mar movida: clip de seguridad y baja 0.5 km/h en lo rapido.\n\nCalentamiento\n- Trote muy suave 15m 65-80% HR\n\nProgresivo de umbral a ritmo de carrera\n- Umbral 12m 86-92% HR\n- Trote 2m 55-65% HR\n- Umbral 9m 86-92% HR\n- Trote 2m 55-65% HR\n- Ritmo carrera 6m\n- Trote 2m 55-65% HR\n- Ritmo carrera 3m\n\nEnfriamiento\n- Trote muy suave 10m 55-65% HR",
+  "type": "Run"
+ },
+ {
+  "external_id": "joseph-10k-2026-2026-11-15-l4",
+  "category": "WORKOUT",
+  "start_date_local": "2026-11-15T00:00:00",
+  "name": "L4 - Rodaje largo Z2 65",
+  "description": "Largo de verdad en Z2: nada de acelerar al final. La FC tiende a subir con el tiempo (y con el calor del barco): si pasa de 152, baja la cinta, aunque el ritmo se vaya. Hidratate cada 20 min. Cinta al 1% de inclinacion. Con mar movida: clip de seguridad y baja 0.5 km/h en lo rapido.\n\nLargo\n- Trote 65m 65-80% HR",
+  "type": "Run"
+ },
+ {
+  "external_id": "joseph-10k-2026-2026-11-16-n1",
+  "category": "NOTE",
+  "start_date_local": "2026-11-16T00:00:00",
+  "name": "N1 - Semana de carrera",
+  "description": "Lunes: pierna ligera (hack squat y extension suaves, sin fallo; gemelo y tibial normal). Martes: HYROX suave, 2 rondas y sin saltos. Miercoles: rodaje corto. Jueves: sin HYROX, activacion. Viernes: descanso. Sabado: soltar piernas, sin full body. Domingo: 10K."
+ },
+ {
+  "external_id": "joseph-10k-2026-2026-11-18-e5",
+  "category": "WORKOUT",
+  "start_date_local": "2026-11-18T00:00:00",
+  "name": "E5 - Rodaje Z2 30",
+  "description": "Suave de verdad: tienes que poder conversar. Techo 152 ppm, lo ideal 135-148; si subes, baja 0.3 km/h. Sin objetivo de ritmo. Ayer fue HYROX: si hay agujetas, las rectas suaves o fuera. Corre despues del tiron, no antes. Cinta al 1% de inclinacion. Con mar movida: clip de seguridad y baja 0.5 km/h en lo rapido.\n\nRodaje\n- Trote 30m 65-80% HR",
+  "type": "Run"
+ },
+ {
+  "external_id": "joseph-10k-2026-2026-11-19-a1",
+  "category": "WORKOUT",
+  "start_date_local": "2026-11-19T00:00:00",
+  "name": "A1 - Activacion 20 + 3x2",
+  "description": "Activacion, no entrenamiento: terminar con ganas. Hoy sin HYROX y el empuje a la mitad. Cinta al 1% de inclinacion. Con mar movida: clip de seguridad y baja 0.5 km/h en lo rapido.\n\nRodaje\n- Trote 15m 65-80% HR\n\nPinceladas a ritmo de carrera 3x\n- Ritmo carrera 2m\n- Trote 2m 55-65% HR\n\nSoltar\n- Trote 5m 55-65% HR",
+  "type": "Run"
+ },
+ {
+  "external_id": "joseph-10k-2026-2026-11-21-s1",
+  "category": "WORKOUT",
+  "start_date_local": "2026-11-21T00:00:00",
+  "name": "S1 - Soltar piernas 15",
+  "description": "Dia antes de la carrera: 15 min suaves y 3 rectas. Hoy sin full body; handstand si quieres. Cena normal, nada nuevo.\n\nSoltar\n- Trote 15m 55-65% HR\n\nRectas 3x\n- Recta progresiva 20s\n- Trote suave 60s 55-65% HR",
+  "type": "Run"
+ },
+ {
+  "external_id": "joseph-10k-2026-2026-11-22-c1",
+  "category": "RACE_A",
+  "start_date_local": "2026-11-22T00:00:00",
+  "name": "C1 - 10K carrera objetivo",
+  "description": "Calienta 15 min muy suave + 3 rectas. Km 1-2 un poco por debajo del ritmo objetivo, km 3-8 parejo, km 9-10 todo lo que quede. Nada nuevo el dia de la carrera (comida, tenis, ropa).",
+  "type": "Run"
+ }
+]

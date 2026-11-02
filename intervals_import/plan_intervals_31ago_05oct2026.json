@@ -1,0 +1,193 @@
+[
+  {
+    "external_id": "joseph-tri-2026-09-01-n1",
+    "category": "WORKOUT",
+    "start_date_local": "2026-09-01T00:00:00",
+    "type": "Swim",
+    "name": "N1 - Natacion tecnica base",
+    "description": "Objetivo: primera evaluacion tecnica y comodidad en el agua. 35 min, 350 m orientativos. Exhalar dentro del agua, mirada hacia abajo y posicion horizontal.\n\nCalentamiento 4x\n- Facil 25mtr intensity=warmup\n- Descanso 20s intensity=rest\n\nTecnica 6x\n- Drill instructor 25mtr intensity=active\n- Descanso 30s intensity=rest\n\nNado completo 4x\n- Crol facil 25mtr intensity=active\n- Descanso 30s intensity=recovery"
+  },
+  {
+    "external_id": "joseph-tri-2026-09-02-n2",
+    "category": "WORKOUT",
+    "start_date_local": "2026-09-02T00:00:00",
+    "type": "Swim",
+    "name": "N2 - Natacion tecnica y respiracion",
+    "description": "Objetivo: coordinar respiracion con posicion. 40 min, 500 m orientativos.\n\nCalentamiento 4x\n- Facil 25mtr intensity=warmup\n- Descanso 20s intensity=rest\n\nTecnica 6x\n- Drill instructor 25mtr intensity=active\n- Descanso 30s intensity=rest\n\nCrol facil 6x\n- Crol relajado 25mtr intensity=active\n- Descanso 30s intensity=recovery\n\nFinal 2x\n- Crol facil 50mtr intensity=active\n- Descanso 40s intensity=recovery"
+  },
+  {
+    "external_id": "joseph-tri-2026-09-03-b1",
+    "category": "WORKOUT",
+    "start_date_local": "2026-09-03T00:00:00",
+    "type": "Ride",
+    "name": "B1 - Bici facil 40",
+    "description": "Objetivo: mantener el patron actual sin fatigar piernas antes del vuelo. RPE 3-4.\n\n- Calentamiento RPE2 8m freeride intensity=warmup\n- Z2 conversacional RPE3-4 27m freeride 85-95rpm intensity=active\n- Enfriamiento 5m freeride intensity=cooldown"
+  },
+  {
+    "external_id": "joseph-tri-2026-09-06-r1",
+    "category": "WORKOUT",
+    "start_date_local": "2026-09-06T00:00:00",
+    "type": "Run",
+    "name": "R1 - Carrera Z2 40",
+    "description": "Objetivo: carrera facil tras el vuelo. Objetivo real 140-148 bpm; techo practico 150. Si el sueno fue malo, hacer 5 + 20 + 5.\n\n- Calentamiento 5m Z1 HR intensity=warmup\n- Z2 ideal 140-148 techo150 30m Z2 HR intensity=active\n- Enfriamiento 5m Z1 HR intensity=cooldown"
+  },
+  {
+    "external_id": "joseph-tri-2026-09-07-b2",
+    "category": "WORKOUT",
+    "start_date_local": "2026-09-07T00:00:00",
+    "type": "Ride",
+    "name": "B2 - Bici de adaptacion 45",
+    "description": "Objetivo: actividad aerobica ligera durante el jet lag.\n\n- Calentamiento RPE2 10m freeride intensity=warmup\n- Z2 conversacional RPE3 30m freeride 85-95rpm intensity=active\n- Enfriamiento 5m freeride intensity=cooldown"
+  },
+  {
+    "external_id": "joseph-tri-2026-09-08-r2",
+    "category": "WORKOUT",
+    "start_date_local": "2026-09-08T00:00:00",
+    "type": "Run",
+    "name": "R2 - Carrera Z2 40",
+    "description": "Objetivo: carrera facil, sin calidad por jet lag. 140-148 bpm, RPE 3-4.\n\n- Calentamiento 5m Z1 HR intensity=warmup\n- Z2 ideal 140-148 techo150 30m Z2 HR intensity=active\n- Enfriamiento 5m Z1 HR intensity=cooldown"
+  },
+  {
+    "external_id": "joseph-tri-2026-09-12-s1",
+    "category": "NOTE",
+    "start_date_local": "2026-09-12T00:00:00",
+    "name": "S1 - Clase de surf 45-60 min",
+    "description": "Solo con instructor y condiciones vigiladas. Registrar como Surf, no como natacion. No anadir bici o carrera este dia."
+  },
+  {
+    "external_id": "joseph-tri-2026-09-13-b3",
+    "category": "WORKOUT",
+    "start_date_local": "2026-09-13T00:00:00",
+    "type": "Ride",
+    "name": "B3 - Bici larga facil 65",
+    "description": "Objetivo: mantener el fondo de bici. RPE 3-4.\n\n- Calentamiento RPE2 10m freeride intensity=warmup\n- Fondo Z2 conversacional 50m freeride 85-95rpm intensity=active\n- Enfriamiento 5m freeride intensity=cooldown"
+  },
+  {
+    "external_id": "joseph-tri-2026-09-15-b4",
+    "category": "WORKOUT",
+    "start_date_local": "2026-09-15T00:00:00",
+    "type": "Ride",
+    "name": "B4 - Bici facil 40 o surf",
+    "description": "Si hay clase de surf y condiciones seguras, hacer surf 45-60 min y omitir esta bici.\n\n- Calentamiento RPE2 8m freeride intensity=warmup\n- Z2 conversacional RPE3 27m freeride 85-95rpm intensity=active\n- Enfriamiento 5m freeride intensity=cooldown"
+  },
+  {
+    "external_id": "joseph-tri-2026-09-17-q1",
+    "category": "WORKOUT",
+    "start_date_local": "2026-09-17T00:00:00",
+    "type": "Run",
+    "name": "Q1 - Carrera 6x1 min",
+    "description": "Separar al menos 6 h de F3. En cinta usar 14.5-15.0 km/h, RPE 7-8; no es sprint maximo. Si hay fatiga de viaje o dolor, sustituir por 35 min faciles.\n\n- Calentamiento progresivo 10m Z1-Z2 HR intensity=warmup\n\nRapido controlado 6x\n- Cinta 14.5-15kph RPE7-8 1m intensity=interval\n- Trote o caminata 2m Z1 HR intensity=recovery\n\n- Enfriamiento completo 8m Z1 HR intensity=cooldown"
+  },
+  {
+    "external_id": "joseph-tri-2026-09-19-b5",
+    "category": "WORKOUT",
+    "start_date_local": "2026-09-19T00:00:00",
+    "type": "Ride",
+    "name": "B5 - Bici larga 70-75",
+    "description": "Objetivo: progresar sin anadir carrera. Si hay fatiga de F4, reducir el bloque central 5 min.\n\n- Calentamiento RPE2 10m freeride intensity=warmup\n- Fondo Z2 conversacional 60m freeride 85-95rpm intensity=active\n- Enfriamiento 5m freeride intensity=cooldown"
+  },
+  {
+    "external_id": "joseph-tri-2026-09-20-r3",
+    "category": "WORKOUT",
+    "start_date_local": "2026-09-20T00:00:00",
+    "type": "Run",
+    "name": "R3 - Carrera Z2 40",
+    "description": "Objetivo: correr facil sobre fatiga ligera de bici.\n\n- Calentamiento 5m Z1 HR intensity=warmup\n- Z2 ideal 140-148 techo150 30m Z2 HR intensity=active\n- Enfriamiento 5m Z1 HR intensity=cooldown"
+  },
+  {
+    "external_id": "joseph-tri-2026-09-23-n3",
+    "category": "WORKOUT",
+    "start_date_local": "2026-09-23T00:00:00",
+    "type": "Swim",
+    "name": "N3 - Natacion de reentrada",
+    "description": "Objetivo: recuperar sensaciones. 40 min, 500 m orientativos.\n\nCalentamiento 4x\n- Facil 25mtr intensity=warmup\n- Descanso 20s intensity=rest\n\nTecnica 4x\n- Drill instructor 25mtr intensity=active\n- Descanso 30s intensity=rest\n\nCrol facil 8x\n- Crol relajado 25mtr intensity=active\n- Descanso 30s intensity=recovery\n\nVuelta calma 4x\n- Muy facil 25mtr intensity=cooldown\n- Descanso 20s intensity=rest"
+  },
+  {
+    "external_id": "joseph-tri-2026-09-23-r4",
+    "category": "WORKOUT",
+    "start_date_local": "2026-09-23T00:00:00",
+    "type": "Run",
+    "name": "R4 - Carrera Z2 corta 30",
+    "description": "Realizar 4-6 h despues de nadar. Omitir si la natacion genero mucha fatiga.\n\n- Calentamiento 5m Z1 HR intensity=warmup\n- Z2 ideal 140-148 techo150 20m Z2 HR intensity=active\n- Enfriamiento 5m Z1 HR intensity=cooldown"
+  },
+  {
+    "external_id": "joseph-tri-2026-09-24-b6",
+    "category": "WORKOUT",
+    "start_date_local": "2026-09-24T00:00:00",
+    "type": "Ride",
+    "name": "B6 - Bici con cadencia 45",
+    "description": "Objetivo: economia de pedaleo. Cadencia rapida con resistencia ligera, sin rebotar.\n\n- Calentamiento RPE2 8m freeride 80-90rpm intensity=warmup\n\nCadencia 6x\n- Cadencia agil RPE4 1m freeride 95-105rpm intensity=interval\n- Pedaleo facil 2m freeride 80-90rpm intensity=recovery\n\n- Z2 estable 14m freeride 85-95rpm intensity=active\n- Enfriamiento 5m freeride intensity=cooldown"
+  },
+  {
+    "external_id": "joseph-tri-2026-09-25-n4",
+    "category": "WORKOUT",
+    "start_date_local": "2026-09-25T00:00:00",
+    "type": "Swim",
+    "name": "N4 - Natacion tecnica 600 m",
+    "description": "Separar 6 h de F4. Si 50 m deteriora la tecnica, cambiar cada uno por 2 x 25 m.\n\nCalentamiento 4x\n- Facil 25mtr intensity=warmup\n- Descanso 20s intensity=rest\n\nTecnica 6x\n- Drill instructor 25mtr intensity=active\n- Descanso 30s intensity=rest\n\nPrincipal 6x\n- Crol facil 50mtr intensity=active\n- Descanso 35s intensity=recovery\n\nVuelta calma 2x\n- Muy facil 25mtr intensity=cooldown"
+  },
+  {
+    "external_id": "joseph-tri-2026-09-26-b7",
+    "category": "WORKOUT",
+    "start_date_local": "2026-09-26T00:00:00",
+    "type": "Ride",
+    "name": "B7 - Bici larga 75",
+    "description": "- Calentamiento RPE2 10m freeride intensity=warmup\n- Fondo Z2 conversacional 60m freeride 85-95rpm intensity=active\n- Preparar transicion 5m freeride intensity=cooldown"
+  },
+  {
+    "external_id": "joseph-tri-2026-09-26-br1",
+    "category": "WORKOUT",
+    "start_date_local": "2026-09-26T00:00:00",
+    "type": "Run",
+    "name": "BR1 - Brick 10",
+    "description": "Comenzar en menos de 5 min despues de B7. No perseguir ritmo.\n\n- Adaptacion piernas 3m Z1 HR intensity=warmup\n- Trote Z2 controlado 7m Z2 HR intensity=active"
+  },
+  {
+    "external_id": "joseph-tri-2026-09-29-n5",
+    "category": "WORKOUT",
+    "start_date_local": "2026-09-29T00:00:00",
+    "type": "Swim",
+    "name": "N5 - Natacion con 50 m",
+    "description": "Objetivo: acumular nado relajado. 45 min, 650 m aproximados.\n\nCalentamiento 4x\n- Facil 25mtr intensity=warmup\n- Descanso 20s intensity=rest\n\nTecnica 4x\n- Drill instructor 25mtr intensity=active\n- Descanso 30s intensity=rest\n\nPrincipal 8x\n- Crol facil 50mtr intensity=active\n- Descanso 35s intensity=recovery\n\nVuelta calma 2x\n- Muy facil 25mtr intensity=cooldown"
+  },
+  {
+    "external_id": "joseph-tri-2026-09-30-q2",
+    "category": "WORKOUT",
+    "start_date_local": "2026-09-30T00:00:00",
+    "type": "Run",
+    "name": "Q2 - Carrera 6x1 min",
+    "description": "Objetivo: repetir con mejor control, sin septima repeticion. Cinta 14.5-15.0 km/h y RPE 7-8.\n\n- Calentamiento progresivo 10m Z1-Z2 HR intensity=warmup\n\nRapido controlado 6x\n- Cinta 14.5-15kph RPE7-8 1m intensity=interval\n- Trote o caminata 2m Z1 HR intensity=recovery\n\n- Enfriamiento completo 8m Z1 HR intensity=cooldown"
+  },
+  {
+    "external_id": "joseph-tri-2026-10-01-b8",
+    "category": "WORKOUT",
+    "start_date_local": "2026-10-01T00:00:00",
+    "type": "Ride",
+    "name": "B8 - Bici facil 45",
+    "description": "Objetivo: recuperacion aerobica despues de Q2 y F3.\n\n- Calentamiento RPE2 10m freeride intensity=warmup\n- Z2 baja conversacional 30m freeride 85-95rpm intensity=active\n- Enfriamiento 5m freeride intensity=cooldown"
+  },
+  {
+    "external_id": "joseph-tri-2026-10-02-n6",
+    "category": "WORKOUT",
+    "start_date_local": "2026-10-02T00:00:00",
+    "type": "Swim",
+    "name": "N6 - Natacion de repeticiones largas",
+    "description": "Objetivo: sostener 75 m solo si la tecnica permanece estable. Alternativa: 12 x 25 m con 25-30 s.\n\nCalentamiento 4x\n- Facil 25mtr intensity=warmup\n- Descanso 20s intensity=rest\n\nTecnica 4x\n- Drill instructor 25mtr intensity=active\n- Descanso 30s intensity=rest\n\nPrincipal 4x\n- Crol relajado 75mtr intensity=active\n- Descanso 45s intensity=recovery\n\nVuelta calma 2x\n- Muy facil 50mtr intensity=cooldown"
+  },
+  {
+    "external_id": "joseph-tri-2026-10-03-b9",
+    "category": "WORKOUT",
+    "start_date_local": "2026-10-03T00:00:00",
+    "type": "Ride",
+    "name": "B9 - Bici larga 80",
+    "description": "Objetivo: mayor duracion de bici del bloque, completamente aerobica.\n\n- Calentamiento RPE2 10m freeride intensity=warmup\n- Fondo Z2 conversacional 65m freeride 85-95rpm intensity=active\n- Preparar transicion 5m freeride intensity=cooldown"
+  },
+  {
+    "external_id": "joseph-tri-2026-10-03-br2",
+    "category": "WORKOUT",
+    "start_date_local": "2026-10-03T00:00:00",
+    "type": "Run",
+    "name": "BR2 - Brick 15",
+    "description": "Comenzar en menos de 5 min despues de B9.\n\n- Adaptacion piernas 3m Z1 HR intensity=warmup\n- Trote Z2 controlado 10m Z2 HR intensity=active\n- Soltar 2m Z1 HR intensity=cooldown"
+  }
+]
