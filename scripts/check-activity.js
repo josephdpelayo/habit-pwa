@@ -110,4 +110,34 @@ const facts = global.HabitShare.workoutFacts(sticker);
 assert.equal(facts.title, 'Pull A');
 assert.equal(facts.number, 12);
 
+
+
+// Una sesión de HABIT y el reloj representan un solo entrenamiento en la lista/semana.
+const habitStrength = A.itemFromAppSession({ id: 'habit-strength', ds: '2026-10-27', board_name: 'Upper A', started_at: '2026-10-27T14:02:00Z',
+  completed_at: '2026-10-27T15:00:00Z', duration_sec: 3480 }, h);
+const garminStrength = A.itemFromSkandiActivity({ id: 'watch-strength', activity_type: 'other', external_source: 'intervals', external_id: 'garmin-100', external_type: 'WeightTraining',
+  performed_at: '2026-10-27T14:00:00Z', duration_min: 60, avg_heart_rate: 128, calories: 370, note: 'Strength' }, h);
+const snapshot = JSON.stringify([habitStrength, garminStrength]);
+const reconciled = A.reconcileActivities([habitStrength, garminStrength]);
+assert.equal(reconciled.length, 1);
+assert.equal(reconciled[0].key, habitStrength.key, 'conserva el acceso a series de HABIT');
+assert.deepEqual([reconciled[0].title, reconciled[0].durationSec, reconciled[0].avgHr, reconciled[0].kcal], ['Upper A', 3480, 128, 370]);
+assert.equal(reconciled.reduce((n, it) => n + it.durationSec, 0), 3480, 'la semana no suma ambos tiempos');
+assert.equal(JSON.stringify([habitStrength, garminStrength]), snapshot, 'no borra ni modifica las fuentes');
+assert.deepEqual(A.reconcileActivities([garminStrength, habitStrength]).map(it => it.key), [habitStrength.key]);
+assert.equal(A.reconcileActivities([garminStrength]).length, 1, 'fuerza solo con reloj sigue visible');
+assert.equal(A.reconcileActivities([habitStrength, { ...garminStrength, startedAt: '2026-10-27T18:00:00Z' }]).length, 2, 'dos entrenos el mismo día siguen separados');
+assert.equal(A.reconcileActivities([habitStrength, { ...garminStrength, type: 'run' }]).length, 2, 'no mezcla carrera con fuerza');
+assert.equal(A.reconcileActivities([habitStrength, { ...garminStrength, startedAt: '' }]).length, 2, 'no usa la fecha de creación para adivinar');
+assert.equal(A.reconcileActivities([habitStrength, { ...garminStrength, durationSec: 900 }]).length, 2, 'duraciones incompatibles quedan separadas');
+assert.equal(A.reconcileActivities([habitStrength, { ...habitStrength, key: 's:second-local' }, garminStrength]).length, 3, 'dos candidatas no se fusionan al azar');
+const stravaStrength = { ...garminStrength, key: 'x:strava', src: 'strava', row: { ...garminStrength.row, external_source: 'strava', external_id: 'strava-200' } };
+assert.equal(A.reconcileActivities([habitStrength, garminStrength, stravaStrength]).length, 1, 'HABIT + Intervals + Strava inequívocos cuentan una sola vez');
+const linkedSkandi = { ...habitStrength, key: 'k:linked', src: 'skandi', startedAt: '', row: { garmin_external_id: 'garmin-100' } };
+assert.equal(A.reconcileActivities([linkedSkandi, garminStrength]).length, 1, 'un enlace explícito prevalece aunque no haya hora');
+const otherStrava = { ...stravaStrength, startedAt: '2026-10-27T18:00:00Z', row: { external_id: 'garmin-100' } };
+assert.equal(A.reconcileActivities([garminStrength, otherStrava]).length, 2, 'ids iguales de proveedores diferentes no son identidad');
+const differentRun = { ...run, key: 'x:strava-run', src: 'strava', distanceM: 18000, row: { external_id: 'different-run' } };
+assert.equal(A.reconcileActivities([run, differentRun]).length, 2, 'distancias incompatibles no se fusionan');
+
 console.log('HABIT Actividad: ok');

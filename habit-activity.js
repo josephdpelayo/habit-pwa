@@ -84,7 +84,7 @@
   function itemFromAppSession(r, h) {
     return {
       key: 's:' + r.id, src: 'app', type: 'strength', title: h.routineName(r.board_name) || 'Entreno libre', named: false,
-      ds: r.ds || h.dsOf(r.completed_at), at: r.completed_at || '', durationSec: r.duration_sec || 0, distanceM: 0,
+      ds: r.ds || h.dsOf(r.completed_at), at: r.completed_at || '', startedAt: r.started_at || '', durationSec: r.duration_sec || 0, distanceM: 0,
       color: r.board_color || COLORS.strength, row: r
     };
   }
@@ -104,7 +104,7 @@
     const named = src !== 'skandi' && !!note;
     return {
       key: 'x:' + x.id, src, type, title: named ? note : typeNoun(type), named,
-      ds: h.dsOf(x.performed_at), at: x.performed_at || '',
+      ds: h.dsOf(x.performed_at), at: x.performed_at || '', startedAt: x.performed_at || '',
       durationSec: Math.round((Number(x.duration_min) || 0) * 60), distanceM: Math.round((Number(x.distance_km) || 0) * 1000),
       elevationM: Math.round(Number(x.elevation_gain_m) || Number(x.elevation_m) || 0), avgHr: posInt(x.avg_heart_rate, 30, 250),
       kcal: posInt(x.calories, 1, 20000), effort: posInt(x.intensity, 1, 10), notes: named ? '' : note,
@@ -116,7 +116,7 @@
     const dur = k.duration_sec || span;
     return {
       key: 'k:' + k.id, src: 'skandi', type: 'strength', title: String(k.title || '').trim() || 'Fuerza', named: false,
-      ds: h.dsOf(k.started_at || k.completed_at), at: k.completed_at || '', durationSec: dur > 0 && dur <= 86400 ? dur : 0, distanceM: 0,
+      ds: h.dsOf(k.started_at || k.completed_at), at: k.completed_at || '', startedAt: k.started_at || '', durationSec: dur > 0 && dur <= 86400 ? dur : 0, distanceM: 0,
       avgHr: posInt(k.garmin_avg_heart_rate, 30, 250), kcal: posInt(k.garmin_calories, 1, 20000), color: COLORS.strength, row: k
     };
   }
@@ -125,6 +125,59 @@
     items.sort((x, y) => y.ds.localeCompare(x.ds) || (Date.parse(y.at) || 0) - (Date.parse(x.at) || 0));
     items.forEach((it, i) => { it.number = before + items.length - i; });
     return items;
+  }
+
+  // Una sesión, varias fuentes. No cambia ni borra los registros originales: reúne la
+  // presentación y sus métricas antes de contar, sumar minutos o preparar un sticker.
+  function reconcileActivities(items) {
+    const watch = (it) => it.src === 'intervals' || it.src === 'strava';
+    const pairs = new Map(items.map((it) => [it.key, []]));
+    const exactPairs = new Map(items.map((it) => [it.key, []]));
+    for (let i = 0; i < items.length; i++) {
+      const a = items[i];
+      for (let j = i + 1; j < items.length; j++) {
+        const b = items[j];
+        if (a.type !== b.type || (!watch(a) && !watch(b))) continue;
+        // Un id solo es comparable dentro de su procedencia, nunca Garmin vs. Strava.
+        const linked = (a.src === 'intervals' && String(b.row.garmin_external_id || '') === String(a.row.external_id || '') && !!a.row.external_id)
+          || (b.src === 'intervals' && String(a.row.garmin_external_id || '') === String(b.row.external_id || '') && !!b.row.external_id);
+        const sameId = watch(a) && a.src === b.src && !!a.row.external_id && a.row.external_id === b.row.external_id;
+        if (linked || sameId) {
+          exactPairs.get(a.key).push(b); exactPairs.get(b.key).push(a); continue;
+        }
+        if (a.src === b.src || a.src === 'manual' || b.src === 'manual' || a.ds !== b.ds) continue;
+        // created_at/completed_at no son la hora real de inicio. Sin ella no se adivina.
+        const startA = Date.parse(a.startedAt || ''), startB = Date.parse(b.startedAt || '');
+        if (!Number.isFinite(startA) || !Number.isFinite(startB) || !(a.durationSec > 0 && b.durationSec > 0)) continue;
+        if (Math.abs(startA - startB) > (watch(a) && watch(b) ? 120000 : 300000)) continue;
+        if (Math.abs(a.durationSec - b.durationSec) > Math.max(300, Math.max(a.durationSec, b.durationSec) * .15)) continue;
+        if (a.distanceM > 0 && b.distanceM > 0 && Math.abs(a.distanceM - b.distanceM) > Math.max(200, Math.max(a.distanceM, b.distanceM) * .03)) continue;
+        pairs.get(a.key).push(b); pairs.get(b.key).push(a);
+      }
+    }
+    const used = new Set(), result = [];
+    const priority = (it) => it.src === 'app' ? 0 : it.key.startsWith('k:') ? 1 : it.src === 'manual' ? 2 : it.src === 'intervals' ? 3 : 4;
+    const neighbors = (it) => exactPairs.get(it.key).length ? exactPairs.get(it.key) : pairs.get(it.key);
+    for (const a of items) {
+      if (used.has(a.key)) continue;
+      const group = [a, ...neighbors(a)];
+      const keys = new Set(group.map((it) => it.key));
+      // Todos deben coincidir entre sí y no tener otra pareja posible. Una cadena de
+      // horarios próximos o dos sesiones locales candidatas no autoriza una fusión.
+      const certain = group.length > 1 && group.every((it) => !used.has(it.key)
+        && neighbors(it).length === group.length - 1 && neighbors(it).every((other) => keys.has(other.key)));
+      if (!certain) { result.push({ ...a }); used.add(a.key); continue; }
+      group.sort((x, z) => priority(x) - priority(z));
+      const primary = group[0];
+      const merged = { ...primary, mergedFrom: group.map((it) => it.key), watchSource: group.find(watch).src };
+      for (const secondary of group.slice(1)) {
+        for (const field of ['durationSec', 'distanceM', 'elevationM', 'avgHr', 'kcal', 'effort']) {
+          if (!(merged[field] > 0) && secondary[field] > 0) merged[field] = secondary[field];
+        }
+      }
+      result.push(merged); group.forEach((it) => used.add(it.key));
+    }
+    return result;
   }
 
   // Cuántos días pedirle a Intervals: desde la última vez, con dos de colchón (el reloj sube la
@@ -217,16 +270,16 @@
       const since = addDaysDS(mazToday(), -state.windowDays), from = sinceIso(since);
       const head = { count: 'exact', head: true };
       const [s, sB, a, aB, x, xB, k, kB] = await Promise.all([
-        sb.from('coaching_schedule').select('id,ds,board_id,board_name,board_color,duration_sec,completed_at')
+        sb.from('coaching_schedule').select('id,ds,board_id,board_name,board_color,duration_sec,started_at,completed_at')
           .eq('user_id', uid).eq('status', 'done').gte('ds', since).order('ds', { ascending: false }).limit(1000),
         sb.from('coaching_schedule').select('id', head).eq('user_id', uid).eq('status', 'done').lt('ds', since),
         sb.from('training_activities').select('*').eq('user_id', uid).gte('ds', since).order('ds', { ascending: false }).limit(1000),
         sb.from('training_activities').select('id', head).eq('user_id', uid).lt('ds', since),
         sb.from('skandi_external_activities')
-          .select('id,activity_type,external_type,external_source,performed_at,duration_min,distance_km,elevation_gain_m,elevation_m,avg_heart_rate,calories,intensity,note')
+          .select('id,activity_type,external_type,external_source,external_id,performed_at,duration_min,distance_km,elevation_gain_m,elevation_m,avg_heart_rate,calories,intensity,note')
           .eq('user_id', uid).gte('performed_at', from).order('performed_at', { ascending: false }).limit(1000),
         sb.from('skandi_external_activities').select('id', head).eq('user_id', uid).lt('performed_at', from),
-        sb.from('skandi_sessions').select('id,title,started_at,completed_at,duration_sec,garmin_avg_heart_rate,garmin_calories')
+        sb.from('skandi_sessions').select('id,title,started_at,completed_at,duration_sec,garmin_external_id,garmin_avg_heart_rate,garmin_calories')
           .eq('user_id', uid).not('completed_at', 'is', null).gte('started_at', from).order('started_at', { ascending: false }).limit(1000),
         sb.from('skandi_sessions').select('id', head).eq('user_id', uid).not('completed_at', 'is', null).lt('started_at', from)
       ]);
@@ -236,15 +289,16 @@
       if (x.error) console.warn('Actividad: sin el cardio de Skandi:', x.error.message);
       if (k.error) console.warn('Actividad: sin las sesiones de Skandi:', k.error.message);
       const h = helpers();
-      const items = [
+      const rawItems = [
         ...(s.data || []).map((r) => itemFromAppSession(r, h)),
         ...(missing ? [] : (a.data || []).map(itemFromManual)),
         ...(x.error ? [] : (x.data || []).map((r) => itemFromSkandiActivity(r, h))),
         ...(k.error ? [] : (k.data || []).map((r) => itemFromSkandiSession(r, h)))
       ].filter((it) => it.ds);
+      const items = reconcileActivities(rawItems);
       const before = (sB.count || 0) + (missing ? 0 : (aB.count || 0)) + (x.error ? 0 : (xB.count || 0)) + (k.error ? 0 : (kB.count || 0));
       numberItems(items, before);
-      state.data = { uid, at: Date.now(), days: state.windowDays, since, items, before, tableMissing: missing };
+      state.data = { uid, at: Date.now(), days: state.windowDays, since, items, before, duplicates: rawItems.length - items.length, tableMissing: missing };
       return state.data;
     })();
     state.loading.catch(() => {}).finally(() => { state.loading = null; });
@@ -436,7 +490,8 @@
     }
     const map = {};
     (sets || []).forEach((s) => { (map[s.ex_key] = map[s.ex_key] || []).push(s); });
-    return { ...sessionStickerData(row, map), number: it.number };
+    return { ...sessionStickerData(row, map), durationSec: row.duration_sec || it.durationSec,
+      avgHr: it.avgHr || 0, kcal: it.kcal || 0, number: it.number };
   }
   async function skandiSessionData(it) {
     const { data: sets, error } = await sb.from('skandi_sets')
@@ -487,6 +542,7 @@
   async function totalCount() {
     const uid = userId();
     if (!uid) return 0;
+    const visible = await loadData();
     const head = { count: 'exact', head: true };
     const rs = await Promise.all([
       sb.from('coaching_schedule').select('id', head).eq('user_id', uid).eq('status', 'done'),
@@ -494,7 +550,7 @@
       sb.from('skandi_external_activities').select('id', head).eq('user_id', uid),
       sb.from('skandi_sessions').select('id', head).eq('user_id', uid).not('completed_at', 'is', null)
     ]);
-    return rs.reduce((n, r) => n + (r.error ? 0 : (r.count || 0)), 0);
+    return Math.max(0, rs.reduce((n, r) => n + (r.error ? 0 : (r.count || 0)), 0) - (visible && visible.duplicates || 0));
   }
   // Al cerrar un entreno en la app, el premio: sus stickers (Crew lo llama desde
   // wsAfterSessionClosed). `row` es la fila cerrada de coaching_schedule; `setsMap`, sus series.
@@ -541,6 +597,7 @@
   }
 
   function sourceLabel(it) {
+    if (it.src === 'app' && it.watchSource) return 'Entreno en HABIT · datos del reloj';
     if (it.src === 'app') return 'Entreno en la app';
     if (it.src === 'manual') return typeLabel(it.type);
     if (it.key.startsWith('k:')) return 'Fuerza · Skandi Fit';
@@ -839,7 +896,7 @@
 
   const api = {
     APP_GLOBALS, TYPES, DIST_TYPES, COLORS, typeFromSkandi, itemFromAppSession, itemFromManual, itemFromSkandiActivity,
-    itemFromSkandiSession, numberItems, syncWindowDays, syncDue, skandiBestSet, skandiStickerData,
+    itemFromSkandiSession, numberItems, reconcileActivities, syncWindowDays, syncDue, skandiBestSet, skandiStickerData,
     render, invalidate, offerSessionStickers, totalCount
   };
   if (typeof module !== 'undefined' && module.exports) module.exports = api;

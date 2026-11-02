@@ -999,3 +999,25 @@ web actual; no sustituirlo antes de que exista la integración iOS.
 
 Referencias: https://developer.apple.com/documentation/healthkit/setting-up-healthkit y
 https://support.garmin.com/en-NZ/?faq=lK5FPB9iPF5PXFkIpFlFPA
+
+
+- **2026-11-01 — Una sesión de HABIT y varias fuentes** (`20261101-9`). Joseph confirma que por
+  ahora basta con recibir lo del reloj y evitar duplicados. `reconcileActivities` reúne las
+  representaciones antes de numerar la lista y calcular la semana. Se conserva la sesión local
+  como entrada principal (y el acceso a sus series), rellenando FC, calorías y otras métricas
+  ausentes con las del reloj. El sticker de la sesión recibe también esas métricas.
+  - Se respeta el enlace explícito `garmin_external_id`. Sin enlace, se exigen mismo tipo y
+    día, inicios reales a no más de cinco minutos (dos entre proveedores externos), duración
+    compatible y distancia compatible cuando ambos la traen. No se usa `created_at` ni solo
+    compartir el día. No se fusionan automáticamente dos registros locales ni actividades
+    manuales sin hora de inicio real.
+  - Si hay varias fuentes, todas deben coincidir mutuamente sin otras candidatas. Las
+    coincidencias ambiguas se conservan separadas; no se escoge una sesión al azar. No se
+    modifican ni borran registros en la base: es una conciliación de la lista cargada.
+  - El resumen y los stickers semanales usan esa lista consolidada. El Nº de entreno descuenta
+    duplicados detectados en la ventana visible; los conteos anteriores a la ventana siguen
+    siendo los históricos brutos hasta cargar esos días. No se presume una deduplicación
+    retrospectiva completa de todos los registros sin haberlos consultado.
+  - Pruebas: sesión solo con reloj, HABIT + reloj, HABIT + Intervals + Strava, datos del reloj
+    conservados, dos entrenos del mismo día, tipos/distancias/duraciones incompatibles,
+    falta de hora real, enlace por id y candidatas ambiguas.
