@@ -47,16 +47,29 @@ Un entreno ya hecho (`done`) o saltado (`skipped`) no se toca.
 
 ## Que se sincronice solo cada mañana
 
-`app.habittraininghub.garmin-sync.plist` corre `sync --commit` todos los días a las 6:00, así
-no hay que acordarse. Cargarlo una vez:
-
 ```bash
-cp garmin_sync/app.habittraininghub.garmin-sync.plist ~/Library/LaunchAgents/
-launchctl load ~/Library/LaunchAgents/app.habittraininghub.garmin-sync.plist
+./habit-garmin instalar          # --hora 6 por omisión
 ```
 
-Lo que imprima queda en `~/.habit-garmin/sync.log`. Para quitarlo, `launchctl unload` con la
-misma ruta.
+Deja una copia del programa en `~/.habit-garmin/app/` (con su propio entorno y la URL y la
+llave anon en `config.json`), escribe el agente de launchd y lo carga. A partir de ahí corre
+`sync --commit` solo, todos los días, y lo que imprima queda en `~/.habit-garmin/sync.log`.
+
+**Por qué una copia y no el repo:** macOS protege `~/Downloads`, y a un agente de launchd le
+niega hasta ejecutar un archivo que viva ahí —`Operation not permitted`— aunque la Terminal sí
+pueda. Instalado fuera, además, deja de importar cómo se llame la carpeta del repo. El código
+del repo sigue siendo el original: **cada vez que cambie algo aquí (incluido
+`exercise_map.json`), hay que volver a correr `instalar`** para que la copia se entere.
+
+Probarlo sin esperar a mañana, quitarlo, o ver si está cargado:
+
+```bash
+launchctl kickstart gui/$(id -u)/app.habittraininghub.garmin-sync
+```
+
+```bash
+launchctl bootout gui/$(id -u)/app.habittraininghub.garmin-sync
+```
 
 ## Cómo se traduce cada ejercicio
 

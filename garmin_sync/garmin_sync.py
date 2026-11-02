@@ -40,6 +40,14 @@ HERE = Path(__file__).resolve().parent
 REPO = HERE.parent
 STATE_DIR = Path.home() / ".habit-garmin"
 STATE_FILE = STATE_DIR / "state.json"
+CONFIG_FILE = STATE_DIR / "config.json"
+# Copia instalada: macOS protege ~/Downloads y a un agente de launchd le niega hasta ejecutar
+# un archivo que viva ahí ("Operation not permitted"), por mucho que la Terminal sí pueda. Así
+# que lo automático corre desde aquí, fuera de cualquier carpeta protegida, y de paso deja de
+# depender de cómo se llame la carpeta del repo.
+APP_DIR = STATE_DIR / "app"
+AGENTE = "app.habittraininghub.garmin-sync"
+PLIST = Path.home() / "Library" / "LaunchAgents" / f"{AGENTE}.plist"
 GARMIN_TOKENS = str(Path.home() / ".garminconnect")
 KEYCHAIN_SERVICE = "habit-supabase"
 MAZ_UTC_OFFSET_H = 7           # America/Mazatlan, igual que la app
@@ -57,7 +65,15 @@ DEPORTE_FUERZA = {"sportTypeId": 5, "sportTypeKey": "strength_training", "displa
 # ── HABIT: configuración y sesión ────────────────────────────────────────────
 
 def habit_config():
-    """SUPABASE_URL y la llave anon, leídas de app.html para no tener una segunda copia."""
+    """SUPABASE_URL y la llave anon (pública): de la copia instalada, o de app.html.
+
+    Instalado fuera del repo no hay app.html que leer, así que `instalar` deja esos dos valores
+    en config.json. Es la llave anon, la misma que cualquiera ve en el código de la app.
+    """
+    if CONFIG_FILE.exists():
+        cfg = json.loads(CONFIG_FILE.read_text(encoding="utf-8"))
+        if cfg.get("supabase_url") and cfg.get("supabase_anon_key"):
+            return cfg["supabase_url"], cfg["supabase_anon_key"]
     src = (REPO / "app.html").read_text(encoding="utf-8", errors="replace")
     url = re.search(r"const SUPABASE_URL='([^']+)'", src)
     key = re.search(r"const SUPABASE_KEY='([^']+)'", src)
@@ -737,6 +753,69 @@ def cmd_limpiar(args):
     print("Listo.")
 
 
+PLIST_XML = """<?xml version="1.0" encoding="UTF-8"?>
+<!-- Lo escribe `habit-garmin instalar`; se edita ahí, no a mano. -->
+<plist version="1.0">
+<dict>
+  <key>Label</key><string>{agente}</string>
+  <key>ProgramArguments</key>
+  <array>
+    <string>{wrapper}</string>
+    <string>sync</string>
+    <string>--commit</string>
+  </array>
+  <key>StartCalendarInterval</key>
+  <dict><key>Hour</key><integer>{hora}</integer><key>Minute</key><integer>0</integer></dict>
+  <key>StandardOutPath</key><string>{log}</string>
+  <key>StandardErrorPath</key><string>{log}</string>
+  <key>RunAtLoad</key><false/>
+</dict>
+</plist>
+"""
+
+
+def cmd_instalar(args):
+    """Deja una copia que sí puede correr sola, fuera de las carpetas protegidas."""
+    import shutil
+    url, anon = habit_config()
+    APP_DIR.mkdir(parents=True, exist_ok=True)
+    for nombre in ("garmin_sync.py", "exercise_map.json"):
+        shutil.copy2(HERE / nombre, APP_DIR / nombre)
+    CONFIG_FILE.write_text(json.dumps(
+        {"supabase_url": url, "supabase_anon_key": anon, "origen": str(HERE),
+         "instalado": datetime.now(timezone.utc).isoformat()}, ensure_ascii=False, indent=1),
+        encoding="utf-8")
+
+    venv = APP_DIR / ".venv"
+    if not (venv / "bin" / "python").exists():
+        base = Path(sys.base_prefix) / "bin" / f"python{sys.version_info.major}.{sys.version_info.minor}"
+        print(f"creando el entorno con {base}…")
+        subprocess.run([str(base), "-m", "venv", str(venv)], check=True)
+        subprocess.run([str(venv / "bin" / "pip"), "install", "-q", "garminconnect[workout]"], check=True)
+
+    wrapper = APP_DIR / "habit-garmin"
+    wrapper.write_text('#!/bin/sh\nexec "$HOME/.habit-garmin/app/.venv/bin/python" '
+                       '"$HOME/.habit-garmin/app/garmin_sync.py" "$@"\n', encoding="utf-8")
+    wrapper.chmod(0o755)
+
+    log = STATE_DIR / "sync.log"
+    PLIST.parent.mkdir(parents=True, exist_ok=True)
+    PLIST.write_text(PLIST_XML.format(agente=AGENTE, wrapper=wrapper, hora=args.hora, log=log),
+                     encoding="utf-8")
+    print(f"instalado en {APP_DIR}")
+    print(f"agente a las {args.hora}:00 → {PLIST}")
+
+    uid = os.getuid()
+    subprocess.run(["launchctl", "bootout", f"gui/{uid}/{AGENTE}"], capture_output=True)
+    alta = subprocess.run(["launchctl", "bootstrap", f"gui/{uid}", str(PLIST)], capture_output=True, text=True)
+    if alta.returncode == 0:
+        print(f"agente cargado. Pruébalo con: launchctl kickstart gui/{uid}/{AGENTE}")
+    else:
+        print(f"(no pude cargarlo desde aquí: {alta.stderr.strip()})\n"
+              f"Cárgalo tú:\n  launchctl bootstrap gui/{uid} {PLIST}")
+    print(f"lo que imprima queda en {log}")
+
+
 def main():
     p = argparse.ArgumentParser(description="HABIT → Garmin Connect (fuerza)")
     sub = p.add_subparsers(dest="cmd", required=True)
@@ -753,6 +832,8 @@ def main():
         q.set_defaults(fn=fn)
     q = sub.add_parser("limpiar"); q.add_argument("--commit", action="store_true")
     q.set_defaults(fn=cmd_limpiar)
+    q = sub.add_parser("instalar"); q.add_argument("--hora", type=int, default=6)
+    q.set_defaults(fn=cmd_instalar)
 
     args = p.parse_args()
     args.fn(args)

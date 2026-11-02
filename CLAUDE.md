@@ -800,6 +800,12 @@ workout tiene que nacer como workout de fuerza de Garmin Connect, y eso es `garm
   `habit-training.js`), y el nombre de HABIT siempre viaja en la nota del paso.
 - `./.venv/bin/python check_garmin_sync.py` prueba sin red que cada par categoría/ejercicio del
   mapa exista de verdad en Garmin y que cada forma de objetivo arme los pasos correctos.
+- **Lo automático no corre desde el repo**: macOS protege `~/Downloads` y a un agente de launchd
+  le niega hasta ejecutar un archivo que viva ahí (`Operation not permitted`), aunque la Terminal
+  sí pueda. Por eso `habit-garmin instalar` copia el programa a `~/.habit-garmin/app/` con su
+  propio entorno y un `config.json` (la URL y la llave anon, que de otro modo salen de leer
+  `app.html`), y escribe y carga el agente apuntando ahí. El repo sigue siendo el original:
+  cambiar `garmin_sync.py` o `exercise_map.json` **pide volver a correr `instalar`**.
 
 ### Environment Variables (Vercel)
 ```
