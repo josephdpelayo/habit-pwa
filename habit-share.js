@@ -55,7 +55,8 @@
   const INTER = '"Inter", -apple-system, system-ui, sans-serif';
   const LOGO_SRC = '/icons/logo-original.png';
   const LOGO_INK = 0.65;        // el PNG del logo trae margen: la tinta es ~65% de su cuadro
-  const SIG = 40;              // la firma (el logotipo chico de abajo): igual en todos los estilos
+  const SIG = 52;              // firma reforzada para seguir legible dentro de una historia
+  const WEEK_BRAND_WIDTH = 400; // legible al compartir a ~75% del ancho de una historia
   const COLOR_KEY = 'habit_sticker_color';
   // Las apps cargan Inter de 300 a 800 y sin itálicas; los stickers usan de 100 a 900 y la
   // itálica. Se pide al abrir la galería, no al cargar: la app no descarga nada de más.
@@ -203,19 +204,16 @@
 
   // Estilo «Logotipo»: el logotipo de HABIT en grande y una línea espaciada debajo.
   function signatureLayout(measure, subText) {
-    const wordPx = 112;
-    const subPx = 42, subSpacing = Math.round(subPx * 0.3);
+    const probe = lockupLayout(0, PAD, 112, measure);
+    const wordPx = Math.min(112, Math.floor(112 * (WIDTH - PAD * 2) / probe.width));
+    const lockup = lockupLayout(WIDTH / 2, PAD, wordPx, measure);
     const text = String(subText || 'MAKE IT A HABIT').toUpperCase();
-    const subW = spacedWidth(text, subSpacing, (c) => measure(c, subFont(subPx)));
-    const probe = lockupLayout(0, PAD, wordPx, measure);
-    const width = Math.ceil(Math.max(probe.width, subW) + PAD * 2);
-    const cx = width / 2;
-    const lockup = lockupLayout(cx, PAD, wordPx, measure);
-    const subY = lockup.logo.y + lockup.height + 60 + subPx * CAP;
+    const subY = lockup.logo.y + lockup.height + 60 + 52 * CAP;
+    const ops = lockupOps(measure, WIDTH / 2, PAD, wordPx).ops;
+    const extra = titleBlock(ops, text, measure, WIDTH / 2, subY, WIDTH - PAD * 2, 52, 'fg', 'center');
     return {
-      kind: 'logotipo', width, height: Math.ceil(subY + PAD * 0.8),
-      lockup,
-      sub: { text, font: subFont(subPx), spacing: subSpacing, x: cx - subW / 2, y: subY }
+      kind: 'logotipo', width: WIDTH, height: Math.ceil(subY + extra + PAD * .8), lockup, ops,
+      sub: { text, font: subFont(52), spacing: 0, x: PAD, y: subY }
     };
   }
 
@@ -530,10 +528,10 @@
     let y = PAD + px * CAP;
     ops.push(textOp(measure, value, F(900, px), { x: WIDTH / 2, y, align: 'center', spacing: Math.round(px * -0.035) }));
     // La coma de «4,320» baja de la línea base: la etiqueta se aparta lo que baja.
-    const lab = fitText(measure, label || f.hero.label, (p) => F(700, p), maxW, 50, 30, 0.22);
+    const lab = fitText(measure, label || f.hero.label, (p) => F(700, p), maxW, 56, 48, 0.08);
     y += Math.round(px * 0.14) + (/,/.test(value) ? Math.round(px * 0.1) : 0) + lab.px * CAP;
     ops.push(textOp(measure, lab.text, F(700, lab.px), { x: WIDTH / 2, y, align: 'center', spacing: lab.spacing }));
-    if (f.customTitle) { y += 72; y += titleBlock(ops, f.customTitle, measure, WIDTH / 2, y, maxW, 40, 'fg', 'center'); }
+    if (f.customTitle) { y += 72; y += titleBlock(ops, f.customTitle, measure, WIDTH / 2, y, maxW, 52, 'fg', 'center'); }
     y += 76;
     const lk = signOps(measure, WIDTH / 2, y);
     ops.push(...lk.ops);
@@ -553,11 +551,11 @@
     y += 56 + sp * 0.72;
     ops.push(textOp(measure, f.light.sub, F(300, sp, true), { x: WIDTH / 2, y, align: 'center' }));
     if (f.day) {
-      const d = fitText(measure, [f.day, f.date].filter(Boolean).join(' · '), (p) => F(600, p), maxW, 32, 24, 0.24);
+      const d = fitText(measure, [f.day, f.date].filter(Boolean).join(' · '), (p) => F(600, p), maxW, 52, 48, 0.06);
       y += 66 + d.px * CAP;
       ops.push(textOp(measure, d.text, F(600, d.px), { x: WIDTH / 2, y, align: 'center', spacing: d.spacing, alpha: 0.75 }));
     }
-    if (f.customTitle) { y += 72; y += titleBlock(ops, f.customTitle, measure, WIDTH / 2, y, maxW, 40, 'fg', 'center'); }
+    if (f.customTitle) { y += 72; y += titleBlock(ops, f.customTitle, measure, WIDTH / 2, y, maxW, 52, 'fg', 'center'); }
     y += 76;
     const lk = signOps(measure, WIDTH / 2, y);
     ops.push(...lk.ops);
@@ -581,7 +579,7 @@
     ops.push(textOp(measure, tt.text, F(900, tt.px), { x: WIDTH / 2, y, align: 'center', spacing: tt.spacing }));
     const meta = f.summary.slice(0, 2).join(' · ').toUpperCase();
     if (meta) {
-      const m = fitText(measure, meta, (p) => F(600, p), maxW, 40, 26, 0.2);
+      const m = fitText(measure, meta, (p) => F(600, p), maxW, 52, 48, 0.06);
       y += 52 + m.px * CAP;
       ops.push(textOp(measure, m.text, F(600, m.px), { x: WIDTH / 2, y, align: 'center', spacing: m.spacing, alpha: 0.85 }));
     }
@@ -609,9 +607,8 @@
     y += (lines.length - 1) * px * 1.02;
     const meta = f.summary.join(' · ');
     if (meta) {
-      const mp = fitPx(measure, meta, (p) => F(500, p), maxW, 46, 30);
-      y += 56 + mp * CAP;
-      ops.push(textOp(measure, meta, F(500, mp), { x: WIDTH / 2, y, align: 'center', alpha: 0.9 }));
+      y += 56 + 52 * CAP;
+      y += titleBlock(ops, meta, measure, WIDTH / 2, y, maxW, 52, 'fg', 'center');
     }
     y += 76;
     const lk = signOps(measure, WIDTH / 2, y);
@@ -630,12 +627,12 @@
     ops.push(textOp(measure, value, F(900, px), { x: WIDTH / 2, y, align: 'center', stroke: Math.max(3, Math.round(px * 0.016)) }));
     const label = [f.hero.unit, f.day].filter(Boolean).join(' · ');
     if (label) {
-      const lp = fitPx(measure, label, (p) => F(800, p), maxW, 48, 28, 0.24);
+      const lp = fitPx(measure, label, (p) => F(800, p), maxW, 56, 48, 0.06);
       // La coma de «4,320» baja de la línea base: con 50 tocaba la unidad.
       y += (/[,.]/.test(value) ? Math.round(px * 0.2) + 34 : 54) + lp * CAP;
       ops.push(textOp(measure, label, F(800, lp), { x: WIDTH / 2, y, align: 'center', spacing: Math.round(lp * 0.24) }));
     }
-    if (f.customTitle) { y += 72; y += titleBlock(ops, f.customTitle, measure, WIDTH / 2, y, maxW, 40, 'fg', 'center'); }
+    if (f.customTitle) { y += 72; y += titleBlock(ops, f.customTitle, measure, WIDTH / 2, y, maxW, 52, 'fg', 'center'); }
     y += 76;
     const lk = signOps(measure, WIDTH / 2, y);
     ops.push(...lk.ops);
@@ -656,7 +653,7 @@
     y += (alphas.length - 1) * px * 0.9;
     const meta = [f.summary.slice(0, 2).join(' · ').toUpperCase(), f.date].filter(Boolean).join(' · ');
     if (meta) {
-      const m = fitText(measure, meta, (p) => F(600, p), maxW, 36, 26, 0.2);
+      const m = fitText(measure, meta, (p) => F(600, p), maxW, 52, 48, 0.06);
       y += 60 + m.px * CAP;
       ops.push(textOp(measure, m.text, F(600, m.px), { x: WIDTH / 2, y, align: 'center', spacing: m.spacing }));
     }
@@ -677,7 +674,7 @@
     ops.push(...lk.ops);
     const corner = opts && 'corner' in opts ? opts.corner : [f.day, f.date].filter(Boolean).join(' ');
     if (corner) {
-      const c = fitText(measure, corner, (p) => F(600, p), maxW - lk.width - 40, 32, 22, 0.14);
+      const c = fitText(measure, corner, (p) => F(600, p), maxW - lk.width - 40, 48, 44, 0.04);
       ops.push(textOp(measure, c.text, F(600, c.px), { x: WIDTH - PAD, y: PAD + lk.height / 2 + c.px * CAP / 2, align: 'right', spacing: c.spacing, alpha: 0.75 }));
     }
     let y = PAD + lk.height + 70;
@@ -688,7 +685,7 @@
     y += 76;
     // Cada columna empieza un poco después de su raya; la cifra más ancha manda el tamaño de
     // las tres, para que se lean como una sola fila.
-    const colW = maxW / trio.length, inset = 30, lp = 30;
+    const colW = maxW / trio.length, inset = 30, lp = 48;
     const vp = Math.min(...trio.map((t) => fitPx(measure, t.value, (p) => F(800, p), colW - inset * 2, 132, 48, -0.02)));
     const top = y;
     y += vp * CAP;
@@ -697,7 +694,7 @@
       const x = PAD + colW * i + (i ? inset : 0);
       if (i) ops.push({ op: 'line', x1: x - inset, y1: top - 2, x2: x - inset, y2: ly + 4, w: 3, alpha: 0.3 });
       ops.push(textOp(measure, t.value, F(800, vp), { x, y, spacing: Math.round(vp * -0.02) }));
-      const l = fitText(measure, t.label, (p) => F(600, p), colW - inset * 2, lp, 22, 0.12);
+      const l = fitText(measure, t.label, (p) => F(600, p), colW - inset * 2, lp, 44, 0.02);
       ops.push(textOp(measure, l.text, F(600, l.px), { x, y: ly, spacing: l.spacing, alpha: 0.7 }));
     });
     y = ly;
@@ -753,26 +750,28 @@
     body.push(...lk.ops);
     y += lk.height + 70;
     const head = f.number ? `ENTRENO Nº ${f.number}` : 'ENTRENO';
-    body.push(textOp(measure, head, F(700, 34), { x: W / 2, y, align: 'center', spacing: 8, color: 'inv' }));
+    body.push(textOp(measure, head, F(700, 48), { x: W / 2, y, align: 'center', spacing: 4, color: 'inv' }));
     if (f.day) {
       y += 50;
-      body.push(textOp(measure, f.day + ' ' + f.date, F(500, 30), { x: W / 2, y, align: 'center', spacing: 5, color: 'inv', alpha: 0.7 }));
+      body.push(textOp(measure, f.day + ' ' + f.date, F(500, 48), { x: W / 2, y, align: 'center', spacing: 2, color: 'inv', alpha: 0.7 }));
     }
     const rule = () => { y += 42; body.push({ op: 'line', x1: x0, y1: y, x2: x1, y2: y, w: 3, dash: [12, 9], color: 'inv', alpha: 0.5 }); y += 26; };
     rule();
     y += 34;
     // El nombre y su tipo; sin nombre propio, el tipo ya es el nombre y no se repite.
-    body.push(...(f.title === ACTIVITY_TYPES[f.type].noun
-      ? receiptRow(measure, 'ACTIVIDAD', f.title.toUpperCase(), y, x0, x1, F(600, 30), F(800, 36))
-      : receiptRow(measure, f.title.toUpperCase(), f.typeLabel.toUpperCase(), y, x0, x1, F(800, 36), F(600, 30))));
+    y += titleBlock(body, f.title.toUpperCase(), measure, x0, y, cw, 52, 'inv');
+    if (f.title !== ACTIVITY_TYPES[f.type].noun) {
+      y += 68;
+      body.push(textOp(measure, f.typeLabel.toUpperCase(), F(600, 48), { x: x0, y, color: 'inv' }));
+    }
     f.exercises.forEach((e) => {
-      y += 54;
-      body.push(...receiptRow(measure, String(e.name).toUpperCase(), String(e.best || '—').toUpperCase(), y, x0, x1, F(500, 30), F(700, 30)));
+      y += 72;
+      body.push(...receiptRow(measure, String(e.name).toUpperCase(), String(e.best || '—').toUpperCase(), y, x0, x1, F(500, 48), F(700, 48)));
     });
     rule();
     f.stats.slice(0, 5).forEach((s, i) => {
-      y += i ? 54 : 30;
-      body.push(...receiptRow(measure, s.label, s.value, y, x0, x1, F(500, 30), F(700, 30)));
+      y += i ? 72 : 48;
+      body.push(...receiptRow(measure, s.label, s.value, y, x0, x1, F(500, 48), F(700, 48)));
     });
     rule();
     y += 44;
@@ -780,7 +779,7 @@
     y += 58;
     body.push(...barcode(f.title + f.ds + f.hero.value, x0 + 30, y, cw - 60, 104));
     y += 104 + 62;
-    body.push(textOp(measure, 'MAKE IT A HABIT', F(700, 30), { x: W / 2, y, align: 'center', spacing: 10, color: 'inv' }));
+    body.push(textOp(measure, 'MAKE IT A HABIT', F(700, 48), { x: W / 2, y, align: 'center', spacing: 4, color: 'inv' }));
     y += 56;
     const top = 40, bottom = y;
     const pts = [
@@ -821,8 +820,8 @@
     const bx = W - PAD - bw, by = PAD;
     const ops = bubbleOps(bx, by, bw, bh, 'right');
     lines.forEach((l, i) => ops.push(textOp(measure, l, F(500, px), { x: bx + padX, y: by + padY + px * 0.78 + i * lineH, color: 'inv' })));
-    let y = by + bh + 34 + 34 * CAP;
-    ops.push(textOp(measure, 'Entrenado', F(500, 34), { x: W - PAD - 8, y, align: 'right', alpha: 0.6 }));
+    let y = by + bh + 34 + 48 * CAP;
+    ops.push(textOp(measure, 'Entrenado', F(600, 48), { x: W - PAD - 8, y, align: 'right', alpha: 0.6 }));
     // Debajo, el logotipo alineado a la derecha, como el globo.
     y += 50;
     const lk = signOps(measure, W - PAD - 8 - lockupLayout(0, 0, SIG, measure).width, y, 'left');
@@ -838,18 +837,18 @@
     const ops = [];
     const top = 20;
     const inner = [];
-    let y = top + pad + 32 * CAP;
-    inner.push(textOp(measure, 'HABIT CREW', F(600, 32), { x: tx, y, spacing: 3, color: 'inv', alpha: 0.55 }));
-    inner.push(textOp(measure, 'ahora', F(400, 32), { x: tr, y, align: 'right', color: 'inv', alpha: 0.45 }));
+    let y = top + pad + 48 * CAP;
+    inner.push(textOp(measure, 'HABIT CREW', F(700, 48), { x: tx, y, spacing: 3, color: 'inv', alpha: 0.55 }));
+    inner.push(textOp(measure, 'ahora', F(500, 48), { x: tr, y, align: 'right', color: 'inv', alpha: 0.45 }));
     y += 62;
     inner.push(textOp(measure, 'Entreno completado', F(700, 46), { x: tx, y, color: 'inv' }));
     const body = [f.title, ...f.summary].join(' · ');
     // Dos renglones como el aviso de iOS; lo que no cabe termina en «…».
-    const all = wrapText(body, tr - tx, (s) => measure(s, F(500, 40)));
-    const lines = all.length > 2 ? [all[0], clip(measure, all.slice(1).join(' '), F(500, 40), tr - tx)] : all;
+    const all = wrapText(body, tr - tx, (s) => measure(s, F(600, 52)));
+    const lines = all.length > 2 ? [all[0], clip(measure, all.slice(1).join(' '), F(600, 52), tr - tx)] : all;
     lines.forEach((l) => {
-      y += 54;
-      inner.push(textOp(measure, l, F(500, 40), { x: tx, y, color: 'inv', alpha: 0.8 }));
+      y += 72;
+      inner.push(textOp(measure, l, F(600, 52), { x: tx, y, color: 'inv', alpha: 0.8 }));
     });
     const h = Math.max(y + 12 + pad - top, icon + pad * 2);
     const iy = top + (h - icon) / 2, li = Math.round(icon * 0.6);
@@ -990,7 +989,7 @@
     lines.forEach((l, i) => ops.push(textOp(measure, l, F(400, px), { x: WIDTH / 2, y: y + i * lineH, align: 'center' })));
     y += (lines.length - 1) * lineH + 60;
     ops.push({ op: 'line', x1: WIDTH / 2 - 40, y1: y, x2: WIDTH / 2 + 40, y2: y, w: 4 });
-    const sp = 32;
+    const sp = 48;
     y += 64 + sp * CAP;
     const sign = ['HABIT CREW', shortDate(ds)].filter(Boolean).join('  ·  ');
     ops.push(textOp(measure, sign, F(600, sp), { x: WIDTH / 2, y, align: 'center', spacing: Math.round(sp * 0.32) }));
@@ -1060,32 +1059,30 @@
     const rows = selectedDisciplines(d), ops = [];
     if (!rows.length) return { ops, height: 0 };
     let y = top;
-    ops.push({ op: 'line', x1: x, x2: x + width, y1: y, y2: y, color: ink, alpha: .25 });
-    y += 58;
-    ops.push(textOp(measure, 'POR DISCIPLINA', F(600, 30), { x, y, spacing: 3, color: ink }));
+    ops.push({ op: 'line', x1: x, x2: x + width, y1: y, y2: y, color: ink, alpha: .4 });
     for (const r of rows) {
-      y += 84;
-      ops.push({ op: 'sport', type: r.type, x, y: y - 48, size: 48, color: ink });
-      const name = fitText(measure, r.label.toUpperCase(), (p) => F(600, p), 310, 30, 28);
-      ops.push(textOp(measure, name.text, F(600, name.px), { x: x + 72, y: y - 4, color: ink }));
-      ops.push(displayOp(measure, r.value, x + width, y, width - 400, 68, ink, { scale: 1, align: 'right' }));
-      y += 28;
+      y += 114;
+      ops.push({ op: 'sport', type: r.type, x, y: y - 62, size: 64, color: ink });
+      const name = fitText(measure, r.label.toUpperCase(), p => F(700, p), 282, 60, 56);
+      ops.push(textOp(measure, name.text, F(700, name.px), { x: x + 86, y: y - 6, color: ink }));
+      ops.push(displayOp(measure, r.value, x + width, y + 8, width - 396, 132, ink, { scale: 1, align: 'right' }));
+      y += 38;
     }
-    return { ops, height: y - top + 32 };
+    return { ops, height: y - top + 12 };
   }
 
   function disciplineWeekLayout(id, d, measure) {
     if (!normalizeDisciplines(d).length) return null;
     const rows = selectedDisciplines(d), fields = selectedFields('week', d), ops = [];
     const x = 88, width = WIDTH - x * 2, right = WIDTH - x;
-    let y = 130;
+    let y = 112;
     const label = (t, px, atX, atY, color, align) => {
-      const f = fitText(measure, t, (p) => F(600, p), width, px, 28);
+      const f = fitText(measure, t, (p) => F(600, p), width, Math.max(48, px), 48);
       ops.push(textOp(measure, f.text, F(600, f.px), { x: atX, y: atY, color: color || 'fg', align: align || 'left' }));
     };
     const heading = id === 'thisweek' ? 'THIS WEEK' : id === 'mix' ? 'WEEKLY MIX' : id === 'pasaporte' ? 'MI SEMANA / PASAPORTE' : 'EN TODAS MIS FORMAS.';
-    if (customTitle(d)) y += titleBlock(ops, customTitle(d), measure, x, y, width, id === 'thisweek' ? 72 : 44);
-    else ops.push(displayOp(measure, heading, x, y, width, id === 'thisweek' ? 72 : 44, 'fg'));
+    if (customTitle(d)) y += titleBlock(ops, customTitle(d), measure, x, y, width, id === 'thisweek' ? 72 : 56);
+    else ops.push(displayOp(measure, heading, x, y, width, id === 'thisweek' ? 72 : 56, 'fg'));
     y += 68;
     if (id === 'pasaporte') {
       const gap = 24, cellW = (width - gap) / 2, cellH = 320;
@@ -1093,8 +1090,8 @@
         const col = i % 2, cellX = x + col * (cellW + gap), cellY = y + Math.floor(i / 2) * (cellH + gap), cx = cellX + cellW / 2;
         ops.push({ op: 'rect', x: cellX, y: cellY, w: cellW, h: cellH, r: 18, stroke: 2 });
         ops.push({ op: 'sport', type: r.type, x: cx - 46, y: cellY + 32, size: 92 });
-        label(r.label.toUpperCase(), 30, cx, cellY + 180, 'fg', 'center');
-        ops.push(displayOp(measure, r.value, cx, cellY + 270, cellW - 48, 70, 'fg', { scale: 1, align: 'center' }));
+        label(r.label.toUpperCase(), 52, cx, cellY + 180, 'fg', 'center');
+        ops.push(displayOp(measure, r.value, cx, cellY + 270, cellW - 48, 104, 'fg', { scale: 1, align: 'center' }));
       });
       y += Math.ceil(rows.length / 2) * (cellH + gap);
     } else {
@@ -1107,7 +1104,7 @@
         } else if (id === 'mix') {
           ops.push({ op: 'rect', x, y, w: width, h: 194, r: 38 });
           ops.push({ op: 'sport', type: r.type, x: x + 34, y: y + 44, size: 88, color: 'inv' });
-          label(r.label.toUpperCase(), 28, x + 154, y + 55, 'inv');
+          label(r.label.toUpperCase(), 48, x + 154, y + 55, 'inv');
           ops.push(displayOp(measure, r.value, x + 154, y + 146, width - 190, 100, 'inv'));
           y += 216;
         } else {
@@ -1123,9 +1120,9 @@
     const totals = fields.filter((r) => ['count', 'durationSec', 'distanceM', 'streak'].includes(r.id));
     if (totals.length) {
       y += 28;
-      for (let i = 0; i < totals.length; i += 2) {
-        const t = totals.slice(i, i + 2).map((r) => r.value + ' ' + r.unit).join(' · ');
-        label(t, 30, x, y); y += 48;
+      for (let i = 0; i < totals.length; i++) {
+        const t = totals.slice(i, i + 1).map((r) => r.value + ' ' + r.unit).join(' · ');
+        label(t, 52, x, y); y += 70;
       }
     }
     if (fields.some((r) => r.id === 'days')) {
@@ -1134,17 +1131,17 @@
       'LMMJVSD'.split('').forEach((t, i) => {
         const cx = x + step * (i + .5);
         ops.push({ op: 'circle', cx, cy: y + 22, r: 18, stroke: days[i] ? 0 : 2, alpha: days[i] ? 1 : .3 });
-        label(t, 28, cx, y + 84, 'fg', 'center');
+        label(t, 48, cx, y + 84, 'fg', 'center');
       });
       y += 120;
     }
     const date = fields.find((r) => r.id === 'weekStart');
-    if (date) { y += 22; label(date.value, 30, x, y); y += 24; }
+    if (date) { y += 22; label(date.value, 52, x, y); y += 32; }
     y += 48;
     const probe = lockupLayout(0, 0, 40, measure);
-    const brand = lockupOps(measure, x, y, Math.round(40 * 320 / probe.width), 'left');
+    const brand = lockupOps(measure, x, y, Math.round(40 * WEEK_BRAND_WIDTH / probe.width), 'left');
     ops.push(...brand.ops);
-    return { kind: id, width: WIDTH, height: Math.ceil(y + brand.height + 80), ops };
+    return { kind: id, width: WIDTH, height: Math.ceil(y + brand.height + 48), ops };
   }
 
   // Referencias Aura: composición de datos, sin copiar nombres de marca ni su interfaz.
@@ -1197,12 +1194,12 @@
     let y = 112;
     const text = (value, px, atX, atY, opts) => {
       opts = opts || {};
-      const t = fitText(measure, String(value), p => F(opts.weight || 600, p), opts.width || width, px, Math.min(28, px));
+      const t = fitText(measure, String(value), p => F(opts.weight || 600, p), opts.width || width, px, Math.min(48, px));
       ops.push(textOp(measure, t.text, F(opts.weight || 600, t.px), { x: atX, y: atY, align: opts.align || 'left', alpha: opts.alpha }));
     };
     const rule = atY => ops.push({ op: 'line', x1: x, x2: right, y1: atY, y2: atY, w: 2, alpha: .3 });
-    if (customTitle(d)) y += titleBlock(ops, customTitle(d), measure, x, y, width, id === 'notas' ? 68 : 42);
-    else text(copy.week, id === 'notas' ? 68 : 42, x, y, { weight: 800 });
+    if (customTitle(d)) y += titleBlock(ops, customTitle(d), measure, x, y, width, id === 'notas' ? 68 : 56);
+    else text(copy.week, id === 'notas' ? 68 : 56, x, y, { weight: 800 });
     y += 78;
     if (id === 'diario' || id === 'notas') {
       if (has('sessions')) {
@@ -1211,25 +1208,25 @@
         for (const r of shown) {
           if (id === 'diario' && has('daily') && r.day !== lastDay) {
             if (lastDay >= 0) y += 30;
-            text(copy.days[r.day], 32, x, y, { weight: 700 }); y += 58; lastDay = r.day;
+            text(copy.days[r.day], 52, x, y, { weight: 700 }); y += 76; lastDay = r.day;
           }
           const value = referenceMetric(r.type, r.durationSec, r.distanceM, true);
           if (id === 'diario') {
-            ops.push({ op: 'sport', type: r.type, x, y: y - 42, size: 50 });
-            ops.push(displayOp(measure, value, x + 80, y, width - 80, 76));
-            y += 94;
+            ops.push({ op: 'sport', type: r.type, x, y: y - 62, size: 68 });
+            ops.push(displayOp(measure, value, x + 96, y, width - 96, 104));
+            y += 118;
           } else {
             // Una lista de notas: marca, cifra y disciplina, con ritmo tipográfico tranquilo.
-            text('✓', 38, x, y);
-            text(value + '  ' + copy.types[r.type].toLowerCase(), 50, x + 66, y, { width: width - 66, weight: 500 });
+            text('✓', 52, x, y);
+            text(value + '  ' + copy.types[r.type].toLowerCase(), 64, x + 76, y, { width: width - 76, weight: 600 });
             y += 78;
           }
         }
-        if (sessions.length > shown.length) { y += 20; text(copy.more(sessions.length - shown.length), 32, x, y); y += 50; }
+        if (sessions.length > shown.length) { y += 20; text(copy.more(sessions.length - shown.length), 52, x, y); y += 50; }
       }
     } else if (id === 'impacto') {
       for (const r of sports) {
-        text(copy.types[r.type], 34, x, y, { weight: 700 }); y += 42;
+        text(copy.types[r.type], 52, x, y, { weight: 700 }); y += 42;
         const value = referenceMetric(r.type, r.durationSec, r.distanceM);
         const op = displayOp(measure, value.replace(/ /g, ''), WIDTH / 2, 0, width, 650, 'fg', { scale: .35, align: 'center' });
         op.y = y + op.px * .78;
@@ -1243,42 +1240,42 @@
         });
         const totalSec = points.reduce((n, r) => n + r.durationSec, 0), totalM = points.reduce((n, r) => n + r.distanceM, 0);
         const distance = totalM > 0 && ACTIVITY_TYPES[sport.type].dist;
-        text(copy.types[sport.type], 34, x, y, { weight: 700 });
-        ops.push(displayOp(measure, referenceMetric(sport.type, totalSec, totalM), right, y + 6, width - 320, 64, 'fg', { align: 'right' }));
+        text(copy.types[sport.type], 52, x, y, { weight: 700 });
+        ops.push(displayOp(measure, referenceMetric(sport.type, totalSec, totalM), right, y + 6, width - 360, 100, 'fg', { align: 'right' }));
         y += 56;
         if (id === 'tabla') {
           rule(y); y += 56;
           for (const point of points.filter(r => r.count)) {
-            text(copy.days[point.day], 30, x, y, { width: 390 });
+            text(copy.days[point.day], 48, x, y, { width: 390 });
             const value = distance ? (point.distanceM > 0 ? referenceMetric(sport.type, 0, point.distanceM) : '—') : referenceMetric(sport.type, point.durationSec, 0, true);
-            ops.push(displayOp(measure, value, right, y + 10, width - 430, 72, 'fg', { align: 'right' }));
-            y += 58; rule(y); y += 54;
+            ops.push(displayOp(measure, value, right, y + 10, width - 430, 108, 'fg', { align: 'right' }));
+            y += 64; rule(y); y += 78;
           }
-          text(copy.total, 30, x, y, { weight: 700 });
-          ops.push(displayOp(measure, referenceMetric(sport.type, totalSec, totalM), right, y + 10, width - 300, 78, 'fg', { align: 'right' }));
+          text(copy.total, 52, x, y, { weight: 700 });
+          ops.push(displayOp(measure, referenceMetric(sport.type, totalSec, totalM), right, y + 10, width - 300, 112, 'fg', { align: 'right' }));
           y += 112;
         } else {
           const values = points.map(r => distance ? r.distanceM / 1000 : r.durationSec / 60);
           const max = Math.max(...values, 1), baseline = y + 280, step = width / 7;
-          text(distance ? copy.distance : copy.time, 26, x, y, { alpha: .65 });
+          text(distance ? copy.distance : copy.time, 48, x, y, { alpha: .65 });
           for (let i = 0; i < 7; i++) {
             const cx = x + step * (i + .5), height = values[i] / max * 214;
             if (height > 0) ops.push({ op: 'rect', x: cx - 26, y: baseline - height, w: 52, h: height, r: 4, alpha: i === 6 ? 1 : .65,
               sourceType: sport.type, sourceDay: i, metricValue: values[i], metric: distance ? 'km' : 'min' });
             const incomplete = sessions.some(r => r.type === sport.type && r.day === i && (distance ? !r.distanceM : !r.durationSec));
             const value = values[i] ? String(Number(values[i].toFixed(1))) + (incomplete ? '+' : '') : incomplete ? '—' : '0';
-            text(value, 28, cx, baseline + 46, { align: 'center', width: step - 10, weight: 700 });
-            text(copy.short[i], 25, cx, baseline + 90, { align: 'center', width: step - 8, alpha: .7 });
+            text(value, 48, cx, baseline + 56, { align: 'center', width: step - 10, weight: 700 });
+            text(copy.short[i], 48, cx, baseline + 120, { align: 'center', width: step - 8, alpha: .7 });
           }
-          rule(baseline + 4); y = baseline + 160;
+          rule(baseline + 4); y = baseline + 184;
         }
       }
     }
     y += 46;
     const probe = lockupLayout(0, 0, 40, measure);
-    const brand = lockupOps(measure, x, y, Math.round(40 * 320 / probe.width), 'left');
+    const brand = lockupOps(measure, x, y, Math.round(40 * WEEK_BRAND_WIDTH / probe.width), 'left');
     ops.push(...brand.ops);
-    return { kind: id, width: WIDTH, height: Math.ceil(y + brand.height + 80), ops };
+    return { kind: id, width: WIDTH, height: Math.ceil(y + brand.height + 48), ops };
   }
 
   function weekFacts(d) {
@@ -1403,7 +1400,7 @@
     const lk = lockupOps(measure, ix, y, SIG, 'left', 'inv');
     body.push(...lk.ops);
     if (c.kicker) {
-      const k = fitText(measure, c.kicker, (p) => F(700, p), iw - lk.width - 40, 30, 20, 0.2);
+      const k = fitText(measure, c.kicker, (p) => F(700, p), iw - lk.width - 40, 48, 44, 0.04);
       body.push(textOp(measure, k.text, F(700, k.px), { x: ir, y: y + lk.height / 2 + k.px * CAP / 2, align: 'right', spacing: k.spacing, color: 'inv', alpha: 0.6 }));
     }
     y += lk.height + 90;
@@ -1414,7 +1411,7 @@
       lines.forEach((l, i) => body.push(textOp(measure, l, F(600, px), { x: ix, y: y + i * lh, color: 'inv' })));
       y += (lines.length - 1) * lh;
     } else {
-      const up = 48, usp = Math.round(up * 0.08);
+      const up = 56, usp = Math.round(up * 0.08);
       const unitW = c.unit ? spacedWidth(c.unit, usp, (ch) => measure(ch, F(800, up))) + 26 : 0;
       const vp = fitPx(measure, c.value, (p) => F(900, p), iw - unitW, 210, 80, -0.03);
       const vsp = Math.round(vp * -0.03);
@@ -1425,20 +1422,20 @@
         body.push(textOp(measure, c.unit, F(800, up), { x: ix + vw + 26, y, spacing: usp, color: 'inv' }));
       }
       if (c.line) {
-        const t = fitText(measure, c.line, (p) => F(600, p), iw, 36, 30, 0.1);
+        const t = fitText(measure, c.line, (p) => F(600, p), iw, 52, 48, 0.02);
         y += 60 + t.px * CAP;
         body.push(textOp(measure, t.text, F(600, t.px), { x: ix, y, spacing: t.spacing, color: 'inv', alpha: 0.75 }));
       }
     }
     // Abajo, pegado al borde: la tarjeta guarda su proporción aunque el contenido sea corto.
-    const fp = 30;
-    const bottom = Math.max(top + Math.round(w / 1.586), y + 100 + fp * CAP + 60);
-    const fy = bottom - 60;
-    const urlW = measure(CREW_URL, F(500, fp));
-    body.push(textOp(measure, CREW_URL, F(500, fp), { x: ir, y: fy, align: 'right', color: 'inv', alpha: 0.6 }));
+    const fp = 48;
+    const bottom = Math.max(top + Math.round(w / 1.586), y + 240);
+    const fy = bottom - 52;
+    const url = fitText(measure, CREW_URL, p => F(600, p), iw, fp, 44);
+    body.push(textOp(measure, url.text, F(600, url.px), { x: ix, y: fy, color: 'inv', alpha: .85 }));
     if (c.foot) {
-      const f = fitText(measure, c.foot, (p) => F(700, p), iw - urlW - 40, fp, 22, 0.16);
-      body.push(textOp(measure, f.text, F(700, f.px), { x: ix, y: fy, spacing: f.spacing, color: 'inv' }));
+      const f = fitText(measure, c.foot, p => F(700, p), iw, fp, 44, .02);
+      body.push(textOp(measure, f.text, F(700, f.px), { x: ix, y: fy - 76, spacing: f.spacing, color: 'inv' }));
     }
     const h = bottom - top, wm = Math.round(h * 0.94);
     const card = { x, y: top, w, h, r: 52 };
@@ -1459,7 +1456,7 @@
     const radiusFor = (px) => outer - 28 - px * 0.5;
     let px = 52;
     for (let i = 0; i < 3; i++) {
-      px = Math.max(30, Math.min(60, Math.round(px * (2 * Math.PI * radiusFor(px) * 0.8) / Math.max(1, widthAt(px)))));
+      px = Math.max(48, Math.min(64, Math.round(px * (2 * Math.PI * radiusFor(px) * 0.8) / Math.max(1, widthAt(px)))));
     }
     const radius = radiusFor(px);
     const inner = radius - px * 0.5 - 28;
@@ -1538,7 +1535,7 @@
             const f = workoutFacts(d);
             return crewStackLayout(m, { rows: [
               { text: (f.hero.value + ' ' + f.hero.unit).trim(), weight: 800, max: 120, min: 56, spacing: 0 },
-              { text: [f.title.toUpperCase(), f.day].filter(Boolean).join(' · '), weight: 600, max: 40, min: 30, spacing: 0.2, alpha: 0.8 }
+              { text: [f.title.toUpperCase(), f.day].filter(Boolean).join(' · '), weight: 600, max: 52, min: 48, spacing: 0.04, alpha: 0.8 }
             ] });
           }
         },
@@ -1591,7 +1588,7 @@
             const w = weekFacts(d);
             return crewStackLayout(m, { rows: [
               { text: `${w.count} ${entrenos(w.count)}`, weight: 800, max: 120, min: 56, spacing: 0 },
-              { text: w.meta || 'ESTA SEMANA', weight: 600, max: 40, min: 30, spacing: 0.2, alpha: 0.8 }
+              { text: w.meta || 'ESTA SEMANA', weight: 600, max: 52, min: 48, spacing: 0.04, alpha: 0.8 }
             ] });
           }
         },
@@ -1668,14 +1665,14 @@
     return stickerFields(kind, d).filter((r) => !Array.isArray(d.fields) || d.fields.includes(r.id));
   }
 
-  // Tres gramáticas, una marca: firma de 320 px de ancho sobre lienzo de 1080.
+  // Tres gramáticas, una marca: firma de 400 px de ancho sobre lienzo de 1080.
   // El contenido crece hacia abajo; nunca se encoge la firma por añadir información.
   function editorialLayout(kind, variant, d, measure) {
     const rows = selectedFields(kind, d), ops = [];
     const card = variant === 'ficha', compact = variant === 'compacto';
     const ink = card ? 'inv' : 'fg';
     const x = 88, maxW = WIDTH - x * 2;
-    let y = 86;
+    let y = 76;
     const put = (text, max, min, weight, color, spacing) => {
       const t = fitText(measure, String(text), (px) => F(weight, px), maxW, max, min, spacing || 0);
       y += t.px * CAP;
@@ -1683,8 +1680,8 @@
       y += t.px * 0.28;
     };
     if (kind === 'week' && customTitle(d)) {
-      y += 32 * CAP; y += titleBlock(ops, customTitle(d), measure, x, y, maxW, 32, ink); y += 32 * .28;
-    } else put(kind === 'week' ? 'MI SEMANA' : 'MI ENTRENO', 32, 32, 600, ink, .18);
+      y += 56 * CAP; y += titleBlock(ops, customTitle(d), measure, x, y, maxW, 56, ink); y += 56 * .28;
+    } else put(kind === 'week' ? 'MI SEMANA' : 'MI ENTRENO', 56, 52, 700, ink, .06);
     y += 42;
     const title = rows.find((r) => r.id === 'title');
     if (title) { put(title.value.toUpperCase(), compact ? 68 : 90, 38, 800); y += 24; }
@@ -1693,16 +1690,16 @@
       if (compact) {
         if (i) y += 22;
         const base = y;
-        const label = fitText(measure, r.unit || r.label.toUpperCase(), (p) => F(500, p), 310, 30, 30);
-        ops.push(textOp(measure, label.text, F(500, label.px), { x, y: base + 44, color: ink, alpha: .75 }));
-        const value = fitText(measure, r.value, (p) => F(700, p), 550, 76, 38);
-        ops.push(textOp(measure, value.text, F(700, value.px), { x: WIDTH - x, y: base + 56, align: 'right', color: ink }));
-        y += 92;
+        const label = fitText(measure, r.unit || r.label.toUpperCase(), (p) => F(500, p), 330, 52, 48);
+        ops.push(textOp(measure, label.text, F(500, label.px), { x, y: base + 56, color: ink, alpha: .75 }));
+        const value = fitText(measure, r.value, (p) => F(700, p), 530, 124, 72);
+        ops.push(textOp(measure, value.text, F(700, value.px), { x: WIDTH - x, y: base + 70, align: 'right', color: ink }));
+        y += 124;
         ops.push({ op: 'line', x1: x, x2: WIDTH - x, y1: y, y2: y, stroke: 2, color: ink, alpha: .22 });
       } else if (i === 0) {
         put(r.value, 200, 48, 800);
         y += 12;
-        put(r.unit || r.label.toUpperCase(), 30, 30, 500, ink, .1);
+        put(r.unit || r.label.toUpperCase(), 52, 48, 600, ink, .02);
         y += 42;
       } else {
         // Dos columnas: añadir datos no encoge toda la composición.
@@ -1712,11 +1709,11 @@
           y += 36;
         }
         const start = x + col * 474;
-        const t = fitText(measure, r.value, (p) => F(700, p), 420, 86, 38);
+        const t = fitText(measure, r.value, (p) => F(700, p), 420, 116, 72);
         ops.push(textOp(measure, t.text, F(700, t.px), { x: start, y: y + 72, color: ink }));
-        const label = fitText(measure, r.unit || r.label.toUpperCase(), (p) => F(500, p), 420, 30, 30);
-        ops.push(textOp(measure, label.text, F(500, label.px), { x: start, y: y + 128, color: ink, alpha: .8 }));
-        if (col === 1 || i === metrics.length - 1) y += 166;
+        const label = fitText(measure, r.unit || r.label.toUpperCase(), (p) => F(500, p), 420, 52, 48);
+        ops.push(textOp(measure, label.text, F(500, label.px), { x: start, y: y + 138, color: ink, alpha: .8 }));
+        if (col === 1 || i === metrics.length - 1) y += 190;
       }
     });
     if (rows.some((r) => r.id === 'days')) {
@@ -1725,18 +1722,18 @@
       'LMMJVSD'.split('').forEach((letter, i) => {
         const cx = x + 36 + i * 132;
         ops.push({ op: 'circle', cx, cy: y + 30, r: 28, stroke: days[i] ? 0 : 2, color: ink, alpha: days[i] ? 1 : .3 });
-        ops.push(textOp(measure, letter, F(600, 30), { x: cx, y: y + 100, align: 'center', color: ink }));
+        ops.push(textOp(measure, letter, F(700, 52), { x: cx, y: y + 108, align: 'center', color: ink }));
       });
-      y += 112;
+      y += 136;
     }
-    if (kind === 'week') { const block = disciplineBlock(d, measure, x, y + 32, maxW, ink); ops.push(...block.ops); y += block.height; }
+    if (kind === 'week') { const block = disciplineBlock(d, measure, x, y + 32, maxW, ink); ops.push(...block.ops); y += block.height + (block.height ? 32 : 0); }
     const date = rows.find((r) => r.id === 'ds' || r.id === 'weekStart');
-    if (date) { y += 36; put(date.value, 32, 32, 500); }
-    y += 64;
+    if (date) { y += 36; put(date.value, 52, 48, 600); }
+    y += 48;
     const probe = lockupLayout(0, 0, 40, measure);
-    const brand = lockupOps(measure, x, y, Math.round(40 * 320 / probe.width), 'left', ink);
+    const brand = lockupOps(measure, x, y, Math.round(40 * WEEK_BRAND_WIDTH / probe.width), 'left', ink);
     ops.push(...brand.ops);
-    y += brand.height + 80;
+    y += brand.height + 48;
     if (card) ops.unshift({ op: 'rect', x: 20, y: 20, w: WIDTH - 40, h: y - 20, r: 44 });
     return { kind: variant, width: WIDTH, height: Math.ceil(y + 20), ops };
   }
@@ -1754,10 +1751,10 @@
     const filled = ['bitacora', 'carnet'].includes(id);
     const ink = filled ? 'inv' : 'fg';
     const left = 88, right = WIDTH - left, inner = right - left;
-    let y = 92;
+    let y = 100;
     function text(value, px, atY, opts) {
       opts = opts || {};
-      const t = fitText(measure, String(value), (p) => F(opts.weight || 700, p, opts.italic), opts.width || inner, px, Math.min(px, 32), opts.spacing || 0);
+      const t = fitText(measure, String(value), (p) => F(opts.weight || 700, p, opts.italic), opts.width || inner, px, Math.min(px, 48), opts.spacing || 0);
       ops.push(textOp(measure, t.text, F(opts.weight || 700, t.px, opts.italic), {
         x: opts.x == null ? left : opts.x, y: atY, align: opts.align || 'left',
         spacing: t.spacing, color: ink, alpha: opts.alpha == null ? 1 : opts.alpha, stroke: opts.stroke
@@ -1773,9 +1770,9 @@
     const hasDays = rows.some((r) => r.id === 'days');
     const centered = ['semana', 'insignia', 'heroe', 'crew', 'racha'].includes(id);
     const heading = id === 'bitacora' ? 'MI SEMANA / REGISTRO' : id === 'ritual' ? 'EL HÁBITO SE CONSTRUYE.' : 'MI SEMANA';
-    if (customTitle(d)) y += titleBlock(ops, customTitle(d), measure, centered ? WIDTH / 2 : left, y, inner, 32, ink, centered ? 'center' : 'left');
-    else (centered ? center : text)(heading, 32, y, { weight: 600, spacing: .14 });
-    y += 58;
+    if (customTitle(d)) y += titleBlock(ops, customTitle(d), measure, centered ? WIDTH / 2 : left, y, inner, 60, ink, centered ? 'center' : 'left');
+    else (centered ? center : text)(heading, 60, y, { weight: 700, spacing: .06 });
+    y += 72;
     // Calendario protagonista: cada celda muestra presencia, nunca una intensidad inventada.
     const calendar = (large) => {
       const step = inner / 7, box = large ? 108 : 64;
@@ -1784,13 +1781,13 @@
         const cy = y + (large ? 74 : 42);
         if (large) {
           ops.push({ op: 'rect', x: cx - box / 2, y: cy - box / 2, w: box, h: box, r: 28, color: ink, stroke: active ? 0 : 2, alpha: active ? 1 : .25 });
-          if (active) ops.push(textOp(measure, '✓', F(700, 52), { x: cx, y: cy + 18, align: 'center', color: filled ? 'fg' : 'inv' }));
+          if (active) ops.push(textOp(measure, '✓', F(700, 60), { x: cx, y: cy + 18, align: 'center', color: filled ? 'fg' : 'inv' }));
         } else {
           ops.push({ op: 'circle', cx, cy, r: box / 2, color: ink, stroke: active ? 0 : 2, alpha: active ? 1 : .3 });
         }
-        text(day, 30, cy + box / 2 + 44, { x: cx, align: 'center', weight: 500 });
+        text(day, 60, cy + box / 2 + 60, { x: cx, align: 'center', weight: 500 });
       });
-      y += large ? 218 : 154;
+      y += large ? 244 : 186;
     };
     if (id === 'ritual' && hasDays) { calendar(true); rule(y); y += 64; }
     if (id === 'crew') {
@@ -1805,48 +1802,48 @@
         const col = i % 2, x = left + col * 474;
         if (!col && i) { y += 190; }
         text(r.value, 110, y + 96, { x, width: 420, weight: 800 });
-        text(r.unit, 30, y + 152, { x, width: 420, weight: 500 });
+        text(r.unit, 52, y + 162, { x, width: 420, weight: 500 });
       });
-      if (metrics.length) y += 206;
+      if (metrics.length) y += 222;
     } else if (main) {
       if (id === 'insignia') {
         const cy = y + 280;
         ops.push({ op: 'circle', cx: WIDTH / 2, cy, r: 270, stroke: 3, color: ink });
         ops.push({ op: 'circle', cx: WIDTH / 2, cy, r: 248, stroke: 1, color: ink, alpha: .35 });
         center(main.value, 210, cy + 35, { width: 420, weight: 900 });
-        center(main.unit, 30, cy + 114, { width: 420, spacing: .1 });
+        center(main.unit, 48, cy + 114, { width: 420, spacing: .1 });
         y += 610;
       } else if (id === 'bitacora') {
         rule(y, [10, 9]); y += 64;
-        text(main.unit, 32, y, { weight: 500, spacing: .12 });
-        y += 206;
+        text(main.unit, 52, y, { weight: 500, spacing: .12 });
+        y += 222;
         text(main.value, 240, y, { weight: 800 }); y += 90;
       } else if (id === 'racha') {
         const label = main.id === 'streak' ? 'SEMANAS / SEGUIDAS' : main.unit;
         center(main.value, 300, y + 240, { weight: 800, italic: true });
-        center(label, 36, y + 330, { spacing: .12 }); y += 410;
+        center(label, 52, y + 330, { spacing: .12 }); y += 410;
       } else {
         const px = id === 'carnet' ? 230 : 300;
         const align = centered ? center : text;
         align(main.value, px, y + px * .8, { weight: 900, stroke: id === 'heroe' ? 4 : undefined });
-        align(main.unit, 34, y + px * .8 + 80, { weight: 600, spacing: .12 });
+        align(main.unit, 52, y + px * .8 + 80, { weight: 600, spacing: .12 });
         y += px * .8 + 160;
       }
       rest.forEach((r) => {
         rule(y, id === 'bitacora' ? [10, 9] : undefined); y += 76;
-        text(r.unit, 30, y, { width: 360, weight: 500, alpha: .8 });
-        text(r.value, 68, y + 8, { x: right, align: 'right', width: 490, weight: 700 });
-        y += 60;
+        text(r.unit, 48, y, { width: 370, weight: 600 });
+        text(r.value, 112, y + 14, { x: right, align: 'right', width: 490, weight: 800 });
+        y += 72;
       });
     }
     if (hasDays && id !== 'ritual') { y += 24; calendar(id === 'semana'); }
-    const sports = disciplineBlock(d, measure, left, y + 24, inner, ink); ops.push(...sports.ops); y += sports.height;
-    if (date) { y += 28; (centered ? center : text)(date.value, 32, y, { weight: 500, spacing: .06 }); y += 32; }
+    const sports = disciplineBlock(d, measure, left, y + 24, inner, ink); ops.push(...sports.ops); y += sports.height + (sports.height ? 24 : 0);
+    if (date) { y += 52; (centered ? center : text)(date.value, 60, y, { weight: 600, spacing: .02 }); y += 38; }
     if (id === 'bitacora') { y += 20; rule(y, [10, 9]); y += 38; ops.push(...barcode(rows.map((r) => r.value).join('|'), left, y, inner, 64).map((o) => ({ ...o, color: ink }))); y += 96; }
-    y += 58;
+    y += 72;
     const probe = lockupLayout(0, 0, 40, measure);
-    const brand = lockupOps(measure, centered ? WIDTH / 2 : left, y, Math.round(40 * 320 / probe.width), centered ? 'center' : 'left', ink);
-    ops.push(...brand.ops); y += brand.height + 80;
+    const brand = lockupOps(measure, centered ? WIDTH / 2 : left, y, Math.round(40 * WEEK_BRAND_WIDTH / probe.width), centered ? 'center' : 'left', ink);
+    ops.push(...brand.ops); y += brand.height + 48;
     if (filled) {
       if (id === 'bitacora') {
         ops.unshift({ op: 'poly', pts: [...zigzag(24, WIDTH - 24, 24, 12, 24, false), ...zigzag(24, WIDTH - 24, y, 12, 24, true).reverse()], color: 'fg' });
@@ -2137,6 +2134,15 @@
 .hs-slide img{display:block;max-width:100%;max-height:100%;object-fit:contain}
 .hs-slide img[hidden]{display:none}
 .hs-slide .hs-wait{padding:0}
+.hs-preview-mode{display:flex;align-items:center;gap:8px;margin:0 20px 12px;color:#cdd0d6;font-size:13px}.hs-preview-mode input{accent-color:#d4ff3a;width:18px;height:18px}
+.hs-preview-frame{width:100%;height:100%;display:flex;align-items:center;justify-content:center;position:relative}
+.hs-preview-caption{display:none}
+.hs-stage.story .hs-slide{height:min(62vh,520px);padding:12px}
+.hs-stage.story .hs-preview-frame{height:100%;width:auto;aspect-ratio:9/16;background:linear-gradient(145deg,#3d4b45,#17252c 48%,#4a4038);border:1px solid #555;border-radius:14px;overflow:hidden}
+.hs-stage.story.light .hs-preview-frame{background:linear-gradient(145deg,#e1d9cb,#c1cbc2 48%,#ece5d9)}
+.hs-stage.story .hs-preview-frame img{max-width:82%;max-height:76%}
+.hs-stage.story .hs-preview-caption{display:block;position:absolute;bottom:14px;left:8px;right:8px;text-align:center;font-size:10px;line-height:1.4;color:#fff;text-shadow:0 1px 4px #000}
+.hs-stage.story.light .hs-preview-caption{color:#151515;text-shadow:none}
 .hs-meta{display:flex;align-items:baseline;justify-content:space-between;margin:12px 22px 10px;font-size:13px}
 .hs-label{font-weight:700;color:#f4f5f7;letter-spacing:.02em}
 .hs-count{color:#7d828c;font-variant-numeric:tabular-nums}
@@ -2190,6 +2196,7 @@
       + '<div class="hs-body"><p class="hs-sub"></p>'
       + '<div class="hs-title-editor"><label for="hs-custom-title"></label><input id="hs-custom-title" type="text" maxlength="60" autocomplete="off" aria-describedby="hs-title-help"><small id="hs-title-help"></small></div>'
       + '<details class="hs-options"><summary>Qué quiero mostrar</summary><div class="hs-presets" hidden><button type="button" data-selection="sports">Solo disciplinas</button><button type="button" data-selection="all">Resumen completo</button></div><div class="hs-fields"></div><p>Solo aparecen datos disponibles. La vista previa muestra exactamente lo que compartirás.</p></details>'
+      + '<label class="hs-preview-mode"><input type="checkbox" id="hs-story-preview" checked><span></span></label>'
       + '<div class="hs-stage"><div class="hs-track"></div></div>'
       // Los colores, debajo del sticker: con doce y uno libre ya no caben en la cabeza.
       + '<div class="hs-colors" role="radiogroup" aria-label="Color del sticker">'
@@ -2216,6 +2223,9 @@
       if (e.target.closest('.hs-share-main')) shareCurrent();
     });
     el.addEventListener('change', (e) => {
+      if (e.target.matches('#hs-story-preview')) {
+        el.querySelector('.hs-stage').classList.toggle('story', e.target.checked); return;
+      }
       if (!e.target.matches('[data-field]') || !state) return;
       setFields(Array.from(el.querySelectorAll('[data-field]:checked'), (b) => b.dataset.field));
     });
@@ -2264,7 +2274,14 @@
     sheet.querySelector('.hs-count').textContent = state.styles.length ? (i + 1) + ' / ' + state.styles.length : '';
     sheet.querySelectorAll('.hs-thumb').forEach((b, j) => { b.classList.toggle('on', j === i); b.setAttribute('aria-selected', j === i ? 'true' : 'false'); });
     const on = sheet.querySelector('.hs-thumb.on');
-    if (on && on.scrollIntoView) on.scrollIntoView({ block: 'nearest', inline: 'nearest' });
+    const rail = sheet.querySelector('.hs-thumbs');
+    // Solo mover las miniaturas a lo ancho: scrollIntoView también ocultaba el editor
+    // y el inicio de la historia al desplazar verticalmente toda la hoja.
+    if (on && rail) {
+      const item = on.getBoundingClientRect(), view = rail.getBoundingClientRect();
+      if (item.left < view.left + 4) rail.scrollLeft += item.left - view.left - 4;
+      else if (item.right > view.right - 4) rail.scrollLeft += item.right - view.right + 4;
+    }
     sheet.querySelector('.hs-share-main').disabled = !(state.items && state.items[i]);
   }
 
@@ -2309,7 +2326,7 @@
       state.styles = stylesFor(state.kind, state.data, canvasMeasure(probe));
       if (state.preferredStyle) state.current = Math.max(0, state.styles.findIndex((s) => s.id === state.preferredStyle));
       // Cada lámina nace con su <img>: pintar un sticker solo le cambia el src, sin mover nada.
-      track.innerHTML = state.styles.map((s) => '<div class="hs-slide"><img alt="Sticker ' + escHtml(referenceCopy(state.data).styles[s.id] || s.label) + '" hidden><div class="hs-wait">Preparando…</div></div>').join('');
+      track.innerHTML = state.styles.map((s) => '<div class="hs-slide"><div class="hs-preview-frame"><img alt="Sticker ' + escHtml(referenceCopy(state.data).styles[s.id] || s.label) + '" hidden><div class="hs-wait">Preparando…</div><span class="hs-preview-caption">' + (/^en\b/i.test(state.data.lang) ? 'Story preview · approximate size' : 'Vista de historia · tamaño aproximado') + '</span></div></div>').join('');
       thumbs.innerHTML = state.styles.map((s, i) => '<button type="button" class="hs-thumb" role="tab" data-i="' + i + '" aria-label="' + escHtml(referenceCopy(state.data).styles[s.id] || s.label) + '"></button>').join('');
       goTo(state.current || 0);
     }
@@ -2386,6 +2403,9 @@
     const titleEditor = sheet.querySelector('.hs-title-editor');
     titleEditor.hidden = state.kind === 'quote';
     const english = /^en\b/i.test(state.data.lang);
+    sheet.querySelector('.hs-preview-mode span').textContent = english ? 'Preview in a story' : 'Ver en una historia';
+    sheet.querySelector('#hs-story-preview').checked = true;
+    sheet.querySelector('.hs-stage').classList.add('story');
     titleEditor.querySelector('label').textContent = english ? 'Sticker title' : 'Título del sticker';
     titleEditor.querySelector('small').textContent = english ? 'Optional · Leave blank to use the original title. Only changes this sticker.' : 'Opcional · Déjalo vacío para usar el título original. Solo cambia este sticker.';
     const titleInput = titleEditor.querySelector('input');

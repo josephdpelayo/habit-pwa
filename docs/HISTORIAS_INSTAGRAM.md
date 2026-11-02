@@ -388,3 +388,26 @@ GPS. Revisión visual en navegador con un ejemplo mixto de once sesiones.
 - Verificación: catálogo, títulos largos, vuelta al predeterminado, selección y datos
   originales en `check-share.js`; editor y PNG de vista previa revisados en navegador
   con datos de ejemplo. La prueba dentro de Instagram en iPhone sigue pendiente.
+
+### 20261102-2 — Legibilidad dentro de una historia
+
+La captura de Instagram mostró etiquetas de 30–32 px y cifras de disciplina de 68 px,
+demasiado pequeñas al reducir un PNG de 1080 px. Se revisaron las proporciones del catálogo:
+
+- Desglose semanal compartido: nombres de disciplina a 60 px y cifras hasta 132 px,
+  iconos mayores y separación para que la fecha no toque la última cifra. Se elimina
+  el encabezado redundante «POR DISCIPLINA». Títulos y días crecen también.
+- Los 22 estilos semanales y los de entreno reciben etiquetas, cifras secundarias y
+  fechas mayores, con ajustes de renglones y espacios. La firma semanal pasa de un ancho
+  objetivo de 320 a 400 px; las firmas secundarias de los demás estilos también crecen.
+- El diseño Logotipo mantiene un ancho de 1080 px: los subtítulos largos ganan renglones
+  en vez de ensanchar el PNG y empequeñecer el conjunto al pegarlo.
+- La galería abre con «Ver en una historia»: marco 9:16 con fondo de contraste y tamaño
+  aproximado. Puede desactivarse para ver el sticker de cerca. El marco y su nota no se
+  exportan; el PNG conserva transparencia. Textos nuevos preparados para ES/EN.
+- Las miniaturas solo desplazan su carrusel horizontal; ya no desplazan verticalmente
+  la hoja cuando se actualiza el título o se dibuja el catálogo.
+- Verificación: catálogo existente, combinaciones de casillas, títulos largos, cifras
+  legibles a 300 px de ancho y separación entre fecha y métricas. Comparación en navegador
+  con Inter y datos de ejemplo, a idéntica escala sobre un marco de historia. Instagram
+  controla la escala inicial al pegar; falta repetir la prueba en el iPhone.

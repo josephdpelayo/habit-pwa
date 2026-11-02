@@ -427,4 +427,21 @@ for (const style of S.stylesFor('workout', namedWorkout, measure)) {
   const text = L.ops ? L.ops.filter(o => o.op === 'text').map(o => o.text).join(' ') + ' ' + L.ops.filter(o => o.op === 'arc').map(o => o.chars.map(c => c.ch).join('')).join('') : L.chars ? L.chars.map(c => c.ch).join('') : L.sub.text;
   assert.ok(text.toLowerCase().includes(namedWorkout.customTitle.toLowerCase()), style.id + ' muestra el título personalizado');
 }
+// Regresión de la historia real: etiquetas pequeñas y cifras secundarias ilegibles.
+const storyWeek = { ...mixedWeek, fields: ['days', 'weekStart', 'discipline:run', 'discipline:strength'] };
+for (const id of ['heroe', 'semana', 'carnet', 'insignia', 'ritual', 'bitacora', 'balance', 'editorial', 'ficha', 'compacto']) {
+  const L = S.KINDS.week.styles.find(st => st.id === id).layout(storyWeek, measure);
+  const texts = L.ops.filter(o => o.op === 'text');
+  const label = texts.find(o => o.text === 'CORRER');
+  const value = texts.find(o => o.text === '33.6 KM');
+  const lastValue = texts.find(o => o.text === '5H 17M');
+  const date = texts.find(o => o.text === S.weekFacts(storyWeek).range);
+  assert.ok(label.px * 300 / L.width >= 15, id + ': disciplina legible al compartir a 300 px');
+  assert.ok(value.px * 300 / L.width >= 32, id + ': la cifra no se vuelve microtexto');
+  assert.ok(date.y - date.px * .75 > lastValue.y + lastValue.px * .25, id + ': la fecha no toca la última cifra');
+  inside(L, 'historia/' + id);
+}
+const longSignature = S.signatureLayout(measure, 'MIS KILÓMETROS Y MI FUERZA A LO LARGO DE TODA ESTA SEMANA');
+assert.equal(longSignature.width, 1080, 'un título largo no ensancha el PNG y encoge todo al pegarlo');
+inside(longSignature, 'firma con título largo');
 console.log('HABIT Stickers: ok');
