@@ -248,4 +248,32 @@ assert.equal(dots.length, 7);
 assert.equal(dots.filter((o) => !o.stroke).length, 4, 'un punto lleno por día entrenado');
 assert.equal(S.KINDS.week.styles.find((s) => s.id === 'racha').layout({ count: 1, streak: 1 }, measure), null, 'una semana no es racha');
 
+
+
+// La selección es el contrato del PNG: ni títulos ni métricas ocultas se recuperan.
+for (const [kind, data] of [['workout', { ...samples.rodada, number: 47, kcal: 560 }], ['week', wk]]) {
+  const fields = S.stickerFields(kind, data);
+  const selections = [[], fields.map((r) => r.id), ...fields.map((r) => [r.id])];
+  for (const selected of selections) {
+    const d = { ...data, fields: selected };
+    assert.deepEqual(S.selectedFields(kind, d).map((r) => r.id), selected.length === fields.length ? fields.map((r) => r.id) : selected);
+    const styles = S.stylesFor(kind, d, measure);
+    assert.equal(styles.length, 3, 'solo estilos que respetan la selección');
+    for (const style of styles) {
+      const L = style.layout(d, measure);
+      inside(L, kind + '/personalizado/' + style.id);
+      assert.ok(saysCrew(L), 'siempre firma como Crew');
+      const logo = L.ops.find((o) => o.op === 'logo');
+      assert.ok(logo.size >= 40 && logo.size <= 90, 'logo con tamaño estable');
+      const text = L.ops.filter((o) => o.op === 'text').map((o) => o.text).join('|');
+      if (!selected.includes('number')) assert.ok(!text.includes('Nº DE ENTRENO'));
+      if (!selected.includes('avgHr')) assert.ok(!text.includes('FC MEDIA'));
+      if (!selected.includes('title')) assert.ok(!text.includes(data.title?.toUpperCase() || 'TÍTULO AUSENTE'));
+      if (!selected.length) assert.equal(L.ops.filter((o) => o.op === 'text').length, 3, 'sin selección: solo encabezado y marca');
+    }
+  }
+}
+assert.ok(!S.stickerFields('workout', samples.yoga).some((r) => r.id === 'avgHr'), 'no ofrece FC inexistente');
+assert.equal(S.weekFacts({ count: 0 }).count, 0, 'cero no se inventa como un entreno');
+
 console.log('HABIT Stickers: ok');

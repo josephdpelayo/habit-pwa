@@ -225,3 +225,50 @@ mejor serie, músculos (con palabras, sin dibujo del cuerpo), récords, nº de e
   - Ligero en Inter 200 (el 100 quedaba en trazos de un pixel), Mensaje con la cola curva de
     iMessage, Cinta con tiras de al menos 58 px (un nombre larguísimo se corta con «…»), Datos
     no sale con una sola cifra.
+
+
+## Galería personalizable — 20261101-6
+
+### Diagnóstico y dirección
+
+El catálogo anterior mezcla firmas discretas con composiciones donde Crew ocupa todo el
+sticker. Además, cada plantilla selecciona los datos por su cuenta: elegir un diseño cambia
+lo que se cuenta. El nuevo flujo separa la selección de información de su presentación.
+La dirección es editorial: tipografía Inter, espacio negativo, líneas finas, un dato principal,
+y métricas secundarias. Mantiene PNG transparente, 12 colores y color libre.
+
+### Entreno y semana
+
+La galería muestra tres diseños compatibles con la selección explícita:
+
+- Editorial: cifra principal y secundarios en dos columnas, sin fondo.
+- Ficha: la misma jerarquía sobre una tarjeta redondeada del color elegido, con tinta de contraste.
+- Compacto: valores alineados a la derecha y etiquetas a la izquierda, sin fondo.
+
+«Qué quiero mostrar» ofrece casillas solo para datos disponibles. En entrenos: título,
+tiempo, distancia, ritmo/velocidad, FC media, número, series, volumen, calorías, desnivel,
+esfuerzo y fecha. En semana: cantidad, tiempo total, distancia total, racha, fechas y días
+entrenados. Por defecto se seleccionan título/tiempo/distancia o cantidad/tiempo/días/fechas.
+Sin casillas quedan únicamente el encabezado y la firma; nunca se recupera una cifra oculta.
+Los días activos representan días distintos, mientras que la cantidad cuenta sesiones.
+No se calculan FC ni calorías semanales porque el resumen actual no entrega esos datos.
+
+### Marca
+
+Los tres diseños usan el mismo lockup horizontal: logo + HABIT + CREW, con las proporciones
+internas de `lockupLayout`. Se calcula un ancho objetivo de 320 px en el lienzo de 1080
+(~30%); el tamaño de fuente se redondea a píxeles enteros. La firma conserva tamaño,
+alineación izquierda y aire propio aunque cambie el contenido. El logo se mide por su tinta.
+La firma nunca se convierte en el dato protagonista.
+
+Los estilos anteriores siguen disponibles en la API para compatibilidad, pero el flujo
+personalizable solo ofrece diseños que respeten `data.fields`. Las frases conservan su
+catálogo actual. No se modifican los datos del entrenamiento ni se guardan preferencias
+personales en el servidor.
+
+### Verificación
+
+Pruebas de cada campo aislado, selección vacía y selección completa, ausencia de FC no
+registrada, exclusión de datos desmarcados y trazos dentro del lienzo. Revisión local de la
+galería con ejemplos de carrera y semana, casillas en vivo, cambio de estilo y color lima.
+Pendiente: pegado y tamaño percibido en una historia real desde iPhone/Android.

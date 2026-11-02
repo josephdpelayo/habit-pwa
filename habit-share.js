@@ -1302,6 +1302,116 @@
     }
   };
 
+  // Datos explícitos: ningún diseño puede recuperar un campo desmarcado.
+  function stickerFields(kind, d) {
+    const rows = [];
+    const add = (id, label, value, unit) => { if (value !== '' && value != null) rows.push({ id, label, value: String(value), unit: unit || '' }); };
+    if (kind === 'week') {
+      const w = weekFacts(d);
+      add('count', 'Entrenamientos', w.count, 'ENTRENOS');
+      if (w.dur) add('durationSec', 'Tiempo total', minutesText(w.dur), 'TIEMPO TOTAL');
+      if (w.dist) add('distanceM', 'Distancia total', (w.dist / 1000).toFixed(1), 'KM TOTALES');
+      if (w.streak > 1) add('streak', 'Racha', w.streak, 'SEMANAS SEGUIDAS');
+      if (w.range) add('weekStart', 'Fechas', w.range);
+      if (d.days) add('days', 'Días entrenados', w.days.filter(Boolean).length, 'DÍAS ACTIVOS');
+    } else {
+      const f = workoutFacts(d);
+      add('title', 'Nombre del entreno', f.title);
+      if (f.dur) add('durationSec', 'Tiempo', f.dur % 60 ? clock(f.dur) : minutesText(f.dur), 'TIEMPO');
+      if (f.dist) add('distanceM', 'Distancia', distanceText(f.type, f.dist), distanceUnit(f.type));
+      if (f.pace) add('pace', 'Ritmo / velocidad', f.pace, f.type === 'bike' ? 'VELOCIDAD' : 'RITMO');
+      if (d.avgHr > 0) add('avgHr', 'Frecuencia cardiaca', Math.round(d.avgHr), 'LPM · FC MEDIA');
+      if (f.number) add('number', 'Número de entreno', f.number, 'Nº DE ENTRENO');
+      if (f.sets) add('sets', 'Series', f.sets, 'SERIES');
+      if (f.vol) add('volumeKg', 'Volumen', thousands(f.vol), 'KG MOVIDOS');
+      if (d.kcal > 0) add('kcal', 'Calorías', thousands(d.kcal), 'KCAL');
+      if (d.elevationM > 0) add('elevationM', 'Desnivel', thousands(d.elevationM), 'M DE DESNIVEL');
+      if (d.effort > 0) add('effort', 'Esfuerzo', Math.round(d.effort) + '/10', 'ESFUERZO');
+      if (f.date) add('ds', 'Fecha', f.date);
+    }
+    return rows;
+  }
+
+  function selectedFields(kind, d) {
+    return stickerFields(kind, d).filter((r) => !Array.isArray(d.fields) || d.fields.includes(r.id));
+  }
+
+  // Tres gramáticas, una marca: firma de 320 px de ancho sobre lienzo de 1080.
+  // El contenido crece hacia abajo; nunca se encoge la firma por añadir información.
+  function editorialLayout(kind, variant, d, measure) {
+    const rows = selectedFields(kind, d), ops = [];
+    const card = variant === 'ficha', compact = variant === 'compacto';
+    const ink = card ? 'inv' : 'fg';
+    const x = 88, maxW = WIDTH - x * 2;
+    let y = 86;
+    const put = (text, max, min, weight, color, spacing) => {
+      const t = fitText(measure, String(text), (px) => F(weight, px), maxW, max, min, spacing || 0);
+      y += t.px * CAP;
+      ops.push(textOp(measure, t.text, F(weight, t.px), { x, y, spacing: t.spacing, color: color || ink }));
+      y += t.px * 0.28;
+    };
+    put(kind === 'week' ? 'MI SEMANA' : 'MI ENTRENO', 32, 32, 600, ink, .18);
+    y += 42;
+    const title = rows.find((r) => r.id === 'title');
+    if (title) { put(title.value.toUpperCase(), compact ? 68 : 90, 38, 800); y += 24; }
+    const metrics = rows.filter((r) => !['title', 'ds', 'weekStart', 'days'].includes(r.id));
+    metrics.forEach((r, i) => {
+      if (compact) {
+        if (i) y += 22;
+        const base = y;
+        const label = fitText(measure, r.unit || r.label.toUpperCase(), (p) => F(500, p), 310, 30, 30);
+        ops.push(textOp(measure, label.text, F(500, label.px), { x, y: base + 44, color: ink, alpha: .75 }));
+        const value = fitText(measure, r.value, (p) => F(700, p), 550, 76, 38);
+        ops.push(textOp(measure, value.text, F(700, value.px), { x: WIDTH - x, y: base + 56, align: 'right', color: ink }));
+        y += 92;
+        ops.push({ op: 'line', x1: x, x2: WIDTH - x, y1: y, y2: y, stroke: 2, color: ink, alpha: .22 });
+      } else if (i === 0) {
+        put(r.value, 200, 48, 800);
+        y += 12;
+        put(r.unit || r.label.toUpperCase(), 30, 30, 500, ink, .1);
+        y += 42;
+      } else {
+        // Dos columnas: añadir datos no encoge toda la composición.
+        const col = (i - 1) % 2;
+        if (col === 0) {
+          ops.push({ op: 'line', x1: x, x2: WIDTH - x, y1: y, y2: y, stroke: 2, color: ink, alpha: .22 });
+          y += 36;
+        }
+        const start = x + col * 474;
+        const t = fitText(measure, r.value, (p) => F(700, p), 420, 86, 38);
+        ops.push(textOp(measure, t.text, F(700, t.px), { x: start, y: y + 72, color: ink }));
+        const label = fitText(measure, r.unit || r.label.toUpperCase(), (p) => F(500, p), 420, 30, 30);
+        ops.push(textOp(measure, label.text, F(500, label.px), { x: start, y: y + 128, color: ink, alpha: .8 }));
+        if (col === 1 || i === metrics.length - 1) y += 166;
+      }
+    });
+    if (rows.some((r) => r.id === 'days')) {
+      y += 42;
+      const days = weekFacts(d).days;
+      'LMMJVSD'.split('').forEach((letter, i) => {
+        const cx = x + 36 + i * 132;
+        ops.push({ op: 'circle', cx, cy: y + 30, r: 28, stroke: days[i] ? 0 : 2, color: ink, alpha: days[i] ? 1 : .3 });
+        ops.push(textOp(measure, letter, F(600, 30), { x: cx, y: y + 100, align: 'center', color: ink }));
+      });
+      y += 112;
+    }
+    const date = rows.find((r) => r.id === 'ds' || r.id === 'weekStart');
+    if (date) { y += 36; put(date.value, 32, 32, 500); }
+    y += 64;
+    const probe = lockupLayout(0, 0, 40, measure);
+    const brand = lockupOps(measure, x, y, Math.round(40 * 320 / probe.width), 'left', ink);
+    ops.push(...brand.ops);
+    y += brand.height + 80;
+    if (card) ops.unshift({ op: 'rect', x: 20, y: 20, w: WIDTH - 40, h: y - 20, r: 44 });
+    return { kind: variant, width: WIDTH, height: Math.ceil(y + 20), ops };
+  }
+
+  for (const kind of ['workout', 'week']) {
+    KINDS[kind].styles.unshift(...[
+      ['editorial', 'Editorial'], ['ficha', 'Ficha'], ['compacto', 'Compacto']
+    ].map(([id, label]) => ({ id, label, customizable: true, layout: (d, m) => editorialLayout(kind, id, d, m) })));
+  }
+
   // ── Dibujo (navegador) ─────────────────────────────────────────────────
 
   let fontsReady = null;
@@ -1475,7 +1585,7 @@
   // Los estilos que sí tienen qué mostrar con estos datos.
   function stylesFor(kind, data, measure) {
     const K = KINDS[kind] || KINDS.quote;
-    return K.styles.filter((s) => { try { return !!s.layout(data || {}, measure); } catch (_) { return false; } });
+    return K.styles.filter((s) => !Array.isArray(data && data.fields) || s.customizable).filter((s) => { try { return !!s.layout(data || {}, measure); } catch (_) { return false; } });
   }
 
   // Un sticker: un canvas transparente del tamaño justo. `logo` es la imagen ya cargada.
@@ -1531,6 +1641,7 @@
 .hs-overlay{position:fixed;inset:0;z-index:10040;background:rgba(6,7,9,.66);display:none;align-items:flex-end;justify-content:center;font-family:${INTER}}
 .hs-overlay.open{display:flex;animation:hsFade .18s ease both}
 .hs-sheet{width:100%;max-width:480px;max-height:94vh;background:#141518;color:#f4f5f7;border-radius:22px 22px 0 0;display:flex;flex-direction:column;overflow:hidden;animation:hsUp .3s cubic-bezier(.2,.8,.2,1) both;padding-bottom:env(safe-area-inset-bottom,0px)}
+.hs-options{margin:12px 20px;color:#cdd0d6;font-size:13px}.hs-options[hidden]{display:none}.hs-options summary{cursor:pointer;padding:10px 0;font-weight:600}.hs-fields{display:grid;grid-template-columns:1fr 1fr;gap:12px;padding:12px 0}.hs-fields label{display:flex;align-items:center;gap:8px}.hs-fields input{accent-color:#d4ff3a;width:18px;height:18px}.hs-options p{font-size:12px;line-height:1.5;color:#9298a3}
 .hs-head{display:flex;align-items:center;gap:12px;padding:16px 16px 6px}
 .hs-title{flex:1;text-align:center;font-size:17px;font-weight:700;margin:0;letter-spacing:0;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .hs-close{background:none;border:0;color:#9aa0aa;font-size:24px;line-height:1;cursor:pointer;padding:4px 6px}
@@ -1604,6 +1715,7 @@
       + '<h2 class="hs-title" id="hs-title"></h2>'
       + '<button type="button" class="hs-close" aria-label="Cerrar">×</button></div>'
       + '<div class="hs-body"><p class="hs-sub"></p>'
+      + '<details class="hs-options"><summary>Qué quiero mostrar</summary><div class="hs-fields"></div><p>Solo aparecen datos disponibles. La vista previa muestra exactamente lo que compartirás.</p></details>'
       + '<div class="hs-stage"><div class="hs-track"></div></div>'
       // Los colores, debajo del sticker: con doce y uno libre ya no caben en la cabeza.
       + '<div class="hs-colors" role="radiogroup" aria-label="Color del sticker">'
@@ -1622,6 +1734,14 @@
       const t = e.target.closest('.hs-thumb');
       if (t) { goTo(Number(t.dataset.i)); return; }
       if (e.target.closest('.hs-share-main')) shareCurrent();
+    });
+    el.addEventListener('change', (e) => {
+      if (!e.target.matches('[data-field]') || !state) return;
+      const id = state.styles && state.styles[state.current] && state.styles[state.current].id;
+      state.data = { ...state.data, fields: Array.from(el.querySelectorAll('[data-field]:checked'), (b) => b.dataset.field) };
+      freeItems(); state.items = null; state.styles = null;
+      state.preferredStyle = id;
+      paint().catch(() => say('No se pudo actualizar la vista previa', 'err'));
     });
     // El color libre: el selector del teléfono avisa mientras se mueve; se pinta al detenerse.
     let colorTimer = 0;
@@ -1683,6 +1803,9 @@
   async function paint() {
     const doc = global.document;
     const my = ++seq;
+    freeItems();
+    state.items = null;
+    sheet.querySelector('.hs-share-main').disabled = true;
     const kind = KINDS[state.kind] || KINDS.quote;
     sheet.querySelector('.hs-title').textContent = state.title || kind.title;
     sheet.querySelector('.hs-sub').textContent = state.subtitle || '';
@@ -1704,6 +1827,7 @@
     if (!state.styles) {
       const probe = newCanvas(doc, 1, 1).getContext('2d');
       state.styles = stylesFor(state.kind, state.data, canvasMeasure(probe));
+      if (state.preferredStyle) state.current = Math.max(0, state.styles.findIndex((s) => s.id === state.preferredStyle));
       // Cada lámina nace con su <img>: pintar un sticker solo le cambia el src, sin mover nada.
       track.innerHTML = state.styles.map((s) => '<div class="hs-slide"><img alt="Sticker ' + escHtml(s.label) + '" hidden><div class="hs-wait">Preparando…</div></div>').join('');
       thumbs.innerHTML = state.styles.map((s, i) => '<button type="button" class="hs-thumb" role="tab" data-i="' + i + '" aria-label="' + escHtml(s.label) + '"></button>').join('');
@@ -1762,6 +1886,17 @@
       title: opts.title || '', subtitle: opts.subtitle || '', items: null, styles: null, current: 0,
       onClose: typeof opts.onClose === 'function' ? opts.onClose : null
     };
+    const options = sheet.querySelector('.hs-options');
+    options.hidden = state.kind === 'quote';
+    options.open = false;
+    if (state.kind !== 'quote') {
+      const fields = stickerFields(state.kind, state.data);
+      if (!Array.isArray(state.data.fields)) {
+        const defaults = state.kind === 'week' ? ['count', 'durationSec', 'days', 'weekStart'] : ['title', 'durationSec', 'distanceM'];
+        state.data = { ...state.data, fields: fields.filter((r) => defaults.includes(r.id)).map((r) => r.id) };
+      }
+      sheet.querySelector('.hs-fields').innerHTML = fields.map((r) => '<label><input type="checkbox" data-field="' + r.id + '"' + (state.data.fields.includes(r.id) ? ' checked' : '') + '><span>' + escHtml(r.label) + '</span></label>').join('');
+    }
     sheet.classList.add('open');
     state.bodyOverflow = doc.body.style.overflow;
     doc.body.style.overflow = 'hidden';
@@ -1798,7 +1933,7 @@
   const api = {
     COLORS, PALETTE, WIDTH, LOGO_INK, KINDS, ACTIVITY_TYPES, SHARE_ICON, contrast, inkFor, resolveColor,
     wrapText, balancedWrap, spacedWidth, lockupLayout, quoteLayout, signatureLayout, sealLayout, shortDate,
-    dayName, thousands, distanceText, clock, minutesText, paceText, workoutFacts, weekFacts, stylesFor,
+    dayName, thousands, distanceText, clock, minutesText, paceText, workoutFacts, weekFacts, stylesFor, stickerFields, selectedFields,
     ensureFonts, loadLogo, renderSticker, toBlob, shareImage, open, close, chipHtml
   };
   if (typeof module !== 'undefined' && module.exports) module.exports = api;
