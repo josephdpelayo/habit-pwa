@@ -6,6 +6,11 @@
 > Relacionados: `PLAN_ENTRENAMIENTO_SKANDI.md` (calendario, resistencia estructurada, Hyrox),
 > `CAPAS_ENTRENAR_SKANDI.md` (programa → semana → rutina), `PROYECTO_SKANDI_V2.md` (nutrición).
 
+> **Requisito confirmado — 1 nov 2026:** HABIT y HABIT Crew deben estar disponibles en español
+> e inglés. Es transversal a todas las fases, incluidos los stickers, mensajes y notificaciones;
+> sustituye cualquier mención anterior del inglés como opcional. Pendiente de implementación
+> global: selector ES/EN, elección persistente y formatos locales de fechas y números.
+
 ---
 
 ## 0. En cinco líneas

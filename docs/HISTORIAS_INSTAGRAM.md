@@ -1,5 +1,9 @@
 # Stickers — que lo que entrenas se pueda subir a Instagram
 
+> **Idiomas (requisito del 1 nov 2026):** textos de la galería y de los stickers en español e
+> inglés, de acuerdo con la elección de idioma de HABIT/HABIT Crew. La localización global
+> está pendiente; los nuevos diseños deben contemplar ambas traducciones y su longitud.
+
 > Plan del 31 oct 2026, rehecho tres veces ese día con Joseph (ver Bitácora). Fases 1 y 2 hechas
 > (la 2 solo en Crew); la galería ya trae 11 estilos de frase, 16 de entreno y 7 de semana, y
 > desde el 1 nov **todos firman como HABIT Crew**.

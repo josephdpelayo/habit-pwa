@@ -6,6 +6,18 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 HABIT Training Hub — a PWA for a gym in Mazatlán, Mexico. Members book training slots, pay via Stripe, and open the gym door from their phone. The app is deployed on Vercel with Supabase as the backend.
 
+## Requisito permanente: español e inglés
+
+Joseph confirmó el 1 de noviembre de 2026 que HABIT y HABIT Crew deben poder usarse en
+**español e inglés**. Es un requisito del producto, no una función opcional. Incluye pantallas,
+botones, mensajes, notificaciones, información de entrenamiento y textos de los stickers.
+La implementación global sigue pendiente: no anunciar que ya existe un selector de idioma.
+Preparar los textos nuevos para ambas traducciones y evitar nuevas dependencias de español
+fijo. La solución deberá permitir elegir ES/EN, recordar la elección y localizar fechas y
+números. Los nombres de marca y el contenido escrito por cada usuario conservan su identidad.
+Este requisito sustituye las notas antiguas que trataban el inglés como opcional o decían
+que HABIT no necesitaba un sistema de idiomas.
+
 This repo ships **two** front-ends off the same Vercel project and the same Supabase database:
 
 - **HABIT Training Hub** (`app.html`, served at `/`) — the gym: bookings, payments, door access, coaching.
