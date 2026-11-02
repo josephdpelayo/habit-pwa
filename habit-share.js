@@ -12,7 +12,7 @@
 //             { type, title, ds, durationSec, distanceM, sets, volumeKg, exercises:[{name,best}],
 //               elevationM, avgHr, kcal, effort, number }
 //   week    — tu semana: { count, durationSec, distanceM, days:[7 × 0/1, lunes primero], weekStart,
-//             streak }
+//             streak, disciplines:[{type,count,durationSec,distanceM}] }
 // Cada sticker es un PNG transparente de un solo color (uno de `PALETTE` o uno libre), en Inter
 // (la fuente de HABIT) con su logo original (/icons/logo-original.png). La galería se desliza
 // de un estilo a otro y su botón Compartir abre la hoja del teléfono (Instagram, WhatsApp,
@@ -973,6 +973,153 @@
 
   // ── Estilos de la semana ────────────────────────────────────────────────
 
+  // Deportes como pictogramas vectoriales: mismo color que el sticker, sin emojis.
+  const SPORT_MARKS = {
+    run: { dots: [[16, 3.5, 2]], paths: [[[6, 8], [11, 6], [15, 10], [20, 8]], [[11, 6], [9, 13], [14, 16], [17, 21]], [[9, 13], [5, 18], [2, 21]]] },
+    strength: { dots: [[12, 6, 1.8]], paths: [[[3, 7], [3, 15]], [[1, 9], [1, 13]], [[21, 7], [21, 15]], [[23, 9], [23, 13]], [[3, 10], [21, 10]], [[7, 10], [7, 14], [12, 16], [17, 14], [17, 10]], [[10, 16], [9, 22]], [[14, 16], [15, 22]]] },
+    bike: { rings: [[5, 17, 4], [19, 17, 4]], paths: [[[5, 17], [10, 8], [15, 17], [5, 17]], [[10, 8], [17, 8], [19, 17]], [[14, 4], [17, 4]], [[8, 5], [11, 5]]] },
+    swim: { dots: [[18, 6, 2]], paths: [[[5, 12], [11, 7], [16, 11]], [[1, 17], [4, 15], [8, 17], [12, 15], [16, 17], [20, 15], [23, 17]], [[1, 22], [4, 20], [8, 22], [12, 20], [16, 22], [20, 20], [23, 22]]] },
+    walk: { dots: [[13, 3.5, 2]], paths: [[[12, 8], [10, 15], [7, 22]], [[10, 15], [15, 18], [17, 22]], [[12, 8], [7, 12], [6, 16]], [[12, 8], [16, 12], [20, 13]]] },
+    cardio: { paths: [[[1, 12], [6, 12], [9, 5], [14, 20], [18, 12], [23, 12]]] },
+    yoga: { dots: [[12, 4, 2]], paths: [[[12, 8], [12, 15]], [[5, 12], [12, 15], [19, 12]], [[12, 15], [3, 21], [21, 21], [12, 15]]] },
+    sport: { rings: [[12, 12, 10]], paths: [[[12, 2], [12, 22]], [[2, 12], [22, 12]], [[5, 4], [8, 12], [5, 20]], [[19, 4], [16, 12], [19, 20]]] },
+    other: { paths: [[[12, 2], [12, 22]], [[2, 12], [22, 12]], [[5, 5], [19, 19]], [[5, 19], [19, 5]]] }
+  };
+
+  function compactWeekTime(seconds) {
+    const min = Math.round(seconds / 60), h = Math.floor(min / 60), m = min % 60;
+    return h ? h + 'H' + (m ? ' ' + m + 'M' : '') : min + 'M';
+  }
+
+  function normalizeDisciplines(d) {
+    const groups = new Map();
+    for (const r of Array.isArray(d.disciplines) ? d.disciplines : []) {
+      if (!r || !ACTIVITY_TYPES[r.type]) continue;
+      const safe = (v, max) => Number.isFinite(Number(v)) ? Math.max(0, Math.min(max, Number(v))) : 0;
+      const count = Math.round(safe(r.count, 1000));
+      if (!count) continue;
+      if (!groups.has(r.type)) groups.set(r.type, { type: r.type, count: 0, durationSec: 0, distanceM: 0 });
+      const g = groups.get(r.type);
+      g.count += count; g.durationSec += safe(r.durationSec, 7 * 86400);
+      if (ACTIVITY_TYPES[r.type].dist) g.distanceM += safe(r.distanceM, 10000000);
+    }
+    const order = ['run', 'strength', 'bike', 'swim', 'walk', 'cardio', 'yoga', 'sport', 'other'];
+    return [...groups.values()].sort((a, b) => order.indexOf(a.type) - order.indexOf(b.type)).map((r) => {
+      let value;
+      if (r.distanceM > 0) value = r.type === 'swim' ? thousands(r.distanceM) + ' M' : (r.distanceM / 1000).toFixed(1) + ' KM';
+      else if (r.durationSec > 0) value = compactWeekTime(r.durationSec);
+      else value = r.count + (r.count === 1 ? ' ENTRENO' : ' ENTRENOS');
+      return { ...r, id: 'discipline:' + r.type, label: ACTIVITY_TYPES[r.type].label, value };
+    });
+  }
+
+  function selectedDisciplines(d) {
+    return normalizeDisciplines(d).filter((r) => !Array.isArray(d.fields) || d.fields.includes(r.id));
+  }
+
+  // Texto ancho de display, medido con su expansión real antes de alinear o recortar.
+  function displayOp(measure, value, x, y, width, maxPx, color, opts) {
+    opts = opts || {};
+    const scale = opts.scale || 1.14;
+    const t = fitText(measure, value, (p) => F(900, p), width / scale, maxPx, 28);
+    const op = textOp(measure, t.text, F(900, t.px), { x, y, color: color || 'fg' });
+    op.w *= scale; op.scaleX = scale;
+    if (opts.align === 'right') op.x -= op.w;
+    if (opts.align === 'center') op.x -= op.w / 2;
+    return op;
+  }
+
+  // El mismo desglose entra también en los 13 diseños existentes, antes de su firma.
+  function disciplineBlock(d, measure, x, top, width, ink) {
+    const rows = selectedDisciplines(d), ops = [];
+    if (!rows.length) return { ops, height: 0 };
+    let y = top;
+    ops.push({ op: 'line', x1: x, x2: x + width, y1: y, y2: y, color: ink, alpha: .25 });
+    y += 58;
+    ops.push(textOp(measure, 'POR DISCIPLINA', F(600, 30), { x, y, spacing: 3, color: ink }));
+    for (const r of rows) {
+      y += 84;
+      ops.push({ op: 'sport', type: r.type, x, y: y - 48, size: 48, color: ink });
+      const name = fitText(measure, r.label.toUpperCase(), (p) => F(600, p), 310, 30, 28);
+      ops.push(textOp(measure, name.text, F(600, name.px), { x: x + 72, y: y - 4, color: ink }));
+      ops.push(displayOp(measure, r.value, x + width, y, width - 400, 68, ink, { scale: 1, align: 'right' }));
+      y += 28;
+    }
+    return { ops, height: y - top + 32 };
+  }
+
+  function disciplineWeekLayout(id, d, measure) {
+    if (!normalizeDisciplines(d).length) return null;
+    const rows = selectedDisciplines(d), fields = selectedFields('week', d), ops = [];
+    const x = 88, width = WIDTH - x * 2, right = WIDTH - x;
+    let y = 130;
+    const label = (t, px, atX, atY, color, align) => {
+      const f = fitText(measure, t, (p) => F(600, p), width, px, 28);
+      ops.push(textOp(measure, f.text, F(600, f.px), { x: atX, y: atY, color: color || 'fg', align: align || 'left' }));
+    };
+    const heading = id === 'thisweek' ? 'THIS WEEK' : id === 'mix' ? 'WEEKLY MIX' : id === 'pasaporte' ? 'MI SEMANA / PASAPORTE' : 'EN TODAS MIS FORMAS.';
+    ops.push(displayOp(measure, heading, x, y, width, id === 'thisweek' ? 72 : 44, 'fg'));
+    y += 68;
+    if (id === 'pasaporte') {
+      const gap = 24, cellW = (width - gap) / 2, cellH = 320;
+      rows.forEach((r, i) => {
+        const col = i % 2, cellX = x + col * (cellW + gap), cellY = y + Math.floor(i / 2) * (cellH + gap), cx = cellX + cellW / 2;
+        ops.push({ op: 'rect', x: cellX, y: cellY, w: cellW, h: cellH, r: 18, stroke: 2 });
+        ops.push({ op: 'sport', type: r.type, x: cx - 46, y: cellY + 32, size: 92 });
+        label(r.label.toUpperCase(), 30, cx, cellY + 180, 'fg', 'center');
+        ops.push(displayOp(measure, r.value, cx, cellY + 270, cellW - 48, 70, 'fg', { scale: 1, align: 'center' }));
+      });
+      y += Math.ceil(rows.length / 2) * (cellH + gap);
+    } else {
+      for (const r of rows) {
+        if (id === 'thisweek') {
+          // Referencia: dos filas compactas, icono deportivo y métrica dominante.
+          ops.push({ op: 'sport', type: r.type, x: x + 10, y: y + 6, size: 110 });
+          ops.push(displayOp(measure, r.value, x + 174, y + 102, width - 174, 146, 'fg', { scale: 1.18 }));
+          y += 156;
+        } else if (id === 'mix') {
+          ops.push({ op: 'rect', x, y, w: width, h: 194, r: 38 });
+          ops.push({ op: 'sport', type: r.type, x: x + 34, y: y + 44, size: 88, color: 'inv' });
+          label(r.label.toUpperCase(), 28, x + 154, y + 55, 'inv');
+          ops.push(displayOp(measure, r.value, x + 154, y + 146, width - 190, 100, 'inv'));
+          y += 216;
+        } else {
+          ops.push({ op: 'sport', type: r.type, x, y: y + 2, size: 48 });
+          ops.push(displayOp(measure, r.label.toUpperCase() + '.', x + 76, y + 52, width - 76, 88, 'fg'));
+          ops.push(displayOp(measure, r.value, x, y + 192, width, 152, 'fg', { scale: 1.05 }));
+          y += 238;
+          ops.push({ op: 'line', x1: x, x2: right, y1: y, y2: y, alpha: .25 }); y += 42;
+        }
+      }
+    }
+    // Los totales son independientes del detalle por deporte y siguen las casillas.
+    const totals = fields.filter((r) => ['count', 'durationSec', 'distanceM', 'streak'].includes(r.id));
+    if (totals.length) {
+      y += 28;
+      for (let i = 0; i < totals.length; i += 2) {
+        const t = totals.slice(i, i + 2).map((r) => r.value + ' ' + r.unit).join(' · ');
+        label(t, 30, x, y); y += 48;
+      }
+    }
+    if (fields.some((r) => r.id === 'days')) {
+      const days = weekFacts(d).days, step = width / 7;
+      y += 18;
+      'LMMJVSD'.split('').forEach((t, i) => {
+        const cx = x + step * (i + .5);
+        ops.push({ op: 'circle', cx, cy: y + 22, r: 18, stroke: days[i] ? 0 : 2, alpha: days[i] ? 1 : .3 });
+        label(t, 28, cx, y + 84, 'fg', 'center');
+      });
+      y += 120;
+    }
+    const date = fields.find((r) => r.id === 'weekStart');
+    if (date) { y += 22; label(date.value, 30, x, y); y += 24; }
+    y += 48;
+    const probe = lockupLayout(0, 0, 40, measure);
+    const brand = lockupOps(measure, x, y, Math.round(40 * 320 / probe.width), 'left');
+    ops.push(...brand.ops);
+    return { kind: id, width: WIDTH, height: Math.ceil(y + brand.height + 80), ops };
+  }
+
   function weekFacts(d) {
     d = d || {};
     const count = Math.max(0, Math.round(d.count || 0));
@@ -1335,6 +1482,7 @@
       if (w.streak > 1) add('streak', 'Racha', w.streak, 'SEMANAS SEGUIDAS');
       if (w.range) add('weekStart', 'Fechas', w.range);
       if (d.days) add('days', 'Días entrenados', w.days.filter(Boolean).length, 'DÍAS ACTIVOS');
+      normalizeDisciplines(d).forEach((r) => add(r.id, r.label + ' · ' + r.value, r.value, r.label.toUpperCase()));
     } else {
       const f = workoutFacts({ ...d, fields: undefined });
       add('title', 'Nombre del entreno', f.title);
@@ -1376,7 +1524,7 @@
     y += 42;
     const title = rows.find((r) => r.id === 'title');
     if (title) { put(title.value.toUpperCase(), compact ? 68 : 90, 38, 800); y += 24; }
-    const metrics = rows.filter((r) => !['title', 'ds', 'weekStart', 'days'].includes(r.id));
+    const metrics = rows.filter((r) => !r.id.startsWith('discipline:') && !['title', 'ds', 'weekStart', 'days'].includes(r.id));
     metrics.forEach((r, i) => {
       if (compact) {
         if (i) y += 22;
@@ -1417,6 +1565,7 @@
       });
       y += 112;
     }
+    if (kind === 'week') { const block = disciplineBlock(d, measure, x, y + 32, maxW, ink); ops.push(...block.ops); y += block.height; }
     const date = rows.find((r) => r.id === 'ds' || r.id === 'weekStart');
     if (date) { y += 36; put(date.value, 32, 32, 500); }
     y += 64;
@@ -1453,7 +1602,7 @@
     }
     const rule = (atY, dash) => ops.push({ op: 'line', x1: left, x2: right, y1: atY, y2: atY, color: ink, alpha: .3, dash });
     const center = (value, px, atY, opts) => text(value, px, atY, { ...opts, x: WIDTH / 2, align: 'center' });
-    const metrics = rows.filter((r) => !['weekStart', 'days'].includes(r.id));
+    const metrics = rows.filter((r) => !r.id.startsWith('discipline:') && !['weekStart', 'days'].includes(r.id));
     const main = (id === 'racha' && metrics.find((r) => r.id === 'streak')) || metrics[0];
     const rest = metrics.filter((r) => r !== main);
     const date = rows.find((r) => r.id === 'weekStart');
@@ -1526,6 +1675,7 @@
       });
     }
     if (hasDays && id !== 'ritual') { y += 24; calendar(id === 'semana'); }
+    const sports = disciplineBlock(d, measure, left, y + 24, inner, ink); ops.push(...sports.ops); y += sports.height;
     if (date) { y += 28; (centered ? center : text)(date.value, 32, y, { weight: 500, spacing: .06 }); y += 32; }
     if (id === 'bitacora') { y += 20; rule(y, [10, 9]); y += 38; ops.push(...barcode(rows.map((r) => r.value).join('|'), left, y, inner, 64).map((o) => ({ ...o, color: ink }))); y += 96; }
     y += 58;
@@ -1546,11 +1696,15 @@
     if (style.customizable) continue;
     const original = style.layout;
     style.customizable = true;
-    style.layout = (d, m) => Array.isArray(d.fields) ? weeklyStudioLayout(style.id, d, m) : original(d, m);
+    style.layout = (d, m) => Array.isArray(d.fields) || normalizeDisciplines(d).length ? weeklyStudioLayout(style.id, d, m) : original(d, m);
   }
   KINDS.week.styles.unshift(...[
     ['ritual', 'Ritual'], ['bitacora', 'Bitácora'], ['balance', 'Balance']
   ].map(([id, label]) => ({ id, label, customizable: true, layout: (d, m) => weeklyStudioLayout(id, d, m) })));
+
+  KINDS.week.styles.unshift(...[
+    ['thisweek', 'This Week'], ['mix', 'Mix'], ['pasaporte', 'Pasaporte'], ['tipografico', 'Tipográfico']
+  ].map(([id, label]) => ({ id, label, customizable: true, layout: (d, m) => disciplineWeekLayout(id, d, m) })));
 
   // ── Dibujo (navegador) ─────────────────────────────────────────────────
 
@@ -1652,10 +1806,12 @@
       ctx.fillStyle = color; ctx.strokeStyle = color;
       if (o.op === 'text') {
         ctx.font = o.font; ctx.textAlign = 'left'; ctx.textBaseline = 'alphabetic';
+        if (o.scaleX) { ctx.translate(o.x, o.y); ctx.scale(o.scaleX, 1); }
+        const tx = o.scaleX ? 0 : o.x, ty = o.scaleX ? 0 : o.y;
         const put = (stroke) => {
           if (o.spacing) drawSpaced(ctx, o.text, o.x, o.y, o.spacing, stroke);
-          else if (stroke) ctx.strokeText(o.text, o.x, o.y);
-          else ctx.fillText(o.text, o.x, o.y);
+          else if (stroke) ctx.strokeText(o.text, tx, ty);
+          else ctx.fillText(o.text, tx, ty);
         };
         if (o.stroke) {
           // Inter variable trae contornos encimados dentro de algunas letras (el 4): trazarlos
@@ -1665,6 +1821,13 @@
           ctx.globalCompositeOperation = 'destination-out';
           put(false);
         } else put(false);
+      } else if (o.op === 'sport') {
+        const mark = SPORT_MARKS[o.type] || SPORT_MARKS.other;
+        ctx.translate(o.x, o.y); ctx.scale(o.size / 26, o.size / 26); ctx.translate(1, 1);
+        ctx.lineWidth = 2.6; ctx.lineCap = 'square'; ctx.lineJoin = 'miter';
+        (mark.dots || []).forEach(([x, y, r]) => { ctx.beginPath(); ctx.arc(x, y, r, 0, Math.PI * 2); ctx.fill(); });
+        (mark.rings || []).forEach(([x, y, r]) => { ctx.beginPath(); ctx.arc(x, y, r, 0, Math.PI * 2); ctx.stroke(); });
+        (mark.paths || []).forEach((points) => { ctx.beginPath(); points.forEach(([x, y], i) => i ? ctx.lineTo(x, y) : ctx.moveTo(x, y)); ctx.stroke(); });
       } else if (o.op === 'logo') {
         // `clip`: el logo se corta en esa forma (la marca de agua del carnet sale de su borde).
         if (o.clip) { roundRectPath(ctx, o.clip.x, o.clip.y, o.clip.w, o.clip.h, o.clip.r); ctx.clip(); }
@@ -1781,7 +1944,7 @@
 .hs-overlay{position:fixed;inset:0;z-index:10040;background:rgba(6,7,9,.66);display:none;align-items:flex-end;justify-content:center;font-family:${INTER}}
 .hs-overlay.open{display:flex;animation:hsFade .18s ease both}
 .hs-sheet{width:100%;max-width:480px;max-height:94vh;background:#141518;color:#f4f5f7;border-radius:22px 22px 0 0;display:flex;flex-direction:column;overflow:hidden;animation:hsUp .3s cubic-bezier(.2,.8,.2,1) both;padding-bottom:env(safe-area-inset-bottom,0px)}
-.hs-options{margin:12px 20px;color:#cdd0d6;font-size:13px}.hs-options[hidden]{display:none}.hs-options summary{cursor:pointer;padding:10px 0;font-weight:600}.hs-fields{max-height:180px;overflow-y:auto;overscroll-behavior:contain;display:grid;grid-template-columns:1fr 1fr;gap:12px;padding:12px 0}.hs-fields label{display:flex;align-items:center;gap:8px}.hs-fields input{flex:0 0 18px;min-width:18px;min-height:18px;padding:0;margin:0;accent-color:#d4ff3a;width:18px;height:18px}.hs-options p{font-size:12px;line-height:1.5;color:#9298a3}
+.hs-options{margin:12px 20px;color:#cdd0d6;font-size:13px}.hs-options[hidden]{display:none}.hs-options summary{cursor:pointer;padding:10px 0;font-weight:600}.hs-fields{max-height:180px;overflow-y:auto;overscroll-behavior:contain;display:grid;grid-template-columns:1fr 1fr;gap:12px;padding:12px 0}.hs-fields label{display:flex;align-items:center;gap:8px}.hs-fields input{flex:0 0 18px;min-width:18px;min-height:18px;padding:0;margin:0;accent-color:#d4ff3a;width:18px;height:18px}.hs-presets{display:flex;gap:8px;padding:10px 0}.hs-presets[hidden]{display:none}.hs-presets button{border:1px solid #45474d;background:#222429;color:#eee;border-radius:999px;padding:8px 12px;font:600 12px ${INTER};cursor:pointer}.hs-options p{font-size:12px;line-height:1.5;color:#9298a3}
 .hs-head{display:flex;align-items:center;gap:12px;padding:16px 16px 6px}
 .hs-title{flex:1;text-align:center;font-size:17px;font-weight:700;margin:0;letter-spacing:0;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .hs-close{background:none;border:0;color:#9aa0aa;font-size:24px;line-height:1;cursor:pointer;padding:4px 6px}
@@ -1855,7 +2018,7 @@
       + '<h2 class="hs-title" id="hs-title"></h2>'
       + '<button type="button" class="hs-close" aria-label="Cerrar">×</button></div>'
       + '<div class="hs-body"><p class="hs-sub"></p>'
-      + '<details class="hs-options"><summary>Qué quiero mostrar</summary><div class="hs-fields"></div><p>Solo aparecen datos disponibles. La vista previa muestra exactamente lo que compartirás.</p></details>'
+      + '<details class="hs-options"><summary>Qué quiero mostrar</summary><div class="hs-presets" hidden><button type="button" data-selection="sports">Solo disciplinas</button><button type="button" data-selection="all">Resumen completo</button></div><div class="hs-fields"></div><p>Solo aparecen datos disponibles. La vista previa muestra exactamente lo que compartirás.</p></details>'
       + '<div class="hs-stage"><div class="hs-track"></div></div>'
       // Los colores, debajo del sticker: con doce y uno libre ya no caben en la cabeza.
       + '<div class="hs-colors" role="radiogroup" aria-label="Color del sticker">'
@@ -1869,6 +2032,12 @@
     doc.body.appendChild(el);
     el.addEventListener('click', (e) => {
       if (e.target === el || e.target.closest('.hs-close')) { close(); return; }
+      const preset = e.target.closest('[data-selection]');
+      if (preset && state) {
+        const fields = stickerFields(state.kind, state.data);
+        setFields(fields.filter((r) => preset.dataset.selection === 'all' || r.id.startsWith('discipline:')).map((r) => r.id));
+        return;
+      }
       const c = e.target.closest('.hs-color');
       if (c && c.dataset.c) { setColor(c.dataset.c); return; }
       const t = e.target.closest('.hs-thumb');
@@ -1877,11 +2046,7 @@
     });
     el.addEventListener('change', (e) => {
       if (!e.target.matches('[data-field]') || !state) return;
-      const id = state.styles && state.styles[state.current] && state.styles[state.current].id;
-      state.data = { ...state.data, fields: Array.from(el.querySelectorAll('[data-field]:checked'), (b) => b.dataset.field) };
-      freeItems(); state.items = null; state.styles = null;
-      state.preferredStyle = id;
-      paint().catch(() => say('No se pudo actualizar la vista previa', 'err'));
+      setFields(Array.from(el.querySelectorAll('[data-field]:checked'), (b) => b.dataset.field));
     });
     // El color libre: el selector del teléfono avisa mientras se mueve; se pinta al detenerse.
     let colorTimer = 0;
@@ -1999,6 +2164,15 @@
     }
   }
 
+  function setFields(fields) {
+    if (!state) return;
+    state.preferredStyle = state.styles && state.styles[state.current] && state.styles[state.current].id;
+    state.data = { ...state.data, fields };
+    sheet.querySelectorAll('[data-field]').forEach((input) => { input.checked = fields.includes(input.dataset.field); });
+    freeItems(); state.items = null; state.styles = null;
+    paint().catch(() => say('No se pudo actualizar la vista previa', 'err'));
+  }
+
   function setColor(c) {
     if (!state || c === state.color) return;
     state.color = c; saveColor(c); paint();
@@ -2029,11 +2203,12 @@
     const options = sheet.querySelector('.hs-options');
     options.hidden = state.kind === 'quote';
     options.open = false;
+    sheet.querySelector('.hs-presets').hidden = state.kind !== 'week' || !normalizeDisciplines(state.data).length;
     if (state.kind !== 'quote') {
       const fields = stickerFields(state.kind, state.data);
       if (!Array.isArray(state.data.fields)) {
         const defaults = state.kind === 'week' ? ['count', 'durationSec', 'days', 'weekStart'] : ['title', 'durationSec', 'distanceM'];
-        state.data = { ...state.data, fields: fields.filter((r) => defaults.includes(r.id)).map((r) => r.id) };
+        state.data = { ...state.data, fields: fields.filter((r) => defaults.includes(r.id) || r.id.startsWith('discipline:')).map((r) => r.id) };
       }
       sheet.querySelector('.hs-fields').innerHTML = fields.map((r) => '<label><input type="checkbox" data-field="' + r.id + '"' + (state.data.fields.includes(r.id) ? ' checked' : '') + '><span>' + escHtml(r.label) + '</span></label>').join('');
     }
@@ -2073,7 +2248,7 @@
   const api = {
     COLORS, PALETTE, WIDTH, LOGO_INK, KINDS, ACTIVITY_TYPES, SHARE_ICON, contrast, inkFor, resolveColor,
     wrapText, balancedWrap, spacedWidth, lockupLayout, quoteLayout, signatureLayout, sealLayout, shortDate,
-    dayName, thousands, distanceText, clock, minutesText, paceText, workoutFacts, weekFacts, stylesFor, stickerFields, selectedFields,
+    dayName, thousands, distanceText, clock, minutesText, paceText, workoutFacts, weekFacts, stylesFor, stickerFields, selectedFields, normalizeDisciplines, selectedDisciplines, compactWeekTime,
     ensureFonts, loadLogo, renderSticker, toBlob, shareImage, open, close, chipHtml
   };
   if (typeof module !== 'undefined' && module.exports) module.exports = api;

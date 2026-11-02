@@ -299,3 +299,34 @@ La semana ofrece 13 opciones con selección explícita:
 No se inventan intensidades ni cantidades por día: las siete marcas solo representan presencia.
 La firma horizontal mantiene un ancho objetivo de 320 px en todos los diseños semanales.
 Se verifican los 13 diseños con las 64 combinaciones de los seis campos semanales.
+
+
+### 20261101-10 — Disciplinas y referencia «THIS WEEK»
+
+El resumen semanal recibe `disciplines:[{type,count,durationSec,distanceM}]` desde
+`HabitActivity.weekSummary`. Se agrupa la lista ya conciliada, dentro de los siete días de la
+semana: correr, fuerza, bici, nado, caminar, cardio, yoga, deportes y otros. La distancia de
+correr no incluye caminar ni bici; fuerza se representa por tiempo y nunca por distancia.
+
+Las casillas añaden cada disciplina disponible, con su métrica principal en la etiqueta.
+Por defecto se incluyen las disciplinas; «Solo disciplinas» desmarca totales, calendario y
+fechas, y «Resumen completo» selecciona todos los datos disponibles. El estilo elegido se
+mantiene al cambiar la selección. Los totales y cada disciplina se controlan por separado:
+desmarcar Tiempo total no oculta un tiempo de Fuerza que esté seleccionado expresamente.
+
+Cuatro estilos nuevos, sin quitar los 13 anteriores (17 cuando hay desglose):
+
+- This Week: referencia de Joseph, «THIS WEEK», pictogramas y cifras anchas en filas compactas.
+  Usar «Solo disciplinas» para acercarse a la referencia: correr en km y fuerza en H/M.
+- Mix: bandas redondeadas sólidas, pictograma, nombre y cifra en tinta de contraste.
+- Pasaporte: sellos deportivos en una cuadrícula de dos columnas.
+- Tipográfico: nombres grandes con punto, cifras debajo y divisores finos.
+
+Los 13 estilos existentes también incorporan «POR DISCIPLINA» antes de la firma. No se
+rellena el desglose cuando los datos antiguos solo traen totales; en ese caso se conservan
+las 13 opciones. Pictogramas vectoriales propios (`sport`), sin emojis ni descargas; el texto
+ancho (`scaleX`) se mide antes de alinear. Todos mantienen la firma horizontal de ~320 px.
+
+Pruebas: sumar fuentes conciliadas sin duplicarlas, excluir otras semanas, separar los km por
+deporte, selección individual y vacía, conservar todos los estilos y que nueve disciplinas con
+cifras largas quepan dentro del PNG. Revisión visual local de los cuatro diseños y sus casillas.

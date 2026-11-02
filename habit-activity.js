@@ -305,14 +305,28 @@
     return state.loading;
   }
 
-  function weekSummary(items) {
-    const ws = mazWeekStart(mazToday());
-    const week = items.filter((it) => it.ds >= ws);
+  function weekSummary(items, weekStart) {
+    const ws = weekStart || mazWeekStart(mazToday());
+    const startMs = Date.parse(ws + 'T00:00:00Z');
+    const end = new Date(startMs + 7 * 864e5).toISOString().slice(0, 10);
+    const week = items.filter((it) => it.ds >= ws && it.ds < end);
     const days = [0, 0, 0, 0, 0, 0, 0];
-    week.forEach((it) => { const i = Math.round((dateObjFromDS(it.ds) - dateObjFromDS(ws)) / 864e5); if (i >= 0 && i < 7) days[i] = 1; });
+    const byType = new Map();
+    week.forEach((it) => {
+      const i = Math.round((Date.parse(it.ds + 'T00:00:00Z') - startMs) / 864e5);
+      if (i >= 0 && i < 7) days[i] = 1;
+      const type = TYPES.includes(it.type) ? it.type : 'other';
+      if (!byType.has(type)) byType.set(type, { type, count: 0, durationSec: 0, distanceM: 0 });
+      const group = byType.get(type);
+      group.count++;
+      group.durationSec += Math.max(0, Number(it.durationSec) || 0);
+      if (hasDistance(type)) group.distanceM += Math.max(0, Number(it.distanceM) || 0);
+    });
+    const order = ['run', 'strength', 'bike', 'swim', 'walk', 'cardio', 'yoga', 'sport', 'other'];
+    const disciplines = [...byType.values()].sort((a, b) => order.indexOf(a.type) - order.indexOf(b.type));
     return {
       weekStart: ws, count: week.length, days, streak: typeof progresoStreak === 'function' ? progresoStreak(items) : 0,
-      durationSec: week.reduce((n, it) => n + (it.durationSec || 0), 0), distanceM: week.reduce((n, it) => n + (it.distanceM || 0), 0)
+      durationSec: disciplines.reduce((n, it) => n + it.durationSec, 0), distanceM: disciplines.reduce((n, it) => n + it.distanceM, 0), disciplines
     };
   }
 
@@ -896,7 +910,7 @@
 
   const api = {
     APP_GLOBALS, TYPES, DIST_TYPES, COLORS, typeFromSkandi, itemFromAppSession, itemFromManual, itemFromSkandiActivity,
-    itemFromSkandiSession, numberItems, reconcileActivities, syncWindowDays, syncDue, skandiBestSet, skandiStickerData,
+    itemFromSkandiSession, numberItems, reconcileActivities, weekSummary, syncWindowDays, syncDue, skandiBestSet, skandiStickerData,
     render, invalidate, offerSessionStickers, totalCount
   };
   if (typeof module !== 'undefined' && module.exports) module.exports = api;

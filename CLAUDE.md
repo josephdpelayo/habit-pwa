@@ -69,7 +69,7 @@ The app has four screens (`#s-auth`, `#s-main`, `#s-admin`, `#s-reception`), tog
   pintado regresa al primero) y un solo botón **Compartir** (`navigator.share` con el archivo;
   sin hoja de compartir, descarga). Tres tipos en `KINDS`: `quote` (11 estilos), `workout` (hasta 19;
   `workoutFacts()` pone en palabras un entreno de la app o una carrera/nado/rodada, y el estilo
-  que no tiene qué enseñar devuelve null y no sale) y `week` (13). Una app abre los de entreno con
+  que no tiene qué enseñar devuelve null y no sale) y `week` (13; 17 con desglose de disciplinas). Una app abre los de entreno con
   `HabitShare.open({kind, data, title, subtitle})`. Las casillas (`data.fields`) no deben
   reducir el catálogo a los tres estilos editoriales: `workoutFacts` filtra la información antes
   de las plantillas, y `weeklyStudioLayout` adapta los semanales; Ritual, Bitácora y Balance son
@@ -830,3 +830,12 @@ se enlaza con Skandi si hay pareja; los ids enlazados se excluyen de la importac
 se elimina su copia externa para no sumar dos veces. `scripts/check-intervals.js` prueba el flujo
 del endpoint con dependencias en memoria. Apple Salud sigue siendo una propuesta para iOS,
 no una integración disponible desde la PWA.
+
+## Stickers semanales por disciplina (20261101-10)
+
+`HabitActivity.weekSummary` agrega disciplinas desde la lista conciliada y las pasa a
+`HabitShare.open`. Los campos `discipline:run`, `discipline:strength`, etc. son independientes
+de los totales. `normalizeDisciplines` no inventa un desglose a partir de sumas generales.
+Los estilos This Week, Mix, Pasaporte y Tipográfico se añaden a los anteriores; estos también
+usan `disciplineBlock`. Conservar los pictogramas vectoriales (`sport`) y la medición de
+texto expandido (`scaleX`) al modificar el renderer.

@@ -140,4 +140,22 @@ assert.equal(A.reconcileActivities([garminStrength, otherStrava]).length, 2, 'id
 const differentRun = { ...run, key: 'x:strava-run', src: 'strava', distanceM: 18000, row: { external_id: 'different-run' } };
 assert.equal(A.reconcileActivities([run, differentRun]).length, 2, 'distancias incompatibles no se fusionan');
 
+
+
+const disciplineSummary = A.weekSummary(A.reconcileActivities([
+  habitStrength, garminStrength,
+  { key: 'run:1', src: 'manual', type: 'run', ds: '2026-10-28', durationSec: 3000, distanceM: 10000, row: {} },
+  { key: 'run:2', src: 'manual', type: 'run', ds: '2026-10-30', durationSec: 7200, distanceM: 23600, row: {} },
+  { key: 'walk:1', src: 'manual', type: 'walk', ds: '2026-10-30', durationSec: 1800, distanceM: 1500, row: {} },
+  { key: 'old:1', src: 'manual', type: 'run', ds: '2026-10-25', durationSec: 1000, distanceM: 5000, row: {} },
+  { key: 'future:1', src: 'manual', type: 'run', ds: '2026-11-02', durationSec: 1000, distanceM: 5000, row: {} }
+]), '2026-10-26');
+assert.equal(disciplineSummary.count, 4, 'cuatro sesiones reales: excluye la copia del reloj y otras semanas');
+assert.deepEqual(disciplineSummary.disciplines, [
+  { type: 'run', count: 2, durationSec: 10200, distanceM: 33600 },
+  { type: 'strength', count: 1, durationSec: 3480, distanceM: 0 },
+  { type: 'walk', count: 1, durationSec: 1800, distanceM: 1500 }
+]);
+assert.equal(disciplineSummary.durationSec, 15480);
+assert.equal(disciplineSummary.distanceM, 35100, 'total general incluye caminar, correr muestra solo sus 33.6 km');
 console.log('HABIT Actividad: ok');

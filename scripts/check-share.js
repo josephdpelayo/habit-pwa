@@ -103,7 +103,7 @@ function inside(L, name) {
   const box = (o) => {
     if (o.op === 'text') return [o.x, o.y - o.px * 0.75, o.x + o.w, o.y + o.px * 0.25];
     if (o.op === 'logo' && o.clip) return [Math.max(o.x, o.clip.x), Math.max(o.y, o.clip.y), Math.min(o.x + o.size, o.clip.x + o.clip.w), Math.min(o.y + o.size, o.clip.y + o.clip.h)];
-    if (o.op === 'logo') return [o.x, o.y, o.x + o.size, o.y + o.size];
+    if (o.op === 'logo' || o.op === 'sport') return [o.x, o.y, o.x + o.size, o.y + o.size];
     if (o.op === 'rect') return [o.x, o.y, o.x + o.w, o.y + o.h];
     if (o.op === 'circle') return [o.cx - o.r, o.cy - o.r, o.cx + o.r, o.cy + o.r];
     if (o.op === 'line') return [Math.min(o.x1, o.x2), Math.min(o.y1, o.y2), Math.max(o.x1, o.x2), Math.max(o.y1, o.y2)];
@@ -236,7 +236,7 @@ const wk = { count: 4, durationSec: 12000, distanceM: 21400, days: [1, 0, 1, 0, 
 const wf = S.weekFacts(wk);
 assert.equal(wf.range, '26.10 – 01.11');
 assert.equal(wf.meta, '3 H 20 MIN · 21.4 KM');
-for (const st of S.KINDS.week.styles) {
+for (const st of S.stylesFor('week', wk, measure)) {
   const L = st.layout(wk, measure);
   assert.ok(L, st.id + ' sale con racha');
   assert.equal(L.kind, st.id);
@@ -304,4 +304,41 @@ assert.equal(privateFacts.number, 0);
 assert.equal(privateFacts.vol, 0);
 assert.deepEqual(privateFacts.exercises, []);
 assert.equal(privateFacts.hero.value, '52:14', 'no recupera volumen para la cifra principal');
+
+
+// Desglose real: fuerza se mide por tiempo, disciplinas de distancia por sus propios km.
+const mixedWeek = { ...wk, disciplines: [
+  { type: 'run', count: 3, distanceM: 33600, durationSec: 14580 },
+  { type: 'strength', count: 4, durationSec: 19020, distanceM: 9999 },
+  { type: 'walk', count: 2, distanceM: 1500, durationSec: 2400 }
+] };
+assert.equal(S.compactWeekTime(19020), '5H 17M');
+assert.equal(S.compactWeekTime(3600), '1H');
+assert.equal(S.compactWeekTime(2700), '45M');
+const sports = S.normalizeDisciplines(mixedWeek);
+assert.deepEqual(sports.map(r => r.value), ['33.6 KM', '5H 17M', '1.5 KM']);
+assert.equal(sports[1].distanceM, 0, 'fuerza nunca presenta km');
+assert.deepEqual(S.selectedDisciplines({ ...mixedWeek, fields: ['discipline:strength'] }).map(r => r.type), ['strength']);
+assert.deepEqual(S.selectedDisciplines({ ...mixedWeek, fields: [] }), []);
+const idsWithSports = S.stylesFor('week', mixedWeek, measure).map(s => s.id);
+assert.equal(idsWithSports.length, 17, '13 anteriores más cuatro con disciplinas');
+assert.ok(idsWithSports.includes('thisweek') && idsWithSports.includes('crew'));
+for (const selection of [[], ['discipline:run'], ['discipline:strength'], ['discipline:run', 'discipline:strength'], S.stickerFields('week', mixedWeek).map(r => r.id)]) {
+  const data = { ...mixedWeek, fields: selection };
+  for (const st of S.stylesFor('week', data, measure)) {
+    const L = st.layout(data, measure);
+    inside(L, 'disciplinas/' + st.id);
+    assert.ok(saysCrew(L));
+    const marks = L.ops.filter(o => o.op === 'sport');
+    assert.deepEqual([...new Set(marks.map(o => o.type))], sports.filter(r => selection.includes(r.id)).map(r => r.type), 'solo iconos de deportes marcados');
+    const text = L.ops.filter(o => o.op === 'text').map(o => o.text);
+    if (!selection.includes('discipline:strength')) assert.ok(!text.includes('5H 17M'), 'no filtra el tiempo de fuerza oculto');
+    if (!selection.includes('discipline:run')) assert.ok(!text.includes('33.6 KM'), 'no filtra los km de correr ocultos');
+  }
+}
+// Nueve disciplinas, cifras largas y nado en metros: todo sigue dentro del PNG.
+const allSports = { ...wk, disciplines: Object.keys(S.ACTIVITY_TYPES).map(type => ({ type, count: 100, durationSec: 360000, distanceM: 2000000 })) };
+for (const st of S.stylesFor('week', { ...allSports, fields: S.stickerFields('week', allSports).map(r => r.id) }, measure)) {
+  inside(st.layout({ ...allSports, fields: S.stickerFields('week', allSports).map(r => r.id) }, measure), 'todos los deportes/' + st.id);
+}
 console.log('HABIT Stickers: ok');
