@@ -92,6 +92,33 @@ The app has four screens (`#s-auth`, `#s-main`, `#s-admin`, `#s-reception`), tog
   ~30 px, porque en una historia el sticker se ve a un tercio. `ACTIVITY_TYPES` (palabras de cada tipo de actividad) vive aquí y Crew lo usa. Inter
   100–900 e itálica se piden al abrir la galería. Cambiar el módulo sin subir la versión deja a
   los teléfonos con el viejo: el service worker lo sirve cache-first por su URL con `?v=`
+- `habit-skills.js` — **escaleras de skills de calistenia** (migración 141,
+  `docs/PROYECTO_COACH.md`), para el coaching 1:1. Módulo puro (sin DOM ni Supabase, como
+  `skandi-recovery.js`) con el motor de las 078/079 de Skandi: la **curva continua**
+  (`skillLevel` = escalón + marca/objetivo, para que subir caiga en el número donde terminó el
+  anterior y la gráfica no se lea como un derrumbe), el **estándar** (`readiness`:
+  `progression_target_sets` series en el objetivo en **dos sesiones seguidas**; una sesión donde
+  no entrenó ese ejercicio se salta, una donde sí y no llegó rompe la racha) y `cueList`.
+  **Diferencia de fondo con Skandi: aquí nada sube de escalón solo.** HABIT no tiene nota de
+  calidad por serie y la forma de un front lever la juzga quien ve el video, así que `readiness`
+  le avisa al alumno que ya cumple para que lo grabe, y **el coach mueve el escalón**
+  (`coach_student_skills`, escritura solo de admin; un trigger lo historia en
+  `coach_skill_events`). Cada escalón **es un ejercicio del `exercise_catalog`** —así entra en
+  rutinas, se le registran series y tiene ficha— con `progression_group/rank/target/
+  target_sets/criteria` encima. La **animación** (`animation_url`, GIF o MP4 corto en bucle,
+  bucket público `skill-media`) es columna aparte de `video_url` a propósito: `videoKindRank`
+  pone YouTube/Drive por encima de un GIF, así que pegar el video de técnica borraría la
+  animación de la escalera. La marca sale de `coaching_session_sets` (`actual_seconds` de la
+  117, o un `actual_reps` viejo tipo "0:30"), y el puente entre una serie y un escalón son las
+  rutinas del propio alumno: `ex_key` es el id del ejercicio dentro de su rutina, no el slug del
+  catálogo. Una línea **puede mezclar unidades** (en handstand los heel pulls son repeticiones
+  entre aguantes) porque cada escalón se mide contra su propio objetivo; el único que hereda el
+  del anterior es el último, que por eso sí comparte unidad. En Crew: pestaña **Skills** en
+  Entrenar, una sola hoja de escalera para alumno y coach (`openSkillSheet`) y los **cues
+  numerados** del coach (`exercises[].note` partido en puntos) más el criterio del escalón en la
+  hoja de entreno — antes `.ex-note` solo salía en la lista de la rutina y desaparecía justo al
+  entrenar. `scripts/check-skills.js` lo prueba y, de paso, **compila el script principal de
+  `crew.html`**, que no lo hacía nadie
 - `habit-activity.js` — **la sección Actividad, en las dos apps** (HABIT la pidió el 1 nov 2026):
   un contenedor `#actividad-content`, su pestaña y `HabitActivity.render(el)` desde `sv()`. Junta
   los entrenos de la app, lo registrado a mano (`training_activities`), las sesiones de fuerza de

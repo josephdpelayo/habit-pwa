@@ -1,7 +1,7 @@
 // HABIT Training Hub — Service Worker
 // Push notifications + app shell caching
 
-const CACHE_VERSION = '20261102-1'; // keep in sync with APP_VERSION in app.html
+const CACHE_VERSION = '20261102-3'; // keep in sync with APP_VERSION in app.html
 const CACHE = `habit-${CACHE_VERSION}`;
 
 // Librerías compartidas con Skandi Fit: la app no arranca sin ellas, así que
@@ -9,7 +9,7 @@ const CACHE = `habit-${CACHE_VERSION}`;
 // nueva invalide la vieja.
 // Skandi Fit vive en el mismo origen y bajo el mismo alcance ('/'), así que este
 // service worker sirve las dos apps: cada una tiene su propio shell offline.
-const SHELL = ['/app.html', '/crew.html', '/skandi.html', `/skandi-recovery.js?v=${CACHE_VERSION}`, `/skandi-plan.js?v=${CACHE_VERSION}`, `/body-figure.js?v=${CACHE_VERSION}`, `/skandi-nutrition.js?v=${CACHE_VERSION}`, `/skandi-load.js?v=${CACHE_VERSION}`, `/skandi-brief.js?v=${CACHE_VERSION}`, `/skandi-joint-load.js?v=${CACHE_VERSION}`, `/skandi-outbox.js?v=${CACHE_VERSION}`, `/habit-training.js?v=${CACHE_VERSION}`, `/habit-share.js?v=${CACHE_VERSION}`, `/habit-activity.js?v=${CACHE_VERSION}`];
+const SHELL = ['/app.html', '/crew.html', '/skandi.html', `/skandi-recovery.js?v=${CACHE_VERSION}`, `/skandi-plan.js?v=${CACHE_VERSION}`, `/body-figure.js?v=${CACHE_VERSION}`, `/skandi-nutrition.js?v=${CACHE_VERSION}`, `/skandi-load.js?v=${CACHE_VERSION}`, `/skandi-brief.js?v=${CACHE_VERSION}`, `/skandi-joint-load.js?v=${CACHE_VERSION}`, `/skandi-outbox.js?v=${CACHE_VERSION}`, `/habit-training.js?v=${CACHE_VERSION}`, `/habit-share.js?v=${CACHE_VERSION}`, `/habit-activity.js?v=${CACHE_VERSION}`, `/habit-skills.js?v=${CACHE_VERSION}`];
 
 // Qué shell le toca a una navegación. Sin esto, abrir /skandi sin señal servía el
 // fallback de HABIT: la app equivocada, con la sesión equivocada.
@@ -83,7 +83,8 @@ self.addEventListener('fetch', e => {
       || url.pathname === '/skandi-outbox.js'
       || url.pathname === '/habit-training.js'
       || url.pathname === '/habit-share.js'
-      || url.pathname === '/habit-activity.js') {
+      || url.pathname === '/habit-activity.js'
+      || url.pathname === '/habit-skills.js') {
     e.respondWith(
       caches.match(request).then(cached => {
         if (cached) return cached;

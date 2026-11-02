@@ -6,12 +6,12 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="HABIT">
 <meta name="application-name" content="HABIT">
-<link rel="manifest" href="/manifest.json?v=20261102-1">
-<link rel="apple-touch-icon" sizes="120x120" href="/icons/icon-120.png?v=20261102-1">
-<link rel="apple-touch-icon" sizes="152x152" href="/icons/icon-152.png?v=20261102-1">
-<link rel="apple-touch-icon" sizes="167x167" href="/icons/icon-167.png?v=20261102-1">
-<link rel="apple-touch-icon" sizes="180x180" href="/icons/icon-180.png?v=20261102-1">
-<link rel="icon" type="image/png" sizes="32x32" href="/icons/icon-32.png?v=20261102-1">
+<link rel="manifest" href="/manifest.json?v=20261102-3">
+<link rel="apple-touch-icon" sizes="120x120" href="/icons/icon-120.png?v=20261102-3">
+<link rel="apple-touch-icon" sizes="152x152" href="/icons/icon-152.png?v=20261102-3">
+<link rel="apple-touch-icon" sizes="167x167" href="/icons/icon-167.png?v=20261102-3">
+<link rel="apple-touch-icon" sizes="180x180" href="/icons/icon-180.png?v=20261102-3">
+<link rel="icon" type="image/png" sizes="32x32" href="/icons/icon-32.png?v=20261102-3">
 <title>HABIT</title>
 <!-- Con id a propósito: scripts/check-training.js toma la primera etiqueta script sin
      atributos como el script principal de la app y la compila. -->
@@ -25,7 +25,7 @@
   var crew=/^\/crew(\/|$)/.test(location.pathname);
   window.HABIT_BRAND=crew?'crew':'gym';
   if(!crew)return;
-  var v='20261102-1';
+  var v='20261102-3';
   document.documentElement.classList.add('brand-crew');
   document.title='HABIT Crew';
   document.querySelectorAll('meta[name="apple-mobile-web-app-title"],meta[name="application-name"]')
@@ -40,11 +40,12 @@
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Share+Tech+Mono&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="/skandi-recovery.js?v=20261102-1"></script>
-<script src="/body-figure.js?v=20261102-1"></script>
-<script src="/habit-training.js?v=20261102-1"></script>
-<script src="/habit-share.js?v=20261102-1"></script>
-<script src="/habit-activity.js?v=20261102-1"></script>
+<script src="/skandi-recovery.js?v=20261102-3"></script>
+<script src="/body-figure.js?v=20261102-3"></script>
+<script src="/habit-training.js?v=20261102-3"></script>
+<script src="/habit-share.js?v=20261102-3"></script>
+<script src="/habit-activity.js?v=20261102-3"></script>
+<script src="/habit-skills.js?v=20261102-3"></script>
 <style>
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
 @media (prefers-reduced-motion:reduce){*,*:before,*:after{scroll-behavior:auto!important;animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}}
@@ -2951,6 +2952,80 @@ button{transition:transform .14s var(--ease-out),background-color .16s ease,colo
    descanso (nada). Antes eran puntitos y guiones casi invisibles. */
 .hoy-day.missed i{box-shadow:none;border:1.5px dashed rgba(255,255,255,.2)}
 .hoy-day.rest i{opacity:0}
+/* ───────── SKILLS DE CALISTENIA (migración 141, habit-skills.js) ─────────
+   La escalera de un skill se entiende viéndola: cada escalón lleva su animación
+   (animation_url, un GIF o un MP4 corto en bucle) y el criterio de forma de ESE
+   escalón. Fondos con var(--card) para quedar dentro del grafito. */
+.sk-strip{margin:0 0 18px}
+.sk-strip-hd{display:flex;align-items:baseline;gap:8px;margin:0 0 9px}
+.sk-strip-hd h3{font-size:12px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:var(--gl)}
+.sk-strip-hd span{font-size:11.5px;color:var(--gray)}
+.sk-row{display:flex;gap:10px;overflow-x:auto;scroll-snap-type:x proximity;padding:2px 0 6px;margin:0 -16px;padding-left:16px;padding-right:16px}
+.sk-row::-webkit-scrollbar{height:0}
+.sk-card{flex:0 0 150px;scroll-snap-align:start;background:var(--card);border-radius:14px;overflow:hidden;cursor:pointer;text-align:left;border:0;padding:0;color:var(--white);display:flex;flex-direction:column}
+.sk-card:active{transform:scale(.985)}
+.sk-thumb{position:relative;width:100%;aspect-ratio:1/1;background:var(--card2);overflow:hidden;display:flex;align-items:center;justify-content:center}
+.sk-thumb img,.sk-thumb video{width:100%;height:100%;object-fit:cover;display:block}
+.sk-thumb-empty{font-size:26px;font-weight:800;color:rgba(255,255,255,.14);letter-spacing:.04em}
+.sk-rank-chip{position:absolute;left:7px;top:7px;background:rgba(0,0,0,.66);color:var(--white);font-size:10px;font-weight:800;letter-spacing:.06em;padding:3px 7px;border-radius:999px}
+.sk-card-body{padding:9px 10px 11px;display:flex;flex-direction:column;gap:5px}
+.sk-card-name{font-size:12.5px;font-weight:700;line-height:1.25}
+.sk-card-rung{font-size:11px;color:var(--gray);line-height:1.3;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.sk-bar{height:4px;border-radius:999px;background:rgba(255,255,255,.1);overflow:hidden}
+.sk-bar i{display:block;height:100%;border-radius:999px;background:var(--purple)}
+.sk-level{font-size:10.5px;font-weight:800;color:var(--purple);letter-spacing:.04em;font-variant-numeric:tabular-nums}
+
+/* La hoja de la escalera. Debajo del visor de video (10000), que se abre desde dentro. */
+.sk-sheet{position:fixed;inset:0;z-index:9990;display:none}
+.sk-sheet.open{display:block}
+.sk-sheet .sk-backdrop{position:absolute;inset:0;background:rgba(0,0,0,.72)}
+.sk-box{position:absolute;left:0;right:0;bottom:0;max-height:94vh;max-width:430px;margin:0 auto;background:var(--black);border-radius:20px 20px 0 0;display:flex;flex-direction:column;overflow:hidden;animation:skUp .26s cubic-bezier(.22,1,.36,1)}
+@keyframes skUp{from{transform:translateY(22px);opacity:.6}to{transform:translateY(0);opacity:1}}
+.sk-top{display:flex;align-items:center;gap:10px;padding:12px 14px 10px;flex-shrink:0}
+.sk-top h2{flex:1;font-size:16px;font-weight:800;letter-spacing:-.01em}
+.sk-body{overflow-y:auto;-webkit-overflow-scrolling:touch;padding:0 14px 26px}
+.sk-hero{border-radius:14px;overflow:hidden;background:var(--card2);margin-bottom:12px}
+.sk-hero img,.sk-hero video{width:100%;display:block;max-height:240px;object-fit:cover}
+.sk-summary{font-size:12.5px;color:var(--gl);line-height:1.5;margin:0 0 14px}
+.sk-mine{background:var(--card);border-radius:14px;padding:13px;margin:0 0 16px;display:flex;flex-direction:column;gap:9px}
+.sk-mine-kicker{font-size:10px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;color:var(--purple)}
+.sk-mine-name{font-size:15px;font-weight:800}
+.sk-mine-meta{font-size:11.5px;color:var(--gray);font-variant-numeric:tabular-nums}
+.sk-mine-note{font-size:12.5px;color:#f0d9a8;background:rgba(245,158,11,.1);border-left:2px solid rgba(245,158,11,.5);border-radius:0 8px 8px 0;padding:8px 10px;line-height:1.45}
+.sk-ready{font-size:12px;font-weight:700;color:var(--green);background:rgba(16,185,129,.1);border-radius:8px;padding:8px 10px;line-height:1.4}
+.sk-ladder{display:flex;flex-direction:column;gap:7px}
+.sk-ladder-hd{font-size:10px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;color:var(--gray);margin:4px 0 2px}
+.sk-rung{display:flex;gap:11px;align-items:flex-start;background:var(--card);border-radius:12px;padding:9px;cursor:pointer;border:0;width:100%;text-align:left;color:var(--white)}
+.sk-rung.current{background:rgba(139,92,246,.14);box-shadow:inset 0 0 0 1.5px rgba(139,92,246,.5)}
+.sk-rung.passed{opacity:.62}
+.sk-rung.locked{opacity:.44}
+.sk-rung:active{transform:scale(.99)}
+.sk-rung-thumb{flex:0 0 58px;width:58px;height:58px;border-radius:9px;overflow:hidden;background:var(--card2);display:flex;align-items:center;justify-content:center;position:relative}
+.sk-rung-thumb img,.sk-rung-thumb video{width:100%;height:100%;object-fit:cover;display:block}
+.sk-rung-n{font-size:15px;font-weight:800;color:rgba(255,255,255,.2)}
+.sk-rung-info{flex:1;min-width:0;display:flex;flex-direction:column;gap:3px}
+.sk-rung-name{font-size:13px;font-weight:700;line-height:1.3}
+.sk-rung-crit{font-size:11.5px;color:var(--gray);line-height:1.4}
+.sk-rung-target{font-size:10.5px;font-weight:800;letter-spacing:.05em;color:var(--gl);font-variant-numeric:tabular-nums}
+.sk-rung-state{flex:0 0 auto;font-size:10px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;padding-top:2px}
+.sk-rung.passed .sk-rung-state{color:var(--green)}
+.sk-rung.current .sk-rung-state{color:var(--purple)}
+.sk-coach{background:var(--card2);border-radius:14px;padding:13px;margin:16px 0 0;display:flex;flex-direction:column;gap:10px}
+.sk-coach-hd{font-size:10px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;color:var(--amber)}
+.sk-coach .field{margin:0}
+.sk-upload{font-size:11px;color:var(--gray);line-height:1.4}
+
+/* Los cues del coach en la hoja de entreno: estaban solo en la lista de la rutina y
+   desaparecían justo al entrenar, que es cuando se leen. Numerados a propósito, para
+   poder señalar uno por su número. */
+.ws-cues{margin:0;padding:9px 11px;background:rgba(245,158,11,.07);border-top:1px solid rgba(245,158,11,.14)}
+.ws-cues-hd{font-size:9.5px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;color:var(--amber);margin-bottom:6px}
+.ws-cues ol,.ws-cues ul{margin:0;padding:0;list-style:none;display:flex;flex-direction:column;gap:5px}
+.ws-cues li{display:flex;gap:8px;font-size:12.5px;color:#f0d9a8;line-height:1.4}
+.ws-cues li b{flex:0 0 15px;color:var(--amber);font-weight:800;font-variant-numeric:tabular-nums}
+.ws-cues .ws-cues-crit{display:block;margin-top:7px;padding-top:7px;border-top:1px solid rgba(245,158,11,.14);font-size:12px;color:var(--gl);line-height:1.45}
+.ws-cues .ws-cues-crit em{color:var(--purple);font-style:normal;font-weight:800;letter-spacing:.04em}
+
 </style>
 </head>
 <body>
@@ -3161,7 +3236,8 @@ button{transition:transform .14s var(--ease-out),background-color .16s ease,colo
     <div class="rut-hub-nav">
       <button class="rut-hub-tab active" data-rtab="hoy" onclick="rutTab('hoy')">Hoy</button>
       <button class="rut-hub-tab" data-rtab="semana" onclick="rutTab('semana')">Semana</button>
-      <button class="rut-hub-tab" data-rtab="rutinas" onclick="rutTab('rutinas')">Mis rutinas</button>
+      <button class="rut-hub-tab" data-rtab="rutinas" onclick="rutTab('rutinas')">Rutinas</button>
+      <button class="rut-hub-tab" data-rtab="skills" onclick="rutTab('skills')">Skills</button>
     </div>
     <div id="rut-panel-hoy" class="rut-panel active">
       <div class="scroll-area"><div id="rut-hoy-content"></div></div>
@@ -3173,6 +3249,9 @@ button{transition:transform .14s var(--ease-out),background-color .16s ease,colo
       <div class="scroll-area">
         <div id="rut-content"></div>
       </div>
+    </div>
+    <div id="rut-panel-skills" class="rut-panel">
+      <div class="scroll-area"><div id="rut-skills-content"></div></div>
     </div>
   </div>
 
@@ -4103,6 +4182,20 @@ button{transition:transform .14s var(--ease-out),background-color .16s ease,colo
   <div class="clk-body" id="clk-body"></div>
 </div>
 
+<!-- ESCALERA DE UN SKILL (openSkillSheet) -->
+<div id="skill-sheet" class="sk-sheet" role="dialog" aria-modal="true" aria-label="Escalera del skill">
+  <div class="sk-backdrop" onclick="closeSkillSheet()"></div>
+  <div class="sk-box">
+    <div class="sk-top">
+      <h2 id="skill-sheet-title">Skill</h2>
+      <button type="button" class="hb-icon-btn" onclick="closeSkillSheet()" aria-label="Cerrar">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg>
+      </button>
+    </div>
+    <div class="sk-body" id="skill-sheet-body"></div>
+  </div>
+</div>
+
 <!-- INSTALL GUIDE MODAL -->
 <div id="install-guide-modal" class="terms-modal" style="display:none">
   <div class="install-box">
@@ -4164,7 +4257,7 @@ const GYM_ONLY_VIEWS=['book','planes','historial','shop'];
 const GYM_APP_URL='/';
 document.querySelectorAll('.brand-name').forEach(el=>{el.textContent=BRAND_NAME;});
 const SUPABASE_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBtcGp0ZXVxanVzYmlkdWV2YndxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc2OTI1NjUsImV4cCI6MjA5MzI2ODU2NX0.XbMzZoo2yqtrD8znLnyo_1zDfrdJAvAPj1lqGOyXnLw';
-const APP_VERSION='20261102-1';
+const APP_VERSION='20261102-3';
 // La pierna va separada en cuádriceps, femorales y pantorrillas: la figura
 // corporal pinta esas tres regiones por separado y el motor de recuperación les
 // da ventanas de descanso distintas. 'Piernas' sigue reconociéndose al leer
@@ -10460,7 +10553,7 @@ let expandedRoutineCards=new Set();
 
 function syncRutTabs(t){
   document.querySelectorAll('.rut-hub-tab').forEach(b=>b.classList.toggle('active',b.dataset.rtab===t));
-  ['hoy','semana','rutinas'].forEach(x=>{
+  ['hoy','semana','rutinas','skills'].forEach(x=>{
     const el=document.getElementById('rut-panel-'+x);
     if(el)el.classList.toggle('active',x===t);
   });
@@ -10502,6 +10595,7 @@ async function renderRutHub(){
   }
   if(tab==='semana')renderRutSemana();
   if(tab==='rutinas')renderRutRutinas();
+  if(tab==='skills')renderRutSkills().catch(console.error);
 }
 
 // Un socio tiene tres orígenes de rutina: las suyas (owner_id), las que le
@@ -14924,7 +15018,8 @@ function wsExerciseHtml(ex,i){
     +(videos.length?'<button class="ws-ex-video" onclick="event.stopPropagation();openMediaFromHead(this)" aria-label="Ver video">'+MV_PLAY_ICON+'</button>':'')
     +'<span class="ws-ex-badge'+(allDone?' done':'')+'">'+doneCount+'/'+sets.length+'</span>'
     +'</div>'
-    +(swipe?'</div>':'');
+    +(swipe?'</div>':'')
+    +wsCuesHtml(ex);
 
   if(!ex._replaced){
     html+='<details class="ws-ex-more"><summary aria-label="Opciones del ejercicio">•••</summary><div class="ws-ex-tools">'
@@ -23468,6 +23563,452 @@ if('serviceWorker' in navigator){
 }
 
 initApp();
+
+// ════════════════════════════════════════════════════════════════════════════
+// SKILLS DE CALISTENIA — la escalera, los cues y el escalón del alumno
+// Migración 141 + habit-skills.js (la curva, el estándar y el parseo de cues).
+//
+// Tres piezas: la pestaña Skills de Entrenar, la hoja de la escalera (una sola, para
+// el alumno y para el coach: lo único que cambia es que el coach puede mover el
+// escalón y subir animaciones) y los cues en la hoja de entreno.
+//
+// El escalón NO lo mueve la app: readiness() avisa al alumno que ya cumple el
+// estándar para que mande el video, y el coach decide con lo que vio. Por eso el
+// alumno solo tiene permiso de lectura en coach_student_skills.
+// ════════════════════════════════════════════════════════════════════════════
+
+// Los textos nuevos nacen en los dos idiomas (requisito permanente de CLAUDE.md).
+// Todavía no hay selector: skLang() devuelve 'es' y el día que exista se cambia aquí
+// y en los campos _es/_en que ya trae la base.
+const SKILL_COPY={
+  es:{tab:'Skills',mine:'Tus skills',explore:'Escaleras de calistenia',
+      exploreSub:'Cómo se construye cada skill, escalón por escalón',
+      mineSub:'Tu escalón lo mueve tu coach',
+      noSkills:'Todavía no hay escaleras cargadas.',
+      yourRung:'Tu escalón',level:'Nivel',best:'Tu mejor marca',noMark:'Sin marca registrada',
+      standard:'Para subir',sets:'series',secs:'s',reps:'reps',
+      coachNote:'De tu coach',ladder:'La escalera completa',
+      passed:'Hecho',current:'Aquí vas',next:'Sigue',
+      ready:'Ya cumples el estándar de este escalón. Grábate y mándale el video a tu coach.',
+      almost:'La última vez cumpliste el estándar. Repítelo y ya es escalón nuevo.',
+      final:'Último escalón de la línea.',
+      noRung:'Tu coach todavía no te ha puesto un escalón en esta línea.',
+      cues:'Qué mirar',critLabel:'Limpio en este escalón',
+      coachPanel:'Coach',coachSearch:'Buscar alumno por nombre',
+      coachSet:'Poner escalón',coachNoteLabel:'Qué le falta (lo lee el alumno)',
+      coachSaved:'Escalón guardado',coachPickFirst:'Elige un alumno',
+      upload:'Subir animación',uploadHint:'GIF o MP4 corto, máx. 15 MB. Se ve en bucle y sin sonido.'},
+  en:{tab:'Skills',mine:'Your skills',explore:'Calisthenics ladders',
+      exploreSub:'How each skill is built, rung by rung',
+      mineSub:'Your coach moves your rung',
+      noSkills:'No ladders loaded yet.',
+      yourRung:'Your rung',level:'Level',best:'Your best mark',noMark:'No mark logged yet',
+      standard:'To level up',sets:'sets',secs:'s',reps:'reps',
+      coachNote:'From your coach',ladder:'The whole ladder',
+      passed:'Done',current:'You are here',next:'Next',
+      ready:'You already meet this rung’s standard. Film it and send your coach the video.',
+      almost:'You met the standard last time. Do it again and the rung is yours.',
+      final:'Final rank of the line.',
+      noRung:'Your coach has not set you a rung on this line yet.',
+      cues:'What to watch',critLabel:'Clean on this rung',
+      coachPanel:'Coach',coachSearch:'Search a student by name',
+      coachSet:'Set rung',coachNoteLabel:'What they still need (the student reads this)',
+      coachSaved:'Rung saved',coachPickFirst:'Pick a student',
+      upload:'Upload animation',uploadHint:'Short GIF or MP4, 15 MB max. It loops, muted.'}
+};
+const skLang=()=>'es';
+const sk=k=>(SKILL_COPY[skLang()]||SKILL_COPY.es)[k]||'';
+
+let coachSkills=[], mySkillRanks={}, skillsLoadedAt=0, skillMarks=null, skillMarksAt=0;
+let skillOpenSlug=null, skillCoachStudent=null, skillCoachResults=[], _rungIndexAt=0, _rungIndex=null;
+const SKILLS_TTL_MS=60000;
+const skillIsCoach=()=>!!(sbProfile&&sbProfile.role==='admin');
+const skillName=s=>(skLang()==='en'?(s.name_en||s.name_es):(s.name_es||s.name_en))||s.slug;
+const skillSummary=s=>(skLang()==='en'?(s.summary_en||s.summary_es):(s.summary_es||s.summary_en))||'';
+const rungCriteria=r=>(skLang()==='en'?(r.progression_criteria_en||r.progression_criteria):(r.progression_criteria||r.progression_criteria_en))||'';
+
+// Sin la 141 corrida, la tabla no existe: la sección simplemente no sale, como Actividad
+// sin la 139. Un error de "relation does not exist" no es algo que deba ver el alumno.
+async function loadSkillsSb(force){
+  if(!sbUser)return coachSkills;
+  if(!force&&skillsLoadedAt&&Date.now()-skillsLoadedAt<SKILLS_TTL_MS)return coachSkills;
+  const[linesRes,mineRes]=await Promise.all([
+    sb.from('coach_skills').select('*').eq('is_active',true).order('sort_order').order('name_es'),
+    sb.from('coach_student_skills').select('*').eq('user_id',sbUser.id)
+  ]);
+  if(linesRes.error){coachSkills=[];skillsLoadedAt=Date.now();return coachSkills;}
+  coachSkills=linesRes.data||[];
+  mySkillRanks={};
+  (mineRes.data||[]).forEach(r=>{mySkillRanks[r.skill_slug]=r;});
+  skillsLoadedAt=Date.now();
+  return coachSkills;
+}
+
+const skillRungs=slug=>HabitSkills.rungs(exerciseCatalogRows(),slug);
+
+// Un ejercicio de rutina apunta a su escalón por catalogId, por slug o —cuando el coach lo
+// escribió a mano— por firma de nombre, la misma regla que findExerciseCatalogMatch.
+function rungIndex(){
+  if(_rungIndex&&_rungIndexAt===exerciseCatalog.length)return _rungIndex;
+  const idx={byId:{},bySlug:{},bySig:{}};
+  exerciseCatalogRows().filter(r=>r.progression_group&&Number(r.progression_rank)>0).forEach(r=>{
+    if(r.id)idx.byId[r.id]=r;
+    if(r.slug)idx.bySlug[r.slug]=r;
+    const sig=exerciseSignature(r.name);
+    if(sig&&!idx.bySig[sig])idx.bySig[sig]=r;
+    (r.aliases||[]).forEach(a=>{const s2=exerciseSignature(a);if(s2&&!idx.bySig[s2])idx.bySig[s2]=r;});
+  });
+  _rungIndex=idx;_rungIndexAt=exerciseCatalog.length;
+  return idx;
+}
+function rungForExercise(ex){
+  if(!ex)return null;
+  const idx=rungIndex();
+  return idx.byId[ex.catalogId||ex.catalog_id]
+    ||idx.bySlug[ex.exerciseKey||ex.slug||'']
+    ||idx.bySig[exerciseSignature(ex.name||'')]
+    ||null;
+}
+
+// La marca de cada línea sale de las series que el alumno ya registró. ex_key de una serie es
+// el id del ejercicio DENTRO de su rutina, no el slug del catálogo, así que el puente son sus
+// propias rutinas: de ahí salen los ex_key que corresponden a cada escalón.
+async function loadSkillMarksSb(force){
+  if(!force&&skillMarks&&Date.now()-skillMarksAt<SKILLS_TTL_MS)return skillMarks;
+  const keyToRung={};
+  (myRoutines||[]).forEach(b=>(b.exercises||[]).forEach(ex=>{
+    const rung=rungForExercise(ex);
+    if(rung&&ex.id)keyToRung[ex.id]=rung;
+  }));
+  const keys=Object.keys(keyToRung);
+  skillMarks={};skillMarksAt=Date.now();
+  if(!keys.length||!sbUser)return skillMarks;
+  const{data,error}=await sb.from('coaching_session_sets')
+    .select('ex_key,schedule_id,done,actual_reps,actual_seconds,created_at')
+    .eq('user_id',sbUser.id).eq('done',true).in('ex_key',keys)
+    .order('created_at',{ascending:false}).limit(1500);
+  if(error)return skillMarks;
+  // Por escalón: la mejor marca y las sesiones en que lo entrenó, de la más reciente a la
+  // más vieja, que es como readiness() espera leerlas.
+  const perRung={};
+  (data||[]).forEach(row=>{
+    const rung=keyToRung[row.ex_key];
+    if(!rung)return;
+    const bucket=perRung[rung.slug]||(perRung[rung.slug]={rung,sessions:new Map()});
+    const sid=row.schedule_id||('x'+row.ex_key);
+    const s=bucket.sessions.get(sid)||{id:sid,at:row.created_at,sets:[]};
+    if(new Date(row.created_at)>new Date(s.at))s.at=row.created_at;
+    s.sets.push(row);
+    bucket.sessions.set(sid,s);
+  });
+  Object.values(perRung).forEach(b=>{
+    const sessions=[...b.sessions.values()].sort((x,y)=>new Date(y.at)-new Date(x.at));
+    const mark=HabitSkills.bestMark(b.rung,sessions.flatMap(s=>s.sets));
+    skillMarks[b.rung.progression_group]=skillMarks[b.rung.progression_group]||{};
+    skillMarks[b.rung.progression_group][b.rung.progression_rank]={mark,sessions};
+  });
+  return skillMarks;
+}
+
+const markFor=(slug,rank)=>((skillMarks&&skillMarks[slug]&&skillMarks[slug][rank])||{mark:0,sessions:[]});
+const unitLabel=rung=>HabitSkills.markUnit(rung)==='time'?sk('secs'):' '+sk('reps');
+const fmtMark=(rung,v)=>HabitSkills.markUnit(rung)==='time'?(v+sk('secs')):(v+' '+sk('reps'));
+
+// Una animación se pinta de dos formas y ninguna pide un toque: un GIF como imagen y un MP4
+// muteado en bucle. Lo que no es ninguna de las dos (un embed) no es animación.
+function skillAnimHtml(url,fallback){
+  const kind=HabitSkills.animationKind(url);
+  if(kind==='image')return '<img src="'+esc(url)+'" alt="" loading="lazy">';
+  if(kind==='video')return '<video src="'+esc(url)+'" muted loop autoplay playsinline preload="metadata"></video>';
+  return fallback||'';
+}
+
+// ---- Pestaña Skills de Entrenar -------------------------------------------------------------
+
+async function renderRutSkills(){
+  const el=document.getElementById('rut-skills-content');
+  if(!el)return;
+  await loadSkillsSb(false);
+  if(!coachSkills.length){el.innerHTML='<div class="empty">'+esc(sk('noSkills'))+'</div>';return;}
+  await loadSkillMarksSb(false);
+  const mine=coachSkills.filter(s=>mySkillRanks[s.slug]);
+  const rest=coachSkills.filter(s=>!mySkillRanks[s.slug]);
+  let html='';
+  if(mine.length){
+    html+='<div class="sk-strip"><div class="sk-strip-hd"><h3>'+esc(sk('mine'))+'</h3><span>'+esc(sk('mineSub'))+'</span></div>'
+      +'<div class="sk-row">'+mine.map(skillCardHtml).join('')+'</div></div>';
+  }
+  if(rest.length){
+    html+='<div class="sk-strip"><div class="sk-strip-hd"><h3>'+esc(mine.length?sk('explore'):sk('mine'))+'</h3>'
+      +'<span>'+esc(sk('exploreSub'))+'</span></div>'
+      +'<div class="sk-row">'+rest.map(skillCardHtml).join('')+'</div></div>';
+  }
+  withScrollKept(el.parentElement,()=>{el.innerHTML=html;});
+}
+
+function skillCardHtml(skill){
+  const rungs=skillRungs(skill.slug);
+  const mineRow=mySkillRanks[skill.slug];
+  const rank=mineRow?Number(mineRow.rank):0;
+  const rung=rank?HabitSkills.rungAt(rungs,rank):null;
+  const mark=rung?markFor(skill.slug,rank).mark:0;
+  const pct=rung?Math.round(HabitSkills.rungProgress(rungs,rank,mark)*100):0;
+  const target=rung?Number(rung.progression_target)||0:0;
+  const anim=(rung&&rung.animation_url)||skill.animation_url||'';
+  const initials=skillName(skill).replace(/[^A-Za-zÁ-Úá-ú ]/g,'').split(/\s+/)
+    .filter(w=>w&&!/^(de|del|la|el|los|las|en|a|al|un|una|of|the|to)$/i.test(w))
+    .map(w=>w[0]||'').join('').slice(0,2).toUpperCase();
+  return '<button type="button" class="sk-card" onclick="openSkillSheet(&quot;'+esc(skill.slug)+'&quot;)">'
+    +'<div class="sk-thumb">'+skillAnimHtml(anim,'<span class="sk-thumb-empty">'+esc(initials)+'</span>')
+    +(rung?'<span class="sk-rank-chip">'+rank+'/'+HabitSkills.topRank(rungs)+'</span>':'')+'</div>'
+    +'<div class="sk-card-body">'
+    +'<div class="sk-card-name">'+esc(skillName(skill))+'</div>'
+    +(rung
+      ?'<div class="sk-card-rung">'+esc(exDisplayName(rung.name)||rung.name)+'</div>'
+       +'<div class="sk-bar"><i style="width:'+pct+'%"></i></div>'
+       +'<div class="sk-level">'+esc(target?fmtMark(rung,mark)+' / '+fmtMark(rung,target):sk('final'))+'</div>'
+      :'<div class="sk-card-rung">'+esc(String(rungs.length))+' escalones</div>')
+    +'</div></button>';
+}
+
+// ---- La hoja de la escalera -----------------------------------------------------------------
+
+async function openSkillSheet(slug){
+  skillOpenSlug=slug;skillCoachStudent=null;skillCoachResults=[];
+  const el=document.getElementById('skill-sheet');
+  if(!el)return;
+  el.classList.add('open');
+  await loadSkillsSb(false);
+  await loadSkillMarksSb(false);
+  renderSkillSheet();
+}
+function closeSkillSheet(){
+  const el=document.getElementById('skill-sheet');
+  if(el)el.classList.remove('open');
+  // Un video oculto sigue corriendo: se quita con la hoja.
+  const body=document.getElementById('skill-sheet-body');
+  if(body)body.innerHTML='';
+  skillOpenSlug=null;skillCoachStudent=null;
+}
+
+function renderSkillSheet(){
+  const skill=coachSkills.find(s=>s.slug===skillOpenSlug);
+  const body=document.getElementById('skill-sheet-body');
+  if(!skill||!body)return;
+  document.getElementById('skill-sheet-title').textContent=skillName(skill);
+  const rungs=skillRungs(skill.slug);
+  const mineRow=mySkillRanks[skill.slug];
+  const rank=mineRow?Number(mineRow.rank):0;
+  let html='';
+  if(skill.animation_url)html+='<div class="sk-hero">'+skillAnimHtml(skill.animation_url)+'</div>';
+  if(skillSummary(skill))html+='<p class="sk-summary">'+esc(skillSummary(skill))+'</p>';
+  html+=skillMineHtml(skill,rungs,rank,mineRow);
+  html+='<div class="sk-ladder-hd">'+esc(sk('ladder'))+'</div>';
+  html+='<div class="sk-ladder">'+rungs.map(r=>skillRungHtml(skill,rungs,r,rank)).join('')+'</div>';
+  if(skillIsCoach())html+=skillCoachHtml(skill,rungs);
+  body.innerHTML=html;
+}
+
+function skillMineHtml(skill,rungs,rank,mineRow){
+  if(!rank)return '<div class="sk-mine"><div class="sk-mine-meta">'+esc(sk('noRung'))+'</div></div>';
+  const rung=HabitSkills.rungAt(rungs,rank);
+  if(!rung)return '';
+  const{mark,sessions}=markFor(skill.slug,rank);
+  const pct=Math.round(HabitSkills.rungProgress(rungs,rank,mark)*100);
+  const ready=HabitSkills.readiness(rungs,rank,sessions);
+  const target=Number(rung.progression_target)||0;
+  return '<div class="sk-mine">'
+    +'<div class="sk-mine-kicker">'+esc(sk('yourRung'))+' · '+rank+'/'+HabitSkills.topRank(rungs)+'</div>'
+    +'<div class="sk-mine-name">'+esc(exDisplayName(rung.name)||rung.name)+'</div>'
+    +(rungCriteria(rung)?'<div class="sk-rung-crit">'+esc(rungCriteria(rung))+'</div>':'')
+    +'<div class="sk-bar"><i style="width:'+pct+'%"></i></div>'
+    +'<div class="sk-mine-meta">'+(mark?esc(sk('best'))+' '+esc(fmtMark(rung,mark)):esc(sk('noMark')))
+    +(target?' · '+esc(sk('standard'))+' '+(rung.progression_target_sets||1)+' '+esc(sk('sets'))+' × '+esc(fmtMark(rung,target)):' · '+esc(sk('final')))
+    +'</div>'
+    +(ready.ready?'<div class="sk-ready">'+esc(sk('ready'))+'</div>'
+      :(ready.lastQualified&&!ready.final?'<div class="sk-ready">'+esc(sk('almost'))+'</div>':''))
+    +(mineRow&&mineRow.coach_note?'<div class="sk-mine-note"><b>'+esc(sk('coachNote'))+':</b> '+esc(mineRow.coach_note)+'</div>':'')
+    +'</div>';
+}
+
+function skillRungHtml(skill,rungs,rung,myRank){
+  const r=Number(rung.progression_rank);
+  const state=!myRank?'':(r<myRank?'passed':(r===myRank?'current':(r===myRank+1?'next':'locked')));
+  const stateLabel=state==='passed'?sk('passed'):(state==='current'?sk('current'):(state==='next'?sk('next'):''));
+  const target=Number(rung.progression_target)||0;
+  const initials=String(r);
+  return '<button type="button" class="sk-rung'+(state?' '+state:'')+'" '
+    +'onclick="openRungMedia(&quot;'+esc(skill.slug)+'&quot;,'+r+')">'
+    +'<span class="sk-rung-thumb">'+skillAnimHtml(rung.animation_url,'<span class="sk-rung-n">'+esc(initials)+'</span>')+'</span>'
+    +'<span class="sk-rung-info">'
+    +'<span class="sk-rung-name">'+r+'. '+esc(exDisplayName(rung.name)||rung.name)+'</span>'
+    +(rungCriteria(rung)?'<span class="sk-rung-crit">'+esc(rungCriteria(rung))+'</span>':'')
+    +(target?'<span class="sk-rung-target">'+(rung.progression_target_sets||1)+' '+esc(sk('sets'))+' × '+esc(fmtMark(rung,target))+'</span>'
+      :'<span class="sk-rung-target">'+esc(sk('final'))+'</span>')
+    +'</span>'
+    +(stateLabel?'<span class="sk-rung-state">'+esc(stateLabel)+'</span>':'')
+    +'</button>';
+}
+
+// Tocar un escalón abre el visor, que ya respeta la forma del medio y muestra abajo los
+// músculos y el "cómo se hace" del ejercicio. La animación va primero: es la que explica
+// la posición de un golpe.
+function openRungMedia(slug,rank){
+  const rungs=skillRungs(slug);
+  const rung=HabitSkills.rungAt(rungs,rank);
+  if(!rung)return;
+  const list=[];
+  if(HabitSkills.animationKind(rung.animation_url))list.push({url:rung.animation_url,title:'Animación'});
+  if(rung.video_url)list.push({url:rung.video_url,title:exDisplayName(rung.name)||rung.name});
+  if(!list.length){toast('Este escalón todavía no tiene video','warn');return;}
+  openMediaViewer(list,{title:exDisplayName(rung.name)||rung.name,ex:{
+    name:rung.name,
+    muscles:[rung.primary_muscle,...(rung.secondary_muscles||[])].filter(Boolean).join(', '),
+    primaryMuscle:rung.primary_muscle||'',
+    instructions:rung.instructions||'',
+    coachTips:rung.coach_tips||'',
+    commonMistakes:rung.common_mistakes||''
+  }});
+}
+
+// ---- El coach, en la misma hoja --------------------------------------------------------------
+
+function skillCoachHtml(skill,rungs){
+  const st=skillCoachStudent;
+  return '<div class="sk-coach">'
+    +'<div class="sk-coach-hd">'+esc(sk('coachPanel'))+'</div>'
+    +'<div class="field"><label>'+esc(sk('coachSearch'))+'</label>'
+    +'<input id="sk-coach-q" value="'+esc(st?st.name:'')+'" placeholder="'+esc(sk('coachSearch'))+'" '
+    +'oninput="skillCoachSearch()" autocomplete="off"></div>'
+    +'<div id="sk-coach-results">'+skillCoachResultsHtml()+'</div>'
+    +(st?'<div class="field"><label>'+esc(sk('coachNoteLabel'))+'</label>'
+        +'<textarea id="sk-coach-note" rows="2">'+esc(st.note||'')+'</textarea></div>'
+        +'<div class="sk-upload">'+esc(st.name)+(st.rank?' · '+esc(sk('yourRung'))+' '+st.rank:'')+'</div>'
+        +'<div class="sk-ladder">'+rungs.map(r=>
+          '<button type="button" class="sk-rung'+(Number(r.progression_rank)===Number(st.rank)?' current':'')+'" '
+          +'onclick="skillCoachSetRank('+Number(r.progression_rank)+')">'
+          +'<span class="sk-rung-thumb"><span class="sk-rung-n">'+Number(r.progression_rank)+'</span></span>'
+          +'<span class="sk-rung-info"><span class="sk-rung-name">'+esc(exDisplayName(r.name)||r.name)+'</span>'
+          +'<span class="sk-rung-target">'+esc(sk('coachSet'))+'</span></span></button>').join('')
+        +'</div>'
+      :'')
+    +'<div class="field"><label>'+esc(sk('upload'))+' · '+esc(skillName(skill))+'</label>'
+    +'<input type="file" accept="image/gif,image/webp,video/mp4,video/webm" '
+    +'onchange="skillUploadAnimation(this,&quot;skill&quot;,&quot;'+esc(skill.slug)+'&quot;,0)"></div>'
+    +'<div class="sk-upload">'+esc(sk('uploadHint'))+'</div>'
+    +'<div class="sk-ladder" style="margin-top:4px">'+rungs.map(r=>
+      '<label class="sk-rung" style="cursor:pointer">'
+      +'<span class="sk-rung-thumb">'+skillAnimHtml(r.animation_url,'<span class="sk-rung-n">'+Number(r.progression_rank)+'</span>')+'</span>'
+      +'<span class="sk-rung-info"><span class="sk-rung-name">'+esc(exDisplayName(r.name)||r.name)+'</span>'
+      +'<span class="sk-rung-target">'+esc(sk('upload'))+'</span>'
+      +'<input type="file" accept="image/gif,image/webp,video/mp4,video/webm" style="display:none" '
+      +'onchange="skillUploadAnimation(this,&quot;rung&quot;,&quot;'+esc(r.slug)+'&quot;,'+Number(r.progression_rank)+')"></span>'
+      +'</label>').join('')+'</div>'
+    +'</div>';
+}
+
+function skillCoachResultsHtml(){
+  if(!skillCoachResults.length)return '';
+  return '<div class="sk-ladder">'+skillCoachResults.map(u=>
+    '<button type="button" class="sk-rung" onclick="skillCoachPick(&quot;'+esc(u.id)+'&quot;,&quot;'+esc(u.name||'')+'&quot;)">'
+    +'<span class="sk-rung-info"><span class="sk-rung-name">'+esc(u.name||'Sin nombre')+'</span></span></button>').join('')+'</div>';
+}
+
+let _skillCoachTimer=null;
+function skillCoachSearch(){
+  clearTimeout(_skillCoachTimer);
+  _skillCoachTimer=setTimeout(async()=>{
+    const q=(document.getElementById('sk-coach-q')?.value||'').trim();
+    if(q.length<2){skillCoachResults=[];skillCoachRepaintResults();return;}
+    const{data,error}=await sb.from('profiles').select('id,name').ilike('name','%'+q+'%').order('name').limit(8);
+    if(error){toast('No se pudo buscar: '+(error.message||error),'err');return;}
+    skillCoachResults=data||[];
+    skillCoachRepaintResults();
+  },260);
+}
+function skillCoachRepaintResults(){
+  const el=document.getElementById('sk-coach-results');
+  if(el)el.innerHTML=skillCoachResultsHtml();
+}
+
+async function skillCoachPick(id,name){
+  const{data}=await sb.from('coach_student_skills').select('*').eq('user_id',id).eq('skill_slug',skillOpenSlug).maybeSingle();
+  skillCoachStudent={id,name,rank:data?Number(data.rank):0,note:data?(data.coach_note||''):''};
+  skillCoachResults=[];
+  renderSkillSheet();
+}
+
+async function skillCoachSetRank(rank){
+  const st=skillCoachStudent;
+  if(!st){toast(sk('coachPickFirst'),'warn');return;}
+  const note=(document.getElementById('sk-coach-note')?.value||'').trim()||null;
+  showLoading();
+  const{error}=await sb.from('coach_student_skills').upsert({
+    user_id:st.id,skill_slug:skillOpenSlug,rank,coach_note:note,
+    set_by:sbUser.id,updated_at:new Date().toISOString()
+  },{onConflict:'user_id,skill_slug'});
+  hideLoading();
+  if(error){toast('No se pudo guardar: '+(error.message||error),'err');return;}
+  skillCoachStudent={...st,rank,note:note||''};
+  // Si el coach se lo puso a sí mismo, su propia escalera cambió.
+  if(st.id===sbUser.id)await loadSkillsSb(true);
+  toast(sk('coachSaved'),'ok');
+  renderSkillSheet();
+}
+
+// La animación vive en el bucket público skill-media (141) y la URL se guarda en
+// coach_skills.animation_url o exercise_catalog.animation_url, nunca en video_url: el video
+// de técnica no debe pisar la animación de la escalera.
+async function skillUploadAnimation(input,kind,slug,rank){
+  const file=input&&input.files&&input.files[0];
+  if(!file)return;
+  input.value='';
+  if(file.size>15*1024*1024){toast('Máximo 15 MB','warn');return;}
+  const ext=(file.name.split('.').pop()||'gif').toLowerCase().replace(/[^a-z0-9]/g,'');
+  const path=(kind==='skill'?'skill/':'rung/')+slug+'-'+Date.now()+'.'+ext;
+  showLoading();
+  try{
+    const up=await sb.storage.from('skill-media').upload(path,file,{upsert:true,contentType:file.type||undefined});
+    if(up.error)throw up.error;
+    const{data:pub}=sb.storage.from('skill-media').getPublicUrl(path);
+    const url=pub&&pub.publicUrl;
+    if(!url)throw new Error('sin URL pública');
+    const res=kind==='skill'
+      ?await sb.from('coach_skills').update({animation_url:url,updated_at:new Date().toISOString()}).eq('slug',slug)
+      :await sb.from('exercise_catalog').update({animation_url:url,updated_at:new Date().toISOString()}).eq('slug',slug);
+    if(res.error)throw res.error;
+    if(kind==='skill'){const s=coachSkills.find(x=>x.slug===slug);if(s)s.animation_url=url;}
+    else{const r=exerciseCatalog.find(x=>x.slug===slug);if(r)r.animation_url=url;_rungIndex=null;}
+    hideLoading();
+    toast('Animación lista','ok');
+    renderSkillSheet();
+  }catch(e){
+    hideLoading();
+    toast('No se pudo subir: '+(e.message||e),'err');
+  }
+}
+
+// ---- Los cues en la hoja de entreno ----------------------------------------------------------
+
+// Las "Indicaciones" del coach se pintaban solo en la lista de la rutina y desaparecían al
+// empezar a entrenar, que es cuando se leen. Van numeradas cuando son más de una, para poder
+// señalar un cue por su número por WhatsApp; una sola frase no se numera.
+// Si el ejercicio es un escalón de una escalera, debajo va su criterio de forma: qué significa
+// "limpio" en ESTE escalón (migración 141, la idea de la 078 de Skandi).
+function wsCuesHtml(ex){
+  const cues=HabitSkills.cueList(ex&&(ex.note||ex.notes||ex.description));
+  const rung=rungForExercise(ex);
+  const crit=rung?rungCriteria(rung):'';
+  if(!cues.length&&!crit)return '';
+  const list=cues.length>1
+    ?'<ol>'+cues.map((c,i)=>'<li><b>'+(i+1)+'</b><span>'+esc(c)+'</span></li>').join('')+'</ol>'
+    :(cues.length?'<ul><li><span>'+esc(cues[0])+'</span></li></ul>':'');
+  return '<div class="ws-cues">'
+    +(cues.length?'<div class="ws-cues-hd">'+esc(sk('cues'))+'</div>'+list:'')
+    +(crit?'<span class="ws-cues-crit"><em>'+esc(sk('critLabel'))+':</em> '+esc(crit)+'</span>':'')
+    +'</div>';
+}
+
 </script>
 </body>
 </html>
