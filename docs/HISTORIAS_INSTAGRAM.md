@@ -43,9 +43,13 @@ globo) lleva la tinta de `inkFor()`: blanco si contrasta 3:1 con el color (WCAG,
 si no negro.
 
 Reglas: un dato héroe (o dos); si hacen falta más de tres renglones, son dos stickers; el
-logotipo es el de HABIT Crew, como el encabezado de Crew: logo + HABIT en 800 espaciado .1em +
-CREW en 600, chico (0.58 de HABIT) y espaciado .32em, sobre la misma línea base. Ningún sticker
-sale sin marca: los que no llevan logotipo firman con «HABIT CREW» en una línea espaciada.
+logotipo es el de HABIT Crew, como el encabezado de Crew: logo (1.15 de HABIT) + HABIT en 800
+espaciado .06em + CREW en 600, chico (0.6 de HABIT) y espaciado .3em, sobre la misma línea base.
+Ningún sticker sale sin marca, y **todos firman abajo con el mismo logotipo, a `SIG` (40 px)**.
+Ninguna letra secundaria baja de ~30 px en el lienzo de 1080: en una historia el sticker se ve
+a un tercio, y lo que medía 22 px desaparecía. **El cuadro de un logo es su tinta**: el PNG trae
+margen (la tinta es ~65%, `LOGO_INK`) y `drawLogo` lo agranda; medirlo por su cuadro dejaba
+todos los logos a dos tercios de lo que se quería.
 
 ## 4. Catálogo de estilos
 
@@ -76,16 +80,17 @@ mejor serie, músculos (con palabras, sin dibujo del cuerpo), récords, nº de e
 
 - **De la marca** (en los tres tipos, segundos en la galería después del primero): **Crew** (la
   marca apilada: el logo, HABIT espaciado al ancho exacto de CREW, y CREW enorme; debajo tu dato
-  o la frase), **Carnet** (una credencial de la crew con proporción de tarjeta: logotipo, chip,
-  la cifra o la frase, y abajo el día y `habittraininghub.app/crew`) e **Insignia** (escudo
+  o la frase), **Carnet** (una credencial de la crew con proporción de tarjeta: logotipo, el
+  logo grande y tenue cortado por el borde derecho como un holograma, la cifra o la frase, y abajo el día y `habittraininghub.app/crew`) e **Insignia** (escudo
   redondo: HABIT CREW y tu entreno dan la vuelta entre dos anillos, con HABIT CREW centrado
   arriba; dentro el logo y la cifra; no hay de frase, para eso está el Sello).
 - **Frase del día** (9 + Crew y Carnet): Frase, Póster (900 en mayúsculas, a la izquierda, con barra), Itálica
   (300 itálica), Cinta (cada renglón en su tira), Mensaje (burbuja que te llegó de HABIT),
   Comillas (unas comillas enormes), Mínimo (400 entre dos líneas finas), Logotipo, Sello.
-- **Entreno** (13 + los tres de la marca; uno sin el dato que enseña no sale): Héroe, Datos (tres cifras como en un
-  reloj), Recibo (ticket con ejercicios, código de barras y Nº de entreno), Ligero (el tiempo en
-  Inter 100), Itálica, Contorno, Notificación, Mensaje («10.02 km corridos. 52:14.» con su
+- **Entreno** (13 + los tres de la marca; uno sin el dato que enseña no sale): Héroe, Datos (dos
+  o tres cifras como en un reloj; con una sola —yoga, un entreno libre— no sale: sería un Héroe
+  chico), Recibo (ticket con ejercicios, código de barras y Nº de entreno), Ligero (el tiempo en
+  Inter 200), Itálica, Contorno, Notificación, Mensaje («10.02 km corridos. 52:14.» con su
   «Entrenado»), Cinta, Espaciado, Eco, Sello, Logotipo. Sirven igual para un entreno de la app
   (series, kilos, ejercicios con su mejor serie) que para una carrera, un nado o una rodada
   registrados a mano (distancia, ritmo, velocidad, FC).
@@ -205,3 +210,18 @@ mejor serie, músculos (con palabras, sin dibujo del cuerpo), récords, nº de e
   - El fondo de la vista previa también se elige por contraste: oscuro para los colores claros,
     claro para los oscuros.
   - Se recuerda el último color, también uno libre (`habit_sticker_color`: la clave o `#rrggbb`).
+- **2026-11-01 — Menos toscos** (versión `20261101-5`). Joseph: «que estén bien estilizados…
+  algunos se ven muy toscos». Revisados los 50 a escala de historia, en blanco, negro y lima.
+  - El logo del Sello estaba en un cuarto del círculo: el PNG trae margen. Ahora el cuadro de
+    todo logo es su tinta (`LOGO_INK`, `drawLogo` lo agranda), y con eso crecieron también los
+    logotipos, la Insignia, el Crew y el icono de la Notificación.
+  - Una sola firma, `SIG` = 40 px (`signOps`), en lugar de tamaños de 22 a 30; la firma de solo
+    texto «HABIT CREW» de Ligero, Contorno, Espaciado y Eco pasó al logotipo como los demás.
+  - Letra secundaria a ~30 px o más en todos (etiquetas, fechas, unidades, filas del Recibo, la
+    Notificación, Mínimo, Datos). Una frase corta crece (`fewLines`: «Hazlo.» sale al doble que
+    una larga) sin pasar de tres renglones; el Póster abre su interlineado para los acentos.
+  - Carnet: el «chip» parecía de relleno; ahora es el logo tenue cortado por el borde (op `logo`
+    con `clip`). En el de la semana, la racha sube a la esquina.
+  - Ligero en Inter 200 (el 100 quedaba en trazos de un pixel), Mensaje con la cola curva de
+    iMessage, Cinta con tiras de al menos 58 px (un nombre larguísimo se corta con «…»), Datos
+    no sale con una sola cifra.

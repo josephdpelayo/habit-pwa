@@ -72,7 +72,9 @@ The app has four screens (`#s-auth`, `#s-main`, `#s-admin`, `#s-reception`), tog
   que no tiene qué enseñar devuelve null y no sale) y `week` (7). Una app abre los de entreno con
   `HabitShare.open({kind, data, title, subtitle})`. Los estilos nuevos son listas de trazos
   (`ops`) que dibuja `drawOps`, y `scripts/check-share.js` revisa que ninguno se salga del
-  lienzo. `ACTIVITY_TYPES` (palabras de cada tipo de actividad) vive aquí y Crew lo usa. Inter
+  lienzo. **El cuadro de un logo es su tinta** (`LOGO_INK`: el PNG trae margen y `drawLogo` lo
+  agranda) y todos firman abajo con el mismo logotipo a `SIG`; ninguna letra secundaria baja de
+  ~30 px, porque en una historia el sticker se ve a un tercio. `ACTIVITY_TYPES` (palabras de cada tipo de actividad) vive aquí y Crew lo usa. Inter
   100–900 e itálica se piden al abrir la galería. Cambiar el módulo sin subir la versión deja a
   los teléfonos con el viejo: el service worker lo sirve cache-first por su URL con `?v=`
 - `habit-activity.js` — **la sección Actividad, en las dos apps** (HABIT la pidió el 1 nov 2026):

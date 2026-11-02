@@ -28,7 +28,8 @@ const quotes = [
 for (const q of quotes) {
   const L = S.quoteLayout(q, measure);
   assert.ok(L.lines.length >= 1 && L.lines.length <= 5, `«${q.slice(0, 20)}…» en 1–5 renglones`);
-  assert.ok(L.size >= 40 && L.size <= 76, 'tamaño de letra en rango');
+  assert.ok(L.size >= 40 && L.size <= 150, 'tamaño de letra en rango');
+  assert.ok(L.size <= 76 || L.lines.length <= 3, 'una frase grande no pasa de tres renglones');
   assert.equal(L.font.includes(L.size + 'px'), true, 'los renglones son del tamaño que se dibuja');
   const inner = S.WIDTH - 72 * 2;
   L.lines.forEach((l) => assert.ok(measure(l.text, L.font) <= inner + 0.5, 'ningún renglón se sale'));
@@ -47,6 +48,7 @@ for (const q of quotes) {
 const long = S.quoteLayout(quotes[2], measure);
 const short = S.quoteLayout(quotes[1], measure);
 assert.ok(long.size < short.size, 'la frase larga baja de tamaño');
+assert.ok(short.size >= 2 * long.size, 'una frase de una palabra sube de tamaño, no se queda como la firma');
 
 const sig = S.signatureLayout(measure);
 assert.ok(sig.lockup.logo.x >= 0 && sig.lockup.logo.x + sig.lockup.width <= sig.width + 0.5, 'la firma cabe a lo ancho');
@@ -83,8 +85,8 @@ for (const text of ['MAKE IT A HABIT · 31.10.26 · ', 'MAKE IT A HABIT · ENTRE
   assert.ok(L.chars[L.chars.length - 1].angle < Math.PI * 2, 'termina antes de cerrar la vuelta');
   assert.ok(L.radius + L.size * 0.55 <= L.width / 2, 'las letras caben en el lienzo');
   assert.ok(L.size >= 30 && L.size <= 120, 'tamaño de letra en rango');
-  // Lo que se ve del logo es su tinta (el PNG trae margen), no su cuadro.
-  const ink = L.logo.size * S.LOGO_INK;
+  // El cuadro del logo es su tinta (drawLogo agranda el PNG por su margen).
+  const ink = L.logo.size;
   assert.ok(ink < L.radius * 2 - L.size * 2, 'el logo no toca las letras');
   assert.ok(ink > L.radius * 0.9, 'el logo llena el centro del sello, no queda chiquito');
 }
@@ -100,6 +102,7 @@ assert.equal(S.shortDate(''), '');
 function inside(L, name) {
   const box = (o) => {
     if (o.op === 'text') return [o.x, o.y - o.px * 0.75, o.x + o.w, o.y + o.px * 0.25];
+    if (o.op === 'logo' && o.clip) return [Math.max(o.x, o.clip.x), Math.max(o.y, o.clip.y), Math.min(o.x + o.size, o.clip.x + o.clip.w), Math.min(o.y + o.size, o.clip.y + o.clip.h)];
     if (o.op === 'logo') return [o.x, o.y, o.x + o.size, o.y + o.size];
     if (o.op === 'rect') return [o.x, o.y, o.x + o.w, o.y + o.h];
     if (o.op === 'circle') return [o.cx - o.r, o.cy - o.r, o.cx + o.r, o.cy + o.r];

@@ -55,6 +55,7 @@
   const INTER = '"Inter", -apple-system, system-ui, sans-serif';
   const LOGO_SRC = '/icons/logo-original.png';
   const LOGO_INK = 0.65;        // el PNG del logo trae margen: la tinta es ~65% de su cuadro
+  const SIG = 40;              // la firma (el logotipo chico de abajo): igual en todos los estilos
   const COLOR_KEY = 'habit_sticker_color';
   // Las apps cargan Inter de 300 a 800 y sin itálicas; los stickers usan de 100 a 900 y la
   // itálica. Se pide al abrir la galería, no al cargar: la app no descarga nada de más.
@@ -138,20 +139,21 @@
   }
 
   // El logotipo de HABIT Crew, como el encabezado de Crew: el logo, HABIT y, sobre la misma
-  // línea base, CREW chico y espaciado (allá 9 px junto a 17 px, .32em; aquí un poco más grande,
-  // porque en una historia el sticker se ve reducido). Centrado en `cx`.
+  // línea base, CREW chico y espaciado (allá 9 px junto a 17 px, .32em). Centrado en `cx`. El
+  // logo se mide por su tinta (ver `drawLogo`): 1.15 veces la letra, como el de 30 px junto a
+  // HABIT de 17 px, y HABIT va centrado en su altura.
   function lockupLayout(cx, top, wordPx, measure) {
-    const spacing = Math.round(wordPx * 0.1);
-    const logo = Math.round(wordPx * 1.75);
-    const gap = Math.round(wordPx * 0.45);
+    const spacing = Math.round(wordPx * 0.06);
+    const logo = Math.round(wordPx * 1.15);
+    const gap = Math.round(wordPx * 0.42);
     const wordW = spacedWidth('HABIT', spacing, (c) => measure(c, wordFont(wordPx)));
-    const crewPx = Math.round(wordPx * 0.58);
-    const crewSpacing = Math.round(crewPx * 0.32);
-    const crewGap = Math.round(wordPx * 0.42);
+    const crewPx = Math.round(wordPx * 0.6);
+    const crewSpacing = Math.round(crewPx * 0.3);
+    const crewGap = Math.round(wordPx * 0.34);
     const crewW = spacedWidth('CREW', crewSpacing, (c) => measure(c, crewFont(crewPx)));
     const width = logo + gap + wordW + crewGap + crewW;
     const x0 = cx - width / 2;
-    const baseline = top + logo / 2 + wordPx * 0.36;
+    const baseline = top + logo / 2 + wordPx * CAP / 2;
     return {
       width, height: logo,
       logo: { x: x0, y: top, size: logo },
@@ -162,27 +164,34 @@
 
   // La frase en renglones parejos, con el tamaño más grande que no pase de `maxLines`. Los
   // renglones siempre se calculan con el tamaño que se queda: si ninguno cabe (una frase
-  // larguísima), se usa el más chico con sus propios renglones.
+  // larguísima), se usa el más chico con sus propios renglones. `maxLines` puede depender del
+  // tamaño (ver `fewLines`).
   function fitLines(text, measure, fontFn, sizes, maxWidth, maxLines) {
+    const most = typeof maxLines === 'function' ? maxLines : () => maxLines;
     let size = sizes[0], lines = [];
     for (const px of sizes) {
       size = px;
       lines = balancedWrap(text, maxWidth, (s) => measure(s, fontFn(px)));
-      if (lines.length <= maxLines) break;
+      if (lines.length <= most(px)) break;
     }
     return { size, lines };
   }
+
+  // Una frase corta («Hazlo.») sube de tamaño, pero solo mientras quepa en `few` renglones:
+  // arriba de `above` px, cinco renglones serían un muro. Con el tamaño de siempre, una frase
+  // de una palabra quedaba apenas más grande que la firma.
+  const fewLines = (above, few, many) => (px) => (px > above ? few : many);
 
   // Estilo «Frase»: la frase centrada y en renglones parejos; debajo el logotipo chico. Una
   // frase larga baja de tamaño en lugar de pasar de cinco renglones.
   function quoteLayout(text, measure) {
     const quote = '“' + String(text || '').trim() + '”';
     const inner = WIDTH - PAD * 2;
-    const { size, lines } = fitLines(quote, measure, quoteFont, [76, 70, 64, 58, 52, 46, 40], inner, 5);
+    const { size, lines } = fitLines(quote, measure, quoteFont, [150, 128, 110, 94, 76, 70, 64, 58, 52, 46, 40], inner, fewLines(76, 3, 5));
     const lineH = Math.round(size * 1.22);
     const top = PAD;
     const textBottom = top + lineH * lines.length;
-    const lockup = lockupLayout(WIDTH / 2, textBottom + 56, 30, measure);
+    const lockup = lockupLayout(WIDTH / 2, textBottom + 64, SIG, measure);
     return {
       kind: 'frase', width: WIDTH,
       height: Math.round(lockup.logo.y + lockup.height + PAD),
@@ -195,14 +204,14 @@
   // Estilo «Logotipo»: el logotipo de HABIT en grande y una línea espaciada debajo.
   function signatureLayout(measure, subText) {
     const wordPx = 112;
-    const subPx = 30, subSpacing = Math.round(subPx * 0.22);
+    const subPx = 42, subSpacing = Math.round(subPx * 0.3);
     const text = String(subText || 'MAKE IT A HABIT').toUpperCase();
     const subW = spacedWidth(text, subSpacing, (c) => measure(c, subFont(subPx)));
     const probe = lockupLayout(0, PAD, wordPx, measure);
     const width = Math.ceil(Math.max(probe.width, subW) + PAD * 2);
     const cx = width / 2;
     const lockup = lockupLayout(cx, PAD, wordPx, measure);
-    const subY = lockup.logo.y + lockup.height + 44 + subPx;
+    const subY = lockup.logo.y + lockup.height + 60 + subPx * CAP;
     return {
       kind: 'logotipo', width, height: Math.ceil(subY + PAD * 0.8),
       lockup,
@@ -243,10 +252,9 @@
     }
     const radius = radiusFor(px);
     const { spacing, chars } = ringChars(body, radius, sealFont(px), measure);
-    // El logo llena ~60% del hueco dentro del anillo (lo que se ve, no su cuadro: con el
-    // margen del PNG, el cuadro de antes dejaba la tinta en un cuarto del sello).
+    // El logo llena ~60% del hueco dentro del anillo.
     const hole = radius - px * CAP / 2;
-    const logo = Math.round(hole * 2 * 0.6 / LOGO_INK);
+    const logo = Math.round(hole * 2 * 0.6);
     return {
       kind: 'sello', width: size, height: size, cx, cy, radius,
       font: sealFont(px), size: px, spacing, chars,
@@ -318,9 +326,9 @@
     };
   }
 
-  // La firma chica de los estilos que no llevan logotipo: HABIT CREW en una línea espaciada.
-  function brandMark(measure, x, y, align) {
-    return textOp(measure, 'HABIT CREW', F(700, 22), { x, y, align: align || 'center', spacing: 10, alpha: 0.8 });
+  // La firma de abajo: el logotipo a `SIG`, centrado en `x` o empezando en `x` con align 'left'.
+  function signOps(measure, x, top, align, color) {
+    return lockupOps(measure, x, top, SIG, align || 'center', color);
   }
 
   // 31.10.26, para el sello.
@@ -477,33 +485,37 @@
     const ops = [];
     let y = PAD + px * CAP;
     ops.push(textOp(measure, value, F(900, px), { x: WIDTH / 2, y, align: 'center', spacing: Math.round(px * -0.035) }));
-    const lp = 36;
-    y += 46 + lp * CAP;
-    ops.push(textOp(measure, label || f.hero.label, F(700, lp), { x: WIDTH / 2, y, align: 'center', spacing: Math.round(lp * 0.34) }));
-    y += 70;
-    const lk = lockupOps(measure, WIDTH / 2, y, 26, 'center');
+    // La coma de «4,320» baja de la línea base: la etiqueta se aparta lo que baja.
+    const lab = fitText(measure, label || f.hero.label, (p) => F(700, p), maxW, 50, 30, 0.22);
+    y += Math.round(px * 0.14) + (/,/.test(value) ? Math.round(px * 0.1) : 0) + lab.px * CAP;
+    ops.push(textOp(measure, lab.text, F(700, lab.px), { x: WIDTH / 2, y, align: 'center', spacing: lab.spacing }));
+    y += 76;
+    const lk = signOps(measure, WIDTH / 2, y);
     ops.push(...lk.ops);
     return { kind: kind || 'heroe', width: WIDTH, height: Math.round(y + lk.height + PAD * 0.8), ops };
   }
 
-  // «Ligero»: el tiempo en Inter 100, enorme, y en itálica en qué se fue.
+  // «Ligero»: el tiempo en Inter 200, enorme, y en itálica en qué se fue. (El 100 se perdía al
+  // achicar el sticker: sus trazos quedaban de un pixel.)
   function lightLayout(f, measure) {
     if (!f.light) return null;
     const maxW = WIDTH - PAD * 2;
-    const px = fitPx(measure, f.light.value, (p) => F(100, p), maxW, 330, 140, -0.02);
+    const px = fitPx(measure, f.light.value, (p) => F(200, p), maxW, 330, 140, -0.02);
     const ops = [];
     let y = PAD + px * CAP;
-    ops.push(textOp(measure, f.light.value, F(100, px), { x: WIDTH / 2, y, align: 'center', spacing: Math.round(px * -0.02) }));
-    const sp = 54;
-    y += 40 + sp * 0.8;
+    ops.push(textOp(measure, f.light.value, F(200, px), { x: WIDTH / 2, y, align: 'center', spacing: Math.round(px * -0.02) }));
+    const sp = 64;
+    y += 56 + sp * 0.72;
     ops.push(textOp(measure, f.light.sub, F(300, sp, true), { x: WIDTH / 2, y, align: 'center' }));
     if (f.day) {
-      y += 70;
-      ops.push(textOp(measure, (f.day + ' ' + f.date).trim(), F(600, 24), { x: WIDTH / 2, y, align: 'center', spacing: 8, alpha: 0.75 }));
+      const d = fitText(measure, [f.day, f.date].filter(Boolean).join(' · '), (p) => F(600, p), maxW, 32, 24, 0.24);
+      y += 66 + d.px * CAP;
+      ops.push(textOp(measure, d.text, F(600, d.px), { x: WIDTH / 2, y, align: 'center', spacing: d.spacing, alpha: 0.75 }));
     }
-    y += f.day ? 50 : 70;
-    ops.push(brandMark(measure, WIDTH / 2, y));
-    return { kind: 'ligero', width: WIDTH, height: Math.round(y + PAD * 0.9), ops };
+    y += 76;
+    const lk = signOps(measure, WIDTH / 2, y);
+    ops.push(...lk.ops);
+    return { kind: 'ligero', width: WIDTH, height: Math.round(y + lk.height + PAD * 0.8), ops };
   }
 
   // «Espaciado»: el día con mucho aire, la rutina en 900 y una línea de cifras.
@@ -512,34 +524,35 @@
     const ops = [];
     let y = PAD;
     if (f.day) {
-      const dp = 44;
+      const dp = 46;
       y += dp * CAP;
-      ops.push(textOp(measure, f.day, F(300, dp), { x: WIDTH / 2, y, align: 'center', spacing: Math.round(dp * 0.55) }));
-      y += 40;
+      ops.push(textOp(measure, f.day, F(400, dp), { x: WIDTH / 2, y, align: 'center', spacing: Math.round(dp * 0.5) }));
+      y += 48;
     }
-    const tt = fitText(measure, f.title.toUpperCase(), (p) => F(900, p), maxW, 150, 64, -0.01);
-    const tp = tt.px;
-    y += tp * 0.92;
-    ops.push(textOp(measure, tt.text, F(900, tp), { x: WIDTH / 2, y, align: 'center', spacing: tt.spacing }));
+    const tt = fitText(measure, f.title.toUpperCase(), (p) => F(900, p), maxW, 200, 64, -0.01);
+    // 0.92 y no la altura de mayúsculas: deja lugar al acento de «SÁBADO».
+    y += tt.px * 0.92;
+    ops.push(textOp(measure, tt.text, F(900, tt.px), { x: WIDTH / 2, y, align: 'center', spacing: tt.spacing }));
     const meta = f.summary.slice(0, 2).join(' · ').toUpperCase();
     if (meta) {
-      const mp = fitPx(measure, meta, (p) => F(600, p), maxW, 30, 20, 0.24);
-      y += 44 + mp * CAP;
-      ops.push(textOp(measure, meta, F(600, mp), { x: WIDTH / 2, y, align: 'center', spacing: Math.round(mp * 0.24), alpha: 0.85 }));
+      const m = fitText(measure, meta, (p) => F(600, p), maxW, 40, 26, 0.2);
+      y += 52 + m.px * CAP;
+      ops.push(textOp(measure, m.text, F(600, m.px), { x: WIDTH / 2, y, align: 'center', spacing: m.spacing, alpha: 0.85 }));
     }
-    y += 62;
-    ops.push(brandMark(measure, WIDTH / 2, y));
-    return { kind: 'espaciado', width: WIDTH, height: Math.round(y + PAD), ops };
+    y += 76;
+    const lk = signOps(measure, WIDTH / 2, y);
+    ops.push(...lk.ops);
+    return { kind: 'espaciado', width: WIDTH, height: Math.round(y + lk.height + PAD * 0.8), ops };
   }
 
   // «Itálica»: «Leg day.» en 800 itálica, con sus cifras debajo.
   function italicLayout(f, measure) {
     const maxW = WIDTH - PAD * 2;
     const text = /[.!?]$/.test(f.title) ? f.title : f.title + '.';
-    let px = fitPx(measure, text, (p) => F(800, p, true), maxW, 180, 96, -0.02);
+    let px = fitPx(measure, text, (p) => F(800, p, true), maxW, 210, 110);
     let lines = [text];
     if (measure(text, F(800, px, true)) > maxW) {
-      const r = fitLines(text, measure, (p) => F(800, p, true), [120, 108, 96, 86, 76], maxW, 3);
+      const r = fitLines(text, measure, (p) => F(800, p, true), [130, 116, 104, 92, 80], maxW, 3);
       px = r.size; lines = r.lines;
     }
     const ops = [];
@@ -550,12 +563,12 @@
     y += (lines.length - 1) * px * 1.02;
     const meta = f.summary.join(' · ');
     if (meta) {
-      const mp = fitPx(measure, meta, (p) => F(500, p), maxW, 38, 24);
-      y += 50 + mp * 0.8;
+      const mp = fitPx(measure, meta, (p) => F(500, p), maxW, 46, 30);
+      y += 56 + mp * CAP;
       ops.push(textOp(measure, meta, F(500, mp), { x: WIDTH / 2, y, align: 'center', alpha: 0.9 }));
     }
-    y += 56;
-    const lk = lockupOps(measure, WIDTH / 2, y, 24, 'center');
+    y += 76;
+    const lk = signOps(measure, WIDTH / 2, y);
     ops.push(...lk.ops);
     return { kind: 'italica', width: WIDTH, height: Math.round(y + lk.height + PAD * 0.8), ops };
   }
@@ -571,14 +584,15 @@
     ops.push(textOp(measure, value, F(900, px), { x: WIDTH / 2, y, align: 'center', stroke: Math.max(3, Math.round(px * 0.016)) }));
     const label = [f.hero.unit, f.day].filter(Boolean).join(' · ');
     if (label) {
-      const lp = fitPx(measure, label, (p) => F(800, p), maxW, 44, 24, 0.26);
+      const lp = fitPx(measure, label, (p) => F(800, p), maxW, 48, 28, 0.24);
       // La coma de «4,320» baja de la línea base: con 50 tocaba la unidad.
-      y += (/[,.]/.test(value) ? Math.round(px * 0.2) + 30 : 50) + lp * CAP;
-      ops.push(textOp(measure, label, F(800, lp), { x: WIDTH / 2, y, align: 'center', spacing: Math.round(lp * 0.26) }));
+      y += (/[,.]/.test(value) ? Math.round(px * 0.2) + 34 : 54) + lp * CAP;
+      ops.push(textOp(measure, label, F(800, lp), { x: WIDTH / 2, y, align: 'center', spacing: Math.round(lp * 0.24) }));
     }
-    y += 60;
-    ops.push(brandMark(measure, WIDTH / 2, y));
-    return { kind: 'contorno', width: WIDTH, height: Math.round(y + PAD), ops };
+    y += 76;
+    const lk = signOps(measure, WIDTH / 2, y);
+    ops.push(...lk.ops);
+    return { kind: 'contorno', width: WIDTH, height: Math.round(y + lk.height + PAD * 0.8), ops };
   }
 
   // «Eco»: el nombre repetido, desvaneciéndose hacia abajo.
@@ -587,7 +601,7 @@
     const tt = fitText(measure, f.title.toUpperCase(), (p) => F(900, p), maxW, 170, 72, -0.02);
     const px = tt.px;
     const ops = [];
-    const alphas = [1, 0.5, 0.26, 0.13, 0.06];
+    const alphas = [1, 0.55, 0.3, 0.15, 0.07];
     let y = PAD + px * CAP;
     alphas.forEach((a, i) => {
       ops.push(textOp(measure, tt.text, F(900, px), { x: WIDTH / 2, y: y + i * px * 0.9, align: 'center', spacing: tt.spacing, alpha: a }));
@@ -595,44 +609,52 @@
     y += (alphas.length - 1) * px * 0.9;
     const meta = [f.summary.slice(0, 2).join(' · ').toUpperCase(), f.date].filter(Boolean).join(' · ');
     if (meta) {
-      const mp = fitPx(measure, meta, (p) => F(600, p), maxW, 26, 18, 0.3);
-      y += 56 + mp * CAP;
-      ops.push(textOp(measure, meta, F(600, mp), { x: WIDTH / 2, y, align: 'center', spacing: Math.round(mp * 0.3) }));
+      const m = fitText(measure, meta, (p) => F(600, p), maxW, 36, 26, 0.2);
+      y += 60 + m.px * CAP;
+      ops.push(textOp(measure, m.text, F(600, m.px), { x: WIDTH / 2, y, align: 'center', spacing: m.spacing }));
     }
-    y += 52;
-    ops.push(brandMark(measure, WIDTH / 2, y));
-    return { kind: 'eco', width: WIDTH, height: Math.round(y + PAD), ops };
+    y += 76;
+    const lk = signOps(measure, WIDTH / 2, y);
+    ops.push(...lk.ops);
+    return { kind: 'eco', width: WIDTH, height: Math.round(y + lk.height + PAD * 0.8), ops };
   }
 
-  // «Datos»: el logotipo y la fecha arriba, el nombre, y tres cifras como en un reloj.
+  // «Datos»: el logotipo y la fecha arriba, el nombre, y tres cifras como en un reloj. Con una
+  // sola cifra (yoga: solo minutos) no sale: sería «Héroe» en chico.
   function dataLayout(f, measure, opts) {
     const trio = (opts && opts.trio) || f.trio;
-    if (!trio || !trio.length) return null;
+    if (!trio || trio.length < 2) return null;
+    const maxW = WIDTH - PAD * 2;
     const ops = [];
-    const lk = lockupOps(measure, PAD, PAD, 24, 'left');
+    const lk = signOps(measure, PAD, PAD, 'left');
     ops.push(...lk.ops);
     const corner = opts && 'corner' in opts ? opts.corner : [f.day, f.date].filter(Boolean).join(' ');
     if (corner) {
-      ops.push(textOp(measure, corner, F(600, 22), { x: WIDTH - PAD, y: PAD + lk.height / 2 + 22 * 0.36, align: 'right', spacing: 5, alpha: 0.8 }));
+      const c = fitText(measure, corner, (p) => F(600, p), maxW - lk.width - 40, 32, 22, 0.14);
+      ops.push(textOp(measure, c.text, F(600, c.px), { x: WIDTH - PAD, y: PAD + lk.height / 2 + c.px * CAP / 2, align: 'right', spacing: c.spacing, alpha: 0.75 }));
     }
-    let y = PAD + lk.height + 46;
+    let y = PAD + lk.height + 70;
     const title = (opts && opts.title) || f.title;
-    const tt = fitText(measure, title, (p) => F(800, p), WIDTH - PAD * 2, 60, 40);
-    y += tt.px * 0.8;
-    ops.push(textOp(measure, tt.text, F(800, tt.px), { x: PAD, y }));
-    y += 52;
-    const colW = (WIDTH - PAD * 2) / trio.length;
-    const vp = Math.min(...trio.map((t) => fitPx(measure, t.value, (p) => F(800, p), colW - 52, 104, 40, -0.02)));
+    const tt = fitText(measure, title, (p) => F(800, p), maxW, 88, 48, -0.01);
+    y += tt.px * CAP;
+    ops.push(textOp(measure, tt.text, F(800, tt.px), { x: PAD, y, spacing: tt.spacing }));
+    y += 76;
+    // Cada columna empieza un poco después de su raya; la cifra más ancha manda el tamaño de
+    // las tres, para que se lean como una sola fila.
+    const colW = maxW / trio.length, inset = 30, lp = 30;
+    const vp = Math.min(...trio.map((t) => fitPx(measure, t.value, (p) => F(800, p), colW - inset * 2, 132, 48, -0.02)));
     const top = y;
     y += vp * CAP;
+    const ly = y + 30 + lp * CAP;
     trio.forEach((t, i) => {
-      const x = PAD + colW * i;
-      if (i) ops.push({ op: 'line', x1: x - 26, y1: top - 6, x2: x - 26, y2: y + 56, w: 2, alpha: 0.3 });
+      const x = PAD + colW * i + (i ? inset : 0);
+      if (i) ops.push({ op: 'line', x1: x - inset, y1: top - 2, x2: x - inset, y2: ly + 4, w: 3, alpha: 0.3 });
       ops.push(textOp(measure, t.value, F(800, vp), { x, y, spacing: Math.round(vp * -0.02) }));
-      ops.push(textOp(measure, clip(measure, t.label, F(600, 22), colW - 28), F(600, 22), { x, y: y + 48, spacing: 4, alpha: 0.7 }));
+      const l = fitText(measure, t.label, (p) => F(600, p), colW - inset * 2, lp, 22, 0.12);
+      ops.push(textOp(measure, l.text, F(600, l.px), { x, y: ly, spacing: l.spacing, alpha: 0.7 }));
     });
-    y += 48;
-    return { kind: 'datos', width: WIDTH, height: Math.round(y + PAD * 0.8), ops };
+    y = ly;
+    return { kind: 'datos', width: WIDTH, height: Math.round(y + PAD * 0.9), ops };
   }
 
   // Dientes de papel: el borde de un recibo recién cortado.
@@ -675,44 +697,44 @@
 
   // «Recibo»: el entreno como ticket de papel, con su código de barras.
   function receiptLayout(f, measure) {
-    const W = 860, px0 = 34, x0 = px0 + 52, x1 = W - px0 - 52;
+    const W = 900, px0 = 34, x0 = px0 + 58, x1 = W - px0 - 58;
     const cw = x1 - x0;
     const ops = [];
     const body = [];
-    let y = 40 + 58;
-    const lk = lockupOps(measure, W / 2, y, 38, 'center', 'inv');
+    let y = 40 + 66;
+    const lk = lockupOps(measure, W / 2, y, 48, 'center', 'inv');
     body.push(...lk.ops);
-    y += lk.height + 52;
+    y += lk.height + 70;
     const head = f.number ? `ENTRENO Nº ${f.number}` : 'ENTRENO';
-    body.push(textOp(measure, head, F(700, 26), { x: W / 2, y, align: 'center', spacing: 7, color: 'inv' }));
+    body.push(textOp(measure, head, F(700, 34), { x: W / 2, y, align: 'center', spacing: 8, color: 'inv' }));
     if (f.day) {
-      y += 40;
-      body.push(textOp(measure, f.day + ' ' + f.date, F(500, 24), { x: W / 2, y, align: 'center', spacing: 5, color: 'inv', alpha: 0.75 }));
+      y += 50;
+      body.push(textOp(measure, f.day + ' ' + f.date, F(500, 30), { x: W / 2, y, align: 'center', spacing: 5, color: 'inv', alpha: 0.7 }));
     }
-    const rule = () => { y += 34; body.push({ op: 'line', x1: x0, y1: y, x2: x1, y2: y, w: 2.5, dash: [10, 8], color: 'inv', alpha: 0.6 }); y += 22; };
+    const rule = () => { y += 42; body.push({ op: 'line', x1: x0, y1: y, x2: x1, y2: y, w: 3, dash: [12, 9], color: 'inv', alpha: 0.5 }); y += 26; };
     rule();
-    y += 30;
+    y += 34;
     // El nombre y su tipo; sin nombre propio, el tipo ya es el nombre y no se repite.
     body.push(...(f.title === ACTIVITY_TYPES[f.type].noun
-      ? receiptRow(measure, 'ACTIVIDAD', f.title.toUpperCase(), y, x0, x1, F(600, 24), F(800, 32))
-      : receiptRow(measure, f.title.toUpperCase(), f.typeLabel.toUpperCase(), y, x0, x1, F(800, 32), F(600, 24))));
+      ? receiptRow(measure, 'ACTIVIDAD', f.title.toUpperCase(), y, x0, x1, F(600, 30), F(800, 36))
+      : receiptRow(measure, f.title.toUpperCase(), f.typeLabel.toUpperCase(), y, x0, x1, F(800, 36), F(600, 30))));
     f.exercises.forEach((e) => {
-      y += 46;
-      body.push(...receiptRow(measure, String(e.name).toUpperCase(), String(e.best || '—').toUpperCase(), y, x0, x1, F(500, 25), F(700, 25)));
+      y += 54;
+      body.push(...receiptRow(measure, String(e.name).toUpperCase(), String(e.best || '—').toUpperCase(), y, x0, x1, F(500, 30), F(700, 30)));
     });
     rule();
     f.stats.slice(0, 5).forEach((s, i) => {
-      y += i ? 46 : 28;
-      body.push(...receiptRow(measure, s.label, s.value, y, x0, x1, F(500, 25), F(700, 25)));
+      y += i ? 54 : 30;
+      body.push(...receiptRow(measure, s.label, s.value, y, x0, x1, F(500, 30), F(700, 30)));
     });
     rule();
-    y += 36;
-    body.push(...receiptRow(measure, 'TOTAL', (f.hero.value + ' ' + f.hero.unit).trim(), y, x0, x1, F(900, 36), F(900, 36)));
-    y += 46;
-    body.push(...barcode(f.title + f.ds + f.hero.value, x0 + 40, y, cw - 80, 92));
-    y += 92 + 50;
-    body.push(textOp(measure, 'MAKE IT A HABIT', F(600, 22), { x: W / 2, y, align: 'center', spacing: 9, color: 'inv' }));
-    y += 50;
+    y += 44;
+    body.push(...receiptRow(measure, 'TOTAL', (f.hero.value + ' ' + f.hero.unit).trim(), y, x0, x1, F(900, 46), F(900, 46)));
+    y += 58;
+    body.push(...barcode(f.title + f.ds + f.hero.value, x0 + 30, y, cw - 60, 104));
+    y += 104 + 62;
+    body.push(textOp(measure, 'MAKE IT A HABIT', F(700, 30), { x: W / 2, y, align: 'center', spacing: 10, color: 'inv' }));
+    y += 56;
     const top = 40, bottom = y;
     const pts = [
       ...zigzag(px0, W - px0, top, 12, 26, false),
@@ -722,63 +744,71 @@
     return { kind: 'recibo', width: W, height: Math.round(bottom + 40), ops };
   }
 
-  // Un globo de mensaje: el rectángulo redondo y su colita. `side` 'right' es un mensaje que
-  // mandaste (el entreno), 'left' uno que te llegó (la frase).
+  // Un globo de mensaje: el rectángulo redondo y su colita curva, como la de iMessage. `side`
+  // 'right' es un mensaje que mandaste (el entreno), 'left' uno que te llegó (la frase). La
+  // colita sale del borde, baja y se dobla hacia fuera; el canvas de los trazos solo sabe de
+  // polígonos, así que sus curvas van en puntos.
   function bubbleOps(x, y, w, h, side) {
     const r = Math.min(52, h / 2);
     const ops = [{ op: 'rect', x, y, w, h, r, color: 'fg' }];
-    const by = y + h;
-    ops.push(side === 'right'
-      ? { op: 'poly', pts: [[x + w - 62, by - 30], [x + w + 16, by + 6], [x + w - 18, by - 44]], color: 'fg' }
-      : { op: 'poly', pts: [[x + 62, by - 30], [x - 16, by + 6], [x + 18, by - 44]], color: 'fg' });
+    const s = side === 'right' ? 1 : -1, ex = side === 'right' ? x + w : x, by = y + h;
+    const P = (dx, dy) => [ex + s * dx, by + dy];
+    const quad = (a, c, b) => Array.from({ length: 10 }, (_, i) => {
+      const t = (i + 1) / 10, u = 1 - t;
+      return [u * u * a[0] + 2 * u * t * c[0] + t * t * b[0], u * u * a[1] + 2 * u * t * c[1] + t * t * b[1]];
+    });
+    const from = P(0, -66), tip = P(22, 0), back = P(-48, -6);
+    ops.push({ op: 'poly', pts: [P(-60, -66), from, ...quad(from, P(0, -18), tip), ...quad(tip, P(-14, 2), back)], color: 'fg' });
     return ops;
   }
 
   // «Burbuja»: el entreno como un mensaje de iPhone, en blanco y negro, con su «Entrenado».
   function bubbleLayout(f, measure) {
-    const maxText = 760, padX = 50, padY = 38;
-    const { size: px, lines } = fitLines(f.bubble, measure, (p) => F(500, p), [60, 54, 48, 44], maxText, 4);
-    const lineH = px * 1.24;
+    const maxText = 780, padX = 52, padY = 40;
+    const { size: px, lines } = fitLines(f.bubble, measure, (p) => F(500, p), [64, 58, 52, 48], maxText, 4);
+    const lineH = px * 1.22;
     const textW = Math.max(...lines.map((l) => measure(l, F(500, px))));
     const bw = Math.ceil(textW + padX * 2);
     const bh = Math.ceil(padY * 2 + px * 0.78 + (lines.length - 1) * lineH + px * 0.22);
-    const W = Math.max(bw + PAD * 2, 600);
+    const W = Math.max(bw + PAD * 2, 640);
     const bx = W - PAD - bw, by = PAD;
     const ops = bubbleOps(bx, by, bw, bh, 'right');
     lines.forEach((l, i) => ops.push(textOp(measure, l, F(500, px), { x: bx + padX, y: by + padY + px * 0.78 + i * lineH, color: 'inv' })));
-    let y = by + bh + 58;
-    ops.push(textOp(measure, 'Entrenado', F(500, 28), { x: W - PAD - 6, y, align: 'right', alpha: 0.65 }));
+    let y = by + bh + 34 + 34 * CAP;
+    ops.push(textOp(measure, 'Entrenado', F(500, 34), { x: W - PAD - 8, y, align: 'right', alpha: 0.6 }));
     // Debajo, el logotipo alineado a la derecha, como el globo.
-    y += 40;
-    const lk = lockupOps(measure, W - PAD - 6 - lockupLayout(0, 0, 24, measure).width, y, 24, 'left');
+    y += 50;
+    const lk = signOps(measure, W - PAD - 8 - lockupLayout(0, 0, SIG, measure).width, y, 'left');
     ops.push(...lk.ops);
     return { kind: 'burbuja', width: W, height: Math.round(y + lk.height + PAD * 0.7), ops };
   }
 
-  // «Notificación»: el aviso de HABIT Crew, como si el teléfono te felicitara.
+  // «Notificación»: el aviso de HABIT Crew, como si el teléfono te felicitara. El ícono va
+  // centrado en la altura del aviso, como en iOS.
   function notifLayout(f, measure) {
-    const W = 1000, cx0 = 20, cw = W - 40, pad = 36, icon = 96;
-    const tx = cx0 + pad + icon + 26, tr = cx0 + cw - pad;
+    const W = 1040, cx0 = 20, cw = W - 40, pad = 40, icon = 124;
+    const tx = cx0 + pad + icon + 32, tr = cx0 + cw - pad;
     const ops = [];
     const top = 20;
     const inner = [];
-    inner.push({ op: 'rect', x: cx0 + pad, y: top + pad, w: icon, h: icon, r: 24, color: 'inv' });
-    inner.push({ op: 'logo', x: cx0 + pad + 16, y: top + pad + 16, size: icon - 32, color: 'fg' });
-    let y = top + pad + 30;
-    inner.push(textOp(measure, 'HABIT CREW', F(600, 28), { x: tx, y, spacing: 2, color: 'inv', alpha: 0.55 }));
-    inner.push(textOp(measure, 'ahora', F(400, 27), { x: tr, y, align: 'right', color: 'inv', alpha: 0.45 }));
-    y += 52;
-    inner.push(textOp(measure, 'Entreno completado', F(700, 40), { x: tx, y, color: 'inv' }));
+    let y = top + pad + 32 * CAP;
+    inner.push(textOp(measure, 'HABIT CREW', F(600, 32), { x: tx, y, spacing: 3, color: 'inv', alpha: 0.55 }));
+    inner.push(textOp(measure, 'ahora', F(400, 32), { x: tr, y, align: 'right', color: 'inv', alpha: 0.45 }));
+    y += 62;
+    inner.push(textOp(measure, 'Entreno completado', F(700, 46), { x: tx, y, color: 'inv' }));
     const body = [f.title, ...f.summary].join(' · ');
     // Dos renglones como el aviso de iOS; lo que no cabe termina en «…».
-    const all = wrapText(body, tr - tx, (s) => measure(s, F(500, 34)));
-    const lines = all.length > 2 ? [all[0], clip(measure, all.slice(1).join(' '), F(500, 34), tr - tx)] : all;
+    const all = wrapText(body, tr - tx, (s) => measure(s, F(500, 40)));
+    const lines = all.length > 2 ? [all[0], clip(measure, all.slice(1).join(' '), F(500, 40), tr - tx)] : all;
     lines.forEach((l) => {
-      y += 48;
-      inner.push(textOp(measure, l, F(500, 34), { x: tx, y, color: 'inv', alpha: 0.82 }));
+      y += 54;
+      inner.push(textOp(measure, l, F(500, 40), { x: tx, y, color: 'inv', alpha: 0.8 }));
     });
-    const h = Math.max(y + 34 - top, icon + pad * 2);
-    ops.push({ op: 'rect', x: cx0, y: top, w: cw, h, r: 48, color: 'fg' }, ...inner);
+    const h = Math.max(y + 12 + pad - top, icon + pad * 2);
+    const iy = top + (h - icon) / 2, li = Math.round(icon * 0.6);
+    ops.push({ op: 'rect', x: cx0, y: top, w: cw, h, r: 52, color: 'fg' },
+      { op: 'rect', x: cx0 + pad, y: iy, w: icon, h: icon, r: 30, color: 'inv' },
+      { op: 'logo', x: cx0 + pad + (icon - li) / 2, y: iy + (icon - li) / 2, size: li, color: 'fg' }, ...inner);
     return { kind: 'notif', width: W, height: Math.round(top + h + 20), ops };
   }
 
@@ -787,7 +817,9 @@
   function tapeLayout(lines, measure, kind, opts) {
     const maxW = WIDTH - PAD * 2 - 120;
     const fontFn = (p) => F(800, p);
-    const px = Math.min(...lines.map((l) => fitPx(measure, l, fontFn, maxW, (opts && opts.maxPx) || 76, 40, 0.04)));
+    // Todas las tiras van del mismo tamaño; `minPx` es el piso, y lo que no cabe ahí se recorta
+    // en lugar de achicar las demás (un nombre larguísimo las dejaba todas diminutas).
+    const px = Math.min(...lines.map((l) => fitPx(measure, l, fontFn, maxW, (opts && opts.maxPx) || 76, (opts && opts.minPx) || 40, 0.04)));
     lines = lines.map((l) => fitText(measure, l, () => fontFn(px), maxW, px, px, 0.04).text);
     const padX = Math.round(px * 0.42), bandH = Math.round(px * 1.36), gap = 14;
     const shift = (opts && opts.shift) || [-34, 40, -14, 28, -40, 18, -24];
@@ -803,15 +835,15 @@
       ops.push(textOp(measure, l, fontFn(px), { x: bx + padX, y: y + (bandH + px * CAP) / 2, spacing: sp, color: 'inv' }));
       y += bandH + gap;
     });
-    y += 30;
-    const lk = lockupOps(measure, WIDTH / 2, y, 26, 'center');
+    y += 52;
+    const lk = signOps(measure, WIDTH / 2, y);
     ops.push(...lk.ops);
     return { kind: kind || 'cinta', width: WIDTH, height: Math.round(y + lk.height + PAD * 0.8), ops };
   }
 
   function workoutTape(f, measure) {
     const lines = [f.title.toUpperCase(), ...f.summary.slice(0, 2).map((s) => s.toUpperCase()), f.day].filter(Boolean).slice(0, 4);
-    return tapeLayout(lines, measure, 'cinta');
+    return tapeLayout(lines, measure, 'cinta', { minPx: 58 });
   }
 
   // ── Estilos de la frase del día ─────────────────────────────────────────
@@ -822,15 +854,16 @@
   function posterLayout(text, measure) {
     const t = cleanQuote(text).toUpperCase();
     const maxW = WIDTH - PAD * 2;
-    const { size: px, lines } = fitLines(t, measure, (p) => F(900, p), [124, 110, 98, 88, 78, 68, 60, 52], maxW, 6);
-    const lineH = px * 0.98;
+    const { size: px, lines } = fitLines(t, measure, (p) => F(900, p), [200, 170, 146, 124, 110, 98, 88, 78, 68, 60, 56], maxW, fewLines(124, 2, 8));
+    // Apretado, pero no tanto que el acento de «DÍAS» toque el renglón de arriba.
+    const lineH = px * 1.04;
     const ops = [];
     let y = PAD + px * 0.92;
     lines.forEach((l, i) => ops.push(textOp(measure, l, F(900, px), { x: PAD, y: y + i * lineH })));
-    y += (lines.length - 1) * lineH + 52;
-    ops.push({ op: 'rect', x: PAD, y, w: 150, h: 14, color: 'fg' });
-    y += 14 + 48;
-    const lk = lockupOps(measure, PAD, y, 28, 'left');
+    y += (lines.length - 1) * lineH + 60;
+    ops.push({ op: 'rect', x: PAD, y, w: 132, h: 16, color: 'fg' });
+    y += 16 + 56;
+    const lk = signOps(measure, PAD, y, 'left');
     ops.push(...lk.ops);
     return { kind: 'poster', width: WIDTH, height: Math.round(y + lk.height + PAD * 0.8), ops };
   }
@@ -839,13 +872,13 @@
   function quoteItalicLayout(text, measure) {
     const q = '“' + cleanQuote(text) + '”';
     const maxW = WIDTH - PAD * 2;
-    const { size: px, lines } = fitLines(q, measure, (p) => F(300, p, true), [82, 74, 66, 58, 52, 46, 40], maxW, 5);
+    const { size: px, lines } = fitLines(q, measure, (p) => F(300, p, true), [150, 128, 110, 94, 82, 74, 66, 58, 52, 46, 40], maxW, fewLines(82, 3, 5));
     const lineH = px * 1.22;
     const ops = [];
     let y = PAD + px * 0.85;
     lines.forEach((l, i) => ops.push(textOp(measure, l, F(300, px, true), { x: WIDTH / 2, y: y + i * lineH, align: 'center' })));
-    y += (lines.length - 1) * lineH + 64;
-    const lk = lockupOps(measure, WIDTH / 2, y, 26, 'center');
+    y += (lines.length - 1) * lineH + 72;
+    const lk = signOps(measure, WIDTH / 2, y);
     ops.push(...lk.ops);
     return { kind: 'italica', width: WIDTH, height: Math.round(y + lk.height + PAD * 0.8), ops };
   }
@@ -856,14 +889,14 @@
     const maxW = WIDTH - PAD * 2 - 140;
     // Se parte con el mismo espaciado con el que se dibuja: si no, un renglón justo se recorta.
     const spaced = (str, font) => spacedWidth(str, Math.round(pxOf(font) * 0.04), (c) => measure(c, font));
-    const { size, lines } = fitLines(t, spaced, (p) => F(800, p), [62, 56, 50, 46, 42], maxW, 7);
+    const { size, lines } = fitLines(t, spaced, (p) => F(800, p), [110, 96, 84, 72, 62, 56, 50, 46, 42], maxW, fewLines(62, 3, 7));
     return tapeLayout(lines, measure, 'cinta', { maxPx: size, shift: [-22, 26, -10, 18, -26, 12, -16] });
   }
 
   // «Mensaje»: la frase como un mensaje que te llegó de HABIT.
   function quoteBubbleLayout(text, measure) {
-    const maxText = 780, padX = 48, padY = 38;
-    const { size: px, lines } = fitLines(cleanQuote(text), measure, (p) => F(500, p), [56, 50, 46, 42, 38], maxText, 7);
+    const maxText = 780, padX = 50, padY = 40;
+    const { size: px, lines } = fitLines(cleanQuote(text), measure, (p) => F(500, p), [76, 66, 58, 52, 48, 44, 40], maxText, fewLines(58, 2, 7));
     const lineH = px * 1.26;
     const textW = Math.max(...lines.map((l) => measure(l, F(500, px))));
     const bw = Math.ceil(textW + padX * 2);
@@ -871,8 +904,8 @@
     const bx = PAD, by = PAD;
     const ops = bubbleOps(bx, by, bw, bh, 'left');
     lines.forEach((l, i) => ops.push(textOp(measure, l, F(500, px), { x: bx + padX, y: by + padY + px * 0.78 + i * lineH, color: 'inv' })));
-    const y = by + bh + 40;
-    const lk = lockupOps(measure, PAD + 8, y, 24, 'left');
+    const y = by + bh + 48;
+    const lk = signOps(measure, PAD + 8, y, 'left');
     ops.push(...lk.ops);
     const W = Math.ceil(Math.max(bx + bw, PAD + 8 + lk.width) + PAD);
     return { kind: 'burbuja', width: W, height: Math.round(y + lk.height + PAD * 0.7), ops };
@@ -888,12 +921,12 @@
     const qy = PAD + qp * CAP;
     ops.push(textOp(measure, '“', F(900, qp), { x: PAD - qp * 0.04, y: qy }));
     let y = qy - qp * 0.42 + 50;
-    const { size: px, lines } = fitLines(cleanQuote(text), measure, (p) => F(600, p), [68, 62, 56, 50, 44, 40], maxW, 6);
+    const { size: px, lines } = fitLines(cleanQuote(text), measure, (p) => F(600, p), [130, 112, 96, 82, 68, 62, 56, 50, 44, 40], maxW, fewLines(68, 3, 6));
     const lineH = px * 1.2;
     y += px * 0.8;
     lines.forEach((l, i) => ops.push(textOp(measure, l, F(600, px), { x: PAD, y: y + i * lineH })));
-    y += (lines.length - 1) * lineH + 60;
-    const lk = lockupOps(measure, PAD, y, 26, 'left');
+    y += (lines.length - 1) * lineH + 68;
+    const lk = signOps(measure, PAD, y, 'left');
     ops.push(...lk.ops);
     return { kind: 'comillas', width: WIDTH, height: Math.round(y + lk.height + PAD * 0.8), ops };
   }
@@ -903,16 +936,17 @@
     const maxW = 820;
     const ops = [];
     let y = PAD;
-    ops.push({ op: 'line', x1: WIDTH / 2 - 36, y1: y, x2: WIDTH / 2 + 36, y2: y, w: 3 });
-    const { size: px, lines } = fitLines(cleanQuote(text), measure, (p) => F(400, p), [52, 48, 44, 40, 36, 32], maxW, 7);
+    ops.push({ op: 'line', x1: WIDTH / 2 - 40, y1: y, x2: WIDTH / 2 + 40, y2: y, w: 4 });
+    const { size: px, lines } = fitLines(cleanQuote(text), measure, (p) => F(400, p), [84, 72, 62, 54, 50, 46, 42, 38, 34], maxW, fewLines(54, 3, 7));
     const lineH = px * 1.36;
-    y += 56 + px * 0.8;
+    y += 64 + px * 0.8;
     lines.forEach((l, i) => ops.push(textOp(measure, l, F(400, px), { x: WIDTH / 2, y: y + i * lineH, align: 'center' })));
-    y += (lines.length - 1) * lineH + 52;
-    ops.push({ op: 'line', x1: WIDTH / 2 - 36, y1: y, x2: WIDTH / 2 + 36, y2: y, w: 3 });
-    y += 56 + 22 * CAP;
+    y += (lines.length - 1) * lineH + 60;
+    ops.push({ op: 'line', x1: WIDTH / 2 - 40, y1: y, x2: WIDTH / 2 + 40, y2: y, w: 4 });
+    const sp = 32;
+    y += 64 + sp * CAP;
     const sign = ['HABIT CREW', shortDate(ds)].filter(Boolean).join('  ·  ');
-    ops.push(textOp(measure, sign, F(600, 22), { x: WIDTH / 2, y, align: 'center', spacing: 11 }));
+    ops.push(textOp(measure, sign, F(600, sp), { x: WIDTH / 2, y, align: 'center', spacing: Math.round(sp * 0.32) }));
     return { kind: 'minimo', width: WIDTH, height: Math.round(y + PAD * 0.8), ops };
   }
 
@@ -940,29 +974,32 @@
   // «Semana»: cuántas veces, y los siete días como puntos.
   function weekDotsLayout(w, measure) {
     const ops = [];
-    let y = PAD + 30 * CAP;
-    ops.push(textOp(measure, 'ESTA SEMANA', F(600, 30), { x: WIDTH / 2, y, align: 'center', spacing: 11 }));
+    const kp = 36;
+    let y = PAD + kp * CAP;
+    ops.push(textOp(measure, 'ESTA SEMANA', F(700, kp), { x: WIDTH / 2, y, align: 'center', spacing: Math.round(kp * 0.3) }));
     const px = 300;
-    y += 40 + px * CAP;
+    y += 52 + px * CAP;
     ops.push(textOp(measure, String(w.count), F(900, px), { x: WIDTH / 2, y, align: 'center', spacing: -10 }));
-    y += 48 + 36 * CAP;
-    ops.push(textOp(measure, w.count === 1 ? 'ENTRENO' : 'ENTRENOS', F(700, 36), { x: WIDTH / 2, y, align: 'center', spacing: 12 }));
-    const r = 32, step = 104, x0 = WIDTH / 2 - step * 3;
-    y += 70 + r;
+    const ep = 46;
+    y += 56 + ep * CAP;
+    ops.push(textOp(measure, w.count === 1 ? 'ENTRENO' : 'ENTRENOS', F(800, ep), { x: WIDTH / 2, y, align: 'center', spacing: Math.round(ep * 0.26) }));
+    const r = 34, step = 112, x0 = WIDTH / 2 - step * 3, lp = 32;
+    y += 84 + r;
     'LMMJVSD'.split('').forEach((letter, i) => {
       const cx = x0 + step * i;
       ops.push(w.days[i]
         ? { op: 'circle', cx, cy: y, r, color: 'fg' }
         : { op: 'circle', cx, cy: y, r: r - 2, stroke: 4, color: 'fg', alpha: 0.45 });
-      ops.push(textOp(measure, letter, F(600, 24), { x: cx, y: y + r + 44, align: 'center', alpha: 0.7 }));
+      ops.push(textOp(measure, letter, F(700, lp), { x: cx, y: y + r + 30 + lp * CAP, align: 'center', alpha: w.days[i] ? 0.9 : 0.5 }));
     });
-    y += r + 44;
+    y += r + 30 + lp * CAP;
     if (w.meta) {
-      y += 64;
-      ops.push(textOp(measure, w.meta, F(600, 28), { x: WIDTH / 2, y, align: 'center', spacing: 6, alpha: 0.85 }));
+      const m = fitText(measure, w.meta, (p) => F(600, p), WIDTH - PAD * 2, 38, 26, 0.14);
+      y += 64 + m.px * CAP;
+      ops.push(textOp(measure, m.text, F(600, m.px), { x: WIDTH / 2, y, align: 'center', spacing: m.spacing, alpha: 0.85 }));
     }
-    y += 56;
-    const lk = lockupOps(measure, WIDTH / 2, y, 26, 'center');
+    y += 76;
+    const lk = signOps(measure, WIDTH / 2, y);
     ops.push(...lk.ops);
     return { kind: 'semana', width: WIDTH, height: Math.round(y + lk.height + PAD * 0.8), ops };
   }
@@ -982,103 +1019,105 @@
     const step = (px * CAP - wp * CAP) / (words.length - 1);
     words.forEach((t, i) => ops.push(textOp(measure, t, F(800, wp), { x: wx, y: base - px * CAP + wp * CAP + i * step, spacing: Math.round(wp * 0.08) })));
     const wordsW = Math.max(...words.map((t) => spacedWidth(t, Math.round(wp * 0.08), (c) => measure(c, F(800, wp)))));
-    let y = base + 64;
-    const lk = lockupOps(measure, PAD, y, 26, 'left');
+    const y = base + 76;
+    const lk = signOps(measure, PAD, y, 'left');
     ops.push(...lk.ops);
-    return { kind: 'racha', width: Math.ceil(wx + wordsW + PAD), height: Math.round(y + lk.height + PAD * 0.8), ops };
+    return { kind: 'racha', width: Math.ceil(Math.max(wx + wordsW, PAD + lk.width) + PAD), height: Math.round(y + lk.height + PAD * 0.8), ops };
   }
 
   // ── Estilos de la marca: HABIT Crew ─────────────────────────────────────
 
   // «Crew»: la marca apilada, como en una playera. El logo, HABIT espaciado al ancho exacto de
-  // CREW, y CREW enorme; debajo, el dato (`rows`, un renglón cada uno) o la frase (`para`).
+  // CREW y CREW enorme; debajo, el dato (`rows`, un renglón cada uno) o la frase (`para`).
+  // HABIT toma el tamaño con el que ese espacio queda en ~0.5em: con uno fijo y chico, las
+  // letras quedaban sueltas de lado a lado.
   function crewStackLayout(measure, o) {
     const maxW = WIDTH - PAD * 2;
     const ops = [];
     let y = PAD;
-    const logo = 92;
-    ops.push({ op: 'logo', x: WIDTH / 2 - logo / 2, y, size: logo });
-    y += logo + 44;
-    const cp = fitPx(measure, 'CREW', (p) => F(900, p), maxW, 330, 160, -0.03);
+    const cp = fitPx(measure, 'CREW', (p) => F(900, p), maxW - 60, 300, 160, -0.03);
     const csp = Math.round(cp * -0.03);
     const crewW = spacedWidth('CREW', csp, (c) => measure(c, F(900, cp)));
-    const hp = Math.round(cp * 0.2);
-    const habitW = [...'HABIT'].reduce((n, c) => n + measure(c, F(700, hp)), 0);
-    y += hp * CAP;
-    ops.push(textOp(measure, 'HABIT', F(700, hp), { x: WIDTH / 2, y, align: 'center', spacing: Math.max(4, (crewW - habitW) / 4) }));
-    y += 34 + cp * CAP;
+    const habitAt = (p) => [...'HABIT'].reduce((n, c) => n + measure(c, F(800, p)), 0);
+    const hp = Math.round(crewW / (habitAt(100) / 100 + 4 * 0.5));
+    const logo = Math.round(hp * 1.15);
+    ops.push({ op: 'logo', x: WIDTH / 2 - logo / 2, y, size: logo });
+    y += logo + Math.round(hp * 0.5) + hp * CAP;
+    ops.push(textOp(measure, 'HABIT', F(800, hp), { x: WIDTH / 2, y, align: 'center', spacing: (crewW - habitAt(hp)) / 4 }));
+    y += Math.round(cp * 0.13) + cp * CAP;
     ops.push(textOp(measure, 'CREW', F(900, cp), { x: WIDTH / 2, y, align: 'center', spacing: csp }));
-    y += 30;
+    y += 20;
     if (o.para) {
-      const { size: px, lines } = fitLines(o.para, measure, (p) => F(500, p), [52, 46, 42, 38, 34], maxW, 5);
+      const { size: px, lines } = fitLines(o.para, measure, (p) => F(500, p), [84, 72, 62, 56, 50, 46, 42, 38], maxW, fewLines(56, 2, 5));
       const lh = px * 1.26;
-      y += 34 + px * 0.8;
+      y += 60 + px * 0.8;
       lines.forEach((l, i) => ops.push(textOp(measure, l, F(500, px), { x: WIDTH / 2, y: y + i * lh, align: 'center' })));
       y += (lines.length - 1) * lh;
     }
     (o.rows || []).filter((r) => r && r.text).forEach((r, i) => {
       const t = fitText(measure, r.text, (p) => F(r.weight, p), maxW, r.max, r.min, r.spacing);
-      y += (i ? 26 : 34) + t.px * CAP;
+      y += (i ? 36 : 64) + t.px * CAP;
       ops.push(textOp(measure, t.text, F(r.weight, t.px), { x: WIDTH / 2, y, align: 'center', spacing: t.spacing, alpha: r.alpha }));
     });
     return { kind: 'crew', width: WIDTH, height: Math.round(y + PAD * 0.9), ops };
   }
 
   // «Carnet»: la credencial de la crew. Una tarjeta rellena (proporción de tarjeta de banco) con
-  // el logotipo, su chip y el dato grande —o la frase—; abajo, el día y dónde se baja la app.
+  // el logotipo, el dato grande —o la frase— y el logo enorme y tenue saliendo por su borde,
+  // como el holograma de una tarjeta; abajo, el día y dónde se baja la app.
   // c: { kicker, value, unit, line, para, foot }.
   function carnetLayout(measure, c) {
-    const x = 40, w = WIDTH - 80, pad = 64, top = 40;
+    const x = 40, w = WIDTH - 80, pad = 68, top = 40;
     const ix = x + pad, ir = x + w - pad, iw = ir - ix;
     const body = [];
-    let y = top + 60;
-    const lk = lockupOps(measure, ix, y, 34, 'left', 'inv');
+    let y = top + 64;
+    const lk = lockupOps(measure, ix, y, SIG, 'left', 'inv');
     body.push(...lk.ops);
     if (c.kicker) {
-      const k = fitText(measure, c.kicker, (p) => F(600, p), iw - lk.width - 40, 22, 16, 0.26);
-      body.push(textOp(measure, k.text, F(600, k.px), { x: ir, y: y + lk.height / 2 + k.px * 0.36, align: 'right', spacing: k.spacing, color: 'inv', alpha: 0.7 }));
+      const k = fitText(measure, c.kicker, (p) => F(700, p), iw - lk.width - 40, 30, 20, 0.2);
+      body.push(textOp(measure, k.text, F(700, k.px), { x: ir, y: y + lk.height / 2 + k.px * CAP / 2, align: 'right', spacing: k.spacing, color: 'inv', alpha: 0.6 }));
     }
-    y += lk.height + 46;
-    // El chip, en trazo: lo que hace que se lea como tarjeta.
-    const chipW = 92, chipH = 70;
-    body.push({ op: 'rect', x: ix, y, w: chipW, h: chipH, r: 14, stroke: 3, color: 'inv', alpha: 0.5 });
-    body.push({ op: 'line', x1: ix, y1: y + chipH / 2, x2: ix + chipW, y2: y + chipH / 2, w: 3, color: 'inv', alpha: 0.5 });
-    body.push({ op: 'line', x1: ix + chipW / 2, y1: y, x2: ix + chipW / 2, y2: y + chipH, w: 3, color: 'inv', alpha: 0.5 });
-    y += chipH + 50;
+    y += lk.height + 90;
     if (c.para) {
-      const { size: px, lines } = fitLines(c.para, measure, (p) => F(600, p), [54, 48, 44, 40, 36, 32], iw, 5);
-      const lh = px * 1.22;
-      y += px * 0.8;
+      const { size: px, lines } = fitLines(c.para, measure, (p) => F(600, p), [96, 84, 72, 60, 54, 48, 44, 40, 36], iw, fewLines(60, 2, 5));
+      const lh = px * 1.2;
+      y += px * CAP;
       lines.forEach((l, i) => body.push(textOp(measure, l, F(600, px), { x: ix, y: y + i * lh, color: 'inv' })));
       y += (lines.length - 1) * lh;
     } else {
-      const up = 38, usp = Math.round(up * 0.2);
-      const unitW = c.unit ? spacedWidth(c.unit, usp, (ch) => measure(ch, F(700, up))) + 24 : 0;
-      const vp = fitPx(measure, c.value, (p) => F(900, p), iw - unitW, 170, 80, -0.03);
+      const up = 48, usp = Math.round(up * 0.08);
+      const unitW = c.unit ? spacedWidth(c.unit, usp, (ch) => measure(ch, F(800, up))) + 26 : 0;
+      const vp = fitPx(measure, c.value, (p) => F(900, p), iw - unitW, 210, 80, -0.03);
       const vsp = Math.round(vp * -0.03);
       y += vp * CAP;
       body.push(textOp(measure, c.value, F(900, vp), { x: ix, y, spacing: vsp, color: 'inv' }));
       if (c.unit) {
         const vw = spacedWidth(c.value, vsp, (ch) => measure(ch, F(900, vp)));
-        body.push(textOp(measure, c.unit, F(700, up), { x: ix + vw + 24, y, spacing: usp, color: 'inv' }));
+        body.push(textOp(measure, c.unit, F(800, up), { x: ix + vw + 26, y, spacing: usp, color: 'inv' }));
       }
       if (c.line) {
-        const t = fitText(measure, c.line, (p) => F(600, p), iw, 28, 20, 0.14);
-        y += 50 + t.px * CAP;
-        body.push(textOp(measure, t.text, F(600, t.px), { x: ix, y, spacing: t.spacing, color: 'inv', alpha: 0.8 }));
+        const t = fitText(measure, c.line, (p) => F(600, p), iw, 36, 30, 0.1);
+        y += 60 + t.px * CAP;
+        body.push(textOp(measure, t.text, F(600, t.px), { x: ix, y, spacing: t.spacing, color: 'inv', alpha: 0.75 }));
       }
     }
     // Abajo, pegado al borde: la tarjeta guarda su proporción aunque el contenido sea corto.
-    const fp = 22;
-    const bottom = Math.max(top + Math.round(w / 1.586), y + 70 + fp * CAP + 52);
-    const fy = bottom - 52;
+    const fp = 30;
+    const bottom = Math.max(top + Math.round(w / 1.586), y + 100 + fp * CAP + 60);
+    const fy = bottom - 60;
     const urlW = measure(CREW_URL, F(500, fp));
-    body.push(textOp(measure, CREW_URL, F(500, fp), { x: ir, y: fy, align: 'right', color: 'inv', alpha: 0.7 }));
+    body.push(textOp(measure, CREW_URL, F(500, fp), { x: ir, y: fy, align: 'right', color: 'inv', alpha: 0.6 }));
     if (c.foot) {
-      const f = fitText(measure, c.foot, (p) => F(600, p), iw - urlW - 40, fp, 16, 0.22);
-      body.push(textOp(measure, f.text, F(600, f.px), { x: ix, y: fy, spacing: f.spacing, color: 'inv' }));
+      const f = fitText(measure, c.foot, (p) => F(700, p), iw - urlW - 40, fp, 22, 0.16);
+      body.push(textOp(measure, f.text, F(700, f.px), { x: ix, y: fy, spacing: f.spacing, color: 'inv' }));
     }
-    const ops = [{ op: 'rect', x, y: top, w, h: bottom - top, r: 52 }, ...body];
+    const h = bottom - top, wm = Math.round(h * 0.94);
+    const card = { x, y: top, w, h, r: 52 };
+    const ops = [
+      { op: 'rect', ...card },
+      { op: 'logo', x: x + w - wm * 0.6, y: top + (h - wm) / 2, size: wm, color: 'inv', alpha: 0.07, clip: card },
+      ...body
+    ];
     return { kind: 'carnet', width: WIDTH, height: bottom + top, ops };
   }
 
@@ -1106,17 +1145,19 @@
       { op: 'circle', cx, cy, r: inner, stroke: 4 },
       { op: 'arc', cx, cy, radius, font: sealFont(px), px, spacing, chars }
     ];
-    const maxW = inner * 2 * 0.74;
-    const vp = fitPx(measure, value, (p) => F(900, p), maxW, 230, 90, -0.03);
-    const logo = 84, up = 34;
-    const blockH = logo + 36 + vp * CAP + (unit ? 42 + up * CAP : 0);
+    const maxW = inner * 2 * 0.72;
+    const vp = fitPx(measure, value, (p) => F(900, p), maxW, 240, 90, -0.03);
+    const logo = Math.round(inner * 0.3);
+    const u = unit ? fitText(measure, unit, (p) => F(700, p), maxW * 0.9, 40, 24, 0.24) : null;
+    // La coma de «4,320» baja de la línea base: la unidad se aparta lo que baja.
+    const gapU = 44 + (/,/.test(value) ? Math.round(vp * 0.08) : 0);
+    const blockH = logo + 44 + vp * CAP + (u ? gapU + u.px * CAP : 0);
     let y = cy - blockH / 2;
     ops.push({ op: 'logo', x: cx - logo / 2, y, size: logo });
-    y += logo + 36 + vp * CAP;
+    y += logo + 44 + vp * CAP;
     ops.push(textOp(measure, value, F(900, vp), { x: cx, y, align: 'center', spacing: Math.round(vp * -0.03) }));
-    if (unit) {
-      const u = fitText(measure, unit, (p) => F(700, p), maxW * 0.9, up, 22, 0.3);
-      y += 42 + u.px * CAP;
+    if (u) {
+      y += gapU + u.px * CAP;
       ops.push(textOp(measure, u.text, F(700, u.px), { x: cx, y, align: 'center', spacing: u.spacing }));
     }
     return { kind: 'insignia', width: size, height: size, ops };
@@ -1167,8 +1208,8 @@
           id: 'crew', label: 'Crew', layout: (d, m) => {
             const f = workoutFacts(d);
             return crewStackLayout(m, { rows: [
-              { text: (f.hero.value + ' ' + f.hero.unit).trim(), weight: 800, max: 84, min: 44, spacing: 0.02 },
-              { text: [f.title.toUpperCase(), f.day].filter(Boolean).join(' · '), weight: 600, max: 30, min: 20, spacing: 0.22, alpha: 0.8 }
+              { text: (f.hero.value + ' ' + f.hero.unit).trim(), weight: 800, max: 120, min: 56, spacing: 0 },
+              { text: [f.title.toUpperCase(), f.day].filter(Boolean).join(' · '), weight: 600, max: 40, min: 30, spacing: 0.2, alpha: 0.8 }
             ] });
           }
         },
@@ -1220,8 +1261,8 @@
           id: 'crew', label: 'Crew', layout: (d, m) => {
             const w = weekFacts(d);
             return crewStackLayout(m, { rows: [
-              { text: `${w.count} ${entrenos(w.count)}`, weight: 800, max: 84, min: 44, spacing: 0.02 },
-              { text: w.meta || 'ESTA SEMANA', weight: 600, max: 30, min: 20, spacing: 0.22, alpha: 0.8 }
+              { text: `${w.count} ${entrenos(w.count)}`, weight: 800, max: 120, min: 56, spacing: 0 },
+              { text: w.meta || 'ESTA SEMANA', weight: 600, max: 40, min: 30, spacing: 0.2, alpha: 0.8 }
             ] });
           }
         },
@@ -1229,8 +1270,9 @@
           id: 'carnet', label: 'Carnet', layout: (d, m) => {
             const w = weekFacts(d);
             return carnetLayout(m, {
-              kicker: 'MI SEMANA', value: String(w.count), unit: entrenos(w.count), line: w.meta,
-              foot: [w.range, w.streak >= 2 ? `${w.streak} SEMANAS SEGUIDAS` : ''].filter(Boolean).join(' · ')
+              // La racha arriba, donde cabe entera; abajo junto a la dirección quedaba diminuta.
+              kicker: w.streak >= 2 ? `${w.streak} SEMANAS SEGUIDAS` : 'MI SEMANA',
+              value: String(w.count), unit: entrenos(w.count), line: w.meta, foot: w.range || 'MI SEMANA'
             });
           }
         },
@@ -1275,7 +1317,7 @@
       sheetReady = new Promise((r) => { link.onload = r; link.onerror = r; });
       doc.head.appendChild(link);
     }
-    const wanted = [F(100, 80), F(300, 60), F(300, 60, true), F(400, 40), F(500, 40), F(600, 40), F(700, 40), F(800, 40), F(800, 80, true), F(900, 80)];
+    const wanted = [F(200, 80), F(300, 60), F(300, 60, true), F(400, 40), F(500, 40), F(600, 40), F(700, 40), F(800, 40), F(800, 80, true), F(900, 80)];
     const load = sheetReady.then(() => (doc.fonts && doc.fonts.load
       ? Promise.all(wanted.map((f) => doc.fonts.load(f, 'HABIT0123456789“”áéíóúÁÉÍÓÚñÑ·:/.,Nº')))
       : null));
@@ -1315,16 +1357,20 @@
     });
   }
 
-  // El logo viene blanco; en cualquier otro color se tiñe en un lienzo aparte (source-in pinta
-  // solo donde el logo tiene tinta, y conserva sus bordes suaves).
+  // Las disposiciones miden el logo por lo que se ve: `box` es su tinta. El PNG trae margen
+  // (la tinta es LOGO_INK de su cuadro), así que se dibuja entero, más grande y centrado en
+  // ella; medirlo por el cuadro dejaba cada logo en dos tercios del tamaño que se pedía.
+  // Viene blanco; en cualquier otro color se tiñe en un lienzo aparte (source-in pinta solo
+  // donde el logo tiene tinta, y conserva sus bordes suaves).
   function drawLogo(ctx, img, box, color, doc) {
-    if (String(color).toLowerCase() === COLORS.blanco) { ctx.drawImage(img, box.x, box.y, box.size, box.size); return; }
-    const off = newCanvas(doc, box.size, box.size);
+    const full = box.size / LOGO_INK, x = box.x - (full - box.size) / 2, y = box.y - (full - box.size) / 2;
+    if (String(color).toLowerCase() === COLORS.blanco) { ctx.drawImage(img, x, y, full, full); return; }
+    const off = newCanvas(doc, full, full);
     const o = off.getContext('2d');
-    o.drawImage(img, 0, 0, box.size, box.size);
+    o.drawImage(img, 0, 0, full, full);
     o.globalCompositeOperation = 'source-in';
-    o.fillStyle = color; o.fillRect(0, 0, box.size, box.size);
-    ctx.drawImage(off, box.x, box.y);
+    o.fillStyle = color; o.fillRect(0, 0, full, full);
+    ctx.drawImage(off, x, y, full, full);
   }
 
   function drawLockup(ctx, L, img, color, doc) {
@@ -1370,6 +1416,8 @@
           put(false);
         } else put(false);
       } else if (o.op === 'logo') {
+        // `clip`: el logo se corta en esa forma (la marca de agua del carnet sale de su borde).
+        if (o.clip) { roundRectPath(ctx, o.clip.x, o.clip.y, o.clip.w, o.clip.h, o.clip.r); ctx.clip(); }
         drawLogo(ctx, img, o, color, doc);
       } else if (o.op === 'rect') {
         roundRectPath(ctx, o.x, o.y, o.w, o.h, o.r);
