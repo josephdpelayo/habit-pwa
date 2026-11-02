@@ -9,7 +9,7 @@ exercise_catalog.animation_url.
 No pretenden ser el video: son el dibujo que hace legible la escalera desde el día uno, y
 el día que haya video de cada escalón se sube desde Admin y pisa esta URL.
 
-Tres decisiones que vale la pena no deshacer:
+Decisiones que vale la pena no deshacer:
 
   · **La figura se dibuja ya en su posición**, en coordenadas absolutas. La animación es
     solo la oscilación de encima. Así el generador sabe exactamente dónde cae cada
@@ -20,6 +20,16 @@ Tres decisiones que vale la pena no deshacer:
     ejercicio: el jalón de talón y el traspaso de peso.
   · **El encuadre se calcula solo.** Un colgado invertido ocupa alto y un front lever ocupa
     ancho; cuadrar los quince a mano era perseguir recortes.
+  · **Puntos de referencia en mano, hombro, cadera, rodilla y pie** (`data-j`), pequeños y
+    del morado de la app. Lo que define un escalón es una alineación —en el tuck avanzado,
+    hombro, cadera y pie a la misma altura; en una parada de manos, todo en una vertical—,
+    y con los puntos esa alineación se ve sin tener que adivinar dónde termina cada palo.
+    scripts/check-skills.js las comprueba leyendo esos puntos, así que una pose mal
+    dibujada falla la prueba en vez de salir a la escalera.
+  · **Una postura es la misma en todas las escaleras.** El tuck y el tuck avanzado salen de
+    TUCK y ADV_TUCK tanto en front lever como en planche y back lever; lo único que cambia es
+    de qué lado queda el pecho, y eso lo resuelve el eje del torso. Así se corrigieron los
+    tucks de planche y back lever, que tenían las rodillas del lado de la espalda.
 
 Correr:  python3 scripts/make-skill-anim.py
 """
@@ -30,6 +40,8 @@ OUT = pathlib.Path(__file__).resolve().parent.parent / 'skill-anim'
 
 INK = '#e8e9ee'                   # la figura
 DIM = 'rgba(232,233,238,.3)'      # barra, piso y muro
+JOINT = '#a78bfa'                 # los puntos de referencia: el morado de la app (--purple)
+JOINT_R = 3.2                     # sutiles: en la miniatura de 58 px casi desaparecen
 HEAD_R, STROKE, PAD = 11, 7, 16
 
 # Largos del cuerpo. Proporciones de persona, no de palo.
@@ -37,6 +49,23 @@ ARM, TORSO, THIGH, SHIN, NECK = 52, 48, 40, 38, 16
 CYCLE = '5s'
 SWAY = 1.5                        # grados: lo justo para que no parezca un dibujo muerto
 FACE_UP, FACE_DOWN = 180, 0       # hacia dónde mira la cara, en el marco sin rotar
+FACE_RIGHT = -90                  # de pie, mirando al frente (el muscle-up arriba de la barra)
+
+# Las posturas de piernas, en grados respecto al segmento anterior (0 = en línea). El signo
+# negativo dobla hacia el lado del pecho cuando el torso apunta lejos de la cabeza, que es
+# como lo dibujan las tres escaleras de lever y planche: por eso valen igual en todas.
+#
+# Tuck: muslos pegados al pecho y talones a los glúteos.
+TUCK = (-140, 158)
+# Tuck avanzado: rodilla a 90° y la cadera abierta lo justo para que el pie vuelva a la línea
+# de hombro y cadera, que es el estándar de la posición. No es un número elegido a ojo: con
+# la rodilla en ángulo recto, el pie cae en la línea cuando THIGH·sen θ = SHIN·cos θ.
+ADV_TUCK = (-math.degrees(math.atan2(SHIN, THIGH)), 90)
+# Straddle: las piernas se abren hacia los lados, así que de perfil siguen sobre la línea y
+# solo se ven más cortas. La de atrás va tenue y apenas desviada, para que se lean dos. El
+# dibujo anterior las abría arriba y abajo, que es una tijera y no un straddle.
+STRADDLE_SCALE = 0.8              # escorzo de una pierna abierta unos 37° hacia el lado
+STRADDLE_DEPTH = 7                # grados de la pierna de atrás: profundidad, no apertura
 
 
 def rot(p, deg, about):
@@ -56,7 +85,15 @@ class Fig:
     """Acumula el dibujo y, de paso, cada punto que toca, para encuadrar al final."""
 
     def __init__(self):
-        self.parts, self.pts = [], []
+        self.parts, self.pts, self.dots = [], [], []
+
+    def joint(self, p, name):
+        """Un punto de referencia. Van aparte de los trazos para pintarse encima de todos."""
+        self.dots.append(f'<circle cx="{p[0]:.1f}" cy="{p[1]:.1f}" r="{JOINT_R}" fill="{JOINT}" '
+                         f'data-j="{name}"/>')
+
+    def drawn(self):
+        return self.parts + self.dots
 
     def line(self, a, b, w=STROKE, color=INK, opacity=1.0, measure=True):
         if measure:
@@ -80,18 +117,21 @@ class Fig:
         x0 -= (side - w) / 2
         y0 -= (side - h) / 2
         w = h = side
+        # Los puntos del marco (las manos) van al final, encima de la figura que se mueve.
         return (f'<svg xmlns="http://www.w3.org/2000/svg" '
                 f'viewBox="{x0:.0f} {y0:.0f} {w:.0f} {h:.0f}" preserveAspectRatio="xMidYMid meet" '
                 f'role="img" aria-label="{title}">\n  <title>{title}</title>\n  '
-                + '\n  '.join(self.parts) + '\n' + groups + '</svg>\n')
+                + '\n  '.join(self.parts) + '\n' + groups
+                + ''.join(f'  {d}\n' for d in self.dots) + '</svg>\n')
 
 
-def pose(fig, shoulder, axis, hip_deg=0, knee_deg=0, legs='together', split=0, facing=None):
-    """El cuerpo del hombro hacia abajo, ya en su posición.
+def pose(fig, shoulder, axis, hip_deg=0, knee_deg=0, legs='together', facing=None):
+    """El cuerpo del hombro hacia abajo, ya en su posición. Marca hombro, cadera, rodilla y
+    pie de la pierna de adelante, y devuelve esas articulaciones.
 
     axis: hacia dónde apunta el torso (0 = abajo, -90 = horizontal a la derecha, -180 = arriba).
     hip_deg / knee_deg: cuánto se dobla cada articulación respecto al segmento anterior.
-    legs: 'together' | 'split' (straddle) | 'one' (una estirada y otra doblada).
+    legs: 'together' | 'straddle' | 'one' (la de adelante estirada, la de atrás doblada).
     facing: hacia dónde mira la cara (0 = abajo, 180 = arriba), o None para no marcarla.
     """
     hip = limb(shoulder, axis, TORSO)
@@ -109,17 +149,24 @@ def pose(fig, shoulder, axis, hip_deg=0, knee_deg=0, legs='together', split=0, f
         tip = rot((head[0], head[1] + HEAD_R + 7), facing, head)
         fig.line(head, tip, w=STROKE - 2)
 
-    if legs == 'one':
-        pairs = [(0, 0), (hip_deg, knee_deg)]
-    elif legs == 'split':
-        pairs = [(split, knee_deg), (-split, knee_deg)]
+    # (dirección del muslo, doblez de rodilla, escala, opacidad). La pierna de atrás va primero
+    # y tenue; la de adelante encima, y es la que lleva los puntos.
+    if legs == 'straddle':
+        # La de atrás se desvía hacia abajo en pantalla, sea cual sea el lado del torso.
+        back = max((axis + STRADDLE_DEPTH, axis - STRADDLE_DEPTH), key=lambda a: limb(hip, a, 10)[1])
+        specs = [(back, 0, STRADDLE_SCALE, .5), (axis, 0, STRADDLE_SCALE, 1.0)]
+    elif legs == 'one':
+        specs = [(axis + hip_deg, knee_deg, 1, .5), (axis, 0, 1, 1.0)]
     else:
-        pairs = [(hip_deg, knee_deg), (hip_deg, knee_deg)]
-    for i, (hd, kd) in enumerate(pairs):
-        op = 1.0 if i == 0 else .5                     # la pierna de atrás, más tenue
-        knee = limb(hip, axis + hd, THIGH)
+        specs = [(axis + hip_deg, knee_deg, 1, .5), (axis + hip_deg, knee_deg, 1, 1.0)]
+    for thigh_dir, kd, k, op in specs:
+        knee = limb(hip, thigh_dir, THIGH * k)
+        foot = limb(knee, thigh_dir + kd, SHIN * k)
         fig.line(hip, knee, opacity=op)
-        fig.line(knee, limb(knee, axis + hd + kd, SHIN), opacity=op)
+        fig.line(knee, foot, opacity=op)
+    for p, name in ((shoulder, 'shoulder'), (hip, 'hip'), (knee, 'knee'), (foot, 'foot')):
+        fig.joint(p, name)
+    return {'shoulder': shoulder, 'hip': hip, 'knee': knee, 'foot': foot}
 
 
 def swaying(fig_parts, about, values=None, times=None):
@@ -136,42 +183,72 @@ def swaying(fig_parts, about, values=None, times=None):
             + '\n    '.join(fig_parts) + '\n  </g>\n')
 
 
-# ───────────────────────────── Front lever ─────────────────────────────
-
-HANDS = (110, 40)
-SHOULDER = (HANDS[0], HANDS[1] + ARM)
-
-FRONT_LEVER = {
-    # slug: (torso, cadera, rodilla, piernas, apertura, un brazo)
-    'colgado-invertido':          (-180,    0,    0, 'together',  0, False),
-    'front-lever-tuck':           ( -90, -140,  158, 'together',  0, False),
-    'front-lever-tuck-avanzado':  ( -90,  -38,  100, 'together',  0, False),
-    'front-lever-a-una-pierna':   ( -90, -120,  140, 'one',       0, False),
-    'front-lever-straddle':       ( -90,    0,    0, 'split',    26, False),
-    'front-lever-half-lay':       ( -90,    0,   95, 'together',  0, False),
-    'front-lever-completo':       ( -90,    0,    0, 'together',  0, False),
-    'front-lever-a-un-brazo':     ( -90,    0,    0, 'together',  0, True),
-}
+def lever_arms(fig, shoulder, one_arm=False):
+    if one_arm:
+        fig.line(HANDS, shoulder)
+    else:
+        fig.line((HANDS[0] - 7, HANDS[1]), (shoulder[0] - 7, shoulder[1]))
+        fig.line((HANDS[0] + 7, HANDS[1]), (shoulder[0] + 7, shoulder[1]), opacity=.5)
 
 
-def front_lever(cfg, title):
-    axis, hip, knee, legs, split, one_arm = cfg
-    person = Fig()
-    pose(person, SHOULDER, axis, hip, knee, legs, split, facing=FACE_UP)
-
+def hang_frame(person, shoulder, one_arm=False, arms=True):
+    """La barra, los brazos y el punto de la mano para todo lo que cuelga con los brazos
+    estirados: front lever, back lever y sus elevaciones. `arms=False` cuando los brazos se
+    mueven y van dentro de la animación (las elevaciones)."""
     frame = Fig()
     # La barra abarca lo que ocupa la pose: una barra fija dejaba al colgado invertido con
     # media barra vacía y al lever completo con la barra cortada.
     xs = [p[0] for p in person.pts] + [HANDS[0]]
     frame.line((min(xs) - 14, HANDS[1]), (max(xs) + 14, HANDS[1]), w=5, color=DIM)
-    if one_arm:
-        frame.line(HANDS, SHOULDER)
-    else:
-        frame.line((HANDS[0] - 7, HANDS[1]), (SHOULDER[0] - 7, SHOULDER[1]))
-        frame.line((HANDS[0] + 7, HANDS[1]), (SHOULDER[0] + 7, SHOULDER[1]), opacity=.5)
+    if arms:
+        lever_arms(frame, shoulder, one_arm)
     frame.circle(HANDS, 6, DIM)
+    frame.joint(HANDS, 'hand')
     frame.pts += person.pts
-    return frame.svg(title, swaying(person.parts, SHOULDER))
+    return frame
+
+
+# ───────────────────────────── Front lever ─────────────────────────────
+
+HANDS = (110, 40)
+SHOULDER = (HANDS[0], HANDS[1] + ARM)     # colgado: el hombro justo bajo las manos
+
+# En una palanca los brazos NO cuelgan en vertical: la palanca la sostiene la espalda (el
+# dorsal lleva el brazo hacia la cadera), así que el brazo va en diagonal y la barra queda
+# sobre el pecho, no sobre el hombro. Vale para front lever y back lever: en los dos la
+# mano se adelanta hacia el lado de la cadera.
+LEVER_ARM = 25
+
+
+def lever_shoulder(axis):
+    """Dónde queda el hombro en una palanca con el torso apuntando a `axis` (-90 = derecha,
+    90 = izquierda): abajo de la barra y corrido hacia el lado de la cabeza."""
+    toward_head = 1 if axis < 0 else -1     # rotar +: el hombro se corre a la izquierda
+    return rot(SHOULDER, toward_head * LEVER_ARM, HANDS)
+
+FRONT_LEVER = {
+    # slug: (torso, (cadera, rodilla), piernas, un brazo)
+    'colgado-invertido':          (-180, (0, 0),   'together', False),
+    'front-lever-tuck':           ( -90, TUCK,     'together', False),
+    'front-lever-tuck-avanzado':  ( -90, ADV_TUCK, 'together', False),
+    # La de adelante estirada en la línea; la de atrás, en tuck.
+    'front-lever-a-una-pierna':   ( -90, TUCK,     'one',      False),
+    'front-lever-straddle':       ( -90, (0, 0),   'straddle', False),
+    # Cadera abierta en la línea y rodillas en ángulo recto: la espinilla cuelga vertical.
+    'front-lever-half-lay':       ( -90, (0, 90),  'together', False),
+    'front-lever-completo':       ( -90, (0, 0),   'together', False),
+    'front-lever-a-un-brazo':     ( -90, (0, 0),   'together', True),
+}
+
+
+def front_lever(cfg, title):
+    axis, (hip, knee), legs, one_arm = cfg
+    # El colgado invertido no es palanca: los brazos van pegados al cuerpo, en vertical.
+    shoulder = SHOULDER if axis == -180 else lever_shoulder(axis)
+    person = Fig()
+    pose(person, shoulder, axis, hip, knee, legs, facing=FACE_UP)
+    frame = hang_frame(person, shoulder, one_arm)
+    return frame.svg(title, swaying(person.drawn(), shoulder))
 
 
 # ───────────────────────────── Parada de manos ─────────────────────────────
@@ -181,7 +258,8 @@ HS_SHOULDER = (HS_HANDS[0], HS_HANDS[1] - ARM)
 
 HANDSTAND = {
     #                                        torso, muro, modo
-    'plancha-en-pared-45-grados':            (-130, 'back',  'static'),
+    # Lo que pide el escalón: cuerpo a 45° del piso con los brazos verticales.
+    'plancha-en-pared-45-grados':            (-135, 'back',  'static'),
     'parada-de-manos-en-pared':              (-171, 'back',  'static'),
     'parada-de-manos-de-frente-a-la-pared':  (-180, 'front', 'static'),
     'heel-pulls-toe-pulls':                  (-180, 'front', 'pulls'),
@@ -193,8 +271,12 @@ HANDSTAND = {
 
 def handstand(cfg, title):
     axis, wall, mode = cfg
+    # En el traspaso el estándar es el hombro apilado sobre la mano que carga: el cuerpo entero
+    # se corre encima de ella y la otra queda en diagonal, descargándose.
+    loaded = (HS_HANDS[0] - 9, HS_HANDS[1])
+    shoulder = (loaded[0], HS_SHOULDER[1]) if mode == 'shift' else HS_SHOULDER
     person = Fig()
-    pose(person, HS_SHOULDER, axis, facing=FACE_DOWN)
+    pose(person, shoulder, axis, facing=FACE_DOWN)
 
     frame = Fig()
     xs = [p[0] for p in person.pts]
@@ -206,11 +288,14 @@ def handstand(cfg, title):
 
     if mode == 'onearm':
         frame.line(HS_HANDS, HS_SHOULDER)
+        frame.joint(HS_HANDS, 'hand')
     elif mode == 'shift':
-        # Una mano se descarga hasta quedar en las puntas, y vuelve. Es el ejercicio.
-        frame.line((HS_HANDS[0] - 9, HS_HANDS[1]), (HS_SHOULDER[0] - 4, HS_SHOULDER[1]))
+        # Una mano se descarga hasta quedar en las puntas, y vuelve. Es el ejercicio. El punto
+        # de referencia es la mano que carga, la que queda apilada bajo el hombro.
+        frame.line(loaded, shoulder)
+        frame.joint(loaded, 'hand')
         lifted = Fig()
-        lifted.line((HS_HANDS[0] + 9, HS_HANDS[1]), (HS_SHOULDER[0] + 4, HS_SHOULDER[1]), opacity=.5)
+        lifted.line((HS_HANDS[0] + 9, HS_HANDS[1]), (shoulder[0] + 4, shoulder[1]), opacity=.5)
         frame.pts += lifted.pts
         frame.parts.append(
             '<g><animateTransform attributeName="transform" type="translate" '
@@ -219,6 +304,7 @@ def handstand(cfg, title):
     else:
         frame.line((HS_HANDS[0] - 9, HS_HANDS[1]), (HS_SHOULDER[0] - 4, HS_SHOULDER[1]))
         frame.line((HS_HANDS[0] + 9, HS_HANDS[1]), (HS_SHOULDER[0] + 4, HS_SHOULDER[1]), opacity=.5)
+        frame.joint(HS_HANDS, 'hand')
     frame.circle(HS_HANDS, 6, DIM)
     frame.pts += person.pts
 
@@ -228,7 +314,7 @@ def handstand(cfg, title):
         vals = [0, 3.5, 0, -3.5, 0]
     else:
         vals = None
-    return frame.svg(title, swaying(person.parts, HS_SHOULDER, vals))
+    return frame.svg(title, swaying(person.drawn(), shoulder, vals))
 
 
 
@@ -258,20 +344,24 @@ def bent_arm(fig, hand, shoulder, bend, opacity=1.0):
 PL_HANDS = (150, 210)
 
 PLANCHE = {
-    # slug: (inclinación del brazo, torso, cadera, rodilla, piernas, apertura)
-    'planche-lean':           (22,  68,    0,    0, 'together',  0),
-    'plancha-tuck':           (34,  90,  140, -158, 'together',  0),
-    'plancha-tuck-avanzada':  (34,  90,   38, -100, 'together',  0),
-    'plancha-straddle':       (36,  90,    0,    0, 'split',    26),
-    'plancha-completa':       (38,  90,    0,    0, 'together',  0),
+    # slug: (inclinación del brazo, torso, (cadera, rodilla), piernas)
+    # El lean es una plancha de lagartija con los hombros por delante: los pies siguen en el
+    # piso y el cuerpo es una sola recta de hombro a pie.
+    'planche-lean':           (22,  68, (0, 0),   'together'),
+    # Las mismas posturas que el front lever. Antes llevaban el signo al revés y las
+    # rodillas salían del lado de la espalda, que en una planche es imposible.
+    'plancha-tuck':           (34,  90, TUCK,     'together'),
+    'plancha-tuck-avanzada':  (34,  90, ADV_TUCK, 'together'),
+    'plancha-straddle':       (36,  90, (0, 0),   'straddle'),
+    'plancha-completa':       (38,  90, (0, 0),   'together'),
 }
 
 
 def planche(cfg, title):
-    arm_deg, axis, hip, knee, legs, split = cfg
+    arm_deg, axis, (hip, knee), legs = cfg
     shoulder = rot((PL_HANDS[0], PL_HANDS[1] - ARM), arm_deg, PL_HANDS)
     person = Fig()
-    pose(person, shoulder, axis, hip, knee, legs, split, facing=FACE_DOWN)
+    pose(person, shoulder, axis, hip, knee, legs, facing=FACE_DOWN)
 
     frame = Fig()
     xs = [q[0] for q in person.pts] + [PL_HANDS[0]]
@@ -279,8 +369,9 @@ def planche(cfg, title):
     frame.line((PL_HANDS[0] - 7, PL_HANDS[1]), (shoulder[0] - 7, shoulder[1]))
     frame.line((PL_HANDS[0] + 7, PL_HANDS[1]), (shoulder[0] + 7, shoulder[1]), opacity=.5)
     frame.circle(PL_HANDS, 6, DIM)
+    frame.joint(PL_HANDS, 'hand')
     frame.pts += person.pts
-    return frame.svg(title, swaying(person.parts, shoulder))
+    return frame.svg(title, swaying(person.drawn(), shoulder))
 
 
 # ───────────────────────────── Back lever ─────────────────────────────
@@ -288,24 +379,20 @@ def planche(cfg, title):
 # Sin la marca de orientación los dos serían el mismo dibujo.
 
 BACK_LEVER = {
-    'back-lever-tuck':       (90, 140, -158, 'together',  0),
-    'back-lever-straddle':   (90,   0,    0, 'split',    26),
-    'back-lever-completo':   (90,   0,    0, 'together',  0),
+    # De cara al piso: con TUCK las rodillas van hacia el piso, del lado del pecho.
+    'back-lever-tuck':       (90, TUCK,   'together'),
+    'back-lever-straddle':   (90, (0, 0), 'straddle'),
+    'back-lever-completo':   (90, (0, 0), 'together'),
 }
 
 
 def back_lever(cfg, title):
-    axis, hip, knee, legs, split = cfg
+    axis, (hip, knee), legs = cfg
+    shoulder = lever_shoulder(axis)
     person = Fig()
-    pose(person, SHOULDER, axis, hip, knee, legs, split, facing=FACE_DOWN)
-    frame = Fig()
-    xs = [q[0] for q in person.pts] + [HANDS[0]]
-    frame.line((min(xs) - 14, HANDS[1]), (max(xs) + 14, HANDS[1]), w=5, color=DIM)
-    frame.line((HANDS[0] - 7, HANDS[1]), (SHOULDER[0] - 7, SHOULDER[1]))
-    frame.line((HANDS[0] + 7, HANDS[1]), (SHOULDER[0] + 7, SHOULDER[1]), opacity=.5)
-    frame.circle(HANDS, 6, DIM)
-    frame.pts += person.pts
-    return frame.svg(title, swaying(person.parts, SHOULDER))
+    pose(person, shoulder, axis, hip, knee, legs, facing=FACE_DOWN)
+    frame = hang_frame(person, shoulder)
+    return frame.svg(title, swaying(person.drawn(), shoulder))
 
 
 # ───────────────────────── Elevaciones a front lever ─────────────────────────
@@ -313,31 +400,36 @@ def back_lever(cfg, title):
 # con los brazos bloqueados. Por eso estas cuatro no se quedan quietas como los aguantes.
 
 FL_RAISE = {
-    'elevacion-a-front-lever-tuck':           (-140,  158, 'together',  0),
-    'elevacion-a-front-lever-tuck-avanzado':  ( -38,  100, 'together',  0),
-    'elevacion-a-front-lever-straddle':       (   0,    0, 'split',    26),
-    'elevaciones-a-front-lever':              (   0,    0, 'together',  0),
+    # La posición de arriba es la del aguante del mismo nombre.
+    'elevacion-a-front-lever-tuck':           (TUCK,     'together'),
+    'elevacion-a-front-lever-tuck-avanzado':  (ADV_TUCK, 'together'),
+    'elevacion-a-front-lever-straddle':       ((0, 0),   'straddle'),
+    'elevaciones-a-front-lever':              ((0, 0),   'together'),
 }
 
 
 def fl_raise(cfg, title):
-    hip, knee, legs, split = cfg
+    (hip, knee), legs = cfg
+    shoulder = lever_shoulder(-90)
     person = Fig()
-    pose(person, SHOULDER, -90, hip, knee, legs, split, facing=FACE_UP)
-    frame = Fig()
+    pose(person, shoulder, -90, hip, knee, legs, facing=FACE_UP)
     # La barra abarca la posición de arriba Y la de colgado, que ocupa alto pero poco ancho.
-    xs = [q[0] for q in person.pts] + [HANDS[0]]
-    frame.line((min(xs) - 14, HANDS[1]), (max(xs) + 14, HANDS[1]), w=5, color=DIM)
-    frame.line((HANDS[0] - 7, HANDS[1]), (SHOULDER[0] - 7, SHOULDER[1]))
-    frame.line((HANDS[0] + 7, HANDS[1]), (SHOULDER[0] + 7, SHOULDER[1]), opacity=.5)
-    frame.circle(HANDS, 6, DIM)
-    frame.pts += person.pts
-    # El cuerpo está dibujado arriba; rotarlo +90 lo devuelve al colgado. La repetición es
-    # subir, aguantar un segundo en la horizontal, bajar con control y esperar abajo.
-    for q in person.pts:
-        frame.pts.append(rot(q, 90, SHOULDER))
-    vals = [90, 0, 0, 90, 90]
-    return frame.svg(title, swaying(person.parts, SHOULDER, vals, times=[0, .30, .46, .78, 1]))
+    frame = hang_frame(person, shoulder, arms=False)
+    arms = Fig()
+    lever_arms(arms, shoulder)
+
+    # Lo dibujado es la posición de arriba (brazos en diagonal, cuerpo horizontal). Abajo, en
+    # el colgado, el brazo vuelve a la vertical —giro en la mano— y el cuerpo cuelga del
+    # hombro —giro en el hombro, que va DENTRO del primero, así que gira con él—. La
+    # repetición es subir, aguantar un segundo en la horizontal, bajar con control y esperar.
+    arm_vals = [-LEVER_ARM, 0, 0, -LEVER_ARM, -LEVER_ARM]
+    body_vals = [90 + LEVER_ARM, 0, 0, 90 + LEVER_ARM, 90 + LEVER_ARM]
+    for q in person.pts + arms.pts:
+        frame.pts.append(rot(rot(q, 90 + LEVER_ARM, shoulder), -LEVER_ARM, HANDS))
+    times = [0, .30, .46, .78, 1]
+    inner = swaying(person.drawn(), shoulder, body_vals, times=times)
+    outer = swaying(arms.drawn() + [inner.strip()], HANDS, arm_vals, times=times)
+    return frame.svg(title, outer)
 
 
 # ───────────────────────────── Muscle-up ─────────────────────────────
@@ -357,35 +449,46 @@ MUSCLE_UP = {
 }
 
 
+# Arriba de la dominada el pecho toca la barra: el hombro queda detrás de ella (lo que mide el
+# pecho de fondo) y un poco por encima, así que la barra cruza el torso a la altura del pecho.
+MU_CHEST_BACK, MU_CHEST_UP = 14, 7
+
+
 def muscle_up(where, title):
     if where == 'hang':        # colgado completo; lo que se marca es la muñeca sobre la barra
         shoulder, axis = (MU_HANDS[0], MU_BAR_Y + ARM), 0
-    elif where == 'pull':      # arriba de la dominada: el pecho llega a la barra
-        shoulder, axis = (MU_HANDS[0], MU_BAR_Y + 27), 0
+    elif where == 'pull':      # arriba de la dominada: la barra toca el PECHO, no la barbilla.
+        # Antes el hombro quedaba 27 abajo de la barra y la barra cruzaba la cara.
+        shoulder, axis = (MU_HANDS[0] - MU_CHEST_BACK, MU_BAR_Y - MU_CHEST_UP), 0
     elif where == 'trans':     # la transición: hombro sobre la barra, cadera todavía abajo.
         # Estática a propósito: un negativo se baja doblando el brazo, y rotar el cuerpo
         # alrededor del hombro para «animarlo» dibujaba una marometa.
         shoulder, axis = (MU_HANDS[0] + 12, MU_BAR_Y - 9), 22
-    else:                      # apoyo arriba de la barra, brazos bloqueados
-        shoulder, axis = (MU_HANDS[0], MU_BAR_Y - ARM), -180
+    else:                      # apoyo arriba de la barra: brazos bloqueados y la cadera en la
+        # barra. Antes el torso apuntaba hacia arriba y era una parada de manos sobre la barra.
+        shoulder, axis = (MU_HANDS[0], MU_BAR_Y - ARM), 0
 
     person = Fig()
-    pose(person, shoulder, axis, facing=FACE_UP if where in ('hang', 'pull') else FACE_DOWN)
+    face = {'hang': FACE_UP, 'pull': FACE_UP, 'trans': FACE_DOWN}.get(where, FACE_RIGHT)
+    pose(person, shoulder, axis, facing=face)
 
     frame = Fig()
     frame.line((MU_HANDS[0] - MU_BAR_HALF, MU_BAR_Y), (MU_HANDS[0] + MU_BAR_HALF, MU_BAR_Y),
                w=5, color=DIM)
-    # Los codos se abren a los lados: con los dos doblándose hacia el mismo lado se cruzaban.
-    for side, bend, op in ((-9, -1, 1.0), (9, 1, .5)):
+    # Los dos codos van atrás, del lado de la espalda: abajo de la barra en la dominada y
+    # arriba en la transición, como en el fondo de un dip. Antes se abrían uno a cada lado y
+    # la dominada al pecho parecía una cruz. El brazo de atrás va tenue.
+    for side, op in ((-9, 1.0), (9, .5)):
         bent_arm(frame, (MU_HANDS[0] + side, MU_BAR_Y), (shoulder[0] + side * .55, shoulder[1]),
-                 bend, opacity=op)
+                 -1, opacity=op)
     if where == 'hang':        # el agarre falso se ve en la muñeca por encima de la barra
         frame.circle((MU_HANDS[0] - 9, MU_BAR_Y - 6), 6, INK)
         frame.circle((MU_HANDS[0] + 9, MU_BAR_Y - 6), 6, INK)
     else:
         frame.circle(MU_HANDS, 6, DIM)
+    frame.joint(MU_HANDS, 'hand')
     frame.pts += person.pts
-    return frame.svg(title, swaying(person.parts, shoulder))
+    return frame.svg(title, swaying(person.drawn(), shoulder))
 
 
 # ───────────────────────────── Curl nórdico ─────────────────────────────
@@ -431,6 +534,12 @@ def nordic(cfg, title):
     if aid == 'band':          # la banda, del pecho a un anclaje detrás
         person.line(shoulder, (shoulder[0] + 46, shoulder[1] - 42), w=4, opacity=.45)
         person.pts.append((shoulder[0] + 46, shoulder[1] - 42))
+    # El estándar es la cadera abierta: rodilla, cadera y hombro en una recta toda la bajada.
+    # Rodilla y tobillo no se mueven; cadera y hombro bajan con el cuerpo.
+    frame.joint(NC_KNEE, 'knee')
+    frame.joint(ankle, 'foot')
+    person.joint(hip, 'hip')
+    person.joint(shoulder, 'shoulder')
 
     # Bajar despacio y volver: lo contrario de un aguante, aquí la lentitud es el estándar.
     # Baja despacio —4 o 5 segundos es el estándar del escalón 1— y vuelve más rápido. Que
@@ -438,7 +547,7 @@ def nordic(cfg, title):
     frame.pts += person.pts
     for q in person.pts:
         frame.pts.append(rot(q, -descent, NC_KNEE))
-    return frame.svg(title, swaying(person.parts, NC_KNEE, [-10, -descent, -descent, -10],
+    return frame.svg(title, swaying(person.drawn(), NC_KNEE, [-10, -descent, -descent, -10],
                                     times=[0, .55, .70, 1]))
 
 

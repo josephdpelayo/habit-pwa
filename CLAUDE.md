@@ -146,7 +146,17 @@ The app has four screens (`#s-auth`, `#s-main`, `#s-admin`, `#s-reception`), tog
   ejercicio —las elevaciones y el nórdico— sí se mueven de verdad, con la bajada ocupando más
   de la mitad del ciclo porque la lentitud es el estándar; un muscle-up negativo en cambio se
   baja doblando el brazo, así que es estático en la transición y no una marometa alrededor del
-  hombro
+  hombro. **Cada figura lleva puntos de referencia** sutiles (morado de la app, `data-j`) en
+  mano, hombro, cadera, rodilla y pie, porque lo que define un escalón es una alineación, y
+  `scripts/check-skills.js` **prueba esa alineación leyendo los puntos**: en el tuck avanzado
+  hombro, cadera y pie a la misma altura; en lever, planche y straddle todo en la línea (el
+  straddle abre las piernas a los lados, así que de perfil van en la línea, acortadas, no en
+  tijera); en la parada de manos la muñeca bajo el hombro y el cuerpo recto; en una palanca
+  el brazo **en diagonal** hacia la cadera, porque la sostiene la espalda (`LEVER_ARM`, 25°;
+  en la elevación el brazo pasa de vertical a diagonal con un giro en la mano que lleva
+  dentro el del hombro). Las posturas `TUCK` y `ADV_TUCK` son las mismas en front lever,
+  planche y back lever: el lado del pecho lo pone el eje del torso. Una pose nueva o cambiada
+  necesita su aserción ahí
 - `habit-activity.js` — **la sección Actividad, en las dos apps** (HABIT la pidió el 1 nov 2026):
   un contenedor `#actividad-content`, su pestaña y `HabitActivity.render(el)` desde `sv()`. Junta
   los entrenos de la app, lo registrado a mano (`training_activities`), las sesiones de fuerza de

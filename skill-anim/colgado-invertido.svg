@@ -10,9 +10,14 @@
     <line x1="110.0" y1="92.0" x2="110.0" y2="108.0" stroke="#e8e9ee" stroke-width="6" stroke-linecap="round" opacity="1.0"/>
     <circle cx="110.0" cy="117.0" r="11" fill="#e8e9ee"/>
     <line x1="110.0" y1="117.0" x2="110.0" y2="99.0" stroke="#e8e9ee" stroke-width="5" stroke-linecap="round" opacity="1.0"/>
-    <line x1="110.0" y1="44.0" x2="110.0" y2="4.0" stroke="#e8e9ee" stroke-width="7" stroke-linecap="round" opacity="1.0"/>
-    <line x1="110.0" y1="4.0" x2="110.0" y2="-34.0" stroke="#e8e9ee" stroke-width="7" stroke-linecap="round" opacity="1.0"/>
     <line x1="110.0" y1="44.0" x2="110.0" y2="4.0" stroke="#e8e9ee" stroke-width="7" stroke-linecap="round" opacity="0.5"/>
     <line x1="110.0" y1="4.0" x2="110.0" y2="-34.0" stroke="#e8e9ee" stroke-width="7" stroke-linecap="round" opacity="0.5"/>
+    <line x1="110.0" y1="44.0" x2="110.0" y2="4.0" stroke="#e8e9ee" stroke-width="7" stroke-linecap="round" opacity="1.0"/>
+    <line x1="110.0" y1="4.0" x2="110.0" y2="-34.0" stroke="#e8e9ee" stroke-width="7" stroke-linecap="round" opacity="1.0"/>
+    <circle cx="110.0" cy="92.0" r="3.2" fill="#a78bfa" data-j="shoulder"/>
+    <circle cx="110.0" cy="44.0" r="3.2" fill="#a78bfa" data-j="hip"/>
+    <circle cx="110.0" cy="4.0" r="3.2" fill="#a78bfa" data-j="knee"/>
+    <circle cx="110.0" cy="-34.0" r="3.2" fill="#a78bfa" data-j="foot"/>
   </g>
+  <circle cx="110.0" cy="40.0" r="3.2" fill="#a78bfa" data-j="hand"/>
 </svg>

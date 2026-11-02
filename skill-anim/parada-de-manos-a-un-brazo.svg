@@ -9,9 +9,14 @@
     <line x1="120.0" y1="158.0" x2="120.0" y2="174.0" stroke="#e8e9ee" stroke-width="6" stroke-linecap="round" opacity="1.0"/>
     <circle cx="120.0" cy="183.0" r="11" fill="#e8e9ee"/>
     <line x1="120.0" y1="183.0" x2="120.0" y2="201.0" stroke="#e8e9ee" stroke-width="5" stroke-linecap="round" opacity="1.0"/>
-    <line x1="120.0" y1="110.0" x2="120.0" y2="70.0" stroke="#e8e9ee" stroke-width="7" stroke-linecap="round" opacity="1.0"/>
-    <line x1="120.0" y1="70.0" x2="120.0" y2="32.0" stroke="#e8e9ee" stroke-width="7" stroke-linecap="round" opacity="1.0"/>
     <line x1="120.0" y1="110.0" x2="120.0" y2="70.0" stroke="#e8e9ee" stroke-width="7" stroke-linecap="round" opacity="0.5"/>
     <line x1="120.0" y1="70.0" x2="120.0" y2="32.0" stroke="#e8e9ee" stroke-width="7" stroke-linecap="round" opacity="0.5"/>
+    <line x1="120.0" y1="110.0" x2="120.0" y2="70.0" stroke="#e8e9ee" stroke-width="7" stroke-linecap="round" opacity="1.0"/>
+    <line x1="120.0" y1="70.0" x2="120.0" y2="32.0" stroke="#e8e9ee" stroke-width="7" stroke-linecap="round" opacity="1.0"/>
+    <circle cx="120.0" cy="158.0" r="3.2" fill="#a78bfa" data-j="shoulder"/>
+    <circle cx="120.0" cy="110.0" r="3.2" fill="#a78bfa" data-j="hip"/>
+    <circle cx="120.0" cy="70.0" r="3.2" fill="#a78bfa" data-j="knee"/>
+    <circle cx="120.0" cy="32.0" r="3.2" fill="#a78bfa" data-j="foot"/>
   </g>
+  <circle cx="120.0" cy="210.0" r="3.2" fill="#a78bfa" data-j="hand"/>
 </svg>

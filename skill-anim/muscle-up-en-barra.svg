@@ -1,4 +1,4 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="10 -124 216 216" preserveAspectRatio="xMidYMid meet" role="img" aria-label="Muscle-up en barra">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="21 -34 194 194" preserveAspectRatio="xMidYMid meet" role="img" aria-label="Muscle-up en barra">
   <title>Muscle-up en barra</title>
   <line x1="56.0" y1="70.0" x2="180.0" y2="70.0" stroke="rgba(232,233,238,.3)" stroke-width="5" stroke-linecap="round" opacity="1.0"/>
   <line x1="109.0" y1="70.0" x2="113.0" y2="18.0" stroke="#e8e9ee" stroke-width="7" stroke-linecap="round" opacity="1.0"/>
@@ -6,13 +6,18 @@
   <circle cx="118.0" cy="70.0" r="6" fill="rgba(232,233,238,.3)"/>
   <g>
     <animateTransform attributeName="transform" type="rotate" values="-1.5 118 18;1.5 118 18;-1.5 118 18" keyTimes="0.00;0.50;1.00" dur="5s" repeatCount="indefinite" calcMode="spline" keySplines="0.4 0 0.6 1;0.4 0 0.6 1"/>
-    <line x1="118.0" y1="18.0" x2="118.0" y2="-30.0" stroke="#e8e9ee" stroke-width="7" stroke-linecap="round" opacity="1.0"/>
-    <line x1="118.0" y1="18.0" x2="118.0" y2="34.0" stroke="#e8e9ee" stroke-width="6" stroke-linecap="round" opacity="1.0"/>
-    <circle cx="118.0" cy="43.0" r="11" fill="#e8e9ee"/>
-    <line x1="118.0" y1="43.0" x2="118.0" y2="61.0" stroke="#e8e9ee" stroke-width="5" stroke-linecap="round" opacity="1.0"/>
-    <line x1="118.0" y1="-30.0" x2="118.0" y2="-70.0" stroke="#e8e9ee" stroke-width="7" stroke-linecap="round" opacity="1.0"/>
-    <line x1="118.0" y1="-70.0" x2="118.0" y2="-108.0" stroke="#e8e9ee" stroke-width="7" stroke-linecap="round" opacity="1.0"/>
-    <line x1="118.0" y1="-30.0" x2="118.0" y2="-70.0" stroke="#e8e9ee" stroke-width="7" stroke-linecap="round" opacity="0.5"/>
-    <line x1="118.0" y1="-70.0" x2="118.0" y2="-108.0" stroke="#e8e9ee" stroke-width="7" stroke-linecap="round" opacity="0.5"/>
+    <line x1="118.0" y1="18.0" x2="118.0" y2="66.0" stroke="#e8e9ee" stroke-width="7" stroke-linecap="round" opacity="1.0"/>
+    <line x1="118.0" y1="18.0" x2="118.0" y2="2.0" stroke="#e8e9ee" stroke-width="6" stroke-linecap="round" opacity="1.0"/>
+    <circle cx="118.0" cy="-7.0" r="11" fill="#e8e9ee"/>
+    <line x1="118.0" y1="-7.0" x2="136.0" y2="-7.0" stroke="#e8e9ee" stroke-width="5" stroke-linecap="round" opacity="1.0"/>
+    <line x1="118.0" y1="66.0" x2="118.0" y2="106.0" stroke="#e8e9ee" stroke-width="7" stroke-linecap="round" opacity="0.5"/>
+    <line x1="118.0" y1="106.0" x2="118.0" y2="144.0" stroke="#e8e9ee" stroke-width="7" stroke-linecap="round" opacity="0.5"/>
+    <line x1="118.0" y1="66.0" x2="118.0" y2="106.0" stroke="#e8e9ee" stroke-width="7" stroke-linecap="round" opacity="1.0"/>
+    <line x1="118.0" y1="106.0" x2="118.0" y2="144.0" stroke="#e8e9ee" stroke-width="7" stroke-linecap="round" opacity="1.0"/>
+    <circle cx="118.0" cy="18.0" r="3.2" fill="#a78bfa" data-j="shoulder"/>
+    <circle cx="118.0" cy="66.0" r="3.2" fill="#a78bfa" data-j="hip"/>
+    <circle cx="118.0" cy="106.0" r="3.2" fill="#a78bfa" data-j="knee"/>
+    <circle cx="118.0" cy="144.0" r="3.2" fill="#a78bfa" data-j="foot"/>
   </g>
+  <circle cx="118.0" cy="70.0" r="3.2" fill="#a78bfa" data-j="hand"/>
 </svg>

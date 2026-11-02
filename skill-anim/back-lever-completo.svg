@@ -1,18 +1,23 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="-46 -39 222 222" preserveAspectRatio="xMidYMid meet" role="img" aria-label="Back lever completo">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="-24 -41 222 222" preserveAspectRatio="xMidYMid meet" role="img" aria-label="Back lever completo">
   <title>Back lever completo</title>
-  <line x1="-30.0" y1="40.0" x2="160.0" y2="40.0" stroke="rgba(232,233,238,.3)" stroke-width="5" stroke-linecap="round" opacity="1.0"/>
-  <line x1="103.0" y1="40.0" x2="103.0" y2="92.0" stroke="#e8e9ee" stroke-width="7" stroke-linecap="round" opacity="1.0"/>
-  <line x1="117.0" y1="40.0" x2="117.0" y2="92.0" stroke="#e8e9ee" stroke-width="7" stroke-linecap="round" opacity="0.5"/>
+  <line x1="-8.0" y1="40.0" x2="182.0" y2="40.0" stroke="rgba(232,233,238,.3)" stroke-width="5" stroke-linecap="round" opacity="1.0"/>
+  <line x1="103.0" y1="40.0" x2="125.0" y2="87.1" stroke="#e8e9ee" stroke-width="7" stroke-linecap="round" opacity="1.0"/>
+  <line x1="117.0" y1="40.0" x2="139.0" y2="87.1" stroke="#e8e9ee" stroke-width="7" stroke-linecap="round" opacity="0.5"/>
   <circle cx="110.0" cy="40.0" r="6" fill="rgba(232,233,238,.3)"/>
   <g>
-    <animateTransform attributeName="transform" type="rotate" values="-1.5 110 92;1.5 110 92;-1.5 110 92" keyTimes="0.00;0.50;1.00" dur="5s" repeatCount="indefinite" calcMode="spline" keySplines="0.4 0 0.6 1;0.4 0 0.6 1"/>
-    <line x1="110.0" y1="92.0" x2="62.0" y2="92.0" stroke="#e8e9ee" stroke-width="7" stroke-linecap="round" opacity="1.0"/>
-    <line x1="110.0" y1="92.0" x2="126.0" y2="92.0" stroke="#e8e9ee" stroke-width="6" stroke-linecap="round" opacity="1.0"/>
-    <circle cx="135.0" cy="92.0" r="11" fill="#e8e9ee"/>
-    <line x1="135.0" y1="92.0" x2="135.0" y2="110.0" stroke="#e8e9ee" stroke-width="5" stroke-linecap="round" opacity="1.0"/>
-    <line x1="62.0" y1="92.0" x2="22.0" y2="92.0" stroke="#e8e9ee" stroke-width="7" stroke-linecap="round" opacity="1.0"/>
-    <line x1="22.0" y1="92.0" x2="-16.0" y2="92.0" stroke="#e8e9ee" stroke-width="7" stroke-linecap="round" opacity="1.0"/>
-    <line x1="62.0" y1="92.0" x2="22.0" y2="92.0" stroke="#e8e9ee" stroke-width="7" stroke-linecap="round" opacity="0.5"/>
-    <line x1="22.0" y1="92.0" x2="-16.0" y2="92.0" stroke="#e8e9ee" stroke-width="7" stroke-linecap="round" opacity="0.5"/>
+    <animateTransform attributeName="transform" type="rotate" values="-1.5 132 87;1.5 132 87;-1.5 132 87" keyTimes="0.00;0.50;1.00" dur="5s" repeatCount="indefinite" calcMode="spline" keySplines="0.4 0 0.6 1;0.4 0 0.6 1"/>
+    <line x1="132.0" y1="87.1" x2="84.0" y2="87.1" stroke="#e8e9ee" stroke-width="7" stroke-linecap="round" opacity="1.0"/>
+    <line x1="132.0" y1="87.1" x2="148.0" y2="87.1" stroke="#e8e9ee" stroke-width="6" stroke-linecap="round" opacity="1.0"/>
+    <circle cx="157.0" cy="87.1" r="11" fill="#e8e9ee"/>
+    <line x1="157.0" y1="87.1" x2="157.0" y2="105.1" stroke="#e8e9ee" stroke-width="5" stroke-linecap="round" opacity="1.0"/>
+    <line x1="84.0" y1="87.1" x2="44.0" y2="87.1" stroke="#e8e9ee" stroke-width="7" stroke-linecap="round" opacity="0.5"/>
+    <line x1="44.0" y1="87.1" x2="6.0" y2="87.1" stroke="#e8e9ee" stroke-width="7" stroke-linecap="round" opacity="0.5"/>
+    <line x1="84.0" y1="87.1" x2="44.0" y2="87.1" stroke="#e8e9ee" stroke-width="7" stroke-linecap="round" opacity="1.0"/>
+    <line x1="44.0" y1="87.1" x2="6.0" y2="87.1" stroke="#e8e9ee" stroke-width="7" stroke-linecap="round" opacity="1.0"/>
+    <circle cx="132.0" cy="87.1" r="3.2" fill="#a78bfa" data-j="shoulder"/>
+    <circle cx="84.0" cy="87.1" r="3.2" fill="#a78bfa" data-j="hip"/>
+    <circle cx="44.0" cy="87.1" r="3.2" fill="#a78bfa" data-j="knee"/>
+    <circle cx="6.0" cy="87.1" r="3.2" fill="#a78bfa" data-j="foot"/>
   </g>
+  <circle cx="110.0" cy="40.0" r="3.2" fill="#a78bfa" data-j="hand"/>
 </svg>

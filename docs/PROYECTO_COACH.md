@@ -213,3 +213,19 @@ ahorraste la Fase 1.
   ponerle escalón a otra persona, ni firmar como otro; y una vez que el coach toma la línea,
   sus update y delete no tocan nada y su upsert falla. El historial registró los cuatro
   movimientos.
+- **2 nov 2026** — **Las figuras, exactas a la posición** (Joseph: «el tuck advance los pies se
+  ven muy abajo»; «en el front lever las manos no caen en vertical, mantienen la palanca con la
+  espalda»). Puntos de referencia sutiles en mano, hombro, cadera, rodilla y pie, y las
+  correcciones que salieron al compararlas con esos puntos:
+  · tuck avanzado (front lever, planche y su elevación): rodilla a 90° y el pie de vuelta en la
+    línea de hombro y cadera, calculado y no a ojo;
+  · tucks de planche y back lever: tenían las rodillas del lado de la espalda;
+  · los cuatro straddle: eran una tijera; ahora las piernas van en la línea, acortadas;
+  · front lever, back lever y elevaciones: brazo en diagonal hacia la cadera (25°);
+  · half lay a 90° exactos, plancha en pared a 45° exactos, traspaso de peso con el hombro
+    sobre la mano que carga;
+  · muscle-up: la dominada al pecho tenía la barra en la cara; el apoyo arriba era una parada
+    de manos sobre la barra; los codos van los dos atrás.
+  Las alineaciones quedaron como aserciones en `scripts/check-skills.js`, probadas contra los
+  errores viejos (cada uno la hace fallar). Los SVG se sirven sin caché, así que no hizo
+  falta migración ni subir versión.

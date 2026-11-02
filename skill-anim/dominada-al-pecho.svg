@@ -1,20 +1,25 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="18 38 201 201" preserveAspectRatio="xMidYMid meet" role="img" aria-label="Dominada al pecho">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="18 4 201 201" preserveAspectRatio="xMidYMid meet" role="img" aria-label="Dominada al pecho">
   <title>Dominada al pecho</title>
   <line x1="56.0" y1="70.0" x2="180.0" y2="70.0" stroke="rgba(232,233,238,.3)" stroke-width="5" stroke-linecap="round" opacity="1.0"/>
-  <line x1="109.0" y1="70.0" x2="132.9" y2="80.2" stroke="#e8e9ee" stroke-width="7" stroke-linecap="round" opacity="1.0"/>
-  <line x1="132.9" y1="80.2" x2="113.0" y2="97.0" stroke="#e8e9ee" stroke-width="7" stroke-linecap="round" opacity="1.0"/>
-  <line x1="127.0" y1="70.0" x2="103.1" y2="80.2" stroke="#e8e9ee" stroke-width="7" stroke-linecap="round" opacity="0.5"/>
-  <line x1="103.1" y1="80.2" x2="123.0" y2="97.0" stroke="#e8e9ee" stroke-width="7" stroke-linecap="round" opacity="0.5"/>
+  <line x1="109.0" y1="70.0" x2="89.5" y2="87.2" stroke="#e8e9ee" stroke-width="7" stroke-linecap="round" opacity="1.0"/>
+  <line x1="89.5" y1="87.2" x2="99.0" y2="63.0" stroke="#e8e9ee" stroke-width="7" stroke-linecap="round" opacity="1.0"/>
+  <line x1="127.0" y1="70.0" x2="109.2" y2="89.0" stroke="#e8e9ee" stroke-width="7" stroke-linecap="round" opacity="0.5"/>
+  <line x1="109.2" y1="89.0" x2="109.0" y2="63.0" stroke="#e8e9ee" stroke-width="7" stroke-linecap="round" opacity="0.5"/>
   <circle cx="118.0" cy="70.0" r="6" fill="rgba(232,233,238,.3)"/>
   <g>
-    <animateTransform attributeName="transform" type="rotate" values="-1.5 118 97;1.5 118 97;-1.5 118 97" keyTimes="0.00;0.50;1.00" dur="5s" repeatCount="indefinite" calcMode="spline" keySplines="0.4 0 0.6 1;0.4 0 0.6 1"/>
-    <line x1="118.0" y1="97.0" x2="118.0" y2="145.0" stroke="#e8e9ee" stroke-width="7" stroke-linecap="round" opacity="1.0"/>
-    <line x1="118.0" y1="97.0" x2="118.0" y2="81.0" stroke="#e8e9ee" stroke-width="6" stroke-linecap="round" opacity="1.0"/>
-    <circle cx="118.0" cy="72.0" r="11" fill="#e8e9ee"/>
-    <line x1="118.0" y1="72.0" x2="118.0" y2="54.0" stroke="#e8e9ee" stroke-width="5" stroke-linecap="round" opacity="1.0"/>
-    <line x1="118.0" y1="145.0" x2="118.0" y2="185.0" stroke="#e8e9ee" stroke-width="7" stroke-linecap="round" opacity="1.0"/>
-    <line x1="118.0" y1="185.0" x2="118.0" y2="223.0" stroke="#e8e9ee" stroke-width="7" stroke-linecap="round" opacity="1.0"/>
-    <line x1="118.0" y1="145.0" x2="118.0" y2="185.0" stroke="#e8e9ee" stroke-width="7" stroke-linecap="round" opacity="0.5"/>
-    <line x1="118.0" y1="185.0" x2="118.0" y2="223.0" stroke="#e8e9ee" stroke-width="7" stroke-linecap="round" opacity="0.5"/>
+    <animateTransform attributeName="transform" type="rotate" values="-1.5 104 63;1.5 104 63;-1.5 104 63" keyTimes="0.00;0.50;1.00" dur="5s" repeatCount="indefinite" calcMode="spline" keySplines="0.4 0 0.6 1;0.4 0 0.6 1"/>
+    <line x1="104.0" y1="63.0" x2="104.0" y2="111.0" stroke="#e8e9ee" stroke-width="7" stroke-linecap="round" opacity="1.0"/>
+    <line x1="104.0" y1="63.0" x2="104.0" y2="47.0" stroke="#e8e9ee" stroke-width="6" stroke-linecap="round" opacity="1.0"/>
+    <circle cx="104.0" cy="38.0" r="11" fill="#e8e9ee"/>
+    <line x1="104.0" y1="38.0" x2="104.0" y2="20.0" stroke="#e8e9ee" stroke-width="5" stroke-linecap="round" opacity="1.0"/>
+    <line x1="104.0" y1="111.0" x2="104.0" y2="151.0" stroke="#e8e9ee" stroke-width="7" stroke-linecap="round" opacity="0.5"/>
+    <line x1="104.0" y1="151.0" x2="104.0" y2="189.0" stroke="#e8e9ee" stroke-width="7" stroke-linecap="round" opacity="0.5"/>
+    <line x1="104.0" y1="111.0" x2="104.0" y2="151.0" stroke="#e8e9ee" stroke-width="7" stroke-linecap="round" opacity="1.0"/>
+    <line x1="104.0" y1="151.0" x2="104.0" y2="189.0" stroke="#e8e9ee" stroke-width="7" stroke-linecap="round" opacity="1.0"/>
+    <circle cx="104.0" cy="63.0" r="3.2" fill="#a78bfa" data-j="shoulder"/>
+    <circle cx="104.0" cy="111.0" r="3.2" fill="#a78bfa" data-j="hip"/>
+    <circle cx="104.0" cy="151.0" r="3.2" fill="#a78bfa" data-j="knee"/>
+    <circle cx="104.0" cy="189.0" r="3.2" fill="#a78bfa" data-j="foot"/>
   </g>
+  <circle cx="118.0" cy="70.0" r="3.2" fill="#a78bfa" data-j="hand"/>
 </svg>

@@ -277,6 +277,127 @@ const guards = (anim.match(/animation_url is null/g) || []).length;
 assert.ok(writes > 0 && writes === guards,
   `cada escritura de animation_url debe ir con "is null": ${writes} escrituras, ${guards} guardas`);
 
+// ── 9. Cada figura es lo que pide su escalón ───────────────────────────────
+// Los SVG llevan un punto de referencia en mano, hombro, cadera, rodilla y pie (data-j), en
+// la posición dibujada —la animación es solo lo de encima—. Lo que define un escalón es una
+// alineación, así que se prueba la alineación: si el generador dibuja mal una pose, falla
+// aquí y no en la escalera de alguien.
+const joints = slug => {
+  const j = {};
+  const svg = fs.readFileSync(`skill-anim/${slug}.svg`, 'utf8');
+  for (const m of svg.matchAll(/<circle cx="(-?[\d.]+)" cy="(-?[\d.]+)" r="([\d.]+)" fill="#a78bfa" data-j="(\w+)"\/>/g)) {
+    j[m[4]] = {x: Number(m[1]), y: Number(m[2]), r: Number(m[3])};
+  }
+  return j;
+};
+const TOL = 0.6;
+const sameY = (slug, names) => {
+  const j = joints(slug);
+  for (const n of names.slice(1)) {
+    assert.ok(Math.abs(j[n].y - j[names[0]].y) <= TOL, `${slug}: ${n} fuera de la línea de ${names[0]} (${j[n].y} vs ${j[names[0]].y})`);
+  }
+};
+// Distancia de cada punto a la recta de los dos primeros: una recta es una recta.
+const collinear = (slug, names) => {
+  const j = joints(slug), a = j[names[0]], b = j[names[1]];
+  const len = Math.hypot(b.x - a.x, b.y - a.y);
+  for (const n of names.slice(2)) {
+    const c = j[n];
+    const off = Math.abs((b.x - a.x) * (c.y - a.y) - (b.y - a.y) * (c.x - a.x)) / len;
+    assert.ok(off <= 0.8, `${slug}: ${n} se sale de la recta ${names.join('-')} por ${off.toFixed(1)}`);
+  }
+};
+
+for (const slug of animSlugs) {
+  const j = joints(slug);
+  const need = slug.startsWith('curl-nordico') ? ['shoulder', 'hip', 'knee', 'foot']
+    : ['hand', 'shoulder', 'hip', 'knee', 'foot'];
+  for (const n of need) assert.ok(j[n], `${slug}: falta el punto de referencia ${n}`);
+  for (const n of Object.keys(j)) assert.ok(j[n].r <= 4, `${slug}: el punto ${n} no es sutil (r=${j[n].r})`);
+}
+
+// Lever, planche y straddle completos: hombro, cadera, rodilla y pie en una sola línea. El
+// straddle también: las piernas se abren a los lados, así que de perfil siguen en la línea
+// (antes se dibujaba como tijera, un pie arriba y otro abajo).
+for (const slug of ['front-lever-completo', 'front-lever-a-un-brazo', 'front-lever-a-una-pierna',
+  'front-lever-straddle', 'back-lever-straddle', 'back-lever-completo', 'plancha-straddle',
+  'plancha-completa', 'elevacion-a-front-lever-straddle', 'elevaciones-a-front-lever']) {
+  sameY(slug, ['shoulder', 'hip', 'knee', 'foot']);
+}
+// Tuck avanzado: hombro, cadera y pie a la misma altura, con la rodilla fuera de la línea.
+for (const slug of ['front-lever-tuck-avanzado', 'plancha-tuck-avanzada', 'elevacion-a-front-lever-tuck-avanzado']) {
+  sameY(slug, ['shoulder', 'hip', 'foot']);
+  const j = joints(slug);
+  assert.ok(Math.abs(j.knee.y - j.hip.y) > 10, `${slug}: la rodilla tiene que salir de la línea`);
+}
+// Half lay: cadera abierta en la línea y la espinilla vertical bajo la rodilla.
+sameY('front-lever-half-lay', ['shoulder', 'hip', 'knee']);
+{
+  const j = joints('front-lever-half-lay');
+  assert.ok(Math.abs(j.foot.x - j.knee.x) <= TOL && j.foot.y > j.knee.y, 'half lay: rodilla a 90°');
+}
+// Las rodillas del tuck van del lado del PECHO: arriba en front lever (de cara al techo),
+// abajo en planche y back lever (de cara al piso). Planche y back lever las tenían al revés.
+for (const slug of ['front-lever-tuck', 'front-lever-tuck-avanzado', 'elevacion-a-front-lever-tuck']) {
+  const j = joints(slug);
+  assert.ok(j.knee.y < j.hip.y, `${slug}: de cara al techo, la rodilla va arriba de la cadera`);
+}
+for (const slug of ['plancha-tuck', 'plancha-tuck-avanzada', 'back-lever-tuck']) {
+  const j = joints(slug);
+  assert.ok(j.knee.y > j.hip.y, `${slug}: de cara al piso, la rodilla va abajo de la cadera`);
+}
+// En una palanca el brazo va en diagonal, porque la palanca la sostiene la espalda: la mano
+// se adelanta hacia la cadera y la barra queda sobre el pecho, entre hombro y cadera.
+for (const slug of animSlugs.filter(s => /^(front-lever|back-lever|elevacion|elevaciones)/.test(s))) {
+  const j = joints(slug);
+  const towardHip = Math.sign(j.hip.x - j.shoulder.x);
+  assert.ok((j.hand.x - j.shoulder.x) * towardHip > 15, `${slug}: el brazo tiene que ir en diagonal hacia la cadera`);
+}
+{
+  const j = joints('colgado-invertido');      // el colgado invertido no es palanca: vertical
+  for (const n of ['shoulder', 'hip', 'knee', 'foot']) {
+    assert.ok(Math.abs(j[n].x - j.hand.x) <= TOL, `colgado invertido: ${n} fuera de la vertical`);
+  }
+}
+// Parada de manos: la muñeca bajo el hombro y el cuerpo recto. Las libres, todo en una
+// vertical; las de pared y la plancha a 45° van inclinadas, pero siguen siendo una recta.
+for (const slug of animSlugs.filter(s => /parada-de-manos|heel-pulls|plancha-en-pared/.test(s))) {
+  const j = joints(slug);
+  assert.ok(Math.abs(j.hand.x - j.shoulder.x) <= TOL, `${slug}: el hombro tiene que estar apilado sobre la muñeca`);
+  collinear(slug, ['shoulder', 'hip', 'knee', 'foot']);
+}
+for (const slug of ['parada-de-manos-libre', 'parada-de-manos-a-un-brazo', 'traspaso-de-peso-en-parada-de-manos',
+  'parada-de-manos-de-frente-a-la-pared', 'heel-pulls-toe-pulls']) {
+  collinear(slug, ['hand', 'shoulder', 'hip', 'foot']);
+}
+{
+  const j = joints('plancha-en-pared-45-grados');
+  const deg = Math.atan2(j.hip.y - j.foot.y, j.foot.x - j.hip.x) * 180 / Math.PI;
+  assert.ok(Math.abs(Math.abs(deg) - 45) <= 1, `plancha en pared: el cuerpo va a 45°, sale a ${deg.toFixed(1)}°`);
+}
+// Planche lean: una recta de hombro a pie, y el pie en el piso.
+collinear('planche-lean', ['shoulder', 'hip', 'knee', 'foot']);
+{
+  const j = joints('planche-lean');
+  assert.ok(Math.abs(j.foot.y - j.hand.y) <= 2, 'planche lean: los pies siguen en el piso');
+}
+// Muscle-up: en la dominada la barra toca el pecho (hombros arriba de ella, cadera abajo); en
+// la transición el hombro ya pasó la barra; arriba es un apoyo, no una parada de manos.
+{
+  const pull = joints('dominada-al-pecho'), trans = joints('muscle-up-negativo'), top = joints('muscle-up-en-barra');
+  assert.ok(pull.shoulder.y < pull.hand.y && pull.hip.y > pull.hand.y, 'dominada al pecho: la barra cruza el pecho');
+  assert.ok(trans.shoulder.y < trans.hand.y && trans.hip.y > trans.hand.y, 'negativo: hombro arriba de la barra, cadera abajo');
+  assert.ok(top.shoulder.y < top.hip.y && top.hip.y <= top.hand.y && top.foot.y > top.hand.y,
+    'muscle-up arriba: apoyo con la cadera en la barra y las piernas abajo, no de cabeza');
+}
+// Nórdico: la cadera abierta es el estándar, así que rodilla, cadera y hombro van en recta;
+// rodilla y tobillo en el piso.
+for (const slug of animSlugs.filter(s => s.startsWith('curl-nordico'))) {
+  collinear(slug, ['knee', 'hip', 'shoulder']);
+  const j = joints(slug);
+  assert.ok(Math.abs(j.knee.y - j.foot.y) <= TOL, `${slug}: rodilla y tobillo en el piso`);
+}
+
 
 // Compila el script principal de crew.html sin ejecutarlo. Ninguna prueba lo hacía —cada una
 // extrae el trozo que le toca— y crew.html es justo el archivo donde entra todo lo nuevo: un
