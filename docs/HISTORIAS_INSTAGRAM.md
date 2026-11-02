@@ -334,3 +334,39 @@ ancho (`scaleX`) se mide antes de alinear. Todos mantienen la firma horizontal d
 Pruebas: sumar fuentes conciliadas sin duplicarlas, excluir otras semanas, separar los km por
 deporte, selección individual y vacía, conservar todos los estilos y que nueve disciplinas con
 cifras largas quepan dentro del PNG. Revisión visual local de los cuatro diseños y sus casillas.
+
+
+### 20261101-11 — Referencias Aura: diario, notas, gráficas y condensado
+
+Referencias aportadas por Joseph: IMG_9301.PNG, IMG_9302.PNG e IMG_9303.PNG. La dirección
+visual es tipografía compacta de alto contraste, datos alineados, listas cronológicas,
+separación por día y gráficas sencillas. Se añaden cinco diseños semanales a los 17 existentes:
+
+- Diario: día de la semana, pictograma y métrica principal de cada sesión.
+- Notas: lista con palomitas, cifras y nombre de la disciplina, sin títulos privados de rutinas.
+- Barras: siete días y una gráfica independiente por disciplina; km para distancia y minutos
+  para tiempo, sin combinar unidades en un mismo eje.
+- Tabla: filas por día y total por disciplina, con valores alineados a la derecha.
+- Impacto: una cifra grande por deporte en Inter 900 condensada horizontalmente.
+
+`weekSummary` pasa `sessions:[{ds,type,durationSec,distanceM}]` desde las actividades ya
+conciliadas y ordenadas de esa semana. No se reconstruye un desglose diario a partir de un
+total semanal. Diario/Notas/Barras/Tabla aparecen cuando hay sesiones reales; Impacto solo
+necesita agregados por disciplina. Con los datos completos, la galería tiene 22 opciones.
+
+Dos casillas nuevas controlan «Detalle de entrenamientos» y «Distribución por día»; los
+estilos anteriores excluyen estos campos de sus cifras principales. «Solo disciplinas»
+conserva esas dos selecciones para que los formatos de detalle sigan funcionando. Las listas
+muestran hasta 36 sesiones y anuncian cuántas adicionales hay. Las tablas de distancia usan
+«—» cuando falta la medida, y las gráficas distinguen descanso (0) de medida ausente («—»).
+Si la distancia del día es parcial, se marca con «+».
+
+Los textos de los cinco nuevos diseños y sus dos controles tienen diccionario ES/EN
+(`WEEK_REFERENCE_COPY`). `HabitShare.open({lang:'en', ...})` y `data.lang` permiten elegir la
+versión exportada; en ausencia de opción se usa el idioma del documento. El selector global
+de idioma y las traducciones del resto de la app siguen pendientes. No anunciar bilingüismo
+global por haber localizado estos diseños.
+
+Verificación: todos los diseños dentro del lienzo, selección vacía/por disciplina, días y
+cifras en ambos idiomas, fuerza medida en minutos, km separados, listas largas y falta de
+GPS. Revisión visual en navegador con un ejemplo mixto de once sesiones.

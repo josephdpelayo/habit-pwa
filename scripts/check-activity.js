@@ -158,4 +158,9 @@ assert.deepEqual(disciplineSummary.disciplines, [
 ]);
 assert.equal(disciplineSummary.durationSec, 15480);
 assert.equal(disciplineSummary.distanceM, 35100, 'total general incluye caminar, correr muestra solo sus 33.6 km');
+
+
+assert.equal(disciplineSummary.sessions.length, 4, 'el diario usa las cuatro sesiones ya conciliadas');
+assert.ok(!disciplineSummary.sessions.some(r => r.ds < '2026-10-26' || r.ds >= '2026-11-02'));
+assert.ok(!disciplineSummary.sessions.some(r => 'title' in r), 'no envía títulos privados al resumen');
 console.log('HABIT Actividad: ok');

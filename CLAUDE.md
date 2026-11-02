@@ -81,7 +81,7 @@ The app has four screens (`#s-auth`, `#s-main`, `#s-admin`, `#s-reception`), tog
   pintado regresa al primero) y un solo botón **Compartir** (`navigator.share` con el archivo;
   sin hoja de compartir, descarga). Tres tipos en `KINDS`: `quote` (11 estilos), `workout` (hasta 19;
   `workoutFacts()` pone en palabras un entreno de la app o una carrera/nado/rodada, y el estilo
-  que no tiene qué enseñar devuelve null y no sale) y `week` (13; 17 con desglose de disciplinas). Una app abre los de entreno con
+  que no tiene qué enseñar devuelve null y no sale) y `week` (hasta 22, según datos de disciplinas y sesiones). Una app abre los de entreno con
   `HabitShare.open({kind, data, title, subtitle})`. Las casillas (`data.fields`) no deben
   reducir el catálogo a los tres estilos editoriales: `workoutFacts` filtra la información antes
   de las plantillas, y `weeklyStudioLayout` adapta los semanales; Ritual, Bitácora y Balance son
@@ -851,3 +851,11 @@ de los totales. `normalizeDisciplines` no inventa un desglose a partir de sumas 
 Los estilos This Week, Mix, Pasaporte y Tipográfico se añaden a los anteriores; estos también
 usan `disciplineBlock`. Conservar los pictogramas vectoriales (`sport`) y la medición de
 texto expandido (`scaleX`) al modificar el renderer.
+
+## Referencias Aura y detalle semanal (20261101-11)
+
+Diario, Notas, Barras, Tabla e Impacto se añaden a los diseños anteriores. `weekSummary.sessions`
+contiene las sesiones ya conciliadas de la semana sin títulos privados. No crear series diarias
+desde totales. Los campos `sessions`/`daily` controlan listas y distribución por día. Gráficas
+de km y de minutos van separadas. Los textos nuevos usan `WEEK_REFERENCE_COPY` (ES/EN);
+`open({lang})` determina la exportación, sin equivaler todavía a traducir toda la aplicación.

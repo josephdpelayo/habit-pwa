@@ -324,9 +324,16 @@
     });
     const order = ['run', 'strength', 'bike', 'swim', 'walk', 'cardio', 'yoga', 'sport', 'other'];
     const disciplines = [...byType.values()].sort((a, b) => order.indexOf(a.type) - order.indexOf(b.type));
+    // Detalle de sesiones ya conciliadas para los stickers de diario y gráficas. No se
+    // reconstruye a partir del total ni se incluyen títulos privados de las rutinas.
+    const sessions = [...week].sort((a, b) => a.ds.localeCompare(b.ds)
+      || (Date.parse(a.startedAt || a.at) || 0) - (Date.parse(b.startedAt || b.at) || 0))
+      .map(it => ({ ds: it.ds, type: TYPES.includes(it.type) ? it.type : 'other',
+        durationSec: Math.max(0, Number(it.durationSec) || 0),
+        distanceM: hasDistance(it.type) ? Math.max(0, Number(it.distanceM) || 0) : 0 }));
     return {
       weekStart: ws, count: week.length, days, streak: typeof progresoStreak === 'function' ? progresoStreak(items) : 0,
-      durationSec: disciplines.reduce((n, it) => n + it.durationSec, 0), distanceM: disciplines.reduce((n, it) => n + it.distanceM, 0), disciplines
+      durationSec: disciplines.reduce((n, it) => n + it.durationSec, 0), distanceM: disciplines.reduce((n, it) => n + it.distanceM, 0), disciplines, sessions
     };
   }
 

@@ -321,7 +321,7 @@ assert.equal(sports[1].distanceM, 0, 'fuerza nunca presenta km');
 assert.deepEqual(S.selectedDisciplines({ ...mixedWeek, fields: ['discipline:strength'] }).map(r => r.type), ['strength']);
 assert.deepEqual(S.selectedDisciplines({ ...mixedWeek, fields: [] }), []);
 const idsWithSports = S.stylesFor('week', mixedWeek, measure).map(s => s.id);
-assert.equal(idsWithSports.length, 17, '13 anteriores más cuatro con disciplinas');
+assert.equal(idsWithSports.length, 18, 'se conserva el catálogo y se añade Impacto sin inventar detalle diario');
 assert.ok(idsWithSports.includes('thisweek') && idsWithSports.includes('crew'));
 for (const selection of [[], ['discipline:run'], ['discipline:strength'], ['discipline:run', 'discipline:strength'], S.stickerFields('week', mixedWeek).map(r => r.id)]) {
   const data = { ...mixedWeek, fields: selection };
@@ -330,7 +330,7 @@ for (const selection of [[], ['discipline:run'], ['discipline:strength'], ['disc
     inside(L, 'disciplinas/' + st.id);
     assert.ok(saysCrew(L));
     const marks = L.ops.filter(o => o.op === 'sport');
-    assert.deepEqual([...new Set(marks.map(o => o.type))], sports.filter(r => selection.includes(r.id)).map(r => r.type), 'solo iconos de deportes marcados');
+    if (st.id !== 'impacto') assert.deepEqual([...new Set(marks.map(o => o.type))], sports.filter(r => selection.includes(r.id)).map(r => r.type), 'solo iconos de deportes marcados');
     const text = L.ops.filter(o => o.op === 'text').map(o => o.text);
     if (!selection.includes('discipline:strength')) assert.ok(!text.includes('5H 17M'), 'no filtra el tiempo de fuerza oculto');
     if (!selection.includes('discipline:run')) assert.ok(!text.includes('33.6 KM'), 'no filtra los km de correr ocultos');
@@ -340,5 +340,61 @@ for (const selection of [[], ['discipline:run'], ['discipline:strength'], ['disc
 const allSports = { ...wk, disciplines: Object.keys(S.ACTIVITY_TYPES).map(type => ({ type, count: 100, durationSec: 360000, distanceM: 2000000 })) };
 for (const st of S.stylesFor('week', { ...allSports, fields: S.stickerFields('week', allSports).map(r => r.id) }, measure)) {
   inside(st.layout({ ...allSports, fields: S.stickerFields('week', allSports).map(r => r.id) }, measure), 'todos los deportes/' + st.id);
+}
+
+
+// Nuevas referencias: listas reales y gráficas por deporte, listas para ES y EN.
+const detailed = { ...mixedWeek, sessions: [
+  { ds: '2026-10-26', type: 'strength', durationSec: 3960, distanceM: 0 },
+  { ds: '2026-10-27', type: 'strength', durationSec: 3222, distanceM: 0 },
+  { ds: '2026-10-27', type: 'run', durationSec: 2520, distanceM: 6390 },
+  { ds: '2026-10-29', type: 'run', durationSec: 2700, distanceM: 6560 },
+  { ds: '2026-10-29', type: 'walk', durationSec: 1400, distanceM: 1140 },
+  { ds: '2026-10-31', type: 'run', durationSec: 3540, distanceM: 10000 },
+  { ds: '2026-11-01', type: 'run', durationSec: 3900, distanceM: 9530 },
+  { ds: '2026-11-02', type: 'run', durationSec: 1000, distanceM: 5000 }
+] };
+assert.equal(S.normalizeWeekSessions(detailed).length, 7, 'no incluye la semana siguiente');
+assert.equal(S.stylesFor('week', detailed, measure).length, 22, 'no quita los 17 anteriores');
+for (const lang of ['es', 'en']) {
+  for (const id of ['diario', 'notas', 'barras', 'tabla', 'impacto']) {
+    const data = { ...detailed, lang, fields: ['discipline:run', 'discipline:strength', 'sessions', 'daily'] };
+    const style = S.KINDS.week.styles.find(s => s.id === id);
+    const L = style.layout(data, measure);
+    inside(L, id + '/' + lang);
+    assert.ok(saysCrew(L));
+    const text = L.ops.filter(o => o.op === 'text').map(o => o.text);
+    assert.equal(text[0], lang === 'es' ? 'ESTA SEMANA' : 'THIS WEEK');
+    if (id === 'diario') assert.ok(text.includes(lang === 'es' ? 'MARTES' : 'TUESDAY'));
+    if (id === 'notas') assert.ok(text.some(t => t.includes(lang === 'es' ? 'correr' : 'running')));
+    if (id === 'barras') {
+      const bars = L.ops.filter(o => o.metric);
+      assert.ok(bars.some(o => o.sourceType === 'run' && o.sourceDay === 1 && o.metricValue === 6.39));
+      assert.ok(!bars.some(o => o.sourceType === 'run' && o.sourceDay === 0), 'lunes de fuerza no crea km de carrera');
+      assert.equal(bars.filter(o => o.sourceType === 'strength').reduce((n, o) => n + o.metricValue, 0), 119.7, 'la fuerza usa minutos, no kilómetros');
+    }
+    const empty = style.layout({ ...data, fields: [] }, measure);
+    assert.equal(empty.ops.filter(o => o.op === 'text').length, 3, 'sin selección: encabezado y marca');
+    const onlyStrength = style.layout({ ...data, fields: ['discipline:strength', 'sessions', 'daily'] }, measure);
+    assert.ok(!onlyStrength.ops.some(o => o.type === 'run' || o.sourceType === 'run'), 'no filtra carreras desmarcadas');
+  }
+}
+const longDiary = { ...detailed, sessions: Array.from({ length: 50 }, (_, i) => ({ type: 'run', ds: '2026-10-27', durationSec: 600, distanceM: 1000 + i })) };
+for (const id of ['diario', 'notas']) {
+  const L = S.KINDS.week.styles.find(s => s.id === id).layout(longDiary, measure);
+  inside(L, 'lista extensa/' + id);
+  assert.ok(L.ops.some(o => o.text === '+ 14 ENTRENOS MÁS'), 'las listas largas anuncian lo que falta');
+}
+
+
+const partialDistance = { ...detailed, fields: ['discipline:run', 'daily'], sessions: [
+  { ds: '2026-10-27', type: 'run', durationSec: 1800, distanceM: 5000 },
+  { ds: '2026-10-28', type: 'run', durationSec: 3000, distanceM: 0 }
+] };
+for (const id of ['barras', 'tabla']) {
+  const L = S.KINDS.week.styles.find(s => s.id === id).layout(partialDistance, measure);
+  inside(L, 'distancia parcial/' + id);
+  assert.ok(L.ops.some(o => o.text === '—'), 'no representa una distancia no medida como cero');
+  assert.ok(!L.ops.some(o => o.text === '50M'), 'una tabla de kilómetros no mezcla minutos');
 }
 console.log('HABIT Stickers: ok');

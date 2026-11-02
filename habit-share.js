@@ -1120,6 +1120,138 @@
     return { kind: id, width: WIDTH, height: Math.ceil(y + brand.height + 80), ops };
   }
 
+  // Referencias Aura: composición de datos, sin copiar nombres de marca ni su interfaz.
+  // Los textos nuevos nacen en ES/EN; el selector global de HABIT sigue siendo otra fase.
+  const WEEK_REFERENCE_COPY = {
+    es: { week: 'ESTA SEMANA', total: 'TOTAL', daily: 'POR DÍA', bySport: 'POR DISCIPLINA', distance: 'KILÓMETROS', time: 'MINUTOS',
+      types: { run: 'CORRER', strength: 'FUERZA', bike: 'BICI', swim: 'NADAR', walk: 'CAMINAR', cardio: 'CARDIO', yoga: 'YOGA', sport: 'DEPORTE', other: 'ENTRENO' },
+      days: ['LUNES', 'MARTES', 'MIÉRCOLES', 'JUEVES', 'VIERNES', 'SÁBADO', 'DOMINGO'],
+      short: ['LUN', 'MAR', 'MIÉ', 'JUE', 'VIE', 'SÁB', 'DOM'], more: n => '+ ' + n + ' ENTRENOS MÁS',
+      fields: { sessions: 'Detalle de entrenamientos', daily: 'Distribución por día' },
+      styles: { diario: 'Diario', notas: 'Notas', barras: 'Barras', tabla: 'Tabla', impacto: 'Impacto' } },
+    en: { week: 'THIS WEEK', total: 'TOTAL', daily: 'BY DAY', bySport: 'BY SPORT', distance: 'KILOMETERS', time: 'MINUTES',
+      types: { run: 'RUNNING', strength: 'STRENGTH', bike: 'CYCLING', swim: 'SWIMMING', walk: 'WALKING', cardio: 'CARDIO', yoga: 'YOGA', sport: 'SPORT', other: 'WORKOUT' },
+      days: ['MONDAY', 'TUESDAY', 'WEDNESDAY', 'THURSDAY', 'FRIDAY', 'SATURDAY', 'SUNDAY'],
+      short: ['MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT', 'SUN'], more: n => '+ ' + n + ' MORE WORKOUTS',
+      fields: { sessions: 'Workout details', daily: 'Daily breakdown' },
+      styles: { diario: 'Journal', notas: 'Notes', barras: 'Bars', tabla: 'Table', impacto: 'Impact' } }
+  };
+  const referenceCopy = d => WEEK_REFERENCE_COPY[/^en\b/i.test(d.lang || d.locale || 'es') ? 'en' : 'es'];
+  function referenceTime(seconds, exact) {
+    const sec = Math.max(0, Math.round(seconds)), h = Math.floor(sec / 3600), m = Math.floor(sec % 3600 / 60), s = sec % 60;
+    if (!exact) return sec < 60 ? sec + 'S' : compactWeekTime(sec);
+    return [h ? h + 'H' : '', m ? m + 'M' : '', s ? s + 'S' : ''].filter(Boolean).join(' ') || '0M';
+  }
+  function referenceMetric(type, durationSec, distanceM, exact) {
+    if (ACTIVITY_TYPES[type].dist && distanceM > 0) {
+      return type === 'swim' ? thousands(distanceM) + ' M' : Number((distanceM / 1000).toFixed(2)) + ' KM';
+    }
+    return durationSec > 0 ? referenceTime(durationSec, exact) : '—';
+  }
+  function normalizeWeekSessions(d) {
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(d.weekStart || '')) return [];
+    const start = Date.parse(d.weekStart + 'T00:00:00Z'), end = start + 7 * 864e5;
+    if (!Number.isFinite(start)) return [];
+    return (Array.isArray(d.sessions) ? d.sessions : []).filter(r => r && ACTIVITY_TYPES[r.type]).map((r) => {
+      const date = /^\d{4}-\d{2}-\d{2}$/.test(r.ds || '') ? Date.parse(r.ds + 'T00:00:00Z') : NaN;
+      const valid = n => Number.isFinite(Number(n)) ? Math.max(0, Number(n)) : 0;
+      return { type: r.type, ds: r.ds, day: Math.round((date - start) / 864e5),
+        durationSec: Math.min(86400, valid(r.durationSec)), distanceM: ACTIVITY_TYPES[r.type].dist ? Math.min(1000000, valid(r.distanceM)) : 0,
+        date };
+    }).filter(r => r.date >= start && r.date < end).sort((a, b) => a.ds.localeCompare(b.ds));
+  }
+  function weeklyReferenceLayout(id, d, measure) {
+    const sports = selectedDisciplines(d), allSessions = normalizeWeekSessions(d), copy = referenceCopy(d);
+    if (!normalizeDisciplines(d).length || (id !== 'impacto' && !allSessions.length)) return null;
+    const has = field => !Array.isArray(d.fields) || d.fields.includes(field);
+    const selected = new Set(sports.map(r => r.type));
+    const sessions = allSessions.filter(r => selected.has(r.type));
+    const ops = [], x = 88, width = WIDTH - x * 2, right = WIDTH - x;
+    let y = 112;
+    const text = (value, px, atX, atY, opts) => {
+      opts = opts || {};
+      const t = fitText(measure, String(value), p => F(opts.weight || 600, p), opts.width || width, px, Math.min(28, px));
+      ops.push(textOp(measure, t.text, F(opts.weight || 600, t.px), { x: atX, y: atY, align: opts.align || 'left', alpha: opts.alpha }));
+    };
+    const rule = atY => ops.push({ op: 'line', x1: x, x2: right, y1: atY, y2: atY, w: 2, alpha: .3 });
+    text(copy.week, id === 'notas' ? 68 : 42, x, y, { weight: 800 }); y += 78;
+    if (id === 'diario' || id === 'notas') {
+      if (has('sessions')) {
+        let lastDay = -1;
+        const shown = sessions.slice(0, 36);
+        for (const r of shown) {
+          if (id === 'diario' && has('daily') && r.day !== lastDay) {
+            if (lastDay >= 0) y += 30;
+            text(copy.days[r.day], 32, x, y, { weight: 700 }); y += 58; lastDay = r.day;
+          }
+          const value = referenceMetric(r.type, r.durationSec, r.distanceM, true);
+          if (id === 'diario') {
+            ops.push({ op: 'sport', type: r.type, x, y: y - 42, size: 50 });
+            ops.push(displayOp(measure, value, x + 80, y, width - 80, 76));
+            y += 94;
+          } else {
+            // Una lista de notas: marca, cifra y disciplina, con ritmo tipográfico tranquilo.
+            text('✓', 38, x, y);
+            text(value + '  ' + copy.types[r.type].toLowerCase(), 50, x + 66, y, { width: width - 66, weight: 500 });
+            y += 78;
+          }
+        }
+        if (sessions.length > shown.length) { y += 20; text(copy.more(sessions.length - shown.length), 32, x, y); y += 50; }
+      }
+    } else if (id === 'impacto') {
+      for (const r of sports) {
+        text(copy.types[r.type], 34, x, y, { weight: 700 }); y += 42;
+        const value = referenceMetric(r.type, r.durationSec, r.distanceM);
+        const op = displayOp(measure, value.replace(/ /g, ''), WIDTH / 2, 0, width, 650, 'fg', { scale: .35, align: 'center' });
+        op.y = y + op.px * .78;
+        ops.push(op); y = op.y + op.px * .25 + 76;
+      }
+    } else if (has('daily')) {
+      for (const sport of sports) {
+        const points = Array.from({ length: 7 }, (_, day) => {
+          const rows = sessions.filter(r => r.type === sport.type && r.day === day);
+          return { day, count: rows.length, durationSec: rows.reduce((n, r) => n + r.durationSec, 0), distanceM: rows.reduce((n, r) => n + r.distanceM, 0) };
+        });
+        const totalSec = points.reduce((n, r) => n + r.durationSec, 0), totalM = points.reduce((n, r) => n + r.distanceM, 0);
+        const distance = totalM > 0 && ACTIVITY_TYPES[sport.type].dist;
+        text(copy.types[sport.type], 34, x, y, { weight: 700 });
+        ops.push(displayOp(measure, referenceMetric(sport.type, totalSec, totalM), right, y + 6, width - 320, 64, 'fg', { align: 'right' }));
+        y += 56;
+        if (id === 'tabla') {
+          rule(y); y += 56;
+          for (const point of points.filter(r => r.count)) {
+            text(copy.days[point.day], 30, x, y, { width: 390 });
+            const value = distance ? (point.distanceM > 0 ? referenceMetric(sport.type, 0, point.distanceM) : '—') : referenceMetric(sport.type, point.durationSec, 0, true);
+            ops.push(displayOp(measure, value, right, y + 10, width - 430, 72, 'fg', { align: 'right' }));
+            y += 58; rule(y); y += 54;
+          }
+          text(copy.total, 30, x, y, { weight: 700 });
+          ops.push(displayOp(measure, referenceMetric(sport.type, totalSec, totalM), right, y + 10, width - 300, 78, 'fg', { align: 'right' }));
+          y += 112;
+        } else {
+          const values = points.map(r => distance ? r.distanceM / 1000 : r.durationSec / 60);
+          const max = Math.max(...values, 1), baseline = y + 280, step = width / 7;
+          text(distance ? copy.distance : copy.time, 26, x, y, { alpha: .65 });
+          for (let i = 0; i < 7; i++) {
+            const cx = x + step * (i + .5), height = values[i] / max * 214;
+            if (height > 0) ops.push({ op: 'rect', x: cx - 26, y: baseline - height, w: 52, h: height, r: 4, alpha: i === 6 ? 1 : .65,
+              sourceType: sport.type, sourceDay: i, metricValue: values[i], metric: distance ? 'km' : 'min' });
+            const incomplete = sessions.some(r => r.type === sport.type && r.day === i && (distance ? !r.distanceM : !r.durationSec));
+            const value = values[i] ? String(Number(values[i].toFixed(1))) + (incomplete ? '+' : '') : incomplete ? '—' : '0';
+            text(value, 28, cx, baseline + 46, { align: 'center', width: step - 10, weight: 700 });
+            text(copy.short[i], 25, cx, baseline + 90, { align: 'center', width: step - 8, alpha: .7 });
+          }
+          rule(baseline + 4); y = baseline + 160;
+        }
+      }
+    }
+    y += 46;
+    const probe = lockupLayout(0, 0, 40, measure);
+    const brand = lockupOps(measure, x, y, Math.round(40 * 320 / probe.width), 'left');
+    ops.push(...brand.ops);
+    return { kind: id, width: WIDTH, height: Math.ceil(y + brand.height + 80), ops };
+  }
+
   function weekFacts(d) {
     d = d || {};
     const count = Math.max(0, Math.round(d.count || 0));
@@ -1483,6 +1615,7 @@
       if (w.range) add('weekStart', 'Fechas', w.range);
       if (d.days) add('days', 'Días entrenados', w.days.filter(Boolean).length, 'DÍAS ACTIVOS');
       normalizeDisciplines(d).forEach((r) => add(r.id, r.label + ' · ' + r.value, r.value, r.label.toUpperCase()));
+      if (normalizeWeekSessions(d).length) { add('sessions', referenceCopy(d).fields.sessions, normalizeWeekSessions(d).length); add('daily', referenceCopy(d).fields.daily, 7); }
     } else {
       const f = workoutFacts({ ...d, fields: undefined });
       add('title', 'Nombre del entreno', f.title);
@@ -1524,7 +1657,7 @@
     y += 42;
     const title = rows.find((r) => r.id === 'title');
     if (title) { put(title.value.toUpperCase(), compact ? 68 : 90, 38, 800); y += 24; }
-    const metrics = rows.filter((r) => !r.id.startsWith('discipline:') && !['title', 'ds', 'weekStart', 'days'].includes(r.id));
+    const metrics = rows.filter((r) => !r.id.startsWith('discipline:') && !['title', 'ds', 'weekStart', 'days', 'sessions', 'daily'].includes(r.id));
     metrics.forEach((r, i) => {
       if (compact) {
         if (i) y += 22;
@@ -1602,7 +1735,7 @@
     }
     const rule = (atY, dash) => ops.push({ op: 'line', x1: left, x2: right, y1: atY, y2: atY, color: ink, alpha: .3, dash });
     const center = (value, px, atY, opts) => text(value, px, atY, { ...opts, x: WIDTH / 2, align: 'center' });
-    const metrics = rows.filter((r) => !r.id.startsWith('discipline:') && !['weekStart', 'days'].includes(r.id));
+    const metrics = rows.filter((r) => !r.id.startsWith('discipline:') && !['weekStart', 'days', 'sessions', 'daily'].includes(r.id));
     const main = (id === 'racha' && metrics.find((r) => r.id === 'streak')) || metrics[0];
     const rest = metrics.filter((r) => r !== main);
     const date = rows.find((r) => r.id === 'weekStart');
@@ -1705,6 +1838,10 @@
   KINDS.week.styles.unshift(...[
     ['thisweek', 'This Week'], ['mix', 'Mix'], ['pasaporte', 'Pasaporte'], ['tipografico', 'Tipográfico']
   ].map(([id, label]) => ({ id, label, customizable: true, layout: (d, m) => disciplineWeekLayout(id, d, m) })));
+
+  KINDS.week.styles.unshift(...[
+    ['diario', 'Diario'], ['notas', 'Notas'], ['barras', 'Barras'], ['tabla', 'Tabla'], ['impacto', 'Impacto']
+  ].map(([id, label]) => ({ id, label, customizable: true, layout: (d, m) => weeklyReferenceLayout(id, d, m) })));
 
   // ── Dibujo (navegador) ─────────────────────────────────────────────────
 
@@ -2035,7 +2172,7 @@
       const preset = e.target.closest('[data-selection]');
       if (preset && state) {
         const fields = stickerFields(state.kind, state.data);
-        setFields(fields.filter((r) => preset.dataset.selection === 'all' || r.id.startsWith('discipline:')).map((r) => r.id));
+        setFields(fields.filter((r) => preset.dataset.selection === 'all' || r.id.startsWith('discipline:') || ['sessions', 'daily'].includes(r.id)).map((r) => r.id));
         return;
       }
       const c = e.target.closest('.hs-color');
@@ -2085,7 +2222,7 @@
     i = Math.max(0, Math.min(state.styles.length - 1, i));
     state.current = i;
     const s = state.styles[i];
-    sheet.querySelector('.hs-label').textContent = s ? s.label : '';
+    sheet.querySelector('.hs-label').textContent = s ? (referenceCopy(state.data).styles[s.id] || s.label) : '';
     sheet.querySelector('.hs-count').textContent = state.styles.length ? (i + 1) + ' / ' + state.styles.length : '';
     sheet.querySelectorAll('.hs-thumb').forEach((b, j) => { b.classList.toggle('on', j === i); b.setAttribute('aria-selected', j === i ? 'true' : 'false'); });
     const on = sheet.querySelector('.hs-thumb.on');
@@ -2134,8 +2271,8 @@
       state.styles = stylesFor(state.kind, state.data, canvasMeasure(probe));
       if (state.preferredStyle) state.current = Math.max(0, state.styles.findIndex((s) => s.id === state.preferredStyle));
       // Cada lámina nace con su <img>: pintar un sticker solo le cambia el src, sin mover nada.
-      track.innerHTML = state.styles.map((s) => '<div class="hs-slide"><img alt="Sticker ' + escHtml(s.label) + '" hidden><div class="hs-wait">Preparando…</div></div>').join('');
-      thumbs.innerHTML = state.styles.map((s, i) => '<button type="button" class="hs-thumb" role="tab" data-i="' + i + '" aria-label="' + escHtml(s.label) + '"></button>').join('');
+      track.innerHTML = state.styles.map((s) => '<div class="hs-slide"><img alt="Sticker ' + escHtml(referenceCopy(state.data).styles[s.id] || s.label) + '" hidden><div class="hs-wait">Preparando…</div></div>').join('');
+      thumbs.innerHTML = state.styles.map((s, i) => '<button type="button" class="hs-thumb" role="tab" data-i="' + i + '" aria-label="' + escHtml(referenceCopy(state.data).styles[s.id] || s.label) + '"></button>').join('');
       goTo(state.current || 0);
     }
     thumbs.querySelectorAll('.hs-thumb').forEach((t) => t.classList.toggle('light', light));
@@ -2196,7 +2333,7 @@
     freeItems();
     seq++;
     state = {
-      kind: KINDS[opts.kind] ? opts.kind : 'quote', data: opts.data || {}, color: readColor(),
+      kind: KINDS[opts.kind] ? opts.kind : 'quote', data: { ...(opts.data || {}), lang: opts.lang || (opts.data && (opts.data.lang || opts.data.locale)) || doc.documentElement.lang || 'es' }, color: readColor(),
       title: opts.title || '', subtitle: opts.subtitle || '', items: null, styles: null, current: 0,
       onClose: typeof opts.onClose === 'function' ? opts.onClose : null
     };
@@ -2207,7 +2344,7 @@
     if (state.kind !== 'quote') {
       const fields = stickerFields(state.kind, state.data);
       if (!Array.isArray(state.data.fields)) {
-        const defaults = state.kind === 'week' ? ['count', 'durationSec', 'days', 'weekStart'] : ['title', 'durationSec', 'distanceM'];
+        const defaults = state.kind === 'week' ? ['count', 'durationSec', 'days', 'weekStart', 'sessions', 'daily'] : ['title', 'durationSec', 'distanceM'];
         state.data = { ...state.data, fields: fields.filter((r) => defaults.includes(r.id) || r.id.startsWith('discipline:')).map((r) => r.id) };
       }
       sheet.querySelector('.hs-fields').innerHTML = fields.map((r) => '<label><input type="checkbox" data-field="' + r.id + '"' + (state.data.fields.includes(r.id) ? ' checked' : '') + '><span>' + escHtml(r.label) + '</span></label>').join('');
@@ -2248,7 +2385,7 @@
   const api = {
     COLORS, PALETTE, WIDTH, LOGO_INK, KINDS, ACTIVITY_TYPES, SHARE_ICON, contrast, inkFor, resolveColor,
     wrapText, balancedWrap, spacedWidth, lockupLayout, quoteLayout, signatureLayout, sealLayout, shortDate,
-    dayName, thousands, distanceText, clock, minutesText, paceText, workoutFacts, weekFacts, stylesFor, stickerFields, selectedFields, normalizeDisciplines, selectedDisciplines, compactWeekTime,
+    dayName, thousands, distanceText, clock, minutesText, paceText, workoutFacts, weekFacts, stylesFor, stickerFields, selectedFields, normalizeDisciplines, selectedDisciplines, compactWeekTime, normalizeWeekSessions, weeklyReferenceLayout, referenceCopy,
     ensureFonts, loadLogo, renderSticker, toBlob, shareImage, open, close, chipHtml
   };
   if (typeof module !== 'undefined' && module.exports) module.exports = api;
