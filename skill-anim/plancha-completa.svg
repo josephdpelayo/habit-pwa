@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="20 70 234 234" preserveAspectRatio="xMidYMid meet" role="img" aria-label="Plancha completa">
+  <title>Plancha completa</title>
+  <line x1="36.0" y1="210.0" x2="238.0" y2="210.0" stroke="rgba(232,233,238,.3)" stroke-width="5" stroke-linecap="round" opacity="1.0"/>
+  <line x1="143.0" y1="210.0" x2="175.0" y2="169.0" stroke="#e8e9ee" stroke-width="7" stroke-linecap="round" opacity="1.0"/>
+  <line x1="157.0" y1="210.0" x2="189.0" y2="169.0" stroke="#e8e9ee" stroke-width="7" stroke-linecap="round" opacity="0.5"/>
+  <circle cx="150.0" cy="210.0" r="6" fill="rgba(232,233,238,.3)"/>
+  <g>
+    <animateTransform attributeName="transform" type="rotate" values="-1.5 182 169;1.5 182 169;-1.5 182 169" keyTimes="0.00;0.50;1.00" dur="5s" repeatCount="indefinite" calcMode="spline" keySplines="0.4 0 0.6 1;0.4 0 0.6 1"/>
+    <line x1="182.0" y1="169.0" x2="134.0" y2="169.0" stroke="#e8e9ee" stroke-width="7" stroke-linecap="round" opacity="1.0"/>
+    <line x1="182.0" y1="169.0" x2="198.0" y2="169.0" stroke="#e8e9ee" stroke-width="6" stroke-linecap="round" opacity="1.0"/>
+    <circle cx="207.0" cy="169.0" r="11" fill="#e8e9ee"/>
+    <line x1="207.0" y1="169.0" x2="207.0" y2="187.0" stroke="#e8e9ee" stroke-width="5" stroke-linecap="round" opacity="1.0"/>
+    <line x1="134.0" y1="169.0" x2="94.0" y2="169.0" stroke="#e8e9ee" stroke-width="7" stroke-linecap="round" opacity="1.0"/>
+    <line x1="94.0" y1="169.0" x2="56.0" y2="169.0" stroke="#e8e9ee" stroke-width="7" stroke-linecap="round" opacity="1.0"/>
+    <line x1="134.0" y1="169.0" x2="94.0" y2="169.0" stroke="#e8e9ee" stroke-width="7" stroke-linecap="round" opacity="0.5"/>
+    <line x1="94.0" y1="169.0" x2="56.0" y2="169.0" stroke="#e8e9ee" stroke-width="7" stroke-linecap="round" opacity="0.5"/>
+  </g>
+</svg>

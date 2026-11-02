@@ -192,9 +192,11 @@ assert.match(fs.readFileSync('sw.js', 'utf8'), /habit-skills\.js/, 'sw.js cachea
 // El dibujo de un escalón vive en dos lados —el SVG en el repo y su URL en la migración— y
 // si se separan, la escalera enseña un hueco o un 404. El generador los produce a la vez;
 // esto falla si alguien borra uno sin el otro.
-const anim = fs.readFileSync('migrations/142_skill_animations.sql', 'utf8');
+const anim = fs.readFileSync('migrations/142_skill_animations.sql', 'utf8')
+  + fs.readFileSync('migrations/143_skill_animations_resto.sql', 'utf8');
 const animSlugs = [...anim.matchAll(/^\s*\('([a-z0-9-]+)'\)[,;]?$/gm)].map(m => m[1]);
-assert.equal(animSlugs.length, 15, 'quince escalones con animación en la 142');
+assert.equal(new Set(animSlugs).size, animSlugs.length, 'ningún escalón enlazado dos veces');
+assert.equal(animSlugs.length, 35, 'las siete escaleras dibujadas');
 const animFiles = fs.readdirSync('skill-anim').filter(f => f.endsWith('.svg')).map(f => f.replace(/\.svg$/, ''));
 for (const slug of animSlugs) {
   assert.ok(animFiles.includes(slug), `la 142 enlaza ${slug}.svg pero el archivo no existe`);
@@ -209,13 +211,18 @@ for (const f of animFiles) {
   assert.ok(animSlugs.includes(f), `skill-anim/${f}.svg no lo enlaza ninguna migración`);
 }
 // Y cada uno tiene que ser un escalón de verdad de una de las dos líneas.
-const ladderSlugs = new Set(rungRows.filter(r => r.grp === 'front-lever' || r.grp === 'handstand').map(r => r.slug));
+const ladderSlugs = new Set(rungRows.map(r => r.slug));
 for (const slug of animSlugs) {
-  assert.ok(ladderSlugs.has(slug), `${slug} tiene animación pero no es escalón de front-lever ni handstand`);
+  assert.ok(ladderSlugs.has(slug), `${slug} tiene animación pero no es escalón de ninguna línea`);
 }
-assert.equal(ladderSlugs.size, 15, 'las dos líneas suman quince escalones');
+assert.equal(ladderSlugs.size, 35, 'todos los escalones de las siete líneas tienen dibujo');
 // La 142 nunca pisa una animación que el coach ya subió.
-assert.match(anim, /animation_url is null/, 'la 142 solo escribe donde está vacío');
+// La invariante no es cuántas escrituras hay, sino que TODAS vayan protegidas: el video
+// que suba el coach no se puede perder porque alguien vuelva a correr la migración.
+const writes = (anim.match(/set animation_url/g) || []).length;
+const guards = (anim.match(/animation_url is null/g) || []).length;
+assert.ok(writes > 0 && writes === guards,
+  `cada escritura de animation_url debe ir con "is null": ${writes} escrituras, ${guards} guardas`);
 
 
 // Compila el script principal de crew.html sin ejecutarlo. Ninguna prueba lo hacía —cada una

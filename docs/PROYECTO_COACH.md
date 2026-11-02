@@ -186,3 +186,9 @@ ahorraste la Fase 1.
   en una escalera se comparan ocho posiciones de un vistazo; solo se mueve donde el movimiento es
   el ejercicio. Revisadas en el navegador a tamaño de hoja y a 58 px. El video real de cada
   escalón las pisa en cuanto se suba desde Admin: la 142 solo escribe donde está vacío.
+- **2 nov 2026** — **Las siete escaleras dibujadas**: 20 animaciones más (planche, elevaciones a
+  front lever, muscle-up, back lever y curl nórdico) y la migración 143 que las enlaza. Se añadió
+  la marca de orientación —sin ella un front lever y un back lever son el mismo monigote— y los
+  brazos que se doblan, que es lo que distingue los escalones del muscle-up. Revisadas las 35 en
+  el navegador: ahí se vieron y se corrigieron un nórdico que pasaba el ciclo de pie en vez de
+  bajando, y un muscle-up negativo que giraba 150° sobre el hombro.

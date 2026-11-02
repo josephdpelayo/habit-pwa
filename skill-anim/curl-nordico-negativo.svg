@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="-17 39 217 217" preserveAspectRatio="xMidYMid meet" role="img" aria-label="Curl nórdico negativo">
+  <title>Curl nórdico negativo</title>
+  <line x1="120.0" y1="210.0" x2="158.0" y2="210.0" stroke="#e8e9ee" stroke-width="7" stroke-linecap="round" opacity="1.0"/>
+  <line x1="90.0" y1="210.0" x2="184.0" y2="210.0" stroke="rgba(232,233,238,.3)" stroke-width="5" stroke-linecap="round" opacity="1.0"/>
+  <line x1="151.0" y1="199.0" x2="165.0" y2="199.0" stroke="rgba(232,233,238,.3)" stroke-width="6" stroke-linecap="round" opacity="1.0"/>
+  <g>
+    <animateTransform attributeName="transform" type="rotate" values="-10 120 210;-72 120 210;-72 120 210;-10 120 210" keyTimes="0.00;0.55;0.70;1.00" dur="5s" repeatCount="indefinite" calcMode="spline" keySplines="0.4 0 0.6 1;0.4 0 0.6 1;0.4 0 0.6 1"/>
+    <line x1="120.0" y1="210.0" x2="120.0" y2="170.0" stroke="#e8e9ee" stroke-width="7" stroke-linecap="round" opacity="1.0"/>
+    <line x1="120.0" y1="170.0" x2="120.0" y2="122.0" stroke="#e8e9ee" stroke-width="7" stroke-linecap="round" opacity="1.0"/>
+    <line x1="120.0" y1="122.0" x2="120.0" y2="106.0" stroke="#e8e9ee" stroke-width="6" stroke-linecap="round" opacity="1.0"/>
+    <circle cx="120.0" cy="97.0" r="11" fill="#e8e9ee"/>
+    <line x1="120.0" y1="97.0" x2="102.0" y2="97.0" stroke="#e8e9ee" stroke-width="5" stroke-linecap="round" opacity="1.0"/>
+  </g>
+</svg>

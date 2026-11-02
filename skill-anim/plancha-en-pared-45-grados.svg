@@ -10,6 +10,7 @@
     <line x1="120.0" y1="158.0" x2="156.8" y2="127.1" stroke="#e8e9ee" stroke-width="7" stroke-linecap="round" opacity="1.0"/>
     <line x1="120.0" y1="158.0" x2="107.7" y2="168.3" stroke="#e8e9ee" stroke-width="6" stroke-linecap="round" opacity="1.0"/>
     <circle cx="100.8" cy="174.1" r="11" fill="#e8e9ee"/>
+    <line x1="100.8" y1="174.1" x2="100.8" y2="192.1" stroke="#e8e9ee" stroke-width="5" stroke-linecap="round" opacity="1.0"/>
     <line x1="156.8" y1="127.1" x2="187.4" y2="101.4" stroke="#e8e9ee" stroke-width="7" stroke-linecap="round" opacity="1.0"/>
     <line x1="187.4" y1="101.4" x2="216.5" y2="77.0" stroke="#e8e9ee" stroke-width="7" stroke-linecap="round" opacity="1.0"/>
     <line x1="156.8" y1="127.1" x2="187.4" y2="101.4" stroke="#e8e9ee" stroke-width="7" stroke-linecap="round" opacity="0.5"/>
