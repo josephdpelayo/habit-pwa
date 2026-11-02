@@ -42,9 +42,15 @@ assert.equal(A.typeFromSkandi('other', 'Yoga'), 'yoga', 'un «other» que era yo
 assert.equal(A.typeFromSkandi('other', 'Hike'), 'walk');
 assert.equal(A.typeFromSkandi('other', 'Soccer'), 'sport');
 assert.equal(A.typeFromSkandi('other', 'Workout'), 'other');
+for (const type of ['WeightTraining', 'StrengthTraining', 'Functional Strength Training', 'Crossfit']) {
+  assert.equal(A.typeFromSkandi('other', type), 'strength', 'reconoce fuerza independiente: ' + type);
+}
 assert.equal(A.typeFromSkandi('other', null), 'other');
 
 const h = { dsOf: (iso) => (iso ? new Date(Date.parse(iso) - 7 * 3600e3).toISOString().slice(0, 10) : ''), routineName: (n) => n };
+const watchStrength = A.itemFromSkandiActivity({ id: 'g-strength', activity_type: 'other', external_source: 'intervals', external_type: 'WeightTraining',
+  performed_at: '2026-10-27T14:00:00Z', duration_min: 60, avg_heart_rate: 128, calories: 370, note: 'Upper A' }, h);
+assert.deepEqual([watchStrength.type, watchStrength.durationSec, watchStrength.avgHr, watchStrength.kcal], ['strength', 3600, 128, 370]);
 const run = A.itemFromSkandiActivity({
   id: 'r1', activity_type: 'running', external_source: 'intervals', external_type: 'Run', performed_at: '2026-10-31T02:30:00+00:00',
   duration_min: 52, distance_km: 10.02, elevation_gain_m: 41, avg_heart_rate: 151, calories: 640, intensity: 7, note: 'Malecón 10K'
@@ -81,6 +87,9 @@ assert.equal(A.syncWindowDays(null, now), 120, 'la primera vez, lo que enseña l
 assert.equal(A.syncWindowDays('2026-09-07T11:41:25Z', now), 58, 'desde la última vez, con dos días de colchón');
 assert.equal(A.syncWindowDays('2026-11-01T17:00:00Z', now), 3, 'nunca menos de tres días');
 assert.equal(A.syncWindowDays('2025-01-01T00:00:00Z', now), 120, 'ni más de cuatro meses');
+assert.equal(A.syncWindowDays('2026-11-01T17:00:00Z', now, 120), 120, 'Sincronizar revisa el historial visible aunque el sync sea reciente');
+assert.equal(A.syncWindowDays('2026-11-01T17:00:00Z', now, 300), 300, 'Ver antes también puede recuperarse');
+assert.equal(A.syncWindowDays(null, now, 1000), 730, 'respeta el límite del servidor');
 assert.equal(A.syncDue(null, now), true);
 assert.equal(A.syncDue('2026-11-01T17:50:00Z', now), false, 'hace diez minutos: no');
 assert.equal(A.syncDue('2026-11-01T17:30:00Z', now), true, 'hace media hora: sí');

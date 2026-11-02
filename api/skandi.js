@@ -1227,7 +1227,10 @@ async function mergeDuplicateManualActivities(userId, sinceIso) {
     .eq('user_id', userId).gte('performed_at', sinceIso);
   if (error) throw new Error(error.message);
 
-  const pairs = SkandiStrava.matchImportedToManual(rows || []);
+  // 'other' también alberga fuerza del reloj. No absorber una sesión de fuerza dentro
+  // de cualquier otra actividad manual por el mero hecho de compartir esa categoría.
+  const pairs = SkandiStrava.matchImportedToManual((rows || []).filter(row =>
+    !SkandiIntervals.STRENGTH_TYPES.has(String(row.external_type || '').replace(/[^a-z]/gi, '').toLowerCase())));
   let merged = 0;
   for (const { imported, manual } of pairs) {
     const patch = {
@@ -1629,7 +1632,16 @@ async function intervalsCredential(userId) {
 
 async function importIntervalsActivities(userId, activities) {
   const { maxHeartRate, hrZones } = await effortRefsOf(userId);
+  const strengthIds = (activities || []).filter(SkandiIntervals.isStrengthActivity).map(a => String(a.id));
+  const linkedIds = new Set();
+  if (strengthIds.length) {
+    const { data, error } = await supabase.from('skandi_sessions')
+      .select('garmin_external_id').eq('user_id', userId).in('garmin_external_id', strengthIds);
+    if (error) throw new Error(error.message);
+    (data || []).forEach(row => linkedIds.add(String(row.garmin_external_id)));
+  }
   const rows = (activities || [])
+    .filter(activity => !SkandiIntervals.isStrengthActivity(activity) || !linkedIds.has(String(activity.id)))
     .map(activity => SkandiIntervals.toActivityRow(activity, { userId, maxHeartRate, hrZones }))
     .filter(Boolean);
   const result = { imported: 0, updated: 0, skipped: (activities || []).length - rows.length };
@@ -1753,6 +1765,11 @@ async function applyGarminMetric(userId, session, metric) {
     const { error: updateError } = await supabase.from('skandi_sessions')
       .update(patch).eq('id', session.id).eq('user_id', userId);
     if (updateError) throw new Error(updateError.message);
+    // Puede haberse importado antes de que existiera la sesión. Solo se elimina la
+    // copia del mismo usuario/origen/id, después de guardar las métricas en la sesión.
+    const { error: deleteError } = await supabase.from('skandi_external_activities')
+      .delete().eq('user_id', userId).eq('external_source', 'intervals').eq('external_id', metric.externalId);
+    if (deleteError) throw new Error(deleteError.message);
   }
 }
 
@@ -1875,8 +1892,8 @@ async function intervalsSync(req, res) {
         oldest: date(oldest), newest: date(newest), limit: 1000, fields: INTERVALS_FIELDS,
       });
     if (!Array.isArray(activities)) throw new Error('Intervals.icu devolvió una respuesta inesperada.');
-    const totals = await importIntervalsActivities(userId, activities);
     const strengthTotals = await linkIntervalsStrengthActivities(userId, activities);
+    const totals = await importIntervalsActivities(userId, activities);
     // El bienestar es un extra: si su endpoint falla, lo entrenado ya se guardó y la
     // sincronización no se declara rota por eso. Se reporta el motivo y se sigue.
     let wellness = { wellness_days: 0, weight_days: 0 };

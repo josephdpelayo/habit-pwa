@@ -68,6 +68,7 @@
   function typeFromSkandi(activityType, externalType) {
     if (SKANDI_TYPES[activityType]) return SKANDI_TYPES[activityType];
     const raw = String(externalType || '').toLowerCase();
+    if (/^(weighttraining|strengthtraining|functionalstrengthtraining|crossfit)$/.test(raw.replace(/[^a-z]/g, ''))) return 'strength';
     if (/yoga|pilates|stretch|mobility/.test(raw)) return 'yoga';
     if (/hike|walk/.test(raw)) return 'walk';
     if (/soccer|football|tennis|padel|basket|volley|golf|squash|badminton|pickleball|surf|climb|ski|snowboard|skate/.test(raw)) return 'sport';
@@ -128,7 +129,10 @@
 
   // Cuántos días pedirle a Intervals: desde la última vez, con dos de colchón (el reloj sube la
   // actividad horas después); sin una vez anterior, los cuatro meses que enseña la lista.
-  function syncWindowDays(lastSyncIso, now) {
+  function syncWindowDays(lastSyncIso, now, visibleDays) {
+    // Una sincronización explícita repara también actividades antiguas que antes se
+    // descartaban, aunque el último sync haya sido hace apenas unos minutos.
+    if (visibleDays > 0) return Math.max(120, Math.min(730, Math.round(visibleDays)));
     const t = Date.parse(lastSyncIso || '');
     if (!isFinite(t)) return 120;
     return Math.max(3, Math.min(120, Math.ceil((now - t) / 864e5) + 2));
@@ -378,7 +382,7 @@
       }
       if (!sync.connected || (!force && !syncDue(sync.last, Date.now()))) return;
       sync.busy = true; sync.error = ''; paint();
-      const r = await skandiApi('intervals-sync', { days: syncWindowDays(sync.last, Date.now()) });
+      const r = await skandiApi('intervals-sync', { days: syncWindowDays(sync.last, Date.now(), force ? state.windowDays : 0) });
       sync.busy = false; sync.last = new Date().toISOString();
       await loadData(true);
       paint();

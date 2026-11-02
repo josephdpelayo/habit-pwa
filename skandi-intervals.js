@@ -92,9 +92,8 @@ function matchStrengthActivities(activities, sessions, { maxHeartRate, hrZones }
       used.add(best.session.id);
       matches.push({ session: best.session, metric });
     } else {
-      // Un entrenamiento de fuerza del reloj sin sesión en Skandi no se enlaza a nada y
-      // tampoco se importa como actividad (duplicaría la fatiga). Devolverlo, y no solo
-      // contarlo, es lo que permite decir CUÁL falta en vez de dejar un hueco silencioso.
+      // Sin sesión propia se conserva como actividad independiente; si después se enlaza,
+      // el servidor retira esa copia externa para contar el entrenamiento una sola vez.
       unmatched.push(metric);
     }
   }
@@ -102,7 +101,23 @@ function matchStrengthActivities(activities, sessions, { maxHeartRate, hrZones }
 }
 
 function toActivityRow(activity, { userId, maxHeartRate, hrZones } = {}) {
-  if (!activity || !activity.id || !isGarminActivity(activity) || isStrengthActivity(activity)) return null;
+  if (!activity || !activity.id || !isGarminActivity(activity)) return null;
+  if (isStrengthActivity(activity)) {
+    const metric = strengthMetrics(activity, { maxHeartRate, hrZones });
+    if (!metric) return null;
+    return {
+      user_id: userId,
+      // El esquema compartido no tiene 'strength'. El tipo original permite a HABIT
+      // mostrar Fuerza sin migración ni fingir series o músculos que el reloj no envía.
+      activity_type: 'other', external_type: String(activity.type).trim(),
+      external_source: 'intervals', external_id: metric.externalId,
+      performed_at: metric.startedAt, duration_min: Math.max(1, Math.round(metric.durationSec / 60)),
+      distance_km: null, elevation_gain_m: null,
+      avg_heart_rate: metric.avgHeartRate, max_heart_rate: metric.maxHeartRate,
+      calories: metric.calories, intensity: metric.intensity, intensity_source: metric.intensitySource,
+      note: metric.activityName,
+    };
+  }
   const start = activity.start_date || activity.start_date_local;
   if (!start || Number.isNaN(new Date(start).getTime())) return null;
 

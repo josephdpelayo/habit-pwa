@@ -956,3 +956,46 @@ nuevas.
   - `scripts/check-activity.js`: que las dos apps declaren lo que usa el módulo, que los botones
     de abajo vayan en el orden de su lista (HABIT los empata por posición), y cómo cada fuente se
     vuelve un renglón.
+
+- **2026-11-01 — Fuerza del reloj sin iniciar HABIT** (`20261101-8`). Se encontró una exclusión
+  explícita en `skandi-intervals.js`: la fuerza de Garmin solo enriquecía sesiones de Skandi y
+  se descartaba si no había una. Ahora se importa como actividad independiente, con el tipo
+  original (`external_type`) para mostrarla como Fuerza en HABIT/Crew, tiempo total incluyendo
+  descansos, FC y calorías disponibles. No se inventan ejercicios ni series. El esquema
+  compartido usa `activity_type='other'` y no requiere una migración.
+  - El enlace con Skandi ocurre antes de la importación. Los ids ya enlazados se excluyen,
+    incluso si su sesión está fuera de la ventana consultada; al enlazar después se retira
+    exclusivamente la copia externa del mismo usuario, origen e id, tras guardar las métricas.
+  - Esa fuerza no se fusiona con un «other» manual por mera proximidad horaria.
+  - «Sincronizar» en Actividad repasa la ventana visible (mínimo 120 días, máximo 730), para
+    recuperar actividades descartadas en sincronizaciones anteriores. El sync automático
+    mantiene su ventana incremental. Solo puede recuperar lo que Intervals.icu entregue.
+  - Prueba del endpoint real con dependencias en memoria: importar sin sesión previa, repetir,
+    preservar esfuerzo/duración manual, enlazar más tarde, no borrar si falla guardar la sesión,
+    no tocar otra cuenta y no reimportar un id ya enlazado. Falta verificar con la cuenta real.
+
+### Apple Salud — propuesta para la siguiente etapa, todavía sin implementar
+
+Joseph propone usar Apple Salud como entrada común para futuros usuarios de iPhone. El flujo
+sería reloj/app → Salud → HABIT, leyendo con HealthKit y autorización de cada persona. Solo
+llegarán entrenos y métricas que las apps de origen hayan escrito y el usuario permita leer;
+no implica que estén disponibles las series/repeticiones de fuerza ni toda la historia Garmin.
+
+La PWA actual no tiene acceso directo a HealthKit. Ya existe la base de iOS con Capacitor
+(`ios/`, `capacitor.config.json`), que se puede extender con un puente nativo sin reescribir
+las pantallas. Haría falta desarrollar ese puente y distribuir una versión instalable de iOS
+para probarla (por ejemplo, TestFlight); no basta con agregar un botón a la web.
+
+Propuesta de primera versión: conexión opcional tras registrarse, lectura de entrenos y métricas
+básicas disponibles (tipo, fecha, duración, distancia, energía y FC), vista previa e importación
+del historial elegido, y actualización al abrir la app. Guardar UUID de HealthKit y procedencia,
+respetar revocaciones y no releer registros propios como nuevas actividades. El envío a nuestra
+cuenta debe estar explicado y autorizado, además del permiso local de HealthKit.
+
+Con varias conexiones activas, conservar una sola actividad y su procedencia: usar ids externos
+cuando existan y proponer una vinculación si solo coinciden horarios, tipo y duración. No unir
+por día ni sumar automáticamente la copia Garmin/Intervals/Salud. Mantener Intervals para la
+web actual; no sustituirlo antes de que exista la integración iOS.
+
+Referencias: https://developer.apple.com/documentation/healthkit/setting-up-healthkit y
+https://support.garmin.com/en-NZ/?faq=lK5FPB9iPF5PXFkIpFlFPA

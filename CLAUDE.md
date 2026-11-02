@@ -786,3 +786,13 @@ Strava's app settings need `Authorization Callback Domain` set to the bare host 
 
 ### SQL Migrations
 All migrations live in `migrations/` with numeric prefixes (`001_schema.sql` … `083_skandi_garmin_strength.sql`). Run them in order in the Supabase SQL Editor. New migrations follow the same naming convention. The API handlers detect missing tables and return descriptive error messages pointing to the required migration.
+
+## Fuerza independiente del reloj (20261101-8)
+
+`skandi-intervals.js` también importa fuerza Garmin sin una sesión previa. Se guarda como
+`activity_type=other` y `external_type=WeightTraining` (o su tipo real), y `habit-activity.js` la
+clasifica como Fuerza. No volver a descartar esa fuerza: iniciar HABIT no es requisito. Primero
+se enlaza con Skandi si hay pareja; los ids enlazados se excluyen de la importación y al enlazar
+se elimina su copia externa para no sumar dos veces. `scripts/check-intervals.js` prueba el flujo
+del endpoint con dependencias en memoria. Apple Salud sigue siendo una propuesta para iOS,
+no una integración disponible desde la PWA.
