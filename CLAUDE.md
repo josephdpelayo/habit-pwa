@@ -755,6 +755,40 @@ All time logic uses **America/Mazatlan (UTC−7)**. The constant `MAZ_UTC_OFFSET
 ### Native (Capacitor)
 `capacitor.config.json` targets `app.habittraininghub.app`. The `ios/` and `www/` directories contain the Capacitor build output. The `www/` dir is generated from `app.html` — do not edit it directly.
 
+### Garmin: la fuerza de HABIT en el reloj (`garmin_sync/`)
+Correr y bici viajan al reloj por Intervals.icu (`intervals_import/`, plan JSON →
+`/athlete/0/events/bulk`). **La fuerza no puede ir por ahí**: el exportador de Intervals a Garmin
+ignora ejercicio, reps y peso, y descarta los pasos sin duración, así que al reloj llegan bloques
+de tiempo ("Go 0:40") sin decir qué hacer (petición abierta en su foro desde sep 2026). Para que
+el Venu 4 **inicie y siga** un entreno de fuerza —animación, cuenta de reps, peso por serie— el
+workout tiene que nacer como workout de fuerza de Garmin Connect, y eso es `garmin_sync/`.
+
+- `garmin_sync.py` lee la semana de HABIT y la escribe en Garmin: `ensure_coaching_week_from_template`
+  para estampar lo que nadie ha abierto en la app, `coaching_schedule` + `boards.exercises` con la
+  misma regla de `sessionExerciseList`, y `upload_strength_workout` + `schedule_workout` del lado
+  de Garmin. **HABIT se lee como el socio**: la llave anon que ya vive en `app.html` más su propia
+  sesión (refresh token en el Llavero, servicio `habit-supabase`); la RLS hace el resto y la
+  service-role no entra aquí. Garmin no tiene API pública para personas: es
+  `python-garminconnect` (API no oficial, tokens en `~/.garminconnect`) en un venv propio
+  (`garmin_sync/.venv`, gitignored) con Python 3.13, porque la librería pide 3.12+.
+- **Idempotente por contenido**: cada día lleva la firma de sus ejercicios en
+  `~/.habit-garmin/state.json`; lo que no cambió se deja, lo que cambió en HABIT se vuelve a
+  subir, y un día que pasó a descanso se borra de Garmin. Un cambio es **borrar y volver a
+  subir**, no un PUT: actualizar exige reenviar los ids de cada paso y un desajuste deja el
+  workout a medias. `done` y `skipped` no se tocan.
+- Los objetivos se traducen como en la app: un rango vale su piso (`defaultRepsFromTarget`), una
+  pirámide es un bloque de una serie por escalón, `20s` es serie de tiempo, sin descanso escrito
+  90 s (0 en calentamiento y movilidad), y **"al fallo" termina con el botón de vuelta del reloj**
+  (`lap.button`), no con una cuenta inventada.
+- `exercise_map.json` traduce al catálogo de Garmin (1 527 ejercicios). **Una llave de dos
+  palabras o más vale también dentro de un nombre más largo** —en HABIT los ejercicios se llaman
+  como se hablan ("Flexiones de pino profundas en pared en paralelas")— y las de una sola palabra
+  solo exactas: "flexiones" dentro de "flexiones de pino libre" apuntaría a la lagartija. Lo que
+  no se encuentra cae a la categoría del patrón (`PATTERN_RULES`, portadas de
+  `habit-training.js`), y el nombre de HABIT siempre viaja en la nota del paso.
+- `./.venv/bin/python check_garmin_sync.py` prueba sin red que cada par categoría/ejercicio del
+  mapa exista de verdad en Garmin y que cada forma de objetivo arme los pasos correctos.
+
 ### Environment Variables (Vercel)
 ```
 SUPABASE_URL

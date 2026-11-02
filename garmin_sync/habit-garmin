@@ -1,0 +1,4 @@
+#!/bin/sh
+# Corre garmin_sync.py con el Python del venv de esta carpeta (ahí vive garminconnect).
+dir=$(cd "$(dirname "$0")" && pwd)
+exec "$dir/.venv/bin/python" "$dir/garmin_sync.py" "$@"

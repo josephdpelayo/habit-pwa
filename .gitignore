@@ -19,3 +19,7 @@ AutoImport/
 habit-pwa/
 .env*
 supabase/.temp/
+
+# Python del sincronizador a Garmin (garmin_sync)
+garmin_sync/.venv/
+__pycache__/

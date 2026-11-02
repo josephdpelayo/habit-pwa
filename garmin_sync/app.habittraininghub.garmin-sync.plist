@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Sincroniza HABIT → Garmin cada mañana a las 6:00, para no tener que acordarse.
+     Cargarlo (una vez):
+       cp garmin_sync/app.habittraininghub.garmin-sync.plist ~/Library/LaunchAgents/
+       launchctl load ~/Library/LaunchAgents/app.habittraininghub.garmin-sync.plist
+     Quitarlo:
+       launchctl unload ~/Library/LaunchAgents/app.habittraininghub.garmin-sync.plist
+     Lo que imprime queda en ~/.habit-garmin/sync.log. Si el Mac está dormido a esa hora,
+     launchd lo corre en cuanto despierta. -->
+<plist version="1.0">
+<dict>
+  <key>Label</key>
+  <string>app.habittraininghub.garmin-sync</string>
+  <key>ProgramArguments</key>
+  <array>
+    <string>/Users/macjoseph/Downloads/habit-pwa-v2 27/garmin_sync/habit-garmin</string>
+    <string>sync</string>
+    <string>--commit</string>
+  </array>
+  <key>StartCalendarInterval</key>
+  <dict>
+    <key>Hour</key><integer>6</integer>
+    <key>Minute</key><integer>0</integer>
+  </dict>
+  <key>StandardOutPath</key>
+  <string>/Users/macjoseph/.habit-garmin/sync.log</string>
+  <key>StandardErrorPath</key>
+  <string>/Users/macjoseph/.habit-garmin/sync.log</string>
+  <key>RunAtLoad</key>
+  <false/>
+</dict>
+</plist>
