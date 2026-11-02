@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="64 53 178 178" preserveAspectRatio="xMidYMid meet" role="img" aria-label="Apertura de hombros en pared">
+  <title>Apertura de hombros en pared</title>
+  <line x1="100.0" y1="132.0" x2="100.0" y2="172.0" stroke="#e8e9ee" stroke-width="7" stroke-linecap="round" opacity="1.0"/>
+  <line x1="100.0" y1="172.0" x2="100.0" y2="210.0" stroke="#e8e9ee" stroke-width="7" stroke-linecap="round" opacity="1.0"/>
+  <line x1="206.0" y1="210.0" x2="206.0" y2="74.0" stroke="rgba(232,233,238,.3)" stroke-width="5" stroke-linecap="round" opacity="1.0"/>
+  <line x1="200.0" y1="129.0" x2="148.0" y2="129.0" stroke="#e8e9ee" stroke-width="7" stroke-linecap="round" opacity="0.5"><animate attributeName="x2" values="148.0;147.9;148.0" keyTimes="0.00;0.50;1.00" dur="5s" repeatCount="indefinite" calcMode="spline" keySplines="0.4 0 0.6 1;0.4 0 0.6 1"/><animate attributeName="y2" values="129.0;132.3;129.0" keyTimes="0.00;0.50;1.00" dur="5s" repeatCount="indefinite" calcMode="spline" keySplines="0.4 0 0.6 1;0.4 0 0.6 1"/></line>
+  <line x1="200.0" y1="132.0" x2="148.0" y2="132.0" stroke="#e8e9ee" stroke-width="7" stroke-linecap="round" opacity="1.0"><animate attributeName="x2" values="148.0;147.9;148.0" keyTimes="0.00;0.50;1.00" dur="5s" repeatCount="indefinite" calcMode="spline" keySplines="0.4 0 0.6 1;0.4 0 0.6 1"/><animate attributeName="y2" values="132.0;135.3;132.0" keyTimes="0.00;0.50;1.00" dur="5s" repeatCount="indefinite" calcMode="spline" keySplines="0.4 0 0.6 1;0.4 0 0.6 1"/></line>
+  <line x1="80.0" y1="210.0" x2="226.0" y2="210.0" stroke="rgba(232,233,238,.3)" stroke-width="5" stroke-linecap="round" opacity="1.0"/>
+  <g>
+    <animateTransform attributeName="transform" type="rotate" values="0 100 132;4 100 132;0 100 132" keyTimes="0.00;0.50;1.00" dur="5s" repeatCount="indefinite" calcMode="spline" keySplines="0.4 0 0.6 1;0.4 0 0.6 1"/>
+    <line x1="100.0" y1="132.0" x2="148.0" y2="132.0" stroke="#e8e9ee" stroke-width="7" stroke-linecap="round" opacity="1.0"/>
+    <line x1="148.0" y1="132.0" x2="164.0" y2="132.0" stroke="#e8e9ee" stroke-width="6" stroke-linecap="round" opacity="1.0"/>
+    <circle cx="173.0" cy="132.0" r="11" fill="#e8e9ee"/>
+    <line x1="173.0" y1="132.0" x2="173.0" y2="150.0" stroke="#e8e9ee" stroke-width="5" stroke-linecap="round" opacity="1.0"/>
+    <circle cx="148.0" cy="132.0" r="3.2" fill="#a78bfa" data-j="shoulder"/>
+  </g>
+  <circle cx="200.0" cy="132.0" r="3.2" fill="#a78bfa" data-j="hand"/>
+  <circle cx="100.0" cy="132.0" r="3.2" fill="#a78bfa" data-j="hip"/>
+  <circle cx="100.0" cy="172.0" r="3.2" fill="#a78bfa" data-j="knee"/>
+  <circle cx="100.0" cy="210.0" r="3.2" fill="#a78bfa" data-j="foot"/>
+</svg>

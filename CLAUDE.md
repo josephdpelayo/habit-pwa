@@ -930,3 +930,43 @@ contiene las sesiones ya conciliadas de la semana sin títulos privados. No crea
 desde totales. Los campos `sessions`/`daily` controlan listas y distribución por día. Gráficas
 de km y de minutos van separadas. Los textos nuevos usan `WEEK_REFERENCE_COPY` (ES/EN);
 `open({lang})` determina la exportación, sin equivaler todavía a traducir toda la aplicación.
+
+## Programa «Parada de manos en 8 semanas» (20261102-6)
+
+Migración 145 y `docs/PROGRAMA_HANDSTAND.md`. **Solo en Crew**; HABIT sigue congelada. Es el
+primer programa del gym que una persona se aplica sola, y por eso no inventa motor: la
+plantilla es un `coaching_programs` con `user_id` nulo (como las de la 114) y empezarlo es
+`apply_coaching_program` sobre la propia cuenta, que copia la plantilla y la vuelve suya. Con
+`start_date` el calendario se estampa semana por semana (115), así que Hoy ya muestra la sesión
+del día sin código nuevo.
+
+- **8 semanas, 4 fases de 2, 6 días** (lun–sáb A B A B A C, domingo libre), 20 min por sesión.
+  Las 12 rutinas (fase × A/B/C) son `boards` del gym con `owner_id` nulo y **no son
+  `is_starter`**: no salen en la lista de nadie hasta que empieza el programa.
+- **Cada fase termina en el estándar de un escalón de la escalera de parada de manos** (141),
+  no en un criterio propio: fase 1 → escalón 1, fase 2 → 3, fase 3 → 4, fase 4 → 5. La sesión C
+  de la segunda semana de cada fase mide ese escalón con `reps='max'`, y al cerrarla
+  `hsAfterSession` compara con `HabitSkills.meetsStandard` —el mismo `readiness` de la
+  escalera—. Si pasa, se le ofrece **subir de escalón** (lo mueve la persona, nunca la app, como
+  en la 144); si no, **«Repetir esta fase»**, que es correr `start_date` dos semanas
+  (`repeatPhaseStartDate`) en su programa, sin tocar la plantilla del gym.
+- **La lógica pura vive en `habit-skills.js`** (`HANDSTAND_PROGRAM`, `programPhase`,
+  `isPhaseTestWeek`, `placementWeek`, `programStartDate`, `repeatPhaseStartDate`,
+  `sessionSeconds`), no en `crew.html`: `scripts/check-handstand.js` la prueba contra la
+  migración y comprueba que cada sesión quepa de verdad en 20 min (series × (trabajo +
+  descanso) + 15 s de transición por ejercicio), que la nota de cada prueba prometa el número
+  que pide su escalón, que todo ejercicio exista en el catálogo y tenga figura, y que los
+  textos nuevos vengan en los dos idiomas con los mismos cues.
+- **Se entra por nivel**: `placementWeek` traduce el escalón en el que va la persona a la
+  primera semana de su fase, y empezar en la semana 5 es un programa que arrancó cuatro semanas
+  antes (`programStartDate`), no un campo nuevo.
+- **El puente con la escalera**: `loadSkillMarksSb` solo miraba las rutinas de `myRoutines`, y
+  las del programa no están ahí; `activeProgramBoardsSb()` las agrega. Sin eso, entrenar el
+  programa no movería la escalera, que es justo lo que lo conecta.
+- **Inglés desde el primer día** (requisito permanente): columnas `instructions_en`,
+  `boards.name_en`, `coaching_programs.name_en`/`notes_en`,
+  `coaching_program_weeks.note_en`, y `note_en` en cada ejercicio de las rutinas. Hoy la app lee
+  el español (`skLang()` devuelve `'es'`); el día que exista el selector, el inglés ya está.
+- **12 figuras nuevas** en `skill-anim/` (generadas por `scripts/make-skill-anim.py`), con sus
+  puntos de referencia y su aserción de alineación en `check-handstand.js`, igual que las 35 de
+  las escaleras. La salida en rueda es la única **de frente**: de perfil un giro lateral no se ve.

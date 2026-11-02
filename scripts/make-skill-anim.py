@@ -191,6 +191,44 @@ def lever_arms(fig, shoulder, one_arm=False):
         fig.line((HANDS[0] + 7, HANDS[1]), (shoulder[0] + 7, shoulder[1]), opacity=.5)
 
 
+SPLINE = '0.4 0 0.6 1'
+
+
+def timing(n, times=None):
+    """keyTimes, duración y curva de una animación de n valores."""
+    t = ';'.join(f'{x:.2f}' for x in times) if times else ';'.join(f'{i / (n - 1):.2f}' for i in range(n))
+    return (f'keyTimes="{t}" dur="{CYCLE}" repeatCount="indefinite" calcMode="spline" '
+            f'keySplines="{";".join([SPLINE] * (n - 1))}"')
+
+
+def moving(fig_parts, offsets, times=None):
+    """Como swaying, pero trasladando: cada valor es (dx, dy) respecto a la pose dibujada."""
+    v = ';'.join(f'{dx:.1f} {dy:.1f}' for dx, dy in offsets)
+    return ('  <g>\n    <animateTransform attributeName="transform" type="translate" '
+            f'values="{v}" {timing(len(offsets), times)}/>\n    '
+            + '\n    '.join(fig_parts) + '\n  </g>\n')
+
+
+def stretching_line(a, b, offsets, times=None, w=STROKE, opacity=1.0):
+    """Un segmento con un extremo quieto (la mano en el piso) y el otro que se va con la figura.
+    Es lo que dibuja un encogimiento: el brazo sigue bloqueado y lo que se mueve es el hombro."""
+    xs = ';'.join(f'{b[0] + dx:.1f}' for dx, _ in offsets)
+    ys = ';'.join(f'{b[1] + dy:.1f}' for _, dy in offsets)
+    t = timing(len(offsets), times)
+    return (f'<line x1="{a[0]:.1f}" y1="{a[1]:.1f}" x2="{b[0]:.1f}" y2="{b[1]:.1f}" stroke="{INK}" '
+            f'stroke-width="{w}" stroke-linecap="round" opacity="{opacity}">'
+            f'<animate attributeName="x2" values="{xs}" {t}/><animate attributeName="y2" values="{ys}" {t}/></line>')
+
+
+def ang(v):
+    """El ángulo de limb() que apunta en la dirección del vector v (0 = abajo, 90 = izquierda)."""
+    return math.degrees(math.atan2(-v[0], v[1]))
+
+
+def sub(a, b):
+    return (a[0] - b[0], a[1] - b[1])
+
+
 def hang_frame(person, shoulder, one_arm=False, arms=True):
     """La barra, los brazos y el punto de la mano para todo lo que cuelga con los brazos
     estirados: front lever, back lever y sus elevaciones. `arms=False` cuando los brazos se
@@ -266,7 +304,14 @@ HANDSTAND = {
     'parada-de-manos-libre':                 (-180, None,    'sway'),
     'traspaso-de-peso-en-parada-de-manos':   (-180, None,    'shift'),
     'parada-de-manos-a-un-brazo':            (-180, None,    'onearm'),
+    # Del programa de parada de manos (migración 145): las mismas figuras con su movimiento.
+    # Los toques son el traspaso con la pared enfrente; el encogimiento sube el cuerpo entero
+    # con los brazos bloqueados.
+    'toques-de-hombro-en-pared':             (-180, 'front', 'shift'),
+    'encogimientos-de-frente-a-la-pared':    (-180, 'front', 'shrug'),
 }
+
+SHRUG = 6                         # cuánto sube el hombro en un encogimiento
 
 
 def handstand(cfg, title):
@@ -301,6 +346,13 @@ def handstand(cfg, title):
             '<g><animateTransform attributeName="transform" type="translate" '
             f'values="0 0;0 -13;0 0" keyTimes="0;.5;1" dur="{CYCLE}" repeatCount="indefinite" '
             f'calcMode="spline" keySplines="0.4 0 0.2 1;0.4 0 0.2 1"/>{lifted.parts[0]}</g>')
+    elif mode == 'shrug':
+        # Empujar el piso: el cuerpo entero sube y los brazos, bloqueados, se van con él.
+        lift = [(0, 0), (0, -SHRUG), (0, 0)]
+        frame.parts.append(stretching_line((HS_HANDS[0] - 9, HS_HANDS[1]), (shoulder[0] - 4, shoulder[1]), lift))
+        frame.parts.append(stretching_line((HS_HANDS[0] + 9, HS_HANDS[1]), (shoulder[0] + 4, shoulder[1]), lift,
+                                           opacity=.5))
+        frame.joint(HS_HANDS, 'hand')
     else:
         frame.line((HS_HANDS[0] - 9, HS_HANDS[1]), (HS_SHOULDER[0] - 4, HS_SHOULDER[1]))
         frame.line((HS_HANDS[0] + 9, HS_HANDS[1]), (HS_SHOULDER[0] + 4, HS_SHOULDER[1]), opacity=.5)
@@ -308,6 +360,8 @@ def handstand(cfg, title):
     frame.circle(HS_HANDS, 6, DIM)
     frame.pts += person.pts
 
+    if mode == 'shrug':
+        return frame.svg(title, moving(person.drawn(), [(0, 0), (0, -SHRUG), (0, 0)]))
     if mode == 'pulls':      # el jalón ES el ejercicio: el cuerpo se despega del muro y vuelve
         vals = [0, 8, 0, -2, 0]
     elif mode == 'sway':     # un hold libre nunca está quieto: corregir es la habilidad
@@ -551,6 +605,358 @@ def nordic(cfg, title):
                                     times=[0, .55, .70, 1]))
 
 
+# ───────────────────────── Programa de parada de manos ─────────────────────────
+# Los ejercicios del programa de 8 semanas (migración 145) que no son escalones. Mismas reglas:
+# la pose se dibuja en su sitio, los puntos de referencia van en mano, hombro, cadera, rodilla y
+# pie, y solo se mueve lo que es el ejercicio. Las figuras de movimiento llevan giros anidados
+# (el de adentro gira con el de afuera) para que lo que tiene que quedar quieto —un pie en el
+# piso, los pies en la pared— quede quieto.
+
+FLOOR = 210
+
+
+def floor_line(frame, pts, y=FLOOR, pad=20):
+    xs = [p[0] for p in pts]
+    frame.line((min(xs) - pad, y), (max(xs) + pad, y), w=5, color=DIM)
+
+
+def head_on(fig, shoulder, hip, facing):
+    """Cuello y cabeza del lado contrario a la cadera, como los pone pose()."""
+    axis = ang(sub(hip, shoulder))
+    neck = rot((shoulder[0], shoulder[1] - NECK), axis, shoulder)
+    head = rot((shoulder[0], shoulder[1] - NECK - HEAD_R + 2), axis, shoulder)
+    fig.line(shoulder, neck, w=STROKE - 1)
+    fig.circle(head, HEAD_R)
+    if facing is not None:
+        fig.line(head, rot((head[0], head[1] + HEAD_R + 7), facing, head), w=STROKE - 2)
+
+
+def floor_arms(fig, hand, shoulder, spread=9, top=4):
+    """Los dos brazos apoyados en el piso; el de atrás, tenue."""
+    fig.line((hand[0] - spread, hand[1]), (shoulder[0] - top, shoulder[1]))
+    fig.line((hand[0] + spread, hand[1]), (shoulder[0] + top, shoulder[1]), opacity=.5)
+
+
+def wrist_prep(title):
+    """En cuadrupedia, el hombro pasa por delante de la muñeca y vuelve. La mano y la rodilla no
+    se mueven: el brazo gira en la mano, el muslo en la rodilla y el torso se traslada."""
+    hand = (150, FLOOR)
+    shoulder = (hand[0], FLOOR - ARM)                 # brazo vertical: la posición de salida
+    hip_y = FLOOR - THIGH                             # rodilla en el piso, muslo vertical
+    hip = (shoulder[0] - math.sqrt(TORSO ** 2 - (hip_y - shoulder[1]) ** 2), hip_y)
+    knee, foot = (hip[0], FLOOR), (hip[0] - SHIN, FLOOR)
+    rock = 12                                         # cuánto pasa el hombro adelante
+    arm_deg = math.degrees(math.asin(rock / ARM))
+    thigh_deg = math.degrees(math.asin(rock / THIGH))
+    shift = sub(rot(shoulder, arm_deg, hand), shoulder)
+
+    upper = Fig()
+    upper.line(shoulder, hip)
+    head_on(upper, shoulder, hip, FACE_DOWN)
+    upper.joint(shoulder, 'shoulder')
+    upper.joint(hip, 'hip')
+    arms = Fig()
+    arms.line((hand[0] - 3, hand[1]), (shoulder[0] - 3, shoulder[1]))
+    arms.line((hand[0] + 3, hand[1]), (shoulder[0] + 3, shoulder[1]), opacity=.5)
+    thigh = Fig()
+    thigh.line(hip, knee)
+
+    frame = Fig()
+    frame.line(knee, foot)                            # la espinilla, en el piso
+    frame.joint(hand, 'hand')
+    frame.joint(knee, 'knee')
+    frame.joint(foot, 'foot')
+    frame.pts += upper.pts + arms.pts + thigh.pts + [(p[0] + shift[0], p[1] + shift[1]) for p in upper.pts]
+    floor_line(frame, frame.pts)
+    return frame.svg(title, swaying(arms.drawn(), hand, [0, round(arm_deg, 1), 0])
+                     + swaying(thigh.drawn(), knee, [0, round(thigh_deg, 1), 0])
+                     + moving(upper.drawn(), [(0, 0), shift, (0, 0)]))
+
+
+def shoulder_wall(title):
+    """Manos en la pared, brazos y torso en una recta, cadera a 90°. Lo que se mueve es el
+    pecho bajando hacia el piso: el torso gira en la cadera y los brazos se estiran con él."""
+    foot = (100, FLOOR)
+    knee = (foot[0], FLOOR - SHIN)
+    hip = (foot[0], knee[1] - THIGH)
+    shoulder = (hip[0] + TORSO, hip[1])
+    hand = (shoulder[0] + ARM, hip[1])
+    sink = 4                                          # grados que baja el pecho
+    sunk = sub(rot(shoulder, sink, hip), shoulder)
+
+    upper = Fig()
+    upper.line(hip, shoulder)
+    head_on(upper, shoulder, hip, FACE_DOWN)
+    upper.joint(shoulder, 'shoulder')
+    frame = Fig()
+    frame.line(hip, knee)
+    frame.line(knee, foot)
+    frame.line((hand[0] + 6, FLOOR), (hand[0] + 6, hand[1] - 58), w=5, color=DIM)   # la pared
+    frame.parts.append(stretching_line((hand[0], hand[1] - 3), (shoulder[0], shoulder[1] - 3),
+                                       [(0, 0), sunk, (0, 0)], opacity=.5))
+    frame.parts.append(stretching_line(hand, shoulder, [(0, 0), sunk, (0, 0)]))
+    frame.pts += upper.pts + [hand, (hand[0] + 6, hand[1] - 58)]
+    floor_line(frame, frame.pts)
+    for p, name in ((hand, 'hand'), (hip, 'hip'), (knee, 'knee'), (foot, 'foot')):
+        frame.joint(p, name)
+    return frame.svg(title, swaying(upper.drawn(), hip, [0, sink, 0]))
+
+
+def hollow(title):
+    """Acostado boca arriba, la lumbar en el piso: hombros y brazos despegados en una recta, y
+    las piernas juntas y estiradas, también despegadas."""
+    floor = 200
+    hip = (130, floor - 4)
+    up, legs_up = math.radians(15), math.radians(22)
+    shoulder = (hip[0] - TORSO * math.cos(up), hip[1] - TORSO * math.sin(up))
+    hand = (shoulder[0] - ARM * math.cos(up), shoulder[1] - ARM * math.sin(up))
+    axis = ang(sub(hip, shoulder))
+    person = Fig()
+    # Los brazos van con el cuerpo: junto a las orejas, en la misma recta que el torso.
+    person.line((shoulder[0], shoulder[1] + 3), (hand[0], hand[1] + 3), opacity=.5)
+    person.line(shoulder, hand)
+    pose(person, shoulder, axis, ang((math.cos(legs_up), -math.sin(legs_up))) - axis, 0, facing=FACE_UP)
+    person.joint(hand, 'hand')
+    frame = Fig()
+    frame.pts += person.pts
+    floor_line(frame, frame.pts, y=floor, pad=14)
+    return frame.svg(title, swaying(person.drawn(), hip, [-1, 1, -1]))
+
+
+def pike_shrug(title):
+    """En pica, brazos bloqueados en línea con el torso. El encogimiento sube el hombro alejándolo
+    de la mano; los pies no se despegan, así que el cuerpo gira en los pies."""
+    hand = (170, FLOOR)
+    a = math.radians(45)                              # brazos y torso, una recta a 45°
+    shoulder = (hand[0] - ARM * math.cos(a), hand[1] - ARM * math.sin(a))
+    hip = (shoulder[0] - TORSO * math.cos(a), shoulder[1] - TORSO * math.sin(a))
+    reach = THIGH + SHIN
+    foot = (hip[0] - math.sqrt(reach ** 2 - (FLOOR - hip[1]) ** 2), FLOOR)
+    axis = ang(sub(hip, shoulder))
+    person = Fig()
+    pose(person, shoulder, axis, ang(sub(foot, hip)) - axis, 0, facing=FACE_DOWN)
+
+    # El giro en los pies que aleja el hombro SHRUG de la mano (con el signo que lo aleja).
+    def gap(d):
+        return math.hypot(*sub(rot(shoulder, d, foot), hand)) - ARM
+    sign = 1 if gap(1) > gap(-1) else -1
+    lo, hi = 0.0, 20.0
+    for _ in range(40):
+        mid = (lo + hi) / 2
+        lo, hi = (mid, hi) if gap(sign * mid) < SHRUG else (lo, mid)
+    d = round(sign * lo, 2)
+    up = sub(rot(shoulder, d, foot), shoulder)
+
+    frame = Fig()
+    frame.parts.append(stretching_line((hand[0] + 4, hand[1]), shoulder, [(0, 0), up, (0, 0)], opacity=.5))
+    frame.parts.append(stretching_line(hand, shoulder, [(0, 0), up, (0, 0)]))
+    frame.joint(hand, 'hand')
+    frame.pts += person.pts + [hand]
+    floor_line(frame, frame.pts)
+    return frame.svg(title, swaying(person.drawn(), foot, [0, d, 0]))
+
+
+def frog_stand(title):
+    """Brazos doblados, las rodillas apoyadas en la parte de atrás del brazo y los pies
+    despegados. Se balancea apenas sobre las manos: es el primer equilibrio del programa."""
+    hand = (150, FLOOR)
+    elbow = limb(hand, ang((-0.24, -0.97)), ARM / 2)   # antebrazo casi vertical, un poco atrás
+    shoulder = limb(elbow, ang((0.6, -0.8)), ARM / 2)  # brazo hacia adelante y arriba
+    knee = (elbow[0] + .3 * (shoulder[0] - elbow[0]), elbow[1] + .3 * (shoulder[1] - elbow[1]))
+    # La cadera es el punto a TORSO del hombro y a THIGH de la rodilla: así la rodilla queda
+    # justo sobre el brazo, que es lo que pide la posición. De las dos soluciones, la de atrás.
+    d = math.hypot(*sub(knee, shoulder))
+    a = (TORSO ** 2 - THIGH ** 2 + d ** 2) / (2 * d)
+    h = math.sqrt(TORSO ** 2 - a ** 2)
+    u = (sub(knee, shoulder)[0] / d, sub(knee, shoulder)[1] / d)
+    base = (shoulder[0] + a * u[0], shoulder[1] + a * u[1])
+    hip = min(((base[0] + h * u[1], base[1] - h * u[0]), (base[0] - h * u[1], base[1] + h * u[0])),
+              key=lambda p: p[0])
+    foot = limb(knee, ang((-0.98, -0.2)), SHIN)        # talones hacia atrás, despegados
+
+    person = Fig()
+    person.line((hand[0] + 5, hand[1]), (elbow[0] + 5, elbow[1]), opacity=.5)
+    person.line((elbow[0] + 5, elbow[1]), (shoulder[0] + 5, shoulder[1]), opacity=.5)
+    person.line(hip, knee, opacity=.5)
+    person.line(hand, elbow)
+    person.line(elbow, shoulder)
+    person.line(shoulder, hip)
+    head_on(person, shoulder, hip, ang((0.5, 0.87)))
+    person.line(hip, knee)
+    person.line(knee, foot)
+    for p, name in ((shoulder, 'shoulder'), (hip, 'hip'), (knee, 'knee'), (foot, 'foot')):
+        person.joint(p, name)
+    frame = Fig()
+    frame.joint(hand, 'hand')
+    frame.pts += person.pts
+    floor_line(frame, frame.pts)
+    return frame.svg(title, swaying(person.drawn(), hand, [-1.2, 1.2, -1.2]))
+
+
+def bunny_hops(title):
+    """Las manos fijas, la cadera sube por encima de los hombros con las rodillas dobladas y
+    vuelve a cuclillas. Dibujada arriba; el giro en el hombro la baja hasta apoyar los pies."""
+    person = Fig()
+    j = pose(person, HS_SHOULDER, -180, -100, 110, facing=FACE_DOWN)
+    land = 0.0
+    while land > -170 and rot(j['foot'], land, HS_SHOULDER)[1] < FLOOR - 4:
+        land -= 0.5
+    frame = Fig()
+    floor_arms(frame, HS_HANDS, HS_SHOULDER)
+    frame.circle(HS_HANDS, 6, DIM)
+    frame.joint(HS_HANDS, 'hand')
+    frame.pts += person.pts + [rot(p, land, HS_SHOULDER) for p in person.pts]
+    floor_line(frame, frame.pts)
+    return frame.svg(title, swaying(person.drawn(), HS_SHOULDER, [land, 0, 0, land, land],
+                                    times=[0, .35, .5, .8, 1]))
+
+
+def cartwheel_bail(title):
+    """La salida en rueda, **de frente**: de perfil un giro de lado no se ve. Desde la parada,
+    las piernas se abren, el cuerpo cae hacia el lado de la mano derecha y el pie de ese lado
+    llega al piso mientras la otra mano se suelta."""
+    hl, hr = (110, FLOOR), (134, FLOOR)
+    sl, sr = (hl[0], FLOOR - ARM), (hr[0], FLOOR - ARM)
+    mid = ((sl[0] + sr[0]) / 2, sl[1])
+    hip = (mid[0], mid[1] - TORSO)
+    hip_l, hip_r = (hip[0] - 6, hip[1]), (hip[0] + 6, hip[1])
+
+    def leg(fig, top, op):
+        knee = (top[0], top[1] - THIGH)
+        foot = (top[0], knee[1] - SHIN)
+        fig.line(top, knee, opacity=op)
+        fig.line(knee, foot, opacity=op)
+        return knee, foot
+
+    trail, lead = Fig(), Fig()
+    leg(trail, hip_l, .5)
+    knee, foot = leg(lead, hip_r, 1.0)
+    lead.joint(knee, 'knee')
+    lead.joint(foot, 'foot')
+    body = Fig()
+    body.line(hl, sl, opacity=.5)                     # la mano que se suelta gira con el cuerpo
+    body.line(hr, sr)
+    body.line(sl, sr, w=STROKE - 2)
+    body.line(mid, hip)
+    body.line(hip_l, hip_r, w=STROKE - 2)
+    body.line(mid, (mid[0], mid[1] + NECK), w=STROKE - 1)
+    body.circle((mid[0], mid[1] + NECK + HEAD_R - 2), HEAD_R)
+    body.joint(sr, 'shoulder')
+    body.joint(hip, 'hip')
+
+    tilt = 40                                         # cuánto cae el cuerpo hacia la derecha
+    open_trail = 18                                   # la pierna de atrás se abre un poco
+    step = 0.0
+    while step < 175 and rot(rot(foot, step, hip_r), tilt, hr)[1] < FLOOR - 4:
+        step += 0.5
+
+    times = [0, .2, .55, .7, 1]
+    inner = (swaying(trail.drawn(), hip_l, [0, 0, open_trail, open_trail, 0], times).strip()
+             + '\n    ' + swaying(lead.drawn(), hip_r, [0, 0, step, step, 0], times).strip())
+    frame = Fig()
+    frame.circle(hr, 6, DIM)
+    frame.joint(hr, 'hand')
+    landed = [rot(rot(foot, step, hip_r), tilt, hr), rot(rot(knee, step, hip_r), tilt, hr)]
+    frame.pts += body.pts + trail.pts + lead.pts + [rot(p, tilt, hr) for p in body.pts] + landed
+    floor_line(frame, frame.pts)
+    outer = swaying(body.parts + [inner] + body.dots, hr, [0, 0, tilt, tilt, 0], times)
+    return frame.svg(title, outer)
+
+
+def wall_walk(title):
+    """De plancha con los pies en la pared a pecho contra la pared. Los brazos quedan
+    verticales todo el camino (hombro sobre la muñeca), las manos se acercan a la pared y el
+    cuerpo recto gira en el hombro; los pies suben por la pared sin despegarse."""
+    wall = 236
+    body = TORSO + THIGH + SHIN
+
+    def shoulder_x(phi):
+        return wall - body * math.cos(math.radians(phi))
+
+    top = 84                                          # pecho casi tocando la pared
+    path = [12, 12, 40, 64, top, top, 64, 40, 12]
+    times = [0, .08, .22, .34, .45, .62, .74, .86, 1]
+    shoulder = (shoulder_x(top), FLOOR - ARM)
+    hand = (shoulder[0], FLOOR)
+    person = Fig()
+    pose(person, shoulder, ang((math.cos(math.radians(top)), -math.sin(math.radians(top)))),
+         facing=FACE_RIGHT)
+    arms = Fig()
+    arms.line((hand[0] - 3, hand[1]), (shoulder[0] - 3, shoulder[1]))
+    arms.line((hand[0] + 3, hand[1]), (shoulder[0] + 3, shoulder[1]), opacity=.5)
+    arms.joint(hand, 'hand')
+    inner = swaying(person.drawn(), shoulder, [top - phi for phi in path], times).strip()
+    outer = moving(arms.parts + [inner] + arms.dots,
+                   [(shoulder_x(phi) - shoulder[0], 0) for phi in path], times)
+
+    frame = Fig()
+    bottom = shoulder_x(path[0]) - shoulder[0]
+    frame.pts += person.pts + arms.pts + [(rot(p, top - path[0], shoulder)[0] + bottom,
+                                           rot(p, top - path[0], shoulder)[1]) for p in person.pts]
+    floor_line(frame, frame.pts)
+    frame.line((wall + 5, FLOOR), (wall + 5, min(p[1] for p in person.pts) - 12), w=5, color=DIM)
+    return frame.svg(title, outer)
+
+
+def kick_up(title, wall):
+    """Desde la zancada con las manos abajo, la pierna de atrás patea y la otra la alcanza
+    arriba. Dibujada arriba, con las piernas juntas; para bajarla, el cuerpo gira en el hombro
+    y la pierna de apoyo gira en la cadera hasta quedar vertical con el pie en el piso."""
+    axis = -171 if wall else -180                     # de espaldas a la pared, o libre
+    shoulder = HS_SHOULDER
+    hip = limb(shoulder, axis, TORSO)
+    kick_knee = limb(hip, axis, THIGH)
+    kick_foot = limb(kick_knee, axis, SHIN)
+
+    person = Fig()
+    person.line(shoulder, hip)
+    head_on(person, shoulder, hip, FACE_DOWN)
+    person.line(hip, kick_knee)
+    person.line(kick_knee, kick_foot)
+    for p, name in ((shoulder, 'shoulder'), (hip, 'hip'), (kick_knee, 'knee'), (kick_foot, 'foot')):
+        person.joint(p, name)
+    support = Fig()
+    support.line(hip, kick_knee, opacity=.5)
+    support.line(kick_knee, kick_foot, opacity=.5)
+
+    # Abajo: el cuerpo inclinado lo justo para que la pierna de apoyo, vertical, llegue al piso.
+    down = 0.0
+    while down > -120 and rot(hip, down, shoulder)[1] + THIGH + SHIN < FLOOR - 3:
+        down -= 0.5
+    lean = ((axis + down) + 180) % 360 - 180          # hacia dónde apunta el torso abajo
+    plant = -lean                                     # lo que gira la pierna de apoyo en la cadera
+    times = [0, .38, .62, .9, 1]
+    inner = swaying(support.drawn(), hip, [plant, 0, 0, plant, plant], times).strip()
+    outer = swaying([inner] + person.parts + person.dots, shoulder, [down, 0, 0, down, down], times)
+
+    frame = Fig()
+    floor_arms(frame, HS_HANDS, shoulder)
+    frame.circle(HS_HANDS, 6, DIM)
+    frame.joint(HS_HANDS, 'hand')
+    low_hip = rot(hip, down, shoulder)
+    frame.pts += person.pts + [rot(p, down, shoulder) for p in person.pts] \
+        + [low_hip, (low_hip[0], low_hip[1] + THIGH + SHIN)]
+    floor_line(frame, frame.pts)
+    if wall:
+        wx = max(p[0] for p in person.pts) + 7
+        frame.line((wx, FLOOR), (wx, min(p[1] for p in person.pts) - 12), w=5, color=DIM)
+    return frame.svg(title, outer)
+
+
+DRILLS = {
+    'preparacion-de-munecas': wrist_prep,
+    'apertura-de-hombros-en-pared': shoulder_wall,
+    'hollow-hold': hollow,
+    'encogimientos-en-pica': pike_shrug,
+    'parada-de-rana': frog_stand,
+    'patadas-de-conejo': bunny_hops,
+    'salida-en-rueda': cartwheel_bail,
+    'caminata-en-pared': wall_walk,
+    'patada-a-la-pared': lambda title: kick_up(title, wall=True),
+    'patada-al-equilibrio': lambda title: kick_up(title, wall=False),
+}
+
+
 TITLES = {
     'colgado-invertido': 'Colgado invertido',
     'front-lever-tuck': 'Front lever tuck',
@@ -587,6 +993,18 @@ TITLES = {
     'curl-nordico-asistido': 'Curl nórdico asistido',
     'curl-nordico': 'Curl nórdico',
     'curl-nordico-con-peso': 'Curl nórdico con peso',
+    'toques-de-hombro-en-pared': 'Toques de hombro en pared',
+    'encogimientos-de-frente-a-la-pared': 'Encogimientos de frente a la pared',
+    'preparacion-de-munecas': 'Preparación de muñecas',
+    'apertura-de-hombros-en-pared': 'Apertura de hombros en pared',
+    'hollow-hold': 'Hollow body',
+    'encogimientos-en-pica': 'Encogimientos en pica',
+    'parada-de-rana': 'Parada de rana',
+    'patadas-de-conejo': 'Patadas de conejo',
+    'salida-en-rueda': 'Salida en rueda',
+    'caminata-en-pared': 'Caminata en pared',
+    'patada-a-la-pared': 'Patada a la pared',
+    'patada-al-equilibrio': 'Patada al equilibrio',
 }
 
 
@@ -600,8 +1018,10 @@ def main():
                       (MUSCLE_UP, muscle_up), (NORDIC, nordic)):
         for slug, cfg in group.items():
             (OUT / f'{slug}.svg').write_text(fn(cfg, TITLES[slug]), encoding='utf8')
+    for slug, fn in DRILLS.items():
+        (OUT / f'{slug}.svg').write_text(fn(TITLES[slug]), encoding='utf8')
     total = sum(len(g) for g in (FRONT_LEVER, HANDSTAND, PLANCHE, BACK_LEVER, FL_RAISE,
-                                 MUSCLE_UP, NORDIC))
+                                 MUSCLE_UP, NORDIC, DRILLS))
     print(f'{total} animaciones en {OUT}')
 
 

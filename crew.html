@@ -6,12 +6,12 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="HABIT">
 <meta name="application-name" content="HABIT">
-<link rel="manifest" href="/manifest.json?v=20261102-5">
-<link rel="apple-touch-icon" sizes="120x120" href="/icons/icon-120.png?v=20261102-5">
-<link rel="apple-touch-icon" sizes="152x152" href="/icons/icon-152.png?v=20261102-5">
-<link rel="apple-touch-icon" sizes="167x167" href="/icons/icon-167.png?v=20261102-5">
-<link rel="apple-touch-icon" sizes="180x180" href="/icons/icon-180.png?v=20261102-5">
-<link rel="icon" type="image/png" sizes="32x32" href="/icons/icon-32.png?v=20261102-5">
+<link rel="manifest" href="/manifest.json?v=20261102-6">
+<link rel="apple-touch-icon" sizes="120x120" href="/icons/icon-120.png?v=20261102-6">
+<link rel="apple-touch-icon" sizes="152x152" href="/icons/icon-152.png?v=20261102-6">
+<link rel="apple-touch-icon" sizes="167x167" href="/icons/icon-167.png?v=20261102-6">
+<link rel="apple-touch-icon" sizes="180x180" href="/icons/icon-180.png?v=20261102-6">
+<link rel="icon" type="image/png" sizes="32x32" href="/icons/icon-32.png?v=20261102-6">
 <title>HABIT</title>
 <!-- Con id a propósito: scripts/check-training.js toma la primera etiqueta script sin
      atributos como el script principal de la app y la compila. -->
@@ -25,7 +25,7 @@
   var crew=/^\/crew(\/|$)/.test(location.pathname);
   window.HABIT_BRAND=crew?'crew':'gym';
   if(!crew)return;
-  var v='20261102-5';
+  var v='20261102-6';
   document.documentElement.classList.add('brand-crew');
   document.title='HABIT Crew';
   document.querySelectorAll('meta[name="apple-mobile-web-app-title"],meta[name="application-name"]')
@@ -40,12 +40,12 @@
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Share+Tech+Mono&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="/skandi-recovery.js?v=20261102-5"></script>
-<script src="/body-figure.js?v=20261102-5"></script>
-<script src="/habit-training.js?v=20261102-5"></script>
-<script src="/habit-share.js?v=20261102-5"></script>
-<script src="/habit-activity.js?v=20261102-5"></script>
-<script src="/habit-skills.js?v=20261102-5"></script>
+<script src="/skandi-recovery.js?v=20261102-6"></script>
+<script src="/body-figure.js?v=20261102-6"></script>
+<script src="/habit-training.js?v=20261102-6"></script>
+<script src="/habit-share.js?v=20261102-6"></script>
+<script src="/habit-activity.js?v=20261102-6"></script>
+<script src="/habit-skills.js?v=20261102-6"></script>
 <style>
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
 @media (prefers-reduced-motion:reduce){*,*:before,*:after{scroll-behavior:auto!important;animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}}
@@ -3029,6 +3029,18 @@ button{transition:transform .14s var(--ease-out),background-color .16s ease,colo
 .sk-ladder.picking .sk-rung{opacity:1;box-shadow:inset 0 0 0 1.5px rgba(139,92,246,.32)}
 .sk-ladder.picking .sk-rung.current{box-shadow:inset 0 0 0 1.5px rgba(139,92,246,.7)}
 .sk-leave{background:none;border:0;color:var(--red);font-size:12px;font-weight:700;padding:12px 0 0;cursor:pointer;text-align:left}
+/* El programa de parada de manos (145) vive en la misma hoja que su escalera. */
+.sk-back{background:none;border:0;color:var(--purple);font-size:12.5px;font-weight:800;padding:2px 0;cursor:pointer}
+.hs-title{font-size:17px;font-weight:800;letter-spacing:-.01em;margin:4px 0 8px;text-align:left}
+.hs-card{border:0}
+.hs-week{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:4px;margin:0 0 6px}
+.hs-day{background:var(--card);border-radius:9px;padding:7px 3px;text-align:center;display:flex;flex-direction:column;gap:3px;min-width:0}
+.hs-day b{font-size:10px;font-weight:800;letter-spacing:.06em;color:var(--gray);text-transform:uppercase}
+.hs-day span{font-size:15px;font-weight:800;color:var(--white);display:flex;flex-direction:column;gap:2px}
+.hs-day em{font-style:normal;font-size:8px;font-weight:700;color:var(--gray);line-height:1.15;letter-spacing:-.01em}
+.hs-day.rest{opacity:.55}
+.hs-stop{color:#f0d9a8}
+.hoy-program{font-size:11.5px;font-weight:700;color:var(--purple);margin:2px 0 8px}
 
 /* Los cues del coach en la hoja de entreno: estaban solo en la lista de la rutina y
    desaparecían justo al entrenar, que es cuando se leen. Numerados a propósito, para
@@ -4272,7 +4284,7 @@ const GYM_ONLY_VIEWS=['book','planes','historial','shop'];
 const GYM_APP_URL='/';
 document.querySelectorAll('.brand-name').forEach(el=>{el.textContent=BRAND_NAME;});
 const SUPABASE_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBtcGp0ZXVxanVzYmlkdWV2YndxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc2OTI1NjUsImV4cCI6MjA5MzI2ODU2NX0.XbMzZoo2yqtrD8znLnyo_1zDfrdJAvAPj1lqGOyXnLw';
-const APP_VERSION='20261102-5';
+const APP_VERSION='20261102-6';
 // La pierna va separada en cuádriceps, femorales y pantorrillas: la figura
 // corporal pinta esas tres regiones por separado y el motor de recuperación les
 // da ventanas de descanso distintas. 'Piernas' sigue reconociéndose al leer
@@ -11420,8 +11432,10 @@ function hoyTopHtml(opts){
     // generated_from_base = la materializó la plantilla semanal; junto con created_by dice
     // si el día viene del coach y no del propio socio.
     const fromCoach=isCoachSet(row)||(row.generated_from_base&&row.created_by&&sbUser&&row.created_by!==sbUser.id);
+    const programLine=hsScheduleLine(row);
     html+=hoyHeroHtml({k:'Hoy · '+dayLabel,title:row.board_name,dot:row.board_color,
       meta:meta.exercises.length+' ejercicios · ~'+meta.duration+' min'+(fromCoach?' · de tu coach':''),
+      extra:programLine?'<div class="hoy-program">'+esc(programLine)+'</div>':'',
       cta:'<button class="btn hoy-cta" onclick="'+start+'(&quot;'+row.id+'&quot;)">Empezar</button>',
       row:hoyStartRowHtml(false)});
   }else if(doneRows.length){
@@ -11842,9 +11856,22 @@ function openProgramPicker(){
         +'<button class="btn-sm" onclick="openProgramManage(&quot;'+p.id+'&quot;)">···</button>'
         +'</div>').join('')
       :'<div class="empty">Aún no guardas ningún programa.<br>Arma tu semana y guárdala con nombre.</div>')
+      +'<div id="program-gym-list"></div>'
       +'<button class="btn" style="margin-top:14px" onclick="openProgramForm()">Guardar la semana actual</button>';
   }
   document.getElementById('program-modal').style.display='flex';
+  renderProgramGymList().catch(()=>{});
+}
+// Los programas del gym que cualquiera puede empezar. Solo los que tienen template_key: el
+// coach también guarda plantillas para sus clientes, y esas no son para el público.
+async function renderProgramGymList(){
+  const tpl=await loadHandstandTemplateSb(false);
+  const el=document.getElementById('program-gym-list');
+  if(!el||!tpl||hsActive())return;
+  el.innerHTML='<div class="sk-ladder-hd" style="margin-top:16px">'+esc(sk('hsGym'))+'</div>'
+    +'<div class="program-row"><div class="program-row-info"><div class="program-row-name">'+esc(tpl.name)+'</div>'
+    +'<div class="program-row-sub">'+esc(skf('hsMeta',{weeks:HS_PROGRAM.weeks,days:HS_PROGRAM.days,min:HS_PROGRAM.minutes}))+'</div></div>'
+    +'<button class="btn-sm bblue" onclick="closeProgramModal();openSkillSheet(&quot;'+esc(HS_PROGRAM.group)+'&quot;,&quot;program&quot;)">'+esc(sk('hsSee'))+'</button></div>';
 }
 function closeProgramModal(){document.getElementById('program-modal').style.display='none';}
 
@@ -14021,6 +14048,10 @@ async function wsAfterSessionClosed(data,closedRow,sets,opts){
   catch(e){toast('No se pudieron guardar los cambios en la rutina: '+e.message,'err');}
   // El «¿Cómo te fue?» es para el coach: sin coaching, nadie lo lee. Para los demás, el
   // premio del entreno son sus stickers.
+  // La prueba de fase del programa de parada de manos va antes que los stickers: si pasó, el
+  // sticker es justo para eso.
+  try{await hsAfterSession({...closedRow,...data},sets);}
+  catch(e){console.warn('hsAfterSession:',e.message||e);}
   if(opts&&opts.feedback){
     if(canAccessCoaching())openWorkoutFeedbackModal(data.id);
     else if(window.HabitActivity)HabitActivity.offerSessionStickers({...closedRow,...data},sets);
@@ -23637,6 +23668,28 @@ const SKILL_COPY={
       change:'Cambiar escalón',leave:'Quitar esta línea de mis skills',leaveTitle:'¿Quitar esta línea?',
       leaveBody:'Tus series se quedan. Solo dejas de marcar en qué escalón vas.',leaveOk:'Quitar',
       coachBySelf:'lo eligió por su cuenta',
+      hsKicker:'Programa',hsPitch:'20 minutos al día, 6 días. De cero a 30 s de parada de manos libre.',
+      hsMeta:'{weeks} semanas · {days} días · {min} min',hsSee:'Ver el programa',hsBack:'‹ Escalera',
+      hsWeek:'Semana {w} de {total}',hsPhase:'Fase {n} · {name}',hsTestSat:'El sábado es la prueba de la fase',
+      hsTestToday:'hoy es la prueba',hsStarts:'Empieza el {date}',hsDone:'Terminaste el programa.',
+      hsPhases:'Las fases',hsWeeksRange:'Semanas {a}–{b}',hsTest:'Prueba',
+      hsWeekTitle:'La semana',hsDayA:'Línea y fuerza',hsDayB:'Equilibrio',hsDayC:'Prueba y juego',hsRest:'Descanso',
+      hsNeed:'Qué necesitas',hsNeedTxt:'Una pared lisa, 2 m libres alrededor y un piso que no resbale.',
+      hsStop:'Señales de alto',hsStopTxt:'Dolor punzante en la muñeca, hormigueo en las manos o dolor al frente del hombro: para esa sesión. Si la muñeca molesta dos días seguidos, haz la preparación de rodillas y sáltate la fuerza esa semana.',
+      hsWhere:'¿Por dónde empiezas?',hsPlace1:'Empiezo desde cero',hsPlace2:'Ya aguanto 45 s de plancha en pared a 45°',
+      hsPlace3:'Ya aguanto 60 s de frente a la pared',hsPlace4:'Ya hago 10 jalones de talón seguidos',
+      hsStart:'Empezar el programa',hsStartTitle:'¿Empiezas el programa?',
+      hsStartToday:'Empiezas hoy en la semana {w}: Fase {n} · {name}.',hsStartMonday:'Empiezas el lunes {date} en la semana {w}: Fase {n} · {name}.',
+      hsCoachWarn:'Ojo: tu coach había puesto días de tu semana y el programa los reemplaza.',hsStarted:'Programa empezado',
+      hsRepeat:'Repetir esta fase',hsRepeatTitle:'¿Repites la fase {n}?',
+      hsRepeatBody:'Las próximas 2 semanas vuelven a ser de la Fase {n} · {name}, y el programa termina 2 semanas después.',
+      hsRepeated:'La Fase {n} vuelve a empezar la próxima semana',
+      hsLeave:'Dejar el programa',hsLeaveTitle:'¿Dejas el programa?',hsLeaveBody:'Tu semana queda libre. Tus entrenos y tus marcas se quedan.',hsLeft:'Dejaste el programa',
+      hsPassTitle:'¡Pasaste la prueba!',hsPassBody:'Fase {n} · {name}: {best} (el estándar es {std}). La semana que viene empieza la Fase {next}.',
+      hsPassFinal:'¡Lo lograste! {best} de parada de manos libre, el estándar del programa.',
+      hsFailTitle:'Todavía no',hsFailBody:'Fase {n} · {name}: {got} de {needed} series llegaron al estándar ({std}). Tu mejor marca: {best}.',
+      hsKeepGoing:'Seguir con la Fase {next}',hsDoneOk:'Listo',hsPractice:'Práctica de la prueba: {best}. El sábado que viene cuenta.',
+      hsGym:'De HABIT',
       cues:'Qué mirar',critLabel:'Limpio en este escalón',
       coachPanel:'Coach',coachSearch:'Buscar alumno por nombre',
       coachSet:'Poner escalón',coachNoteLabel:'Qué le falta (lo lee el alumno)',
@@ -23669,6 +23722,28 @@ const SKILL_COPY={
       change:'Change rung',leave:'Remove this line from my skills',leaveTitle:'Remove this line?',
       leaveBody:'Your sets stay. You just stop marking which rung you are on.',leaveOk:'Remove',
       coachBySelf:'picked it on their own',
+      hsKicker:'Program',hsPitch:'20 minutes a day, 6 days. From zero to a 30 s freestanding handstand.',
+      hsMeta:'{weeks} weeks · {days} days · {min} min',hsSee:'See the program',hsBack:'‹ Ladder',
+      hsWeek:'Week {w} of {total}',hsPhase:'Phase {n} · {name}',hsTestSat:'Saturday is the phase test',
+      hsTestToday:'today is the test',hsStarts:'Starts on {date}',hsDone:'You finished the program.',
+      hsPhases:'The phases',hsWeeksRange:'Weeks {a}–{b}',hsTest:'Test',
+      hsWeekTitle:'The week',hsDayA:'Line & strength',hsDayB:'Balance',hsDayC:'Test & play',hsRest:'Rest',
+      hsNeed:'What you need',hsNeedTxt:'A flat wall, 2 m of free space around you and a floor that does not slip.',
+      hsStop:'Stop signs',hsStopTxt:'Sharp wrist pain, tingling in the hands or pain at the front of the shoulder: stop that session. If the wrist bothers you two days in a row, do the prep on your knees and skip the strength work that week.',
+      hsWhere:'Where do you start?',hsPlace1:'I am starting from zero',hsPlace2:'I can hold a 45° wall plank for 45 s',
+      hsPlace3:'I can hold 60 s chest to the wall',hsPlace4:'I can do 10 heel pulls in a row',
+      hsStart:'Start the program',hsStartTitle:'Start the program?',
+      hsStartToday:'You start today in week {w}: Phase {n} · {name}.',hsStartMonday:'You start on Monday {date} in week {w}: Phase {n} · {name}.',
+      hsCoachWarn:'Note: your coach had set days of your week and the program replaces them.',hsStarted:'Program started',
+      hsRepeat:'Repeat this phase',hsRepeatTitle:'Repeat phase {n}?',
+      hsRepeatBody:'The next 2 weeks are Phase {n} · {name} again, and the program ends 2 weeks later.',
+      hsRepeated:'Phase {n} starts again next week',
+      hsLeave:'Leave the program',hsLeaveTitle:'Leave the program?',hsLeaveBody:'Your week becomes free. Your workouts and marks stay.',hsLeft:'You left the program',
+      hsPassTitle:'You passed the test!',hsPassBody:'Phase {n} · {name}: {best} (the standard is {std}). Next week Phase {next} begins.',
+      hsPassFinal:'You did it! {best} freestanding handstand, the program standard.',
+      hsFailTitle:'Not yet',hsFailBody:'Phase {n} · {name}: {got} of {needed} sets reached the standard ({std}). Your best: {best}.',
+      hsKeepGoing:'Go on to Phase {next}',hsDoneOk:'Done',hsPractice:'Test practice: {best}. Next Saturday counts.',
+      hsGym:'From HABIT',
       cues:'What to watch',critLabel:'Clean on this rung',
       coachPanel:'Coach',coachSearch:'Search a student by name',
       coachSet:'Set rung',coachNoteLabel:'What they still need (the student reads this)',
@@ -23742,7 +23817,10 @@ function rungForExercise(ex){
 async function loadSkillMarksSb(force){
   if(!force&&skillMarks&&Date.now()-skillMarksAt<SKILLS_TTL_MS)return skillMarks;
   const keyToRung={}, rungBySlug={};
-  (myRoutines||[]).forEach(b=>(b.exercises||[]).forEach(ex=>{
+  // Las rutinas del programa activo también: son del gym y no están en myRoutines, y sin ellas
+  // entrenar el programa de parada de manos no movía la escalera, que es lo que lo conecta.
+  const programBoards=await activeProgramBoardsSb();
+  [...(myRoutines||[]),...programBoards].forEach(b=>(b.exercises||[]).forEach(ex=>{
     const rung=rungForExercise(ex);
     if(rung&&ex.id)keyToRung[ex.id]=rung;
   }));
@@ -23780,6 +23858,22 @@ async function loadSkillMarksSb(force){
     skillMarks[b.rung.progression_group][b.rung.progression_rank]={mark,sessions};
   });
   return skillMarks;
+}
+
+// Las rutinas que usa el programa activo y que no están ya en myRoutines (las del gym que no
+// son básicas ni asignadas). Se piden una vez y se guardan junto a las demás.
+async function activeProgramBoardsSb(){
+  const p=typeof activeProgram==='function'?activeProgram():null;
+  if(!p)return [];
+  const have=new Set((myRoutines||[]).map(b=>b.id));
+  const ids=[...new Set((myProgramDays||[]).filter(d=>d.program_id===p.id&&d.board_id).map(d=>d.board_id))]
+    .filter(id=>!have.has(id));
+  const missing=ids.filter(id=>!coachBoardsById[id]||!Array.isArray(coachBoardsById[id].exercises));
+  if(missing.length){
+    const{data}=await sb.from('boards').select('id,name,exercises').in('id',missing);
+    (data||[]).forEach(b=>{coachBoardsById[b.id]={...(coachBoardsById[b.id]||{}),...b};});
+  }
+  return ids.map(id=>coachBoardsById[id]).filter(Boolean);
 }
 
 const markFor=(slug,rank)=>((skillMarks&&skillMarks[slug]&&skillMarks[slug][rank])||{mark:0,sessions:[]});
@@ -23845,14 +23939,18 @@ function skillCardHtml(skill){
 
 // ---- La hoja de la escalera -----------------------------------------------------------------
 
-async function openSkillSheet(slug){
-  skillOpenSlug=slug;skillCoachStudent=null;skillCoachResults=[];skillPickMode=false;
+async function openSkillSheet(slug,view){
+  skillOpenSlug=slug;skillCoachStudent=null;skillCoachResults=[];skillPickMode=false;skillView='ladder';
   const el=document.getElementById('skill-sheet');
   if(!el)return;
   el.classList.add('open');
-  await loadSkillsSb(false);
+  // La escalera de parada de manos lleva encima su programa: hace falta la plantilla y saber
+  // si la persona ya lo tiene activo.
+  await Promise.all([loadSkillsSb(false),
+    HS_PROGRAM&&slug===HS_PROGRAM.group?Promise.all([loadHandstandTemplateSb(false),loadWeekPlanSb(false)]).catch(()=>{}):null]);
   await loadSkillMarksSb(false);
-  renderSkillSheet();
+  if(view==='program'&&hsTemplate)skillOpenProgram();
+  else renderSkillSheet();
 }
 function closeSkillSheet(){
   const el=document.getElementById('skill-sheet');
@@ -23868,12 +23966,15 @@ function renderSkillSheet(){
   const body=document.getElementById('skill-sheet-body');
   if(!skill||!body)return;
   document.getElementById('skill-sheet-title').textContent=skillName(skill);
+  const isHs=HS_PROGRAM&&skill.slug===HS_PROGRAM.group&&hsTemplate;
+  if(isHs&&skillView==='program'){body.innerHTML=hsProgramHtml();return;}
   const rungs=skillRungs(skill.slug);
   const mineRow=mySkillRanks[skill.slug];
   const rank=mineRow?Number(mineRow.rank):0;
   let html='';
   if(skill.animation_url)html+='<div class="sk-hero">'+skillAnimHtml(skill.animation_url)+'</div>';
   if(skillSummary(skill))html+='<p class="sk-summary">'+esc(skillSummary(skill))+'</p>';
+  if(isHs)html+=hsCardHtml(true);
   const owner=HabitSkills.rungOwner(mineRow);
   html+=skillMineHtml(skill,rungs,rank,mineRow);
   if(skillPickMode)html+='<div class="sk-pick-bar"><span>'+esc(sk('pickBar'))+'</span>'
@@ -24066,6 +24167,267 @@ async function skillTrainRung(rank){
   }else openWorkoutSheet();
   await wsAddExercise(rung.slug,{template:plan});
   skillMarks=null;
+}
+
+// ---- El programa de parada de manos (migración 145, docs/PROGRAMA_HANDSTAND.md) ------------
+//
+// Una plantilla del gym (coaching_programs con user_id nulo y template_key 'handstand-8')
+// que la persona se aplica a sí misma con apply_coaching_program: la copia es suya y el
+// calendario se estampa desde start_date, como cualquier programa. Lo propio del programa es
+// por dónde se entra (la fase según su escalón), la prueba de cada fase al cerrar la sesión
+// del sábado y «Repetir la fase», que es correr start_date una fase. Sin la 145 la plantilla
+// no existe y nada de esto se pinta.
+
+const HS_PROGRAM=window.HabitSkills?HabitSkills.HANDSTAND_PROGRAM:null;
+let hsTemplate=null, hsTemplateAt=0, hsBoardIds=new Set(), skillView='ladder', hsPlaceWeek=1;
+
+async function loadHandstandTemplateSb(force){
+  if(!HS_PROGRAM||!sbUser)return null;
+  if(!force&&hsTemplateAt&&Date.now()-hsTemplateAt<SKILLS_TTL_MS)return hsTemplate;
+  hsTemplateAt=Date.now();
+  const{data,error}=await sb.from('coaching_programs').select('*')
+    .is('user_id',null).eq('template_key',HS_PROGRAM.key).maybeSingle();
+  if(error||!data){hsTemplate=null;return null;}
+  const{data:days}=await sb.from('coaching_program_days').select('week_index,dow,board_id,board_name').eq('program_id',data.id);
+  hsTemplate={...data,days:days||[]};
+  hsBoardIds=new Set((days||[]).map(d=>d.board_id).filter(Boolean));
+  return hsTemplate;
+}
+function hsActive(){const p=activeProgram();return p&&HS_PROGRAM&&p.template_key===HS_PROGRAM.key?p:null;}
+const hsPhaseName=ph=>(ph?(skLang()==='en'?ph.en:ph.es):'');
+const hsPhaseWeeks=ph=>({a:(ph.n-1)*HS_PROGRAM.weeksPerPhase+1,b:ph.n*HS_PROGRAM.weeksPerPhase});
+function hsRungStd(rung){
+  if(!rung||!rung.progression_target)return '';
+  return (rung.progression_target_sets||1)+' × '+fmtMark(rung,rung.progression_target);
+}
+// La línea «Semana 3 de 8 · Fase 2 · Línea en pared» de un día del programa, o '' si ese día
+// no es de este programa.
+function hsScheduleLine(row){
+  const p=hsActive();
+  if(!p||!row||row.program_id!==p.id)return '';
+  const w=Number(row.program_week_index)||0;
+  const ph=HabitSkills.programPhase(HS_PROGRAM,w);
+  if(!ph)return '';
+  const sat=(dateObjFromDS(row.ds).getUTCDay()+6)%7===5;
+  return skf('hsWeek',{w,total:HS_PROGRAM.weeks})+' · '+skf('hsPhase',{n:ph.n,name:hsPhaseName(ph)})
+    +(sat&&HabitSkills.isPhaseTestWeek(HS_PROGRAM,w)?' · '+sk('hsTestToday'):'');
+}
+
+function hsCardHtml(withButton){
+  if(!hsTemplate)return '';
+  const p=hsActive();
+  const w=p?myProgramCycleIndex(p):0;
+  const ph=p?HabitSkills.programPhase(HS_PROGRAM,w):null;
+  let line, sub='';
+  if(p&&ph){
+    line=skf('hsWeek',{w,total:HS_PROGRAM.weeks})+' · '+skf('hsPhase',{n:ph.n,name:hsPhaseName(ph)});
+    if(HabitSkills.isPhaseTestWeek(HS_PROGRAM,w))sub=sk('hsTestSat');
+  }else if(p&&w===0)line=skf('hsStarts',{date:fmtDS(mazWeekStart(p.start_date))});
+  else if(p&&w===-1)line=sk('hsDone');
+  else{line=sk('hsPitch');sub=skf('hsMeta',{weeks:HS_PROGRAM.weeks,days:HS_PROGRAM.days,min:HS_PROGRAM.minutes});}
+  const pct=p&&ph?Math.round(w/HS_PROGRAM.weeks*100):(p&&w===-1?100:0);
+  return '<div class="sk-mine hs-card">'
+    +'<div class="sk-mine-kicker">'+esc(sk('hsKicker'))+'</div>'
+    +'<div class="sk-mine-name">'+esc((p&&p.name)||hsTemplate.name)+'</div>'
+    +'<div class="sk-hint">'+esc(line)+'</div>'
+    +(p?'<div class="sk-bar"><i style="width:'+pct+'%"></i></div>':'')
+    +(sub?'<div class="sk-mine-meta">'+esc(sub)+'</div>':'')
+    +(withButton?'<div class="sk-actions"><button type="button" class="btn-ghost" style="margin-top:0" onclick="skillOpenProgram()">'+esc(sk('hsSee'))+'</button></div>':'')
+    +'</div>';
+}
+
+function skillOpenProgram(){
+  skillView='program';
+  const row=mySkillRanks[HS_PROGRAM.group];
+  hsPlaceWeek=HabitSkills.placementWeek(HS_PROGRAM,row?Number(row.rank):1);
+  renderSkillSheet();
+  const body=document.getElementById('skill-sheet-body');
+  if(body)body.scrollTop=0;
+}
+function skillCloseProgram(){skillView='ladder';renderSkillSheet();}
+function hsPick(week){hsPlaceWeek=week;renderSkillSheet();}
+
+function hsProgramHtml(){
+  const tpl=hsTemplate, p=hsActive();
+  const w=p?myProgramCycleIndex(p):0;
+  const cur=p?HabitSkills.programPhase(HS_PROGRAM,w):null;
+  const rungs=skillRungs(HS_PROGRAM.group);
+  const notes=(skLang()==='en'?(tpl.notes_en||tpl.notes):tpl.notes)||'';
+  let html='<button type="button" class="sk-back" onclick="skillCloseProgram()">'+esc(sk('hsBack'))+'</button>'
+    +'<div class="sk-mine-kicker" style="margin-top:6px">'+esc(sk('hsKicker'))+' · '
+    +esc(skf('hsMeta',{weeks:HS_PROGRAM.weeks,days:HS_PROGRAM.days,min:HS_PROGRAM.minutes}))+'</div>'
+    +'<h3 class="hs-title">'+esc((p&&p.name)||tpl.name)+'</h3>'
+    +(notes?'<p class="sk-summary">'+esc(notes)+'</p>':'');
+  if(p)html+=hsCardHtml(false);
+
+  // Las fases: qué mide cada prueba, con el estándar del escalón.
+  html+='<div class="sk-ladder-hd">'+esc(sk('hsPhases'))+'</div><div class="sk-ladder">';
+  HS_PROGRAM.phases.forEach(ph=>{
+    const rung=HabitSkills.rungAt(rungs,ph.rank);
+    const r=hsPhaseWeeks(ph);
+    const state=!p||!cur?'':(ph.n<cur.n?'passed':(ph.n===cur.n?'current':''));
+    html+='<div class="sk-rung'+(state?' '+state:'')+'" style="cursor:default">'
+      +'<span class="sk-rung-thumb">'+skillAnimHtml(rung&&rung.animation_url,'<span class="sk-rung-n">'+ph.n+'</span>')+'</span>'
+      +'<span class="sk-rung-info"><span class="sk-rung-name">'+esc(skf('hsPhase',{n:ph.n,name:hsPhaseName(ph)}))+'</span>'
+      +'<span class="sk-rung-crit">'+esc(skf('hsWeeksRange',{a:r.a,b:r.b}))+'</span>'
+      +(rung?'<span class="sk-rung-target">'+esc(sk('hsTest'))+': '+esc(rungLabel(rung))+' · '+esc(hsRungStd(rung))+'</span>':'')
+      +'</span>'
+      +(state?'<span class="sk-rung-state">'+esc(state==='passed'?sk('passed'):sk('current'))+'</span>':'')
+      +'</div>';
+  });
+  html+='</div>';
+
+  // La semana tipo.
+  const kinds=['A','B','A','B','A','C'];
+  html+='<div class="sk-ladder-hd" style="margin-top:14px">'+esc(sk('hsWeekTitle'))+'</div><div class="hs-week">'
+    +DOW_SHORT.slice(0,7).map((d,i)=>'<div class="hs-day'+(i===6?' rest':'')+'"><b>'+esc(d)+'</b><span>'
+      +(i<6?esc(kinds[i])+'<em>'+esc(sk('hsDay'+kinds[i]))+'</em>':'<em>'+esc(sk('hsRest'))+'</em>')+'</span></div>').join('')
+    +'</div>';
+
+  html+='<div class="sk-ladder-hd" style="margin-top:14px">'+esc(sk('hsNeed'))+'</div><p class="sk-summary">'+esc(sk('hsNeedTxt'))+'</p>'
+    +'<div class="sk-ladder-hd">'+esc(sk('hsStop'))+'</div><p class="sk-summary hs-stop">'+esc(sk('hsStopTxt'))+'</p>';
+
+  if(p){
+    html+='<div class="sk-actions">'
+      +(cur?'<button type="button" class="btn-ghost" onclick="hsRepeatPhase()">'+esc(sk('hsRepeat'))+'</button>':'')
+      +'</div><button type="button" class="sk-leave" onclick="hsLeaveProgram()">'+esc(sk('hsLeave'))+'</button>';
+  }else{
+    html+='<div class="sk-ladder-hd" style="margin-top:6px">'+esc(sk('hsWhere'))+'</div><div class="sk-ladder picking">'
+      +HS_PROGRAM.phases.map(ph=>{
+        const start=hsPhaseWeeks(ph).a;
+        return '<button type="button" class="sk-rung'+(start===hsPlaceWeek?' current':'')+'" onclick="hsPick('+start+')">'
+          +'<span class="sk-rung-info"><span class="sk-rung-name">'+esc(sk('hsPlace'+ph.n))+'</span>'
+          +'<span class="sk-rung-crit">'+esc(skf('hsPhase',{n:ph.n,name:hsPhaseName(ph)}))+' · '+esc(skf('hsWeek',{w:start,total:HS_PROGRAM.weeks}))+'</span></span>'
+          +(start===hsPlaceWeek?'<span class="sk-rung-state">✓</span>':'')+'</button>';
+      }).join('')+'</div>'
+      +'<div class="sk-actions" style="margin-top:12px"><button type="button" class="btn" onclick="hsStartProgram()">'+esc(sk('hsStart'))+'</button></div>';
+  }
+  return html;
+}
+
+// Empezar: la semana del ciclo que toca es la de la fase elegida. Entre semana se empieza hoy
+// y los días que ya pasaron quedan omitidos; en fin de semana, el lunes.
+async function hsStartProgram(){
+  const tpl=hsTemplate;
+  if(!tpl||hsActive())return;
+  const startWeek=hsPlaceWeek;
+  const ph=HabitSkills.programPhase(HS_PROGRAM,startWeek);
+  const today=mazToday(), weekStart=mazWeekStart(today);
+  const weekend=(dateObjFromDS(today).getUTCDay()+6)%7>=5;
+  const firstMonday=weekend?addDaysDS(weekStart,7):weekStart;
+  const firstDay=weekend?firstMonday:today;
+  const vars={w:startWeek,n:ph.n,name:hsPhaseName(ph),date:fmtDS(firstMonday)};
+  const body=(weekend?skf('hsStartMonday',vars):skf('hsStartToday',vars))
+    +(coachSetDays().length?'\n\n'+sk('hsCoachWarn'):'');
+  if(!await confirmSheet(body,{title:sk('hsStartTitle'),confirmLabel:sk('hsStart')}))return;
+  showLoading();
+  try{
+    const{data:programId,error}=await sb.rpc('apply_coaching_program',{
+      p_user_id:sbUser.id,p_program_id:tpl.id,p_week_start:weekStart,p_today:today,
+      p_start_date:HabitSkills.programStartDate(firstMonday,startWeek)
+    });
+    if(error)throw error;
+    // La copia es de la persona; la llave dice de qué plantilla salió, y es lo que hace que la
+    // app le pinte la fase y la prueba.
+    await sb.from('coaching_programs').update({template_key:HS_PROGRAM.key,name_en:tpl.name_en||null,notes_en:tpl.notes_en||null})
+      .eq('id',programId).eq('user_id',sbUser.id);
+    // Lo de esta semana antes de empezar no son entrenos que se pasaron: quedan omitidos, igual
+    // que con «Omitir» en Hoy, y así el calendario no los vuelve a estampar.
+    if(firstDay>weekStart&&hsBoardIds.size){
+      await sb.from('coaching_schedule').update({status:'skipped'})
+        .eq('user_id',sbUser.id).eq('status','scheduled').eq('generated_from_base',true)
+        .gte('ds',weekStart).lt('ds',firstDay).in('board_id',[...hsBoardIds]);
+    }
+    await refreshWeekAndSchedule();
+    skillMarks=null;
+    hideLoading();
+    toast(sk('hsStarted'),'ok');
+    renderSkillSheet();
+  }catch(e){hideLoading();toast(sk('saveErr')+': '+(e.message||e),'err');}
+}
+
+// Repetir la fase es correr la fecha de inicio lo que dura una fase: las semanas que siguen
+// vuelven a ser de esta fase. La copia es de la persona, así que la plantilla no se toca.
+async function hsRepeatPhaseNow(p){
+  const{error}=await sb.from('coaching_programs')
+    .update({start_date:HabitSkills.repeatPhaseStartDate(HS_PROGRAM,p.start_date),updated_at:new Date().toISOString()})
+    .eq('id',p.id).eq('user_id',sbUser.id);
+  if(error)throw error;
+  await refreshWeekAndSchedule();
+}
+async function hsRepeatPhase(){
+  const p=hsActive();
+  const ph=p?HabitSkills.programPhase(HS_PROGRAM,myProgramCycleIndex(p)):null;
+  if(!ph)return;
+  const vars={n:ph.n,name:hsPhaseName(ph)};
+  if(!await confirmSheet(skf('hsRepeatBody',vars),{title:skf('hsRepeatTitle',vars),confirmLabel:sk('hsRepeat')}))return;
+  showLoading();
+  try{await hsRepeatPhaseNow(p);hideLoading();toast(skf('hsRepeated',vars),'ok');renderSkillSheet();}
+  catch(e){hideLoading();toast(sk('saveErr')+': '+(e.message||e),'err');}
+}
+
+// Dejarlo: el programa se desactiva y su semana base (la que escribió apply_coaching_program)
+// se borra, porque si no la plantilla seguiría estampando la Fase 1 cada semana.
+async function hsLeaveProgram(){
+  const p=hsActive();
+  if(!p)return;
+  if(!await confirmSheet(sk('hsLeaveBody'),{title:sk('hsLeaveTitle'),confirmLabel:sk('hsLeave'),danger:true}))return;
+  showLoading();
+  try{
+    const{error}=await sb.from('coaching_programs').update({is_active:false,updated_at:new Date().toISOString()})
+      .eq('id',p.id).eq('user_id',sbUser.id);
+    if(error)throw error;
+    if(hsBoardIds.size)await sb.from('coaching_week_templates').delete().eq('user_id',sbUser.id).in('board_id',[...hsBoardIds]);
+    await refreshWeekAndSchedule();
+    hideLoading();
+    toast(sk('hsLeft'),'ok');
+    renderSkillSheet();
+  }catch(e){hideLoading();toast(sk('saveErr')+': '+(e.message||e),'err');}
+}
+
+// La prueba de fase, al cerrar la sesión C (el sábado) de una semana del programa. Se mide con
+// el estándar del escalón de esa fase sobre las series de ESTA sesión (meetsStandard). En la
+// primera semana de la fase es práctica; en la segunda decide: pasar (y subir en la escalera si
+// la línea es suya) o repetir la fase. Decide la persona, como subir de escalón.
+async function hsAfterSession(row,sets){
+  const p=hsActive();
+  if(!p||!row||row.program_id!==p.id)return;
+  const w=Number(row.program_week_index)||0;
+  const ph=HabitSkills.programPhase(HS_PROGRAM,w);
+  const cDay=(myProgramDays||[]).find(d=>d.program_id===p.id&&Number(d.week_index)===w&&Number(d.dow)===5);
+  if(!ph||!cDay||cDay.board_id!==row.board_id)return;
+  await loadSkillsSb(false);
+  const rungs=skillRungs(HS_PROGRAM.group);
+  const rung=HabitSkills.rungAt(rungs,ph.rank);
+  if(!rung)return;
+  let testSets=[];
+  sessionExerciseList(row,sets||{}).forEach((ex,i)=>{
+    const r=rungForExercise(ex);
+    if(r&&r.slug===rung.slug)testSets=testSets.concat((sets||{})[exerciseKeyForSession(row.board_id,ex,i)]||[]);
+  });
+  const res=HabitSkills.meetsStandard(rung,testSets);
+  const best=res.best?fmtMark(rung,res.best):'—', std=hsRungStd(rung);
+  if(!HabitSkills.isPhaseTestWeek(HS_PROGRAM,w)){toast(skf('hsPractice',{best}),'ok');return;}
+  const next=HS_PROGRAM.phases[ph.n]||null;
+  const vars={n:ph.n,name:hsPhaseName(ph),best,std,next:next&&next.n,got:res.qualifying,needed:res.needed};
+  if(res.passed){
+    const mine=mySkillRanks[HS_PROGRAM.group];
+    const nextRung=HabitSkills.nextRung(rungs,ph.rank);
+    const canLevel=nextRung&&HabitSkills.rungOwner(mine)!=='coach'&&(!mine||Number(mine.rank)<=ph.rank);
+    const choices=(canLevel?[{key:'level',label:skf('levelUp',{name:rungLabel(nextRung)})}]:[]).concat([{key:'ok',label:sk('hsDoneOk')}]);
+    const k=await choiceSheet(next?skf('hsPassBody',vars):skf('hsPassFinal',vars),choices,{title:sk('hsPassTitle')});
+    if(k==='level'){
+      try{await skillSaveOwnRank(HS_PROGRAM.group,Number(nextRung.progression_rank));toast(skf('selfSaved',{name:rungLabel(nextRung)}),'ok');}
+      catch(e){toast(sk('saveErr')+': '+(e.message||e),'err');}
+    }
+  }else{
+    const choices=[{key:'repeat',label:sk('hsRepeat')}].concat(next?[{key:'go',label:skf('hsKeepGoing',vars)}]:[]);
+    const k=await choiceSheet(skf('hsFailBody',vars),choices,{title:sk('hsFailTitle')});
+    if(k==='repeat'){
+      try{await hsRepeatPhaseNow(p);toast(skf('hsRepeated',vars),'ok');}
+      catch(e){toast(sk('saveErr')+': '+(e.message||e),'err');}
+    }
+  }
 }
 
 // ---- El coach, en la misma hoja --------------------------------------------------------------

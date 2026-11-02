@@ -260,8 +260,11 @@ for (const slug of animSlugs) {
   assert.ok(vb, `${slug}.svg sin viewBox`);
   assert.equal(vb[3], vb[4], `${slug}.svg no es cuadrado: la miniatura lo recortaría`);
 }
+// Las figuras del programa de parada de manos las enlaza la 145 (y las prueba check-handstand.js).
+const programAnim = [...fs.readFileSync('migrations/145_handstand_program.sql', 'utf8')
+  .matchAll(/\/skill-anim\/([a-z0-9-]+)\.svg/g)].map(m => m[1]);
 for (const f of animFiles) {
-  assert.ok(animSlugs.includes(f), `skill-anim/${f}.svg no lo enlaza ninguna migración`);
+  assert.ok(animSlugs.includes(f) || programAnim.includes(f), `skill-anim/${f}.svg no lo enlaza ninguna migración`);
 }
 // Y cada uno tiene que ser un escalón de verdad de una de las dos líneas.
 const ladderSlugs = new Set(rungRows.map(r => r.slug));

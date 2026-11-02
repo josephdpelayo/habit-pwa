@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "private": true,
   "scripts": {
-    "check": "for f in api/*.js lib/*.js sw.js habit-training.js habit-share.js habit-activity.js habit-skills.js skandi-*.js body-figure.js; do node --check \"$f\" || exit 1; done && node scripts/check-p2-program.js && node scripts/check-training.js && node scripts/check-recovery.js && node scripts/check-hoy.js && node scripts/check-routines.js && node scripts/check-session-edits.js && node scripts/check-push.js && node scripts/check-community-filter.js && node scripts/check-share.js && node scripts/check-activity.js && node scripts/check-intervals.js && node scripts/check-skills.js",
+    "check": "for f in api/*.js lib/*.js sw.js habit-training.js habit-share.js habit-activity.js habit-skills.js skandi-*.js body-figure.js; do node --check \"$f\" || exit 1; done && node scripts/check-p2-program.js && node scripts/check-training.js && node scripts/check-recovery.js && node scripts/check-hoy.js && node scripts/check-routines.js && node scripts/check-session-edits.js && node scripts/check-push.js && node scripts/check-community-filter.js && node scripts/check-share.js && node scripts/check-activity.js && node scripts/check-intervals.js && node scripts/check-skills.js && node scripts/check-handstand.js",
     "check:sql": "python3 scripts/check-sql.py",
     "lint": "eslint api/*.js sw.js"
   },

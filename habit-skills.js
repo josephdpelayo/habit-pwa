@@ -165,6 +165,101 @@
     return m ? m[1] : null;
   }
 
+  // ---- ¿Cumplió el estándar en esta sesión? --------------------------------------------------
+
+  // Las series de UNA sesión contra el estándar de un escalón: progression_target_sets series
+  // en el objetivo. Es la prueba de fase de un programa (docs/PROGRAMA_HANDSTAND.md §5), que se
+  // mide en un solo sábado; readiness() en cambio pide dos sesiones seguidas para subir.
+  function meetsStandard(rung, sets) {
+    const target = Number(rung && rung.progression_target) || 0;
+    const needed = Math.max(1, Number(rung && rung.progression_target_sets) || 1);
+    const qualifying = target
+      ? (sets || []).filter(s => s && s.done && setMark(rung, s) >= target).length
+      : 0;
+    return { passed: !!target && qualifying >= needed, qualifying, needed, target,
+             best: bestMark(rung, sets) };
+  }
+
+  // ---- Programas por fases (handstand-8, migración 145) --------------------------------------
+
+  // Lo que la app necesita saber del programa para pintarlo y decidir; las rutinas, los días y
+  // las semanas viven en la base. `rank` es el escalón de la escalera que mide la prueba de
+  // cada fase: la fase termina cuando se cumple ese estándar.
+  const HANDSTAND_PROGRAM = {
+    key: 'handstand-8', group: 'handstand', weeks: 8, weeksPerPhase: 2, minutes: 20, days: 6,
+    phases: [
+      { n: 1, rank: 1, es: 'Base', en: 'Base' },
+      { n: 2, rank: 3, es: 'Línea en pared', en: 'Wall line' },
+      { n: 3, rank: 4, es: 'Equilibrio', en: 'Balance' },
+      { n: 4, rank: 5, es: 'Libre', en: 'Freestanding' }
+    ]
+  };
+
+  // La fase de una semana del ciclo (1..weeks), o null fuera del ciclo (0 = no empezó,
+  // -1 = terminó, como coaching_program_week_index en SQL).
+  function programPhase(program, weekIndex) {
+    const w = Number(weekIndex);
+    if (!program || !(w >= 1) || w > program.weeks) return null;
+    return program.phases[Math.ceil(w / program.weeksPerPhase) - 1] || null;
+  }
+
+  // La segunda semana de cada fase termina en la prueba (su sábado).
+  function isPhaseTestWeek(program, weekIndex) {
+    return !!programPhase(program, weekIndex) && Number(weekIndex) % program.weeksPerPhase === 0;
+  }
+
+  // Por dónde entra alguien que ya está en el escalón `rank` de la escalera: la primera fase
+  // cuya prueba es ese escalón o uno más arriba. Escalón 1 → fase 1; 2–3 → fase 2 (su prueba es
+  // el 3); 4 → fase 3; 5 o más → fase 4. Devuelve la primera semana de esa fase.
+  function placementWeek(program, rank) {
+    const r = Math.max(1, Number(rank) || 1);
+    const phase = program.phases.find(p => p.rank >= r) || program.phases[program.phases.length - 1];
+    return (phase.n - 1) * program.weeksPerPhase + 1;
+  }
+
+  // Fechas ISO (YYYY-MM-DD) en UTC, sin horas: un día es un día en cualquier zona.
+  function addDaysIso(iso, days) {
+    const d = new Date(String(iso).slice(0, 10) + 'T00:00:00Z');
+    d.setUTCDate(d.getUTCDate() + Number(days || 0));
+    return d.toISOString().slice(0, 10);
+  }
+
+  // start_date tal que el lunes `firstMonday` sea la semana `startWeek` del ciclo: entrar en la
+  // fase 3 es un programa que «empezó» cuatro semanas antes. Así no hace falta otro motor: el
+  // calendario ya se estampa desde start_date (115).
+  function programStartDate(firstMonday, startWeek) {
+    return addDaysIso(firstMonday, -7 * (Math.max(1, Number(startWeek) || 1) - 1));
+  }
+
+  // Repetir la fase: la fecha de inicio se corre lo que dura una fase, y las semanas que siguen
+  // vuelven a ser de la fase que se está terminando.
+  function repeatPhaseStartDate(program, startDate) {
+    return addDaysIso(startDate, 7 * program.weeksPerPhase);
+  }
+
+  // ---- Cuánto dura una sesión ---------------------------------------------------------------
+
+  // Trabajo + descanso de cada serie. Un 'max' se cuenta como MAX_HOLD_SEC (aguante) o
+  // MAX_REPS repeticiones, y una repetición como REP_SEC: es lo que permite probar que las
+  // rutinas de 20 minutos de verdad caben en 20 minutos.
+  const MAX_HOLD_SEC = 40, MAX_REPS = 10, REP_SEC = 3;
+
+  function exerciseSeconds(ex) {
+    const sets = Math.max(1, parseInt(ex && ex.sets, 10) || 1);
+    const reps = String(ex && ex.reps == null ? '' : ex.reps).trim().toLowerCase();
+    const timed = String(ex && ex.repsType || '').toLowerCase() === 'time' || ht().metricType(ex) === 'time';
+    const isMax = /^(max|máx|fallo)$/.test(reps);
+    const work = timed
+      ? (isMax ? MAX_HOLD_SEC : (ht().parseSeconds(reps) || 0))
+      : (isMax ? MAX_REPS : (parseInt(reps, 10) || 0)) * REP_SEC;
+    const rest = ht().parseSeconds(String(ex && ex.rest || '').replace(/\s+/g, '')) || 0;
+    return sets * (work + rest);
+  }
+
+  function sessionSeconds(exercises) {
+    return (exercises || []).reduce((n, ex) => n + exerciseSeconds(ex), 0);
+  }
+
   // ---- Cues --------------------------------------------------------------------------------
 
   // Las "Indicaciones" de un ejercicio son un solo campo de texto (boards.exercises[].note),
@@ -206,7 +301,10 @@
     rungs, rungAt, topRank, nextRung, isFinalRung,
     markUnit, setMark, bestMark,
     skillLevel, rungProgress, readiness,
-    rungOwner, rungWorkout, catalogSlugFromExKey,
+    rungOwner, rungWorkout, catalogSlugFromExKey, meetsStandard,
+    HANDSTAND_PROGRAM, programPhase, isPhaseTestWeek, placementWeek,
+    addDaysIso, programStartDate, repeatPhaseStartDate,
+    MAX_HOLD_SEC, MAX_REPS, REP_SEC, exerciseSeconds, sessionSeconds,
     cueList, animationKind
   };
 

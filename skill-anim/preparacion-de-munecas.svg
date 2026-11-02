@@ -1,0 +1,26 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="30 74 204 204" preserveAspectRatio="xMidYMid meet" role="img" aria-label="Preparación de muñecas">
+  <title>Preparación de muñecas</title>
+  <line x1="103.5" y1="210.0" x2="65.5" y2="210.0" stroke="#e8e9ee" stroke-width="7" stroke-linecap="round" opacity="1.0"/>
+  <line x1="45.5" y1="210.0" x2="217.2" y2="210.0" stroke="rgba(232,233,238,.3)" stroke-width="5" stroke-linecap="round" opacity="1.0"/>
+  <g>
+    <animateTransform attributeName="transform" type="rotate" values="0 150 210;13.3 150 210;0 150 210" keyTimes="0.00;0.50;1.00" dur="5s" repeatCount="indefinite" calcMode="spline" keySplines="0.4 0 0.6 1;0.4 0 0.6 1"/>
+    <line x1="147.0" y1="210.0" x2="147.0" y2="158.0" stroke="#e8e9ee" stroke-width="7" stroke-linecap="round" opacity="1.0"/>
+    <line x1="153.0" y1="210.0" x2="153.0" y2="158.0" stroke="#e8e9ee" stroke-width="7" stroke-linecap="round" opacity="0.5"/>
+  </g>
+  <g>
+    <animateTransform attributeName="transform" type="rotate" values="0 104 210;17.5 104 210;0 104 210" keyTimes="0.00;0.50;1.00" dur="5s" repeatCount="indefinite" calcMode="spline" keySplines="0.4 0 0.6 1;0.4 0 0.6 1"/>
+    <line x1="103.5" y1="170.0" x2="103.5" y2="210.0" stroke="#e8e9ee" stroke-width="7" stroke-linecap="round" opacity="1.0"/>
+  </g>
+  <g>
+    <animateTransform attributeName="transform" type="translate" values="0.0 0.0;12.0 1.4;0.0 0.0" keyTimes="0.00;0.50;1.00" dur="5s" repeatCount="indefinite" calcMode="spline" keySplines="0.4 0 0.6 1;0.4 0 0.6 1"/>
+    <line x1="150.0" y1="158.0" x2="103.5" y2="170.0" stroke="#e8e9ee" stroke-width="7" stroke-linecap="round" opacity="1.0"/>
+    <line x1="150.0" y1="158.0" x2="165.5" y2="154.0" stroke="#e8e9ee" stroke-width="6" stroke-linecap="round" opacity="1.0"/>
+    <circle cx="174.2" cy="151.8" r="11" fill="#e8e9ee"/>
+    <line x1="174.2" y1="151.8" x2="174.2" y2="169.8" stroke="#e8e9ee" stroke-width="5" stroke-linecap="round" opacity="1.0"/>
+    <circle cx="150.0" cy="158.0" r="3.2" fill="#a78bfa" data-j="shoulder"/>
+    <circle cx="103.5" cy="170.0" r="3.2" fill="#a78bfa" data-j="hip"/>
+  </g>
+  <circle cx="150.0" cy="210.0" r="3.2" fill="#a78bfa" data-j="hand"/>
+  <circle cx="103.5" cy="210.0" r="3.2" fill="#a78bfa" data-j="knee"/>
+  <circle cx="65.5" cy="210.0" r="3.2" fill="#a78bfa" data-j="foot"/>
+</svg>

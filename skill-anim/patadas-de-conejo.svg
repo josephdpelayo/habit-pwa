@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="14 56 184 184" preserveAspectRatio="xMidYMid meet" role="img" aria-label="Patadas de conejo">
+  <title>Patadas de conejo</title>
+  <line x1="111.0" y1="210.0" x2="116.0" y2="158.0" stroke="#e8e9ee" stroke-width="7" stroke-linecap="round" opacity="1.0"/>
+  <line x1="129.0" y1="210.0" x2="124.0" y2="158.0" stroke="#e8e9ee" stroke-width="7" stroke-linecap="round" opacity="0.5"/>
+  <circle cx="120.0" cy="210.0" r="6" fill="rgba(232,233,238,.3)"/>
+  <line x1="30.1" y1="210.0" x2="182.1" y2="210.0" stroke="rgba(232,233,238,.3)" stroke-width="5" stroke-linecap="round" opacity="1.0"/>
+  <g>
+    <animateTransform attributeName="transform" type="rotate" values="-102.0 120 158;0 120 158;0 120 158;-102.0 120 158;-102.0 120 158" keyTimes="0.00;0.35;0.50;0.80;1.00" dur="5s" repeatCount="indefinite" calcMode="spline" keySplines="0.4 0 0.6 1;0.4 0 0.6 1;0.4 0 0.6 1;0.4 0 0.6 1"/>
+    <line x1="120.0" y1="158.0" x2="120.0" y2="110.0" stroke="#e8e9ee" stroke-width="7" stroke-linecap="round" opacity="1.0"/>
+    <line x1="120.0" y1="158.0" x2="120.0" y2="174.0" stroke="#e8e9ee" stroke-width="6" stroke-linecap="round" opacity="1.0"/>
+    <circle cx="120.0" cy="183.0" r="11" fill="#e8e9ee"/>
+    <line x1="120.0" y1="183.0" x2="120.0" y2="201.0" stroke="#e8e9ee" stroke-width="5" stroke-linecap="round" opacity="1.0"/>
+    <line x1="120.0" y1="110.0" x2="80.6" y2="116.9" stroke="#e8e9ee" stroke-width="7" stroke-linecap="round" opacity="0.5"/>
+    <line x1="80.6" y1="116.9" x2="87.2" y2="79.5" stroke="#e8e9ee" stroke-width="7" stroke-linecap="round" opacity="0.5"/>
+    <line x1="120.0" y1="110.0" x2="80.6" y2="116.9" stroke="#e8e9ee" stroke-width="7" stroke-linecap="round" opacity="1.0"/>
+    <line x1="80.6" y1="116.9" x2="87.2" y2="79.5" stroke="#e8e9ee" stroke-width="7" stroke-linecap="round" opacity="1.0"/>
+    <circle cx="120.0" cy="158.0" r="3.2" fill="#a78bfa" data-j="shoulder"/>
+    <circle cx="120.0" cy="110.0" r="3.2" fill="#a78bfa" data-j="hip"/>
+    <circle cx="80.6" cy="116.9" r="3.2" fill="#a78bfa" data-j="knee"/>
+    <circle cx="87.2" cy="79.5" r="3.2" fill="#a78bfa" data-j="foot"/>
+  </g>
+  <circle cx="120.0" cy="210.0" r="3.2" fill="#a78bfa" data-j="hand"/>
+</svg>

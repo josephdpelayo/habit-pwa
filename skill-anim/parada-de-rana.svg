@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="75 104 156 156" preserveAspectRatio="xMidYMid meet" role="img" aria-label="Parada de rana">
+  <title>Parada de rana</title>
+  <line x1="91.2" y1="210.0" x2="215.4" y2="210.0" stroke="rgba(232,233,238,.3)" stroke-width="5" stroke-linecap="round" opacity="1.0"/>
+  <g>
+    <animateTransform attributeName="transform" type="rotate" values="-1.2 150 210;1.2 150 210;-1.2 150 210" keyTimes="0.00;0.50;1.00" dur="5s" repeatCount="indefinite" calcMode="spline" keySplines="0.4 0 0.6 1;0.4 0 0.6 1"/>
+    <line x1="155.0" y1="210.0" x2="148.8" y2="184.8" stroke="#e8e9ee" stroke-width="7" stroke-linecap="round" opacity="0.5"/>
+    <line x1="148.8" y1="184.8" x2="164.4" y2="164.0" stroke="#e8e9ee" stroke-width="7" stroke-linecap="round" opacity="0.5"/>
+    <line x1="111.4" y1="163.5" x2="148.4" y2="178.5" stroke="#e8e9ee" stroke-width="7" stroke-linecap="round" opacity="0.5"/>
+    <line x1="150.0" y1="210.0" x2="143.8" y2="184.8" stroke="#e8e9ee" stroke-width="7" stroke-linecap="round" opacity="1.0"/>
+    <line x1="143.8" y1="184.8" x2="159.4" y2="164.0" stroke="#e8e9ee" stroke-width="7" stroke-linecap="round" opacity="1.0"/>
+    <line x1="159.4" y1="164.0" x2="111.4" y2="163.5" stroke="#e8e9ee" stroke-width="7" stroke-linecap="round" opacity="1.0"/>
+    <line x1="159.4" y1="164.0" x2="175.4" y2="164.1" stroke="#e8e9ee" stroke-width="6" stroke-linecap="round" opacity="1.0"/>
+    <circle cx="184.4" cy="164.2" r="11" fill="#e8e9ee"/>
+    <line x1="184.4" y1="164.2" x2="193.3" y2="179.8" stroke="#e8e9ee" stroke-width="5" stroke-linecap="round" opacity="1.0"/>
+    <line x1="111.4" y1="163.5" x2="148.4" y2="178.5" stroke="#e8e9ee" stroke-width="7" stroke-linecap="round" opacity="1.0"/>
+    <line x1="148.4" y1="178.5" x2="111.2" y2="170.9" stroke="#e8e9ee" stroke-width="7" stroke-linecap="round" opacity="1.0"/>
+    <circle cx="159.4" cy="164.0" r="3.2" fill="#a78bfa" data-j="shoulder"/>
+    <circle cx="111.4" cy="163.5" r="3.2" fill="#a78bfa" data-j="hip"/>
+    <circle cx="148.4" cy="178.5" r="3.2" fill="#a78bfa" data-j="knee"/>
+    <circle cx="111.2" cy="170.9" r="3.2" fill="#a78bfa" data-j="foot"/>
+  </g>
+  <circle cx="150.0" cy="210.0" r="3.2" fill="#a78bfa" data-j="hand"/>
+</svg>

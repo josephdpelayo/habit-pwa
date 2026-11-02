@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="3 65 229 229" preserveAspectRatio="xMidYMid meet" role="img" aria-label="Hollow body">
+  <title>Hollow body</title>
+  <line x1="19.4" y1="200.0" x2="216.3" y2="200.0" stroke="rgba(232,233,238,.3)" stroke-width="5" stroke-linecap="round" opacity="1.0"/>
+  <g>
+    <animateTransform attributeName="transform" type="rotate" values="-1 130 196;1 130 196;-1 130 196" keyTimes="0.00;0.50;1.00" dur="5s" repeatCount="indefinite" calcMode="spline" keySplines="0.4 0 0.6 1;0.4 0 0.6 1"/>
+    <line x1="83.6" y1="186.6" x2="33.4" y2="173.1" stroke="#e8e9ee" stroke-width="7" stroke-linecap="round" opacity="0.5"/>
+    <line x1="83.6" y1="183.6" x2="33.4" y2="170.1" stroke="#e8e9ee" stroke-width="7" stroke-linecap="round" opacity="1.0"/>
+    <line x1="83.6" y1="183.6" x2="130.0" y2="196.0" stroke="#e8e9ee" stroke-width="7" stroke-linecap="round" opacity="1.0"/>
+    <line x1="83.6" y1="183.6" x2="68.2" y2="179.4" stroke="#e8e9ee" stroke-width="6" stroke-linecap="round" opacity="1.0"/>
+    <circle cx="59.5" cy="177.1" r="11" fill="#e8e9ee"/>
+    <line x1="59.5" y1="177.1" x2="59.5" y2="159.1" stroke="#e8e9ee" stroke-width="5" stroke-linecap="round" opacity="1.0"/>
+    <line x1="130.0" y1="196.0" x2="167.1" y2="181.0" stroke="#e8e9ee" stroke-width="7" stroke-linecap="round" opacity="0.5"/>
+    <line x1="167.1" y1="181.0" x2="202.3" y2="166.8" stroke="#e8e9ee" stroke-width="7" stroke-linecap="round" opacity="0.5"/>
+    <line x1="130.0" y1="196.0" x2="167.1" y2="181.0" stroke="#e8e9ee" stroke-width="7" stroke-linecap="round" opacity="1.0"/>
+    <line x1="167.1" y1="181.0" x2="202.3" y2="166.8" stroke="#e8e9ee" stroke-width="7" stroke-linecap="round" opacity="1.0"/>
+    <circle cx="83.6" cy="183.6" r="3.2" fill="#a78bfa" data-j="shoulder"/>
+    <circle cx="130.0" cy="196.0" r="3.2" fill="#a78bfa" data-j="hip"/>
+    <circle cx="167.1" cy="181.0" r="3.2" fill="#a78bfa" data-j="knee"/>
+    <circle cx="202.3" cy="166.8" r="3.2" fill="#a78bfa" data-j="foot"/>
+    <circle cx="33.4" cy="170.1" r="3.2" fill="#a78bfa" data-j="hand"/>
+  </g>
+</svg>

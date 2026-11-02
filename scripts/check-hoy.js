@@ -72,6 +72,7 @@ const makeHarness = new Function(`
   const readCachedTrainingSession=()=>cached;
   const showActiveSessionBar=()=>{}, wsStartTicker=()=>{}, updateCoachingNavBadge=()=>{};
   const renderInicioCoachingWidgets=()=>{}, hydrateSessionSetDefaults=async()=>{};
+  const hsScheduleLine=()=>'';   // la línea del programa de parada de manos (check-handstand.js)
   const loadMyRoutinesSb=async()=>{}, loadCoachWeekDataSb=async()=>{}, loadWeekPlanSb=async()=>{};
   const loadMyRecoverySb=async()=>{}, renderRutSemana=()=>{}, renderRutRutinas=()=>{};
   const trainingSyncClass=()=>'', trainingSyncText=()=>'Guardado';
