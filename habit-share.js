@@ -468,10 +468,31 @@
       else light = { value: `${Math.floor(dur / 3600)}:${pad2((dur % 3600) / 60)}`, sub: 'horas ' + T.verb };
     }
 
-    return {
+    const facts = {
       type, typeLabel: T.label, title, ds: d.ds || '', day: dayName(d.ds), date: shortDate(d.ds),
       dur, dist, sets, vol, pace, hero, stats, trio: trio.slice(0, 3), summary, bubble, light,
       exercises, number: d.number > 0 ? Math.round(d.number) : 0
+    };
+    if (!Array.isArray(d.fields)) return facts;
+    const selected = selectedFields('workout', { ...d, fields: d.fields });
+    const has = (id) => d.fields.includes(id);
+    const metrics = selected.filter((r) => !['title', 'ds', 'exercises'].includes(r.id));
+    const main = metrics.find((r) => ['distanceM', 'volumeKg', 'sets'].includes(r.id)) || metrics[0];
+    return {
+      ...facts,
+      title: has('title') ? title : 'MI ENTRENO',
+      ds: has('ds') ? facts.ds : '', day: has('ds') ? facts.day : '', date: has('ds') ? facts.date : '',
+      dur: has('durationSec') ? dur : 0, dist: has('distanceM') ? dist : 0,
+      sets: has('sets') ? sets : 0, vol: has('volumeKg') ? vol : 0,
+      pace: has('pace') ? pace : '', number: has('number') ? facts.number : 0,
+      exercises: has('exercises') ? exercises : [],
+      hero: main ? { value: main.value, unit: main.unit, label: main.unit || main.label.toUpperCase() }
+        : { value: '✓', unit: '', label: 'ENTRENADO' },
+      stats: metrics.map((r) => ({ label: r.unit || r.label.toUpperCase(), value: r.value })),
+      trio: metrics.slice(0, 3).map((r) => ({ value: r.value, label: r.unit || r.label.toUpperCase() })),
+      summary: metrics.slice(0, 3).map((r) => [r.value, r.unit].filter(Boolean).join(' ')),
+      bubble: [has('title') ? title + '.' : 'Entrenado.', ...metrics.map((r) => [r.value, r.unit].filter(Boolean).join(' ') + '.')].join(' '),
+      light: has('durationSec') ? light : null
     };
   }
 
@@ -1315,7 +1336,7 @@
       if (w.range) add('weekStart', 'Fechas', w.range);
       if (d.days) add('days', 'Días entrenados', w.days.filter(Boolean).length, 'DÍAS ACTIVOS');
     } else {
-      const f = workoutFacts(d);
+      const f = workoutFacts({ ...d, fields: undefined });
       add('title', 'Nombre del entreno', f.title);
       if (f.dur) add('durationSec', 'Tiempo', f.dur % 60 ? clock(f.dur) : minutesText(f.dur), 'TIEMPO');
       if (f.dist) add('distanceM', 'Distancia', distanceText(f.type, f.dist), distanceUnit(f.type));
@@ -1328,6 +1349,7 @@
       if (d.elevationM > 0) add('elevationM', 'Desnivel', thousands(d.elevationM), 'M DE DESNIVEL');
       if (d.effort > 0) add('effort', 'Esfuerzo', Math.round(d.effort) + '/10', 'ESFUERZO');
       if (f.date) add('ds', 'Fecha', f.date);
+      if (f.exercises.length) add('exercises', 'Ejercicios y mejores series', f.exercises.map((e) => e.name + (e.best ? ' · ' + e.best : '')).join(' / '));
     }
     return rows;
   }
@@ -1411,6 +1433,124 @@
       ['editorial', 'Editorial'], ['ficha', 'Ficha'], ['compacto', 'Compacto']
     ].map(([id, label]) => ({ id, label, customizable: true, layout: (d, m) => editorialLayout(kind, id, d, m) })));
   }
+
+  // La semana tiene su propio lenguaje: calendario, boleto, cifras, sello y tipografía.
+  // Siempre parte de la misma lista ya seleccionada; ningún diseño consulta métricas ocultas.
+  function weeklyStudioLayout(id, d, measure) {
+    const rows = selectedFields('week', d), ops = [];
+    const filled = ['bitacora', 'carnet'].includes(id);
+    const ink = filled ? 'inv' : 'fg';
+    const left = 88, right = WIDTH - left, inner = right - left;
+    let y = 92;
+    function text(value, px, atY, opts) {
+      opts = opts || {};
+      const t = fitText(measure, String(value), (p) => F(opts.weight || 700, p, opts.italic), opts.width || inner, px, Math.min(px, 32), opts.spacing || 0);
+      ops.push(textOp(measure, t.text, F(opts.weight || 700, t.px, opts.italic), {
+        x: opts.x == null ? left : opts.x, y: atY, align: opts.align || 'left',
+        spacing: t.spacing, color: ink, alpha: opts.alpha == null ? 1 : opts.alpha, stroke: opts.stroke
+      }));
+      return t.px;
+    }
+    const rule = (atY, dash) => ops.push({ op: 'line', x1: left, x2: right, y1: atY, y2: atY, color: ink, alpha: .3, dash });
+    const center = (value, px, atY, opts) => text(value, px, atY, { ...opts, x: WIDTH / 2, align: 'center' });
+    const metrics = rows.filter((r) => !['weekStart', 'days'].includes(r.id));
+    const main = (id === 'racha' && metrics.find((r) => r.id === 'streak')) || metrics[0];
+    const rest = metrics.filter((r) => r !== main);
+    const date = rows.find((r) => r.id === 'weekStart');
+    const hasDays = rows.some((r) => r.id === 'days');
+    const centered = ['semana', 'insignia', 'heroe', 'crew', 'racha'].includes(id);
+    const heading = id === 'bitacora' ? 'MI SEMANA / REGISTRO' : id === 'ritual' ? 'EL HÁBITO SE CONSTRUYE.' : 'MI SEMANA';
+    (centered ? center : text)(heading, 32, y, { weight: 600, spacing: .14 });
+    y += 58;
+    // Calendario protagonista: cada celda muestra presencia, nunca una intensidad inventada.
+    const calendar = (large) => {
+      const step = inner / 7, box = large ? 108 : 64;
+      'LMMJVSD'.split('').forEach((day, i) => {
+        const cx = left + step * (i + .5), active = !!(d.days && d.days[i]);
+        const cy = y + (large ? 74 : 42);
+        if (large) {
+          ops.push({ op: 'rect', x: cx - box / 2, y: cy - box / 2, w: box, h: box, r: 28, color: ink, stroke: active ? 0 : 2, alpha: active ? 1 : .25 });
+          if (active) ops.push(textOp(measure, '✓', F(700, 52), { x: cx, y: cy + 18, align: 'center', color: filled ? 'fg' : 'inv' }));
+        } else {
+          ops.push({ op: 'circle', cx, cy, r: box / 2, color: ink, stroke: active ? 0 : 2, alpha: active ? 1 : .3 });
+        }
+        text(day, 30, cy + box / 2 + 44, { x: cx, align: 'center', weight: 500 });
+      });
+      y += large ? 218 : 154;
+    };
+    if (id === 'ritual' && hasDays) { calendar(true); rule(y); y += 64; }
+    if (id === 'crew') {
+      // Firma de tamaño constante; la tipografía protagonista es la frase, no otro logo enorme.
+      center('MAKE IT', 142, y + 106, { weight: 900 });
+      center('A HABIT.', 142, y + 246, { weight: 900 });
+      y += 310;
+    }
+    if (id === 'datos' || id === 'balance') {
+      // Dos columnas como máximo para que un tiempo largo siga siendo legible.
+      metrics.forEach((r, i) => {
+        const col = i % 2, x = left + col * 474;
+        if (!col && i) { y += 190; }
+        text(r.value, 110, y + 96, { x, width: 420, weight: 800 });
+        text(r.unit, 30, y + 152, { x, width: 420, weight: 500 });
+      });
+      if (metrics.length) y += 206;
+    } else if (main) {
+      if (id === 'insignia') {
+        const cy = y + 280;
+        ops.push({ op: 'circle', cx: WIDTH / 2, cy, r: 270, stroke: 3, color: ink });
+        ops.push({ op: 'circle', cx: WIDTH / 2, cy, r: 248, stroke: 1, color: ink, alpha: .35 });
+        center(main.value, 210, cy + 35, { width: 420, weight: 900 });
+        center(main.unit, 30, cy + 114, { width: 420, spacing: .1 });
+        y += 610;
+      } else if (id === 'bitacora') {
+        rule(y, [10, 9]); y += 64;
+        text(main.unit, 32, y, { weight: 500, spacing: .12 });
+        y += 206;
+        text(main.value, 240, y, { weight: 800 }); y += 90;
+      } else if (id === 'racha') {
+        const label = main.id === 'streak' ? 'SEMANAS / SEGUIDAS' : main.unit;
+        center(main.value, 300, y + 240, { weight: 800, italic: true });
+        center(label, 36, y + 330, { spacing: .12 }); y += 410;
+      } else {
+        const px = id === 'carnet' ? 230 : 300;
+        const align = centered ? center : text;
+        align(main.value, px, y + px * .8, { weight: 900, stroke: id === 'heroe' ? 4 : undefined });
+        align(main.unit, 34, y + px * .8 + 80, { weight: 600, spacing: .12 });
+        y += px * .8 + 160;
+      }
+      rest.forEach((r) => {
+        rule(y, id === 'bitacora' ? [10, 9] : undefined); y += 76;
+        text(r.unit, 30, y, { width: 360, weight: 500, alpha: .8 });
+        text(r.value, 68, y + 8, { x: right, align: 'right', width: 490, weight: 700 });
+        y += 60;
+      });
+    }
+    if (hasDays && id !== 'ritual') { y += 24; calendar(id === 'semana'); }
+    if (date) { y += 28; (centered ? center : text)(date.value, 32, y, { weight: 500, spacing: .06 }); y += 32; }
+    if (id === 'bitacora') { y += 20; rule(y, [10, 9]); y += 38; ops.push(...barcode(rows.map((r) => r.value).join('|'), left, y, inner, 64).map((o) => ({ ...o, color: ink }))); y += 96; }
+    y += 58;
+    const probe = lockupLayout(0, 0, 40, measure);
+    const brand = lockupOps(measure, centered ? WIDTH / 2 : left, y, Math.round(40 * 320 / probe.width), centered ? 'center' : 'left', ink);
+    ops.push(...brand.ops); y += brand.height + 80;
+    if (filled) {
+      if (id === 'bitacora') {
+        ops.unshift({ op: 'poly', pts: [...zigzag(24, WIDTH - 24, 24, 12, 24, false), ...zigzag(24, WIDTH - 24, y, 12, 24, true).reverse()], color: 'fg' });
+      } else ops.unshift({ op: 'rect', x: 24, y: 24, w: WIDTH - 48, h: y - 24, r: 48, color: 'fg' });
+    }
+    return { kind: id, width: WIDTH, height: Math.ceil(y + 24), ops };
+  }
+
+  // Restaurar el catálogo completo: las casillas no son un filtro de diseños.
+  for (const style of KINDS.workout.styles) style.customizable = true;
+  for (const style of KINDS.week.styles) {
+    if (style.customizable) continue;
+    const original = style.layout;
+    style.customizable = true;
+    style.layout = (d, m) => Array.isArray(d.fields) ? weeklyStudioLayout(style.id, d, m) : original(d, m);
+  }
+  KINDS.week.styles.unshift(...[
+    ['ritual', 'Ritual'], ['bitacora', 'Bitácora'], ['balance', 'Balance']
+  ].map(([id, label]) => ({ id, label, customizable: true, layout: (d, m) => weeklyStudioLayout(id, d, m) })));
 
   // ── Dibujo (navegador) ─────────────────────────────────────────────────
 
@@ -1585,7 +1725,7 @@
   // Los estilos que sí tienen qué mostrar con estos datos.
   function stylesFor(kind, data, measure) {
     const K = KINDS[kind] || KINDS.quote;
-    return K.styles.filter((s) => !Array.isArray(data && data.fields) || s.customizable).filter((s) => { try { return !!s.layout(data || {}, measure); } catch (_) { return false; } });
+    return K.styles.filter((s) => { try { return !!s.layout(data || {}, measure); } catch (_) { return false; } });
   }
 
   // Un sticker: un canvas transparente del tamaño justo. `logo` es la imagen ya cargada.
@@ -1641,7 +1781,7 @@
 .hs-overlay{position:fixed;inset:0;z-index:10040;background:rgba(6,7,9,.66);display:none;align-items:flex-end;justify-content:center;font-family:${INTER}}
 .hs-overlay.open{display:flex;animation:hsFade .18s ease both}
 .hs-sheet{width:100%;max-width:480px;max-height:94vh;background:#141518;color:#f4f5f7;border-radius:22px 22px 0 0;display:flex;flex-direction:column;overflow:hidden;animation:hsUp .3s cubic-bezier(.2,.8,.2,1) both;padding-bottom:env(safe-area-inset-bottom,0px)}
-.hs-options{margin:12px 20px;color:#cdd0d6;font-size:13px}.hs-options[hidden]{display:none}.hs-options summary{cursor:pointer;padding:10px 0;font-weight:600}.hs-fields{display:grid;grid-template-columns:1fr 1fr;gap:12px;padding:12px 0}.hs-fields label{display:flex;align-items:center;gap:8px}.hs-fields input{accent-color:#d4ff3a;width:18px;height:18px}.hs-options p{font-size:12px;line-height:1.5;color:#9298a3}
+.hs-options{margin:12px 20px;color:#cdd0d6;font-size:13px}.hs-options[hidden]{display:none}.hs-options summary{cursor:pointer;padding:10px 0;font-weight:600}.hs-fields{max-height:180px;overflow-y:auto;overscroll-behavior:contain;display:grid;grid-template-columns:1fr 1fr;gap:12px;padding:12px 0}.hs-fields label{display:flex;align-items:center;gap:8px}.hs-fields input{flex:0 0 18px;min-width:18px;min-height:18px;padding:0;margin:0;accent-color:#d4ff3a;width:18px;height:18px}.hs-options p{font-size:12px;line-height:1.5;color:#9298a3}
 .hs-head{display:flex;align-items:center;gap:12px;padding:16px 16px 6px}
 .hs-title{flex:1;text-align:center;font-size:17px;font-weight:700;margin:0;letter-spacing:0;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .hs-close{background:none;border:0;color:#9aa0aa;font-size:24px;line-height:1;cursor:pointer;padding:4px 6px}

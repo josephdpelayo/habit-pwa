@@ -243,7 +243,7 @@ for (const st of S.KINDS.week.styles) {
   inside(L, 'semana/' + st.id);
   assert.ok(saysCrew(L), 'semana/' + st.id + ' firma como HABIT Crew');
 }
-const dots = S.KINDS.week.styles[0].layout(wk, measure).ops.filter((o) => o.op === 'circle');
+const dots = S.KINDS.week.styles.find((s) => s.id === 'semana').layout(wk, measure).ops.filter((o) => o.op === 'circle');
 assert.equal(dots.length, 7);
 assert.equal(dots.filter((o) => !o.stroke).length, 4, 'un punto lleno por día entrenado');
 assert.equal(S.KINDS.week.styles.find((s) => s.id === 'racha').layout({ count: 1, streak: 1 }, measure), null, 'una semana no es racha');
@@ -258,22 +258,50 @@ for (const [kind, data] of [['workout', { ...samples.rodada, number: 47, kcal: 5
     const d = { ...data, fields: selected };
     assert.deepEqual(S.selectedFields(kind, d).map((r) => r.id), selected.length === fields.length ? fields.map((r) => r.id) : selected);
     const styles = S.stylesFor(kind, d, measure);
-    assert.equal(styles.length, 3, 'solo estilos que respetan la selección');
+    assert.ok(styles.length >= (kind === 'week' ? 13 : 15), 'las casillas conservan la variedad del catálogo');
     for (const style of styles) {
       const L = style.layout(d, measure);
-      inside(L, kind + '/personalizado/' + style.id);
+      if (L.ops) inside(L, kind + '/personalizado/' + style.id);
       assert.ok(saysCrew(L), 'siempre firma como Crew');
-      const logo = L.ops.find((o) => o.op === 'logo');
-      assert.ok(logo.size >= 40 && logo.size <= 90, 'logo con tamaño estable');
-      const text = L.ops.filter((o) => o.op === 'text').map((o) => o.text).join('|');
+      const logo = L.ops && L.ops.find((o) => o.op === 'logo' && !o.clip);
+      if (kind === 'week' && logo) assert.ok(logo.size >= 40 && logo.size <= 90, 'firma semanal con tamaño estable');
+      const text = L.ops ? L.ops.filter((o) => o.op === 'text').map((o) => o.text).join('|') : '';
       if (!selected.includes('number')) assert.ok(!text.includes('Nº DE ENTRENO'));
       if (!selected.includes('avgHr')) assert.ok(!text.includes('FC MEDIA'));
       if (!selected.includes('title')) assert.ok(!text.includes(data.title?.toUpperCase() || 'TÍTULO AUSENTE'));
-      if (!selected.length) assert.equal(L.ops.filter((o) => o.op === 'text').length, 3, 'sin selección: solo encabezado y marca');
+      if (!selected.length && style.id === 'editorial') assert.equal(L.ops.filter((o) => o.op === 'text').length, 3, 'sin selección: solo encabezado y marca');
     }
   }
 }
 assert.ok(!S.stickerFields('workout', samples.yoga).some((r) => r.id === 'avgHr'), 'no ofrece FC inexistente');
 assert.equal(S.weekFacts({ count: 0 }).count, 0, 'cero no se inventa como un entreno');
 
+// Todas las combinaciones semanales conservan el catálogo y omiten los datos ocultos.
+const weekFields = S.stickerFields('week', wk);
+for (let mask = 0; mask < (1 << weekFields.length); mask++) {
+  const fields = weekFields.filter((_, i) => mask & (1 << i)).map((r) => r.id);
+  const data = { ...wk, fields };
+  const styles = S.stylesFor('week', data, measure);
+  assert.equal(styles.length, 13, 'los 13 estilos siguen disponibles al cambiar casillas');
+  for (const st of styles) {
+    const L = st.layout(data, measure);
+    inside(L, 'semana/' + st.id + '/selección ' + mask);
+    const texts = L.ops.filter((o) => o.op === 'text').map((o) => o.text);
+    for (const field of weekFields.filter((r) => !fields.includes(r.id) && r.id !== 'days')) {
+      assert.ok(!texts.includes(field.value), st.id + ' no filtra ' + field.id + ' desmarcado');
+    }
+    if (!fields.includes('days')) assert.ok(!L.ops.some((o) => o.op === 'text' && o.text === 'L'), 'no dibuja calendario oculto');
+  }
+}
+const workoutWithFields = { ...samples.fuerza, fields: ['title', 'durationSec'] };
+const restoredWorkoutIds = S.stylesFor('workout', workoutWithFields, measure).map((s) => s.id);
+for (const id of ['crew', 'carnet', 'insignia', 'recibo', 'ligero', 'italica', 'contorno', 'notif', 'burbuja', 'cinta', 'espaciado', 'eco', 'sello', 'logotipo']) {
+  assert.ok(restoredWorkoutIds.includes(id), 'vuelve el estilo de entreno ' + id);
+}
+const privateFacts = S.workoutFacts({ ...samples.fuerza, fields: ['durationSec'] });
+assert.equal(privateFacts.title, 'MI ENTRENO');
+assert.equal(privateFacts.number, 0);
+assert.equal(privateFacts.vol, 0);
+assert.deepEqual(privateFacts.exercises, []);
+assert.equal(privateFacts.hero.value, '52:14', 'no recupera volumen para la cifra principal');
 console.log('HABIT Stickers: ok');

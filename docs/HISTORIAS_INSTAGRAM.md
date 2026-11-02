@@ -239,7 +239,7 @@ y métricas secundarias. Mantiene PNG transparente, 12 colores y color libre.
 
 ### Entreno y semana
 
-La galería muestra tres diseños compatibles con la selección explícita:
+Los primeros tres diseños compatibles con la selección explícita son:
 
 - Editorial: cifra principal y secundarios en dos columnas, sin fondo.
 - Ficha: la misma jerarquía sobre una tarjeta redondeada del color elegido, con tinta de contraste.
@@ -261,8 +261,9 @@ internas de `lockupLayout`. Se calcula un ancho objetivo de 320 px en el lienzo 
 alineación izquierda y aire propio aunque cambie el contenido. El logo se mide por su tinta.
 La firma nunca se convierte en el dato protagonista.
 
-Los estilos anteriores siguen disponibles en la API para compatibilidad, pero el flujo
-personalizable solo ofrece diseños que respeten `data.fields`. Las frases conservan su
+Desde `20261101-7`, los estilos anteriores vuelven a la galería personalizable: todos
+respetan `data.fields`. Cada plantilla de entreno conserva su composición y muestra los
+campos que utiliza entre los seleccionados; los datos desmarcados nunca se recuperan. Las frases conservan su
 catálogo actual. No se modifican los datos del entrenamiento ni se guardan preferencias
 personales en el servidor.
 
@@ -272,3 +273,29 @@ Pruebas de cada campo aislado, selección vacía y selección completa, ausencia
 registrada, exclusión de datos desmarcados y trazos dentro del lienzo. Revisión local de la
 galería con ejemplos de carrera y semana, casillas en vivo, cambio de estilo y color lima.
 Pendiente: pegado y tamaño percibido en una historia real desde iPhone/Android.
+
+
+### 20261101-7 — Variedad recuperada y semana como protagonista
+
+La restricción a tres opciones era una regresión del selector de información, no una decisión
+sobre el catálogo. Se elimina el filtro y se adaptan los hechos del entreno antes de construir
+las plantillas anteriores. Se recuperan hasta 19 estilos de entreno (algunos necesitan tiempo
+o varias métricas); las casillas también permiten controlar ejercicios y mejores series.
+
+La semana ofrece 13 opciones con selección explícita:
+
+- Ritual: calendario de siete casillas con palomitas, cantidad protagonista y métricas debajo.
+- Bitácora: papel con bordes dentados, separadores punteados y código de barras decorativo.
+- Balance: tablero de cifras en dos columnas y días activos en puntos.
+- Editorial, Ficha y Compacto: las tres composiciones anteriores.
+- Semana: cifra centrada y calendario grande.
+- Crew: «MAKE IT / A HABIT.» y resumen centrado.
+- Carnet: tarjeta sólida con el resumen y calendario.
+- Insignia: cifra dentro de dos anillos y datos debajo.
+- Héroe: cifra en contorno.
+- Racha: semanas seguidas en itálica cuando se selecciona racha; si se oculta usa otra métrica seleccionada.
+- Datos: columnas de métricas.
+
+No se inventan intensidades ni cantidades por día: las siete marcas solo representan presencia.
+La firma horizontal mantiene un ancho objetivo de 320 px en todos los diseños semanales.
+Se verifican los 13 diseños con las 64 combinaciones de los seis campos semanales.

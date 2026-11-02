@@ -67,10 +67,13 @@ The app has four screens (`#s-auth`, `#s-main`, `#s-admin`, `#s-reception`), tog
   CREW. La galería se desliza de un estilo a otro (miniaturas para saltar,
   **directo y no suave**: con scroll-snap, un salto suave que se cruza con un sticker recién
   pintado regresa al primero) y un solo botón **Compartir** (`navigator.share` con el archivo;
-  sin hoja de compartir, descarga). Tres tipos en `KINDS`: `quote` (11 estilos), `workout` (16;
+  sin hoja de compartir, descarga). Tres tipos en `KINDS`: `quote` (11 estilos), `workout` (hasta 19;
   `workoutFacts()` pone en palabras un entreno de la app o una carrera/nado/rodada, y el estilo
-  que no tiene qué enseñar devuelve null y no sale) y `week` (7). Una app abre los de entreno con
-  `HabitShare.open({kind, data, title, subtitle})`. Los estilos nuevos son listas de trazos
+  que no tiene qué enseñar devuelve null y no sale) y `week` (13). Una app abre los de entreno con
+  `HabitShare.open({kind, data, title, subtitle})`. Las casillas (`data.fields`) no deben
+  reducir el catálogo a los tres estilos editoriales: `workoutFacts` filtra la información antes
+  de las plantillas, y `weeklyStudioLayout` adapta los semanales; Ritual, Bitácora y Balance son
+  los primeros. Cada diseño semanal usa una firma de ancho objetivo 320 px sobre 1080. Los estilos nuevos son listas de trazos
   (`ops`) que dibuja `drawOps`, y `scripts/check-share.js` revisa que ninguno se salga del
   lienzo. **El cuadro de un logo es su tinta** (`LOGO_INK`: el PNG trae margen y `drawLogo` lo
   agranda) y todos firman abajo con el mismo logotipo a `SIG`; ninguna letra secundaria baja de
