@@ -393,6 +393,28 @@
 
   // Todo lo que los estilos dicen de un entreno, ya en palabras: el dato héroe, las cifras, la
   // frase de la burbuja. Un estilo que no tiene qué mostrar (sin tiempo no hay «Ligero») no sale.
+  const TITLE_LIMIT = 60;
+  function customTitle(d) {
+    return [...String((d && d.customTitle) || '').replace(/\s+/g, ' ').trim()].slice(0, TITLE_LIMIT).join('');
+  }
+
+  // Un título largo gana renglones; nunca invade las cifras ni cambia la firma.
+  function titleBlock(ops, title, measure, x, y, width, px, color, align) {
+    const font = F(700, px), lines = wrapText(title, width, t => measure(t, font));
+    lines.forEach((line, i) => {
+      const op = textOp(measure, line, font, { x, y: y + i * px * 1.25, color: color || 'fg', align: align || 'left' });
+      // También cabe una sola palabra larga, sin perder letras.
+      if (op.w > width) {
+        const scale = width / op.w;
+        if (align === 'center') op.x = x - width / 2;
+        else if (align === 'right') op.x = x - width;
+        op.w = width; op.scaleX = scale;
+      }
+      ops.push(op);
+    });
+    return Math.max(0, lines.length - 1) * px * 1.25;
+  }
+
   function workoutFacts(d) {
     d = d || {};
     const type = ACTIVITY_TYPES[d.type] ? d.type : 'strength';
@@ -401,7 +423,7 @@
     const dist = T.dist && d.distanceM > 0 ? Math.round(d.distanceM) : 0;
     const sets = d.sets > 0 ? Math.round(d.sets) : 0;
     const vol = d.volumeKg > 0 ? Math.round(d.volumeKg) : 0;
-    const title = String(d.title || '').trim().slice(0, 60) || T.noun;
+    const title = customTitle(d) || String(d.title || '').trim().slice(0, 60) || T.noun;
     const exercises = (Array.isArray(d.exercises) ? d.exercises : []).filter((e) => e && e.name).slice(0, 4);
     const distT = distanceText(type, dist), unit = distanceUnit(type);
     const pace = paceText(type, dur, dist);
@@ -469,8 +491,8 @@
     }
 
     const facts = {
-      type, typeLabel: T.label, title, ds: d.ds || '', day: dayName(d.ds), date: shortDate(d.ds),
-      dur, dist, sets, vol, pace, hero, stats, trio: trio.slice(0, 3), summary, bubble, light,
+      type, typeLabel: T.label, title, customTitle: customTitle(d), ds: d.ds || '', day: dayName(d.ds), date: shortDate(d.ds),
+      dur, dist, sets, vol, pace, hero, stats, trio: trio.slice(0, 3), summary, bubble: customTitle(d) && dist ? title + '. ' + bubble : bubble, light,
       exercises, number: d.number > 0 ? Math.round(d.number) : 0
     };
     if (!Array.isArray(d.fields)) return facts;
@@ -481,6 +503,7 @@
     return {
       ...facts,
       title: has('title') ? title : 'MI ENTRENO',
+      customTitle: has('title') ? customTitle(d) : '',
       ds: has('ds') ? facts.ds : '', day: has('ds') ? facts.day : '', date: has('ds') ? facts.date : '',
       dur: has('durationSec') ? dur : 0, dist: has('distanceM') ? dist : 0,
       sets: has('sets') ? sets : 0, vol: has('volumeKg') ? vol : 0,
@@ -510,6 +533,7 @@
     const lab = fitText(measure, label || f.hero.label, (p) => F(700, p), maxW, 50, 30, 0.22);
     y += Math.round(px * 0.14) + (/,/.test(value) ? Math.round(px * 0.1) : 0) + lab.px * CAP;
     ops.push(textOp(measure, lab.text, F(700, lab.px), { x: WIDTH / 2, y, align: 'center', spacing: lab.spacing }));
+    if (f.customTitle) { y += 72; y += titleBlock(ops, f.customTitle, measure, WIDTH / 2, y, maxW, 40, 'fg', 'center'); }
     y += 76;
     const lk = signOps(measure, WIDTH / 2, y);
     ops.push(...lk.ops);
@@ -533,6 +557,7 @@
       y += 66 + d.px * CAP;
       ops.push(textOp(measure, d.text, F(600, d.px), { x: WIDTH / 2, y, align: 'center', spacing: d.spacing, alpha: 0.75 }));
     }
+    if (f.customTitle) { y += 72; y += titleBlock(ops, f.customTitle, measure, WIDTH / 2, y, maxW, 40, 'fg', 'center'); }
     y += 76;
     const lk = signOps(measure, WIDTH / 2, y);
     ops.push(...lk.ops);
@@ -610,6 +635,7 @@
       y += (/[,.]/.test(value) ? Math.round(px * 0.2) + 34 : 54) + lp * CAP;
       ops.push(textOp(measure, label, F(800, lp), { x: WIDTH / 2, y, align: 'center', spacing: Math.round(lp * 0.24) }));
     }
+    if (f.customTitle) { y += 72; y += titleBlock(ops, f.customTitle, measure, WIDTH / 2, y, maxW, 40, 'fg', 'center'); }
     y += 76;
     const lk = signOps(measure, WIDTH / 2, y);
     ops.push(...lk.ops);
@@ -1058,7 +1084,8 @@
       ops.push(textOp(measure, f.text, F(600, f.px), { x: atX, y: atY, color: color || 'fg', align: align || 'left' }));
     };
     const heading = id === 'thisweek' ? 'THIS WEEK' : id === 'mix' ? 'WEEKLY MIX' : id === 'pasaporte' ? 'MI SEMANA / PASAPORTE' : 'EN TODAS MIS FORMAS.';
-    ops.push(displayOp(measure, heading, x, y, width, id === 'thisweek' ? 72 : 44, 'fg'));
+    if (customTitle(d)) y += titleBlock(ops, customTitle(d), measure, x, y, width, id === 'thisweek' ? 72 : 44);
+    else ops.push(displayOp(measure, heading, x, y, width, id === 'thisweek' ? 72 : 44, 'fg'));
     y += 68;
     if (id === 'pasaporte') {
       const gap = 24, cellW = (width - gap) / 2, cellH = 320;
@@ -1174,7 +1201,9 @@
       ops.push(textOp(measure, t.text, F(opts.weight || 600, t.px), { x: atX, y: atY, align: opts.align || 'left', alpha: opts.alpha }));
     };
     const rule = atY => ops.push({ op: 'line', x1: x, x2: right, y1: atY, y2: atY, w: 2, alpha: .3 });
-    text(copy.week, id === 'notas' ? 68 : 42, x, y, { weight: 800 }); y += 78;
+    if (customTitle(d)) y += titleBlock(ops, customTitle(d), measure, x, y, width, id === 'notas' ? 68 : 42);
+    else text(copy.week, id === 'notas' ? 68 : 42, x, y, { weight: 800 });
+    y += 78;
     if (id === 'diario' || id === 'notas') {
       if (has('sessions')) {
         let lastDay = -1;
@@ -1542,13 +1571,13 @@
         {
           id: 'sello', label: 'Sello', layout: (d, m) => {
             const f = workoutFacts(d);
-            return sealLayout(`${f.hero.value} ${f.hero.unit} · ${f.date ? f.date + ' · ' : ''}HABIT CREW · `.replace(/ {2,}/g, ' '), m);
+            return sealLayout(`${f.customTitle ? f.customTitle + ' · ' : ''}${f.hero.value} ${f.hero.unit} · ${f.date ? f.date + ' · ' : ''}HABIT CREW · `.replace(/ {2,}/g, ' '), m);
           }
         },
         {
           id: 'logotipo', label: 'Logotipo', layout: (d, m) => {
             const f = workoutFacts(d);
-            return signatureLayout(m, f.number ? `ENTRENO Nº ${f.number}` : `${f.hero.value} ${f.hero.unit} · ${f.day || 'MAKE IT A HABIT'}`);
+            return signatureLayout(m, f.customTitle || (f.number ? `ENTRENO Nº ${f.number}` : `${f.hero.value} ${f.hero.unit} · ${f.day || 'MAKE IT A HABIT'}`));
           }
         }
       ]
@@ -1653,7 +1682,9 @@
       ops.push(textOp(measure, t.text, F(weight, t.px), { x, y, spacing: t.spacing, color: color || ink }));
       y += t.px * 0.28;
     };
-    put(kind === 'week' ? 'MI SEMANA' : 'MI ENTRENO', 32, 32, 600, ink, .18);
+    if (kind === 'week' && customTitle(d)) {
+      y += 32 * CAP; y += titleBlock(ops, customTitle(d), measure, x, y, maxW, 32, ink); y += 32 * .28;
+    } else put(kind === 'week' ? 'MI SEMANA' : 'MI ENTRENO', 32, 32, 600, ink, .18);
     y += 42;
     const title = rows.find((r) => r.id === 'title');
     if (title) { put(title.value.toUpperCase(), compact ? 68 : 90, 38, 800); y += 24; }
@@ -1742,7 +1773,8 @@
     const hasDays = rows.some((r) => r.id === 'days');
     const centered = ['semana', 'insignia', 'heroe', 'crew', 'racha'].includes(id);
     const heading = id === 'bitacora' ? 'MI SEMANA / REGISTRO' : id === 'ritual' ? 'EL HÁBITO SE CONSTRUYE.' : 'MI SEMANA';
-    (centered ? center : text)(heading, 32, y, { weight: 600, spacing: .14 });
+    if (customTitle(d)) y += titleBlock(ops, customTitle(d), measure, centered ? WIDTH / 2 : left, y, inner, 32, ink, centered ? 'center' : 'left');
+    else (centered ? center : text)(heading, 32, y, { weight: 600, spacing: .14 });
     y += 58;
     // Calendario protagonista: cada celda muestra presencia, nunca una intensidad inventada.
     const calendar = (large) => {
@@ -1829,7 +1861,7 @@
     if (style.customizable) continue;
     const original = style.layout;
     style.customizable = true;
-    style.layout = (d, m) => Array.isArray(d.fields) || normalizeDisciplines(d).length ? weeklyStudioLayout(style.id, d, m) : original(d, m);
+    style.layout = (d, m) => Array.isArray(d.fields) || normalizeDisciplines(d).length || customTitle(d) ? weeklyStudioLayout(style.id, d, m) : original(d, m);
   }
   KINDS.week.styles.unshift(...[
     ['ritual', 'Ritual'], ['bitacora', 'Bitácora'], ['balance', 'Balance']
@@ -2095,6 +2127,7 @@
 .hs-custom.has{background:radial-gradient(circle,var(--c) 0 44%,transparent 46%),conic-gradient(#ef4444,#ffd60a,#d4ff3a,#10b981,#7cc4ff,#2563eb,#8b5cf6,#ff8fb8,#ef4444)}
 .hs-custom input{position:absolute;inset:0;width:100%;height:100%;opacity:0;border:0;padding:0;margin:0;cursor:pointer}
 .hs-body{overflow-y:auto;overscroll-behavior:contain;padding-bottom:10px}
+.hs-title-editor{margin:10px 20px 0}.hs-title-editor[hidden]{display:none}.hs-title-editor label{display:block;font-size:13px;font-weight:600;margin-bottom:8px}.hs-title-editor input{box-sizing:border-box;width:100%;min-height:44px;border:1px solid #45474d;border-radius:12px;background:#222429;color:#f4f5f7;padding:11px 12px;font:400 16px ${INTER}}.hs-title-editor input:focus-visible{outline:2px solid #d4ff3a;outline-offset:2px}.hs-title-editor small{display:block;color:#9298a3;font-size:12px;line-height:1.5;margin-top:6px}
 .hs-sub{text-align:center;font-size:13px;color:#9aa0aa;margin:0 20px 12px;min-height:1px}
 .hs-stage{margin:0 16px;border-radius:20px;overflow:hidden;background:#1f2024}
 .hs-stage.light,.hs-thumb.light{background:#d9dbe0}
@@ -2155,6 +2188,7 @@
       + '<h2 class="hs-title" id="hs-title"></h2>'
       + '<button type="button" class="hs-close" aria-label="Cerrar">×</button></div>'
       + '<div class="hs-body"><p class="hs-sub"></p>'
+      + '<div class="hs-title-editor"><label for="hs-custom-title"></label><input id="hs-custom-title" type="text" maxlength="60" autocomplete="off" aria-describedby="hs-title-help"><small id="hs-title-help"></small></div>'
       + '<details class="hs-options"><summary>Qué quiero mostrar</summary><div class="hs-presets" hidden><button type="button" data-selection="sports">Solo disciplinas</button><button type="button" data-selection="all">Resumen completo</button></div><div class="hs-fields"></div><p>Solo aparecen datos disponibles. La vista previa muestra exactamente lo que compartirás.</p></details>'
       + '<div class="hs-stage"><div class="hs-track"></div></div>'
       // Los colores, debajo del sticker: con doce y uno libre ya no caben en la cabeza.
@@ -2188,6 +2222,9 @@
     // El color libre: el selector del teléfono avisa mientras se mueve; se pinta al detenerse.
     let colorTimer = 0;
     el.addEventListener('input', (e) => {
+      if (e.target.matches('#hs-custom-title') && state) {
+        setStickerTitle(e.target.value); return;
+      }
       if (!e.target.matches('.hs-custom input')) return;
       const v = e.target.value;
       clearTimeout(colorTimer);
@@ -2206,6 +2243,7 @@
     doc.addEventListener('keydown', (e) => {
       if (!el.classList.contains('open')) return;
       if (e.key === 'Escape') close();
+      else if (e.target.matches('input, textarea, [contenteditable]')) return;
       else if (e.key === 'ArrowRight') goTo(state.current + 1);
       else if (e.key === 'ArrowLeft') goTo(state.current - 1);
     });
@@ -2310,6 +2348,14 @@
     paint().catch(() => say('No se pudo actualizar la vista previa', 'err'));
   }
 
+  function setStickerTitle(value) {
+    if (!state) return;
+    const title = customTitle({ customTitle: value });
+    state.data = { ...state.data, customTitle: title };
+    const fields = state.data.fields || [];
+    setFields(state.kind === 'workout' && title && !fields.includes('title') ? [...fields, 'title'] : fields);
+  }
+
   function setColor(c) {
     if (!state || c === state.color) return;
     state.color = c; saveColor(c); paint();
@@ -2337,6 +2383,14 @@
       title: opts.title || '', subtitle: opts.subtitle || '', items: null, styles: null, current: 0,
       onClose: typeof opts.onClose === 'function' ? opts.onClose : null
     };
+    const titleEditor = sheet.querySelector('.hs-title-editor');
+    titleEditor.hidden = state.kind === 'quote';
+    const english = /^en\b/i.test(state.data.lang);
+    titleEditor.querySelector('label').textContent = english ? 'Sticker title' : 'Título del sticker';
+    titleEditor.querySelector('small').textContent = english ? 'Optional · Leave blank to use the original title. Only changes this sticker.' : 'Opcional · Déjalo vacío para usar el título original. Solo cambia este sticker.';
+    const titleInput = titleEditor.querySelector('input');
+    titleInput.value = customTitle(state.data);
+    titleInput.placeholder = state.kind === 'week' ? (english ? 'E.g. My week in motion' : 'Ej. Mi semana en movimiento') : workoutFacts({ ...state.data, customTitle: '', fields: undefined }).title;
     const options = sheet.querySelector('.hs-options');
     options.hidden = state.kind === 'quote';
     options.open = false;
@@ -2383,7 +2437,7 @@
   }
 
   const api = {
-    COLORS, PALETTE, WIDTH, LOGO_INK, KINDS, ACTIVITY_TYPES, SHARE_ICON, contrast, inkFor, resolveColor,
+    COLORS, PALETTE, WIDTH, LOGO_INK, TITLE_LIMIT, customTitle, KINDS, ACTIVITY_TYPES, SHARE_ICON, contrast, inkFor, resolveColor,
     wrapText, balancedWrap, spacedWidth, lockupLayout, quoteLayout, signatureLayout, sealLayout, shortDate,
     dayName, thousands, distanceText, clock, minutesText, paceText, workoutFacts, weekFacts, stylesFor, stickerFields, selectedFields, normalizeDisciplines, selectedDisciplines, compactWeekTime, normalizeWeekSessions, weeklyReferenceLayout, referenceCopy,
     ensureFonts, loadLogo, renderSticker, toBlob, shareImage, open, close, chipHtml

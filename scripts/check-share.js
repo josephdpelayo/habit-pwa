@@ -397,4 +397,34 @@ for (const id of ['barras', 'tabla']) {
   assert.ok(L.ops.some(o => o.text === '—'), 'no representa una distancia no medida como cero');
   assert.ok(!L.ops.some(o => o.text === '50M'), 'una tabla de kilómetros no mezcla minutos');
 }
+// El título pertenece al sticker: no renombra el entreno y vaciarlo restaura el diseño.
+assert.equal(S.customTitle({ customTitle: '  Mi   semana\n en movimiento  ' }), 'Mi semana en movimiento');
+assert.equal([...S.customTitle({ customTitle: 'á'.repeat(100) })].length, 60);
+for (const lang of ['es', 'en']) {
+  for (const title of ['Mi semana en movimiento', 'Una semana de fuerza y kilómetros con la mejor compañía', 'W'.repeat(60)]) {
+    const data = { ...detailed, lang, customTitle: title, fields: S.stickerFields('week', detailed).map(r => r.id) };
+    assert.equal(S.stylesFor('week', data, measure).length, 22);
+    for (const style of S.stylesFor('week', data, measure)) {
+      const L = style.layout(data, measure);
+      inside(L, 'título semanal/' + style.id);
+      const headings = L.ops.filter(o => o.op === 'text').slice(0, S.wrapText(title, L.width - 176, t => measure(t, '700 32px Inter')).length + 3).map(o => o.text).join(' ');
+      assert.ok(headings.includes(title), style.id + ' conserva el título completo');
+      assert.ok(saysCrew(L));
+      const cleared = style.layout({ ...data, customTitle: '   ' }, measure);
+      const original = style.layout({ ...data, customTitle: '' }, measure);
+      assert.deepEqual(cleared, original, style.id + ' restaura el título por defecto');
+    }
+  }
+}
+const namedWorkout = { ...samples.carrera, customTitle: 'Domingo de kilómetros', fields: ['title', 'durationSec', 'distanceM', 'pace'] };
+assert.equal(S.workoutFacts(namedWorkout).title, 'Domingo de kilómetros');
+assert.equal(namedWorkout.title, 'Correr', 'no modifica el nombre de la actividad');
+assert.equal(S.workoutFacts({ ...namedWorkout, customTitle: ' ' }).title, 'Correr');
+assert.equal(S.workoutFacts({ ...namedWorkout, fields: [] }).customTitle, '', 'respeta ocultar el título');
+for (const style of S.stylesFor('workout', namedWorkout, measure)) {
+  const L = style.layout(namedWorkout, measure);
+  if (L.ops) inside(L, 'título de entreno/' + style.id);
+  const text = L.ops ? L.ops.filter(o => o.op === 'text').map(o => o.text).join(' ') + ' ' + L.ops.filter(o => o.op === 'arc').map(o => o.chars.map(c => c.ch).join('')).join('') : L.chars ? L.chars.map(c => c.ch).join('') : L.sub.text;
+  assert.ok(text.toLowerCase().includes(namedWorkout.customTitle.toLowerCase()), style.id + ' muestra el título personalizado');
+}
 console.log('HABIT Stickers: ok');

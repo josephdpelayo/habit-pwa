@@ -370,3 +370,21 @@ global por haber localizado estos diseños.
 Verificación: todos los diseños dentro del lienzo, selección vacía/por disciplina, días y
 cifras en ambos idiomas, fuerza medida en minutos, km separados, listas largas y falta de
 GPS. Revisión visual en navegador con un ejemplo mixto de once sesiones.
+
+### 20261102-1 — Título personalizado del sticker
+
+- Entrenos y resúmenes semanales muestran un campo «Título del sticker» encima de las
+  opciones. Es opcional, hasta 60 caracteres; vacío o solo espacios recupera el título
+  predeterminado de cada diseño. El título de la hoja sigue siendo «Tu entreno» / «Tu semana».
+- `data.customTitle` solo afecta la imagen; no escribe ni renombra la actividad original.
+  Se conserva al cambiar diseño, color o selección de métricas dentro de la galería.
+  Escribir un título de entreno activa la casilla del nombre para que se vea; desmarcarla
+  vuelve a ocultarlo. Al abrir otro sticker se parte de sus propios datos.
+- Los 22 diseños semanales aceptan el título; si es largo, gana renglones sin cambiar
+  la proporción de la firma. Los diseños numéricos de entreno también lo incorporan.
+  Las frases conservan su contenido y no muestran este editor.
+- Campo, ayuda y ejemplo preparados en español e inglés. El selector global de idioma
+  sigue pendiente. Las flechas del teclado editan el texto sin cambiar de diseño.
+- Verificación: catálogo, títulos largos, vuelta al predeterminado, selección y datos
+  originales en `check-share.js`; editor y PNG de vista previa revisados en navegador
+  con datos de ejemplo. La prueba dentro de Instagram en iPhone sigue pendiente.
