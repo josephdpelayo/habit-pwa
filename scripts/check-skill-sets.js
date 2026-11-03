@@ -131,10 +131,45 @@ assert.equal(sueltas['front-lever'][2].sessions.length, 2, 'dos series sueltas s
 // tienen rung_id y no deben tumbar el cálculo.
 assert.deepEqual(S.marksFromRows([{ ...set(TUCK, 1, 20), rung_id: null }], resolve), {});
 
-// ── 5. La migración ────────────────────────────────────────────────────────
+// ── 5. El objetivo como fracción del máximo ────────────────────────────────
+// «El aguante al 80 %»: el número se saca del máximo de ESA variante, no de uno global.
+// Su mejor straddle son 10 s (la sesión de arriba), su mejor tuck 20 s.
+const mejor = (rung, ms) => S.bestMark(rung, (ms['front-lever'][rung.progression_rank] || { sessions: [] })
+  .sessions.flatMap(x => x.sets));
+assert.equal(mejor(STRADDLE, marks), 10);
+assert.equal(mejor(TUCK, marks), 20);
+assert.equal(S.relativeTarget(STRADDLE, mejor(STRADDLE, marks), 80).text, '8s');
+assert.equal(S.relativeTarget(TUCK, mejor(TUCK, marks), 80).text, '16s',
+  'el mismo 80 % pide distinto en cada escalón: ahí está la gracia');
+assert.equal(S.relativeTarget(STRADDLE, 10, 80).from, 'mark');
+
+// Sin marca en ese escalón no hay máximo: cae al estándar del escalón y lo dice.
+const sinMarca = S.relativeTarget(STRADDLE, 0, 80);
+assert.equal(sinMarca.from, 'standard');
+assert.equal(sinMarca.text, '10s', '80 % del estándar de 12 s');
+// Y si el escalón tampoco tiene estándar (el último de la línea), no hay nada que prometer.
+assert.equal(S.relativeTarget(bySlug('front-lever-a-un-brazo'), 0, 80), null);
+
+// Un porcentaje fuera de rango no es un objetivo.
+for (const malo of [0, 5, 101, 'ochenta', null, undefined, -80]) {
+  assert.equal(S.relativeTarget(STRADDLE, 10, malo), null, `${malo} no es un porcentaje`);
+}
+assert.equal(S.relativeTarget(STRADDLE, 10, 100).text, '10s', 'el 100 % es tu máximo, y se vale');
+// Nunca baja de 1: un 10 % de 4 s es medio segundo, y medio segundo no es una serie.
+assert.equal(S.relativeTarget({ ...TUCK, progression_target: 4 }, 0, 10).value, 1);
+
+// Lo que lleva escrito el ejercicio.
+assert.equal(S.targetPctOf({ targetPct: 80 }), 80);
+assert.equal(S.targetPctOf({ targetPct: '80%' }), 80, 'se acepta escrito con el signo');
+assert.equal(S.targetPctOf({ target_pct: 75 }), 75);
+assert.equal(S.targetPctOf({}), 0, 'sin porcentaje, el objetivo es el del escalón');
+assert.equal(S.targetPctOf({ targetPct: 5 }), 0);
+assert.equal(S.targetPctOf(null), 0);
+
+// ── 6. La migración ────────────────────────────────────────────────────────
 const sql = fs.readFileSync('migrations/146_set_progression.sql', 'utf8');
 assert.match(sql, /add column if not exists rung_id uuid references public\.exercise_catalog\(id\) on delete set null/,
   'la serie guarda su escalón, y borrar un ejercicio no borra la historia');
 assert.match(sql, /create index if not exists idx_coaching_session_sets_rung/);
 
-console.log('HABIT progresión por serie: 4 escalones de front lever en una sesión, marcas separadas OK');
+console.log('HABIT progresión por serie: 4 escalones en una sesión, marcas separadas y objetivo al % OK');

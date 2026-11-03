@@ -6,12 +6,12 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="HABIT">
 <meta name="application-name" content="HABIT">
-<link rel="manifest" href="/manifest.json?v=20261102-7">
-<link rel="apple-touch-icon" sizes="120x120" href="/icons/icon-120.png?v=20261102-7">
-<link rel="apple-touch-icon" sizes="152x152" href="/icons/icon-152.png?v=20261102-7">
-<link rel="apple-touch-icon" sizes="167x167" href="/icons/icon-167.png?v=20261102-7">
-<link rel="apple-touch-icon" sizes="180x180" href="/icons/icon-180.png?v=20261102-7">
-<link rel="icon" type="image/png" sizes="32x32" href="/icons/icon-32.png?v=20261102-7">
+<link rel="manifest" href="/manifest.json?v=20261102-8">
+<link rel="apple-touch-icon" sizes="120x120" href="/icons/icon-120.png?v=20261102-8">
+<link rel="apple-touch-icon" sizes="152x152" href="/icons/icon-152.png?v=20261102-8">
+<link rel="apple-touch-icon" sizes="167x167" href="/icons/icon-167.png?v=20261102-8">
+<link rel="apple-touch-icon" sizes="180x180" href="/icons/icon-180.png?v=20261102-8">
+<link rel="icon" type="image/png" sizes="32x32" href="/icons/icon-32.png?v=20261102-8">
 <title>HABIT</title>
 <!-- Con id a propósito: scripts/check-training.js toma la primera etiqueta script sin
      atributos como el script principal de la app y la compila. -->
@@ -25,7 +25,7 @@
   var crew=/^\/crew(\/|$)/.test(location.pathname);
   window.HABIT_BRAND=crew?'crew':'gym';
   if(!crew)return;
-  var v='20261102-7';
+  var v='20261102-8';
   document.documentElement.classList.add('brand-crew');
   document.title='HABIT Crew';
   document.querySelectorAll('meta[name="apple-mobile-web-app-title"],meta[name="application-name"]')
@@ -40,12 +40,12 @@
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Share+Tech+Mono&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="/skandi-recovery.js?v=20261102-7"></script>
-<script src="/body-figure.js?v=20261102-7"></script>
-<script src="/habit-training.js?v=20261102-7"></script>
-<script src="/habit-share.js?v=20261102-7"></script>
-<script src="/habit-activity.js?v=20261102-7"></script>
-<script src="/habit-skills.js?v=20261102-7"></script>
+<script src="/skandi-recovery.js?v=20261102-8"></script>
+<script src="/body-figure.js?v=20261102-8"></script>
+<script src="/habit-training.js?v=20261102-8"></script>
+<script src="/habit-share.js?v=20261102-8"></script>
+<script src="/habit-activity.js?v=20261102-8"></script>
+<script src="/habit-skills.js?v=20261102-8"></script>
 <style>
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
 @media (prefers-reduced-motion:reduce){*,*:before,*:after{scroll-behavior:auto!important;animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}}
@@ -4277,7 +4277,7 @@ const GYM_ONLY_VIEWS=['book','planes','historial','shop'];
 const GYM_APP_URL='/';
 document.querySelectorAll('.brand-name').forEach(el=>{el.textContent=BRAND_NAME;});
 const SUPABASE_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBtcGp0ZXVxanVzYmlkdWV2YndxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc2OTI1NjUsImV4cCI6MjA5MzI2ODU2NX0.XbMzZoo2yqtrD8znLnyo_1zDfrdJAvAPj1lqGOyXnLw';
-const APP_VERSION='20261102-7';
+const APP_VERSION='20261102-8';
 // La pierna va separada en cuádriceps, femorales y pantorrillas: la figura
 // corporal pinta esas tres regiones por separado y el motor de recuperación les
 // da ventanas de descanso distintas. 'Piernas' sigue reconociéndose al leer
@@ -9827,6 +9827,26 @@ function wsRemoveLastSet(exKey){
 // Las dos celdas de una serie de línea: en qué escalón fue y qué marcó. La unidad la manda
 // el escalón, no el ejercicio: una línea puede mezclar aguantes y repeticiones (en handstand
 // los jalones de talón van entre dos aguantes).
+// El máximo de un escalón. **Sin la sesión en curso**, por la misma razón que «La vez
+// pasada» la excluye: si no, la primera serie de hoy se vuelve el máximo y el objetivo al 80 %
+// sube solo a media sesión, persiguiéndose a sí mismo.
+function wsBestForRung(group,rung){
+  const m=(skillMarks&&skillMarks[group]&&skillMarks[group][rung.progression_rank])||null;
+  if(!m)return 0;
+  const sid=activeCoachingSession&&activeCoachingSession.id;
+  return HabitSkills.bestMark(rung,m.sessions.filter(x=>x.id!==sid).flatMap(x=>x.sets));
+}
+
+// El objetivo de una serie de línea: el porcentaje del ejercicio sobre el máximo de ese
+// escalón, o el estándar del escalón si no lleva porcentaje.
+function wsLineTarget(ex,rung){
+  if(!rung)return null;
+  const pct=HabitSkills.targetPctOf(ex);
+  if(!pct)return{text:HabitSkills.rungTargetText(rung),pct:0};
+  return HabitSkills.relativeTarget(rung,wsBestForRung(HabitSkills.skillGroupOf(ex),rung),pct)
+    ||{text:HabitSkills.rungTargetText(rung),pct:0};
+}
+
 // El nombre corto de un escalón: sin el nombre de la línea, que ya lo dice la cabeza del
 // ejercicio. En una celda de 100 px «Front lever a una pierna» se corta justo en lo que
 // distingue un escalón de otro, que es todo lo que hay que leer aquí.
@@ -9845,7 +9865,8 @@ function rungShortName(rung,group){
 function wsRungCellsHtml(ex,sets,s,exKey){
   const rung=wsSetRung(ex,sets,s);
   const name=rung?rungShortName(rung,HabitSkills.skillGroupOf(ex)):'Elegir';
-  const std=rung?HabitSkills.rungTargetText(rung):'';
+  const t=wsLineTarget(ex,rung);
+  const std=t?t.text:'';
   const timed=rung?HabitSkills.markUnit(rung)==='time':false;
   return '<button type="button" class="set-rung-btn" onclick="wsOpenRungPicker(&quot;'+s.id+'&quot;,&quot;'+esc(exKey)+'&quot;)" title="'+esc(name)+'">'+esc(name)+'</button>'
     +(timed
@@ -13913,7 +13934,7 @@ async function seedSessionSetsSb(scheduleRow){
     // escalón, y el objetivo es el de ese escalón.
     const lineRung=wsSetRung(ex,[],null);
     for(let s=0;s<n;s++)rows.push({schedule_id:scheduleRow.id,user_id:sbUser.id,ex_key:exKey,set_idx:s,
-      reps_target:lineRung?(HabitSkills.rungTargetText(lineRung)||null):repsTargetForSet(ex,s),
+      reps_target:lineRung?((wsLineTarget(ex,lineRung)||{}).text||null):repsTargetForSet(ex,s),
       weight:!lineRung&&metricType==='reps'&&prev.weight!=null?prev.weight:null,
       actual_reps:!lineRung&&metricType==='reps'?(prev.reps||null):null,
       actual_seconds:null,metric_type:lineRung?HabitSkills.markUnit(lineRung):metricType,
@@ -14894,6 +14915,7 @@ async function wsLoadLastScores(){
 }
 
 // ── Render ────────────────────────────────────────────────────────────────
+let _wsMarksPending=false;
 function renderWorkoutSheet(){
   if(!wsOpen||!activeCoachingSession)return;
   const content=document.getElementById('ws-content');
@@ -14909,6 +14931,13 @@ function renderWorkoutSheet(){
   // Si la hoja se abrió antes de que llegaran las series, la que sigue se resuelve aquí.
   if(!wsFocusSet)wsFocusFirstPending();
   const exercises=sessionExerciseList();
+  // El objetivo al % se calcula contra el máximo de cada escalón, y eso vive en skillMarks.
+  // Si la hoja trae un ejercicio de línea y todavía no están, se piden y se repinta una vez.
+  if(!skillMarks&&!_wsMarksPending&&exercises.some(HabitSkills.isSkillExercise)){
+    _wsMarksPending=true;
+    loadSkillMarksSb(false).then(()=>{_wsMarksPending=false;renderWorkoutSheet();})
+      .catch(()=>{_wsMarksPending=false;});
+  }
   const allSets=Object.values(coachSessionSets).flat();
   const done=allSets.filter(s=>s.done).length;
   const progressPct=allSets.length?Math.round(done/allSets.length*100):0;
@@ -15083,6 +15112,7 @@ function wsExerciseHtml(ex,i){
     +'<div class="ws-ex-name">'+(groupLabel?'<span class="ex-superset-mini">'+esc(groupLabel)+'</span>':'')
     +esc(exDisplayName(ex.name)||'Ejercicio')+'<span class="ws-ex-chev"> ›</span></div>'
     +'<div class="ws-ex-meta">'+esc(exerciseDetailParts(ex).join(' · ')||'Sin detalle')+'</div>'
+    +(HabitSkills.targetPctOf(ex)?'<div class="ws-ex-meta" style="color:var(--purple)">Objetivo: '+HabitSkills.targetPctOf(ex)+' % de tu máximo en cada escalón</div>':'')
     +(ex._swappedFrom?'<div class="ws-ex-meta" style="color:var(--amber)">Sustituto de esta sesión</div>':'')
     +(ex._replaced?'<div class="ws-ex-meta" style="color:var(--gray)">Cambiado a media sesión</div>':'')
     +(last&&last.weight!=null?'<div class="ws-ex-last">Última vez: '+esc(fmtWeightValue(kgToUnit(last.weight,exerciseWeightUnit(exKey)),exerciseWeightUnit(exKey),false))
@@ -15101,6 +15131,7 @@ function wsExerciseHtml(ex,i){
       +'<button class="ws-ex-tool" onclick="wsToggleSwap(&quot;'+esc(exKey)+'&quot;)">Cambiar</button>'
       +'<button class="ws-ex-tool" onclick="wsRemoveLastSet(&quot;'+esc(exKey)+'&quot;)">Quitar una serie</button>'
       +'<button class="ws-ex-tool" onclick="wsToggleRir()">'+(wsShowRir()?'Ocultar RIR':'Registrar RIR')+'</button>'
+      +(HabitSkills.isSkillExercise(ex)?'<button class="ws-ex-tool" onclick="wsSetTargetPct(&quot;'+esc(exKey)+'&quot;)">Objetivo: % de tu máximo</button>':'')
       +'<button class="ws-ex-tool danger" onclick="wsRemoveExercise(&quot;'+esc(exKey)+'&quot;)">Quitar ejercicio</button>'
       +'</div></details>'
       +wsSwapPanelHtml(exKey);
@@ -23888,9 +23919,11 @@ async function updateSetRungSb(setId,exKey,rungId){
   for(const row of targets){
     try{
       const patch={rung_id:rungId,updated_at:new Date().toISOString()};
-      // El objetivo de la serie es el del escalón: cada uno tiene el suyo y pueden cambiar de
-      // unidad dentro de la misma línea.
-      const t=HabitSkills.rungTargetText(rung);
+      // El objetivo de la serie es el del escalón —cada uno tiene el suyo y pueden cambiar de
+      // unidad dentro de la misma línea— o el porcentaje del ejercicio sobre el máximo de ESE
+      // escalón, que es lo que hace que subir de variante baje el número.
+      const exNow=sessionExerciseList().find((e,n)=>exerciseKeyForSession(activeCoachingSession.board_id,e,n)===exKey);
+      const t=(exNow?(wsLineTarget(exNow,rung)||{}).text:null)||HabitSkills.rungTargetText(rung);
       if(t)patch.reps_target=t;
       const data=await trainingUpdate('coaching_session_sets',row.id,patch,row);
       const i=arr.findIndex(x=>x.id===row.id);
@@ -23903,6 +23936,51 @@ async function updateSetRungSb(setId,exKey,rungId){
     }
   }
   refreshSessionUiFor(exKey);
+}
+
+// «El aguante al 80 %». El número no se escribe: se saca del máximo de la variante en la que
+// vaya cada serie, así que el mismo ejercicio pide menos al subir de escalón y vuelve a pedir
+// más cuando lo dominas. Sin marca todavía en ese escalón, cae al estándar del escalón.
+async function wsSetTargetPct(exKey){
+  const list=sessionExerciseList();
+  const i=list.findIndex((e,n)=>exerciseKeyForSession(activeCoachingSession.board_id,e,n)===exKey);
+  const ex=list[i];
+  if(!ex||!HabitSkills.isSkillExercise(ex))return;
+  const cur=HabitSkills.targetPctOf(ex);
+  const choices=[70,75,80,85,90,100].map(p=>({key:String(p),label:(p===cur?'✓ ':'')+p+' % de tu máximo'}))
+    .concat([{key:'0',label:(cur?'':'✓ ')+'El estándar del escalón'}]);
+  const k=await choiceSheet('El objetivo se calcula contra tu mejor marca en la progresión de cada serie.',
+    choices,{title:'¿Qué objetivo?'});
+  if(k==null)return;
+  const pct=Number(k)||0;
+  if(pct===cur)return;
+  showLoading('Guardando...');
+  try{
+    await loadSkillMarksSb(false).catch(()=>{});
+    // El porcentaje vive en el ejercicio de la sesión, como cualquier cambio en vivo.
+    const overlay=(Array.isArray(activeCoachingSession.session_exercises)?activeCoachingSession.session_exercises:[]).slice();
+    const j=overlay.findIndex(e=>(e.ex_key||e.id)===(ex.ex_key||ex.id));
+    const upd={...ex};
+    if(pct)upd.targetPct=pct;else delete upd.targetPct;
+    if(j>-1)overlay[j]={...overlay[j],...(pct?{targetPct:pct}:{targetPct:undefined})};
+    else overlay.push({...upd,ex_key:exKey});
+    await persistSessionExercisesSb(overlay);
+    // Y el objetivo escrito de las series que faltan se recalcula con el nuevo criterio.
+    const arr=coachSessionSets[exKey]||[];
+    for(const row of arr.filter(r=>!r.done)){
+      const rung=wsSetRung(upd,arr,row);
+      const t=wsLineTarget(upd,rung);
+      if(!t||!t.text)continue;
+      try{
+        const data=await trainingUpdate('coaching_session_sets',row.id,{reps_target:t.text,updated_at:new Date().toISOString()},row);
+        const n=arr.findIndex(x=>x.id===row.id);
+        if(n>-1)arr[n]=data;
+      }catch(e){/* el objetivo es una sugerencia: que falle una fila no tumba el cambio */}
+    }
+    hideLoading();
+    renderWorkoutSheet();
+    toast(pct?('Objetivo: '+pct+' % de tu máximo'):'Objetivo: el estándar del escalón','ok');
+  }catch(e){hideLoading();toast('Error: '+e.message,'err');}
 }
 
 async function wsOpenRungPicker(setId,exKey){
@@ -24236,7 +24314,7 @@ async function skillTrainLine(){
     const rung=wsSetRung(entry,[],null);
     const n=exerciseSetCount(entry);
     const base={schedule_id:activeCoachingSession.id,user_id:sbUser.id,ex_key:newKey,
-      reps_target:rung?(HabitSkills.rungTargetText(rung)||null):null,done:false};
+      reps_target:rung?((wsLineTarget(entry,rung)||{}).text||null):null,done:false};
     const rows=Array.from({length:n},(_,i)=>({...base,set_idx:i,rung_id:rung?rung.id:null}));
     let{data,error}=await sb.from('coaching_session_sets').insert(rows).select();
     // Sin la 146 el ejercicio igual sirve: se registra la marca, pero sin decir en qué escalón.

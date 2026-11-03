@@ -967,7 +967,7 @@ de `apply_coaching_program` una vez.
 migración ya no escriba nada del programa, y **la alineación de cada figura** leyendo sus puntos
 de referencia, igual que `check-skills.js` con los 35 escalones.
 
-## En una skill la progresión es la carga (20261102-7)
+## En una skill la progresión es la carga (20261102-8)
 
 Migración 146 y `docs/PROGRAMA_HANDSTAND.md` §10. **Solo en Crew.** Un ejercicio de calistenia
 no se carga con kilos: se carga con progresión, y no con una por entreno. Joseph entrena el
@@ -1004,6 +1004,17 @@ día**. Por eso la variante va **por serie**, exactamente donde vive `weight`.
 - **Todo tolera que la 146 no esté corrida**: la siembra, `addSetSb` y `skillTrainLine`
   reintentan sin `rung_id` ante un PGRST204, y `wsLoadLastRungs` se queda callado. El ejercicio
   funciona sin la columna; lo único que se pierde es en qué escalón fue la serie.
+- **El objetivo puede ser una fracción de tu máximo** (`exercises[].targetPct`, menú ••• →
+  «Objetivo: % de tu máximo»). Joseph hace el aguante «al 80 %» y no había dónde escribirlo:
+  `reps_target` es un número absoluto. Ahora el porcentaje vive en el ejercicio y el número se
+  calcula **contra el máximo de ESA variante** (`HabitSkills.relativeTarget`), así que un 80 %
+  de tuck y un 80 % de straddle no son el mismo tiempo — el mismo ejercicio pide menos al subir
+  de escalón y vuelve a pedir más cuando lo dominas. Sin marca todavía en ese escalón cae al
+  estándar del escalón (`from: 'standard'`): inventar un porcentaje de un máximo que no existe
+  sería peor. El máximo se lee **sin la sesión en curso** (`wsBestForRung`), por la misma razón
+  que «La vez pasada» la excluye: si no, la primera serie de hoy se vuelve el máximo y el
+  objetivo se persigue a sí mismo a media sesión. Cambiar de escalón o de porcentaje recalcula
+  el `reps_target` de las series que faltan.
 - **Cómo se agrega hoy**: «Entrenar la línea» en la hoja de la escalera, junto a «Entrenar este
   escalón». El builder de rutinas todavía no sabe crear un ejercicio de línea.
 

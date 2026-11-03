@@ -241,6 +241,37 @@
     return marks;
   }
 
+  // ---- El objetivo como fracción del máximo ------------------------------------------------
+
+  // «El aguante al 80 %» es como Joseph programa el suyo, y hasta ahora no había dónde
+  // escribirlo: reps_target es un número absoluto. El porcentaje vive en el ejercicio
+  // (`targetPct`) y el número se calcula contra el máximo de ESA variante — un 80 % de tuck y
+  // un 80 % de straddle no son el mismo tiempo, y es justo por eso que sirve: el mismo
+  // ejercicio pide menos cuando subes de escalón y vuelve a pedir más cuando lo dominas.
+  //
+  // Sin marca todavía en ese escalón no hay máximo del que sacar un porcentaje, así que cae al
+  // estándar del escalón y lo dice (`from`): inventar un número sobre un máximo que no existe
+  // sería peor que enseñar el estándar.
+  const TARGET_PCT_MIN = 10, TARGET_PCT_MAX = 100;
+
+  function relativeTarget(rung, best, pct) {
+    const p = Math.round(Number(pct));
+    if (!rung || !(p >= TARGET_PCT_MIN) || p > TARGET_PCT_MAX) return null;
+    const mark = Number(best) > 0 ? Number(best) : 0;
+    const base = mark || Number(rung.progression_target) || 0;
+    if (!base) return null;
+    const unit = markUnit(rung);
+    const value = Math.max(1, Math.round(base * p / 100));
+    return { pct: p, value, unit, base, from: mark ? 'mark' : 'standard',
+             text: unit === 'time' ? value + 's' : String(value) };
+  }
+
+  // El porcentaje que lleva escrito un ejercicio, o 0. Se acepta "80" y "80%".
+  function targetPctOf(ex) {
+    const p = Math.round(Number(String((ex && (ex.targetPct || ex.target_pct)) || '').replace('%', '')));
+    return p >= TARGET_PCT_MIN && p <= TARGET_PCT_MAX ? p : 0;
+  }
+
   // ---- Cues --------------------------------------------------------------------------------
 
   // Las "Indicaciones" de un ejercicio son un solo campo de texto (boards.exercises[].note),
@@ -284,6 +315,7 @@
     skillLevel, rungProgress, readiness,
     rungOwner, rungWorkout, catalogSlugFromExKey, meetsStandard,
     skillGroupOf, isSkillExercise, rungById, defaultRung, rungTargetText, marksFromRows,
+    TARGET_PCT_MIN, TARGET_PCT_MAX, relativeTarget, targetPctOf,
     cueList, animationKind
   };
 

@@ -367,8 +367,11 @@ en la hoja de la escalera.
 2. **«La vez pasada» todavía compara contra el ejercicio**, no contra la variante: en un
    ejercicio de línea pondría el tiempo de un tuck junto a un straddle. `lastScoresFor` tendría
    que ir por (ejercicio, escalón).
-3. **El 80 %.** Joseph hace el aguante «al 80 %» de su máximo en esa variante. Es una dosis
-   relativa y hoy no hay cómo escribirla: `reps_target` es un texto con un número absoluto.
+3. ~~**El 80 %.**~~ **Hecho (20261102-8).** `exercises[].targetPct` + `relativeTarget()`: el
+   objetivo se calcula contra el máximo de la variante de cada serie, sin contar la sesión en
+   curso, y cae al estándar del escalón mientras no haya marca. Se elige en el menú ••• del
+   ejercicio. Falta poder escribir un porcentaje libre (hoy son 70/75/80/85/90/100) y que una
+   rutina lo traiga puesto, que depende del pendiente 1.
 4. **Las otras dos líneas de su front lever.** Hoy existen `front-lever` (aguantes) y
    `front-lever-raise` (elevaciones). Sus presses/negativas y sus touch/dominadas en L no son
    líneas: o se agregan, o se registran como ejercicios sueltos del catálogo.
