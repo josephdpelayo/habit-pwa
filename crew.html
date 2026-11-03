@@ -6,12 +6,12 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="HABIT">
 <meta name="application-name" content="HABIT">
-<link rel="manifest" href="/manifest.json?v=20261102-6">
-<link rel="apple-touch-icon" sizes="120x120" href="/icons/icon-120.png?v=20261102-6">
-<link rel="apple-touch-icon" sizes="152x152" href="/icons/icon-152.png?v=20261102-6">
-<link rel="apple-touch-icon" sizes="167x167" href="/icons/icon-167.png?v=20261102-6">
-<link rel="apple-touch-icon" sizes="180x180" href="/icons/icon-180.png?v=20261102-6">
-<link rel="icon" type="image/png" sizes="32x32" href="/icons/icon-32.png?v=20261102-6">
+<link rel="manifest" href="/manifest.json?v=20261102-7">
+<link rel="apple-touch-icon" sizes="120x120" href="/icons/icon-120.png?v=20261102-7">
+<link rel="apple-touch-icon" sizes="152x152" href="/icons/icon-152.png?v=20261102-7">
+<link rel="apple-touch-icon" sizes="167x167" href="/icons/icon-167.png?v=20261102-7">
+<link rel="apple-touch-icon" sizes="180x180" href="/icons/icon-180.png?v=20261102-7">
+<link rel="icon" type="image/png" sizes="32x32" href="/icons/icon-32.png?v=20261102-7">
 <title>HABIT</title>
 <!-- Con id a propósito: scripts/check-training.js toma la primera etiqueta script sin
      atributos como el script principal de la app y la compila. -->
@@ -25,7 +25,7 @@
   var crew=/^\/crew(\/|$)/.test(location.pathname);
   window.HABIT_BRAND=crew?'crew':'gym';
   if(!crew)return;
-  var v='20261102-6';
+  var v='20261102-7';
   document.documentElement.classList.add('brand-crew');
   document.title='HABIT Crew';
   document.querySelectorAll('meta[name="apple-mobile-web-app-title"],meta[name="application-name"]')
@@ -40,12 +40,12 @@
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Share+Tech+Mono&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="/skandi-recovery.js?v=20261102-6"></script>
-<script src="/body-figure.js?v=20261102-6"></script>
-<script src="/habit-training.js?v=20261102-6"></script>
-<script src="/habit-share.js?v=20261102-6"></script>
-<script src="/habit-activity.js?v=20261102-6"></script>
-<script src="/habit-skills.js?v=20261102-6"></script>
+<script src="/skandi-recovery.js?v=20261102-7"></script>
+<script src="/body-figure.js?v=20261102-7"></script>
+<script src="/habit-training.js?v=20261102-7"></script>
+<script src="/habit-share.js?v=20261102-7"></script>
+<script src="/habit-activity.js?v=20261102-7"></script>
+<script src="/habit-skills.js?v=20261102-7"></script>
 <style>
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
 @media (prefers-reduced-motion:reduce){*,*:before,*:after{scroll-behavior:auto!important;animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}}
@@ -3029,18 +3029,11 @@ button{transition:transform .14s var(--ease-out),background-color .16s ease,colo
 .sk-ladder.picking .sk-rung{opacity:1;box-shadow:inset 0 0 0 1.5px rgba(139,92,246,.32)}
 .sk-ladder.picking .sk-rung.current{box-shadow:inset 0 0 0 1.5px rgba(139,92,246,.7)}
 .sk-leave{background:none;border:0;color:var(--red);font-size:12px;font-weight:700;padding:12px 0 0;cursor:pointer;text-align:left}
-/* El programa de parada de manos (145) vive en la misma hoja que su escalera. */
 .sk-back{background:none;border:0;color:var(--purple);font-size:12.5px;font-weight:800;padding:2px 0;cursor:pointer}
-.hs-title{font-size:17px;font-weight:800;letter-spacing:-.01em;margin:4px 0 8px;text-align:left}
-.hs-card{border:0}
-.hs-week{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:4px;margin:0 0 6px}
-.hs-day{background:var(--card);border-radius:9px;padding:7px 3px;text-align:center;display:flex;flex-direction:column;gap:3px;min-width:0}
-.hs-day b{font-size:10px;font-weight:800;letter-spacing:.06em;color:var(--gray);text-transform:uppercase}
-.hs-day span{font-size:15px;font-weight:800;color:var(--white);display:flex;flex-direction:column;gap:2px}
-.hs-day em{font-style:normal;font-size:8px;font-weight:700;color:var(--gray);line-height:1.15;letter-spacing:-.01em}
-.hs-day.rest{opacity:.55}
-.hs-stop{color:#f0d9a8}
-.hoy-program{font-size:11.5px;font-weight:700;color:var(--purple);margin:2px 0 8px}
+/* En una skill la progresión es la carga (146): este botón va donde van los kilos. */
+.set-rung-btn{background:var(--card2);border:0;border-radius:8px;color:var(--white);font-size:11.5px;font-weight:700;padding:7px 6px;cursor:pointer;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;text-align:center;line-height:1.2}
+.set-row.done .set-rung-btn{opacity:.7}
+.set-rung-btn:disabled{opacity:.5;cursor:default}
 
 /* Los cues del coach en la hoja de entreno: estaban solo en la lista de la rutina y
    desaparecían justo al entrenar, que es cuando se leen. Numerados a propósito, para
@@ -4284,7 +4277,7 @@ const GYM_ONLY_VIEWS=['book','planes','historial','shop'];
 const GYM_APP_URL='/';
 document.querySelectorAll('.brand-name').forEach(el=>{el.textContent=BRAND_NAME;});
 const SUPABASE_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBtcGp0ZXVxanVzYmlkdWV2YndxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc2OTI1NjUsImV4cCI6MjA5MzI2ODU2NX0.XbMzZoo2yqtrD8znLnyo_1zDfrdJAvAPj1lqGOyXnLw';
-const APP_VERSION='20261102-6';
+const APP_VERSION='20261102-7';
 // La pierna va separada en cuádriceps, femorales y pantorrillas: la figura
 // corporal pinta esas tres regiones por separado y el motor de recuperación les
 // da ventanas de descanso distintas. 'Piernas' sigue reconociéndose al leer
@@ -9831,11 +9824,43 @@ function wsRemoveLastSet(exKey){
   const target=arr.find(x=>!x.done)||arr[0];
   if(target)deleteSetSb(target.id,exKey);
 }
+// Las dos celdas de una serie de línea: en qué escalón fue y qué marcó. La unidad la manda
+// el escalón, no el ejercicio: una línea puede mezclar aguantes y repeticiones (en handstand
+// los jalones de talón van entre dos aguantes).
+// El nombre corto de un escalón: sin el nombre de la línea, que ya lo dice la cabeza del
+// ejercicio. En una celda de 100 px «Front lever a una pierna» se corta justo en lo que
+// distingue un escalón de otro, que es todo lo que hay que leer aquí.
+function rungShortName(rung,group){
+  const full=exDisplayName(rung.name)||rung.name||'';
+  const line=(coachSkills.find(x=>x.slug===group)||{});
+  const pref=[skillName(line),line.name_es,line.name_en].filter(Boolean);
+  const norm=t=>String(t).toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'');
+  for(const pr of pref){
+    const n=norm(pr);
+    if(n&&norm(full).startsWith(n)&&full.length>pr.length+1)return full.slice(pr.length).replace(/^[\s:·-]+/,'');
+  }
+  return full;
+}
+
+function wsRungCellsHtml(ex,sets,s,exKey){
+  const rung=wsSetRung(ex,sets,s);
+  const name=rung?rungShortName(rung,HabitSkills.skillGroupOf(ex)):'Elegir';
+  const std=rung?HabitSkills.rungTargetText(rung):'';
+  const timed=rung?HabitSkills.markUnit(rung)==='time':false;
+  return '<button type="button" class="set-rung-btn" onclick="wsOpenRungPicker(&quot;'+s.id+'&quot;,&quot;'+esc(exKey)+'&quot;)" title="'+esc(name)+'">'+esc(name)+'</button>'
+    +(timed
+      ?'<input class="set-reps-in set-actual-time-in" type="number" inputmode="numeric" min="0" placeholder="'+esc(std||'seg')+'" onfocus="selectSetInput(this)" value="'+(s.actual_seconds!=null?esc(String(s.actual_seconds)):'')+'" onchange="updateSetSecondsSb(&quot;'+s.id+'&quot;,this.value)">'
+      :'<input class="set-reps-in set-actual-reps-in" type="number" inputmode="numeric" placeholder="'+esc(std||'reps')+'" onfocus="selectSetInput(this)" value="'+(s.actual_reps!=null?esc(String(s.actual_reps)):'')+'" onchange="updateSetRepsSb(&quot;'+s.id+'&quot;,this.value)">');
+}
+
 function renderSetTrackerHtml(sessionCtx,exKey,ex){
   const sets=sessionCtx.sets[exKey]||[];
   if(!sets.length)return'';
   const unit=exerciseWeightUnit(exKey);
   const metric=window.HabitTraining?HabitTraining.metricType(ex):(inferTargetType(ex)==='time'?'time':'reps');
+  // Un ejercicio de línea (146) no se carga con peso: se carga con progresión, y cada serie
+  // puede ir en una distinta. La columna de los kilos la ocupa el escalón.
+  const isLine=HabitSkills.isSkillExercise(ex);
   const focusSetIdx=typeof sessionCtx.focusSetIdx==='number'?sessionCtx.focusSetIdx:null;
   // RIR es para quien lo usa: aparece si lo encendiste, o si la rutina lo pide (el
   // coach puso un RIR objetivo) o ya lo registraste. Borrar una serie y "Marcar todas"
@@ -9844,11 +9869,13 @@ function renderSetTrackerHtml(sessionCtx,exKey,ex){
   const showRir=wsShowRir()||sets.some(s=>s.target_rir!=null||s.rir!=null);
   return '<div class="set-tracker'+(showRir?' has-rir':'')+'">'
     +'<div class="set-tracker-hdr"><span>SERIE</span>'
-    +(metric==='time'?'<span>TIEMPO</span><span>OBJ.</span>':'<button class="unit-toggle-btn" onclick="toggleExerciseWeightUnit(&quot;'+esc(exKey)+'&quot;)" title="Cambiar unidad de peso">'+unit.toUpperCase()+'</button><span>REPS</span>')
+    +(isLine?'<span>PROGRESIÓN</span><span>MARCA</span>'
+      :metric==='time'?'<span>TIEMPO</span><span>OBJ.</span>':'<button class="unit-toggle-btn" onclick="toggleExerciseWeightUnit(&quot;'+esc(exKey)+'&quot;)" title="Cambiar unidad de peso">'+unit.toUpperCase()+'</button><span>REPS</span>')
     +(showRir?'<span class="rir-k" title="Repeticiones en reserva. Es opcional: puedes cerrar la serie sin llenarlo.">RIR<i>opcional</i></span>':'')+'<span></span></div>'
     +sets.map(s=>'<div class="set-row'+(s.done?' done':'')+(focusSetIdx===s.set_idx&&!s.done?' next':'')+(s._pendingSync?' pending-sync':'')+'" data-set-id="'+s.id+'" data-ex-key="'+esc(exKey)+'">'
       +'<span class="set-num">'+(s.set_idx+1)+'</span>'
-      +(metric==='time'
+      +(isLine?wsRungCellsHtml(ex,sets,s,exKey)
+        :metric==='time'
         ?'<input class="set-reps-in set-actual-time-in" type="number" inputmode="numeric" min="0" placeholder="seg" onfocus="selectSetInput(this)" value="'+(s.actual_seconds!=null?esc(String(s.actual_seconds)):'')+'" onchange="updateSetSecondsSb(&quot;'+s.id+'&quot;,this.value)"><span class="set-num">'+esc(s.reps_target||ex.reps||'—')+'</span>'
         :'<input class="set-reps-in set-weight-in" type="number" inputmode="decimal" placeholder="'+unit+'" onfocus="selectSetInput(this)" value="'+formatWeightForUnit(s.weight,unit)+'" onchange="updateSetWeightSb(&quot;'+s.id+'&quot;,this.value,&quot;'+esc(exKey)+'&quot;)"><input class="set-reps-in set-actual-reps-in" type="number" inputmode="numeric" placeholder="'+esc(repsPlaceholder(s.reps_target))+'" onfocus="selectSetInput(this)" value="'+(s.actual_reps!=null?esc(String(s.actual_reps)):'')+'" onchange="updateSetRepsSb(&quot;'+s.id+'&quot;,this.value)">')
       +(!showRir?'':'<input class="set-reps-in set-rir-in" type="number" inputmode="numeric" min="0" max="10" title="Opcional" onfocus="selectSetInput(this)" placeholder="'+(s.target_rir!=null?esc(String(s.target_rir)):'–')+'" value="'+(s.rir!=null?esc(String(s.rir)):'')+'" onchange="updateSetRirSb(&quot;'+s.id+'&quot;,this.value,this)">')
@@ -10369,8 +10396,16 @@ async function addSetSb(scheduleId,exKey,defaultReps){
   const nextIdx=arr.length;
   const lastWeight=arr.length?arr[arr.length-1].weight:null;
   const lastReps=arr.length?arr[arr.length-1].actual_reps:null;
+  // En una línea la carga es el escalón: la serie nueva nace en el de la anterior.
+  const lastRung=arr.length?(arr[arr.length-1].rung_id||null):null;
   try{
-    const{data,error}=await sb.from('coaching_session_sets').insert({schedule_id:scheduleId,user_id:sbUser.id,ex_key:exKey,set_idx:nextIdx,reps_target:defaultReps||null,weight:lastWeight,actual_reps:lastReps||null,done:false}).select().single();
+    const row={schedule_id:scheduleId,user_id:sbUser.id,ex_key:exKey,set_idx:nextIdx,reps_target:defaultReps||null,weight:lastWeight,actual_reps:lastReps||null,done:false};
+    if(lastRung)row.rung_id=lastRung;
+    let{data,error}=await sb.from('coaching_session_sets').insert(row).select().single();
+    // Sin la 146 la columna no existe todavía: mejor la serie sin escalón que sin serie.
+    if(error&&lastRung&&(error.code==='PGRST204'||/rung_id/i.test(String(error.message||'')))){
+      ({data,error}=await sb.from('coaching_session_sets').insert({...row,rung_id:undefined}).select().single());
+    }
     if(error)throw error;
     if(!coachSessionSets[exKey])coachSessionSets[exKey]=[];
     coachSessionSets[exKey].push(data);
@@ -11432,10 +11467,8 @@ function hoyTopHtml(opts){
     // generated_from_base = la materializó la plantilla semanal; junto con created_by dice
     // si el día viene del coach y no del propio socio.
     const fromCoach=isCoachSet(row)||(row.generated_from_base&&row.created_by&&sbUser&&row.created_by!==sbUser.id);
-    const programLine=hsScheduleLine(row);
     html+=hoyHeroHtml({k:'Hoy · '+dayLabel,title:row.board_name,dot:row.board_color,
       meta:meta.exercises.length+' ejercicios · ~'+meta.duration+' min'+(fromCoach?' · de tu coach':''),
-      extra:programLine?'<div class="hoy-program">'+esc(programLine)+'</div>':'',
       cta:'<button class="btn hoy-cta" onclick="'+start+'(&quot;'+row.id+'&quot;)">Empezar</button>',
       row:hoyStartRowHtml(false)});
   }else if(doneRows.length){
@@ -11856,22 +11889,9 @@ function openProgramPicker(){
         +'<button class="btn-sm" onclick="openProgramManage(&quot;'+p.id+'&quot;)">···</button>'
         +'</div>').join('')
       :'<div class="empty">Aún no guardas ningún programa.<br>Arma tu semana y guárdala con nombre.</div>')
-      +'<div id="program-gym-list"></div>'
       +'<button class="btn" style="margin-top:14px" onclick="openProgramForm()">Guardar la semana actual</button>';
   }
   document.getElementById('program-modal').style.display='flex';
-  renderProgramGymList().catch(()=>{});
-}
-// Los programas del gym que cualquiera puede empezar. Solo los que tienen template_key: el
-// coach también guarda plantillas para sus clientes, y esas no son para el público.
-async function renderProgramGymList(){
-  const tpl=await loadHandstandTemplateSb(false);
-  const el=document.getElementById('program-gym-list');
-  if(!el||!tpl||hsActive())return;
-  el.innerHTML='<div class="sk-ladder-hd" style="margin-top:16px">'+esc(sk('hsGym'))+'</div>'
-    +'<div class="program-row"><div class="program-row-info"><div class="program-row-name">'+esc(tpl.name)+'</div>'
-    +'<div class="program-row-sub">'+esc(skf('hsMeta',{weeks:HS_PROGRAM.weeks,days:HS_PROGRAM.days,min:HS_PROGRAM.minutes}))+'</div></div>'
-    +'<button class="btn-sm bblue" onclick="closeProgramModal();openSkillSheet(&quot;'+esc(HS_PROGRAM.group)+'&quot;,&quot;program&quot;)">'+esc(sk('hsSee'))+'</button></div>';
 }
 function closeProgramModal(){document.getElementById('program-modal').style.display='none';}
 
@@ -13889,7 +13909,15 @@ async function seedSessionSetsSb(scheduleRow){
     // reps_target es por serie: en una pirámide cada fila nace con su
     // escalón, en todo lo demás con la misma cifra de siempre.
     const metricType=window.HabitTraining?HabitTraining.metricType(ex):(inferTargetType(ex)==='time'?'time':'reps');
-    for(let s=0;s<n;s++)rows.push({schedule_id:scheduleRow.id,user_id:sbUser.id,ex_key:exKey,set_idx:s,reps_target:repsTargetForSet(ex,s),weight:metricType==='reps'&&prev.weight!=null?prev.weight:null,actual_reps:metricType==='reps'?(prev.reps||null):null,actual_seconds:null,metric_type:metricType,target_rir:targetRir,done:false});
+    // Un ejercicio de línea (146) no nace con peso ni con un objetivo de la rutina: nace en un
+    // escalón, y el objetivo es el de ese escalón.
+    const lineRung=wsSetRung(ex,[],null);
+    for(let s=0;s<n;s++)rows.push({schedule_id:scheduleRow.id,user_id:sbUser.id,ex_key:exKey,set_idx:s,
+      reps_target:lineRung?(HabitSkills.rungTargetText(lineRung)||null):repsTargetForSet(ex,s),
+      weight:!lineRung&&metricType==='reps'&&prev.weight!=null?prev.weight:null,
+      actual_reps:!lineRung&&metricType==='reps'?(prev.reps||null):null,
+      actual_seconds:null,metric_type:lineRung?HabitSkills.markUnit(lineRung):metricType,
+      rung_id:lineRung?lineRung.id:null,target_rir:targetRir,done:false});
   });
   if(!rows.length)return;
   // Si esto falla, el socio abre el entreno y cada ejercicio dice "Sin series"
@@ -13907,9 +13935,9 @@ async function seedSessionSetsSb(scheduleRow){
     // target_rir es la columna más nueva (migración 070). Una PWA cachea el
     // shell, así que un cliente puede correr por delante de la base; antes de
     // dejarlo con un entreno inservible se reintenta sin ese campo.
-    if(e.code==='PGRST204'||/target_rir/i.test(msg)){
+    if(e.code==='PGRST204'||/target_rir|rung_id/i.test(msg)){
       const{error:retryErr}=await sb.from('coaching_session_sets')
-        .upsert(rows.map(({target_rir,actual_seconds,metric_type,...r})=>r),{onConflict:'schedule_id,ex_key,set_idx',ignoreDuplicates:true});
+        .upsert(rows.map(({target_rir,actual_seconds,metric_type,rung_id,...r})=>r),{onConflict:'schedule_id,ex_key,set_idx',ignoreDuplicates:true});
       if(!retryErr){
         toast('Entreno listo, pero sin RIR: falta correr la migración 070','warn');
         return;
@@ -14048,10 +14076,6 @@ async function wsAfterSessionClosed(data,closedRow,sets,opts){
   catch(e){toast('No se pudieron guardar los cambios en la rutina: '+e.message,'err');}
   // El «¿Cómo te fue?» es para el coach: sin coaching, nadie lo lee. Para los demás, el
   // premio del entreno son sus stickers.
-  // La prueba de fase del programa de parada de manos va antes que los stickers: si pasó, el
-  // sticker es justo para eso.
-  try{await hsAfterSession({...closedRow,...data},sets);}
-  catch(e){console.warn('hsAfterSession:',e.message||e);}
   if(opts&&opts.feedback){
     if(canAccessCoaching())openWorkoutFeedbackModal(data.id);
     else if(window.HabitActivity)HabitActivity.offerSessionStickers({...closedRow,...data},sets);
@@ -16728,7 +16752,6 @@ function filterBoardsAdmin(value){
   if(empty)empty.style.display=cards.length&&!visible?'block':'none';
 }
 
-
 async function toggleAssignSb(cb){
   const bid=cb.dataset.bid,uid=cb.dataset.uid;
   const checked=cb.checked;
@@ -17406,7 +17429,6 @@ async function generateReport(){
     out.innerHTML='<div class="empty">Error: '+e.message+'</div>';
   }
 }
-
 
 
 // ═══════════════════════════════════════
@@ -21831,7 +21853,6 @@ function toggleAssign(bid,uid,checked){
 }
 
 
-
 async function adminCreateUserSb(){
   const name=document.getElementById('nu-name').value.trim();
   const email=document.getElementById('nu-email').value.trim();
@@ -22667,7 +22688,6 @@ async function renderAdminFeed(){
     });
   }catch(e){el.innerHTML='<div class="empty">Error: '+e.message+'</div>';}
 }
-
 
 // ── COMUNIDAD → RETOS (migración 129, docs/RETOS.md) ──
 // Alguien propone un reto (el WOD escrito y cómo se mide) y cualquiera registra su marca. La
@@ -23535,7 +23555,6 @@ async function addBoardSb(){
   }catch(e){hideLoading();toast('Error: '+e.message,'err');}
 }
 
-
 async function loadSlotOccupancyFromSb(ds){
   try{
     const[occRes,blockRes]=await Promise.allSettled([
@@ -23558,7 +23577,6 @@ async function loadSlotOccupancyFromSb(ds){
     });
   }catch(e){console.error('loadSlots error:',e);}
 }
-
 
 function handleCancelBk(btn){
   const bid=btn.dataset.bid;
@@ -23661,6 +23679,7 @@ const SKILL_COPY={
       selfSaved:'Listo: vas en {name}',saveErr:'No se pudo guardar tu escalón',
       byYou:'lo elegiste tú',byCoach:'lo puso tu coach',
       train:'Entrenar este escalón',trainAdd:'Agregar a mi entreno',trainThere:'Ya está en tu entreno',
+      trainLine:'Entrenar la línea',lineHint:'Eliges la progresión en cada serie',
       readySelf:'Cumpliste el estándar dos sesiones seguidas: ya puedes subir.',
       almostSelf:'La última vez cumpliste el estándar. Repítelo y ya puedes subir.',
       levelUp:'Subir a {name}',levelTitle:'¿Subes de escalón?',
@@ -23668,28 +23687,6 @@ const SKILL_COPY={
       change:'Cambiar escalón',leave:'Quitar esta línea de mis skills',leaveTitle:'¿Quitar esta línea?',
       leaveBody:'Tus series se quedan. Solo dejas de marcar en qué escalón vas.',leaveOk:'Quitar',
       coachBySelf:'lo eligió por su cuenta',
-      hsKicker:'Programa',hsPitch:'20 minutos al día, 6 días. De cero a 30 s de parada de manos libre.',
-      hsMeta:'{weeks} semanas · {days} días · {min} min',hsSee:'Ver el programa',hsBack:'‹ Escalera',
-      hsWeek:'Semana {w} de {total}',hsPhase:'Fase {n} · {name}',hsTestSat:'El sábado es la prueba de la fase',
-      hsTestToday:'hoy es la prueba',hsStarts:'Empieza el {date}',hsDone:'Terminaste el programa.',
-      hsPhases:'Las fases',hsWeeksRange:'Semanas {a}–{b}',hsTest:'Prueba',
-      hsWeekTitle:'La semana',hsDayA:'Línea y fuerza',hsDayB:'Equilibrio',hsDayC:'Prueba y juego',hsRest:'Descanso',
-      hsNeed:'Qué necesitas',hsNeedTxt:'Una pared lisa, 2 m libres alrededor y un piso que no resbale.',
-      hsStop:'Señales de alto',hsStopTxt:'Dolor punzante en la muñeca, hormigueo en las manos o dolor al frente del hombro: para esa sesión. Si la muñeca molesta dos días seguidos, haz la preparación de rodillas y sáltate la fuerza esa semana.',
-      hsWhere:'¿Por dónde empiezas?',hsPlace1:'Empiezo desde cero',hsPlace2:'Ya aguanto 45 s de plancha en pared a 45°',
-      hsPlace3:'Ya aguanto 60 s de frente a la pared',hsPlace4:'Ya hago 10 jalones de talón seguidos',
-      hsStart:'Empezar el programa',hsStartTitle:'¿Empiezas el programa?',
-      hsStartToday:'Empiezas hoy en la semana {w}: Fase {n} · {name}.',hsStartMonday:'Empiezas el lunes {date} en la semana {w}: Fase {n} · {name}.',
-      hsCoachWarn:'Ojo: tu coach había puesto días de tu semana y el programa los reemplaza.',hsStarted:'Programa empezado',
-      hsRepeat:'Repetir esta fase',hsRepeatTitle:'¿Repites la fase {n}?',
-      hsRepeatBody:'Las próximas 2 semanas vuelven a ser de la Fase {n} · {name}, y el programa termina 2 semanas después.',
-      hsRepeated:'La Fase {n} vuelve a empezar la próxima semana',
-      hsLeave:'Dejar el programa',hsLeaveTitle:'¿Dejas el programa?',hsLeaveBody:'Tu semana queda libre. Tus entrenos y tus marcas se quedan.',hsLeft:'Dejaste el programa',
-      hsPassTitle:'¡Pasaste la prueba!',hsPassBody:'Fase {n} · {name}: {best} (el estándar es {std}). La semana que viene empieza la Fase {next}.',
-      hsPassFinal:'¡Lo lograste! {best} de parada de manos libre, el estándar del programa.',
-      hsFailTitle:'Todavía no',hsFailBody:'Fase {n} · {name}: {got} de {needed} series llegaron al estándar ({std}). Tu mejor marca: {best}.',
-      hsKeepGoing:'Seguir con la Fase {next}',hsDoneOk:'Listo',hsPractice:'Práctica de la prueba: {best}. El sábado que viene cuenta.',
-      hsGym:'De HABIT',
       cues:'Qué mirar',critLabel:'Limpio en este escalón',
       coachPanel:'Coach',coachSearch:'Buscar alumno por nombre',
       coachSet:'Poner escalón',coachNoteLabel:'Qué le falta (lo lee el alumno)',
@@ -23715,6 +23712,7 @@ const SKILL_COPY={
       selfSaved:'Done: you are on {name}',saveErr:'Could not save your rung',
       byYou:'you picked it',byCoach:'set by your coach',
       train:'Train this rung',trainAdd:'Add to my workout',trainThere:'Already in your workout',
+      trainLine:'Train the line',lineHint:'You pick the progression on every set',
       readySelf:'You met the standard two sessions in a row: you can move up.',
       almostSelf:'You met the standard last time. Do it again and you can move up.',
       levelUp:'Move up to {name}',levelTitle:'Move up a rung?',
@@ -23722,28 +23720,6 @@ const SKILL_COPY={
       change:'Change rung',leave:'Remove this line from my skills',leaveTitle:'Remove this line?',
       leaveBody:'Your sets stay. You just stop marking which rung you are on.',leaveOk:'Remove',
       coachBySelf:'picked it on their own',
-      hsKicker:'Program',hsPitch:'20 minutes a day, 6 days. From zero to a 30 s freestanding handstand.',
-      hsMeta:'{weeks} weeks · {days} days · {min} min',hsSee:'See the program',hsBack:'‹ Ladder',
-      hsWeek:'Week {w} of {total}',hsPhase:'Phase {n} · {name}',hsTestSat:'Saturday is the phase test',
-      hsTestToday:'today is the test',hsStarts:'Starts on {date}',hsDone:'You finished the program.',
-      hsPhases:'The phases',hsWeeksRange:'Weeks {a}–{b}',hsTest:'Test',
-      hsWeekTitle:'The week',hsDayA:'Line & strength',hsDayB:'Balance',hsDayC:'Test & play',hsRest:'Rest',
-      hsNeed:'What you need',hsNeedTxt:'A flat wall, 2 m of free space around you and a floor that does not slip.',
-      hsStop:'Stop signs',hsStopTxt:'Sharp wrist pain, tingling in the hands or pain at the front of the shoulder: stop that session. If the wrist bothers you two days in a row, do the prep on your knees and skip the strength work that week.',
-      hsWhere:'Where do you start?',hsPlace1:'I am starting from zero',hsPlace2:'I can hold a 45° wall plank for 45 s',
-      hsPlace3:'I can hold 60 s chest to the wall',hsPlace4:'I can do 10 heel pulls in a row',
-      hsStart:'Start the program',hsStartTitle:'Start the program?',
-      hsStartToday:'You start today in week {w}: Phase {n} · {name}.',hsStartMonday:'You start on Monday {date} in week {w}: Phase {n} · {name}.',
-      hsCoachWarn:'Note: your coach had set days of your week and the program replaces them.',hsStarted:'Program started',
-      hsRepeat:'Repeat this phase',hsRepeatTitle:'Repeat phase {n}?',
-      hsRepeatBody:'The next 2 weeks are Phase {n} · {name} again, and the program ends 2 weeks later.',
-      hsRepeated:'Phase {n} starts again next week',
-      hsLeave:'Leave the program',hsLeaveTitle:'Leave the program?',hsLeaveBody:'Your week becomes free. Your workouts and marks stay.',hsLeft:'You left the program',
-      hsPassTitle:'You passed the test!',hsPassBody:'Phase {n} · {name}: {best} (the standard is {std}). Next week Phase {next} begins.',
-      hsPassFinal:'You did it! {best} freestanding handstand, the program standard.',
-      hsFailTitle:'Not yet',hsFailBody:'Phase {n} · {name}: {got} of {needed} sets reached the standard ({std}). Your best: {best}.',
-      hsKeepGoing:'Go on to Phase {next}',hsDoneOk:'Done',hsPractice:'Test practice: {best}. Next Saturday counts.',
-      hsGym:'From HABIT',
       cues:'What to watch',critLabel:'Clean on this rung',
       coachPanel:'Coach',coachSearch:'Search a student by name',
       coachSet:'Set rung',coachNoteLabel:'What they still need (the student reads this)',
@@ -23817,10 +23793,7 @@ function rungForExercise(ex){
 async function loadSkillMarksSb(force){
   if(!force&&skillMarks&&Date.now()-skillMarksAt<SKILLS_TTL_MS)return skillMarks;
   const keyToRung={}, rungBySlug={};
-  // Las rutinas del programa activo también: son del gym y no están en myRoutines, y sin ellas
-  // entrenar el programa de parada de manos no movía la escalera, que es lo que lo conecta.
-  const programBoards=await activeProgramBoardsSb();
-  [...(myRoutines||[]),...programBoards].forEach(b=>(b.exercises||[]).forEach(ex=>{
+  (myRoutines||[]).forEach(b=>(b.exercises||[]).forEach(ex=>{
     const rung=rungForExercise(ex);
     if(rung&&ex.id)keyToRung[ex.id]=rung;
   }));
@@ -23832,48 +23805,119 @@ async function loadSkillMarksSb(force){
   const rungOfKey=k=>keyToRung[k]||rungBySlug[HabitSkills.catalogSlugFromExKey(k)]||null;
   const keys=Object.keys(keyToRung);
   skillMarks={};skillMarksAt=Date.now();
-  if(!keys.length||!sbUser)return skillMarks;
-  const{data,error}=await sb.from('coaching_session_sets')
-    .select('ex_key,schedule_id,done,actual_reps,actual_seconds,created_at')
-    .eq('user_id',sbUser.id).eq('done',true).in('ex_key',keys)
-    .order('created_at',{ascending:false}).limit(1500);
-  if(error)return skillMarks;
-  // Por escalón: la mejor marca y las sesiones en que lo entrenó, de la más reciente a la
-  // más vieja, que es como readiness() espera leerlas.
-  const perRung={};
-  (data||[]).forEach(row=>{
-    const rung=rungOfKey(row.ex_key);
-    if(!rung)return;
-    const bucket=perRung[rung.slug]||(perRung[rung.slug]={rung,sessions:new Map()});
-    const sid=row.schedule_id||('x'+row.ex_key);
-    const s=bucket.sessions.get(sid)||{id:sid,at:row.created_at,sets:[]};
-    if(new Date(row.created_at)>new Date(s.at))s.at=row.created_at;
-    s.sets.push(row);
-    bucket.sessions.set(sid,s);
+  if(!sbUser)return skillMarks;
+  const COLS='id,ex_key,schedule_id,done,actual_reps,actual_seconds,created_at';
+  // Dos consultas y no una: las series de un ejercicio de línea (146) traen su escalón en
+  // rung_id y su ex_key no es ninguna de las llaves de las rutinas, así que un solo filtro
+  // dejaría fuera justo las que vienen con el escalón exacto. La segunda tolera que la 146 no
+  // esté corrida: sin columna, se queda lo de siempre.
+  const [porLlave,porEscalon]=await Promise.all([
+    keys.length?sb.from('coaching_session_sets').select(COLS)
+      .eq('user_id',sbUser.id).eq('done',true).in('ex_key',keys)
+      .order('created_at',{ascending:false}).limit(1500):Promise.resolve({data:[]}),
+    sb.from('coaching_session_sets').select(COLS+',rung_id')
+      .eq('user_id',sbUser.id).eq('done',true).not('rung_id','is',null)
+      .order('created_at',{ascending:false}).limit(1500)
+  ]);
+  if(porLlave.error&&porEscalon.error)return skillMarks;
+  const seen=new Set(), rows=[];
+  [...(porEscalon.data||[]),...(porLlave.data||[])].forEach(r=>{
+    if(seen.has(r.id))return;
+    seen.add(r.id);rows.push(r);
   });
-  Object.values(perRung).forEach(b=>{
-    const sessions=[...b.sessions.values()].sort((x,y)=>new Date(y.at)-new Date(x.at));
-    const mark=HabitSkills.bestMark(b.rung,sessions.flatMap(s=>s.sets));
-    skillMarks[b.rung.progression_group]=skillMarks[b.rung.progression_group]||{};
-    skillMarks[b.rung.progression_group][b.rung.progression_rank]={mark,sessions};
-  });
+  // El escalón de una serie: el suyo si lo tiene (exacto), y si no, el que diga su llave.
+  const byId=rungIndex().byId||{};
+  skillMarks=HabitSkills.marksFromRows(rows,row=>(row.rung_id&&byId[row.rung_id])||rungOfKey(row.ex_key));
   return skillMarks;
 }
 
-// Las rutinas que usa el programa activo y que no están ya en myRoutines (las del gym que no
-// son básicas ni asignadas). Se piden una vez y se guardan junto a las demás.
-async function activeProgramBoardsSb(){
-  const p=typeof activeProgram==='function'?activeProgram():null;
-  if(!p)return [];
-  const have=new Set((myRoutines||[]).map(b=>b.id));
-  const ids=[...new Set((myProgramDays||[]).filter(d=>d.program_id===p.id&&d.board_id).map(d=>d.board_id))]
-    .filter(id=>!have.has(id));
-  const missing=ids.filter(id=>!coachBoardsById[id]||!Array.isArray(coachBoardsById[id].exercises));
-  if(missing.length){
-    const{data}=await sb.from('boards').select('id,name,exercises').in('id',missing);
-    (data||[]).forEach(b=>{coachBoardsById[b.id]={...(coachBoardsById[b.id]||{}),...b};});
+// ---- La progresión es la carga (migración 146, docs/PROGRAMA_HANDSTAND.md §10) --------------
+//
+// Un ejercicio de rutina puede ser una línea entera («Aguante de front lever», skillGroup) en
+// vez de una variante. Entonces la hoja de entreno no pide kilos: pide en qué progresión, y se
+// cambia serie por serie, que es como se entrena de verdad — el aguante arriba, las negativas
+// un escalón abajo, los touch mucho más abajo, el mismo día.
+
+// Lo último que registró en cada línea, para que la primera serie arranque donde quedó. Se pide
+// una vez por sesión y tolera que la 146 no esté corrida: sin columna, no hay nada que leer.
+let wsLastRung={}, wsLastRungAt=0;
+async function wsLoadLastRungs(){
+  if(!sbUser||Date.now()-wsLastRungAt<SKILLS_TTL_MS)return wsLastRung;
+  wsLastRungAt=Date.now();
+  const{data,error}=await sb.from('coaching_session_sets').select('rung_id,created_at')
+    .eq('user_id',sbUser.id).not('rung_id','is',null)
+    .order('created_at',{ascending:false}).limit(200);
+  if(error)return wsLastRung;      // sin la 146 la columna no existe: se usa el escalón marcado
+  const byId=rungIndex().byId||{};
+  const out={};
+  (data||[]).forEach(r=>{
+    const rung=byId[r.rung_id];
+    if(rung&&!out[rung.progression_group])out[rung.progression_group]=rung.id;
+  });
+  wsLastRung=out;
+  return out;
+}
+
+const wsLineRungs=ex=>HabitSkills.isSkillExercise(ex)?skillRungs(HabitSkills.skillGroupOf(ex)):[];
+
+// En qué escalón va una serie. El suyo si ya lo tiene; si no, el de la serie anterior de este
+// mismo ejercicio (dentro de un entreno se sube y se baja), luego lo último que registró en la
+// línea, luego el escalón que lleva marcado, y si no, el primero.
+function wsSetRung(ex,sets,s){
+  const list=wsLineRungs(ex);
+  if(!list.length)return null;
+  const group=HabitSkills.skillGroupOf(ex);
+  const prev=(sets||[]).filter(x=>x.rung_id&&x.set_idx<((s&&s.set_idx)!=null?s.set_idx:1e9)).pop();
+  const mine=mySkillRanks[group];
+  return HabitSkills.defaultRung(list,{
+    lastInSession:(s&&s.rung_id)||(prev&&prev.rung_id),
+    lastLogged:wsLastRung[group],
+    currentRank:mine&&Number(mine.rank)});
+}
+
+// Cambiar la progresión de una serie. Arrastra a las siguientes que no estén hechas y que
+// sigan en el escalón viejo: cambiar de variante a media sesión quiere decir "de aquí en
+// adelante", y así no pisa ni una serie ya hecha ni una que el socio puso aparte.
+async function updateSetRungSb(setId,exKey,rungId){
+  const arr=coachSessionSets[exKey]||[];
+  const me=arr.find(x=>x.id===setId);
+  if(!me)return;
+  const from=me.rung_id||null;
+  const rung=rungIndex().byId[rungId]||null;
+  const targets=[me].concat(arr.filter(x=>x.set_idx>me.set_idx&&!x.done&&(x.rung_id||null)===from));
+  for(const row of targets){
+    try{
+      const patch={rung_id:rungId,updated_at:new Date().toISOString()};
+      // El objetivo de la serie es el del escalón: cada uno tiene el suyo y pueden cambiar de
+      // unidad dentro de la misma línea.
+      const t=HabitSkills.rungTargetText(rung);
+      if(t)patch.reps_target=t;
+      const data=await trainingUpdate('coaching_session_sets',row.id,patch,row);
+      const i=arr.findIndex(x=>x.id===row.id);
+      if(i>-1)arr[i]=data;
+    }catch(e){
+      toast(/rung_id/i.test(String(e.message||e))
+        ?'Falta correr la migración 146 para guardar la progresión'
+        :'Error: '+e.message,'err');
+      return;
+    }
   }
-  return ids.map(id=>coachBoardsById[id]).filter(Boolean);
+  refreshSessionUiFor(exKey);
+}
+
+async function wsOpenRungPicker(setId,exKey){
+  const ex=sessionExerciseList().find((e,i)=>exerciseKeyForSession(activeCoachingSession.board_id,e,i)===exKey);
+  const list=wsLineRungs(ex);
+  if(!list.length)return;
+  const sets=coachSessionSets[exKey]||[];
+  const cur=wsSetRung(ex,sets,sets.find(x=>x.id===setId));
+  const choices=list.map(r=>{
+    const std=HabitSkills.rungTargetText(r);
+    const n=Number(r.progression_target_sets)||1;
+    return{key:r.id,label:(cur&&r.id===cur.id?'✓ ':'')+(exDisplayName(r.name)||r.name)+(std?' · '+n+' × '+std:'')};
+  });
+  const k=await choiceSheet('',choices,{title:'¿En qué progresión?'});
+  if(k&&(!cur||k!==cur.id))await updateSetRungSb(setId,exKey,k);
 }
 
 const markFor=(slug,rank)=>((skillMarks&&skillMarks[slug]&&skillMarks[slug][rank])||{mark:0,sessions:[]});
@@ -23940,17 +23984,13 @@ function skillCardHtml(skill){
 // ---- La hoja de la escalera -----------------------------------------------------------------
 
 async function openSkillSheet(slug,view){
-  skillOpenSlug=slug;skillCoachStudent=null;skillCoachResults=[];skillPickMode=false;skillView='ladder';
+  skillOpenSlug=slug;skillCoachStudent=null;skillCoachResults=[];skillPickMode=false;
   const el=document.getElementById('skill-sheet');
   if(!el)return;
   el.classList.add('open');
-  // La escalera de parada de manos lleva encima su programa: hace falta la plantilla y saber
-  // si la persona ya lo tiene activo.
-  await Promise.all([loadSkillsSb(false),
-    HS_PROGRAM&&slug===HS_PROGRAM.group?Promise.all([loadHandstandTemplateSb(false),loadWeekPlanSb(false)]).catch(()=>{}):null]);
+  await loadSkillsSb(false);
   await loadSkillMarksSb(false);
-  if(view==='program'&&hsTemplate)skillOpenProgram();
-  else renderSkillSheet();
+  renderSkillSheet();
 }
 function closeSkillSheet(){
   const el=document.getElementById('skill-sheet');
@@ -23966,15 +24006,12 @@ function renderSkillSheet(){
   const body=document.getElementById('skill-sheet-body');
   if(!skill||!body)return;
   document.getElementById('skill-sheet-title').textContent=skillName(skill);
-  const isHs=HS_PROGRAM&&skill.slug===HS_PROGRAM.group&&hsTemplate;
-  if(isHs&&skillView==='program'){body.innerHTML=hsProgramHtml();return;}
   const rungs=skillRungs(skill.slug);
   const mineRow=mySkillRanks[skill.slug];
   const rank=mineRow?Number(mineRow.rank):0;
   let html='';
   if(skill.animation_url)html+='<div class="sk-hero">'+skillAnimHtml(skill.animation_url)+'</div>';
   if(skillSummary(skill))html+='<p class="sk-summary">'+esc(skillSummary(skill))+'</p>';
-  if(isHs)html+=hsCardHtml(true);
   const owner=HabitSkills.rungOwner(mineRow);
   html+=skillMineHtml(skill,rungs,rank,mineRow);
   if(skillPickMode)html+='<div class="sk-pick-bar"><span>'+esc(sk('pickBar'))+'</span>'
@@ -24027,6 +24064,7 @@ function skillMineHtml(skill,rungs,rank,mineRow){
       +(self&&ready.ready&&next?'<button type="button" class="btn" onclick="skillSelfLevelUp()">'+esc(skf('levelUp',{name:rungLabel(next)}))+'</button>':'')
       +'<button type="button" class="'+(self&&ready.ready&&next?'btn-ghost':'btn')+'" onclick="skillTrainRung('+rank+')">'
       +esc(inSession?sk('trainAdd'):sk('train'))+'</button>'
+      +'<button type="button" class="btn-ghost" onclick="skillTrainLine()" title="'+esc(sk('lineHint'))+'">'+esc(sk('trainLine'))+'</button>'
       +(self?'<button type="button" class="btn-ghost" onclick="skillStartPick()">'+esc(sk('change'))+'</button>':'')
       +'</div>')
     +'</div>';
@@ -24169,265 +24207,51 @@ async function skillTrainRung(rank){
   skillMarks=null;
 }
 
-// ---- El programa de parada de manos (migración 145, docs/PROGRAMA_HANDSTAND.md) ------------
-//
-// Una plantilla del gym (coaching_programs con user_id nulo y template_key 'handstand-8')
-// que la persona se aplica a sí misma con apply_coaching_program: la copia es suya y el
-// calendario se estampa desde start_date, como cualquier programa. Lo propio del programa es
-// por dónde se entra (la fase según su escalón), la prueba de cada fase al cerrar la sesión
-// del sábado y «Repetir la fase», que es correr start_date una fase. Sin la 145 la plantilla
-// no existe y nada de esto se pinta.
-
-const HS_PROGRAM=window.HabitSkills?HabitSkills.HANDSTAND_PROGRAM:null;
-let hsTemplate=null, hsTemplateAt=0, hsBoardIds=new Set(), skillView='ladder', hsPlaceWeek=1;
-
-async function loadHandstandTemplateSb(force){
-  if(!HS_PROGRAM||!sbUser)return null;
-  if(!force&&hsTemplateAt&&Date.now()-hsTemplateAt<SKILLS_TTL_MS)return hsTemplate;
-  hsTemplateAt=Date.now();
-  const{data,error}=await sb.from('coaching_programs').select('*')
-    .is('user_id',null).eq('template_key',HS_PROGRAM.key).maybeSingle();
-  if(error||!data){hsTemplate=null;return null;}
-  const{data:days}=await sb.from('coaching_program_days').select('week_index,dow,board_id,board_name').eq('program_id',data.id);
-  hsTemplate={...data,days:days||[]};
-  hsBoardIds=new Set((days||[]).map(d=>d.board_id).filter(Boolean));
-  return hsTemplate;
-}
-function hsActive(){const p=activeProgram();return p&&HS_PROGRAM&&p.template_key===HS_PROGRAM.key?p:null;}
-const hsPhaseName=ph=>(ph?(skLang()==='en'?ph.en:ph.es):'');
-const hsPhaseWeeks=ph=>({a:(ph.n-1)*HS_PROGRAM.weeksPerPhase+1,b:ph.n*HS_PROGRAM.weeksPerPhase});
-function hsRungStd(rung){
-  if(!rung||!rung.progression_target)return '';
-  return (rung.progression_target_sets||1)+' × '+fmtMark(rung,rung.progression_target);
-}
-// La línea «Semana 3 de 8 · Fase 2 · Línea en pared» de un día del programa, o '' si ese día
-// no es de este programa.
-function hsScheduleLine(row){
-  const p=hsActive();
-  if(!p||!row||row.program_id!==p.id)return '';
-  const w=Number(row.program_week_index)||0;
-  const ph=HabitSkills.programPhase(HS_PROGRAM,w);
-  if(!ph)return '';
-  const sat=(dateObjFromDS(row.ds).getUTCDay()+6)%7===5;
-  return skf('hsWeek',{w,total:HS_PROGRAM.weeks})+' · '+skf('hsPhase',{n:ph.n,name:hsPhaseName(ph)})
-    +(sat&&HabitSkills.isPhaseTestWeek(HS_PROGRAM,w)?' · '+sk('hsTestToday'):'');
-}
-
-function hsCardHtml(withButton){
-  if(!hsTemplate)return '';
-  const p=hsActive();
-  const w=p?myProgramCycleIndex(p):0;
-  const ph=p?HabitSkills.programPhase(HS_PROGRAM,w):null;
-  let line, sub='';
-  if(p&&ph){
-    line=skf('hsWeek',{w,total:HS_PROGRAM.weeks})+' · '+skf('hsPhase',{n:ph.n,name:hsPhaseName(ph)});
-    if(HabitSkills.isPhaseTestWeek(HS_PROGRAM,w))sub=sk('hsTestSat');
-  }else if(p&&w===0)line=skf('hsStarts',{date:fmtDS(mazWeekStart(p.start_date))});
-  else if(p&&w===-1)line=sk('hsDone');
-  else{line=sk('hsPitch');sub=skf('hsMeta',{weeks:HS_PROGRAM.weeks,days:HS_PROGRAM.days,min:HS_PROGRAM.minutes});}
-  const pct=p&&ph?Math.round(w/HS_PROGRAM.weeks*100):(p&&w===-1?100:0);
-  return '<div class="sk-mine hs-card">'
-    +'<div class="sk-mine-kicker">'+esc(sk('hsKicker'))+'</div>'
-    +'<div class="sk-mine-name">'+esc((p&&p.name)||hsTemplate.name)+'</div>'
-    +'<div class="sk-hint">'+esc(line)+'</div>'
-    +(p?'<div class="sk-bar"><i style="width:'+pct+'%"></i></div>':'')
-    +(sub?'<div class="sk-mine-meta">'+esc(sub)+'</div>':'')
-    +(withButton?'<div class="sk-actions"><button type="button" class="btn-ghost" style="margin-top:0" onclick="skillOpenProgram()">'+esc(sk('hsSee'))+'</button></div>':'')
-    +'</div>';
-}
-
-function skillOpenProgram(){
-  skillView='program';
-  const row=mySkillRanks[HS_PROGRAM.group];
-  hsPlaceWeek=HabitSkills.placementWeek(HS_PROGRAM,row?Number(row.rank):1);
-  renderSkillSheet();
-  const body=document.getElementById('skill-sheet-body');
-  if(body)body.scrollTop=0;
-}
-function skillCloseProgram(){skillView='ladder';renderSkillSheet();}
-function hsPick(week){hsPlaceWeek=week;renderSkillSheet();}
-
-function hsProgramHtml(){
-  const tpl=hsTemplate, p=hsActive();
-  const w=p?myProgramCycleIndex(p):0;
-  const cur=p?HabitSkills.programPhase(HS_PROGRAM,w):null;
-  const rungs=skillRungs(HS_PROGRAM.group);
-  const notes=(skLang()==='en'?(tpl.notes_en||tpl.notes):tpl.notes)||'';
-  let html='<button type="button" class="sk-back" onclick="skillCloseProgram()">'+esc(sk('hsBack'))+'</button>'
-    +'<div class="sk-mine-kicker" style="margin-top:6px">'+esc(sk('hsKicker'))+' · '
-    +esc(skf('hsMeta',{weeks:HS_PROGRAM.weeks,days:HS_PROGRAM.days,min:HS_PROGRAM.minutes}))+'</div>'
-    +'<h3 class="hs-title">'+esc((p&&p.name)||tpl.name)+'</h3>'
-    +(notes?'<p class="sk-summary">'+esc(notes)+'</p>':'');
-  if(p)html+=hsCardHtml(false);
-
-  // Las fases: qué mide cada prueba, con el estándar del escalón.
-  html+='<div class="sk-ladder-hd">'+esc(sk('hsPhases'))+'</div><div class="sk-ladder">';
-  HS_PROGRAM.phases.forEach(ph=>{
-    const rung=HabitSkills.rungAt(rungs,ph.rank);
-    const r=hsPhaseWeeks(ph);
-    const state=!p||!cur?'':(ph.n<cur.n?'passed':(ph.n===cur.n?'current':''));
-    html+='<div class="sk-rung'+(state?' '+state:'')+'" style="cursor:default">'
-      +'<span class="sk-rung-thumb">'+skillAnimHtml(rung&&rung.animation_url,'<span class="sk-rung-n">'+ph.n+'</span>')+'</span>'
-      +'<span class="sk-rung-info"><span class="sk-rung-name">'+esc(skf('hsPhase',{n:ph.n,name:hsPhaseName(ph)}))+'</span>'
-      +'<span class="sk-rung-crit">'+esc(skf('hsWeeksRange',{a:r.a,b:r.b}))+'</span>'
-      +(rung?'<span class="sk-rung-target">'+esc(sk('hsTest'))+': '+esc(rungLabel(rung))+' · '+esc(hsRungStd(rung))+'</span>':'')
-      +'</span>'
-      +(state?'<span class="sk-rung-state">'+esc(state==='passed'?sk('passed'):sk('current'))+'</span>':'')
-      +'</div>';
-  });
-  html+='</div>';
-
-  // La semana tipo.
-  const kinds=['A','B','A','B','A','C'];
-  html+='<div class="sk-ladder-hd" style="margin-top:14px">'+esc(sk('hsWeekTitle'))+'</div><div class="hs-week">'
-    +DOW_SHORT.slice(0,7).map((d,i)=>'<div class="hs-day'+(i===6?' rest':'')+'"><b>'+esc(d)+'</b><span>'
-      +(i<6?esc(kinds[i])+'<em>'+esc(sk('hsDay'+kinds[i]))+'</em>':'<em>'+esc(sk('hsRest'))+'</em>')+'</span></div>').join('')
-    +'</div>';
-
-  html+='<div class="sk-ladder-hd" style="margin-top:14px">'+esc(sk('hsNeed'))+'</div><p class="sk-summary">'+esc(sk('hsNeedTxt'))+'</p>'
-    +'<div class="sk-ladder-hd">'+esc(sk('hsStop'))+'</div><p class="sk-summary hs-stop">'+esc(sk('hsStopTxt'))+'</p>';
-
-  if(p){
-    html+='<div class="sk-actions">'
-      +(cur?'<button type="button" class="btn-ghost" onclick="hsRepeatPhase()">'+esc(sk('hsRepeat'))+'</button>':'')
-      +'</div><button type="button" class="sk-leave" onclick="hsLeaveProgram()">'+esc(sk('hsLeave'))+'</button>';
-  }else{
-    html+='<div class="sk-ladder-hd" style="margin-top:6px">'+esc(sk('hsWhere'))+'</div><div class="sk-ladder picking">'
-      +HS_PROGRAM.phases.map(ph=>{
-        const start=hsPhaseWeeks(ph).a;
-        return '<button type="button" class="sk-rung'+(start===hsPlaceWeek?' current':'')+'" onclick="hsPick('+start+')">'
-          +'<span class="sk-rung-info"><span class="sk-rung-name">'+esc(sk('hsPlace'+ph.n))+'</span>'
-          +'<span class="sk-rung-crit">'+esc(skf('hsPhase',{n:ph.n,name:hsPhaseName(ph)}))+' · '+esc(skf('hsWeek',{w:start,total:HS_PROGRAM.weeks}))+'</span></span>'
-          +(start===hsPlaceWeek?'<span class="sk-rung-state">✓</span>':'')+'</button>';
-      }).join('')+'</div>'
-      +'<div class="sk-actions" style="margin-top:12px"><button type="button" class="btn" onclick="hsStartProgram()">'+esc(sk('hsStart'))+'</button></div>';
+// Entrenar la línea entera en vez de un escalón (146): un solo ejercicio que no pide kilos sino
+// progresión, y la progresión se elige en cada serie. Es lo que hace falta para entrenar como
+// se entrena de verdad — el aguante arriba, las negativas un escalón abajo, los touch más
+// abajo — sin meter tres ejercicios distintos en la hoja.
+async function skillTrainLine(){
+  const slug=skillOpenSlug;
+  const skill=coachSkills.find(s=>s.slug===slug);
+  const rungs=skillRungs(slug);
+  if(!skill||!rungs.length)return;
+  if(activeCoachingSession&&sessionExerciseList().some(ex=>HabitSkills.skillGroupOf(ex)===slug)){
+    closeSkillSheet();openWorkoutSheet();toast(sk('trainThere'),'ok');return;
   }
-  return html;
-}
-
-// Empezar: la semana del ciclo que toca es la de la fase elegida. Entre semana se empieza hoy
-// y los días que ya pasaron quedan omitidos; en fin de semana, el lunes.
-async function hsStartProgram(){
-  const tpl=hsTemplate;
-  if(!tpl||hsActive())return;
-  const startWeek=hsPlaceWeek;
-  const ph=HabitSkills.programPhase(HS_PROGRAM,startWeek);
-  const today=mazToday(), weekStart=mazWeekStart(today);
-  const weekend=(dateObjFromDS(today).getUTCDay()+6)%7>=5;
-  const firstMonday=weekend?addDaysDS(weekStart,7):weekStart;
-  const firstDay=weekend?firstMonday:today;
-  const vars={w:startWeek,n:ph.n,name:hsPhaseName(ph),date:fmtDS(firstMonday)};
-  const body=(weekend?skf('hsStartMonday',vars):skf('hsStartToday',vars))
-    +(coachSetDays().length?'\n\n'+sk('hsCoachWarn'):'');
-  if(!await confirmSheet(body,{title:sk('hsStartTitle'),confirmLabel:sk('hsStart')}))return;
-  showLoading();
+  closeSkillSheet();
+  if(!activeCoachingSession){
+    await startFreeWorkoutSb(skillName(skill));
+    if(!activeCoachingSession)return;
+  }else openWorkoutSheet();
+  showLoading('Agregando...');
   try{
-    const{data:programId,error}=await sb.rpc('apply_coaching_program',{
-      p_user_id:sbUser.id,p_program_id:tpl.id,p_week_start:weekStart,p_today:today,
-      p_start_date:HabitSkills.programStartDate(firstMonday,startWeek)
-    });
-    if(error)throw error;
-    // La copia es de la persona; la llave dice de qué plantilla salió, y es lo que hace que la
-    // app le pinte la fase y la prueba.
-    await sb.from('coaching_programs').update({template_key:HS_PROGRAM.key,name_en:tpl.name_en||null,notes_en:tpl.notes_en||null})
-      .eq('id',programId).eq('user_id',sbUser.id);
-    // Lo de esta semana antes de empezar no son entrenos que se pasaron: quedan omitidos, igual
-    // que con «Omitir» en Hoy, y así el calendario no los vuelve a estampar.
-    if(firstDay>weekStart&&hsBoardIds.size){
-      await sb.from('coaching_schedule').update({status:'skipped'})
-        .eq('user_id',sbUser.id).eq('status','scheduled').eq('generated_from_base',true)
-        .gte('ds',weekStart).lt('ds',firstDay).in('board_id',[...hsBoardIds]);
+    await wsLoadLastRungs().catch(()=>{});
+    const newKey=wsUniqueExKey('line-'+slug);
+    const entry={id:newKey,name:skillName(skill),skillGroup:slug,
+      sets:String(HabitSkills.RUNG_MIN_SETS),rest:HabitSkills.RUNG_REST_SEC+'s',ex_key:newKey};
+    const overlay=(Array.isArray(activeCoachingSession.session_exercises)?activeCoachingSession.session_exercises:[]).slice();
+    overlay.push(entry);
+    await persistSessionExercisesSb(overlay);
+    const rung=wsSetRung(entry,[],null);
+    const n=exerciseSetCount(entry);
+    const base={schedule_id:activeCoachingSession.id,user_id:sbUser.id,ex_key:newKey,
+      reps_target:rung?(HabitSkills.rungTargetText(rung)||null):null,done:false};
+    const rows=Array.from({length:n},(_,i)=>({...base,set_idx:i,rung_id:rung?rung.id:null}));
+    let{data,error}=await sb.from('coaching_session_sets').insert(rows).select();
+    // Sin la 146 el ejercicio igual sirve: se registra la marca, pero sin decir en qué escalón.
+    if(error&&(error.code==='PGRST204'||/rung_id/i.test(String(error.message||'')))){
+      toast('Falta correr la migración 146: se guarda la marca, no la progresión','warn');
+      ({data,error}=await sb.from('coaching_session_sets')
+        .insert(rows.map(({rung_id,...r})=>r)).select());
     }
-    await refreshWeekAndSchedule();
+    if(error)throw error;
+    coachSessionSets[newKey]=(data||[]).sort((a,b)=>a.set_idx-b.set_idx);
+    hideLoading();
+    renderWorkoutSheet();
     skillMarks=null;
-    hideLoading();
-    toast(sk('hsStarted'),'ok');
-    renderSkillSheet();
-  }catch(e){hideLoading();toast(sk('saveErr')+': '+(e.message||e),'err');}
-}
-
-// Repetir la fase es correr la fecha de inicio lo que dura una fase: las semanas que siguen
-// vuelven a ser de esta fase. La copia es de la persona, así que la plantilla no se toca.
-async function hsRepeatPhaseNow(p){
-  const{error}=await sb.from('coaching_programs')
-    .update({start_date:HabitSkills.repeatPhaseStartDate(HS_PROGRAM,p.start_date),updated_at:new Date().toISOString()})
-    .eq('id',p.id).eq('user_id',sbUser.id);
-  if(error)throw error;
-  await refreshWeekAndSchedule();
-}
-async function hsRepeatPhase(){
-  const p=hsActive();
-  const ph=p?HabitSkills.programPhase(HS_PROGRAM,myProgramCycleIndex(p)):null;
-  if(!ph)return;
-  const vars={n:ph.n,name:hsPhaseName(ph)};
-  if(!await confirmSheet(skf('hsRepeatBody',vars),{title:skf('hsRepeatTitle',vars),confirmLabel:sk('hsRepeat')}))return;
-  showLoading();
-  try{await hsRepeatPhaseNow(p);hideLoading();toast(skf('hsRepeated',vars),'ok');renderSkillSheet();}
-  catch(e){hideLoading();toast(sk('saveErr')+': '+(e.message||e),'err');}
-}
-
-// Dejarlo: el programa se desactiva y su semana base (la que escribió apply_coaching_program)
-// se borra, porque si no la plantilla seguiría estampando la Fase 1 cada semana.
-async function hsLeaveProgram(){
-  const p=hsActive();
-  if(!p)return;
-  if(!await confirmSheet(sk('hsLeaveBody'),{title:sk('hsLeaveTitle'),confirmLabel:sk('hsLeave'),danger:true}))return;
-  showLoading();
-  try{
-    const{error}=await sb.from('coaching_programs').update({is_active:false,updated_at:new Date().toISOString()})
-      .eq('id',p.id).eq('user_id',sbUser.id);
-    if(error)throw error;
-    if(hsBoardIds.size)await sb.from('coaching_week_templates').delete().eq('user_id',sbUser.id).in('board_id',[...hsBoardIds]);
-    await refreshWeekAndSchedule();
-    hideLoading();
-    toast(sk('hsLeft'),'ok');
-    renderSkillSheet();
-  }catch(e){hideLoading();toast(sk('saveErr')+': '+(e.message||e),'err');}
-}
-
-// La prueba de fase, al cerrar la sesión C (el sábado) de una semana del programa. Se mide con
-// el estándar del escalón de esa fase sobre las series de ESTA sesión (meetsStandard). En la
-// primera semana de la fase es práctica; en la segunda decide: pasar (y subir en la escalera si
-// la línea es suya) o repetir la fase. Decide la persona, como subir de escalón.
-async function hsAfterSession(row,sets){
-  const p=hsActive();
-  if(!p||!row||row.program_id!==p.id)return;
-  const w=Number(row.program_week_index)||0;
-  const ph=HabitSkills.programPhase(HS_PROGRAM,w);
-  const cDay=(myProgramDays||[]).find(d=>d.program_id===p.id&&Number(d.week_index)===w&&Number(d.dow)===5);
-  if(!ph||!cDay||cDay.board_id!==row.board_id)return;
-  await loadSkillsSb(false);
-  const rungs=skillRungs(HS_PROGRAM.group);
-  const rung=HabitSkills.rungAt(rungs,ph.rank);
-  if(!rung)return;
-  let testSets=[];
-  sessionExerciseList(row,sets||{}).forEach((ex,i)=>{
-    const r=rungForExercise(ex);
-    if(r&&r.slug===rung.slug)testSets=testSets.concat((sets||{})[exerciseKeyForSession(row.board_id,ex,i)]||[]);
-  });
-  const res=HabitSkills.meetsStandard(rung,testSets);
-  const best=res.best?fmtMark(rung,res.best):'—', std=hsRungStd(rung);
-  if(!HabitSkills.isPhaseTestWeek(HS_PROGRAM,w)){toast(skf('hsPractice',{best}),'ok');return;}
-  const next=HS_PROGRAM.phases[ph.n]||null;
-  const vars={n:ph.n,name:hsPhaseName(ph),best,std,next:next&&next.n,got:res.qualifying,needed:res.needed};
-  if(res.passed){
-    const mine=mySkillRanks[HS_PROGRAM.group];
-    const nextRung=HabitSkills.nextRung(rungs,ph.rank);
-    const canLevel=nextRung&&HabitSkills.rungOwner(mine)!=='coach'&&(!mine||Number(mine.rank)<=ph.rank);
-    const choices=(canLevel?[{key:'level',label:skf('levelUp',{name:rungLabel(nextRung)})}]:[]).concat([{key:'ok',label:sk('hsDoneOk')}]);
-    const k=await choiceSheet(next?skf('hsPassBody',vars):skf('hsPassFinal',vars),choices,{title:sk('hsPassTitle')});
-    if(k==='level'){
-      try{await skillSaveOwnRank(HS_PROGRAM.group,Number(nextRung.progression_rank));toast(skf('selfSaved',{name:rungLabel(nextRung)}),'ok');}
-      catch(e){toast(sk('saveErr')+': '+(e.message||e),'err');}
-    }
-  }else{
-    const choices=[{key:'repeat',label:sk('hsRepeat')}].concat(next?[{key:'go',label:skf('hsKeepGoing',vars)}]:[]);
-    const k=await choiceSheet(skf('hsFailBody',vars),choices,{title:sk('hsFailTitle')});
-    if(k==='repeat'){
-      try{await hsRepeatPhaseNow(p);toast(skf('hsRepeated',vars),'ok');}
-      catch(e){toast(sk('saveErr')+': '+(e.message||e),'err');}
-    }
-  }
+    toast(skillName(skill)+' agregado','ok');
+  }catch(e){hideLoading();toast('Error al agregar: '+e.message,'err');}
 }
 
 // ---- El coach, en la misma hoja --------------------------------------------------------------

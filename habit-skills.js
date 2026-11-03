@@ -180,84 +180,65 @@
              best: bestMark(rung, sets) };
   }
 
-  // ---- Programas por fases (handstand-8, migración 145) --------------------------------------
+  // ---- La progresión es la carga (migración 146) ---------------------------------------------
 
-  // Lo que la app necesita saber del programa para pintarlo y decidir; las rutinas, los días y
-  // las semanas viven en la base. `rank` es el escalón de la escalera que mide la prueba de
-  // cada fase: la fase termina cuando se cumple ese estándar.
-  const HANDSTAND_PROGRAM = {
-    key: 'handstand-8', group: 'handstand', weeks: 8, weeksPerPhase: 2, minutes: 20, days: 6,
-    phases: [
-      { n: 1, rank: 1, es: 'Base', en: 'Base' },
-      { n: 2, rank: 3, es: 'Línea en pared', en: 'Wall line' },
-      { n: 3, rank: 4, es: 'Equilibrio', en: 'Balance' },
-      { n: 4, rank: 5, es: 'Libre', en: 'Freestanding' }
-    ]
-  };
+  // Un ejercicio de rutina puede ser una LÍNEA entera en vez de una variante: la rutina dice
+  // «Aguante de front lever» y la progresión se elige al entrenar. No es un ejercicio del
+  // catálogo con un campo de más: es otra cosa, y por eso se reconoce por `skillGroup` y no
+  // por `catalogId`.
+  const skillGroupOf = ex => (ex && (ex.skillGroup || ex.skill_group)) || '';
+  const isSkillExercise = ex => !!skillGroupOf(ex);
 
-  // La fase de una semana del ciclo (1..weeks), o null fuera del ciclo (0 = no empezó,
-  // -1 = terminó, como coaching_program_week_index en SQL).
-  function programPhase(program, weekIndex) {
-    const w = Number(weekIndex);
-    if (!program || !(w >= 1) || w > program.weeks) return null;
-    return program.phases[Math.ceil(w / program.weeksPerPhase) - 1] || null;
+  const rungById = (list, id) =>
+    (id && (list || []).find(r => String(r.id) === String(id))) || null;
+
+  // En qué escalón arranca una serie. El orden copia al del peso, que es lo que esto sustituye:
+  // manda lo que acabas de hacer en esta misma sesión —dentro de un entreno se sube y se baja,
+  // que es justo el caso que esto existe para resolver—, luego lo último que registraste en
+  // esa línea, luego el escalón que llevas marcado, y si no hay nada, el primero de la
+  // escalera. Nunca devuelve algo que no esté en la lista.
+  function defaultRung(list, opts) {
+    const o = opts || {};
+    const by = v => rungById(list, v) || rungAt(list, v);
+    return by(o.lastInSession) || by(o.lastLogged) || by(o.currentRank) || (list || [])[0] || null;
   }
 
-  // La segunda semana de cada fase termina en la prueba (su sábado).
-  function isPhaseTestWeek(program, weekIndex) {
-    return !!programPhase(program, weekIndex) && Number(weekIndex) % program.weeksPerPhase === 0;
+  // El objetivo escrito de un escalón, para sembrar la serie cuando la rutina no trae uno
+  // propio: cada escalón tiene el suyo y cambian de unidad dentro de una misma línea (en
+  // handstand los jalones de talón son repeticiones entre aguantes).
+  function rungTargetText(rung) {
+    if (!rung || rung.progression_target == null || rung.progression_target === '') return '';
+    const n = Number(rung.progression_target);
+    if (!Number.isFinite(n) || n <= 0) return '';
+    return markUnit(rung) === 'time' ? n + 's' : String(n);
   }
 
-  // Por dónde entra alguien que ya está en el escalón `rank` de la escalera: la primera fase
-  // cuya prueba es ese escalón o uno más arriba. Escalón 1 → fase 1; 2–3 → fase 2 (su prueba es
-  // el 3); 4 → fase 3; 5 o más → fase 4. Devuelve la primera semana de esa fase.
-  function placementWeek(program, rank) {
-    const r = Math.max(1, Number(rank) || 1);
-    const phase = program.phases.find(p => p.rank >= r) || program.phases[program.phases.length - 1];
-    return (phase.n - 1) * program.weeksPerPhase + 1;
-  }
-
-  // Fechas ISO (YYYY-MM-DD) en UTC, sin horas: un día es un día en cualquier zona.
-  function addDaysIso(iso, days) {
-    const d = new Date(String(iso).slice(0, 10) + 'T00:00:00Z');
-    d.setUTCDate(d.getUTCDate() + Number(days || 0));
-    return d.toISOString().slice(0, 10);
-  }
-
-  // start_date tal que el lunes `firstMonday` sea la semana `startWeek` del ciclo: entrar en la
-  // fase 3 es un programa que «empezó» cuatro semanas antes. Así no hace falta otro motor: el
-  // calendario ya se estampa desde start_date (115).
-  function programStartDate(firstMonday, startWeek) {
-    return addDaysIso(firstMonday, -7 * (Math.max(1, Number(startWeek) || 1) - 1));
-  }
-
-  // Repetir la fase: la fecha de inicio se corre lo que dura una fase, y las semanas que siguen
-  // vuelven a ser de la fase que se está terminando.
-  function repeatPhaseStartDate(program, startDate) {
-    return addDaysIso(startDate, 7 * program.weeksPerPhase);
-  }
-
-  // ---- Cuánto dura una sesión ---------------------------------------------------------------
-
-  // Trabajo + descanso de cada serie. Un 'max' se cuenta como MAX_HOLD_SEC (aguante) o
-  // MAX_REPS repeticiones, y una repetición como REP_SEC: es lo que permite probar que las
-  // rutinas de 20 minutos de verdad caben en 20 minutos.
-  const MAX_HOLD_SEC = 40, MAX_REPS = 10, REP_SEC = 3;
-
-  function exerciseSeconds(ex) {
-    const sets = Math.max(1, parseInt(ex && ex.sets, 10) || 1);
-    const reps = String(ex && ex.reps == null ? '' : ex.reps).trim().toLowerCase();
-    const timed = String(ex && ex.repsType || '').toLowerCase() === 'time' || ht().metricType(ex) === 'time';
-    const isMax = /^(max|máx|fallo)$/.test(reps);
-    const work = timed
-      ? (isMax ? MAX_HOLD_SEC : (ht().parseSeconds(reps) || 0))
-      : (isMax ? MAX_REPS : (parseInt(reps, 10) || 0)) * REP_SEC;
-    const rest = ht().parseSeconds(String(ex && ex.rest || '').replace(/\s+/g, '')) || 0;
-    return sets * (work + rest);
-  }
-
-  function sessionSeconds(exercises) {
-    return (exercises || []).reduce((n, ex) => n + exerciseSeconds(ex), 0);
+  // La marca de cada escalón a partir de las series registradas. `resolve(row)` dice de qué
+  // escalón es cada fila: con la 146 eso es su rung_id, y en las filas viejas se deduce del
+  // ex_key. Devuelve { group: { rank: { mark, sessions } } }, con las sesiones de la más
+  // reciente a la más vieja, que es como readiness() espera leerlas.
+  function marksFromRows(rows, resolve) {
+    const perRung = {};
+    (rows || []).forEach(row => {
+      const rung = resolve && resolve(row);
+      if (!rung) return;
+      const bucket = perRung[rung.slug] || (perRung[rung.slug] = { rung, sessions: new Map() });
+      // Sin schedule_id la serie es suelta: cuenta como su propia sesión, no como una ajena.
+      const sid = row.schedule_id || ('x' + row.id + row.ex_key);
+      const prev = bucket.sessions.get(sid);
+      const s = prev || { id: sid, at: row.created_at, sets: [] };
+      if (new Date(row.created_at) > new Date(s.at)) s.at = row.created_at;
+      s.sets.push(row);
+      bucket.sessions.set(sid, s);
+    });
+    const marks = {};
+    Object.values(perRung).forEach(b => {
+      const sessions = [...b.sessions.values()].sort((x, y) => new Date(y.at) - new Date(x.at));
+      const mark = bestMark(b.rung, sessions.flatMap(s => s.sets));
+      const g = b.rung.progression_group;
+      (marks[g] || (marks[g] = {}))[b.rung.progression_rank] = { mark, sessions };
+    });
+    return marks;
   }
 
   // ---- Cues --------------------------------------------------------------------------------
@@ -302,9 +283,7 @@
     markUnit, setMark, bestMark,
     skillLevel, rungProgress, readiness,
     rungOwner, rungWorkout, catalogSlugFromExKey, meetsStandard,
-    HANDSTAND_PROGRAM, programPhase, isPhaseTestWeek, placementWeek,
-    addDaysIso, programStartDate, repeatPhaseStartDate,
-    MAX_HOLD_SEC, MAX_REPS, REP_SEC, exerciseSeconds, sessionSeconds,
+    skillGroupOf, isSkillExercise, rungById, defaultRung, rungTargetText, marksFromRows,
     cueList, animationKind
   };
 

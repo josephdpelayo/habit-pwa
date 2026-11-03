@@ -931,42 +931,82 @@ desde totales. Los campos `sessions`/`daily` controlan listas y distribución po
 de km y de minutos van separadas. Los textos nuevos usan `WEEK_REFERENCE_COPY` (ES/EN);
 `open({lang})` determina la exportación, sin equivaler todavía a traducir toda la aplicación.
 
-## Programa «Parada de manos en 8 semanas» (20261102-6)
+## Ejercicios de parada de manos, y por qué no hay programa (20261102-6)
 
-Migración 145 y `docs/PROGRAMA_HANDSTAND.md`. **Solo en Crew**; HABIT sigue congelada. Es el
-primer programa del gym que una persona se aplica sola, y por eso no inventa motor: la
-plantilla es un `coaching_programs` con `user_id` nulo (como las de la 114) y empezarlo es
-`apply_coaching_program` sobre la propia cuenta, que copia la plantilla y la vuelve suya. Con
-`start_date` el calendario se estampa semana por semana (115), así que Hoy ya muestra la sesión
-del día sin código nuevo.
+Migración 145 y `docs/PROGRAMA_HANDSTAND.md`. Diez ejercicios nuevos del `exercise_catalog`
+—preparación de muñecas y hombros, encogimientos en pica y de frente a la pared, patadas de
+conejo, a la pared y al equilibrio, salida en rueda, caminata en pared, toques de hombro— cada
+uno con su figura en `skill-anim/`, sus `instructions` en español y en **inglés**
+(`instructions_en`, requisito permanente) y su patrón de movimiento. Más la figura de
+`hollow-hold` y `parada-de-rana`, que ya estaban en el catálogo sin ella.
 
-- **8 semanas, 4 fases de 2, 6 días** (lun–sáb A B A B A C, domingo libre), 20 min por sesión.
-  Las 12 rutinas (fase × A/B/C) son `boards` del gym con `owner_id` nulo y **no son
-  `is_starter`**: no salen en la lista de nadie hasta que empieza el programa.
-- **Cada fase termina en el estándar de un escalón de la escalera de parada de manos** (141),
-  no en un criterio propio: fase 1 → escalón 1, fase 2 → 3, fase 3 → 4, fase 4 → 5. La sesión C
-  de la segunda semana de cada fase mide ese escalón con `reps='max'`, y al cerrarla
-  `hsAfterSession` compara con `HabitSkills.meetsStandard` —el mismo `readiness` de la
-  escalera—. Si pasa, se le ofrece **subir de escalón** (lo mueve la persona, nunca la app, como
-  en la 144); si no, **«Repetir esta fase»**, que es correr `start_date` dos semanas
-  (`repeatPhaseStartDate`) en su programa, sin tocar la plantilla del gym.
-- **La lógica pura vive en `habit-skills.js`** (`HANDSTAND_PROGRAM`, `programPhase`,
-  `isPhaseTestWeek`, `placementWeek`, `programStartDate`, `repeatPhaseStartDate`,
-  `sessionSeconds`), no en `crew.html`: `scripts/check-handstand.js` la prueba contra la
-  migración y comprueba que cada sesión quepa de verdad en 20 min (series × (trabajo +
-  descanso) + 15 s de transición por ejercicio), que la nota de cada prueba prometa el número
-  que pide su escalón, que todo ejercicio exista en el catálogo y tenga figura, y que los
-  textos nuevos vengan en los dos idiomas con los mismos cues.
-- **Se entra por nivel**: `placementWeek` traduce el escalón en el que va la persona a la
-  primera semana de su fase, y empezar en la semana 5 es un programa que arrancó cuatro semanas
-  antes (`programStartDate`), no un campo nuevo.
-- **El puente con la escalera**: `loadSkillMarksSb` solo miraba las rutinas de `myRoutines`, y
-  las del programa no están ahí; `activeProgramBoardsSb()` las agrega. Sin eso, entrenar el
-  programa no movería la escalera, que es justo lo que lo conecta.
-- **Inglés desde el primer día** (requisito permanente): columnas `instructions_en`,
-  `boards.name_en`, `coaching_programs.name_en`/`notes_en`,
-  `coaching_program_weeks.note_en`, y `note_en` en cada ejercicio de las rutinas. Hoy la app lee
-  el español (`skLang()` devuelve `'es'`); el día que exista el selector, el inglés ya está.
-- **12 figuras nuevas** en `skill-anim/` (generadas por `scripts/make-skill-anim.py`), con sus
-  puntos de referencia y su aserción de alineación en `check-handstand.js`, igual que las 35 de
-  las escaleras. La salida en rueda es la única **de frente**: de perfil un giro lateral no se ve.
+**La 145 escribía además un programa de 8 semanas y ya no.** Traía 12 rutinas fijas (fase ×
+A/B/C) y una plantilla de `coaching_programs` con sus 48 días, todo colgado de
+`apply_coaching_program`. Joseph lo rechazó el 2 nov 2026, antes de que se corriera en
+Supabase: **no quiere un programa cerrado**, quiere asignar ejercicios según el nivel de cada
+quien. Como nunca llegó a la base, la migración se reescribió en lugar de agregar una que la
+deshaga; los ejercicios y las figuras se quedaron porque son contenido y sirven igual.
+
+**Lo que sí quiere, y que el modelo de hoy no da: en una skill la progresión es la carga.**
+Un «Aguante de front lever» en la rutina no debe pedir kilos sino **en qué progresión**, y debe
+poder cambiarla **serie por serie dentro del mismo entreno** — así entrena él: el aguante en
+straddle al 80 %, las negativas subiendo en advanced y bajando en half straddle, los touch y las
+dominadas en L y en tuck, todo el mismo día. Contra eso, hoy `coach_student_skills` guarda **un
+escalón por línea y por persona** y la marca de la escalera se deduce del `ex_key`, o sea una
+sola progresión por ejercicio. Pendiente de construir.
+
+La 145 también le quita a `anon` el EXECUTE sobre `apply_coaching_program`,
+`ensure_coaching_week_from_template` y `coaching_week_slots`: su candado
+(`auth.uid() <> p_user_id`) no frena una llamada sin sesión, porque `null <> x` es null, así que
+con la llave pública de la app y el id de alguien se le reescribía la semana. Mismo caso que la
+124, y nada que ver con el handstand, por eso sobrevivió al recorte. Cada revoke va guardado con
+`to_regprocedure`: una firma que no exista tumbaría la transacción entera, y la 115 ya cambió la
+de `apply_coaching_program` una vez.
+
+`scripts/check-handstand-exercises.js` prueba los diez ejercicios, sus dos idiomas, que la
+migración ya no escriba nada del programa, y **la alineación de cada figura** leyendo sus puntos
+de referencia, igual que `check-skills.js` con los 35 escalones.
+
+## En una skill la progresión es la carga (20261102-7)
+
+Migración 146 y `docs/PROGRAMA_HANDSTAND.md` §10. **Solo en Crew.** Un ejercicio de calistenia
+no se carga con kilos: se carga con progresión, y no con una por entreno. Joseph entrena el
+front lever con el aguante en straddle, las negativas subiendo en una pierna y bajando en tuck
+avanzado, y los touch y las dominadas en tuck — **cuatro escalones de la misma línea el mismo
+día**. Por eso la variante va **por serie**, exactamente donde vive `weight`.
+
+- **`coaching_session_sets.rung_id`** (→ `exercise_catalog(id)`, `on delete set null`) dice en
+  qué escalón se hizo esa serie. Es el gemelo de `weight` para lo que no se carga con peso.
+  `merge_exercise_catalog` desactiva la fila que fusiona en vez de borrarla, así que un merge no
+  deja `rung_id` colgando.
+- **Un ejercicio de rutina puede ser la LÍNEA entera**: `boards.exercises[].skillGroup` (el slug
+  de `coach_skills`) en lugar de `catalogId`. La rutina dice «Aguante de front lever» y la
+  progresión se elige al entrenar. Es jsonb, no pidió columna. `HabitSkills.isSkillExercise()`
+  es lo que lo distingue.
+- **La hoja de entreno**: donde va la columna de los kilos va un botón con el escalón
+  (`wsRungCellsHtml`), y tocarlo abre la escalera en un `choiceSheet`. La unidad de la marca la
+  manda **el escalón, no el ejercicio**: una línea puede mezclar aguantes y repeticiones (en
+  handstand los jalones de talón van entre dos aguantes), así que la celda de al lado es
+  segundos o reps según la serie, y el objetivo sembrado es el de ese escalón.
+  `rungShortName()` le quita el nombre de la línea al del escalón, porque en 100 px «Front
+  lever a una pierna» se corta justo en lo que distingue un escalón de otro.
+- **Dónde arranca cada serie** (`HabitSkills.defaultRung`, puro): manda lo que acabas de hacer
+  en esta sesión —el caso que esto existe para resolver—, luego lo último que registraste en esa
+  línea (`wsLoadLastRungs`), luego el escalón que llevas marcado, y si no hay nada, el primero.
+  Cambiar el escalón de una serie **arrastra a las siguientes que no estén hechas y sigan en el
+  escalón viejo**: cambiar de variante a media sesión quiere decir «de aquí en adelante», y así
+  no pisa una serie ya hecha ni una que pusiste aparte.
+- **La marca de la escalera sale de la serie, no del `ex_key`.** `loadSkillMarksSb` hacía dos
+  cosas frágiles: cruzaba las rutinas de la persona para adivinar qué escalón era cada llave, y
+  asumía una sola progresión por ejercicio. Ahora son **dos consultas** (por llave, como antes,
+  y por `rung_id`), porque la llave de un ejercicio de línea no está en ninguna rutina, y la
+  agregación vive en `HabitSkills.marksFromRows`, que es puro y se prueba.
+- **Todo tolera que la 146 no esté corrida**: la siembra, `addSetSb` y `skillTrainLine`
+  reintentan sin `rung_id` ante un PGRST204, y `wsLoadLastRungs` se queda callado. El ejercicio
+  funciona sin la columna; lo único que se pierde es en qué escalón fue la serie.
+- **Cómo se agrega hoy**: «Entrenar la línea» en la hoja de la escalera, junto a «Entrenar este
+  escalón». El builder de rutinas todavía no sabe crear un ejercicio de línea.
+
+`scripts/check-skill-sets.js` lo prueba con la escalera real de front lever leída de la 141, y
+el caso que importa es el entreno de Joseph: cuatro escalones en una sesión, cuatro marcas
+separadas, y `readiness` leyendo solo las series del escalón que le toca.

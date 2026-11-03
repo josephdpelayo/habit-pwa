@@ -292,3 +292,83 @@ no se ve.
   - **Falta la etapa 4**: correr la 145 en el SQL Editor de Supabase y publicar. Hasta que
     corra, la tarjeta del programa no aparece (sin plantilla, `hsTemplate` es null y
     `hsCardHtml` devuelve ''), y el resto de Crew sigue igual.
+- **2 nov 2026 (tarde)** — **El programa se cae; los ejercicios se quedan.** Joseph: «no lo
+  quiero como tal como programa tampoco. Dependiendo el nivel de cada uno les pondré diferentes
+  ejercicios». Nada de la 145 había corrido en Supabase todavía, así que se reescribió en lugar
+  de agregar una migración que la deshaga: `145_handstand_program.sql` →
+  `145_handstand_exercises.sql`, que deja los 10 ejercicios con su figura y su inglés (y la
+  figura de `hollow-hold` y `parada-de-rana`), y tira las 12 rutinas, la plantilla de 8 semanas
+  y las columnas que solo servían para ella. Sobrevive también el revoke a `anon`, que nunca fue
+  del handstand. `check-handstand.js` → `check-handstand-exercises.js`, reducido a los
+  ejercicios y a la alineación de las figuras. **Se pierden los cues de 3 líneas** de cada
+  ejercicio de las rutinas: vivían en `boards.exercises[].note`, que ya no existe. Las
+  `instructions` del catálogo dicen lo mismo en prosa.
+  **Lo que todavía está en el repo y hay que quitar o reusar**: la UI del programa en
+  `crew.html` (`hsCardHtml`, `hsProgramHtml`, `hsStartProgram`, `hsRepeatPhase`,
+  `hsAfterSession`, `hsScheduleLine`, `renderProgramGymList`, `loadHandstandTemplateSb`,
+  `activeProgramBoardsSb`) y la lógica de programa en `habit-skills.js` (`HANDSTAND_PROGRAM`,
+  `programPhase`, `isPhaseTestWeek`, `placementWeek`, `programStartDate`,
+  `repeatPhaseStartDate`). Hoy quedan inertes: sin plantilla, `hsTemplate` es null y no se
+  dibuja nada.
+
+---
+
+## 10. Lo que sí quiere: la progresión como carga
+
+Decidido el 2 nov 2026, en lugar del programa.
+
+**En una skill, la progresión es la carga.** Donde un ejercicio con peso pregunta «¿cuántos
+kg?», un aguante de front lever tiene que preguntar «¿en qué progresión?», y dejar cambiarla
+**serie por serie dentro del mismo entreno**, igual que se cambia el peso entre series. Así
+entrena Joseph su front lever hoy: el aguante en straddle al 80 %, los presses y las negativas
+subiendo en advanced y bajando en half straddle, los touch y las dominadas en L y en tuck —
+cuatro progresiones distintas de la misma línea, el mismo día.
+
+**El ejercicio de la rutina nombra la línea, no la variante** (decisión de Joseph): la rutina
+dice «Aguante de front lever» y la progresión se elige al entrenar, arrancando en la que se usó
+la última vez.
+
+Contra eso, el modelo de hoy:
+
+- `coach_student_skills` guarda **un escalón por línea y por persona**. Lo que hace falta es un
+  escalón por serie, que además puede ir hacia arriba y hacia abajo dentro de la misma sesión.
+- La marca de la escalera se deduce del `ex_key` del ejercicio (`loadSkillMarksSb`), o sea **una
+  sola progresión por ejercicio**. Con la progresión por serie la marca sale exacta, que es
+  mejor que lo de hoy.
+- `coaching_session_sets` tiene `weight` por serie y nada que diga en qué variante se hizo.
+- «La vez pasada» compara contra el ejercicio; tendría que comparar contra **esa variante**, o
+  pondría el tiempo de un tuck junto a un straddle.
+
+Falta decidir y construir. Pendiente también: el **80 %** que Joseph usa en el aguante es una
+dosis relativa al máximo de esa variante, y hoy no hay forma de escribirla.
+
+### Construido (2 nov 2026, versión 20261102-7)
+
+**Migración 146**: `coaching_session_sets.rung_id` y su índice por persona y escalón.
+
+**Fuera de Crew**: la UI del programa (≈400 líneas: `hsCardHtml`, `hsProgramHtml`,
+`hsStartProgram`, `hsRepeatPhase`, `hsAfterSession`, `hsScheduleLine`, `renderProgramGymList`,
+`loadHandstandTemplateSb`, `activeProgramBoardsSb`, sus textos en los dos idiomas y su CSS) y la
+lógica de programa de `habit-skills.js` (`HANDSTAND_PROGRAM`, `programPhase`, `isPhaseTestWeek`,
+`placementWeek`, `programStartDate`, `repeatPhaseStartDate`, `sessionSeconds`,
+`exerciseSeconds`).
+
+**Dentro**: `HabitSkills.isSkillExercise` / `skillGroupOf` / `rungById` / `defaultRung` /
+`rungTargetText` / `marksFromRows` (puro, probado), y en Crew la celda de progresión en la hoja
+de entreno, el selector con la escalera entera, el arrastre a las series siguientes, la siembra
+y `addSetSb` heredando el escalón, `loadSkillMarksSb` leyendo `rung_id`, y «Entrenar la línea»
+en la hoja de la escalera.
+
+**Lo que falta:**
+
+1. **El builder de rutinas** no sabe crear un ejercicio de línea. Hoy solo se agrega desde la
+   escalera, a la sesión en curso. Para que una rutina diga «Aguante de front lever» hay que
+   poder elegir una línea donde hoy se elige un ejercicio del catálogo.
+2. **«La vez pasada» todavía compara contra el ejercicio**, no contra la variante: en un
+   ejercicio de línea pondría el tiempo de un tuck junto a un straddle. `lastScoresFor` tendría
+   que ir por (ejercicio, escalón).
+3. **El 80 %.** Joseph hace el aguante «al 80 %» de su máximo en esa variante. Es una dosis
+   relativa y hoy no hay cómo escribirla: `reps_target` es un texto con un número absoluto.
+4. **Las otras dos líneas de su front lever.** Hoy existen `front-lever` (aguantes) y
+   `front-lever-raise` (elevaciones). Sus presses/negativas y sus touch/dominadas en L no son
+   líneas: o se agregan, o se registran como ejercicios sueltos del catálogo.
