@@ -218,7 +218,15 @@ for (const s of ['patada-al-equilibrio', 'toques-de-hombro-en-pared', 'encogimie
 }
 
 // ── 7. Lo que la 145 cierra de paso ────────────────────────────────────────
-assert.match(sql, /revoke execute on function public\.apply_coaching_program\(uuid, uuid, date, date, date\) from anon/);
-assert.match(sql, /revoke execute on function public\.ensure_coaching_week_from_template\(uuid, date\) from anon/);
+// Las funciones que reescriben la semana de alguien se le quitan a anon, y cada una solo
+// donde esté: un revoke sobre una función que no existe tumba toda la migración (la 124).
+for (const f of ['public.apply_coaching_program(uuid, uuid, date, date, date)',
+                 'public.apply_coaching_program(uuid, uuid, date, date)',
+                 'public.ensure_coaching_week_from_template(uuid, date)',
+                 'public.coaching_week_slots(uuid, uuid, integer)']) {
+  assert.ok(sql.includes(`'${f}'`), `la 145 tiene que quitarle a anon ${f}`);
+}
+assert.match(sql, /to_regprocedure\(f\) is not null/, 'el revoke va guardado: la firma puede no existir');
+assert.match(sql, /execute 'revoke execute on function ' \|\| f \|\| ' from anon'/);
 
 console.log(`HABIT handstand: ${boards.length} rutinas, ${rows.length + prep.length * 12} ejercicios programados, todas en ≤ ${P.minutes} min`);

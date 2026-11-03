@@ -421,9 +421,23 @@ join (values (1, 'Base', 'Base'), (2, 'Línea en pared', 'Wall line'),
 -- 5. anon fuera de las funciones que reescriben la semana de alguien
 -- ---------------------------------------------------------------------------
 
-revoke execute on function public.apply_coaching_program(uuid, uuid, date, date, date) from anon;
-revoke execute on function public.ensure_coaching_week_from_template(uuid, date) from anon;
-revoke execute on function public.coaching_week_slots(uuid, uuid, integer) from anon;
+-- Cada una solo donde esté, como en la 124: un revoke sobre una función que no existe es un
+-- error, y aquí tumbaría toda la migración por una firma que cambió de versión (la 115 dejó
+-- apply_coaching_program en cinco argumentos y tiró la de cuatro).
+do $$
+declare f text;
+begin
+  foreach f in array array['public.apply_coaching_program(uuid, uuid, date, date, date)',
+                           'public.apply_coaching_program(uuid, uuid, date, date)',
+                           'public.ensure_coaching_week_from_template(uuid, date)',
+                           'public.coaching_week_slots(uuid, uuid, integer)'] loop
+    if to_regprocedure(f) is not null then
+      execute 'revoke execute on function ' || f || ' from anon';
+    else
+      raise notice 'No existe %, no hay permiso que quitar', f;
+    end if;
+  end loop;
+end $$;
 
 do $$
 declare n_boards int; n_days int; n_weeks int;
