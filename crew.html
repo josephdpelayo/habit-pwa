@@ -6,12 +6,12 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="HABIT">
 <meta name="application-name" content="HABIT">
-<link rel="manifest" href="/manifest.json?v=20261102-8">
-<link rel="apple-touch-icon" sizes="120x120" href="/icons/icon-120.png?v=20261102-8">
-<link rel="apple-touch-icon" sizes="152x152" href="/icons/icon-152.png?v=20261102-8">
-<link rel="apple-touch-icon" sizes="167x167" href="/icons/icon-167.png?v=20261102-8">
-<link rel="apple-touch-icon" sizes="180x180" href="/icons/icon-180.png?v=20261102-8">
-<link rel="icon" type="image/png" sizes="32x32" href="/icons/icon-32.png?v=20261102-8">
+<link rel="manifest" href="/manifest.json?v=20261102-9">
+<link rel="apple-touch-icon" sizes="120x120" href="/icons/icon-120.png?v=20261102-9">
+<link rel="apple-touch-icon" sizes="152x152" href="/icons/icon-152.png?v=20261102-9">
+<link rel="apple-touch-icon" sizes="167x167" href="/icons/icon-167.png?v=20261102-9">
+<link rel="apple-touch-icon" sizes="180x180" href="/icons/icon-180.png?v=20261102-9">
+<link rel="icon" type="image/png" sizes="32x32" href="/icons/icon-32.png?v=20261102-9">
 <title>HABIT</title>
 <!-- Con id a propósito: scripts/check-training.js toma la primera etiqueta script sin
      atributos como el script principal de la app y la compila. -->
@@ -25,7 +25,7 @@
   var crew=/^\/crew(\/|$)/.test(location.pathname);
   window.HABIT_BRAND=crew?'crew':'gym';
   if(!crew)return;
-  var v='20261102-8';
+  var v='20261102-9';
   document.documentElement.classList.add('brand-crew');
   document.title='HABIT Crew';
   document.querySelectorAll('meta[name="apple-mobile-web-app-title"],meta[name="application-name"]')
@@ -40,12 +40,12 @@
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Share+Tech+Mono&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="/skandi-recovery.js?v=20261102-8"></script>
-<script src="/body-figure.js?v=20261102-8"></script>
-<script src="/habit-training.js?v=20261102-8"></script>
-<script src="/habit-share.js?v=20261102-8"></script>
-<script src="/habit-activity.js?v=20261102-8"></script>
-<script src="/habit-skills.js?v=20261102-8"></script>
+<script src="/skandi-recovery.js?v=20261102-9"></script>
+<script src="/body-figure.js?v=20261102-9"></script>
+<script src="/habit-training.js?v=20261102-9"></script>
+<script src="/habit-share.js?v=20261102-9"></script>
+<script src="/habit-activity.js?v=20261102-9"></script>
+<script src="/habit-skills.js?v=20261102-9"></script>
 <style>
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
 @media (prefers-reduced-motion:reduce){*,*:before,*:after{scroll-behavior:auto!important;animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}}
@@ -4277,7 +4277,7 @@ const GYM_ONLY_VIEWS=['book','planes','historial','shop'];
 const GYM_APP_URL='/';
 document.querySelectorAll('.brand-name').forEach(el=>{el.textContent=BRAND_NAME;});
 const SUPABASE_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBtcGp0ZXVxanVzYmlkdWV2YndxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc2OTI1NjUsImV4cCI6MjA5MzI2ODU2NX0.XbMzZoo2yqtrD8znLnyo_1zDfrdJAvAPj1lqGOyXnLw';
-const APP_VERSION='20261102-8';
+const APP_VERSION='20261102-9';
 // La pierna va separada en cuádriceps, femorales y pantorrillas: la figura
 // corporal pinta esas tres regiones por separado y el motor de recuperación les
 // da ventanas de descanso distintas. 'Piernas' sigue reconociéndose al leer
@@ -9837,6 +9837,22 @@ function wsBestForRung(group,rung){
   return HabitSkills.bestMark(rung,m.sessions.filter(x=>x.id!==sid).flatMap(x=>x.sets));
 }
 
+// Lo que hiciste la última vez EN ESE ESCALÓN. En un ejercicio de línea «la vez pasada» no
+// puede ser la del ejercicio: pondría el tiempo de un tuck al lado de un straddle, que no se
+// comparan. Es la mejor serie de la última sesión en que entrenaste ese escalón, sin contar la
+// de hoy.
+function wsLastForRung(group,rung){
+  const m=(skillMarks&&skillMarks[group]&&skillMarks[group][rung.progression_rank])||null;
+  if(!m)return null;
+  const sid=activeCoachingSession&&activeCoachingSession.id;
+  const prev=m.sessions.find(x=>x.id!==sid);
+  if(!prev)return null;
+  const mark=HabitSkills.bestMark(rung,prev.sets);
+  return mark>0?{mark,at:prev.at}:null;
+}
+
+const fmtRungMark=(rung,v)=>HabitSkills.markUnit(rung)==='time'?(v+'s'):(v+' reps');
+
 // El objetivo de una serie de línea: el porcentaje del ejercicio sobre el máximo de ese
 // escalón, o el estándar del escalón si no lleva porcentaje.
 function wsLineTarget(ex,rung){
@@ -15071,6 +15087,19 @@ function wsScrollToFocus(){
     el.scrollIntoView({block:'center',behavior:'smooth'});
   });
 }
+// «Última vez» de un ejercicio de línea: la del escalón de la serie que toca ahora, que es la
+// que estás a punto de hacer. Si ya terminaste, la de la última serie.
+function wsLineLastHtml(ex,sets){
+  const group=HabitSkills.skillGroupOf(ex);
+  const next=(sets||[]).find(x=>!x.done)||(sets||[])[sets.length-1];
+  const rung=wsSetRung(ex,sets,next);
+  if(!rung)return '';
+  const last=wsLastForRung(group,rung);
+  if(!last)return '<div class="ws-ex-last">Primera vez en '+esc(rungShortName(rung,group))+'</div>';
+  return '<div class="ws-ex-last">Última vez en '+esc(rungShortName(rung,group))+': '
+    +esc(fmtRungMark(rung,last.mark))+'</div>';
+}
+
 function wsExerciseHtml(ex,i){
   const boardId=activeCoachingSession.board_id;
   const exKey=exerciseKeyForSession(boardId,ex,i);
@@ -15115,8 +15144,9 @@ function wsExerciseHtml(ex,i){
     +(HabitSkills.targetPctOf(ex)?'<div class="ws-ex-meta" style="color:var(--purple)">Objetivo: '+HabitSkills.targetPctOf(ex)+' % de tu máximo en cada escalón</div>':'')
     +(ex._swappedFrom?'<div class="ws-ex-meta" style="color:var(--amber)">Sustituto de esta sesión</div>':'')
     +(ex._replaced?'<div class="ws-ex-meta" style="color:var(--gray)">Cambiado a media sesión</div>':'')
-    +(last&&last.weight!=null?'<div class="ws-ex-last">Última vez: '+esc(fmtWeightValue(kgToUnit(last.weight,exerciseWeightUnit(exKey)),exerciseWeightUnit(exKey),false))
-        +(last.reps?' × '+esc(String(last.reps)):'')+'</div>':'')
+    +(HabitSkills.isSkillExercise(ex)?wsLineLastHtml(ex,sets)
+      :(last&&last.weight!=null?'<div class="ws-ex-last">Última vez: '+esc(fmtWeightValue(kgToUnit(last.weight,exerciseWeightUnit(exKey)),exerciseWeightUnit(exKey),false))
+        +(last.reps?' × '+esc(String(last.reps)):'')+'</div>':''))
     +(nextSuggestion?'<div class="ws-ex-last" style="color:var(--green)">'+esc(nextSuggestion)+'</div>':'')
     +'</div>'
     +(videos.length?'<button class="ws-ex-video" onclick="event.stopPropagation();openMediaFromHead(this)" aria-label="Ver video">'+MV_PLAY_ICON+'</button>':'')
@@ -23989,10 +24019,16 @@ async function wsOpenRungPicker(setId,exKey){
   if(!list.length)return;
   const sets=coachSessionSets[exKey]||[];
   const cur=wsSetRung(ex,sets,sets.find(x=>x.id===setId));
+  // Cada escalón con tu marca: elegir progresión es justo el momento en que hace falta
+  // saber en qué andas, y el estándar solo dice a dónde vas.
+  const group=HabitSkills.skillGroupOf(ex);
   const choices=list.map(r=>{
     const std=HabitSkills.rungTargetText(r);
     const n=Number(r.progression_target_sets)||1;
-    return{key:r.id,label:(cur&&r.id===cur.id?'✓ ':'')+(exDisplayName(r.name)||r.name)+(std?' · '+n+' × '+std:'')};
+    const mine=wsLastForRung(group,r);
+    return{key:r.id,label:(cur&&r.id===cur.id?'✓ ':'')+(exDisplayName(r.name)||r.name)
+      +(mine?' · tu marca '+fmtRungMark(r,mine.mark):'')
+      +(std?' · estándar '+n+' × '+std:'')};
   });
   const k=await choiceSheet('',choices,{title:'¿En qué progresión?'});
   if(k&&(!cur||k!==cur.id))await updateSetRungSb(setId,exKey,k);

@@ -364,9 +364,9 @@ en la hoja de la escalera.
 1. **El builder de rutinas** no sabe crear un ejercicio de línea. Hoy solo se agrega desde la
    escalera, a la sesión en curso. Para que una rutina diga «Aguante de front lever» hay que
    poder elegir una línea donde hoy se elige un ejercicio del catálogo.
-2. **«La vez pasada» todavía compara contra el ejercicio**, no contra la variante: en un
-   ejercicio de línea pondría el tiempo de un tuck junto a un straddle. `lastScoresFor` tendría
-   que ir por (ejercicio, escalón).
+2. ~~**«La vez pasada» por variante.**~~ **Hecho (20261102-9).** `wsLastForRung`: la cabeza
+   del ejercicio enseña la marca del escalón de la serie que toca, y el selector de progresión
+   enseña tu marca en cada escalón junto al estándar.
 3. ~~**El 80 %.**~~ **Hecho (20261102-8).** `exercises[].targetPct` + `relativeTarget()`: el
    objetivo se calcula contra el máximo de la variante de cada serie, sin contar la sesión en
    curso, y cae al estándar del escalón mientras no haya marca. Se elige en el menú ••• del

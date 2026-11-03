@@ -967,7 +967,7 @@ de `apply_coaching_program` una vez.
 migración ya no escriba nada del programa, y **la alineación de cada figura** leyendo sus puntos
 de referencia, igual que `check-skills.js` con los 35 escalones.
 
-## En una skill la progresión es la carga (20261102-8)
+## En una skill la progresión es la carga (20261102-9)
 
 Migración 146 y `docs/PROGRAMA_HANDSTAND.md` §10. **Solo en Crew.** Un ejercicio de calistenia
 no se carga con kilos: se carga con progresión, y no con una por entreno. Joseph entrena el
@@ -1015,6 +1015,11 @@ día**. Por eso la variante va **por serie**, exactamente donde vive `weight`.
   que «La vez pasada» la excluye: si no, la primera serie de hoy se vuelve el máximo y el
   objetivo se persigue a sí mismo a media sesión. Cambiar de escalón o de porcentaje recalcula
   el `reps_target` de las series que faltan.
+- **«La vez pasada» es por variante** (`wsLastForRung`): en un ejercicio de línea la del
+  ejercicio pondría el tiempo de un tuck al lado de un straddle, que no se comparan. La cabeza
+  enseña la del escalón de la serie que toca ahora («Última vez en straddle: 15s», o «Primera
+  vez en …»), y el selector de progresión enseña tu marca en cada escalón junto al estándar,
+  porque elegir variante es justo cuando hace falta saber en qué andas.
 - **Cómo se agrega hoy**: «Entrenar la línea» en la hoja de la escalera, junto a «Entrenar este
   escalón». El builder de rutinas todavía no sabe crear un ejercicio de línea.
 
