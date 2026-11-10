@@ -1026,3 +1026,36 @@ día**. Por eso la variante va **por serie**, exactamente donde vive `weight`.
 `scripts/check-skill-sets.js` lo prueba con la escalera real de front lever leída de la 141, y
 el caso que importa es el entreno de Joseph: cuatro escalones en una sesión, cuatro marcas
 separadas, y `readiness` leyendo solo las series del escalón que le toca.
+
+## Actividad de una fecha a otra, y la firma a elegir (20261110-1)
+
+Joseph lo pidió el 10 nov 2026 para enseñar **todos sus días a bordo**: la semana se quedaba
+corta. Va en `habit-activity.js` y `habit-share.js`, así que llega a HABIT y a Crew sin tocar
+`app.html` (solo la versión).
+
+- **Elegir fechas** (Actividad, junto a «Compartir mi semana»): una hoja con Desde/Hasta y atajos
+  (7, 14, 30 días, este mes, mes pasado). Con un rango puesto, la tarjeta de la semana pasa a ser
+  la del periodo (entrenos, días activos de N, un cuadro por día) y la lista se filtra a esas
+  fechas. Las fechas se ordenan solas, no pasan de hoy y un periodo tiene **400 días como
+  máximo** (`MAX_RANGE_DAYS` / `MAX_PERIOD_DAYS`). Si empieza antes de la ventana cargada, la
+  ventana crece (`ensureLoadedFrom`). Los textos nuevos están en ES/EN (`RANGE_TEXT`) por el
+  `lang` del documento, y las fechas con `toLocaleDateString`.
+- **`HabitActivity.periodSummary(items, from, to)`** es puro: `daily` trae **solo los días con
+  algo**, sumados de los renglones ya conciliados, y sin títulos. El sticker pone los días
+  vacíos; nunca reparte un total entre los días.
+- **Stickers `kind: 'period'`**: Mosaico (calendario L–D con el número del día hasta 9 semanas;
+  más largo, una semana por columna), Pulso (una barra por día, minutos o entrenos), Bitácora
+  (rellena, dientes de papel, Desde/Hasta y un punto por día), Órbita (los días alrededor de un
+  círculo), Cifras (apiladas en itálica), Sello (la insignia) y los tres editoriales. Las casillas
+  son `activeDays`, `count`, `durationSec`, `distanceM`, `bestStreak`, `range`, `calendar`
+  («Día por día») y las disciplinas; ninguna casilla apagada sale. Textos en `PERIOD_COPY` (ES/EN).
+- **La firma**: `lockupLayout` dibuja logo + HABIT Crew, **solo el logo** o **solo HABIT Crew**
+  según `brandMode`. Es estado del módulo porque la firma la comparten todos los estilos; la
+  galería lo pone al abrir y lo regresa a `'both'` al cerrar. **Solo lo ve quien está en
+  `BRAND_EDITOR_EMAILS`** (hoy, Joseph), con la elección en `localStorage`
+  (`habit_sticker_brand`); cualquier otra cuenta firma completo aunque el teléfono tenga algo
+  guardado. Con solo el logo se quita «HABIT CREW» de anillos y avisos y el estilo «Crew» no
+  sale; con solo el nombre no hay logo en ningún trazo. Los estilos que dan a la firma un ancho
+  fijo calculan su tamaño con el logotipo completo (`brandPx`), para que el logo solo no se
+  infle. La prueba «todos firman como HABIT Crew» sigue valiendo para la firma por defecto, y
+  `scripts/check-share.js` revisa los otros dos modos en los cuatro tipos.

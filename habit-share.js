@@ -6,11 +6,13 @@
 //
 //   <section data-hs-share="quote" data-hs-text="…" data-hs-date="2026-10-31"> … </section>
 //
-// o lo abre ella misma: HabitShare.open({ kind:'workout', data:{…} }). Tres tipos:
+// o lo abre ella misma: HabitShare.open({ kind:'workout', data:{…} }). Cuatro tipos:
 //   quote   — la frase del día: { text, ds }
 //   workout — un entreno, de la app o de fuera (correr, bici, nadar…):
 //             { type, title, ds, durationSec, distanceM, sets, volumeKg, exercises:[{name,best}],
 //               elevationM, avgHr, kcal, effort, number }
+//   period  — de una fecha a otra (HabitActivity.periodSummary): { from, to, count, durationSec,
+//             distanceM, daily:[{ds,count,durationSec,distanceM}], disciplines }
 //   week    — tu semana: { count, durationSec, distanceM, days:[7 × 0/1, lunes primero], weekStart,
 //             streak, disciplines:[{type,count,durationSec,distanceM}] }
 // Cada sticker es un PNG transparente de un solo color (uno de `PALETTE` o uno libre), en Inter
@@ -58,6 +60,19 @@
   const SIG = 52;              // firma reforzada para seguir legible dentro de una historia
   const WEEK_BRAND_WIDTH = 400; // legible al compartir a ~75% del ancho de una historia
   const COLOR_KEY = 'habit_sticker_color';
+  // La firma: logo + HABIT Crew (siempre, para todos), o solo una de las dos para quien está en
+  // BRAND_EDITOR_EMAILS (Joseph lo pidió el 10 nov 2026). Es estado del módulo y no un dato del
+  // sticker porque la firma la dibuja `lockupLayout`, que comparten todos los estilos; la
+  // galería lo pone al abrir y lo regresa a 'both' al cerrar.
+  const BRAND_MODES = ['both', 'logo', 'text'];
+  const BRAND_KEY = 'habit_sticker_brand';
+  const BRAND_EDITOR_EMAILS = ['josephdpelayo@gmail.com'];
+  let brandMode = 'both';
+  function setBrand(mode) { brandMode = BRAND_MODES.includes(mode) ? mode : 'both'; return brandMode; }
+  const showLogo = () => brandMode !== 'text';
+  const showWord = () => brandMode !== 'logo';
+  // Quita «HABIT CREW · » de un texto de anillo cuando la firma es solo el logo.
+  const brandRing = (text) => (showWord() ? text : String(text).replace(/HABIT CREW\s*·\s*/gi, ''));
   // Las apps cargan Inter de 300 a 800 y sin itálicas; los stickers usan de 100 a 900 y la
   // itálica. Se pide al abrir la galería, no al cargar: la app no descarga nada de más.
   const FONT_HREF = 'https://fonts.googleapis.com/css2?family=Inter:ital,wght@0,100..900;1,100..900&display=swap';
@@ -144,6 +159,8 @@
   // logo se mide por su tinta (ver `drawLogo`): 1.15 veces la letra, como el de 30 px junto a
   // HABIT de 17 px, y HABIT va centrado en su altura.
   function lockupLayout(cx, top, wordPx, measure) {
+    // Sin el logo, el nombre crece un poco para que la firma no se quede corta.
+    if (brandMode === 'text') wordPx = Math.round(wordPx * 1.2);
     const spacing = Math.round(wordPx * 0.06);
     const logo = Math.round(wordPx * 1.15);
     const gap = Math.round(wordPx * 0.42);
@@ -152,9 +169,22 @@
     const crewSpacing = Math.round(crewPx * 0.3);
     const crewGap = Math.round(wordPx * 0.34);
     const crewW = spacedWidth('CREW', crewSpacing, (c) => measure(c, crewFont(crewPx)));
+    const baseline = top + logo / 2 + wordPx * CAP / 2;
+    if (brandMode === 'logo') {
+      // Solo el logo: crece para seguir pesando como firma (el logotipo entero medía ~6 logos).
+      const size = Math.round(wordPx * 2.2);
+      return { width: size, height: size, logo: { x: cx - size / 2, y: top, size }, word: null, crew: null };
+    }
+    if (brandMode === 'text') {
+      const w = wordW + crewGap + crewW, x = cx - w / 2;
+      return {
+        width: w, height: logo, logo: null,
+        word: { text: 'HABIT', font: wordFont(wordPx), spacing, x, y: baseline },
+        crew: { text: 'CREW', font: crewFont(crewPx), spacing: crewSpacing, x: x + wordW + crewGap, y: baseline }
+      };
+    }
     const width = logo + gap + wordW + crewGap + crewW;
     const x0 = cx - width / 2;
-    const baseline = top + logo / 2 + wordPx * CAP / 2;
     return {
       width, height: logo,
       logo: { x: x0, y: top, size: logo },
@@ -162,6 +192,16 @@
       crew: { text: 'CREW', font: crewFont(crewPx), spacing: crewSpacing, x: x0 + logo + gap + wordW + crewGap, y: baseline }
     };
   }
+
+  // El ancho del logotipo completo, sea cual sea la firma elegida: los estilos que dan a la
+  // firma un ancho fijo (WEEK_BRAND_WIDTH) calculan su tamaño con él, para que solo el logo no
+  // se infle hasta ocupar ese ancho.
+  function fullLockupWidth(wordPx, measure) {
+    const prev = brandMode;
+    brandMode = 'both';
+    try { return lockupLayout(0, 0, wordPx, measure).width; } finally { brandMode = prev; }
+  }
+  const brandPx = (measure) => Math.round(40 * WEEK_BRAND_WIDTH / fullLockupWidth(40, measure));
 
   // La frase en renglones parejos, con el tamaño más grande que no pase de `maxLines`. Los
   // renglones siempre se calculan con el tamaño que se queda: si ninguno cabe (una frase
@@ -195,7 +235,7 @@
     const lockup = lockupLayout(WIDTH / 2, textBottom + 64, SIG, measure);
     return {
       kind: 'frase', width: WIDTH,
-      height: Math.round(lockup.logo.y + lockup.height + PAD),
+      height: Math.round(textBottom + 64 + lockup.height + PAD),
       font: quoteFont(size), size, lineH,
       lines: lines.map((t, i) => ({ text: t, x: WIDTH / 2, y: top + lineH * i + size })),
       lockup
@@ -204,11 +244,10 @@
 
   // Estilo «Logotipo»: el logotipo de HABIT en grande y una línea espaciada debajo.
   function signatureLayout(measure, subText) {
-    const probe = lockupLayout(0, PAD, 112, measure);
-    const wordPx = Math.min(112, Math.floor(112 * (WIDTH - PAD * 2) / probe.width));
+    const wordPx = Math.min(112, Math.floor(112 * (WIDTH - PAD * 2) / fullLockupWidth(112, measure)));
     const lockup = lockupLayout(WIDTH / 2, PAD, wordPx, measure);
     const text = String(subText || 'MAKE IT A HABIT').toUpperCase();
-    const subY = lockup.logo.y + lockup.height + 60 + 52 * CAP;
+    const subY = PAD + lockup.height + 60 + 52 * CAP;
     const ops = lockupOps(measure, WIDTH / 2, PAD, wordPx).ops;
     const extra = titleBlock(ops, text, measure, WIDTH / 2, subY, WIDTH - PAD * 2, 52, 'fg', 'center');
     return {
@@ -238,7 +277,7 @@
   // letra baja de tamaño.
   function sealLayout(text, measure) {
     const size = 1000, cx = size / 2, cy = size / 2;
-    const body = String(text || 'MAKE IT A HABIT · ').toUpperCase();
+    const body = brandRing(String(text || 'MAKE IT A HABIT · ')).toUpperCase();
     // La letra crece hasta que el texto llena ~78% de la vuelta (un sello apretado, no letras
     // sueltas); el radio se ajusta para que la letra más grande siga cabiendo en el lienzo.
     const widthAt = (px) => [...body].reduce((n, c) => n + measure(c, sealFont(px)), 0);
@@ -256,7 +295,7 @@
     return {
       kind: 'sello', width: size, height: size, cx, cy, radius,
       font: sealFont(px), size: px, spacing, chars,
-      logo: { x: cx - logo / 2, y: cy - logo / 2, size: logo }
+      logo: showLogo() ? { x: cx - logo / 2, y: cy - logo / 2, size: logo } : null
     };
   }
 
@@ -317,10 +356,10 @@
     return {
       width: L.width, height: L.height,
       ops: [
-        { op: 'logo', x: L.logo.x, y: L.logo.y, size: L.logo.size, color: color || 'fg' },
-        textOp(measure, 'HABIT', L.word.font, { x: L.word.x, y: L.word.y, spacing: L.word.spacing, color: color || 'fg' }),
-        textOp(measure, 'CREW', L.crew.font, { x: L.crew.x, y: L.crew.y, spacing: L.crew.spacing, color: color || 'fg' })
-      ]
+        L.logo && { op: 'logo', x: L.logo.x, y: L.logo.y, size: L.logo.size, color: color || 'fg' },
+        L.word && textOp(measure, 'HABIT', L.word.font, { x: L.word.x, y: L.word.y, spacing: L.word.spacing, color: color || 'fg' }),
+        L.crew && textOp(measure, 'CREW', L.crew.font, { x: L.crew.x, y: L.crew.y, spacing: L.crew.spacing, color: color || 'fg' })
+      ].filter(Boolean)
     };
   }
 
@@ -833,12 +872,13 @@
   // centrado en la altura del aviso, como en iOS.
   function notifLayout(f, measure) {
     const W = 1040, cx0 = 20, cw = W - 40, pad = 40, icon = 124;
-    const tx = cx0 + pad + icon + 32, tr = cx0 + cw - pad;
+    // Sin logo, el aviso no lleva el cuadro de la app: un cuadro vacío parecería un error.
+    const tx = cx0 + pad + (showLogo() ? icon + 32 : 0), tr = cx0 + cw - pad;
     const ops = [];
     const top = 20;
     const inner = [];
     let y = top + pad + 48 * CAP;
-    inner.push(textOp(measure, 'HABIT CREW', F(700, 48), { x: tx, y, spacing: 3, color: 'inv', alpha: 0.55 }));
+    if (showWord()) inner.push(textOp(measure, 'HABIT CREW', F(700, 48), { x: tx, y, spacing: 3, color: 'inv', alpha: 0.55 }));
     inner.push(textOp(measure, 'ahora', F(500, 48), { x: tr, y, align: 'right', color: 'inv', alpha: 0.45 }));
     y += 62;
     inner.push(textOp(measure, 'Entreno completado', F(700, 46), { x: tx, y, color: 'inv' }));
@@ -852,9 +892,12 @@
     });
     const h = Math.max(y + 12 + pad - top, icon + pad * 2);
     const iy = top + (h - icon) / 2, li = Math.round(icon * 0.6);
-    ops.push({ op: 'rect', x: cx0, y: top, w: cw, h, r: 52, color: 'fg' },
-      { op: 'rect', x: cx0 + pad, y: iy, w: icon, h: icon, r: 30, color: 'inv' },
-      { op: 'logo', x: cx0 + pad + (icon - li) / 2, y: iy + (icon - li) / 2, size: li, color: 'fg' }, ...inner);
+    ops.push({ op: 'rect', x: cx0, y: top, w: cw, h, r: 52, color: 'fg' });
+    if (showLogo()) {
+      ops.push({ op: 'rect', x: cx0 + pad, y: iy, w: icon, h: icon, r: 30, color: 'inv' },
+        { op: 'logo', x: cx0 + pad + (icon - li) / 2, y: iy + (icon - li) / 2, size: li, color: 'fg' });
+    }
+    ops.push(...inner);
     return { kind: 'notif', width: W, height: Math.round(top + h + 20), ops };
   }
 
@@ -991,6 +1034,14 @@
     ops.push({ op: 'line', x1: WIDTH / 2 - 40, y1: y, x2: WIDTH / 2 + 40, y2: y, w: 4 });
     const sp = 48;
     y += 64 + sp * CAP;
+    if (!showWord()) {
+      // Solo el logo: va él donde iba el nombre, y la fecha debajo.
+      const lg = 96;
+      ops.push({ op: 'logo', x: WIDTH / 2 - lg / 2, y: y - sp * CAP, size: lg });
+      y += lg - sp * CAP;
+      if (shortDate(ds)) { y += 40 + sp * CAP; ops.push(textOp(measure, shortDate(ds), F(600, sp), { x: WIDTH / 2, y, align: 'center', spacing: Math.round(sp * 0.32) })); }
+      return { kind: 'minimo', width: WIDTH, height: Math.round(y + PAD * 0.8), ops };
+    }
     const sign = ['HABIT CREW', shortDate(ds)].filter(Boolean).join('  ·  ');
     ops.push(textOp(measure, sign, F(600, sp), { x: WIDTH / 2, y, align: 'center', spacing: Math.round(sp * 0.32) }));
     return { kind: 'minimo', width: WIDTH, height: Math.round(y + PAD * 0.8), ops };
@@ -1138,8 +1189,7 @@
     const date = fields.find((r) => r.id === 'weekStart');
     if (date) { y += 22; label(date.value, 52, x, y); y += 32; }
     y += 48;
-    const probe = lockupLayout(0, 0, 40, measure);
-    const brand = lockupOps(measure, x, y, Math.round(40 * WEEK_BRAND_WIDTH / probe.width), 'left');
+    const brand = lockupOps(measure, x, y, brandPx(measure), 'left');
     ops.push(...brand.ops);
     return { kind: id, width: WIDTH, height: Math.ceil(y + brand.height + 48), ops };
   }
@@ -1152,13 +1202,13 @@
       days: ['LUNES', 'MARTES', 'MIÉRCOLES', 'JUEVES', 'VIERNES', 'SÁBADO', 'DOMINGO'],
       short: ['LUN', 'MAR', 'MIÉ', 'JUE', 'VIE', 'SÁB', 'DOM'], more: n => '+ ' + n + ' ENTRENOS MÁS',
       fields: { sessions: 'Detalle de entrenamientos', daily: 'Distribución por día' },
-      styles: { diario: 'Diario', notas: 'Notas', barras: 'Barras', tabla: 'Tabla', impacto: 'Impacto' } },
+      styles: { diario: 'Diario', notas: 'Notas', barras: 'Barras', tabla: 'Tabla', impacto: 'Impacto', mosaico: 'Mosaico', pulso: 'Pulso', orbita: 'Órbita', cifras: 'Cifras' } },
     en: { week: 'THIS WEEK', total: 'TOTAL', daily: 'BY DAY', bySport: 'BY SPORT', distance: 'KILOMETERS', time: 'MINUTES',
       types: { run: 'RUNNING', strength: 'STRENGTH', bike: 'CYCLING', swim: 'SWIMMING', walk: 'WALKING', cardio: 'CARDIO', yoga: 'YOGA', sport: 'SPORT', other: 'WORKOUT' },
       days: ['MONDAY', 'TUESDAY', 'WEDNESDAY', 'THURSDAY', 'FRIDAY', 'SATURDAY', 'SUNDAY'],
       short: ['MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT', 'SUN'], more: n => '+ ' + n + ' MORE WORKOUTS',
       fields: { sessions: 'Workout details', daily: 'Daily breakdown' },
-      styles: { diario: 'Journal', notas: 'Notes', barras: 'Bars', tabla: 'Table', impacto: 'Impact' } }
+      styles: { diario: 'Journal', notas: 'Notes', barras: 'Bars', tabla: 'Table', impacto: 'Impact', mosaico: 'Mosaic', pulso: 'Pulse', orbita: 'Orbit', cifras: 'Figures', bitacora: 'Logbook', sello: 'Stamp' } }
   };
   const referenceCopy = d => WEEK_REFERENCE_COPY[/^en\b/i.test(d.lang || d.locale || 'es') ? 'en' : 'es'];
   function referenceTime(seconds, exact) {
@@ -1272,8 +1322,7 @@
       }
     }
     y += 46;
-    const probe = lockupLayout(0, 0, 40, measure);
-    const brand = lockupOps(measure, x, y, Math.round(40 * WEEK_BRAND_WIDTH / probe.width), 'left');
+    const brand = lockupOps(measure, x, y, brandPx(measure), 'left');
     ops.push(...brand.ops);
     return { kind: id, width: WIDTH, height: Math.ceil(y + brand.height + 48), ops };
   }
@@ -1358,6 +1407,8 @@
   // HABIT toma el tamaño con el que ese espacio queda en ~0.5em: con uno fijo y chico, las
   // letras quedaban sueltas de lado a lado.
   function crewStackLayout(measure, o) {
+    // El estilo ES la palabra: con la firma de solo logo no tiene qué enseñar.
+    if (!showWord()) return null;
     const maxW = WIDTH - PAD * 2;
     const ops = [];
     let y = PAD;
@@ -1367,8 +1418,11 @@
     const habitAt = (p) => [...'HABIT'].reduce((n, c) => n + measure(c, F(800, p)), 0);
     const hp = Math.round(crewW / (habitAt(100) / 100 + 4 * 0.5));
     const logo = Math.round(hp * 1.15);
-    ops.push({ op: 'logo', x: WIDTH / 2 - logo / 2, y, size: logo });
-    y += logo + Math.round(hp * 0.5) + hp * CAP;
+    if (showLogo()) {
+      ops.push({ op: 'logo', x: WIDTH / 2 - logo / 2, y, size: logo });
+      y += logo + Math.round(hp * 0.5);
+    }
+    y += hp * CAP;
     ops.push(textOp(measure, 'HABIT', F(800, hp), { x: WIDTH / 2, y, align: 'center', spacing: (crewW - habitAt(hp)) / 4 }));
     y += Math.round(cp * 0.13) + cp * CAP;
     ops.push(textOp(measure, 'CREW', F(900, cp), { x: WIDTH / 2, y, align: 'center', spacing: csp }));
@@ -1441,9 +1495,9 @@
     const card = { x, y: top, w, h, r: 52 };
     const ops = [
       { op: 'rect', ...card },
-      { op: 'logo', x: x + w - wm * 0.6, y: top + (h - wm) / 2, size: wm, color: 'inv', alpha: 0.07, clip: card },
+      showLogo() && { op: 'logo', x: x + w - wm * 0.6, y: top + (h - wm) / 2, size: wm, color: 'inv', alpha: 0.07, clip: card },
       ...body
-    ];
+    ].filter(Boolean);
     return { kind: 'carnet', width: WIDTH, height: bottom + top, ops };
   }
 
@@ -1451,7 +1505,7 @@
   // y dentro el logo con la cifra. La letra del anillo se ajusta para llenar ~80% de la vuelta.
   function insigniaLayout(measure, ring, value, unit) {
     const size = 1000, cx = size / 2, cy = size / 2, outer = 474;
-    const body = String(ring).toUpperCase();
+    const body = brandRing(String(ring)).toUpperCase();
     const widthAt = (px) => [...body].reduce((n, ch) => n + measure(ch, sealFont(px)), 0);
     const radiusFor = (px) => outer - 28 - px * 0.5;
     let px = 52;
@@ -1473,14 +1527,15 @@
     ];
     const maxW = inner * 2 * 0.72;
     const vp = fitPx(measure, value, (p) => F(900, p), maxW, 240, 90, -0.03);
-    const logo = Math.round(inner * 0.3);
+    const logo = showLogo() ? Math.round(inner * 0.3) : 0;
     const u = unit ? fitText(measure, unit, (p) => F(700, p), maxW * 0.9, 40, 24, 0.24) : null;
     // La coma de «4,320» baja de la línea base: la unidad se aparta lo que baja.
     const gapU = 44 + (/,/.test(value) ? Math.round(vp * 0.08) : 0);
-    const blockH = logo + 44 + vp * CAP + (u ? gapU + u.px * CAP : 0);
+    const logoGap = logo ? logo + 44 : 0;
+    const blockH = logoGap + vp * CAP + (u ? gapU + u.px * CAP : 0);
     let y = cy - blockH / 2;
-    ops.push({ op: 'logo', x: cx - logo / 2, y, size: logo });
-    y += logo + 44 + vp * CAP;
+    if (logo) ops.push({ op: 'logo', x: cx - logo / 2, y, size: logo });
+    y += logoGap + vp * CAP;
     ops.push(textOp(measure, value, F(900, vp), { x: cx, y, align: 'center', spacing: Math.round(vp * -0.03) }));
     if (u) {
       y += gapU + u.px * CAP;
@@ -1632,7 +1687,18 @@
   function stickerFields(kind, d) {
     const rows = [];
     const add = (id, label, value, unit) => { if (value !== '' && value != null) rows.push({ id, label, value: String(value), unit: unit || '' }); };
-    if (kind === 'week') {
+    if (kind === 'period') {
+      const p = periodFacts(d), c = periodCopy(d);
+      if (!p.total) return rows;
+      add('activeDays', c.fields.activeDays, p.active + '/' + p.total, c.active);
+      add('count', c.fields.count, p.count, c.count(p.count));
+      if (p.dur) add('durationSec', c.fields.durationSec, minutesText(p.dur), c.time);
+      if (p.dist) add('distanceM', c.fields.distanceM, (p.dist / 1000).toFixed(1), c.dist);
+      if (p.best > 1) add('bestStreak', c.fields.bestStreak, p.best, c.streak);
+      add('range', c.fields.range, p.range);
+      add('calendar', c.fields.calendar, p.total, c.days(p.total));
+      normalizeDisciplines(d).forEach((r) => add(r.id, r.label + ' · ' + r.value, r.value, r.label.toUpperCase()));
+    } else if (kind === 'week') {
       const w = weekFacts(d);
       add('count', 'Entrenamientos', w.count, 'ENTRENOS');
       if (w.dur) add('durationSec', 'Tiempo total', minutesText(w.dur), 'TIEMPO TOTAL');
@@ -1679,13 +1745,13 @@
       ops.push(textOp(measure, t.text, F(weight, t.px), { x, y, spacing: t.spacing, color: color || ink }));
       y += t.px * 0.28;
     };
-    if (kind === 'week' && customTitle(d)) {
+    if (kind !== 'workout' && customTitle(d)) {
       y += 56 * CAP; y += titleBlock(ops, customTitle(d), measure, x, y, maxW, 56, ink); y += 56 * .28;
-    } else put(kind === 'week' ? 'MI SEMANA' : 'MI ENTRENO', 56, 52, 700, ink, .06);
+    } else put(kind === 'week' ? 'MI SEMANA' : kind === 'period' ? periodCopy(d).kicker : 'MI ENTRENO', 56, 52, 700, ink, .06);
     y += 42;
     const title = rows.find((r) => r.id === 'title');
     if (title) { put(title.value.toUpperCase(), compact ? 68 : 90, 38, 800); y += 24; }
-    const metrics = rows.filter((r) => !r.id.startsWith('discipline:') && !['title', 'ds', 'weekStart', 'days', 'sessions', 'daily'].includes(r.id));
+    const metrics = rows.filter((r) => !r.id.startsWith('discipline:') && !['title', 'ds', 'weekStart', 'days', 'sessions', 'daily', 'range', 'calendar'].includes(r.id));
     metrics.forEach((r, i) => {
       if (compact) {
         if (i) y += 22;
@@ -1726,12 +1792,11 @@
       });
       y += 136;
     }
-    if (kind === 'week') { const block = disciplineBlock(d, measure, x, y + 32, maxW, ink); ops.push(...block.ops); y += block.height + (block.height ? 32 : 0); }
-    const date = rows.find((r) => r.id === 'ds' || r.id === 'weekStart');
+    if (kind !== 'workout') { const block = disciplineBlock(d, measure, x, y + 32, maxW, ink); ops.push(...block.ops); y += block.height + (block.height ? 32 : 0); }
+    const date = rows.find((r) => r.id === 'ds' || r.id === 'weekStart' || r.id === 'range');
     if (date) { y += 36; put(date.value, 52, 48, 600); }
     y += 48;
-    const probe = lockupLayout(0, 0, 40, measure);
-    const brand = lockupOps(measure, x, y, Math.round(40 * WEEK_BRAND_WIDTH / probe.width), 'left', ink);
+    const brand = lockupOps(measure, x, y, brandPx(measure), 'left', ink);
     ops.push(...brand.ops);
     y += brand.height + 48;
     if (card) ops.unshift({ op: 'rect', x: 20, y: 20, w: WIDTH - 40, h: y - 20, r: 44 });
@@ -1841,8 +1906,7 @@
     if (date) { y += 52; (centered ? center : text)(date.value, 60, y, { weight: 600, spacing: .02 }); y += 38; }
     if (id === 'bitacora') { y += 20; rule(y, [10, 9]); y += 38; ops.push(...barcode(rows.map((r) => r.value).join('|'), left, y, inner, 64).map((o) => ({ ...o, color: ink }))); y += 96; }
     y += 72;
-    const probe = lockupLayout(0, 0, 40, measure);
-    const brand = lockupOps(measure, centered ? WIDTH / 2 : left, y, Math.round(40 * WEEK_BRAND_WIDTH / probe.width), centered ? 'center' : 'left', ink);
+    const brand = lockupOps(measure, centered ? WIDTH / 2 : left, y, brandPx(measure), centered ? 'center' : 'left', ink);
     ops.push(...brand.ops); y += brand.height + 48;
     if (filled) {
       if (id === 'bitacora') {
@@ -1871,6 +1935,244 @@
   KINDS.week.styles.unshift(...[
     ['diario', 'Diario'], ['notas', 'Notas'], ['barras', 'Barras'], ['tabla', 'Tabla'], ['impacto', 'Impacto']
   ].map(([id, label]) => ({ id, label, customizable: true, layout: (d, m) => weeklyReferenceLayout(id, d, m) })));
+
+  // ── Un periodo: de una fecha a otra ──────────────────────────────────────
+  // Joseph lo pidió el 10 nov 2026 para enseñar todos sus días a bordo: la semana se queda
+  // corta. Datos (HabitActivity.periodSummary): { from, to, count, durationSec, distanceM,
+  // daily:[{ds,count,durationSec,distanceM}], disciplines }. Lo que se dice de cada día sale de
+  // `daily`, nunca se reparte un total entre los días.
+  const MAX_PERIOD_DAYS = 400;
+  const PERIOD_COPY = {
+    es: { kicker: 'MI PERIODO', days: (n) => n + (n === 1 ? ' DÍA' : ' DÍAS'), active: 'DÍAS ACTIVOS', count: (n) => (n === 1 ? 'ENTRENO' : 'ENTRENOS'),
+      time: 'TIEMPO TOTAL', dist: 'KM TOTALES', streak: 'DÍAS SEGUIDOS', from: 'DESDE', to: 'HASTA', log: 'BITÁCORA', perDay: 'MINUTOS POR DÍA',
+      perDayCount: 'ENTRENOS POR DÍA', week: 'LMMJVSD', title: 'Tu periodo',
+      fields: { activeDays: 'Días entrenados', count: 'Entrenamientos', durationSec: 'Tiempo total', distanceM: 'Distancia total', bestStreak: 'Mejor racha', range: 'Fechas', calendar: 'Día por día' } },
+    en: { kicker: 'MY STRETCH', days: (n) => n + (n === 1 ? ' DAY' : ' DAYS'), active: 'ACTIVE DAYS', count: (n) => (n === 1 ? 'WORKOUT' : 'WORKOUTS'),
+      time: 'TOTAL TIME', dist: 'TOTAL KM', streak: 'DAYS IN A ROW', from: 'FROM', to: 'TO', log: 'LOGBOOK', perDay: 'MINUTES PER DAY',
+      perDayCount: 'WORKOUTS PER DAY', week: 'MTWTFSS', title: 'Your stretch',
+      fields: { activeDays: 'Days trained', count: 'Workouts', durationSec: 'Total time', distanceM: 'Total distance', bestStreak: 'Best streak', range: 'Dates', calendar: 'Day by day' } }
+  };
+  const periodCopy = (d) => PERIOD_COPY[/^en\b/i.test((d && (d.lang || d.locale)) || 'es') ? 'en' : 'es'];
+  const DS_RE = /^\d{4}-\d{2}-\d{2}$/;
+  function dsAt(startMs, i) { return new Date(startMs + i * 864e5).toISOString().slice(0, 10); }
+  // 19.10 – 08.11.26; con dos años, los dos (28.12.26 – 04.01.27); un solo día, 31.10.26.
+  function rangeText(from, to) {
+    if (!DS_RE.test(from || '') || !DS_RE.test(to || '')) return '';
+    if (from === to) return shortDate(from);
+    const dm = (ds) => ds.slice(8, 10) + '.' + ds.slice(5, 7);
+    return from.slice(0, 4) === to.slice(0, 4) ? dm(from) + ' – ' + shortDate(to) : shortDate(from) + ' – ' + shortDate(to);
+  }
+  function periodFacts(d) {
+    d = d || {};
+    const from = DS_RE.test(d.from || '') ? d.from : '';
+    const to = from && DS_RE.test(d.to || '') && d.to >= from ? d.to : from;
+    const startMs = Date.parse(from + 'T00:00:00Z'), endMs = Date.parse(to + 'T00:00:00Z');
+    const total = from ? Math.min(MAX_PERIOD_DAYS, Math.round((endMs - startMs) / 864e5) + 1) : 0;
+    const num = (v, max) => (Number.isFinite(Number(v)) ? Math.max(0, Math.min(max, Number(v))) : 0);
+    const byDs = new Map();
+    for (const r of Array.isArray(d.daily) ? d.daily : []) if (r && DS_RE.test(r.ds || '')) byDs.set(r.ds, r);
+    const daily = Array.from({ length: total }, (_, i) => {
+      const ds = dsAt(startMs, i), r = byDs.get(ds) || {};
+      return { ds, i, dow: (new Date(startMs + i * 864e5).getUTCDay() + 6) % 7, count: Math.round(num(r.count, 100)),
+        durationSec: num(r.durationSec, 86400), distanceM: num(r.distanceM, 2000000) };
+    });
+    const active = daily.filter((r) => r.count > 0).length;
+    let best = 0, run = 0;
+    daily.forEach((r) => { run = r.count ? run + 1 : 0; best = Math.max(best, run); });
+    const sum = (k) => daily.reduce((n, r) => n + r[k], 0);
+    const count = d.count != null ? Math.round(num(d.count, 100000)) : sum('count');
+    const dur = Math.round(d.durationSec != null ? num(d.durationSec, 400 * 86400) : sum('durationSec'));
+    const dist = Math.round(d.distanceM != null ? num(d.distanceM, 1e8) : sum('distanceM'));
+    return { from, to: total ? dsAt(startMs, total - 1) : '', total, active, count, dur, dist, best, daily, range: rangeText(from, total ? dsAt(startMs, total - 1) : '') };
+  }
+  const PERIOD_METRICS = ['activeDays', 'count', 'durationSec', 'distanceM', 'bestStreak'];
+
+  // Seis diseños propios del periodo; los tres editoriales vienen de `editorialLayout`.
+  function periodLayout(id, d, measure) {
+    const p = periodFacts(d);
+    if (!p.total || !p.count) return null;
+    const c = periodCopy(d), rows = selectedFields('period', d);
+    const has = (f) => rows.some((r) => r.id === f);
+    const metrics = rows.filter((r) => PERIOD_METRICS.includes(r.id));
+    const filled = id === 'bitacora', ink = filled ? 'inv' : 'fg';
+    const ops = [], left = 88, right = WIDTH - left, inner = right - left;
+    let y = 100;
+    const text = (value, px, atY, o) => {
+      o = o || {};
+      const t = fitText(measure, String(value), (q) => F(o.weight || 700, q, o.italic), o.width || inner, px, Math.min(px, o.min || 48), o.spacing || 0);
+      ops.push(textOp(measure, t.text, F(o.weight || 700, t.px, o.italic), {
+        x: o.x == null ? left : o.x, y: atY, align: o.align || 'left', spacing: t.spacing, color: o.color || ink, alpha: o.alpha
+      }));
+      return t.px;
+    };
+    const center = (value, px, atY, o) => text(value, px, atY, { ...o, x: WIDTH / 2, align: 'center' });
+    const rule = (atY, dash) => ops.push({ op: 'line', x1: left, x2: right, y1: atY, y2: atY, color: ink, alpha: .3, dash });
+    const valueRows = (list, dash) => list.forEach((r) => {
+      rule(y, dash); y += 82;
+      text(r.unit, 48, y, { width: 400, weight: 600 });
+      text(r.value, 104, y + 12, { x: right, align: 'right', width: 470, weight: 800 });
+      y += 74;
+    });
+    const dm = (ds) => ds.slice(8, 10) + '.' + ds.slice(5, 7);
+    const heading = (px, align) => {
+      if (customTitle(d)) { y += titleBlock(ops, customTitle(d), measure, align === 'center' ? WIDTH / 2 : left, y, inner, Math.min(px, 104), ink, align); return; }
+      (align === 'center' ? center : text)(c.days(p.total), px, y, { weight: 900 });
+    };
+
+    if (id === 'mosaico') {
+      // Un cuadro por día: lleno si entrenaste. Hasta nueve semanas es un calendario (L a D,
+      // con el número del día); más largo, una semana por columna, como un mapa de actividad.
+      if (has('range')) { text(p.range, 52, y, { weight: 600, spacing: .06, alpha: .8 }); y += 40; }
+      y += customTitle(d) ? 110 : 150;
+      heading(190);
+      y += 70;
+      if (has('calendar')) {
+        const first = p.daily[0].dow, weeks = Math.ceil((first + p.total) / 7);
+        if (weeks <= 9) {
+          const step = inner / 7, cell = Math.min(112, step - 14);
+          c.week.split('').forEach((l, i) => text(l, 48, y + 36, { x: left + step * (i + .5), align: 'center', weight: 600, alpha: .6 }));
+          y += 72;
+          p.daily.forEach((r) => {
+            const k = first + r.i, cx = left + step * (k % 7 + .5), top = y + Math.floor(k / 7) * (cell + 14);
+            ops.push({ op: 'rect', x: cx - cell / 2, y: top, w: cell, h: cell, r: Math.round(cell * .26), color: ink, stroke: r.count ? 0 : 3, alpha: r.count ? 1 : .3 });
+            ops.push(textOp(measure, String(Number(r.ds.slice(8))), F(700, 44), { x: cx, y: top + cell / 2 + 44 * CAP / 2, align: 'center', color: r.count ? (filled ? 'fg' : 'inv') : ink, alpha: r.count ? 1 : .55 }));
+          });
+          y += weeks * (cell + 14) + 20;
+        } else {
+          const unit = inner / weeks, cell = unit * .8;
+          p.daily.forEach((r) => {
+            const k = first + r.i, x = left + Math.floor(k / 7) * unit, top = y + (k % 7) * unit;
+            ops.push({ op: 'rect', x, y: top, w: cell, h: cell, r: Math.round(cell * .25), color: ink, stroke: r.count ? 0 : Math.max(1.5, cell * .07), alpha: r.count ? 1 : .3 });
+          });
+          y += unit * 7 + 30;
+          text(dm(p.from), 48, y + 20, { weight: 600, alpha: .7 });
+          text(dm(p.to), 48, y + 20, { x: right, align: 'right', weight: 600, alpha: .7 });
+          y += 50;
+        }
+      }
+      metrics.forEach((r, i) => {
+        const col = i % 2, x = left + col * 474;
+        if (!col) y += i ? 200 : 40;
+        text(r.value, 112, y + 96, { x, width: 420, weight: 800 });
+        text(r.unit, 48, y + 160, { x, width: 420, weight: 500, alpha: .8 });
+      });
+      if (metrics.length) y += 210;
+    } else if (id === 'pulso') {
+      // Un ecualizador: una barra por día, alta según lo que entrenaste; el descanso es una raya.
+      heading(120);
+      y += has('range') ? 76 : 30;
+      if (has('range')) { text(p.range, 52, y, { weight: 600, spacing: .06, alpha: .8 }); y += 30; }
+      const main = metrics.find((r) => r.id === 'durationSec') || metrics[0];
+      if (main) {
+        y += 230;
+        text(main.value, 230, y, { weight: 900, italic: true });
+        y += 76; text(main.unit, 52, y, { weight: 600, spacing: .1 }); y += 20;
+      }
+      if (has('calendar')) {
+        const byTime = p.daily.some((r) => r.durationSec > 0);
+        const vals = p.daily.map((r) => (byTime ? r.durationSec / 60 : r.count));
+        const max = Math.max(...vals, 1), base = y + 380, unit = inner / p.total, bw = Math.max(3, unit * .66);
+        p.daily.forEach((r, i) => {
+          const x = left + unit * i + (unit - bw) / 2;
+          if (vals[i] > 0 || r.count) {
+            const h = Math.max(14, vals[i] / max * 300);
+            ops.push({ op: 'rect', x, y: base - h, w: bw, h, r: Math.min(bw / 2, 10), color: ink });
+          } else ops.push({ op: 'rect', x, y: base - 6, w: bw, h: 6, r: Math.min(bw / 2, 3), color: ink, alpha: .3 });
+        });
+        y = base + 64;
+        text(dm(p.from), 48, y, { weight: 600, alpha: .7 });
+        text(byTime ? c.perDay : c.perDayCount, 48, y, { x: WIDTH / 2, align: 'center', width: 460, weight: 600, alpha: .7 });
+        text(dm(p.to), 48, y, { x: right, align: 'right', weight: 600, alpha: .7 });
+        y += 40;
+      }
+      y += 30;
+      valueRows(metrics.filter((r) => r !== main));
+    } else if (id === 'bitacora') {
+      // El periodo como página de bitácora: rellena, con dientes de papel y código de barras.
+      text(c.log, 60, y, { weight: 800, spacing: .16 });
+      text(c.days(p.total), 52, y, { x: right, align: 'right', width: 360, weight: 600, alpha: .7 });
+      y += 24;
+      if (customTitle(d)) { y += 96; y += titleBlock(ops, customTitle(d), measure, left, y, inner, 72, ink); y += 20; }
+      y += 40; rule(y, [10, 9]);
+      if (has('range')) {
+        for (const [label, ds] of [[c.from, p.from], [c.to, p.to]]) {
+          y += 96;
+          text(label, 48, y, { weight: 600, spacing: .12, alpha: .75 });
+          text(shortDate(ds), 96, y + 10, { x: right, align: 'right', width: 520, weight: 800 });
+        }
+        y += 52;
+      }
+      valueRows(metrics, [10, 9]);
+      if (has('calendar')) {
+        rule(y, [10, 9]); y += 56;
+        const cols = Math.min(p.total, p.total > 98 ? 21 : 14), step = inner / cols, r0 = Math.min(30, step * .36);
+        p.daily.forEach((r) => {
+          const cx = left + step * (r.i % cols + .5), cy = y + r0 + Math.floor(r.i / cols) * step;
+          ops.push(r.count ? { op: 'circle', cx, cy, r: r0, color: ink } : { op: 'circle', cx, cy, r: r0 - 1.5, stroke: 3, color: ink, alpha: .4 });
+        });
+        y += Math.ceil(p.total / cols) * step + 10;
+      }
+    } else if (id === 'orbita') {
+      // Los días dando la vuelta a un círculo, del primero arriba y en el sentido del reloj.
+      if (customTitle(d)) { y += titleBlock(ops, customTitle(d), measure, WIDTH / 2, y, inner, 64, ink, 'center'); y += 20; }
+      else { center(has('range') ? p.range : c.kicker, 52, y, { weight: 700, spacing: .1 }); y += 20; }
+      const R = 400, cy = y + 40 + R + 30, cx = WIDTH / 2;
+      if (has('calendar')) {
+        const dr = Math.max(5, Math.min(28, Math.PI * R / p.total * .62));
+        p.daily.forEach((r) => {
+          const a = -Math.PI / 2 + 2 * Math.PI * r.i / p.total, x = cx + R * Math.cos(a), yy = cy + R * Math.sin(a);
+          ops.push(r.count ? { op: 'circle', cx: x, cy: yy, r: dr, color: ink } : { op: 'circle', cx: x, cy: yy, r: Math.max(2, dr - 2), stroke: Math.min(4, dr * .35), color: ink, alpha: .35 });
+        });
+      } else ops.push({ op: 'circle', cx, cy, r: R, stroke: 6, color: ink });
+      const main = metrics[0] || { value: String(p.total), unit: c.days(p.total).replace(/^\d+ /, '') };
+      const vp = fitPx(measure, main.value, (q) => F(900, q), R * 1.3, 240, 90, -0.02);
+      ops.push(textOp(measure, main.value, F(900, vp), { x: cx, y: cy + vp * CAP / 2 - 10, align: 'center', spacing: Math.round(vp * -0.02), color: ink }));
+      text(main.unit, 48, cy + vp * CAP / 2 + 70, { x: cx, align: 'center', width: R * 1.4, weight: 600, spacing: .1 });
+      y = cy + R + 60;
+      if (customTitle(d) && has('range')) { center(p.range, 52, y + 30, { weight: 600, alpha: .8 }); y += 70; }
+      valueRows(metrics.slice(1));
+    } else if (id === 'cifras') {
+      // Las cifras apiladas, enormes y en itálica, como portada de revista.
+      if (customTitle(d)) { y += 104 * CAP - 40; y += titleBlock(ops, customTitle(d), measure, left, y, inner, 104, ink); y += 30; }
+      else { text(c.days(p.total), 60, y, { weight: 800, spacing: .1 }); y += 30; }
+      metrics.forEach((r) => {
+        rule(y + 24);
+        const vp = fitPx(measure, r.value, (q) => F(900, q, true), inner, 260, 110, -0.02);
+        y += 24 + 40 + vp * CAP;
+        ops.push(textOp(measure, r.value, F(900, vp, true), { x: left, y, spacing: Math.round(vp * -0.02), color: ink }));
+        y += 74; text(r.unit, 52, y, { weight: 600, spacing: .1 }); y += 26;
+      });
+      if (has('range')) { y += 76; text(p.range, 52, y, { weight: 600, spacing: .04, alpha: .8 }); y += 16; }
+    } else return null;
+
+    const sports = disciplineBlock(d, measure, left, y + 30, inner, ink);
+    ops.push(...sports.ops); y += sports.height + (sports.height ? 30 : 0);
+    if (filled) { y += 30; rule(y, [10, 9]); y += 38; ops.push(...barcode([p.from, p.to, p.count].join('|'), left, y, inner, 64).map((o) => ({ ...o, color: ink }))); y += 64; }
+    y += 72;
+    const centered = id === 'orbita';
+    const brand = lockupOps(measure, centered ? WIDTH / 2 : left, y, brandPx(measure), centered ? 'center' : 'left', ink);
+    ops.push(...brand.ops); y += brand.height + 48;
+    if (filled) ops.unshift({ op: 'poly', pts: [...zigzag(24, WIDTH - 24, 24, 12, 24, false), ...zigzag(24, WIDTH - 24, y, 12, 24, true).reverse()], color: 'fg' });
+    return { kind: id, width: WIDTH, height: Math.ceil(y + 24), ops };
+  }
+
+  KINDS.period = {
+    title: 'Tu periodo',
+    styles: [
+      ['mosaico', 'Mosaico'], ['pulso', 'Pulso'], ['bitacora', 'Bitácora'], ['orbita', 'Órbita'], ['cifras', 'Cifras']
+    ].map(([id, label]) => ({ id, label, customizable: true, layout: (d, m) => periodLayout(id, d, m) }))
+  };
+  KINDS.period.styles.push({
+    id: 'sello', label: 'Sello', customizable: true, layout: (d, m) => {
+      const p = periodFacts(d), c = periodCopy(d);
+      if (!p.total || !p.count) return null;
+      const rows = selectedFields('period', d), main = rows.find((r) => PERIOD_METRICS.includes(r.id));
+      const ring = ['HABIT CREW', customTitle(d) || c.days(p.total), rows.some((r) => r.id === 'range') ? p.range : ''].filter(Boolean).join(' · ') + ' · ';
+      return insigniaLayout(m, ring, main ? main.value : String(p.count), main ? main.unit : c.count(p.count));
+    }
+  });
+  KINDS.period.styles.push(...[['editorial', 'Editorial'], ['ficha', 'Ficha'], ['compacto', 'Compacto']]
+    .map(([id, label]) => ({ id, label, customizable: true, layout: (d, m) => (periodFacts(d).count ? editorialLayout('period', id, d, m) : null) })));
 
   // ── Dibujo (navegador) ─────────────────────────────────────────────────
 
@@ -1944,11 +2246,10 @@
   }
 
   function drawLockup(ctx, L, img, color, doc) {
-    drawLogo(ctx, img, L.logo, color, doc);
-    ctx.font = L.word.font; ctx.textAlign = 'left'; ctx.textBaseline = 'alphabetic';
-    drawSpaced(ctx, L.word.text, L.word.x, L.word.y, L.word.spacing);
-    ctx.font = L.crew.font;
-    drawSpaced(ctx, L.crew.text, L.crew.x, L.crew.y, L.crew.spacing);
+    if (L.logo) drawLogo(ctx, img, L.logo, color, doc);
+    ctx.textAlign = 'left'; ctx.textBaseline = 'alphabetic';
+    if (L.word) { ctx.font = L.word.font; drawSpaced(ctx, L.word.text, L.word.x, L.word.y, L.word.spacing); }
+    if (L.crew) { ctx.font = L.crew.font; drawSpaced(ctx, L.crew.text, L.crew.x, L.crew.y, L.crew.spacing); }
   }
 
   function roundRectPath(ctx, x, y, w, h, r) {
@@ -2039,7 +2340,7 @@
       drawSpaced(ctx, L.sub.text, L.sub.x, L.sub.y, L.sub.spacing);
     },
     sello(ctx, L, img, color, doc) {
-      drawLogo(ctx, img, L.logo, color, doc);
+      if (L.logo) drawLogo(ctx, img, L.logo, color, doc);
       ctx.font = L.font; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
       L.chars.forEach((c) => {
         ctx.save();
@@ -2123,6 +2424,7 @@
 .hs-custom{background:conic-gradient(#ef4444,#ffd60a,#d4ff3a,#10b981,#7cc4ff,#2563eb,#8b5cf6,#ff8fb8,#ef4444)}
 .hs-custom.has{background:radial-gradient(circle,var(--c) 0 44%,transparent 46%),conic-gradient(#ef4444,#ffd60a,#d4ff3a,#10b981,#7cc4ff,#2563eb,#8b5cf6,#ff8fb8,#ef4444)}
 .hs-custom input{position:absolute;inset:0;width:100%;height:100%;opacity:0;border:0;padding:0;margin:0;cursor:pointer}
+.hs-brand{display:flex;align-items:center;gap:6px;margin:12px 20px 0;flex-wrap:wrap}.hs-brand[hidden]{display:none}.hs-brand span{font-size:12px;font-weight:600;color:#9298a3;letter-spacing:.06em;text-transform:uppercase;margin-right:4px}.hs-brand button{border:0;border-radius:999px;background:#222429;color:#cdd0d6;font:600 13px ${INTER};padding:8px 12px;cursor:pointer;min-height:36px}.hs-brand button.on{background:#fff;color:#0b0b0b}
 .hs-body{overflow-y:auto;overscroll-behavior:contain;padding-bottom:10px}
 .hs-title-editor{margin:10px 20px 0}.hs-title-editor[hidden]{display:none}.hs-title-editor label{display:block;font-size:13px;font-weight:600;margin-bottom:8px}.hs-title-editor input{box-sizing:border-box;width:100%;min-height:44px;border:1px solid #45474d;border-radius:12px;background:#222429;color:#f4f5f7;padding:11px 12px;font:400 16px ${INTER}}.hs-title-editor input:focus-visible{outline:2px solid #d4ff3a;outline-offset:2px}.hs-title-editor small{display:block;color:#9298a3;font-size:12px;line-height:1.5;margin-top:6px}
 .hs-sub{text-align:center;font-size:13px;color:#9aa0aa;margin:0 20px 12px;min-height:1px}
@@ -2170,6 +2472,32 @@
   function readColor() {
     try { const c = global.localStorage.getItem(COLOR_KEY); return paletteHex(c) || isHex(c) ? c : 'blanco'; } catch (_) { return 'blanco'; }
   }
+  // Quién puede quitar el logo o el nombre de la firma: hoy, solo Joseph. `sbUser` es el de
+  // cada app (las dos lo declaran con let en su <script>, así que se ve desde aquí).
+  /* global sbUser */
+  function canEditBrand() {
+    const email = typeof sbUser !== 'undefined' && sbUser && sbUser.email ? String(sbUser.email).toLowerCase() : '';
+    return BRAND_EDITOR_EMAILS.includes(email);
+  }
+  function readBrand() {
+    try { const v = global.localStorage.getItem(BRAND_KEY); return BRAND_MODES.includes(v) ? v : 'both'; } catch (_) { return 'both'; }
+  }
+  function saveBrand(v) { try { global.localStorage.setItem(BRAND_KEY, v); } catch (_) { /* sin almacenamiento: dura lo que la galería */ } }
+  function brandHtml(english) {
+    const L = english ? { k: 'Signature', both: 'Logo + HABIT Crew', logo: 'Logo only', text: 'HABIT Crew only' }
+      : { k: 'Firma', both: 'Logo + HABIT Crew', logo: 'Solo logo', text: 'Solo HABIT Crew' };
+    return '<span>' + L.k + '</span>' + BRAND_MODES.map((m) => '<button type="button" role="radio" data-brand="' + m + '" class="' + (m === brandMode ? 'on' : '')
+      + '" aria-checked="' + (m === brandMode) + '">' + L[m] + '</button>').join('');
+  }
+  function setBrandChoice(mode) {
+    if (!state || !canEditBrand() || mode === brandMode) return;
+    setBrand(mode); saveBrand(brandMode);
+    sheet.querySelectorAll('[data-brand]').forEach((b) => { const on = b.dataset.brand === brandMode; b.classList.toggle('on', on); b.setAttribute('aria-checked', String(on)); });
+    // Cambia qué estilos existen (sin nombre, «Crew» no tiene qué enseñar): se rehace la lista.
+    state.preferredStyle = state.styles && state.styles[state.current] && state.styles[state.current].id;
+    freeItems(); state.items = null; state.styles = null;
+    paint().catch(() => say('No se pudo actualizar la vista previa', 'err'));
+  }
   function saveColor(c) { try { global.localStorage.setItem(COLOR_KEY, c); } catch (_) { /* sin almacenamiento: no pasa nada */ } }
   function say(msg, type) { if (typeof global.toast === 'function') global.toast(msg, type); }
   const escHtml = (s) => String(s == null ? '' : s).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
@@ -2202,6 +2530,7 @@
       + '<div class="hs-colors" role="radiogroup" aria-label="Color del sticker">'
       + PALETTE.map((c) => '<button type="button" class="hs-color" role="radio" data-c="' + c.key + '" aria-label="' + c.label + '" style="background:' + c.hex + '"></button>').join('')
       + '<label class="hs-color hs-custom" aria-label="Otro color"><input type="color" value="#ff6b2c"></label></div>'
+      + '<div class="hs-brand" role="radiogroup" hidden></div>'
       + '<div class="hs-meta"><span class="hs-label"></span><span class="hs-count"></span></div>'
       + '<div class="hs-thumbs" role="tablist" aria-label="Estilos"></div>'
       + '<div class="hs-actions"><button type="button" class="hs-share-main" disabled>' + SHARE_ICON + 'Compartir</button></div>'
@@ -2213,11 +2542,13 @@
       const preset = e.target.closest('[data-selection]');
       if (preset && state) {
         const fields = stickerFields(state.kind, state.data);
-        setFields(fields.filter((r) => preset.dataset.selection === 'all' || r.id.startsWith('discipline:') || ['sessions', 'daily'].includes(r.id)).map((r) => r.id));
+        setFields(fields.filter((r) => preset.dataset.selection === 'all' || r.id.startsWith('discipline:') || ['sessions', 'daily', 'calendar', 'range'].includes(r.id)).map((r) => r.id));
         return;
       }
       const c = e.target.closest('.hs-color');
       if (c && c.dataset.c) { setColor(c.dataset.c); return; }
+      const b = e.target.closest('[data-brand]');
+      if (b) { setBrandChoice(b.dataset.brand); return; }
       const t = e.target.closest('.hs-thumb');
       if (t) { goTo(Number(t.dataset.i)); return; }
       if (e.target.closest('.hs-share-main')) shareCurrent();
@@ -2403,6 +2734,10 @@
     const titleEditor = sheet.querySelector('.hs-title-editor');
     titleEditor.hidden = state.kind === 'quote';
     const english = /^en\b/i.test(state.data.lang);
+    setBrand(canEditBrand() ? readBrand() : 'both');
+    const brandRow = sheet.querySelector('.hs-brand');
+    brandRow.hidden = !canEditBrand();
+    brandRow.innerHTML = brandRow.hidden ? '' : brandHtml(english);
     sheet.querySelector('.hs-preview-mode span').textContent = english ? 'Preview in a story' : 'Ver en una historia';
     sheet.querySelector('#hs-story-preview').checked = true;
     sheet.querySelector('.hs-stage').classList.add('story');
@@ -2410,15 +2745,17 @@
     titleEditor.querySelector('small').textContent = english ? 'Optional · Leave blank to use the original title. Only changes this sticker.' : 'Opcional · Déjalo vacío para usar el título original. Solo cambia este sticker.';
     const titleInput = titleEditor.querySelector('input');
     titleInput.value = customTitle(state.data);
-    titleInput.placeholder = state.kind === 'week' ? (english ? 'E.g. My week in motion' : 'Ej. Mi semana en movimiento') : workoutFacts({ ...state.data, customTitle: '', fields: undefined }).title;
+    titleInput.placeholder = state.kind === 'period' ? (english ? 'E.g. 21 days on board' : 'Ej. 21 días a bordo')
+      : state.kind === 'week' ? (english ? 'E.g. My week in motion' : 'Ej. Mi semana en movimiento') : workoutFacts({ ...state.data, customTitle: '', fields: undefined }).title;
     const options = sheet.querySelector('.hs-options');
     options.hidden = state.kind === 'quote';
     options.open = false;
-    sheet.querySelector('.hs-presets').hidden = state.kind !== 'week' || !normalizeDisciplines(state.data).length;
+    sheet.querySelector('.hs-presets').hidden = state.kind === 'quote' || state.kind === 'workout' || !normalizeDisciplines(state.data).length;
     if (state.kind !== 'quote') {
       const fields = stickerFields(state.kind, state.data);
       if (!Array.isArray(state.data.fields)) {
-        const defaults = state.kind === 'week' ? ['count', 'durationSec', 'days', 'weekStart', 'sessions', 'daily'] : ['title', 'durationSec', 'distanceM'];
+        const defaults = state.kind === 'week' ? ['count', 'durationSec', 'days', 'weekStart', 'sessions', 'daily']
+          : state.kind === 'period' ? ['activeDays', 'count', 'durationSec', 'distanceM', 'range', 'calendar'] : ['title', 'durationSec', 'distanceM'];
         state.data = { ...state.data, fields: fields.filter((r) => defaults.includes(r.id) || r.id.startsWith('discipline:')).map((r) => r.id) };
       }
       sheet.querySelector('.hs-fields').innerHTML = fields.map((r) => '<label><input type="checkbox" data-field="' + r.id + '"' + (state.data.fields.includes(r.id) ? ' checked' : '') + '><span>' + escHtml(r.label) + '</span></label>').join('');
@@ -2433,6 +2770,7 @@
     if (!sheet) return;
     sheet.classList.remove('open');
     global.document.body.style.overflow = (state && state.bodyOverflow) || '';
+    setBrand('both');
     freeItems();
     const done = state && state.onClose;
     if (state) { state.items = null; state.styles = null; state.onClose = null; }
@@ -2460,6 +2798,7 @@
     COLORS, PALETTE, WIDTH, LOGO_INK, TITLE_LIMIT, customTitle, KINDS, ACTIVITY_TYPES, SHARE_ICON, contrast, inkFor, resolveColor,
     wrapText, balancedWrap, spacedWidth, lockupLayout, quoteLayout, signatureLayout, sealLayout, shortDate,
     dayName, thousands, distanceText, clock, minutesText, paceText, workoutFacts, weekFacts, stylesFor, stickerFields, selectedFields, normalizeDisciplines, selectedDisciplines, compactWeekTime, normalizeWeekSessions, weeklyReferenceLayout, referenceCopy,
+    periodFacts, rangeText, PERIOD_COPY, BRAND_MODES, setBrand, getBrand: () => brandMode,
     ensureFonts, loadLogo, renderSticker, toBlob, shareImage, open, close, chipHtml
   };
   if (typeof module !== 'undefined' && module.exports) module.exports = api;

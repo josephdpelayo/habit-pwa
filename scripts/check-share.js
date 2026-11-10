@@ -444,4 +444,104 @@ for (const id of ['heroe', 'semana', 'carnet', 'insignia', 'ritual', 'bitacora',
 const longSignature = S.signatureLayout(measure, 'MIS KILÓMETROS Y MI FUERZA A LO LARGO DE TODA ESTA SEMANA');
 assert.equal(longSignature.width, 1080, 'un título largo no ensancha el PNG y encoge todo al pegarlo');
 inside(longSignature, 'firma con título largo');
+
+// ── Un periodo: de una fecha a otra (10 nov 2026, «todos los días a bordo») ─────────────
+assert.equal(S.rangeText('2026-10-19', '2026-11-08'), '19.10 – 08.11.26');
+assert.equal(S.rangeText('2026-12-28', '2027-01-04'), '28.12.26 – 04.01.27', 'dos años, los dos');
+assert.equal(S.rangeText('2026-10-31', '2026-10-31'), '31.10.26');
+function periodData(from, days, every) {
+  const start = Date.parse(from + 'T00:00:00Z'), daily = [];
+  for (let i = 0; i < days; i++) {
+    if (i % every === every - 1) continue;
+    daily.push({ ds: new Date(start + i * 864e5).toISOString().slice(0, 10), count: i % 5 ? 1 : 2, durationSec: 2400 + (i % 7) * 600, distanceM: i % 2 ? 8000 : 0 });
+  }
+  const sum = (k) => daily.reduce((n, r) => n + r[k], 0);
+  return { from, to: new Date(start + (days - 1) * 864e5).toISOString().slice(0, 10), count: sum('count'), durationSec: sum('durationSec'), distanceM: sum('distanceM'), daily,
+    disciplines: [{ type: 'run', count: Math.ceil(daily.length / 2), durationSec: sum('durationSec') / 2, distanceM: sum('distanceM') }, { type: 'strength', count: Math.floor(daily.length / 2), durationSec: sum('durationSec') / 2 }] };
+}
+const aboard = periodData('2026-10-19', 21, 4);
+const pf = S.periodFacts(aboard);
+assert.equal(pf.total, 21, 'las dos fechas cuentan');
+assert.equal(pf.active, 16, 'días con algo, no entrenos');
+assert.equal(pf.best, 3, 'mejor racha de días seguidos');
+assert.equal(pf.daily[0].dow, 0, '19 oct 2026 es lunes');
+assert.equal(S.periodFacts({ from: '2026-11-08', to: '2026-10-19' }).total, 1, 'unas fechas al revés no inventan días');
+assert.equal(S.periodFacts({ from: '2025-01-01', to: '2026-11-08' }).total, 400, 'un periodo no pasa de 400 días');
+const periodIds = S.KINDS.period.styles.map((st) => st.id);
+assert.deepEqual(periodIds, ['mosaico', 'pulso', 'bitacora', 'orbita', 'cifras', 'sello', 'editorial', 'ficha', 'compacto']);
+assert.equal(S.stylesFor('period', { from: '2026-10-19', to: '2026-10-25', count: 0, daily: [] }, measure).length, 0, 'sin entrenos no hay sticker');
+for (const [days, every] of [[1, 9], [7, 3], [21, 4], [63, 5], [64, 5], [120, 3], [400, 2]]) {
+  const data = periodData('2026-01-05', days, every);
+  const all = S.stickerFields('period', data).map((r) => r.id);
+  for (const fields of [all, [], ['calendar'], ['activeDays', 'range'], ['count', 'discipline:run']]) {
+    for (const lang of ['es', 'en']) {
+      const dd = { ...data, fields, lang, customTitle: days === 21 ? 'Veintiún días a bordo del barco, entrenando' : '' };
+      const styles = S.stylesFor('period', dd, measure);
+      assert.equal(styles.length, 9, `${days} días/${fields.join('+') || 'nada'}: los nueve diseños`);
+      for (const st of styles) {
+        const L = st.layout(dd, measure);
+        inside(L, `periodo ${days}d/${st.id}/${fields.join('+')}`);
+        assert.ok(saysCrew(L), 'periodo/' + st.id + ' firma como HABIT Crew');
+      }
+    }
+  }
+}
+// Una casilla apagada no sale en ningún diseño.
+{
+  const fields = S.stickerFields('period', aboard).map((r) => r.id).filter((id) => id !== 'activeDays');
+  for (const st of S.stylesFor('period', { ...aboard, fields }, measure)) {
+    const L = st.layout({ ...aboard, fields }, measure);
+    const texts = L.ops.filter((o) => o.op === 'text').map((o) => o.text).concat(L.ops.filter((o) => o.op === 'arc').map((o) => o.chars.map((c) => c.ch).join('')));
+    assert.ok(!texts.some((t) => t.includes('16/21')), 'periodo/' + st.id + ': sin días entrenados si se apagan');
+  }
+  const noCal = S.KINDS.period.styles.find((st) => st.id === 'mosaico').layout({ ...aboard, fields: ['count'] }, measure);
+  assert.ok(!noCal.ops.some((o) => o.op === 'rect'), 'sin «Día por día», el mosaico no dibuja días');
+  const cal = S.KINDS.period.styles.find((st) => st.id === 'mosaico').layout({ ...aboard, fields: ['calendar'] }, measure);
+  assert.equal(cal.ops.filter((o) => o.op === 'rect').length, 21, 'un cuadro por día');
+  assert.equal(cal.ops.filter((o) => o.op === 'rect' && !o.stroke).length, 16, 'llenos los días entrenados');
+  const orbit = S.KINDS.period.styles.find((st) => st.id === 'orbita').layout({ ...aboard, fields: ['calendar'] }, measure);
+  assert.equal(orbit.ops.filter((o) => o.op === 'circle').length, 21, 'la órbita: un punto por día');
+}
+
+// ── La firma: logo + HABIT Crew, solo el logo o solo HABIT Crew ─────────────────────────
+assert.equal(S.getBrand(), 'both', 'por defecto, la firma completa');
+const brandSamples = [['quote', { text: quotes[0], ds: '2026-10-31' }], ['workout', { ...samples.rodada, number: 47 }], ['week', wk], ['period', aboard]];
+const brandTexts = (L) => {
+  if (L.lockup) return [L.lockup.word && 'HABIT', L.lockup.crew && 'CREW'].filter(Boolean);
+  if (L.chars) return [L.chars.map((c) => c.ch).join('')];
+  return L.ops.filter((o) => o.op === 'text').map((o) => o.text).concat(L.ops.filter((o) => o.op === 'arc').map((o) => o.chars.map((c) => c.ch).join('')));
+};
+const hasLogo = (L) => (L.lockup ? !!L.lockup.logo : L.logo ? true : (L.ops || []).some((o) => o.op === 'logo'));
+for (const mode of ['logo', 'text']) {
+  S.setBrand(mode);
+  for (const [kind, data] of brandSamples) {
+    for (const st of S.stylesFor(kind, data, measure)) {
+      const L = st.layout(data, measure);
+      const name = `${mode}/${kind}/${st.id}`;
+      if (L.ops) inside(L, name);
+      const words = brandTexts(L);
+      if (mode === 'logo') {
+        assert.ok(!words.some((t) => /\bCREW\b/.test(t)), name + ': solo el logo, sin HABIT CREW');
+        assert.ok(hasLogo(L), name + ': lleva el logo');
+      } else {
+        assert.ok(!hasLogo(L), name + ': solo HABIT Crew, sin logo');
+        assert.ok(saysCrew(L), name + ': dice HABIT Crew');
+      }
+    }
+  }
+  const crew = S.KINDS.quote.styles.find((st) => st.id === 'crew').layout({ text: quotes[0] }, measure);
+  if (mode === 'logo') assert.equal(crew, null, 'sin nombre, «Crew» no tiene qué enseñar');
+  const lk = S.lockupLayout(540, 0, 52, measure);
+  if (mode === 'logo') assert.ok(lk.logo && !lk.word && !lk.crew && lk.width === lk.logo.size, 'el logo solo');
+  else assert.ok(!lk.logo && lk.word && lk.crew, 'HABIT Crew solo');
+}
+S.setBrand('both');
+assert.equal(S.setBrand('cualquiera'), 'both', 'una firma desconocida es la completa');
+{
+  // La firma semanal no se infla: solo el logo ocupa menos que el logotipo completo.
+  const ritual = (mode) => { S.setBrand(mode); const L = S.KINDS.week.styles.find((st) => st.id === 'ritual').layout({ ...wk, fields: ['count'] }, measure); S.setBrand('both'); return L; };
+  const logoOnly = ritual('logo').ops.find((o) => o.op === 'logo');
+  assert.ok(logoOnly.size >= 80 && logoOnly.size <= 140, 'el logo solo, del tamaño de una firma (' + logoOnly.size + ')');
+}
+
 console.log('HABIT Stickers: ok');

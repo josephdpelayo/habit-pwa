@@ -163,4 +163,30 @@ assert.equal(disciplineSummary.distanceM, 35100, 'total general incluye caminar,
 assert.equal(disciplineSummary.sessions.length, 4, 'el diario usa las cuatro sesiones ya conciliadas');
 assert.ok(!disciplineSummary.sessions.some(r => r.ds < '2026-10-26' || r.ds >= '2026-11-02'));
 assert.ok(!disciplineSummary.sessions.some(r => 'title' in r), 'no envía títulos privados al resumen');
+
+// ── De una fecha a otra ──────────────────────────────────────────────────
+{
+  const items = [
+    { ds: '2026-10-19', type: 'run', durationSec: 3000, distanceM: 10000 },
+    { ds: '2026-10-19', type: 'strength', durationSec: 3600, distanceM: 999 },
+    { ds: '2026-10-25', type: 'swim', durationSec: 1800, distanceM: 1500 },
+    { ds: '2026-11-08', type: 'yoga', durationSec: 1200 },
+    { ds: '2026-11-09', type: 'run', durationSec: 2000, distanceM: 5000 },
+    { ds: '2026-10-18', type: 'run', durationSec: 2000, distanceM: 5000 }
+  ];
+  const p = A.periodSummary(items, '2026-10-19', '2026-11-08');
+  assert.equal(p.totalDays, 21, 'las dos fechas cuentan');
+  assert.equal(p.count, 4, 'solo lo de esas fechas');
+  assert.equal(p.activeDays, 3);
+  assert.equal(p.distanceM, 11500, 'la fuerza no suma distancia');
+  assert.deepEqual(p.daily[0], { ds: '2026-10-19', count: 2, durationSec: 6600, distanceM: 10000 }, 'un día junta lo de ese día');
+  assert.ok(!p.daily.some((r) => 'title' in r), 'sin títulos privados');
+  assert.deepEqual(A.periodSummary(items, '2026-11-08', '2026-10-19'), p, 'fechas al revés, el mismo periodo');
+  assert.equal(A.periodSummary(items, '2025-01-01', '2026-11-08').totalDays, 400, 'no pasa de 400 días');
+  assert.equal(A.periodSummary(items, 'ayer', '2026-11-08'), null);
+  // El sticker lee lo mismo que la tarjeta.
+  const f = global.HabitShare.periodFacts(p);
+  assert.equal(f.total, 21); assert.equal(f.active, 3); assert.equal(f.count, 4);
+  assert.ok(global.HabitShare.stylesFor('period', p, (t, font) => String(t).length * Number(String(font).match(/(\d+)px/)[1]) * 0.5).length >= 9);
+}
 console.log('HABIT Actividad: ok');

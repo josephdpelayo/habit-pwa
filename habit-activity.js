@@ -46,6 +46,7 @@
     sport: '<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/><path d="M12 3.5v17M3.5 12h17M6.3 5.8c3 3.4 3 9 0 12.4M17.7 5.8c-3 3.4-3 9 0 12.4"/></svg>',
     other: '<svg viewBox="0 0 24 24"><path d="M12 3.5v4M12 16.5v4M3.5 12h4M16.5 12h4M6 6l2.8 2.8M15.2 15.2L18 18M6 18l2.8-2.8M15.2 8.8L18 6"/></svg>'
   };
+  const CAL_ICON = '<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3.5" y="5" width="17" height="15.5" rx="2.5"/><path d="M3.5 10h17M8 3v4M16 3v4"/></svg>';
   const PLUS = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>';
   const SYNC_ICON = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 11a8 8 0 0 0-14.3-4.9L4 8"/><path d="M4 3.5V8h4.5"/><path d="M4 13a8 8 0 0 0 14.3 4.9L20 16"/><path d="M20 20.5V16h-4.5"/></svg>';
   const MONTHS = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'];
@@ -225,7 +226,7 @@
   // ── Navegador ────────────────────────────────────────────────────────────
 
   const doc = global.document;
-  const state = { data: null, windowDays: 120, filter: 'all', loading: null, form: null, detailKey: null, root: null };
+  const state = { data: null, windowDays: 120, filter: 'all', loading: null, form: null, detailKey: null, root: null, range: null, rangeForm: null };
   const sync = { uid: null, checked: false, connected: false, last: null, busy: false, error: '' };
   let sheet = null;
 
@@ -305,16 +306,11 @@
     return state.loading;
   }
 
-  function weekSummary(items, weekStart) {
-    const ws = weekStart || mazWeekStart(mazToday());
-    const startMs = Date.parse(ws + 'T00:00:00Z');
-    const end = new Date(startMs + 7 * 864e5).toISOString().slice(0, 10);
-    const week = items.filter((it) => it.ds >= ws && it.ds < end);
-    const days = [0, 0, 0, 0, 0, 0, 0];
+  // Por disciplina, en el mismo orden que la semana. Lo usan la semana y el periodo.
+  const DISCIPLINE_ORDER = ['run', 'strength', 'bike', 'swim', 'walk', 'cardio', 'yoga', 'sport', 'other'];
+  function groupDisciplines(list) {
     const byType = new Map();
-    week.forEach((it) => {
-      const i = Math.round((Date.parse(it.ds + 'T00:00:00Z') - startMs) / 864e5);
-      if (i >= 0 && i < 7) days[i] = 1;
+    list.forEach((it) => {
       const type = TYPES.includes(it.type) ? it.type : 'other';
       if (!byType.has(type)) byType.set(type, { type, count: 0, durationSec: 0, distanceM: 0 });
       const group = byType.get(type);
@@ -322,8 +318,48 @@
       group.durationSec += Math.max(0, Number(it.durationSec) || 0);
       if (hasDistance(type)) group.distanceM += Math.max(0, Number(it.distanceM) || 0);
     });
-    const order = ['run', 'strength', 'bike', 'swim', 'walk', 'cardio', 'yoga', 'sport', 'other'];
-    const disciplines = [...byType.values()].sort((a, b) => order.indexOf(a.type) - order.indexOf(b.type));
+    return [...byType.values()].sort((a, b) => DISCIPLINE_ORDER.indexOf(a.type) - DISCIPLINE_ORDER.indexOf(b.type));
+  }
+
+  // De una fecha a otra, las dos incluidas (Joseph, 10 nov 2026: «todos los días a bordo»).
+  // `daily` trae solo los días con algo; los vacíos los pone el sticker. Sin títulos: un
+  // sticker no necesita el nombre de tus rutinas.
+  const MAX_RANGE_DAYS = 400;
+  const DS_RE = /^\d{4}-\d{2}-\d{2}$/;
+  const dsDays = (a, b) => Math.round((Date.parse(b + 'T00:00:00Z') - Date.parse(a + 'T00:00:00Z')) / 864e5);
+  const dsPlus = (ds, n) => new Date(Date.parse(ds + 'T00:00:00Z') + n * 864e5).toISOString().slice(0, 10);
+  function periodSummary(items, from, to) {
+    if (!DS_RE.test(from || '') || !DS_RE.test(to || '')) return null;
+    if (to < from) [from, to] = [to, from];
+    if (dsDays(from, to) >= MAX_RANGE_DAYS) from = dsPlus(to, -(MAX_RANGE_DAYS - 1));
+    const list = (items || []).filter((it) => it.ds >= from && it.ds <= to);
+    const byDay = new Map();
+    list.forEach((it) => {
+      const day = byDay.get(it.ds) || { ds: it.ds, count: 0, durationSec: 0, distanceM: 0 };
+      day.count++;
+      day.durationSec += Math.max(0, Number(it.durationSec) || 0);
+      if (hasDistance(it.type)) day.distanceM += Math.max(0, Number(it.distanceM) || 0);
+      byDay.set(it.ds, day);
+    });
+    const disciplines = groupDisciplines(list);
+    return {
+      from, to, totalDays: dsDays(from, to) + 1, activeDays: byDay.size, count: list.length,
+      durationSec: disciplines.reduce((n, r) => n + r.durationSec, 0), distanceM: disciplines.reduce((n, r) => n + r.distanceM, 0),
+      daily: [...byDay.values()].sort((a, b) => a.ds.localeCompare(b.ds)), disciplines
+    };
+  }
+
+  function weekSummary(items, weekStart) {
+    const ws = weekStart || mazWeekStart(mazToday());
+    const startMs = Date.parse(ws + 'T00:00:00Z');
+    const end = new Date(startMs + 7 * 864e5).toISOString().slice(0, 10);
+    const week = items.filter((it) => it.ds >= ws && it.ds < end);
+    const days = [0, 0, 0, 0, 0, 0, 0];
+    week.forEach((it) => {
+      const i = Math.round((Date.parse(it.ds + 'T00:00:00Z') - startMs) / 864e5);
+      if (i >= 0 && i < 7) days[i] = 1;
+    });
+    const disciplines = groupDisciplines(week);
     // Detalle de sesiones ya conciliadas para los stickers de diario y gráficas. No se
     // reconstruye a partir del total ni se incluyen títulos privados de las rutinas.
     const sessions = [...week].sort((a, b) => a.ds.localeCompare(b.ds)
@@ -371,13 +407,15 @@
         + (d.tableMissing ? '' : '<button class="btn" data-act="add">Registrar una actividad</button>')
         + '<button class="btn-sm" data-act="train">Entrenar con la app</button></section>';
     }
-    html += weekHtml(weekSummary(d.items));
-    const types = TYPES.filter((t) => d.items.some((it) => it.type === t));
+    const range = state.range;
+    html += range ? periodHtml(periodSummary(d.items, range.from, range.to)) : weekHtml(weekSummary(d.items));
+    const base = range ? d.items.filter((it) => it.ds >= range.from && it.ds <= range.to) : d.items;
+    const types = TYPES.filter((t) => base.some((it) => it.type === t));
     if (state.filter !== 'all' && !types.includes(state.filter)) state.filter = 'all';
     if (types.length > 1) {
       html += '<div class="act-filters" role="tablist">' + ['all', ...types].map((t) => '<button class="act-filter' + (state.filter === t ? ' on' : '') + '" data-act="filter" data-v="' + t + '">' + (t === 'all' ? 'Todo' : esc(typeLabel(t))) + '</button>').join('') + '</div>';
     }
-    const shown = state.filter === 'all' ? d.items : d.items.filter((it) => it.type === state.filter);
+    const shown = state.filter === 'all' ? base : base.filter((it) => it.type === state.filter);
     let month = '';
     shown.forEach((it) => {
       const m = it.ds.slice(0, 7);
@@ -388,8 +426,8 @@
       }
       html += rowHtml(it, S);
     });
-    if (!shown.length) html += '<div class="empty">Nada de esto en los últimos meses.</div>';
-    html += '<button class="act-more" data-act="more">Ver antes del ' + esc(fmtDS(d.since)) + '</button>';
+    if (!shown.length) html += '<div class="empty">' + esc(range ? R().none : 'Nada de esto en los últimos meses.') + '</div>';
+    if (!range) html += '<button class="act-more" data-act="more">Ver antes del ' + esc(fmtDS(d.since)) + '</button>';
     if (d.tableMissing) html += '<p class="act-note">Pronto podrás registrar aquí lo que entrenas fuera de la app.</p>';
     return html;
   }
@@ -400,8 +438,129 @@
       + '<div class="act-week-n">' + w.count + '<span>' + (w.count === 1 ? 'entreno' : 'entrenos') + '<br>esta semana</span></div>'
       + (meta ? '<div class="act-week-meta">' + esc(meta) + '</div>' : '')
       + '<div class="act-week-days">' + 'LMMJVSD'.split('').map((l, i) => '<span class="' + (w.days[i] ? 'on' : '') + '"><i></i>' + l + '</span>').join('') + '</div>'
+      + '<div class="act-week-actions">'
       + (w.count && S ? '<button class="act-week-share" data-act="share-week">' + S.SHARE_ICON + 'Compartir mi semana</button>' : '')
+      + '<button class="act-week-share" data-act="range">' + CAL_ICON + esc(R().pick) + '</button></div>'
       + '</section>';
+  }
+
+  // ── Un periodo: de una fecha a otra ─────────────────────────────────────
+  // Textos nuevos en los dos idiomas (requisito del 1 nov 2026), por el idioma del documento
+  // mientras no exista el selector global.
+  const RANGE_TEXT = {
+    es: { pick: 'Elegir fechas', title: 'Tu periodo', sheet: 'Elegir fechas', from: 'Desde', to: 'Hasta', apply: 'Ver esta actividad',
+      stickers: 'Crear stickers', share: 'Compartir este periodo', change: 'Cambiar fechas', clear: 'Quitar fechas',
+      none: 'Nada registrado en esas fechas.', empty: 'Sin actividad en esas fechas', loading: 'Cargando esas fechas…',
+      workouts: (n) => (n === 1 ? 'entreno' : 'entrenos'), inRange: 'en estas fechas', daysOf: (a, t) => a + ' de ' + t + (t === 1 ? ' día' : ' días'),
+      days: (n) => n + (n === 1 ? ' día' : ' días'), max: 'Hasta 400 días por periodo',
+      presets: [['7', 'Últimos 7 días'], ['14', 'Últimos 14 días'], ['30', 'Últimos 30 días'], ['month', 'Este mes'], ['last-month', 'Mes pasado']] },
+    en: { pick: 'Pick dates', title: 'Your stretch', sheet: 'Pick dates', from: 'From', to: 'To', apply: 'Show this activity',
+      stickers: 'Make stickers', share: 'Share this stretch', change: 'Change dates', clear: 'Clear dates',
+      none: 'Nothing logged on those dates.', empty: 'No activity on those dates', loading: 'Loading those dates…',
+      workouts: (n) => (n === 1 ? 'workout' : 'workouts'), inRange: 'on these dates', daysOf: (a, t) => a + ' of ' + t + (t === 1 ? ' day' : ' days'),
+      days: (n) => n + (n === 1 ? ' day' : ' days'), max: 'Up to 400 days per stretch',
+      presets: [['7', 'Last 7 days'], ['14', 'Last 14 days'], ['30', 'Last 30 days'], ['month', 'This month'], ['last-month', 'Last month']] }
+  };
+  const lang = () => (doc && doc.documentElement && /^en\b/i.test(doc.documentElement.lang || '') ? 'en' : 'es');
+  const R = () => RANGE_TEXT[lang()];
+  // 19 oct – 8 nov 2026, en el idioma de la app.
+  function rangeLabel(from, to) {
+    const f = (ds, year) => new Date(ds + 'T12:00:00Z').toLocaleDateString(lang() === 'en' ? 'en-US' : 'es-MX', { day: 'numeric', month: 'short', year: year ? 'numeric' : undefined, timeZone: 'UTC' }).replace(/\./g, '');
+    return from === to ? f(from, true) : f(from, from.slice(0, 4) !== to.slice(0, 4)) + ' – ' + f(to, true);
+  }
+  function periodHtml(p) {
+    const S = share(), t = R();
+    if (!p) return '';
+    const active = new Set(p.daily.map((r) => r.ds));
+    const meta = [t.daysOf(p.activeDays, p.totalDays), durText(p.durationSec), p.distanceM ? (p.distanceM / 1000).toFixed(1) + ' km' : ''].filter(Boolean).join(' · ');
+    let dots = '';
+    for (let i = 0; i < p.totalDays; i++) dots += '<i class="' + (active.has(dsPlus(p.from, i)) ? 'on' : '') + '"></i>';
+    return '<section class="act-week act-period">'
+      + '<div class="act-period-k">' + esc(rangeLabel(p.from, p.to)) + ' · ' + esc(t.days(p.totalDays)) + '</div>'
+      + '<div class="act-week-n">' + p.count + '<span>' + esc(t.workouts(p.count)) + '<br>' + esc(t.inRange) + '</span></div>'
+      + '<div class="act-week-meta">' + esc(meta) + '</div>'
+      + '<div class="act-period-days' + (p.totalDays > 62 ? ' tiny' : '') + '">' + dots + '</div>'
+      + '<div class="act-week-actions">'
+      + (p.count && S ? '<button class="act-week-share" data-act="share-period">' + S.SHARE_ICON + esc(t.share) + '</button>' : '')
+      + '<button class="act-week-share" data-act="range">' + CAL_ICON + esc(t.change) + '</button>'
+      + '<button class="act-week-share" data-act="range-clear">× ' + esc(t.clear) + '</button></div>'
+      + '</section>';
+  }
+  function presetRange(key) {
+    const today = mazToday();
+    if (key === 'month') return { from: today.slice(0, 8) + '01', to: today };
+    if (key === 'last-month') {
+      const end = dsPlus(today.slice(0, 8) + '01', -1);
+      return { from: end.slice(0, 8) + '01', to: end };
+    }
+    return { from: dsPlus(today, -(Number(key) - 1)), to: today };
+  }
+  // Las fechas que se pidieron, ya en orden, sin pasar de hoy ni de 400 días.
+  function cleanRange(from, to) {
+    const today = mazToday();
+    if (!DS_RE.test(from || '')) from = today;
+    if (!DS_RE.test(to || '')) to = from;
+    if (to < from) [from, to] = [to, from];
+    if (to > today) to = today;
+    if (from > to) from = to;
+    if (dsDays(from, to) >= MAX_RANGE_DAYS) from = dsPlus(to, -(MAX_RANGE_DAYS - 1));
+    return { from, to };
+  }
+  // La lista se carga por ventana de días hacia atrás: un periodo que empieza antes la agranda.
+  async function ensureLoadedFrom(from) {
+    const need = dsDays(from, mazToday()) + 1;
+    if (state.data && state.data.since <= from) return state.data;
+    if (need > state.windowDays) state.windowDays = need;
+    return loadData(true);
+  }
+  function openRange() {
+    const cur = state.range || presetRange('30');
+    state.rangeForm = { ...cur };
+    openSheet(R().sheet, rangeFormHtml());
+    previewRange();
+  }
+  function rangeFormHtml() {
+    const t = R(), f = state.rangeForm, today = mazToday();
+    const preset = t.presets.find(([k]) => { const r = presetRange(k); return r.from === f.from && r.to === f.to; });
+    return '<div class="act-range">'
+      + '<label class="act-f"><span>' + esc(t.from) + '</span><input type="date" data-act-change="range-from" value="' + esc(f.from) + '" max="' + esc(today) + '"></label>'
+      + '<label class="act-f"><span>' + esc(t.to) + '</span><input type="date" data-act-change="range-to" value="' + esc(f.to) + '" max="' + esc(today) + '"></label></div>'
+      + '<div class="act-chips act-quick">' + t.presets.map(([k, label]) => '<button class="act-chip' + (preset && preset[0] === k ? ' on' : '') + '" data-act="range-preset" data-v="' + k + '">' + esc(label) + '</button>').join('') + '</div>'
+      + '<div class="act-range-preview" aria-live="polite">' + esc(t.loading) + '</div>'
+      + '<p class="act-note">' + esc(t.max) + '</p>'
+      + '<button class="btn act-save" data-act="range-apply">' + esc(t.apply) + '</button>'
+      + (share() ? '<div class="act-d-actions"><button class="act-week-share" data-act="range-stickers">' + share().SHARE_ICON + esc(t.stickers) + '</button></div>' : '');
+  }
+  async function previewRange() {
+    const f = state.rangeForm;
+    if (!f || !sheet) return;
+    const box = () => sheet.querySelector('.act-range-preview');
+    if (box()) box().textContent = R().loading;
+    try {
+      const d = await ensureLoadedFrom(f.from);
+      if (state.rangeForm !== f || !box()) return;
+      const p = periodSummary(d.items, f.from, f.to), t = R();
+      box().innerHTML = '<b>' + p.count + '</b> ' + esc(t.workouts(p.count)) + ' · ' + esc(t.daysOf(p.activeDays, p.totalDays))
+        + '<span>' + esc(rangeLabel(p.from, p.to)) + '</span>';
+    } catch (e) { if (box()) box().textContent = e.message || String(e); }
+  }
+  async function applyRange(thenShare) {
+    if (!state.rangeForm) return;
+    const r = cleanRange(state.rangeForm.from, state.rangeForm.to);
+    state.range = r;
+    state.filter = 'all';
+    closeSheet();
+    try { await ensureLoadedFrom(r.from); } catch (e) { say(e.message || String(e), 'err'); }
+    paint();
+    if (thenShare) sharePeriod();
+  }
+  function sharePeriod() {
+    const S = share();
+    if (!state.data || !S || !state.range) return;
+    const p = periodSummary(state.data.items, state.range.from, state.range.to);
+    if (!p || !p.count) { say(R().empty, 'err'); return; }
+    const t = R();
+    S.open({ kind: 'period', data: p, title: t.title, subtitle: rangeLabel(p.from, p.to) + ' · ' + p.count + ' ' + t.workouts(p.count) + ' · ' + t.daysOf(p.activeDays, p.totalDays) });
   }
   function rowHtml(it, S) {
     const meta = [fmtDS(it.ds), durText(it.durationSec), distText(it.type, it.distanceM)].filter(Boolean).join(' · ');
@@ -614,7 +773,7 @@
   }
   function closeSheet() {
     if (sheet) sheet.classList.remove('open');
-    state.form = null; state.detailKey = null;
+    state.form = null; state.detailKey = null; state.rangeForm = null;
   }
 
   function sourceLabel(it) {
@@ -766,6 +925,12 @@
     if (act === 'detail') openDetail(key);
     else if (act === 'share') shareItem(key);
     else if (act === 'share-week') shareWeek();
+    else if (act === 'share-period') sharePeriod();
+    else if (act === 'range') openRange();
+    else if (act === 'range-clear') { state.range = null; paint(); }
+    else if (act === 'range-preset' && state.rangeForm) { state.rangeForm = presetRange(v); setSheetBody(rangeFormHtml(), true); previewRange(); }
+    else if (act === 'range-apply') applyRange(false);
+    else if (act === 'range-stickers') applyRange(true);
     else if (act === 'add') openForm();
     else if (act === 'edit') openForm(key);
     else if (act === 'delete') remove(key);
@@ -788,6 +953,16 @@
   }
   function onChange(e) {
     const t = e.target;
+    const rc = t && t.getAttribute && t.getAttribute('data-act-change');
+    if ((rc === 'range-from' || rc === 'range-to') && state.rangeForm) {
+      if (!DS_RE.test(t.value)) return;
+      state.rangeForm = { ...state.rangeForm, [rc === 'range-from' ? 'from' : 'to']: t.value };
+      const r = cleanRange(state.rangeForm.from, state.rangeForm.to);
+      state.rangeForm = r;
+      setSheetBody(rangeFormHtml(), true);
+      previewRange();
+      return;
+    }
     if (!t || !t.getAttribute || t.getAttribute('data-act-change') !== 'day' || !state.form) return;
     readForm();
     if (/^\d{4}-\d{2}-\d{2}$/.test(t.value)) state.form.ds = t.value;
@@ -824,7 +999,18 @@
 .act-week-days .on i{border:0;background:#22c55e;box-shadow:0 0 0 4px rgba(34,197,94,.14)}
 .act-week-days .on{color:var(--white,#fff)}
 .act-week-share,.act-row-share{display:inline-flex;align-items:center;gap:7px;border:0;background:none;color:var(--gl,#c9ccd2);font:600 13px 'Inter',sans-serif;cursor:pointer}
-.act-week-share{margin-top:16px;padding:6px 0;letter-spacing:.06em;text-transform:uppercase;font-size:12px}
+.act-week-share{padding:6px 0;letter-spacing:.06em;text-transform:uppercase;font-size:12px}
+.act-week-actions{display:flex;flex-wrap:wrap;gap:4px 18px;margin-top:16px}
+.act-period-k{font-size:11px;font-weight:600;letter-spacing:.18em;text-transform:uppercase;color:var(--gray,#8a8f99);margin-bottom:12px}
+.act-period-days{display:flex;flex-wrap:wrap;gap:5px;margin-top:16px}
+.act-period-days i{width:14px;height:14px;border-radius:4px;box-shadow:inset 0 0 0 1.5px rgba(255,255,255,.18)}
+.act-period-days.tiny{gap:3px}.act-period-days.tiny i{width:8px;height:8px;border-radius:2px}
+.act-period-days i.on{background:#22c55e;box-shadow:none}
+.act-range{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.act-range input{color-scheme:dark;min-height:48px}
+.act-range-preview{margin:18px 2px 0;font-size:15px;color:var(--gl,#c9ccd2);min-height:42px}
+.act-range-preview b{font-size:22px;color:var(--white,#fff)}
+.act-range-preview span{display:block;font-size:12.5px;color:var(--gray,#8a8f99);margin-top:4px}
 .act-week-share svg,.act-row-share svg{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round}
 .act-filters{display:flex;gap:6px;overflow-x:auto;margin:0 -16px 6px;padding:2px 16px 8px;scrollbar-width:none}
 .act-filters::-webkit-scrollbar{display:none}
@@ -917,7 +1103,7 @@
 
   const api = {
     APP_GLOBALS, TYPES, DIST_TYPES, COLORS, typeFromSkandi, itemFromAppSession, itemFromManual, itemFromSkandiActivity,
-    itemFromSkandiSession, numberItems, reconcileActivities, weekSummary, syncWindowDays, syncDue, skandiBestSet, skandiStickerData,
+    itemFromSkandiSession, numberItems, reconcileActivities, weekSummary, periodSummary, syncWindowDays, syncDue, skandiBestSet, skandiStickerData,
     render, invalidate, offerSessionStickers, totalCount
   };
   if (typeof module !== 'undefined' && module.exports) module.exports = api;
