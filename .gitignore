@@ -23,3 +23,7 @@ supabase/.temp/
 # Python del sincronizador a Garmin (garmin_sync)
 garmin_sync/.venv/
 __pycache__/
+
+# Investigación (notas y reportes, no son del producto)
+research_notes/
+reports/
