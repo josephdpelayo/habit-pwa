@@ -248,16 +248,16 @@ async function receptionActive(req, res, token) {
     .order('start_idx');
   if (bookingError) throw bookingError;
 
-  const activeBookings = (bookings || []).filter(booking => {
+  const visibleBookings = (bookings || []).filter(booking => {
     const slotsUsed = Number(booking.slots_used || 3);
     const startMs = mazDateMs(booking.ds, booking.start_idx);
     const endMs = startMs + slotsUsed * SLOT_DUR * 60000;
-    return startMs <= nowMs && nowMs < endMs;
+    return startMs <= nowMs + 30 * 60000 && nowMs < endMs;
   });
-  if (!activeBookings.length) return res.status(200).json({ now: new Date().toISOString(), sessions: [] });
+  if (!visibleBookings.length) return res.status(200).json({ now: new Date().toISOString(), sessions: [], upcoming: [] });
 
-  const bookingIds = activeBookings.map(booking => booking.id);
-  const hostIds = [...new Set(activeBookings.map(booking => booking.user_id).filter(Boolean))];
+  const bookingIds = visibleBookings.map(booking => booking.id);
+  const hostIds = [...new Set(visibleBookings.map(booking => booking.user_id).filter(Boolean))];
 
   let passRows = [];
   try {
@@ -285,7 +285,7 @@ async function receptionActive(req, res, token) {
     guestsByBooking.get(pass.booking_id).push(pass.guest_user_id);
   });
 
-  const sessions = activeBookings.flatMap(booking => {
+  const sessions = visibleBookings.flatMap(booking => {
     const slotsUsed = Number(booking.slots_used || 3);
     const startMs = mazDateMs(booking.ds, booking.start_idx);
     const endMs = startMs + slotsUsed * SLOT_DUR * 60000;
@@ -318,7 +318,11 @@ async function receptionActive(req, res, token) {
     });
   }).sort((a, b) => a.minutes_left - b.minutes_left || a.name.localeCompare(b.name));
 
-  return res.status(200).json({ now: new Date().toISOString(), sessions });
+  return res.status(200).json({
+    now: new Date(nowMs).toISOString(),
+    sessions: sessions.filter(session => Date.parse(session.started_at) <= nowMs),
+    upcoming: sessions.filter(session => Date.parse(session.started_at) > nowMs),
+  });
 }
 
 async function searchUsers(req, res, token) {
