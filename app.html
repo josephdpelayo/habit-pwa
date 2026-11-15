@@ -6,12 +6,12 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="HABIT">
 <meta name="application-name" content="HABIT">
-<link rel="manifest" href="/manifest.json?v=20261110-1">
-<link rel="apple-touch-icon" sizes="120x120" href="/icons/icon-120.png?v=20261110-1">
-<link rel="apple-touch-icon" sizes="152x152" href="/icons/icon-152.png?v=20261110-1">
-<link rel="apple-touch-icon" sizes="167x167" href="/icons/icon-167.png?v=20261110-1">
-<link rel="apple-touch-icon" sizes="180x180" href="/icons/icon-180.png?v=20261110-1">
-<link rel="icon" type="image/png" sizes="32x32" href="/icons/icon-32.png?v=20261110-1">
+<link rel="manifest" href="/manifest.json?v=20261115-1">
+<link rel="apple-touch-icon" sizes="120x120" href="/icons/icon-120.png?v=20261115-1">
+<link rel="apple-touch-icon" sizes="152x152" href="/icons/icon-152.png?v=20261115-1">
+<link rel="apple-touch-icon" sizes="167x167" href="/icons/icon-167.png?v=20261115-1">
+<link rel="apple-touch-icon" sizes="180x180" href="/icons/icon-180.png?v=20261115-1">
+<link rel="icon" type="image/png" sizes="32x32" href="/icons/icon-32.png?v=20261115-1">
 <title>HABIT</title>
 <!-- Con id a propósito: scripts/check-training.js toma la primera etiqueta script sin
      atributos como el script principal de la app y la compila. -->
@@ -25,7 +25,7 @@
   var crew=/^\/crew(\/|$)/.test(location.pathname);
   window.HABIT_BRAND=crew?'crew':'gym';
   if(!crew)return;
-  var v='20261110-1';
+  var v='20261115-1';
   document.documentElement.classList.add('brand-crew');
   document.title='HABIT Crew';
   document.querySelectorAll('meta[name="apple-mobile-web-app-title"],meta[name="application-name"]')
@@ -40,11 +40,11 @@
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Share+Tech+Mono&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="/skandi-recovery.js?v=20261110-1"></script>
-<script src="/body-figure.js?v=20261110-1"></script>
-<script src="/habit-training.js?v=20261110-1"></script>
-<script src="/habit-share.js?v=20261110-1"></script>
-<script src="/habit-activity.js?v=20261110-1"></script>
+<script src="/skandi-recovery.js?v=20261115-1"></script>
+<script src="/body-figure.js?v=20261115-1"></script>
+<script src="/habit-training.js?v=20261115-1"></script>
+<script src="/habit-share.js?v=20261115-1"></script>
+<script src="/habit-activity.js?v=20261115-1"></script>
 <style>
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
 @media (prefers-reduced-motion:reduce){*,*:before,*:after{scroll-behavior:auto!important;animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}}
@@ -315,6 +315,28 @@ input,select,button,textarea{font-family:'Inter',sans-serif}
 .sb-full{background:rgba(156,163,175,.1);color:var(--gray)}
 .sb-wait{background:rgba(245,158,11,.12);color:var(--amber)}
 .sb-grp{background:rgba(124,58,237,.15);color:#a78bfa}
+.coach-class-eyebrow{display:flex;align-items:center;gap:6px;font-size:10px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;color:#a78bfa;margin-bottom:6px}
+.coach-class-eyebrow svg{width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round;flex-shrink:0}
+.coach-class-card{border:1px solid rgba(139,92,246,.35);background:linear-gradient(180deg,rgba(139,92,246,.1),rgba(139,92,246,.03));border-radius:10px;padding:14px 14px 12px;margin-bottom:10px}
+.coach-class-title{font-size:17px;font-weight:800;color:var(--white);margin:0 0 2px}
+.coach-class-meta{font-size:12px;color:var(--gray);margin:0 0 10px}
+.coach-class-slots{display:flex;flex-direction:column;gap:6px}
+.coach-class-slot{display:flex;align-items:center;gap:8px;width:100%;text-align:left;border:1px solid rgba(139,92,246,.22);background:rgba(0,0,0,.2);border-radius:6px;padding:9px 11px;cursor:pointer;font:inherit;color:inherit}
+.coach-class-slot.is-disabled{cursor:default;opacity:.55}
+.coach-class-slot .ccs-time{font-size:13px;font-weight:800;color:var(--white);min-width:92px;flex-shrink:0}
+.coach-class-slot .ccs-price{flex:1;font-size:11px;color:var(--gray);min-width:0}
+.coach-class-slot .ccs-badge{font-size:10px;padding:3px 8px;border-radius:2px;font-weight:700;white-space:nowrap;letter-spacing:.04em;text-transform:uppercase;flex-shrink:0}
+.ccs-open{background:rgba(139,92,246,.15);color:#a78bfa}
+.ccs-reserved{background:rgba(16,185,129,.12);color:var(--green)}
+.ccs-full{background:rgba(156,163,175,.1);color:var(--gray)}
+.coach-class-banner{display:flex;align-items:center;gap:10px;border:1px solid rgba(139,92,246,.35);background:linear-gradient(135deg,rgba(139,92,246,.16),rgba(139,92,246,.05));border-radius:10px;padding:12px;margin-bottom:12px;cursor:pointer}
+.coach-class-banner:active{background:rgba(139,92,246,.22)}
+.coach-class-banner-icon{width:36px;height:36px;border-radius:8px;background:rgba(139,92,246,.18);display:flex;align-items:center;justify-content:center;color:#a78bfa;flex-shrink:0}
+.coach-class-banner-icon svg{width:19px;height:19px;stroke:currentColor;fill:none;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round}
+.coach-class-banner-text{flex:1;min-width:0}
+.coach-class-banner-title{font-size:14px;font-weight:800;color:var(--white)}
+.coach-class-banner-sub{font-size:12px;color:var(--gray);margin-top:2px}
+.coach-class-banner-arrow{color:#a78bfa;font-size:17px;flex-shrink:0}
 .adm-slot-row{display:grid;grid-template-columns:64px minmax(0,1fr) auto;gap:8px 10px;align-items:center;min-height:58px}
 .adm-slot-main{min-width:0}
 .adm-slot-head{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:4px}
@@ -3017,6 +3039,7 @@ button{transition:transform .14s var(--ease-out),background-color .16s ease,colo
       <div id="inicio-coach-action"></div>
       <div id="inicio-push-card"></div>
       <div id="access-main"></div>
+      <div id="inicio-david-pilot"></div>
       <div class="daily-quote-wrap"></div>
       <div id="inicio-fasting-mini"></div>
       <div id="guest-group-wrap"></div>
@@ -4080,7 +4103,7 @@ const GYM_ONLY_VIEWS=['book','planes','historial','shop'];
 const GYM_APP_URL='/';
 document.querySelectorAll('.brand-name').forEach(el=>{el.textContent=BRAND_NAME;});
 const SUPABASE_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBtcGp0ZXVxanVzYmlkdWV2YndxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc2OTI1NjUsImV4cCI6MjA5MzI2ODU2NX0.XbMzZoo2yqtrD8znLnyo_1zDfrdJAvAPj1lqGOyXnLw';
-const APP_VERSION='20261110-1';
+const APP_VERSION='20261115-1';
 // La pierna va separada en cuádriceps, femorales y pantorrillas: la figura
 // corporal pinta esas tres regiones por separado y el motor de recuperación les
 // da ventanas de descanso distintas. 'Piernas' sigue reconociéndose al leer
@@ -5664,6 +5687,7 @@ const DOOR_OPEN_COOLDOWN_MS=5000;
 const DOOR_RATE_LIMIT_MS=60000;
 const DOOR_LOCATION_EXEMPT_EMAILS=['josephdpelayo@gmail.com','habit1@habit.com','zuritalejandro5@gmail.com'];
 const DOOR_ICON='<div class="ac-door-icon"><svg viewBox="0 0 24 24"><path d="M8 21h8"/><path d="M10 21V5a2 2 0 0 1 2-2h5v18"/><path d="M14 12h.01"/></svg></div>';
+const COACH_ICON='<svg viewBox="0 0 24 24"><rect x="4" y="4" width="16" height="17" rx="2"/><path d="M9 4V2h6v2"/><path d="M9 12l2 2 4-4"/></svg>';
 
 function isDoorLocationExempt(){
   const email=String((sbUser&&sbUser.email)||(curUser&&curUser.email)||'').toLowerCase();
@@ -6933,7 +6957,7 @@ function sv(v){
   updateTopActions(v);
   updateSupportFab(v);
   ALL_VIEWS.forEach(n=>{const el=document.getElementById('v-'+n);if(el)el.classList.toggle('active',n===v);});
-  if(v==='inicio'){renderInicioRetos().catch(console.error);renderMembershipStatus();loadAccessData().catch(console.error);renderDailyQuote();renderInicioCoachingWidgets();renderGuestGroup().catch(console.error);renderActiveBookings().catch(console.error);renderUserNotifsSb().catch(console.error);}
+  if(v==='inicio'){renderInicioRetos().catch(console.error);renderMembershipStatus();loadAccessData().catch(console.error);renderDailyQuote();renderInicioCoachingWidgets();renderInicioDavidPilot().catch(console.error);renderGuestGroup().catch(console.error);renderActiveBookings().catch(console.error);renderUserNotifsSb().catch(console.error);}
   if(v==='book'){const _ds=dk(curDate);loadSlotOccupancyFromSb(_ds).then(()=>renderBook().catch(console.error));}
   if(v==='planes'){renderPlans();void renderDavidPilot('david-pilot-plans').catch(console.error);}
   if(v==='rutinas'){renderRutinas().catch(console.error);}
@@ -7449,19 +7473,30 @@ async function renderDavidPilot(panelId, rescheduling=false){
   const {data,error}=await sb.rpc('david_pilot_slots');
   if(error||!data?.length||rescheduleBk)return;
 
-  panel.innerHTML='<p class="slbl">Entrena con David</p>'+
-    '<p>Lunes 16 de noviembre · 60 min · Máximo 3 personas</p>';
+  panel.innerHTML='<div class="coach-class-card">'+
+    '<div class="coach-class-eyebrow">'+COACH_ICON+'<span>Clase con entrenador</span></div>'+
+    '<h3 class="coach-class-title">Entrena con David</h3>'+
+    '<p class="coach-class-meta">Lunes 16 de noviembre · 60 min · Máximo 3 personas</p>'+
+    '<div class="coach-class-slots"></div>'+
+    '</div>';
+  const slotsWrap=panel.querySelector('.coach-class-slots');
   for(const session of data){
-    const button=document.createElement('button');
-    button.className='btn-sm bblue';
     const start=Number(session.start_idx);
     const price=session.amount===0
       ? (session.credits_used===2?'2 boletos de clase':'Incluido en tu mensualidad')
       : (session.credits_used===1?'1 boleto + ':'')+'$'+(session.amount/100)+' MXN';
-    const availability=session.reserved?'Reservado':!session.remaining?'Cupo lleno':
-      session.amount&&!session.payment_open?'Pago en línea cerrado':session.remaining+' libre(s) · '+price;
-    button.textContent=fmtSlot(start)+'–'+fmtSlot(start+2)+' · '+availability;
-    button.disabled=session.reserved||session.remaining===0||Boolean(session.amount&&!session.payment_open);
+    const closed=Boolean(session.amount&&!session.payment_open);
+    const disabled=session.reserved||session.remaining===0||closed;
+    let badgeClass='ccs-open',badgeText=session.remaining+' libre'+(session.remaining===1?'':'s');
+    if(session.reserved){badgeClass='ccs-reserved';badgeText='Reservado';}
+    else if(session.remaining===0){badgeClass='ccs-full';badgeText='Cupo lleno';}
+    else if(closed){badgeClass='ccs-full';badgeText='Pago cerrado';}
+    const button=document.createElement('button');
+    button.className='coach-class-slot'+(disabled?' is-disabled':'');
+    button.disabled=disabled;
+    button.innerHTML='<span class="ccs-time">'+fmtSlot(start)+'–'+fmtSlot(start+2)+'</span>'+
+      '<span class="ccs-price">'+(session.reserved?'Ya tienes tu lugar':price)+'</span>'+
+      '<span class="ccs-badge '+badgeClass+'">'+badgeText+'</span>';
     button.onclick=async()=>{
       if(!await confirmSheet('¿Reservar Entrena con David a las '+fmtSlot(start)+'? '+price))return;
       button.disabled=true;
@@ -7491,9 +7526,33 @@ async function renderDavidPilot(panelId, rescheduling=false){
         if(panelId==='david-pilot')await renderBook();
       }
     };
-    panel.appendChild(button);
+    slotsWrap.appendChild(button);
   }
   panel.hidden=false;
+}
+
+async function renderInicioDavidPilot(){
+  const el=document.getElementById('inicio-david-pilot');
+  if(!el)return;
+  el.innerHTML='';
+  if(!sbUser||mazToday()>'2026-11-16')return;
+  const {data,error}=await sb.rpc('david_pilot_slots');
+  if(error||!data?.length)return;
+  const reserved=data.find(s=>s.reserved);
+  const openCount=data.filter(s=>s.remaining>0&&!(s.amount&&!s.payment_open)).length;
+  if(!reserved&&!openCount)return;
+  const title=reserved?'Ya tienes tu lugar con David':'Entrena con David · lunes 16 nov';
+  const sub=reserved?'Te esperamos a las '+fmtSlot(Number(reserved.start_idx))+'.'
+    :'60 min · máximo 3 personas · quedan '+openCount+' horario'+(openCount===1?'':'s');
+  el.innerHTML='<div class="coach-class-banner" onclick="sv(\'book\')">'+
+    '<div class="coach-class-banner-icon">'+COACH_ICON+'</div>'+
+    '<div class="coach-class-banner-text">'+
+      '<div class="coach-class-eyebrow"><span>Clase con entrenador</span></div>'+
+      '<div class="coach-class-banner-title">'+title+'</div>'+
+      '<div class="coach-class-banner-sub">'+sub+'</div>'+
+    '</div>'+
+    '<div class="coach-class-banner-arrow">→</div>'+
+  '</div>';
 }
 
 async function renderBook(){
