@@ -1335,6 +1335,12 @@ body.reception-mode{background:#141612}
 .reception-mark::before{transform:rotate(60deg)}
 .reception-mark::after{transform:rotate(-60deg)}
 .reception-list{flex:1;min-height:0;overflow:auto;border-top:1px solid var(--reception-line)}
+.reception-list.is-two-column{
+  display:grid;grid-template-columns:repeat(2,minmax(0,1fr));align-content:start;
+  column-gap:clamp(20px,3vw,48px);
+}
+.reception-list.is-two-column .reception-name{font-size:clamp(21px,2.7vw,52px)}
+.reception-list.is-two-column .reception-min{font-size:clamp(23px,3.1vw,56px)}
 .reception-card{
   display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:center;
   gap:clamp(8px,1.5vw,20px);padding:clamp(8px,1.7vh,20px) 0;
@@ -1355,10 +1361,11 @@ body.reception-mode{background:#141612}
   flex-shrink:0;gap:4px 16px;color:var(--reception-muted);font-size:clamp(11px,1vw,16px);
 }
 .reception-upcoming{display:flex;flex:1;flex-wrap:wrap;align-items:baseline;gap:2px 10px;min-width:min(100%,260px)}
+.reception-upcoming[hidden]{display:none}
 .reception-upcoming h2{font-size:inherit;font-weight:650}
 .reception-upcoming-list{min-width:0;max-height:4.5em;overflow:auto;overflow-wrap:anywhere}
 .reception-upcoming-list time{white-space:nowrap;font-variant-numeric:tabular-nums}
-.reception-controls{display:flex;flex-wrap:wrap;align-items:center;gap:4px 12px}
+.reception-controls{display:flex;flex-wrap:wrap;align-items:center;gap:4px 12px;margin-inline-start:auto}
 .reception-status{display:flex;align-items:center;gap:6px;white-space:nowrap}
 .reception-status::before{content:"";width:6px;height:6px;border-radius:50%;background:var(--reception-accent)}
 .reception-status[data-offline]::before{background:#ffd09a}
@@ -3075,6 +3082,7 @@ button{transition:transform .14s var(--ease-out),background-color .16s ease,colo
       </div>
       <div id="book-expiry-hint" style="display:none;font-size:12px;color:var(--amber,#d97706);background:rgba(217,119,6,.1);border:1px solid rgba(217,119,6,.25);border-radius:4px;padding:6px 10px;margin:6px 0"></div>
       <div id="book-reschedule-banner" style="display:none;font-size:12px;color:var(--bl);background:rgba(37,99,235,.08);border:1px solid rgba(37,99,235,.25);border-radius:4px;padding:8px 10px;margin:6px 0"></div>
+      <div id="david-pilot" hidden></div>
       <div id="book-my-bks" style="margin-bottom:6px"></div>
       <p class="slbl" style="margin-bottom:4px">Horarios · toca tu hora de entrada <span style="color:#444;font-weight:400;text-transform:none;letter-spacing:0">· desliza</span></p>
     </div>
@@ -3100,6 +3108,7 @@ button{transition:transform .14s var(--ease-out),background-color .16s ease,colo
   <!-- MEMBRESÍA -->
   <div id="v-planes" class="view">
     <div class="scroll-area">
+      <div id="david-pilot-plans" hidden></div>
       <p class="slbl">Tipo de membresía</p>
       <div class="ptype-row">
         <button class="ptype-btn active" onclick="setPT('individual',this)">Individual</button>
@@ -3311,9 +3320,9 @@ button{transition:transform .14s var(--ease-out),background-color .16s ease,colo
       </div>
     </section>
     <footer class="reception-footer">
-      <section class="reception-upcoming" aria-labelledby="reception-upcoming-title">
+      <section class="reception-upcoming" aria-labelledby="reception-upcoming-title" hidden>
         <h2 id="reception-upcoming-title">Próximas entradas (30 min)</h2>
-        <div id="reception-upcoming-list" class="reception-upcoming-list">Cargando reservas…</div>
+        <div id="reception-upcoming-list" class="reception-upcoming-list"></div>
       </section>
       <div class="reception-controls">
         <div id="reception-status" class="reception-status" role="status">Conectando…</div>
@@ -4722,7 +4731,7 @@ async function loadUserData(){
   ]);
   curUser.bookings=bkRes.status==='fulfilled'?(bkRes.value.data||[]).map(b=>({
     id:b.id,ds:b.ds,startIdx:b.start_idx,slotsUsed:b.slots_used||3,
-    isGroup:b.is_group,grupalSpots:b.grupal_spots,timeStr:b.time_str,durMin:b.dur_min||90,createdAt:b.created_at
+    isGroup:b.is_group,grupalSpots:b.grupal_spots,timeStr:b.time_str,durMin:b.dur_min||90,coachDavid:!!b.coach_david,createdAt:b.created_at
   })):[];
   curUser.payments=payRes.status==='fulfilled'?(payRes.value.data||[]).map(p=>({
     id:p.id,plan:p.plan_name,planType:p.plan_type,amount:p.amount,
@@ -5477,7 +5486,7 @@ let _coachBoardReturn=null;
 let coachProgramSheetId=null, coachProgramSheetWeek=0;
 let exerciseNotesMap={}, noteCtx=null;
 let mensajesAdminClients=[], selectedChatClientId=null, adminChatChannel=null, adminChatPollInt=null;
-let receptionSessions=[], receptionLastSync=null, receptionLoading=false, receptionError='';
+let receptionSessions=[], receptionLastSync=null, receptionLoading=false, receptionError='', receptionResizeObserver=null;
 let guestFavorites=[], guestSelected=new Set(), guestSavedActive=new Set(), guestOriginalFavoriteIds=new Set(), guestDeletedIds=new Set(), guestSearchResults=[], guestActiveBookingId=null, guestSearchTimer=null, guestDirty=false, guestCollapsed=true, guestQuery='';
 let shopProducts=[...DEFAULT_SHOP_PRODUCTS], shopCart=loadShopCart(), shopDraftQty={}, shopSelectedVariants={}, shopDelivery='pickup', shopView='catalog', adminProductFormOpen=false, adminEditingProductId=null;
 let shopLightboxImages=[], shopLightboxIdx=0;
@@ -6053,7 +6062,7 @@ async function loadAccessData(){
       .gte('ds',yday2).order('ds').order('start_idx').limit(10);
     curUser.bookings=(bks||[]).map(b=>({
       id:b.id,ds:b.ds,startIdx:b.start_idx,slotsUsed:b.slots_used||3,
-      isGroup:b.is_group,grupalSpots:b.grupal_spots,timeStr:b.time_str,durMin:b.dur_min||90,createdAt:b.created_at
+      isGroup:b.is_group,grupalSpots:b.grupal_spots,timeStr:b.time_str,durMin:b.dur_min||90,coachDavid:!!b.coach_david,createdAt:b.created_at
     }));
     curUser.guestBookings=[];
     const{data:sessionData}=await sb.auth.getSession();
@@ -6657,6 +6666,8 @@ function stopReception(){
   if(receptionClockInt){clearInterval(receptionClockInt);receptionClockInt=null;}
   if(receptionDataInt){clearInterval(receptionDataInt);receptionDataInt=null;}
   stopReceptionWorker();
+  receptionResizeObserver?.disconnect();
+  receptionResizeObserver=null;
   receptionLoading=false;
   receptionSessions=[];
   receptionLastSync=null;
@@ -6701,6 +6712,10 @@ function showReception(){
   document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
   const rec=document.getElementById('s-reception');
   if(rec)rec.classList.add('active');
+  const list=document.getElementById('reception-list');
+  receptionResizeObserver?.disconnect();
+  receptionResizeObserver=new ResizeObserver(()=>layoutReceptionList(list));
+  receptionResizeObserver.observe(list,{box:'border-box'});
   updateReceptionClock();
   renderReceptionList();
   loadReceptionSessions();
@@ -6728,6 +6743,14 @@ function updateReceptionClock(){
   if(dateEl.textContent!==day)dateEl.textContent=day;
 }
 
+function layoutReceptionList(list,previousScroll=list.scrollTop){
+  list.classList.remove('is-two-column');
+  if(list.childElementCount>1&&list.clientWidth>=800&&list.scrollHeight>list.clientHeight){
+    list.classList.add('is-two-column');
+  }
+  list.scrollTop=previousScroll;
+}
+
 function renderReceptionList(){
   const list=document.getElementById('reception-list');
   const upcoming=document.getElementById('reception-upcoming-list');
@@ -6753,21 +6776,24 @@ function renderReceptionList(){
     else group.guests.push(session.name||'Invitado');
   }
 
-  const upcomingHtml=receptionError?'Sin conexión':Array.from(arrivals)
+  upcoming.parentElement.hidden=!arrivals.size;
+  const upcomingHtml=Array.from(arrivals)
     .sort(([a],[b])=>a-b)
     .map(([starts,names])=>'<div><time>'+receptionTimeFormat.format(starts)+'</time> · '+esc(names.join(', '))+'</div>')
-    .join('')||(receptionLastSync?'Sin entradas programadas.':'Cargando reservas…');
+    .join('');
   if(upcoming.dataset.rendered!==upcomingHtml){
     upcoming.innerHTML=upcomingHtml;
     upcoming.dataset.rendered=upcomingHtml;
   }
-  const statusText=receptionError?'Sin conexión':receptionLastSync?'En vivo':'Conectando…';
+  const statusText=receptionError
+    ? 'Sin conexión'+(receptionLastSync?' · última actualización '+receptionTimeFormat.format(new Date(receptionLastSync)):'')
+    : receptionLastSync?'En vivo':'Conectando…';
   if(status.textContent!==statusText)status.textContent=statusText;
   status.toggleAttribute('data-offline',!!receptionError);
   status.title=receptionLastSync?'Última sincronización · '+fmtDateTimeMaz(receptionLastSync):'';
 
   let listHtml;
-  if(receptionError){
+  if(receptionError&&!receptionLastSync){
     listHtml='<p class="reception-empty reception-error">'+esc(receptionError)+'</p>';
   }else if(!active.size){
     listHtml='<p class="reception-empty">'+(receptionLastSync?'No hay clientes activos en este momento.':'Cargando sesiones activas…')+'</p>';
@@ -6790,8 +6816,10 @@ function renderReceptionList(){
     }).join('');
   }
   if(list.dataset.rendered!==listHtml){
+    const previousScroll=list.scrollTop;
     list.innerHTML=listHtml;
     list.dataset.rendered=listHtml;
+    layoutReceptionList(list,previousScroll);
   }
 }
 
@@ -6809,6 +6837,10 @@ async function loadReceptionSessions(){
     });
     const payload=await res.json().catch(()=>({}));
     if(sbUser!==user)return;
+    if(res.status===401||res.status===403){
+      receptionSessions=[];
+      receptionLastSync=null;
+    }
     if(!res.ok)throw new Error(payload.error||'No se pudieron cargar las sesiones');
     receptionError='';
     receptionSessions=[...(payload.sessions||[]),...(payload.upcoming||[])];
@@ -6903,7 +6935,7 @@ function sv(v){
   ALL_VIEWS.forEach(n=>{const el=document.getElementById('v-'+n);if(el)el.classList.toggle('active',n===v);});
   if(v==='inicio'){renderInicioRetos().catch(console.error);renderMembershipStatus();loadAccessData().catch(console.error);renderDailyQuote();renderInicioCoachingWidgets();renderGuestGroup().catch(console.error);renderActiveBookings().catch(console.error);renderUserNotifsSb().catch(console.error);}
   if(v==='book'){const _ds=dk(curDate);loadSlotOccupancyFromSb(_ds).then(()=>renderBook().catch(console.error));}
-  if(v==='planes')renderPlans();
+  if(v==='planes'){renderPlans();void renderDavidPilot('david-pilot-plans').catch(console.error);}
   if(v==='rutinas'){renderRutinas().catch(console.error);}
   if(v==='progreso'){renderProgreso().catch(console.error);}
   if(v==='actividad'&&window.HabitActivity){HabitActivity.render(document.getElementById('actividad-content'));}
@@ -7172,30 +7204,30 @@ async function renderActiveBookings(){
     // Update local cache
     curUser.bookings=uniqueBks.map(b=>({
       id:b.id,ds:b.ds,startIdx:b.start_idx,slotsUsed:b.slots_used||3,
-      isGroup:b.is_group,grupalSpots:b.grupal_spots,timeStr:b.time_str,durMin:b.dur_min||90,createdAt:b.created_at
+      isGroup:b.is_group,grupalSpots:b.grupal_spots,timeStr:b.time_str,durMin:b.dur_min||90,coachDavid:!!b.coach_david,createdAt:b.created_at
     }));
     if(!upcoming.length){el.innerHTML='';return;}
     el.innerHTML='<p class="slbl" style="margin-bottom:10px">Mis reservas activas</p>';
     const _today=mazToday(),_yday=addDaysDS(_today,-1);
     upcoming.forEach(b=>{
-      const dl=b.ds===_today?'Hoy':b.ds===_yday?'Anoche':'Mañana';
+      const dl=b.ds===_today?'Hoy':b.ds===_yday?'Anoche':fmtDS(b.ds);
       const slotsUsed=b.slots_used||3;
       const aw=getAW({ds:b.ds,startIdx:b.start_idx,slotsUsed});
       const started=aw.sessionStart.getTime()<=mazNow().getTime();
       const hoursUntilSession=(aw.sessionStart.getTime()-mazNow().getTime())/3600000;
       const bookedRecently=!!b.created_at&&(mazNow().getTime()-new Date(b.created_at).getTime())/3600000<=CANCEL_WINDOW_H;
-      const canC=!started&&(hoursUntilSession>=CANCEL_H||bookedRecently);
-      const canR=!started;
+      const canC=!b.coach_david&&!started&&(hoursUntilSession>=CANCEL_H||bookedRecently);
+      const canR=!b.coach_david&&!started;
       const div=document.createElement('div');
       div.className='active-bk-card';
       div.innerHTML='<div style="flex:1">'
         +'<div style="font-size:14px;font-weight:600;color:var(--white)">'+dl+' · '+(b.time_str||fmtTimeRange(b.start_idx,b.slots_used||3))+'</div>'
-        +'<div style="font-size:11px;color:var(--gray);margin-top:2px">'+(b.is_group?'Grupal':'Individual')+' · '+(b.dur_min||90)+' min</div>'
+        +'<div style="font-size:11px;color:var(--gray);margin-top:2px">'+(b.coach_david?'Entrena con David':b.is_group?'Grupal':'Individual')+' · '+(b.dur_min||90)+' min</div>'
         +'</div>'
         +'<div style="display:flex;gap:6px;align-items:center">'
         +(canR?'<button class="btn-sm bblue" data-bid="'+b.id+'" onclick="handleRescheduleBk(this)">Cambiar hora</button>':'')
         +(canC?'<button class="btn-sm bred" data-bid="'+b.id+'" onclick="handleCancelBk(this)">Cancelar</button>'
-               :'<span class="badge bg-amber" style="font-size:9px">No cancelable</span>')
+               :'<span class="badge bg-amber" style="font-size:9px">'+(b.coach_david?'Cambios en recepción':'No cancelable')+'</span>')
         +'</div>';
       el.appendChild(div);
     });
@@ -7410,6 +7442,60 @@ function changeDay(delta){
 }
 function clearSel(){selStartIdx=null;selShort=false;renderBook();}
 
+async function renderDavidPilot(panelId, rescheduling=false){
+  const panel=document.getElementById(panelId);
+  panel.hidden=true;
+  if(rescheduling||mazToday()>'2026-11-16'||!sbUser)return;
+  const {data,error}=await sb.rpc('david_pilot_slots');
+  if(error||!data?.length||rescheduleBk)return;
+
+  panel.innerHTML='<p class="slbl">Entrena con David</p>'+
+    '<p>Lunes 16 de noviembre · 60 min · Máximo 3 personas</p>';
+  for(const session of data){
+    const button=document.createElement('button');
+    button.className='btn-sm bblue';
+    const start=Number(session.start_idx);
+    const price=session.amount===0
+      ? (session.credits_used===2?'2 boletos de clase':'Incluido en tu mensualidad')
+      : (session.credits_used===1?'1 boleto + ':'')+'$'+(session.amount/100)+' MXN';
+    const availability=session.reserved?'Reservado':!session.remaining?'Cupo lleno':
+      session.amount&&!session.payment_open?'Pago en línea cerrado':session.remaining+' libre(s) · '+price;
+    button.textContent=fmtSlot(start)+'–'+fmtSlot(start+2)+' · '+availability;
+    button.disabled=session.reserved||session.remaining===0||Boolean(session.amount&&!session.payment_open);
+    button.onclick=async()=>{
+      if(!await confirmSheet('¿Reservar Entrena con David a las '+fmtSlot(start)+'? '+price))return;
+      button.disabled=true;
+      try{
+        if(session.amount){
+          const {data}=await sb.auth.getSession();
+          const token=data.session?.access_token;
+          if(!token)throw new Error('Inicia sesión para reservar.');
+          const response=await fetch('/api/create-checkout-session',{
+            method:'POST',
+            headers:{'Content-Type':'application/json',Authorization:'Bearer '+token},
+            body:JSON.stringify({davidSlot:start,expectedAmount:session.amount})
+          });
+          const checkout=await response.json();
+          if(!response.ok||!checkout.url)throw new Error(checkout.error||'No se pudo iniciar el pago.');
+          location.assign(checkout.url);
+          return;
+        }
+        const result=await sb.rpc('reserve_david_pilot',{p_start_idx:start});
+        if(result.error)throw result.error;
+        await renderActiveBookings();
+        toast('Sesión con David confirmada','ok');
+      }catch(error){
+        toast(error.message||'No se pudo reservar','err');
+      }finally{
+        await renderDavidPilot(panelId);
+        if(panelId==='david-pilot')await renderBook();
+      }
+    };
+    panel.appendChild(button);
+  }
+  panel.hidden=false;
+}
+
 async function renderBook(){
   let curDS=dk(curDate);
   if(curDS<mazToday()){
@@ -7427,6 +7513,7 @@ async function renderBook(){
   }
   const ds=curDS;
   const rescheduling=!!(rescheduleBk&&rescheduleBk.ds===ds);
+  void renderDavidPilot('david-pilot',rescheduling).catch(console.error);
   document.getElementById('pb').disabled=rescheduling||curDS<=mazToday();
   document.getElementById('nb').disabled=rescheduling||curDS>=maxDS;
   document.getElementById('dp').textContent=fmtD(curDate);
@@ -7455,16 +7542,16 @@ async function renderBook(){
     if(myBks.length){
       myBkEl.innerHTML='<p class="slbl" style="margin-bottom:4px">Mis reservas este día</p>'+
         myBks.map(b=>{
-          const canC=canCancelBk(b);
+          const canC=!b.coachDavid&&canCancelBk(b);
           const isPast=isBookingPast(b);
-          const canR=!isPast&&mazDateMs(b.ds,b.startIdx)>mazNow().getTime();
+          const canR=!b.coachDavid&&!isPast&&mazDateMs(b.ds,b.startIdx)>mazNow().getTime();
           return '<div style="background:rgba(37,99,235,.08);border:1px solid rgba(37,99,235,.2);border-radius:4px;padding:8px 12px;display:flex;align-items:center;justify-content:space-between;margin-bottom:4px">'+
-            '<span style="font-size:13px;color:var(--bl);font-weight:600">'+b.timeStr+' · 90 min</span>'+
+            '<span style="font-size:13px;color:var(--bl);font-weight:600">'+b.timeStr+' · '+b.durMin+' min'+(b.coachDavid?' · Entrena con David':'')+'</span>'+
             '<div style="display:flex;gap:6px;align-items:center">'+
             (isPast?'<span class="badge bg-gray">Pasada</span>':(
               (canR?'<button class="btn-sm bblue" data-bid="'+b.id+'" onclick="handleRescheduleBk(this)">Cambiar hora</button>':'')+
               (canC?'<button class="btn-sm bred" data-bid="'+b.id+'" onclick="handleCancelBook(this)">Cancelar</button>':
-                    '<span class="badge bg-amber" style="font-size:9px">No cancelable</span>')
+                    '<span class="badge bg-amber" style="font-size:9px">'+(b.coachDavid?'Cambios en recepción':'No cancelable')+'</span>')
             ))+
             '</div></div>';
         }).join('');
@@ -8000,7 +8087,8 @@ async function handleStripeReturn(){
     return;
   }
   if(!params.get('stripe_success'))return;
-  toast('Pago recibido. Activando membresia...','ok');
+  const david=params.get('david')==='1';
+  toast(david?'Confirmando sesión con David…':'Pago recibido. Activando membresia...','ok');
   const sessionId=params.get('session_id');
   history.replaceState({},'',location.pathname);
   try{
@@ -8014,15 +8102,20 @@ async function handleStripeReturn(){
       });
       const out=await res.json().catch(()=>({}));
       if(!res.ok)throw new Error(out.error||'No se pudo confirmar el pago');
+      if(david&&!out.confirmed){
+        toast('No se confirmó el lugar. El reembolso fue solicitado.','warn');
+        return;
+      }
     }else{
+      if(david)throw new Error('Sesión requerida');
       await new Promise(r=>setTimeout(r,2500));
     }
     await loadUserData();
     renderMembershipStatus();
     renderHistorial();
-    toast('Membresia activada','ok');
+    toast(david?'Sesión con David confirmada':'Membresia activada','ok');
   }catch(e){
-    toast('Pago recibido. Si no aparece tu membresia, espera unos segundos y recarga.','warn');
+    toast(david?'El pago sigue en verificación. Revisa Mis reservas en unos momentos.':'Pago recibido. Si no aparece tu membresia, espera unos segundos y recarga.','warn');
   }
 }
 async function doPay(){
@@ -15635,7 +15728,7 @@ async function renderAdmSlots(){
         if(si<0||si>=TOTAL_SLOTS)continue;
         slotRows[si].taken=Math.min(CAP,slotRows[si].taken+spots);
         slotRows[si].items.push({
-          name:b.profiles?.name||'Usuario',
+          name:(b.profiles?.name||'Usuario')+(b.coach_david?' · Entrena con David':''),
           isGroup:b.is_group,
           spots,
           bookingId:b.id
@@ -15915,20 +16008,22 @@ async function adminCancelBookingSb(bid){
   showLoading('Cancelando reserva...');
   try{
     const{data:b,error}=await sb.from('bookings')
-      .select('id,user_id,ds,time_str,is_group,profiles(name,credits)')
+      .select('*,profiles(name,credits)')
       .eq('id',bid).single();
     if(error)throw error;
-    await sb.from('bookings').update({status:'cancelled'}).eq('id',bid);
+    const {error:cancelError}=await sb.from('bookings').update({status:'cancelled'}).eq('id',bid);
+    if(cancelError)throw cancelError;
     await sb.from('slot_occupancy').delete().eq('booking_id',bid);
     const currentCredits=Number(b.profiles?.credits)||0;
-    if(currentCredits<999){
+    const refundVisit=currentCredits<999&&b.david_credits_used==null;
+    if(refundVisit){
       await sb.from('profiles').update({credits:currentCredits+1}).eq('id',b.user_id);
     }
     try{
       await sb.from('admin_notifs').insert({message:'Reserva cancelada (admin): '+(b.profiles?.name||'Usuario')+' - '+fmtDS(b.ds)+' '+b.time_str+(b.is_group?' (grupal)':'')});
     }catch(_){}
     hideLoading();
-    toast('Reserva cancelada · visita devuelta','ok');
+    toast(refundVisit?'Reserva cancelada · visita devuelta':'Reserva cancelada','ok');
     await loadSlotOccupancyFromSb(document.getElementById('adm-date').value||mazToday());
     renderAdmSlots();
   }catch(e){

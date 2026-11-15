@@ -1,4 +1,4 @@
-const { stripe, activateMembership, fulfillShopOrder } = require('../lib/_fulfillment');
+const { stripe, activateMembership, fulfillShopOrder, fulfillDavidPilot } = require('../lib/_fulfillment');
 
 function readRawBody(req) {
   return new Promise((resolve, reject) => {
@@ -31,7 +31,9 @@ module.exports = async function handler(req, res) {
       const session = event.data.object;
       if (!session || !session.id) throw new Error('Invalid session object in webhook');
       if (session.payment_status !== 'paid') return res.status(200).json({ received: true, skipped: 'payment_status not paid' });
-      if (session.metadata && session.metadata.kind === 'shop_order') {
+      if (session.metadata?.kind === 'david_pilot') {
+        await fulfillDavidPilot(session);
+      } else if (session.metadata?.kind === 'shop_order') {
         await fulfillShopOrder(session);
       } else {
         await activateMembership(session);

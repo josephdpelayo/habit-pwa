@@ -1,4 +1,4 @@
-const { stripe, supabase, activateMembership } = require('../lib/_fulfillment');
+const { stripe, supabase, activateMembership, fulfillDavidPilot } = require('../lib/_fulfillment');
 
 module.exports = async function handler(req, res) {
   if (req.method !== 'POST') {
@@ -21,7 +21,9 @@ module.exports = async function handler(req, res) {
     if (ownerId !== authData.user.id) return res.status(403).json({ error: 'Pago no pertenece a esta cuenta' });
     if (session.payment_status !== 'paid') return res.status(402).json({ error: 'Pago pendiente' });
 
-    const result = await activateMembership(session);
+    const result = session.metadata?.kind === 'david_pilot'
+      ? await fulfillDavidPilot(session)
+      : await activateMembership(session);
     return res.status(200).json(result);
   } catch (err) {
     console.error(err);

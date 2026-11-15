@@ -1346,6 +1346,12 @@ body.reception-mode{background:#141612}
 .reception-mark::before{transform:rotate(60deg)}
 .reception-mark::after{transform:rotate(-60deg)}
 .reception-list{flex:1;min-height:0;overflow:auto;border-top:1px solid var(--reception-line)}
+.reception-list.is-two-column{
+  display:grid;grid-template-columns:repeat(2,minmax(0,1fr));align-content:start;
+  column-gap:clamp(20px,3vw,48px);
+}
+.reception-list.is-two-column .reception-name{font-size:clamp(21px,2.7vw,52px)}
+.reception-list.is-two-column .reception-min{font-size:clamp(23px,3.1vw,56px)}
 .reception-card{
   display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:center;
   gap:clamp(8px,1.5vw,20px);padding:clamp(8px,1.7vh,20px) 0;
@@ -1366,10 +1372,11 @@ body.reception-mode{background:#141612}
   flex-shrink:0;gap:4px 16px;color:var(--reception-muted);font-size:clamp(11px,1vw,16px);
 }
 .reception-upcoming{display:flex;flex:1;flex-wrap:wrap;align-items:baseline;gap:2px 10px;min-width:min(100%,260px)}
+.reception-upcoming[hidden]{display:none}
 .reception-upcoming h2{font-size:inherit;font-weight:650}
 .reception-upcoming-list{min-width:0;max-height:4.5em;overflow:auto;overflow-wrap:anywhere}
 .reception-upcoming-list time{white-space:nowrap;font-variant-numeric:tabular-nums}
-.reception-controls{display:flex;flex-wrap:wrap;align-items:center;gap:4px 12px}
+.reception-controls{display:flex;flex-wrap:wrap;align-items:center;gap:4px 12px;margin-inline-start:auto}
 .reception-status{display:flex;align-items:center;gap:6px;white-space:nowrap}
 .reception-status::before{content:"";width:6px;height:6px;border-radius:50%;background:var(--reception-accent)}
 .reception-status[data-offline]::before{background:#ffd09a}
@@ -3471,9 +3478,9 @@ button{transition:transform .14s var(--ease-out),background-color .16s ease,colo
       </div>
     </section>
     <footer class="reception-footer">
-      <section class="reception-upcoming" aria-labelledby="reception-upcoming-title">
+      <section class="reception-upcoming" aria-labelledby="reception-upcoming-title" hidden>
         <h2 id="reception-upcoming-title">Próximas entradas (30 min)</h2>
-        <div id="reception-upcoming-list" class="reception-upcoming-list">Cargando reservas…</div>
+        <div id="reception-upcoming-list" class="reception-upcoming-list"></div>
       </section>
       <div class="reception-controls">
         <div id="reception-status" class="reception-status" role="status">Conectando…</div>
@@ -5748,7 +5755,7 @@ let _coachBoardReturn=null;
 let coachProgramSheetId=null, coachProgramSheetWeek=0;
 let exerciseNotesMap={}, noteCtx=null;
 let mensajesAdminClients=[], selectedChatClientId=null, adminChatChannel=null, adminChatPollInt=null;
-let receptionSessions=[], receptionLastSync=null, receptionLoading=false, receptionError='';
+let receptionSessions=[], receptionLastSync=null, receptionLoading=false, receptionError='', receptionResizeObserver=null;
 let guestFavorites=[], guestSelected=new Set(), guestSavedActive=new Set(), guestOriginalFavoriteIds=new Set(), guestDeletedIds=new Set(), guestSearchResults=[], guestActiveBookingId=null, guestSearchTimer=null, guestDirty=false, guestCollapsed=true, guestQuery='';
 let shopProducts=[...DEFAULT_SHOP_PRODUCTS], shopCart=loadShopCart(), shopDraftQty={}, shopSelectedVariants={}, shopDelivery='pickup', shopView='catalog', adminProductFormOpen=false, adminEditingProductId=null;
 let shopLightboxImages=[], shopLightboxIdx=0;
@@ -6939,6 +6946,8 @@ function stopReception(){
   if(receptionClockInt){clearInterval(receptionClockInt);receptionClockInt=null;}
   if(receptionDataInt){clearInterval(receptionDataInt);receptionDataInt=null;}
   stopReceptionWorker();
+  receptionResizeObserver?.disconnect();
+  receptionResizeObserver=null;
   receptionLoading=false;
   receptionSessions=[];
   receptionLastSync=null;
@@ -6983,6 +6992,10 @@ function showReception(){
   document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
   const rec=document.getElementById('s-reception');
   if(rec)rec.classList.add('active');
+  const list=document.getElementById('reception-list');
+  receptionResizeObserver?.disconnect();
+  receptionResizeObserver=new ResizeObserver(()=>layoutReceptionList(list));
+  receptionResizeObserver.observe(list,{box:'border-box'});
   updateReceptionClock();
   renderReceptionList();
   loadReceptionSessions();
@@ -7010,6 +7023,14 @@ function updateReceptionClock(){
   if(dateEl.textContent!==day)dateEl.textContent=day;
 }
 
+function layoutReceptionList(list,previousScroll=list.scrollTop){
+  list.classList.remove('is-two-column');
+  if(list.childElementCount>1&&list.clientWidth>=800&&list.scrollHeight>list.clientHeight){
+    list.classList.add('is-two-column');
+  }
+  list.scrollTop=previousScroll;
+}
+
 function renderReceptionList(){
   const list=document.getElementById('reception-list');
   const upcoming=document.getElementById('reception-upcoming-list');
@@ -7035,21 +7056,24 @@ function renderReceptionList(){
     else group.guests.push(session.name||'Invitado');
   }
 
-  const upcomingHtml=receptionError?'Sin conexión':Array.from(arrivals)
+  upcoming.parentElement.hidden=!arrivals.size;
+  const upcomingHtml=Array.from(arrivals)
     .sort(([a],[b])=>a-b)
     .map(([starts,names])=>'<div><time>'+receptionTimeFormat.format(starts)+'</time> · '+esc(names.join(', '))+'</div>')
-    .join('')||(receptionLastSync?'Sin entradas programadas.':'Cargando reservas…');
+    .join('');
   if(upcoming.dataset.rendered!==upcomingHtml){
     upcoming.innerHTML=upcomingHtml;
     upcoming.dataset.rendered=upcomingHtml;
   }
-  const statusText=receptionError?'Sin conexión':receptionLastSync?'En vivo':'Conectando…';
+  const statusText=receptionError
+    ? 'Sin conexión'+(receptionLastSync?' · última actualización '+receptionTimeFormat.format(new Date(receptionLastSync)):'')
+    : receptionLastSync?'En vivo':'Conectando…';
   if(status.textContent!==statusText)status.textContent=statusText;
   status.toggleAttribute('data-offline',!!receptionError);
   status.title=receptionLastSync?'Última sincronización · '+fmtDateTimeMaz(receptionLastSync):'';
 
   let listHtml;
-  if(receptionError){
+  if(receptionError&&!receptionLastSync){
     listHtml='<p class="reception-empty reception-error">'+esc(receptionError)+'</p>';
   }else if(!active.size){
     listHtml='<p class="reception-empty">'+(receptionLastSync?'No hay clientes activos en este momento.':'Cargando sesiones activas…')+'</p>';
@@ -7072,8 +7096,10 @@ function renderReceptionList(){
     }).join('');
   }
   if(list.dataset.rendered!==listHtml){
+    const previousScroll=list.scrollTop;
     list.innerHTML=listHtml;
     list.dataset.rendered=listHtml;
+    layoutReceptionList(list,previousScroll);
   }
 }
 
@@ -7091,6 +7117,10 @@ async function loadReceptionSessions(){
     });
     const payload=await res.json().catch(()=>({}));
     if(sbUser!==user)return;
+    if(res.status===401||res.status===403){
+      receptionSessions=[];
+      receptionLastSync=null;
+    }
     if(!res.ok)throw new Error(payload.error||'No se pudieron cargar las sesiones');
     receptionError='';
     receptionSessions=[...(payload.sessions||[]),...(payload.upcoming||[])];
@@ -16395,20 +16425,22 @@ async function adminCancelBookingSb(bid){
   showLoading('Cancelando reserva...');
   try{
     const{data:b,error}=await sb.from('bookings')
-      .select('id,user_id,ds,time_str,is_group,profiles(name,credits)')
+      .select('*,profiles(name,credits)')
       .eq('id',bid).single();
     if(error)throw error;
-    await sb.from('bookings').update({status:'cancelled'}).eq('id',bid);
+    const {error:cancelError}=await sb.from('bookings').update({status:'cancelled'}).eq('id',bid);
+    if(cancelError)throw cancelError;
     await sb.from('slot_occupancy').delete().eq('booking_id',bid);
     const currentCredits=Number(b.profiles?.credits)||0;
-    if(currentCredits<999){
+    const refundVisit=currentCredits<999&&b.david_credits_used==null;
+    if(refundVisit){
       await sb.from('profiles').update({credits:currentCredits+1}).eq('id',b.user_id);
     }
     try{
       await sb.from('admin_notifs').insert({message:'Reserva cancelada (admin): '+(b.profiles?.name||'Usuario')+' - '+fmtDS(b.ds)+' '+b.time_str+(b.is_group?' (grupal)':'')});
     }catch(_){}
     hideLoading();
-    toast('Reserva cancelada · visita devuelta','ok');
+    toast(refundVisit?'Reserva cancelada · visita devuelta':'Reserva cancelada','ok');
     await loadSlotOccupancyFromSb(document.getElementById('adm-date').value||mazToday());
     renderAdmSlots();
   }catch(e){

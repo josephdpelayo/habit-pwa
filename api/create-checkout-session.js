@@ -25,6 +25,39 @@ module.exports = async function handler(req, res) {
     const { data: authData, error: authError } = await supabase.auth.getUser(token);
     if (authError || !authData.user) return res.status(401).json({ error: 'Sesion invalida' });
 
+    const { davidSlot, expectedAmount } = req.body || {};
+    if (davidSlot !== undefined) {
+      const ticketPrice = getPlan('i1').price * 100;
+      if (![14, 16, 18].includes(davidSlot) || ![ticketPrice, ticketPrice * 2].includes(expectedAmount)) {
+        return res.status(400).json({ error: 'Horario o precio inválido' });
+      }
+      const { data: hold, error } = await supabase.rpc('hold_david_pilot', {
+        p_user: authData.user.id,
+        p_idx: davidSlot,
+        p_amount: expectedAmount,
+      });
+      if (error) return res.status(409).json({ error: error.code === 'P0001' ? error.message : 'No se pudo apartar el lugar' });
+      const baseUrl = getBaseUrl(req);
+      const session = await stripe.checkout.sessions.create({
+        mode: 'payment',
+        payment_method_types: ['card'],
+        expires_at: Math.floor(Date.parse(hold.expires_at) / 1000) - 60,
+        client_reference_id: authData.user.id,
+        line_items: [{
+          quantity: 1,
+          price_data: {
+            currency: 'mxn',
+            unit_amount: hold.amount,
+            product_data: { name: 'HABIT - Entrena con David', description: 'Reserva equivalente a dos boletos de clase' },
+          },
+        }],
+        metadata: { kind: 'david_pilot', hold_id: hold.id },
+        success_url: `${baseUrl}/app.html?stripe_success=1&david=1&session_id={CHECKOUT_SESSION_ID}`,
+        cancel_url: `${baseUrl}/app.html?stripe_cancel=1&david=1`,
+      }, { idempotencyKey: `david-pilot-${hold.id}` });
+      return res.status(200).json({ url: session.url });
+    }
+
     const { planId } = req.body || {};
     const plan = getPlan(planId);
     if (!plan) return res.status(400).json({ error: 'Plan no encontrado' });
