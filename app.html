@@ -6,12 +6,12 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="HABIT">
 <meta name="application-name" content="HABIT">
-<link rel="manifest" href="/manifest.json?v=20261115-1">
-<link rel="apple-touch-icon" sizes="120x120" href="/icons/icon-120.png?v=20261115-1">
-<link rel="apple-touch-icon" sizes="152x152" href="/icons/icon-152.png?v=20261115-1">
-<link rel="apple-touch-icon" sizes="167x167" href="/icons/icon-167.png?v=20261115-1">
-<link rel="apple-touch-icon" sizes="180x180" href="/icons/icon-180.png?v=20261115-1">
-<link rel="icon" type="image/png" sizes="32x32" href="/icons/icon-32.png?v=20261115-1">
+<link rel="manifest" href="/manifest.json?v=20261115-2">
+<link rel="apple-touch-icon" sizes="120x120" href="/icons/icon-120.png?v=20261115-2">
+<link rel="apple-touch-icon" sizes="152x152" href="/icons/icon-152.png?v=20261115-2">
+<link rel="apple-touch-icon" sizes="167x167" href="/icons/icon-167.png?v=20261115-2">
+<link rel="apple-touch-icon" sizes="180x180" href="/icons/icon-180.png?v=20261115-2">
+<link rel="icon" type="image/png" sizes="32x32" href="/icons/icon-32.png?v=20261115-2">
 <title>HABIT</title>
 <!-- Con id a propósito: scripts/check-training.js toma la primera etiqueta script sin
      atributos como el script principal de la app y la compila. -->
@@ -25,7 +25,7 @@
   var crew=/^\/crew(\/|$)/.test(location.pathname);
   window.HABIT_BRAND=crew?'crew':'gym';
   if(!crew)return;
-  var v='20261115-1';
+  var v='20261115-2';
   document.documentElement.classList.add('brand-crew');
   document.title='HABIT Crew';
   document.querySelectorAll('meta[name="apple-mobile-web-app-title"],meta[name="application-name"]')
@@ -40,11 +40,11 @@
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Share+Tech+Mono&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="/skandi-recovery.js?v=20261115-1"></script>
-<script src="/body-figure.js?v=20261115-1"></script>
-<script src="/habit-training.js?v=20261115-1"></script>
-<script src="/habit-share.js?v=20261115-1"></script>
-<script src="/habit-activity.js?v=20261115-1"></script>
+<script src="/skandi-recovery.js?v=20261115-2"></script>
+<script src="/body-figure.js?v=20261115-2"></script>
+<script src="/habit-training.js?v=20261115-2"></script>
+<script src="/habit-share.js?v=20261115-2"></script>
+<script src="/habit-activity.js?v=20261115-2"></script>
 <style>
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
 @media (prefers-reduced-motion:reduce){*,*:before,*:after{scroll-behavior:auto!important;animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}}
@@ -320,6 +320,8 @@ input,select,button,textarea{font-family:'Inter',sans-serif}
 .coach-class-card{border:1px solid rgba(139,92,246,.35);background:linear-gradient(180deg,rgba(139,92,246,.1),rgba(139,92,246,.03));border-radius:10px;padding:14px 14px 12px;margin-bottom:10px}
 .coach-class-title{font-size:17px;font-weight:800;color:var(--white);margin:0 0 2px}
 .coach-class-meta{font-size:12px;color:var(--gray);margin:0 0 10px}
+.coach-class-days{display:flex;flex-direction:column;gap:10px}
+.coach-class-day-lbl{font-size:11px;font-weight:700;color:#a78bfa;margin-bottom:5px}
 .coach-class-slots{display:flex;flex-direction:column;gap:6px}
 .coach-class-slot{display:flex;align-items:center;gap:8px;width:100%;text-align:left;border:1px solid rgba(139,92,246,.22);background:rgba(0,0,0,.2);border-radius:6px;padding:9px 11px;cursor:pointer;font:inherit;color:inherit}
 .coach-class-slot.is-disabled{cursor:default;opacity:.55}
@@ -4103,7 +4105,7 @@ const GYM_ONLY_VIEWS=['book','planes','historial','shop'];
 const GYM_APP_URL='/';
 document.querySelectorAll('.brand-name').forEach(el=>{el.textContent=BRAND_NAME;});
 const SUPABASE_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBtcGp0ZXVxanVzYmlkdWV2YndxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc2OTI1NjUsImV4cCI6MjA5MzI2ODU2NX0.XbMzZoo2yqtrD8znLnyo_1zDfrdJAvAPj1lqGOyXnLw';
-const APP_VERSION='20261115-1';
+const APP_VERSION='20261115-2';
 // La pierna va separada en cuádriceps, femorales y pantorrillas: la figura
 // corporal pinta esas tres regiones por separado y el motor de recuperación les
 // da ventanas de descanso distintas. 'Piernas' sigue reconociéndose al leer
@@ -7466,67 +7468,81 @@ function changeDay(delta){
 }
 function clearSel(){selStartIdx=null;selShort=false;renderBook();}
 
+const DAVID_PILOT_LAST_DS='2026-11-20';
+
 async function renderDavidPilot(panelId, rescheduling=false){
   const panel=document.getElementById(panelId);
   panel.hidden=true;
-  if(rescheduling||mazToday()>'2026-11-16'||!sbUser)return;
+  if(rescheduling||mazToday()>DAVID_PILOT_LAST_DS||!sbUser)return;
   const {data,error}=await sb.rpc('david_pilot_slots');
   if(error||!data?.length||rescheduleBk)return;
 
   panel.innerHTML='<div class="coach-class-card">'+
     '<div class="coach-class-eyebrow">'+COACH_ICON+'<span>Clase con entrenador</span></div>'+
     '<h3 class="coach-class-title">Entrena con David</h3>'+
-    '<p class="coach-class-meta">Lunes 16 de noviembre · 60 min · Máximo 3 personas</p>'+
-    '<div class="coach-class-slots"></div>'+
+    '<p class="coach-class-meta">Esta semana, lunes a viernes · 60 min · Máximo 3 personas</p>'+
+    '<div class="coach-class-days"></div>'+
     '</div>';
-  const slotsWrap=panel.querySelector('.coach-class-slots');
+  const daysWrap=panel.querySelector('.coach-class-days');
+  const byDay=new Map();
   for(const session of data){
-    const start=Number(session.start_idx);
-    const price=session.amount===0
-      ? (session.credits_used===2?'2 boletos de clase':'Incluido en tu mensualidad')
-      : (session.credits_used===1?'1 boleto + ':'')+'$'+(session.amount/100)+' MXN';
-    const closed=Boolean(session.amount&&!session.payment_open);
-    const disabled=session.reserved||session.remaining===0||closed;
-    let badgeClass='ccs-open',badgeText=session.remaining+' libre'+(session.remaining===1?'':'s');
-    if(session.reserved){badgeClass='ccs-reserved';badgeText='Reservado';}
-    else if(session.remaining===0){badgeClass='ccs-full';badgeText='Cupo lleno';}
-    else if(closed){badgeClass='ccs-full';badgeText='Pago cerrado';}
-    const button=document.createElement('button');
-    button.className='coach-class-slot'+(disabled?' is-disabled':'');
-    button.disabled=disabled;
-    button.innerHTML='<span class="ccs-time">'+fmtSlot(start)+'–'+fmtSlot(start+2)+'</span>'+
-      '<span class="ccs-price">'+(session.reserved?'Ya tienes tu lugar':price)+'</span>'+
-      '<span class="ccs-badge '+badgeClass+'">'+badgeText+'</span>';
-    button.onclick=async()=>{
-      if(!await confirmSheet('¿Reservar Entrena con David a las '+fmtSlot(start)+'? '+price))return;
-      button.disabled=true;
-      try{
-        if(session.amount){
-          const {data}=await sb.auth.getSession();
-          const token=data.session?.access_token;
-          if(!token)throw new Error('Inicia sesión para reservar.');
-          const response=await fetch('/api/create-checkout-session',{
-            method:'POST',
-            headers:{'Content-Type':'application/json',Authorization:'Bearer '+token},
-            body:JSON.stringify({davidSlot:start,expectedAmount:session.amount})
-          });
-          const checkout=await response.json();
-          if(!response.ok||!checkout.url)throw new Error(checkout.error||'No se pudo iniciar el pago.');
-          location.assign(checkout.url);
-          return;
+    if(!byDay.has(session.ds))byDay.set(session.ds,[]);
+    byDay.get(session.ds).push(session);
+  }
+  for(const [ds,sessions] of byDay){
+    const dayBlock=document.createElement('div');
+    dayBlock.className='coach-class-day';
+    dayBlock.innerHTML='<p class="coach-class-day-lbl">'+fmtDS(ds)+'</p><div class="coach-class-slots"></div>';
+    const slotsWrap=dayBlock.querySelector('.coach-class-slots');
+    for(const session of sessions){
+      const start=Number(session.start_idx);
+      const price=session.amount===0
+        ? (session.credits_used===2?'2 boletos de clase':'Incluido en tu mensualidad')
+        : (session.credits_used===1?'1 boleto + ':'')+'$'+(session.amount/100)+' MXN';
+      const closed=Boolean(session.amount&&!session.payment_open);
+      const disabled=session.reserved||session.remaining===0||closed;
+      let badgeClass='ccs-open',badgeText=session.remaining+' libre'+(session.remaining===1?'':'s');
+      if(session.reserved){badgeClass='ccs-reserved';badgeText='Reservado';}
+      else if(session.remaining===0){badgeClass='ccs-full';badgeText='Cupo lleno';}
+      else if(closed){badgeClass='ccs-full';badgeText='Pago cerrado';}
+      const button=document.createElement('button');
+      button.className='coach-class-slot'+(disabled?' is-disabled':'');
+      button.disabled=disabled;
+      button.innerHTML='<span class="ccs-time">'+fmtSlot(start)+'–'+fmtSlot(start+2)+'</span>'+
+        '<span class="ccs-price">'+(session.reserved?'Ya tienes tu lugar':price)+'</span>'+
+        '<span class="ccs-badge '+badgeClass+'">'+badgeText+'</span>';
+      button.onclick=async()=>{
+        if(!await confirmSheet('¿Reservar Entrena con David el '+fmtDS(ds)+' a las '+fmtSlot(start)+'? '+price))return;
+        button.disabled=true;
+        try{
+          if(session.amount){
+            const {data}=await sb.auth.getSession();
+            const token=data.session?.access_token;
+            if(!token)throw new Error('Inicia sesión para reservar.');
+            const response=await fetch('/api/create-checkout-session',{
+              method:'POST',
+              headers:{'Content-Type':'application/json',Authorization:'Bearer '+token},
+              body:JSON.stringify({davidDs:ds,davidSlot:start,expectedAmount:session.amount})
+            });
+            const checkout=await response.json();
+            if(!response.ok||!checkout.url)throw new Error(checkout.error||'No se pudo iniciar el pago.');
+            location.assign(checkout.url);
+            return;
+          }
+          const result=await sb.rpc('reserve_david_pilot',{p_ds:ds,p_start_idx:start});
+          if(result.error)throw result.error;
+          await renderActiveBookings();
+          toast('Sesión con David confirmada','ok');
+        }catch(error){
+          toast(error.message||'No se pudo reservar','err');
+        }finally{
+          await renderDavidPilot(panelId);
+          if(panelId==='david-pilot')await renderBook();
         }
-        const result=await sb.rpc('reserve_david_pilot',{p_start_idx:start});
-        if(result.error)throw result.error;
-        await renderActiveBookings();
-        toast('Sesión con David confirmada','ok');
-      }catch(error){
-        toast(error.message||'No se pudo reservar','err');
-      }finally{
-        await renderDavidPilot(panelId);
-        if(panelId==='david-pilot')await renderBook();
-      }
-    };
-    slotsWrap.appendChild(button);
+      };
+      slotsWrap.appendChild(button);
+    }
+    daysWrap.appendChild(dayBlock);
   }
   panel.hidden=false;
 }
@@ -7535,15 +7551,15 @@ async function renderInicioDavidPilot(){
   const el=document.getElementById('inicio-david-pilot');
   if(!el)return;
   el.innerHTML='';
-  if(!sbUser||mazToday()>'2026-11-16')return;
+  if(!sbUser||mazToday()>DAVID_PILOT_LAST_DS)return;
   const {data,error}=await sb.rpc('david_pilot_slots');
   if(error||!data?.length)return;
   const reserved=data.find(s=>s.reserved);
-  const openCount=data.filter(s=>s.remaining>0&&!(s.amount&&!s.payment_open)).length;
-  if(!reserved&&!openCount)return;
-  const title=reserved?'Ya tienes tu lugar con David':'Entrena con David · lunes 16 nov';
-  const sub=reserved?'Te esperamos a las '+fmtSlot(Number(reserved.start_idx))+'.'
-    :'60 min · máximo 3 personas · quedan '+openCount+' horario'+(openCount===1?'':'s');
+  const openDays=new Set(data.filter(s=>s.remaining>0&&!(s.amount&&!s.payment_open)).map(s=>s.ds));
+  if(!reserved&&!openDays.size)return;
+  const title=reserved?'Ya tienes tu lugar con David':'Esta semana: clases con David';
+  const sub=reserved?'Te esperamos el '+fmtDS(reserved.ds)+' a las '+fmtSlot(Number(reserved.start_idx))+'.'
+    :'Lunes a viernes · 60 min · máximo 3 personas · '+openDays.size+' día'+(openDays.size===1?'':'s')+' con cupo';
   el.innerHTML='<div class="coach-class-banner" onclick="sv(\'book\')">'+
     '<div class="coach-class-banner-icon">'+COACH_ICON+'</div>'+
     '<div class="coach-class-banner-text">'+

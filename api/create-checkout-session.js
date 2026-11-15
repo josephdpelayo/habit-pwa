@@ -25,14 +25,17 @@ module.exports = async function handler(req, res) {
     const { data: authData, error: authError } = await supabase.auth.getUser(token);
     if (authError || !authData.user) return res.status(401).json({ error: 'Sesion invalida' });
 
-    const { davidSlot, expectedAmount } = req.body || {};
+    const { davidDs, davidSlot, expectedAmount } = req.body || {};
     if (davidSlot !== undefined) {
       const ticketPrice = getPlan('i1').price * 100;
-      if (![14, 16, 18].includes(davidSlot) || ![ticketPrice, ticketPrice * 2].includes(expectedAmount)) {
+      const pilotDates = ['2026-11-16', '2026-11-17', '2026-11-18', '2026-11-19', '2026-11-20'];
+      if (!pilotDates.includes(davidDs) || ![14, 16, 18].includes(davidSlot) ||
+          ![ticketPrice, ticketPrice * 2].includes(expectedAmount)) {
         return res.status(400).json({ error: 'Horario o precio inválido' });
       }
       const { data: hold, error } = await supabase.rpc('hold_david_pilot', {
         p_user: authData.user.id,
+        p_ds: davidDs,
         p_idx: davidSlot,
         p_amount: expectedAmount,
       });
