@@ -63,7 +63,8 @@ as $$
          t.starts_at > now() + interval '32 minutes',
          case when p.plan_id in ('im', 'gm') and p.plan_expiry >= t.starts_at then 0
               else public.david_pilot_credits(p, t.starts_at) end
-  from generate_series(date '2026-11-16', date '2026-11-20', interval '1 day') as d(day)
+  from generate_series(0, 4) as offsets(day_offset)
+  cross join lateral (select date '2026-11-16' + offsets.day_offset as day) d
   cross join (values (14), (16), (18)) as s(idx)
   join public.profiles p on p.id = auth.uid()
   cross join lateral (select public.habit_slot_start(d.day, s.idx) as starts_at) t
