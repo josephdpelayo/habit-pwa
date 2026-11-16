@@ -6,12 +6,12 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="HABIT">
 <meta name="application-name" content="HABIT">
-<link rel="manifest" href="/manifest.json?v=20261115-2">
-<link rel="apple-touch-icon" sizes="120x120" href="/icons/icon-120.png?v=20261115-2">
-<link rel="apple-touch-icon" sizes="152x152" href="/icons/icon-152.png?v=20261115-2">
-<link rel="apple-touch-icon" sizes="167x167" href="/icons/icon-167.png?v=20261115-2">
-<link rel="apple-touch-icon" sizes="180x180" href="/icons/icon-180.png?v=20261115-2">
-<link rel="icon" type="image/png" sizes="32x32" href="/icons/icon-32.png?v=20261115-2">
+<link rel="manifest" href="/manifest.json?v=20261116-1">
+<link rel="apple-touch-icon" sizes="120x120" href="/icons/icon-120.png?v=20261116-1">
+<link rel="apple-touch-icon" sizes="152x152" href="/icons/icon-152.png?v=20261116-1">
+<link rel="apple-touch-icon" sizes="167x167" href="/icons/icon-167.png?v=20261116-1">
+<link rel="apple-touch-icon" sizes="180x180" href="/icons/icon-180.png?v=20261116-1">
+<link rel="icon" type="image/png" sizes="32x32" href="/icons/icon-32.png?v=20261116-1">
 <title>HABIT</title>
 <!-- Con id a propósito: scripts/check-training.js toma la primera etiqueta script sin
      atributos como el script principal de la app y la compila. -->
@@ -25,7 +25,7 @@
   var crew=/^\/crew(\/|$)/.test(location.pathname);
   window.HABIT_BRAND=crew?'crew':'gym';
   if(!crew)return;
-  var v='20261115-2';
+  var v='20261116-1';
   document.documentElement.classList.add('brand-crew');
   document.title='HABIT Crew';
   document.querySelectorAll('meta[name="apple-mobile-web-app-title"],meta[name="application-name"]')
@@ -40,11 +40,11 @@
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Share+Tech+Mono&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="/skandi-recovery.js?v=20261115-2"></script>
-<script src="/body-figure.js?v=20261115-2"></script>
-<script src="/habit-training.js?v=20261115-2"></script>
-<script src="/habit-share.js?v=20261115-2"></script>
-<script src="/habit-activity.js?v=20261115-2"></script>
+<script src="/skandi-recovery.js?v=20261116-1"></script>
+<script src="/body-figure.js?v=20261116-1"></script>
+<script src="/habit-training.js?v=20261116-1"></script>
+<script src="/habit-share.js?v=20261116-1"></script>
+<script src="/habit-activity.js?v=20261116-1"></script>
 <style>
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
 @media (prefers-reduced-motion:reduce){*,*:before,*:after{scroll-behavior:auto!important;animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}}
@@ -320,8 +320,9 @@ input,select,button,textarea{font-family:'Inter',sans-serif}
 .coach-class-card{border:1px solid rgba(139,92,246,.35);background:linear-gradient(180deg,rgba(139,92,246,.1),rgba(139,92,246,.03));border-radius:10px;padding:14px 14px 12px;margin-bottom:10px}
 .coach-class-title{font-size:17px;font-weight:800;color:var(--white);margin:0 0 2px}
 .coach-class-meta{font-size:12px;color:var(--gray);margin:0 0 10px}
-.coach-class-days{display:flex;flex-direction:column;gap:10px}
-.coach-class-day-lbl{font-size:11px;font-weight:700;color:#a78bfa;margin-bottom:5px}
+.coach-class-date{font-size:14px;font-weight:750;color:var(--white);margin:0 0 3px}
+.coach-class-card.is-tomorrow{border-color:rgba(139,92,246,.68)}
+.coach-class-section{margin-bottom:12px}
 .coach-class-slots{display:flex;flex-direction:column;gap:6px}
 .coach-class-slot{display:flex;align-items:center;gap:8px;width:100%;text-align:left;border:1px solid rgba(139,92,246,.22);background:rgba(0,0,0,.2);border-radius:6px;padding:9px 11px;cursor:pointer;font:inherit;color:inherit}
 .coach-class-slot.is-disabled{cursor:default;opacity:.55}
@@ -4105,7 +4106,7 @@ const GYM_ONLY_VIEWS=['book','planes','historial','shop'];
 const GYM_APP_URL='/';
 document.querySelectorAll('.brand-name').forEach(el=>{el.textContent=BRAND_NAME;});
 const SUPABASE_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBtcGp0ZXVxanVzYmlkdWV2YndxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc2OTI1NjUsImV4cCI6MjA5MzI2ODU2NX0.XbMzZoo2yqtrD8znLnyo_1zDfrdJAvAPj1lqGOyXnLw';
-const APP_VERSION='20261115-2';
+const APP_VERSION='20261116-1';
 // La pierna va separada en cuádriceps, femorales y pantorrillas: la figura
 // corporal pinta esas tres regiones por separado y el motor de recuperación les
 // da ventanas de descanso distintas. 'Piernas' sigue reconociéndose al leer
@@ -7472,29 +7473,43 @@ const DAVID_PILOT_LAST_DS='2026-11-20';
 
 async function renderDavidPilot(panelId, rescheduling=false){
   const panel=document.getElementById(panelId);
-  panel.hidden=true;
-  if(rescheduling||mazToday()>DAVID_PILOT_LAST_DS||!sbUser)return;
+  const today=mazToday();
+  if(rescheduling||today>DAVID_PILOT_LAST_DS||!sbUser){
+    panel.hidden=true;
+    return;
+  }
+  const user=sbUser;
   const {data,error}=await sb.rpc('david_pilot_slots');
-  if(error||!data?.length||rescheduleBk)return;
+  if(sbUser!==user||rescheduleBk)return;
+  if(error){
+    panel.innerHTML='<p class="coach-class-card">No se pudo actualizar la disponibilidad de Entrena con David. Vuelve a abrir esta sección para reintentar.</p>';
+    panel.hidden=false;
+    return;
+  }
+  if(!data?.length){
+    panel.hidden=true;
+    return;
+  }
 
-  panel.innerHTML='<div class="coach-class-card">'+
+  panel.innerHTML='<header class="coach-class-section">'+
     '<div class="coach-class-eyebrow">'+COACH_ICON+'<span>Clase con entrenador</span></div>'+
     '<h3 class="coach-class-title">Entrena con David</h3>'+
-    '<p class="coach-class-meta">Esta semana, lunes a viernes · 60 min · Máximo 3 personas</p>'+
-    '<div class="coach-class-days"></div>'+
-    '</div>';
-  const daysWrap=panel.querySelector('.coach-class-days');
+    '</header>';
+  const tomorrow=addDaysDS(today,1);
   const byDay=new Map();
   for(const session of data){
     if(!byDay.has(session.ds))byDay.set(session.ds,[]);
     byDay.get(session.ds).push(session);
   }
-  for(const [ds,sessions] of byDay){
-    const dayBlock=document.createElement('div');
-    dayBlock.className='coach-class-day';
-    dayBlock.innerHTML='<p class="coach-class-day-lbl">'+fmtDS(ds)+'</p><div class="coach-class-slots"></div>';
+  for(const [ds,sessions] of [...byDay].sort(([a],[b])=>a.localeCompare(b))){
+    const dayBlock=document.createElement('section');
+    dayBlock.className='coach-class-card'+(ds===tomorrow?' is-tomorrow':'');
+    const prefix=ds===today?'Hoy · ':ds===tomorrow?'Mañana · ':'';
+    dayBlock.innerHTML='<h4 class="coach-class-date">'+prefix+esc(fmtDS(ds))+'</h4>'+
+      '<p class="coach-class-meta">60 min · Máximo 3 personas por clase</p>'+
+      '<div class="coach-class-slots"></div>';
     const slotsWrap=dayBlock.querySelector('.coach-class-slots');
-    for(const session of sessions){
+    for(const session of sessions.sort((a,b)=>a.start_idx-b.start_idx)){
       const start=Number(session.start_idx);
       const price=session.amount===0
         ? (session.credits_used===2?'2 boletos de clase':'Incluido en tu mensualidad')
@@ -7542,7 +7557,7 @@ async function renderDavidPilot(panelId, rescheduling=false){
       };
       slotsWrap.appendChild(button);
     }
-    daysWrap.appendChild(dayBlock);
+    panel.appendChild(dayBlock);
   }
   panel.hidden=false;
 }
@@ -7588,7 +7603,7 @@ async function renderBook(){
   }
   const ds=curDS;
   const rescheduling=!!(rescheduleBk&&rescheduleBk.ds===ds);
-  void renderDavidPilot('david-pilot',rescheduling).catch(console.error);
+  void renderDavidPilot('david-pilot',Boolean(rescheduleBk)).catch(console.error);
   document.getElementById('pb').disabled=rescheduling||curDS<=mazToday();
   document.getElementById('nb').disabled=rescheduling||curDS>=maxDS;
   document.getElementById('dp').textContent=fmtD(curDate);
@@ -23231,6 +23246,13 @@ document.addEventListener('visibilitychange',()=>{
     if(accessDataInt){clearInterval(accessDataInt);accessDataInt=null;}
   } else if(sbUser&&curUser){
     loadAccessData();
+    if(document.getElementById('v-book').classList.contains('active')){
+      void renderDavidPilot('david-pilot',Boolean(rescheduleBk)).catch(console.error);
+    }else if(document.getElementById('v-planes').classList.contains('active')){
+      void renderDavidPilot('david-pilot-plans').catch(console.error);
+    }else if(document.getElementById('v-inicio').classList.contains('active')){
+      void renderInicioDavidPilot().catch(console.error);
+    }
     if(!accInt)accInt=setInterval(()=>{if(curUser&&document.getElementById('v-inicio').classList.contains('active'))renderAccess();},1000);
     if(!accessDataInt)accessDataInt=setInterval(()=>{if(curUser&&sbUser)loadAccessData();},60000);
   }
