@@ -1059,3 +1059,24 @@ corta. Va en `habit-activity.js` y `habit-share.js`, así que llega a HABIT y a 
   fijo calculan su tamaño con el logotipo completo (`brandPx`), para que el logo solo no se
   infle. La prueba «todos firman como HABIT Crew» sigue valiendo para la firma por defecto, y
   `scripts/check-share.js` revisa los otros dos modos en los cuatro tipos.
+
+## Avisos: las dos funciones de Supabase (20 nov 2026)
+
+Los avisos web push no salen de Vercel sino de dos Edge Functions de Supabase, cuyo código
+ahora vive en `supabase/functions/` (antes solo existía desplegado). Se despliegan con el
+conector de Supabase o `supabase functions deploy`; cambiar el archivo no cambia nada en vivo.
+
+- **`send-push`** (`verify_jwt = true`): la llaman `sendPush()` en las apps (JWT del socio) y
+  `api/*` (service-role). `target` es `'admin'` (filas con `role = 'admin'`, que se estampa al
+  guardar la suscripción), `'user:<uuid>'`, o nada = todos. Contesta 200 aunque Apple/Google
+  rechacen; desde el 20 nov deja en los logs de la función cada envío (`push: done`) y cada
+  rechazo con su código (`push: rejected`).
+- **`send-reminders`** (`verify_jwt = false`): «Tu sesión es en 1 hora». **Hasta el 20 nov 2026
+  nada la llamaba** —no había cron y ninguna reserva tuvo `reminder_sent_at`—. La migración 150
+  la programa con pg_cron + pg_net cada 10 min (`habit-send-reminders`); avisa lo que empieza en
+  50–80 min y marca la reserva. Las fechas son de Mazatlán (`mazDs`): con la fecha UTC, desde
+  las 5 pm se saltaba las reservas de la noche.
+
+Casi todo lo que manda la app va a `'admin'`, y solo recibe quien activó los avisos en
+Admin → Notificaciones en su propio teléfono (el 20 nov era 1 de 4 admins). Comentarios y
+reacciones de la comunidad son avisos dentro de la app (`user_notifications`), no push.
