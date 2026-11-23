@@ -1080,3 +1080,13 @@ conector de Supabase o `supabase functions deploy`; cambiar el archivo no cambia
 Casi todo lo que manda la app va a `'admin'`, y solo recibe quien activó los avisos en
 Admin → Notificaciones en su propio teléfono (el 20 nov era 1 de 4 admins). Comentarios y
 reacciones de la comunidad son avisos dentro de la app (`user_notifications`), no push.
+
+**23 nov 2026 (migración 151): los avisos de admin siguen al teléfono.** Joseph no recibía
+nada porque su iPhone estaba con su cuenta de socio: la fila es por dispositivo, y al entrar
+con otra cuenta pasaba a `role = 'user'`. Ahora `push_subscriptions.admin_alerts_for` guarda
+qué admin pidió avisos en ese teléfono, `save_push_subscription` lo conserva cuando otra cuenta
+toma el mismo dispositivo, y `send-push` manda `'admin'` a toda fila cuyo `user_id` o
+`admin_alerts_for` es hoy un admin. `showAdmin()` guarda la suscripción al entrar (antes solo
+al abrir Alertas). Comprar un plan con Stripe avisa al admin (`activateMembership`; antes solo
+la tienda y lo de David). `send-push` rechaza la llave anon (401): `verify_jwt` la dejaba pasar
+y con la llave pública cualquiera mandaba avisos a todos.
