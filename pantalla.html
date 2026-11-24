@@ -1,0 +1,565 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="theme-color" content="#141518">
+<meta name="robots" content="noindex">
+<title>HABIT · Pantalla</title>
+<link rel="icon" type="image/png" sizes="32x32" href="/icons/icon-32.png">
+<link rel="apple-touch-icon" sizes="180x180" href="/icons/icon-180.png">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@500;600;700;800;900&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="/habit-screen.js?v=20261124-1"></script>
+<!--
+  La pantalla del gym (docs/PANTALLA_GYM.md, migración 152). Dos modos en el mismo archivo:
+
+  /pantalla?k=<llave>   La tele. No inicia sesión (el cliente no guarda ninguna aunque alguien
+                        haya entrado en este navegador): lee todo por gym_screen_state(), que
+                        pide la llave de la pantalla. La llave se recuerda en el aparato, así
+                        que después basta /pantalla.
+  /pantalla?control     El control, en el teléfono del admin: usa la sesión que ya tiene en la
+                        app (mismo origen) para encender la tele, cambiar el idioma o la llave,
+                        recargarla y copiar su dirección.
+
+  Quién sale lo decide cada socio en la app (Perfil → Pantalla del gym); quien no lo activó
+  nunca llega aquí, solo se cuenta. La rutina la arma HabitScreen.effectiveExercises, la misma
+  regla que la hoja de entreno.
+
+  Se entera de los cambios por Realtime en gym_screen_pings (una fila sin datos personales que
+  tocan triggers de reservas, entrenos y series) y, por si el socket se cae, vuelve a leer cada
+  60 s. Nunca consulta Vercel. Se recarga sola con versión nueva, cada noche a las 4:00 y con
+  el botón «Recargar tele» del control.
+
+  Doble clic o la tecla F: pantalla completa.
+-->
+<style>
+:root{
+  --black:#141518;--card:#1c1e23;--card2:#24272d;--blue:#2563eb;--bl:#7fb0ff;--white:#f7f7f4;--gray:#8f96a3;--gl:#c9ced7;
+  --green:#20d492;--amber:#f5b84b;--red:#ff6464;--line:rgba(255,255,255,.07);
+  --pad:clamp(14px,2.2vw,44px);
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%;overflow:hidden}
+body{font-family:'Inter',system-ui,-apple-system,sans-serif;color:var(--white);-webkit-font-smoothing:antialiased;
+  background:radial-gradient(ellipse 70% 55% at 50% -14%,rgba(37,99,235,.2),transparent 70%),var(--black)}
+body.idle{cursor:none}
+.watermark{position:fixed;right:-9vh;bottom:-11vh;width:64vh;height:64vh;opacity:.03;pointer-events:none;z-index:0}
+.stage{position:relative;z-index:1;height:100vh;height:100dvh;display:flex;flex-direction:column;gap:clamp(10px,1.8vh,24px);padding:var(--pad);padding-top:max(var(--pad),env(safe-area-inset-top));padding-bottom:max(var(--pad),env(safe-area-inset-bottom))}
+
+/* ── Encabezado ── */
+.top{display:grid;grid-template-columns:minmax(0,1fr) auto minmax(0,1fr);align-items:center;gap:clamp(12px,2vw,32px);padding-bottom:clamp(10px,1.6vh,22px);border-bottom:1px solid var(--line)}
+.brand{display:flex;align-items:center;gap:clamp(10px,1vw,16px);min-width:0}
+.brand img{width:clamp(34px,6vh,74px);height:clamp(34px,6vh,74px);object-fit:contain;flex-shrink:0}
+.brand-name{font-size:clamp(18px,3.2vh,40px);font-weight:900;letter-spacing:.12em;line-height:1}
+.brand-sub{font-size:clamp(8px,1.15vh,14px);font-weight:800;letter-spacing:.24em;color:var(--bl);text-transform:uppercase;margin-top:.45em}
+.title{text-align:center;min-width:0}
+.kicker{font-size:clamp(10px,1.5vh,19px);font-weight:800;letter-spacing:.28em;text-transform:uppercase;color:var(--bl)}
+h1{font-size:clamp(20px,4.2vh,56px);font-weight:900;line-height:1.05;margin-top:.2em;white-space:nowrap}
+h1::first-letter{text-transform:uppercase}
+.status{display:flex;align-items:center;justify-content:flex-end;gap:clamp(10px,1.4vw,22px)}
+.live{display:inline-flex;align-items:center;gap:.6em;border:1px solid rgba(32,212,146,.32);background:rgba(32,212,146,.1);color:var(--green);border-radius:999px;padding:.55em 1.05em;font-size:clamp(10px,1.4vh,17px);font-weight:900;letter-spacing:.16em;text-transform:uppercase;white-space:nowrap}
+.live i{width:.62em;height:.62em;border-radius:50%;background:currentColor;box-shadow:0 0 12px currentColor;animation:pulse 1.6s ease-in-out infinite}
+.live.warn{border-color:rgba(245,184,75,.35);background:rgba(245,184,75,.1);color:var(--amber)}
+.clock{font-size:clamp(18px,3.6vh,46px);font-weight:800;font-variant-numeric:tabular-nums;color:var(--gl)}
+@keyframes pulse{50%{opacity:.35}}
+
+/* ── Quién está ── */
+.main{flex:1;min-height:0;display:flex;flex-direction:column;gap:clamp(10px,1.6vh,22px)}
+.grid{flex:1;min-height:0;display:grid;gap:clamp(12px,1.4vw,28px);grid-template-columns:repeat(var(--cols,1),minmax(0,1fr));grid-auto-rows:minmax(0,1fr)}
+.card{position:relative;min-height:0;display:flex;flex-direction:column;gap:clamp(8px,1.2vh,16px);background:var(--card);border-radius:clamp(14px,2vh,26px);padding:clamp(14px,2.2vh,30px) clamp(16px,1.6vw,32px);overflow:hidden}
+.card:before{content:'';position:absolute;left:0;top:0;bottom:0;width:clamp(5px,.5vw,9px);background:var(--c,var(--blue))}
+.c-top{display:flex;align-items:flex-start;justify-content:space-between;gap:16px;min-width:0}
+.c-name{font-size:calc(var(--fs)*1.35);font-weight:900;line-height:1.05;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0}
+.c-when{font-size:calc(var(--fs)*.62);font-weight:700;color:var(--gray);margin-top:.35em;font-variant-numeric:tabular-nums}
+.c-timer{font-size:calc(var(--fs)*1.25);font-weight:900;font-variant-numeric:tabular-nums;line-height:1;color:var(--white);white-space:nowrap}
+.c-routine{display:flex;align-items:center;gap:.6em;min-width:0;font-size:calc(var(--fs)*.82);font-weight:800}
+.c-routine b{min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.pill{flex:none;display:inline-flex;align-items:center;gap:.45em;padding:.38em .8em;border-radius:999px;font-size:calc(var(--fs)*.5);font-weight:900;letter-spacing:.1em;text-transform:uppercase;background:rgba(255,255,255,.07);color:var(--gl);white-space:nowrap}
+.pill.on{background:rgba(32,212,146,.14);color:var(--green)}
+.pill.on:before{content:'';width:.6em;height:.6em;border-radius:50%;background:currentColor;animation:pulse 1.6s ease-in-out infinite}
+.pill.done{background:rgba(127,176,255,.14);color:var(--bl)}
+.pill.pause{background:rgba(245,184,75,.14);color:var(--amber)}
+.bar{height:clamp(6px,.8vh,11px);border-radius:99px;background:rgba(255,255,255,.07);overflow:hidden}
+.bar i{display:block;height:100%;width:0;border-radius:inherit;background:var(--c,var(--blue));transition:width 1s cubic-bezier(.2,.8,.2,1)}
+.c-prog{display:flex;align-items:center;gap:.8em}
+.c-prog .bar{flex:1}
+.c-count{flex:none;font-size:calc(var(--fs)*.58);font-weight:700;color:var(--gray);font-variant-numeric:tabular-nums}
+.exs{list-style:none;display:flex;flex-direction:column;gap:clamp(4px,.6vh,8px);flex:1 1 auto;min-height:0;overflow:hidden}
+/* Una sola persona: la tarjeta es toda la pantalla y la lista va en dos columnas. */
+.grid.solo .exs{display:grid;grid-template-columns:1fr 1fr;grid-auto-rows:min-content;column-gap:clamp(12px,1.4vw,28px)}
+.ex{display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:center;gap:14px;padding:.5em .75em;border-radius:12px;font-size:calc(var(--fs)*.66)}
+.ex .n{font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ex .n small{display:block;font-size:.78em;font-weight:600;color:var(--gray);margin-top:.15em}
+.ex .s{display:flex;gap:.28em;align-items:center}
+.ex .s i{width:.62em;height:.62em;border-radius:50%;background:rgba(255,255,255,.14)}
+.ex .s i.d{background:var(--c,var(--blue))}
+.ex .s em{font-style:normal;font-weight:800;color:var(--gl);font-variant-numeric:tabular-nums}
+.ex.done{color:var(--gray)}
+.ex.now{background:var(--card2);box-shadow:inset 0 0 0 1px rgba(255,255,255,.06)}
+.ex.now .n{color:var(--white)}
+.ex.swapped .n{text-decoration:line-through;text-decoration-thickness:.06em;color:var(--gray)}
+.ex-more{font-size:calc(var(--fs)*.56);font-weight:700;color:var(--gray);padding:0 .75em}
+.c-note{font-size:calc(var(--fs)*.62);color:var(--gray);font-weight:600}
+.card.slim{justify-content:center}
+
+/* ── Sin nadie: el reloj grande ── */
+.empty{flex:1;min-height:0;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;gap:2vh}
+.big-clock{font-size:clamp(64px,min(18vw,26vh),420px);font-weight:900;line-height:.95;font-variant-numeric:tabular-nums;letter-spacing:-.03em}
+.big-clock span{color:var(--bl);font-size:.42em;margin-left:.08em}
+.empty h2{font-size:clamp(20px,3.6vh,46px);font-weight:900}
+.empty p{font-size:clamp(13px,2vh,26px);color:var(--gray);max-width:46ch;line-height:1.4}
+.empty img{width:clamp(70px,14vh,160px);height:clamp(70px,14vh,160px);opacity:.5}
+
+/* ── Más tarde y pie ── */
+.later{display:flex;align-items:center;gap:clamp(10px,1.2vw,22px);min-width:0;overflow:hidden;white-space:nowrap;font-size:clamp(12px,1.9vh,24px)}
+.later .tag{flex:none;color:var(--bl);font-weight:900;letter-spacing:.16em;text-transform:uppercase;font-size:.78em}
+.later .it{flex:none;display:inline-flex;align-items:center;gap:.55em;background:var(--card);border-radius:999px;padding:.5em .95em;font-weight:700}
+.later .it b{font-variant-numeric:tabular-nums;color:var(--gl)}
+.later .it u{text-decoration:none;color:var(--gray);font-weight:600}
+.later .dot{width:.6em;height:.6em;border-radius:50%;background:var(--c,var(--blue))}
+.foot{display:flex;align-items:center;justify-content:space-between;gap:20px;padding-top:clamp(8px,1.4vh,18px);border-top:1px solid var(--line);font-size:clamp(11px,1.6vh,20px);color:var(--gray);font-weight:600;min-height:1.6em}
+
+.fs-btn{position:fixed;right:14px;bottom:14px;z-index:20;border:1px solid rgba(255,255,255,.14);background:rgba(20,20,22,.85);color:var(--gl);border-radius:12px;padding:10px 14px;font:700 12px 'Inter',sans-serif;letter-spacing:.06em;cursor:pointer;opacity:.85;transition:opacity .3s}
+body.idle .fs-btn{opacity:0;pointer-events:none}
+
+/* ── Celular / vertical: una columna que se desplaza ── */
+@media (max-width:760px),(orientation:portrait) and (max-width:1100px){
+  html,body{overflow:auto}
+  .stage{height:auto;min-height:100dvh}
+  .top{grid-template-columns:minmax(0,1fr) auto}
+  .title{grid-column:1/-1;grid-row:2;text-align:left}
+  h1{white-space:normal;font-size:24px}
+  .clock{display:none}
+  .grid{display:flex;flex-direction:column}
+  .card{min-height:auto}
+  .later{flex-wrap:wrap;white-space:normal}
+  .fs-btn{display:none}
+}
+@media (prefers-reduced-motion:reduce){*,*:before,*:after{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}}
+
+/* ── Control (teléfono del admin) ── */
+body.control{overflow:auto;height:auto}
+body.control .stage{height:auto;min-height:100dvh;max-width:560px;margin:0 auto}
+.ctl{display:flex;flex-direction:column;gap:14px}
+.ctl h2{font-size:22px;font-weight:900}
+.ctl p{color:var(--gray);font-size:14px;line-height:1.45}
+.ctl .box{background:var(--card);border-radius:16px;padding:16px;display:flex;flex-direction:column;gap:12px}
+.ctl .row{display:flex;align-items:center;justify-content:space-between;gap:12px;font-size:15px;font-weight:700}
+.ctl .seg{display:inline-flex;background:var(--card2);border-radius:12px;padding:3px}
+.ctl .seg button{border:0;background:none;color:var(--gl);font:700 14px 'Inter',sans-serif;padding:9px 14px;border-radius:10px;cursor:pointer}
+.ctl .seg button.on{background:var(--blue);color:#fff}
+.ctl .url{font:600 13px ui-monospace,Menlo,monospace;word-break:break-all;background:var(--card2);border-radius:10px;padding:10px 12px;color:var(--gl)}
+.ctl .btn{border:0;border-radius:13px;padding:13px 16px;font:800 15px 'Inter',sans-serif;cursor:pointer;background:#e9eef5;color:#060607}
+.ctl .btn.ghost{background:var(--card2);color:var(--white)}
+.ctl .btn.danger{background:rgba(255,100,100,.14);color:var(--red)}
+.ctl .msg{font-size:13px;color:var(--green);min-height:1.2em}
+.ctl .msg.err{color:var(--red)}
+</style>
+</head>
+<body>
+<img class="watermark" src="/icons/logo-original.png" alt="">
+<div class="stage">
+  <header class="top">
+    <div class="brand">
+      <img src="/icons/logo-original.png" alt="">
+      <div><div class="brand-name">HABIT</div><div class="brand-sub">Training Hub</div></div>
+    </div>
+    <div class="title"><div class="kicker" id="kicker"></div><h1 id="title"></h1></div>
+    <div class="status"><div class="live" id="live"><i></i><span></span></div><div class="clock" id="clock">--:--</div></div>
+  </header>
+  <main class="main" id="main" aria-live="polite"></main>
+  <footer class="foot" id="foot"></footer>
+</div>
+<button class="fs-btn" id="fs" type="button"></button>
+
+<script>
+const PANTALLA_VERSION='20261124-1';
+const SUPABASE_URL='https://pmpjteuqjusbiduevbwq.supabase.co';
+const SUPABASE_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBtcGp0ZXVxanVzYmlkdWV2YndxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc2OTI1NjUsImV4cCI6MjA5MzI2ODU2NX0.XbMzZoo2yqtrD8znLnyo_1zDfrdJAvAPj1lqGOyXnLw';
+const SCREEN_ID='main';
+const POLL_MS=60000;          // respaldo si Realtime se cae
+const VERSION_CHECK_MS=15*60000;
+const KEY_STORE='habit_tv_key';
+const H=window.HabitScreen;
+
+const params=new URLSearchParams(location.search);
+const narrowMq=matchMedia('(max-width:760px),(orientation:portrait) and (max-width:1100px)');
+const CONTROL=params.has('control');
+const $=id=>document.getElementById(id);
+const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const store={get(k){try{return localStorage.getItem(k);}catch(_){return null;}},set(k,v){try{v==null?localStorage.removeItem(k):localStorage.setItem(k,v);}catch(_){}}};
+
+// La tele no guarda sesión: aunque alguien haya entrado a la app en este navegador, aquí se
+// lee como anon. El control sí usa la sesión del admin (misma llave de almacenamiento que la app).
+const tv=supabase.createClient(SUPABASE_URL,SUPABASE_KEY,CONTROL
+  ?{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:false}}
+  :{auth:{persistSession:false,autoRefreshToken:false,detectSessionInUrl:false}});
+
+let lang='es';
+const t=()=>H.T(lang);
+const fmtTime=d=>new Intl.DateTimeFormat(lang==='en'?'en-US':'es-MX',{hour:'2-digit',minute:'2-digit',hour12:false,timeZone:'America/Mazatlan'}).format(d);
+const fmtDay=d=>new Intl.DateTimeFormat(lang==='en'?'en-US':'es-MX',{weekday:'long',day:'numeric',month:'long',timeZone:'America/Mazatlan'}).format(d);
+function fmtDur(sec){
+  sec=Math.max(0,Math.floor(sec));
+  const h=Math.floor(sec/3600),m=Math.floor(sec%3600/60),s=sec%60;
+  return (h?h+':'+String(m).padStart(2,'0'):String(m))+':'+String(s).padStart(2,'0');
+}
+
+
+// ═════════════════════════════════════════════════════════════════════════════
+// La tele
+// ═════════════════════════════════════════════════════════════════════════════
+function initTv(){
+  let key=params.get('k');
+  if(key){store.set(KEY_STORE,key);}else key=store.get(KEY_STORE);
+  // La llave no se queda en la barra de direcciones a la vista de quien pase.
+  if(params.has('k'))history.replaceState(null,'',location.pathname);
+
+  let data=null,view='loading',fetchOk=true,skew=0,nonce=null,peopleSig='';
+  const serverNow=()=>new Date(Date.now()+skew);
+
+  async function load(){
+    if(!key){view='key';data=null;return;}
+    const{data:res,error}=await tv.rpc('gym_screen_state',{p_screen:SCREEN_ID,p_key:key});
+    if(error){
+      if(/gym_screen_state|schema cache|does not exist|42883|PGRST202/i.test((error.message||'')+' '+(error.code||''))){view='missing';data=null;return;}
+      throw error;
+    }
+    if(!res||res.ok===false){view='key';data=null;store.set(KEY_STORE,null);return;}
+    skew=Date.parse(res.now)-Date.now();
+    data=res;
+    if(res.lang&&res.lang!==lang){lang=res.lang;document.documentElement.lang=lang;}
+    view=res.mode==='off'?'off':'ok';
+  }
+  let inflight=false,again=false;
+  async function refresh(){
+    if(inflight){again=true;return;}
+    inflight=true;
+    try{await load();fetchOk=true;}
+    catch(e){console.warn('pantalla:',e);fetchOk=false;}
+    inflight=false;
+    render();
+    if(again){again=false;refresh();}
+  }
+  let debounceT=null;
+  // Un entreno en curso toca la fila con cada serie; se juntan los avisos de un segundo.
+  const scheduleRefresh=()=>{clearTimeout(debounceT);debounceT=setTimeout(refresh,800);};
+
+  // ── Pintado ────────────────────────────────────────────────────────────────
+  function render(){
+    paintChrome();
+    const main=$('main'),foot=$('foot');
+    if(view!=='ok'){
+      peopleSig='';
+      const T=t();
+      const [title,sub]=view==='loading'?[T.loading,'']:view==='missing'?[T.missing,T.missingSub]
+        :view==='key'?[T.badKey,T.badKeySub]:[T.off,T.offSub];
+      main.innerHTML='<div class="empty">'+(view==='off'?bigClockHtml():'<img src="/icons/logo-original.png" alt="">')
+        +'<h2>'+esc(title)+'</h2>'+(sub?'<p>'+esc(sub)+'</p>':'')+'</div>';
+      foot.textContent='';
+      return;
+    }
+    const now=serverNow();
+    const people=(data.people||[]).map(p=>({...p,start:Date.parse(p.start_at),end:Date.parse(p.end_at)}));
+    // «En el gym» desde 10 min antes de su reserva, como la puerta.
+    const inGym=people.filter(p=>now>=p.start-10*60000&&now<p.end);
+    const later=people.filter(p=>now<p.start-10*60000);
+    const sig=JSON.stringify([inGym.map(p=>p.key),later.map(p=>p.key),data.people]);
+    if(sig!==peopleSig){
+      peopleSig=sig;
+      main.innerHTML=(inGym.length?gridHtml(inGym):emptyHtml(later.length))+(later.length?laterHtml(later):'');
+      fitCards();
+    }
+    tickTimers();
+    const hidden=data.hidden_now|0;
+    foot.textContent=hidden?t().hiddenNow(hidden):'';
+  }
+  function paintChrome(){
+    const T=t(),now=serverNow();
+    $('kicker').textContent=T.inGym;
+    $('title').textContent=fmtDay(now);
+    const live=$('live');
+    live.className='live'+(fetchOk?'':' warn');
+    live.querySelector('span').textContent=fetchOk?T.live:T.reconnecting;
+    $('fs').textContent=document.fullscreenElement?T.exitFullscreen:T.fullscreen;
+    document.title='HABIT · '+T.inGym;
+  }
+  function bigClockHtml(){return '<div class="big-clock" id="big-clock"></div>';}
+  function emptyHtml(hasLater){
+    const T=t();
+    return '<div class="empty">'+bigClockHtml()+'<h2>'+esc(T.noOne)+'</h2><p>'+esc(T.noOneSub)+'</p></div>';
+  }
+  function gridHtml(list){
+    const n=list.length;
+    // 1 → una tarjeta grande; 2 y 3 lado a lado; 4 → 2×2 (el cupo del gym).
+    const cols=n===4?2:Math.min(n,3);
+    const rows=Math.ceil(n/cols);
+    const fs=n===1?'clamp(20px,4.4vh,56px)':rows>1?'clamp(14px,2.6vh,34px)':n===2?'clamp(16px,3.4vh,44px)':'clamp(14px,2.9vh,38px)';
+    // Tope de partida; fitCards() quita después lo que de verdad no cabe en cada tarjeta.
+    const maxEx=n===1?16:rows>1?6:10;
+    return '<div class="grid'+(n===1?' solo':'')+'" style="--cols:'+cols+';--fs:'+fs+'">'+list.map(p=>cardHtml(p,maxEx)).join('')+'</div>';
+  }
+  function statusOf(r){
+    if(!r)return null;
+    if(r.status==='in_progress')return r.paused_at?'paused':'in_progress';
+    return r.status==='done'?'done':'planned';
+  }
+  function cardHtml(p,maxEx){
+    const T=t();
+    const name=p.name||T.member;
+    const when=T.until(fmtTime(new Date(p.end)));
+    if(p.visibility!=='routine'){
+      return '<article class="card slim"><div class="c-name">'+esc(name)+'</div><div class="c-when">'+esc(when)+'</div></article>';
+    }
+    const r=p.routine;
+    if(!r){
+      return '<article class="card slim"><div class="c-name">'+esc(name)+'</div><div class="c-when">'+esc(when)+'</div>'
+        +'<div class="c-note">'+esc(T.noRoutine)+'</div></article>';
+    }
+    const st=statusOf(r);
+    const pr=H.progress(r);
+    const pct=pr.total?Math.round(pr.done/pr.total*100):0;
+    const color=safeColor(r.color);
+    const pillCls=st==='in_progress'?'on':st==='done'?'done':st==='paused'?'pause':'';
+    const timer=st==='in_progress'||st==='paused'
+      ?'<div class="c-timer" data-start="'+esc(r.started_at||'')+'" data-paused="'+(r.paused_seconds|0)+'" data-pausedat="'+esc(r.paused_at||'')+'"></div>':'';
+    // Una ventana de ejercicios alrededor del que va: el anterior para ver de dónde viene,
+    // y los que siguen.
+    const items=pr.items;
+    let from=0;
+    if(items.length>maxEx&&pr.current>0)from=Math.min(Math.max(0,pr.current-1),items.length-maxEx);
+    const shown=items.slice(from,from+maxEx);
+    const exs=shown.map((it,i)=>{
+      const idx=from+i;
+      const cls=it.replaced?'swapped':idx===pr.current&&st!=='planned'?'now':it.done>=it.total&&it.total?'done':'';
+      const dots=it.total<=8
+        ?Array.from({length:it.total},(_,k)=>'<i'+(k<it.done?' class="d"':'')+'></i>').join('')
+        :'<em>'+it.done+'/'+it.total+'</em>';
+      const sub=[H.targetLabel(it),it.lastWeight?fmtKg(it.lastWeight)+' kg':''].filter(Boolean).join(' · ');
+      return '<li class="ex '+cls+'"><div class="n">'+esc(it.name||'—')+(sub?'<small>'+esc(sub)+'</small>':'')+'</div><div class="s">'+dots+'</div></li>';
+    }).join('');
+    const rest=items.length-(from+shown.length);
+    return '<article class="card" style="--c:'+color+'" data-rest="'+rest+'">'
+      +'<div class="c-top"><div style="min-width:0"><div class="c-name">'+esc(name)+'</div><div class="c-when">'+esc(when)+'</div></div>'+timer+'</div>'
+      +'<div class="c-routine"><b>'+esc(r.title||T.freeTraining)+'</b><span class="pill '+pillCls+'">'+esc(T.st[st])+'</span></div>'
+      +'<div class="c-prog"><div class="bar"><i style="width:'+pct+'%"></i></div>'
+      +'<span class="c-count">'+esc(pr.total?T.sets(pr.done,pr.total):T.exercises(items.length))+'</span></div>'
+      +'<ul class="exs">'+exs+'</ul><div class="ex-more"></div>'
+      +'</article>';
+  }
+  // Lo que no cabe se quita desde abajo (el que va siempre queda: la ventana empieza uno
+  // antes de él) y se cuenta en «+N más». En el celular la lista se desplaza y no se recorta.
+  function fitCards(){
+    if(narrowMq.matches)return;
+    document.querySelectorAll('#main .card[data-rest]').forEach(card=>{
+      const ul=card.querySelector('.exs'),more=card.querySelector('.ex-more');
+      let rest=+card.dataset.rest||0;
+      const label=()=>{more.textContent=rest>0?t().more(rest):'';};
+      label();
+      while(ul.children.length>1&&ul.scrollHeight>ul.clientHeight+1){ul.lastElementChild.remove();rest++;label();}
+    });
+  }
+  function laterHtml(list){
+    const T=t();
+    return '<div class="later"><span class="tag">'+esc(T.next)+'</span>'+list.slice(0,8).map(p=>{
+      const r=p.visibility==='routine'?p.routine:null;
+      return '<span class="it" style="--c:'+safeColor(r&&r.color)+'"><b>'+esc(fmtTime(new Date(p.start)))+'</b>'+esc(p.name||T.member)
+        +(r?'<span class="dot"></span><u>'+esc(r.title||T.freeTraining)+'</u>':'')+'</span>';
+    }).join('')+'</div>';
+  }
+  function fmtKg(v){const n=Number(v);return Number.isInteger(n)?String(n):String(+n.toFixed(1));}
+  // El color viene de la rutina: solo se acepta un hex, nada que pueda escaparse del style.
+  function safeColor(c){return /^#[0-9a-f]{3,8}$/i.test(String(c||''))?c:'#2563eb';}
+
+  // ── Cada segundo: relojes y cronómetros, sin repintar las tarjetas ───────────
+  function tickTimers(){
+    const now=serverNow();
+    $('clock').textContent=fmtTime(now);
+    const big=document.getElementById('big-clock');
+    if(big){
+      const s=new Intl.DateTimeFormat('en-US',{second:'2-digit',timeZone:'America/Mazatlan'}).format(now);
+      big.innerHTML=esc(fmtTime(now))+'<span>'+esc(String(s).padStart(2,'0'))+'</span>';
+    }
+    document.querySelectorAll('.c-timer').forEach(el=>{
+      const start=Date.parse(el.dataset.start);
+      if(!start){el.textContent='';return;}
+      const pausedAt=Date.parse(el.dataset.pausedat);
+      const end=pausedAt||+now;
+      el.textContent=fmtDur((end-start)/1000-(+el.dataset.paused||0));
+    });
+  }
+  let lastMinute=-1;
+  setInterval(()=>{
+    tickTimers();
+    // Cada minuto se vuelve a decidir quién está «en el gym» y quién «más tarde».
+    const m=Math.floor(Date.now()/60000);
+    if(m!==lastMinute){lastMinute=m;if(view==='ok'){peopleSig='';render();}}
+  },1000);
+
+  // ── Realtime + respaldo ────────────────────────────────────────────────────
+  tv.channel('gym-screen-'+SCREEN_ID)
+    .on('postgres_changes',{event:'*',schema:'public',table:'gym_screen_pings',filter:'screen_id=eq.'+SCREEN_ID},payload=>{
+      const n=payload&&payload.new&&payload.new.reload_nonce;
+      if(n!=null&&nonce!=null&&n!==nonce){location.reload();return;}
+      if(n!=null)nonce=n;
+      scheduleRefresh();
+    })
+    .subscribe();
+  tv.from('gym_screen_pings').select('reload_nonce').eq('screen_id',SCREEN_ID).maybeSingle()
+    .then(({data})=>{if(data)nonce=data.reload_nonce;});
+  setInterval(refresh,POLL_MS);
+
+  // ── Versión nueva: se compara contra el archivo estático (sin funciones de Vercel) ──
+  setInterval(async()=>{
+    try{
+      const res=await fetch('/pantalla.html?probe='+Date.now(),{cache:'no-store'});
+      const m=(await res.text()).match(/PANTALLA_VERSION='([^']+)'/);
+      if(m&&m[1]!==PANTALLA_VERSION)location.reload();
+    }catch(_){}
+  },VERSION_CHECK_MS);
+  // Y cada noche a las 4:00 de Mazatlán, por si algo se quedó atorado.
+  setInterval(()=>{
+    const hm=new Intl.DateTimeFormat('en-GB',{hour:'2-digit',minute:'2-digit',hourCycle:'h23',timeZone:'America/Mazatlan'}).format(new Date());
+    if(hm==='04:00'&&performance.now()>5*60000)location.reload();
+  },30000);
+
+  let resizeT=null;
+  const relayout=()=>{clearTimeout(resizeT);resizeT=setTimeout(()=>{peopleSig='';render();},200);};
+  addEventListener('resize',relayout);
+  if(narrowMq.addEventListener)narrowMq.addEventListener('change',relayout);
+
+  screenBehaviour(refresh);
+  render();
+  refresh();
+}
+
+// ── Pantalla: completa, que no se apague, cursor que se esconde ───────────────
+function screenBehaviour(onVisible){
+  let wakeLock=null;
+  async function keepAwake(){
+    try{if('wakeLock' in navigator&&!document.hidden&&!wakeLock){wakeLock=await navigator.wakeLock.request('screen');wakeLock.addEventListener('release',()=>{wakeLock=null;});}}
+    catch(_){}
+  }
+  function toggleFullscreen(){
+    if(document.fullscreenElement)document.exitFullscreen&&document.exitFullscreen();
+    else if(document.documentElement.requestFullscreen)document.documentElement.requestFullscreen().catch(()=>{});
+  }
+  let idleT=null;
+  function wake(){document.body.classList.remove('idle');clearTimeout(idleT);idleT=setTimeout(()=>document.body.classList.add('idle'),3000);}
+  $('fs').addEventListener('click',toggleFullscreen);
+  addEventListener('dblclick',toggleFullscreen);
+  addEventListener('keydown',e=>{if(e.key==='f'||e.key==='F')toggleFullscreen();});
+  addEventListener('mousemove',wake);
+  addEventListener('touchstart',wake,{passive:true});
+  document.addEventListener('fullscreenchange',()=>{$('fs').textContent=document.fullscreenElement?t().exitFullscreen:t().fullscreen;});
+  document.addEventListener('visibilitychange',()=>{if(!document.hidden){onVisible();keepAwake();}});
+  addEventListener('online',onVisible);
+  wake();keepAwake();
+}
+
+// ═════════════════════════════════════════════════════════════════════════════
+// El control
+// ═════════════════════════════════════════════════════════════════════════════
+// Los textos del control, en los dos idiomas (requisito permanente). Mientras la app no tenga
+// selector de idioma, manda el del teléfono.
+const CONTROL_TEXT={
+  es:{kicker:'Control',title:'Pantalla del gym',screen:'Pantalla',on:'Encendida',off:'Apagada',
+    onHelp:'Los socios ya ven la opción en Perfil, y a quien tenga reserva se le pregunta una vez si quiere salir.',
+    offHelp:'Apagada, la app no le enseña nada a nadie y la tele solo muestra la hora.',
+    tvLang:'Idioma de la tele',address:'Dirección de la tele',
+    addressHelp:o=>'Ábrela una vez en el aparato de la tele: se queda recordada y después basta '+o+'/pantalla. Sin la llave no se ve nada.',
+    copy:'Copiar dirección',preview:'Ver la tele aquí',reload:'Recargar la tele',rotate:'Cambiar la llave',
+    rotateHelp:'Cambiar la llave desconecta la tele hasta que abras la dirección nueva en ella. Úsalo si la dirección salió del gym.',
+    rotateAsk:'¿Cambiar la llave? La tele deja de mostrar datos hasta que abras la dirección nueva en ella.',
+    missing:'Falta preparar la base de datos',missingSub:'Corre la migración 152 en Supabase.',
+    readFail:'No se pudo leer la pantalla',noAdmin:'Solo para admins',
+    noAdminSub:'Entra a HABIT con tu cuenta de admin en este mismo navegador y vuelve a abrir esta página.',
+    failed:'No se pudo: ',turnedOn:'Pantalla encendida',turnedOff:'Pantalla apagada',langDone:'Idioma cambiado',
+    reloading:'La tele se va a recargar',rotated:'Llave nueva: abre la dirección nueva en la tele',
+    copied:'Dirección copiada',copyManual:'Selecciónala y cópiala'},
+  en:{kicker:'Control',title:'Gym screen',screen:'Screen',on:'On',off:'Off',
+    onHelp:'Members now see the option in Profile, and anyone with a booking is asked once whether they want to show up.',
+    offHelp:'While it’s off, the app shows nothing to anyone and the TV only shows the time.',
+    tvLang:'TV language',address:'TV address',
+    addressHelp:o=>'Open it once on the TV device: it’s remembered, and after that '+o+'/pantalla is enough. Without the key nothing shows.',
+    copy:'Copy address',preview:'Preview the TV here',reload:'Reload the TV',rotate:'Change the key',
+    rotateHelp:'Changing the key disconnects the TV until you open the new address on it. Use it if the address got out of the gym.',
+    rotateAsk:'Change the key? The TV stops showing data until you open the new address on it.',
+    missing:'The database isn’t ready',missingSub:'Run migration 152 in Supabase.',
+    readFail:'Couldn’t read the screen',noAdmin:'Admins only',
+    noAdminSub:'Sign in to HABIT with your admin account in this same browser, then open this page again.',
+    failed:'Couldn’t do it: ',turnedOn:'Screen on',turnedOff:'Screen off',langDone:'Language changed',
+    reloading:'The TV will reload',rotated:'New key: open the new address on the TV',
+    copied:'Address copied',copyManual:'Select it and copy it'}
+};
+function initControl(){
+  const C=CONTROL_TEXT[/^en\b/i.test(navigator.language||'')?'en':'es'];
+  document.documentElement.lang=C===CONTROL_TEXT.en?'en':'es';
+  document.body.classList.add('control');
+  $('fs').remove();
+  $('kicker').textContent=C.kicker;
+  $('title').textContent=C.title;
+  $('live').style.display='none';
+  $('clock').style.display='none';
+  const main=$('main');
+  let screen=null,msg='',msgErr=false;
+
+  async function load(){
+    const{data:{session}}=await tv.auth.getSession();
+    if(!session){paintNoAdmin();return;}
+    const{data,error}=await tv.rpc('gym_screen_admin',{p_screen:SCREEN_ID});
+    if(error){
+      if(/gym_screen_admin|schema cache|PGRST202|42883/i.test((error.message||'')+' '+(error.code||'')))return paintMsgOnly(C.missing,C.missingSub);
+      if(/NOT_ADMIN/.test(error.message||''))return paintNoAdmin();
+      return paintMsgOnly(C.readFail,error.message||'');
+    }
+    screen=data;paint();
+  }
+  function paintMsgOnly(title,sub){main.innerHTML='<div class="ctl"><h2>'+esc(title)+'</h2><p>'+esc(sub)+'</p></div>';}
+  function paintNoAdmin(){paintMsgOnly(C.noAdmin,C.noAdminSub);}
+  function tvUrl(){return location.origin+'/pantalla?k='+encodeURIComponent(screen.access_key);}
+  function paint(){
+    const on=screen.mode==='on';
+    main.innerHTML='<div class="ctl">'
+      +'<div class="box"><div class="row"><span>'+esc(C.screen)+'</span><span class="seg"><button data-c="mode" data-v="on" class="'+(on?'on':'')+'">'+esc(C.on)+'</button><button data-c="mode" data-v="off" class="'+(on?'':'on')+'">'+esc(C.off)+'</button></span></div>'
+      +'<p>'+esc(on?C.onHelp:C.offHelp)+'</p></div>'
+      +'<div class="box"><div class="row"><span>'+esc(C.tvLang)+'</span><span class="seg"><button data-c="lang" data-v="es" class="'+(screen.lang==='es'?'on':'')+'">Español</button><button data-c="lang" data-v="en" class="'+(screen.lang==='en'?'on':'')+'">English</button></span></div></div>'
+      +'<div class="box"><div class="row"><span>'+esc(C.address)+'</span></div>'
+      +'<div class="url" id="tv-url">'+esc(tvUrl())+'</div>'
+      +'<p>'+esc(C.addressHelp(location.origin))+'</p>'
+      +'<button class="btn" data-c="copy">'+esc(C.copy)+'</button>'
+      +'<button class="btn ghost" data-c="preview">'+esc(C.preview)+'</button></div>'
+      +'<div class="box"><button class="btn ghost" data-c="reload">'+esc(C.reload)+'</button>'
+      +'<button class="btn danger" data-c="rotate">'+esc(C.rotate)+'</button>'
+      +'<p>'+esc(C.rotateHelp)+'</p></div>'
+      +'<div class="msg'+(msgErr?' err':'')+'" id="ctl-msg">'+esc(msg)+'</div>'
+      +'</div>';
+  }
+  function note(text,err){msg=text;msgErr=!!err;const el=$('ctl-msg');if(el){el.textContent=text;el.className='msg'+(err?' err':'');}}
+  async function configure(args,done){
+    const{data,error}=await tv.rpc('gym_screen_configure',Object.assign({p_screen:SCREEN_ID},args));
+    if(error){note(C.failed+(error.message||''),true);return;}
+    screen=data;msg=done||'';msgErr=false;paint();
+  }
+  main.addEventListener('click',async e=>{
+    const b=e.target.closest('[data-c]');if(!b||!screen)return;
+    const c=b.dataset.c;
+    if(c==='mode')configure({p_mode:b.dataset.v},b.dataset.v==='on'?C.turnedOn:C.turnedOff);
+    else if(c==='lang')configure({p_lang:b.dataset.v},C.langDone);
+    else if(c==='reload')configure({p_reload:true},C.reloading);
+    else if(c==='rotate'){if(confirm(C.rotateAsk))configure({p_rotate_key:true},C.rotated);}
+    else if(c==='copy'){
+      try{await navigator.clipboard.writeText(tvUrl());note(C.copied);}
+      catch(_){const r=document.createRange();r.selectNodeContents($('tv-url'));const s=getSelection();s.removeAllRanges();s.addRange(r);note(C.copyManual);}
+    }
+    else if(c==='preview')window.open(tvUrl(),'_blank','noopener');
+  });
+  load();
+}
+
+// Al final: las tablas de textos de arriba son const y tienen que existir antes de arrancar.
+if(CONTROL)initControl();else initTv();
+</script>
+</body>
+</html>

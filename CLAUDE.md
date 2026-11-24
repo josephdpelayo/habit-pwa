@@ -42,8 +42,10 @@ This repo ships **two** front-ends off the same Vercel project and the same Supa
   modules (`skandi-recovery.js`, `body-figure.js`), but has its own tables (`skandi_*`), its own
   manifest, and no overlap in UI code. See `docs/PROYECTO_SKANDI_V2.md` for the roadmap in progress.
 
-Plus one standalone page: **`competencia.html`** (served at `/competencia`) — the live scoreboard of
-a lifting competition, for the gym's TV. Read-only; it's captured in Admin → Competencia.
+Plus two standalone pages for the gym's TV: **`competencia.html`** (served at `/competencia`) — the
+live scoreboard of a lifting competition. Read-only; it's captured in Admin → Competencia. And
+**`pantalla.html`** (served at `/pantalla`) — the gym screen: who is in the gym and what they're
+training (see "La pantalla del gym" at the end).
 
 ## Commands
 
@@ -67,7 +69,7 @@ A single ~5500-line file containing all HTML, CSS, and JavaScript. There is no f
 The app has four screens (`#s-auth`, `#s-main`, `#s-admin`, `#s-reception`), toggled by adding/removing the `.active` CSS class. Within `#s-main`, tabs are toggled via `.view.active`. Admin has its own tab system via `admTab()`.
 
 - `index.html` — just redirects to `app.html` with a version query string for cache busting
-- `sw.js` — service worker: push notifications + app shell cache. **One registration at scope `/` serves both apps** — two service workers at the root would evict each other, so Skandi registers this same file. Fetch handler: icons and the shared JS modules are cache-first, navigation is network-first (and refreshes the cached shell with what it just fetched), API calls pass through untouched. `shellFor()` picks the offline fallback by path: `/skandi*` → `skandi.html`, `/competencia*` → `competencia.html`, `/crew*` → `crew.html`, everything else → `app.html`. Any new standalone page needs its own line there: the navigation handler stores what it fetched under `shellFor()`, so a page that falls through to `app.html` overwrites the app's offline copy with itself. **Every response the worker stores or hands to a navigation goes through `clean()`**: Vercel answers `/app.html` with a redirect to `/app`, `cache.addAll` stored that as a `redirected` response, and Safari refuses to give one to a navigation — the installed iPhone app opened completely blank (not even the login screen) whenever it fell back to the cache. Saving the offline copy is a side effect that must never replace a page that did arrive from the network.
+- `sw.js` — service worker: push notifications + app shell cache. **One registration at scope `/` serves both apps** — two service workers at the root would evict each other, so Skandi registers this same file. Fetch handler: icons and the shared JS modules are cache-first, navigation is network-first (and refreshes the cached shell with what it just fetched), API calls pass through untouched. `shellFor()` picks the offline fallback by path: `/skandi*` → `skandi.html`, `/competencia*` → `competencia.html`, `/pantalla*` → `pantalla.html`, `/crew*` → `crew.html`, everything else → `app.html`. Any new standalone page needs its own line there: the navigation handler stores what it fetched under `shellFor()`, so a page that falls through to `app.html` overwrites the app's offline copy with itself. **Every response the worker stores or hands to a navigation goes through `clean()`**: Vercel answers `/app.html` with a redirect to `/app`, `cache.addAll` stored that as a `redirected` response, and Safari refuses to give one to a navigation — the installed iPhone app opened completely blank (not even the login screen) whenever it fell back to the cache. Saving the offline copy is a side effect that must never replace a page that did arrive from the network.
 - `habit-share.js` — **stickers para historias de Instagram** (`docs/HISTORIAS_INSTAGRAM.md`),
   en **las dos apps**. Todo vive aquí —el dibujo, la galería (crea su propia hoja y su CSS, clases
   `hs-*`) y compartir— para que HABIT, congelada, solo reciba el `<script>` y una marca: un
@@ -171,7 +173,9 @@ The app has four screens (`#s-auth`, `#s-main`, `#s-admin`, `#s-reception`), tog
   (`HabitActivity.offerSessionStickers`); HABIT no
 - `manifest.json` / `crew-manifest.json` / `skandi-manifest.json` — one PWA manifest per app. All use `scope: "/"` and are told apart by `id`.
 
-**Version / cache busting**: one version string covers the whole project, because one service worker caches both apps. It lives in `APP_VERSION` (`app.html` **and** `crew.html`), `SKANDI_VERSION` (`skandi.html`) and `CACHE_VERSION` (`sw.js`), plus the `?v=` strings in `index.html`, the three manifests' `start_url`, the `<link>`/`<script>` tags at the top of `app.html`, `crew.html` and `skandi.html`, and the `v` inside the `#brand-boot` script of `app.html` and `crew.html`. Bumping the version is the one change `app.html` still takes. **Changing either app means bumping all of them to the same value** — a stale `CACHE_VERSION` leaves the offline shell frozen at the previous deploy.
+**Version / cache busting**: one version string covers the whole project, because one service worker caches both apps. It lives in `APP_VERSION` (`app.html` **and** `crew.html`), `SKANDI_VERSION` (`skandi.html`) and `CACHE_VERSION` (`sw.js`), plus the `?v=` strings in `index.html`, the three manifests' `start_url`, the `<link>`/`<script>` tags at the top of `app.html`, `crew.html` and `skandi.html`, and the `v` inside the `#brand-boot` script of `app.html` and `crew.html`, and in `pantalla.html`
+both `PANTALLA_VERSION` and its `habit-screen.js?v=` (the TV reloads itself when the deployed
+`PANTALLA_VERSION` changes; `scripts/check-screen.js` fails if they drift). Bumping the version is the one change `app.html` still takes. **Changing either app means bumping all of them to the same value** — a stale `CACHE_VERSION` leaves the offline shell frozen at the previous deploy.
 
 ### Frontend (`skandi.html`)
 Same architecture as `app.html` — a single ~4,500-line vanilla-JS file, Supabase from CDN, no build
@@ -962,6 +966,15 @@ con la llave pública de la app y el id de alguien se le reescribía la semana. 
 124, y nada que ver con el handstand, por eso sobrevivió al recorte. Cada revoke va guardado con
 `to_regprocedure`: una firma que no exista tumbaría la transacción entera, y la 115 ya cambió la
 de `apply_coaching_program` una vez.
+**Corrección (24 nov 2026): la 145 no cerró ese hueco.** Corrió, pero solo quitó la concesión
+explícita a `anon`; la de `PUBLIC` (`=X` en el acl, con la que nace toda función) seguía, y
+`anon` es parte de `PUBLIC`. Al revés pasaba en la 073–076 y 147–148: `revoke … from public`
+no quita el `anon`/`authenticated` explícito que ponen los privilegios por defecto de Supabase.
+Lo cierra la **154**, que además dejó `profile_cards` en solo `select` para `authenticated`:
+tenía todos los privilegios para `anon` y `authenticated`, y por ser security definer y
+actualizable, un `update` sin sesión escribía en `profiles`. Para cerrar una función hay que
+revocar de `public` **y** de `anon` (y de `authenticated` si es solo del servidor), y conceder
+de nuevo a quien la usa.
 
 `scripts/check-handstand-exercises.js` prueba los diez ejercicios, sus dos idiomas, que la
 migración ya no escriba nada del programa, y **la alineación de cada figura** leyendo sus puntos
@@ -1090,3 +1103,47 @@ toma el mismo dispositivo, y `send-push` manda `'admin'` a toda fila cuyo `user_
 al abrir Alertas). Comprar un plan con Stripe avisa al admin (`activateMembership`; antes solo
 la tienda y lo de David). `send-push` rechaza la llave anon (401): `verify_jwt` la dejaba pasar
 y con la llave pública cualquiera mandaba avisos a todos.
+
+## La pantalla del gym (24 nov 2026, fase 1)
+
+`pantalla.html` + `habit-screen.js` + migración 152; el plan completo (fases 2–4: transmitir el
+entreno en vivo) está en `docs/PANTALLA_GYM.md`. La tele enseña **quién reservó y está en el gym
+ahora** (desde 10 min antes, como la puerta), su rutina del día con las series que lleva, y las
+reservas de más tarde. **Nadie sale hasta que lo activa** (Joseph, 24 nov): `gym_screen_prefs`
+nace `hidden` y una persona sin fila cuenta como `hidden`; el filtro es del servidor, y de esas
+personas solo se manda cuántas hay.
+
+- **La tele no inicia sesión y no lee tablas**: todo sale de `gym_screen_state(screen, key)`,
+  security definer, la única función que `anon` ejecuta. Pide la **llave de la pantalla**
+  (`gym_screens.access_key`, que ni anon ni los socios pueden leer: permisos por columna), porque
+  la llave anon está en el HTML y sin otra cualquiera preguntaría desde su casa quién va al gym.
+  La tele la recuerda en `localStorage` (`habit_tv_key`) y la quita de la barra de direcciones.
+  El cliente de la tele va con `persistSession:false` y no se llama `sb`: si se llamara así,
+  `habit-screen.js` creería que está en una app.
+- **Qué rutina toca hoy** lo resuelve `gym_screen_routine`: la sesión del día (en curso → por
+  hacer → hecha); si solo hay `skipped`, descansa; si no hay fila, la semana aún no se estampó
+  (el estampado corre desde el teléfono) y se resuelve como `ensure_coaching_week_from_template`.
+  **Qué ejercicios son** no se resuelve en SQL: el servidor manda copia, rutina, lo cambiado hoy
+  y las series, recortados por `gym_screen_trim` (sin notas ni videos), y los arma
+  `HabitScreen.effectiveExercises`, que `scripts/check-screen.js` corre contra
+  `sessionExerciseList` de `crew.html` sobre los mismos datos. Cambiar una cambia la otra.
+- **Realtime sin leer datos**: `gym_screen_pings` es una fila por pantalla sin nada personal; la
+  tocan triggers **por sentencia** en `bookings`, `booking_guest_passes`, `coaching_schedule`,
+  `coaching_session_sets`, `gym_screen_prefs` y `gym_screens` (solo con la pantalla encendida, y
+  tragándose cualquier error: una serie nunca falla porque la tele no se enteró). La tele oye el
+  aviso y vuelve a pedir el estado (800 ms de antirrebote, respaldo cada 60 s). Nunca consulta
+  Vercel: la recepción ya agotó el CPU gratis haciéndolo.
+- **Se actualiza sola**: cada 15 min compara `PANTALLA_VERSION` con el archivo publicado, cada
+  noche a las 4:00 se recarga, y `gym_screen_configure(p_reload)` sube `reload_nonce`.
+- **Control**: `/pantalla?control` en el teléfono del admin, con su sesión de la app (mismo
+  origen): encender/apagar, idioma de la tele, copiar la dirección con la llave, cambiar la llave,
+  recargar. Por RPC (`gym_screen_admin`, `gym_screen_configure`); el panel no entra en `app.html`.
+  La pantalla **nace apagada**: apagada, la app no enseña el ajuste ni invita a nadie.
+- **En las apps** `habit-screen.js` (cargado por `app.html` —tercera excepción de HABIT congelada,
+  aceptada el 24 nov— y `crew.html`) se pinta solo: pone «Pantalla del gym» en Perfil antes de
+  `#perfil-blocks-section` y, a quien tiene una reserva de hoy en adelante, le pregunta **una
+  vez**, en Inicio y nunca encima de un entreno u otra hoja. Cualquier respuesta guarda
+  `asked_at`; cerrar la hoja con × no cuenta. Solo lo ve quien ha reservado en los últimos 120
+  días o ya tiene fila: una cuenta solo de Crew no sale en la tele.
+- Textos de la tele, del control y del módulo en ES/EN (`HabitScreen.TEXT`, `CONTROL_TEXT`); el
+  idioma de la tele es `gym_screens.lang`.

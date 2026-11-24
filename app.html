@@ -6,12 +6,12 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="HABIT">
 <meta name="application-name" content="HABIT">
-<link rel="manifest" href="/manifest.json?v=20261123-3">
-<link rel="apple-touch-icon" sizes="120x120" href="/icons/icon-120.png?v=20261123-3">
-<link rel="apple-touch-icon" sizes="152x152" href="/icons/icon-152.png?v=20261123-3">
-<link rel="apple-touch-icon" sizes="167x167" href="/icons/icon-167.png?v=20261123-3">
-<link rel="apple-touch-icon" sizes="180x180" href="/icons/icon-180.png?v=20261123-3">
-<link rel="icon" type="image/png" sizes="32x32" href="/icons/icon-32.png?v=20261123-3">
+<link rel="manifest" href="/manifest.json?v=20261124-1">
+<link rel="apple-touch-icon" sizes="120x120" href="/icons/icon-120.png?v=20261124-1">
+<link rel="apple-touch-icon" sizes="152x152" href="/icons/icon-152.png?v=20261124-1">
+<link rel="apple-touch-icon" sizes="167x167" href="/icons/icon-167.png?v=20261124-1">
+<link rel="apple-touch-icon" sizes="180x180" href="/icons/icon-180.png?v=20261124-1">
+<link rel="icon" type="image/png" sizes="32x32" href="/icons/icon-32.png?v=20261124-1">
 <title>HABIT</title>
 <!-- Con id a propósito: scripts/check-training.js toma la primera etiqueta script sin
      atributos como el script principal de la app y la compila. -->
@@ -25,7 +25,7 @@
   var crew=/^\/crew(\/|$)/.test(location.pathname);
   window.HABIT_BRAND=crew?'crew':'gym';
   if(!crew)return;
-  var v='20261123-3';
+  var v='20261124-1';
   document.documentElement.classList.add('brand-crew');
   document.title='HABIT Crew';
   document.querySelectorAll('meta[name="apple-mobile-web-app-title"],meta[name="application-name"]')
@@ -40,11 +40,12 @@
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Share+Tech+Mono&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="/skandi-recovery.js?v=20261123-3"></script>
-<script src="/body-figure.js?v=20261123-3"></script>
-<script src="/habit-training.js?v=20261123-3"></script>
-<script src="/habit-share.js?v=20261123-3"></script>
-<script src="/habit-activity.js?v=20261123-3"></script>
+<script src="/skandi-recovery.js?v=20261124-1"></script>
+<script src="/body-figure.js?v=20261124-1"></script>
+<script src="/habit-training.js?v=20261124-1"></script>
+<script src="/habit-share.js?v=20261124-1"></script>
+<script src="/habit-activity.js?v=20261124-1"></script>
+<script src="/habit-screen.js?v=20261124-1"></script>
 <style>
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
 @media (prefers-reduced-motion:reduce){*,*:before,*:after{scroll-behavior:auto!important;animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}}
@@ -4114,7 +4115,7 @@ const GYM_ONLY_VIEWS=['book','planes','historial','shop'];
 const GYM_APP_URL='/';
 document.querySelectorAll('.brand-name').forEach(el=>{el.textContent=BRAND_NAME;});
 const SUPABASE_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBtcGp0ZXVxanVzYmlkdWV2YndxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc2OTI1NjUsImV4cCI6MjA5MzI2ODU2NX0.XbMzZoo2yqtrD8znLnyo_1zDfrdJAvAPj1lqGOyXnLw';
-const APP_VERSION='20261123-3';
+const APP_VERSION='20261124-1';
 // La pierna va separada en cuádriceps, femorales y pantorrillas: la figura
 // corporal pinta esas tres regiones por separado y el motor de recuperación les
 // da ventanas de descanso distintas. 'Piernas' sigue reconociéndose al leer
@@ -7495,7 +7496,7 @@ function changeDay(delta){
 function clearSel(){selStartIdx=null;selShort=false;renderBook();}
 
 const DAVID_PILOT_FIRST_DS='2026-11-16';
-const DAVID_PILOT_LAST_DS='2026-11-27';
+const DAVID_PILOT_LAST_DS='2026-11-28';
 let davidPilotRequest=0;
 
 async function renderDavidPilot(ds){
@@ -16793,14 +16794,17 @@ async function renderDashboard(){
     const today=mazToday();
     const monthStart=today.slice(0,7);
     const cutoff14=addDaysDS(today,-14);
-    const[{data:allU},{data:pays},{data:bks},{data:logs},{data:recentBks}]=await Promise.all([
+    const[{data:allU},{data:pays},{data:bks},{data:logs},{data:recentBks},todayBookingsRes]=await Promise.all([
       // '*' y no la lista de columnas: joined_as (127) puede no existir todavía, y pedirla
       // por nombre tumbaría el dashboard entero.
       sb.from('profiles').select('*').neq('role','admin').neq('role','reception').neq('source','skandi'),
       sb.from('payments').select('amount,created_at,plan_name,user_id,payment_method,net_amount').order('created_at',{ascending:false}).limit(2000),
       sb.from('bookings').select('ds,status').eq('status','active'),
       sb.from('access_log').select('id'),
-      sb.from('bookings').select('user_id').eq('status','active').gte('ds',cutoff14)
+      sb.from('bookings').select('user_id').eq('status','active').gte('ds',cutoff14),
+      // Count today's rows on the server: the historical list can hit the API row limit.
+      sb.from('bookings').select('id',{count:'exact',head:true}).eq('ds',today).eq('status','active')
+        .then(res=>res, error=>({error,count:null}))
     ]);
     const allPlans=[...PLANS.individual,...PLANS.grupal];
     const active=(allU||[]).filter(u=>{const pp=allPlans.find(x=>x.id===u.plan_id);const ul=u.credits>=999||(pp&&pp.credits>=999);return(ul||u.credits>0)&&(!u.plan_expiry||new Date(u.plan_expiry)>new Date());});
@@ -16815,7 +16819,8 @@ async function renderDashboard(){
     // Dinero real recibido (Stripe neto + GAIA + efectivo/transferencia); no el cobrado bruto.
     const monthRev=(pays||[]).filter(p=>dsFromIsoMaz(p.created_at).startsWith(monthStart)).reduce((s,p)=>s+paymentRealAmount(p),0);
     const totalRev=(pays||[]).reduce((s,p)=>s+paymentRealAmount(p),0);
-    const todayBks=(bks||[]).filter(b=>b.ds===today).length;
+    const todayBks=todayBookingsRes.error||!Number.isInteger(todayBookingsRes.count)?'—':todayBookingsRes.count;
+    if(todayBookingsRes.error)console.error('Dashboard booking count:',todayBookingsRes.error);
     const expiring=(allU||[]).filter(u=>{const d=daysUntil(u.plan_expiry);return d!==null&&d<=5&&d>=0;});
     const recentIds=new Set((recentBks||[]).map(b=>b.user_id));
     const atRisk=activePaid.filter(u=>!recentIds.has(u.id));
@@ -16823,7 +16828,7 @@ async function renderDashboard(){
 
     const actionEl=document.getElementById('admin-action-center');
     if(actionEl)actionEl.innerHTML=
-      '<button class="admin-action '+(todayBks?'good':'')+'" onclick="admTab(\'slots\')"><div class="admin-action-k"><span>Agenda</span><span>→</span></div><div class="admin-action-count">'+todayBks+'</div><div class="admin-action-sub">reservas programadas hoy</div></button>'
+      '<button class="admin-action '+(typeof todayBks==='number'&&todayBks>0?'good':'')+'" onclick="admTab(\'slots\')"><div class="admin-action-k"><span>Agenda</span><span>→</span></div><div class="admin-action-count">'+todayBks+'</div><div class="admin-action-sub">reservas programadas hoy</div></button>'
       +'<button class="admin-action '+(expiring.length?'attention':'good')+'" onclick="openAdminUserFilter(\'por-vencer\')"><div class="admin-action-k"><span>Renovaciones</span><span>→</span></div><div class="admin-action-count">'+expiring.length+'</div><div class="admin-action-sub">membresías por vencer</div></button>'
       +'<button class="admin-action '+(atRisk.length?'attention':'good')+'" onclick="openAdminUserFilter(\'activo\')"><div class="admin-action-k"><span>Seguimiento</span><span>→</span></div><div class="admin-action-count">'+atRisk.length+'</div><div class="admin-action-sub">sin reservar en 14 días</div></button>'
       +'<button class="admin-action" onclick="admTab(\'coaching\')"><div class="admin-action-k"><span>Coaching</span><span>→</span></div><div class="admin-action-count">'+coachingClients+'</div><div class="admin-action-sub">clientes con servicio activo</div></button>';

@@ -1,7 +1,7 @@
 // HABIT Training Hub — Service Worker
 // Push notifications + app shell caching
 
-const CACHE_VERSION = '20261123-3'; // keep in sync with APP_VERSION in app.html
+const CACHE_VERSION = '20261124-1'; // keep in sync with APP_VERSION in app.html
 const CACHE = `habit-${CACHE_VERSION}`;
 
 // Librerías compartidas con Skandi Fit: la app no arranca sin ellas, así que
@@ -9,7 +9,7 @@ const CACHE = `habit-${CACHE_VERSION}`;
 // nueva invalide la vieja.
 // Skandi Fit vive en el mismo origen y bajo el mismo alcance ('/'), así que este
 // service worker sirve las dos apps: cada una tiene su propio shell offline.
-const SHELL = ['/app.html', '/crew.html', '/skandi.html', `/skandi-recovery.js?v=${CACHE_VERSION}`, `/skandi-plan.js?v=${CACHE_VERSION}`, `/body-figure.js?v=${CACHE_VERSION}`, `/skandi-nutrition.js?v=${CACHE_VERSION}`, `/skandi-load.js?v=${CACHE_VERSION}`, `/skandi-brief.js?v=${CACHE_VERSION}`, `/skandi-joint-load.js?v=${CACHE_VERSION}`, `/skandi-outbox.js?v=${CACHE_VERSION}`, `/habit-training.js?v=${CACHE_VERSION}`, `/habit-share.js?v=${CACHE_VERSION}`, `/habit-activity.js?v=${CACHE_VERSION}`, `/habit-skills.js?v=${CACHE_VERSION}`];
+const SHELL = ['/app.html', '/crew.html', '/skandi.html', `/skandi-recovery.js?v=${CACHE_VERSION}`, `/skandi-plan.js?v=${CACHE_VERSION}`, `/body-figure.js?v=${CACHE_VERSION}`, `/skandi-nutrition.js?v=${CACHE_VERSION}`, `/skandi-load.js?v=${CACHE_VERSION}`, `/skandi-brief.js?v=${CACHE_VERSION}`, `/skandi-joint-load.js?v=${CACHE_VERSION}`, `/skandi-outbox.js?v=${CACHE_VERSION}`, `/habit-training.js?v=${CACHE_VERSION}`, `/habit-share.js?v=${CACHE_VERSION}`, `/habit-activity.js?v=${CACHE_VERSION}`, `/habit-screen.js?v=${CACHE_VERSION}`, `/habit-skills.js?v=${CACHE_VERSION}`];
 
 // Qué shell le toca a una navegación. Sin esto, abrir /skandi sin señal servía el
 // fallback de HABIT: la app equivocada, con la sesión equivocada.
@@ -17,12 +17,14 @@ const SHELL = ['/app.html', '/crew.html', '/skandi.html', `/skandi-recovery.js?v
 // navegación guarda lo que baja bajo shellFor(), y sin esta línea abrirla desde
 // un teléfono con la app instalada pisaba la copia offline de app.html con el
 // marcador. No va en SHELL: sin red no hay marcador que mostrar.
+// /pantalla (la tele del gym, docs/PANTALLA_GYM.md) igual: su propia línea, fuera de SHELL.
 // /crew (HABIT Crew) es su propio archivo desde el 31 oct 2026: crew.html. Antes era el
 // mismo app.html reescrito; se separó para que HABIT (la app del gym) no cambiara con lo
 // nuevo de Crew. Con shell propio, abrir Crew no pisa la copia offline de HABIT.
 const shellFor = pathname => {
   if (pathname === '/skandi' || pathname.startsWith('/skandi.html')) return '/skandi.html';
   if (pathname === '/competencia' || pathname.startsWith('/competencia.html')) return '/competencia.html';
+  if (pathname === '/pantalla' || pathname.startsWith('/pantalla.html')) return '/pantalla.html';
   if (pathname === '/crew' || pathname.startsWith('/crew/') || pathname.startsWith('/crew.html')) return '/crew.html';
   return '/app.html';
 };
@@ -84,6 +86,7 @@ self.addEventListener('fetch', e => {
       || url.pathname === '/habit-training.js'
       || url.pathname === '/habit-share.js'
       || url.pathname === '/habit-activity.js'
+      || url.pathname === '/habit-screen.js'
       || url.pathname === '/habit-skills.js') {
     e.respondWith(
       caches.match(request).then(cached => {
@@ -160,7 +163,7 @@ self.addEventListener('notificationclick', e => {
   e.waitUntil(
     self.clients.matchAll({ type: 'window', includeUncontrolled: true }).then(clients => {
       const c = deep
-        ? clients.find(c => c.url.startsWith(self.location.origin) && !/^\/(skandi|competencia)/.test(new URL(c.url).pathname))
+        ? clients.find(c => c.url.startsWith(self.location.origin) && !/^\/(skandi|competencia|pantalla)/.test(new URL(c.url).pathname))
         : clients.find(c => c.url.includes(self.location.origin));
       if (c) {
         if (deep) c.postMessage({ type: 'habit-notification-click', url });

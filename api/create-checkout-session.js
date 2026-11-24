@@ -29,7 +29,7 @@ module.exports = async function handler(req, res) {
     if (davidSlot !== undefined) {
       const ticketPrice = getPlan('i1').price * 100;
       const pilotDates = ['2026-11-16', '2026-11-17', '2026-11-18', '2026-11-19', '2026-11-20',
-        '2026-11-24', '2026-11-25', '2026-11-26', '2026-11-27'];
+        '2026-11-24', '2026-11-25', '2026-11-26', '2026-11-27', '2026-11-28'];
       if (!pilotDates.includes(davidDs) || ![14, 16, 18].includes(davidSlot) ||
           ![ticketPrice, ticketPrice * 2].includes(expectedAmount)) {
         return res.status(400).json({ error: 'Horario o precio inválido' });
