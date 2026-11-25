@@ -157,4 +157,37 @@ assert.ok(/filter \(where v\.visibility <> 'hidden'\)/.test(sql), 'lo de quien n
 assert.ok(/mode\s+text not null default 'off'/.test(sql), 'la pantalla nace apagada: nadie recibe la invitación antes de que exista');
 assert.ok(/exception when others then\s+null;/.test(sql), 'un error al avisar a la tele nunca tumba una serie');
 
+// ── Fase 2: transmitir (migración 153) ───────────────────────────────────
+const sql153 = read('migrations/153_gym_screen_casts.sql');
+for (const [file, html] of Object.entries(apps)) {
+  // El botón se pone en la barra de la hoja de entreno, antes de minimizar.
+  assert.ok(/<div id="workout-sheet" class="workout-sheet">\s*<div class="ws-bar">/.test(html), file + ': la hoja de entreno tiene su barra');
+  assert.ok(html.includes('class="ws-min"'), file + ': el botón de minimizar, antes del cual va «Pantalla»');
+}
+assert.deepEqual(H.CAST_IN, { crew: true, habit: false }, 'fase 2: se transmite desde Crew; HABIT es la fase 3');
+const anon153 = [...sql153.matchAll(/grant execute on function ([\w.]+)\([^)]*\) to ([^;]+);/g)].filter((m) => /\banon\b/.test(m[2])).map((m) => m[1]);
+assert.deepEqual(anon153, ['public.gym_screen_state'], 'anon sigue sin ejecutar más que la función de la tele');
+for (const fn of ['start_gym_cast', 'update_gym_cast', 'stop_gym_cast']) {
+  assert.ok(new RegExp(`grant execute on function public\\.${fn}\\([^)]*\\) to authenticated;`).test(sql153), fn + ' es de quien tiene sesión');
+  assert.ok(new RegExp(`revoke all on function public\\.${fn}\\([^)]*\\) from public, anon, authenticated;`).test(sql153), fn + ' empieza sin permisos');
+}
+assert.ok(/revoke all on public\.gym_screen_casts from public, anon, authenticated;/.test(sql153) && !/grant (insert|update|delete)[^;]*gym_screen_casts/.test(sql153), 'la transmisión solo se escribe por RPC');
+assert.ok(/gym_screen_booking_end\(v_uid\)/.test(sql153) && /'NO_BOOKING'/.test(sql153), 'sin reserva corriendo no se transmite');
+assert.ok(/v_others >= 4/.test(sql153), 'máximo 4 por pantalla, el cupo');
+assert.ok(/after update of status on public\.coaching_schedule/.test(sql153), 'cerrar el entreno quita la transmisión');
+assert.ok(/cron\.schedule\('habit-gym-screen-casts'/.test(sql153), 'lo vencido se limpia solo');
+assert.ok(/case when cs\.user_id is not null then 'routine'/.test(sql153), 'quien transmite sale aunque su preferencia de Perfil sea no aparecer');
+assert.ok(/drop function if exists public\.gym_screen_configure\(text, text, text, boolean, boolean\);/.test(sql153), 'la firma vieja del control se retira: dos candidatas confunden a PostgREST');
+// Los códigos que devuelve el servidor tienen texto en los dos idiomas.
+for (const code of new Set([...sql153.matchAll(/'error', '([A-Z_]+)'/g)].map((m) => m[1]).filter((c) => c !== 'KEY'))) {
+  for (const l of ['es', 'en']) assert.ok(H.TEXT[l].castErr[code], `${l}: castErr.${code}`);
+}
+assert.equal(H.T('es').setOf(2, 4), 'Serie 2 de 4');
+assert.equal(H.T('en').setOf(2, 4), 'Set 2 of 4');
+// La tele lee del teléfono solo lo que la 153 manda.
+for (const k of ['focus_key', 'focus_idx', 'rest_end_at', 'rest_frozen_s', 'rest_total_s', 'updated_at']) {
+  assert.ok(sql153.includes(`'${k}'`), 'gym_screen_state manda ' + k);
+  assert.ok(tvPage.includes(k), 'la tele usa ' + k);
+}
+
 console.log('check-screen: ok');

@@ -10,7 +10,7 @@
 <link rel="apple-touch-icon" sizes="180x180" href="/icons/icon-180.png">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@500;600;700;800;900&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="/habit-screen.js?v=20261124-1"></script>
+<script src="/habit-screen.js?v=20261125-1"></script>
 <!--
   La pantalla del gym (docs/PANTALLA_GYM.md, migración 152). Dos modos en el mismo archivo:
 
@@ -102,6 +102,25 @@ h1::first-letter{text-transform:uppercase}
 .ex-more{font-size:calc(var(--fs)*.56);font-weight:700;color:var(--gray);padding:0 .75em}
 .c-note{font-size:calc(var(--fs)*.62);color:var(--gray);font-weight:600}
 .card.slim{justify-content:center}
+/* ── En vivo (fase 2) ── */
+.card.is-live{box-shadow:0 0 0 2px rgba(32,212,146,.55),0 14px 50px rgba(32,212,146,.12)}
+.card.is-live.stale{box-shadow:none;opacity:.55}
+.pill.cast{background:rgba(32,212,146,.16);color:var(--green)}
+.pill.cast:before{content:'';width:.6em;height:.6em;border-radius:50%;background:currentColor;animation:pulse 1.2s ease-in-out infinite}
+.card.stale .pill.cast{background:rgba(245,184,75,.14);color:var(--amber)}
+.card.stale .pill.cast:before{animation:none}
+.c-now{background:var(--card2);border-radius:14px;padding:.55em .8em;min-width:0}
+.c-now-n{font-size:calc(var(--fs)*1);font-weight:900;line-height:1.1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.c-now-s{font-size:calc(var(--fs)*.64);font-weight:800;color:var(--c,var(--bl));margin-top:.25em;font-variant-numeric:tabular-nums;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.c-rest{display:none;flex-direction:column;align-items:flex-end;gap:.2em;min-width:0}
+.card.resting .c-rest{display:flex}
+.card.resting .c-timer{display:none}
+.c-rest .lbl{font-size:calc(var(--fs)*.5);font-weight:900;letter-spacing:.14em;text-transform:uppercase;color:var(--amber)}
+.c-rest b{font-size:calc(var(--fs)*1.6);font-weight:900;line-height:1;font-variant-numeric:tabular-nums;color:var(--amber)}
+.c-rest.go b{color:var(--green);font-size:calc(var(--fs)*1.05)}
+.c-rest .rb{display:block;width:calc(var(--fs)*4.2);height:calc(var(--fs)*.16);border-radius:99px;background:rgba(255,255,255,.08);overflow:hidden}
+.c-rest .rb i{display:block;height:100%;background:var(--amber);border-radius:inherit;transition:width 1s linear}
+.c-rest.go .rb{visibility:hidden}
 
 /* ── Sin nadie: el reloj grande ── */
 .empty{flex:1;min-height:0;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;gap:2vh}
@@ -174,7 +193,7 @@ body.control .stage{height:auto;min-height:100dvh;max-width:560px;margin:0 auto}
 <button class="fs-btn" id="fs" type="button"></button>
 
 <script>
-const PANTALLA_VERSION='20261124-1';
+const PANTALLA_VERSION='20261125-1';
 const SUPABASE_URL='https://pmpjteuqjusbiduevbwq.supabase.co';
 const SUPABASE_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBtcGp0ZXVxanVzYmlkdWV2YndxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc2OTI1NjUsImV4cCI6MjA5MzI2ODU2NX0.XbMzZoo2yqtrD8znLnyo_1zDfrdJAvAPj1lqGOyXnLw';
 const SCREEN_ID='main';
@@ -225,7 +244,9 @@ function makeDemo(){
   const setsFor=(list,doneUpTo)=>{const out=[];let n=0;list.forEach(e=>{const k=e.id,c=+e.sets;for(let i=0;i<c;i++){out.push({k,i,d:n<doneUpTo,w:(weights[k]||[])[i]||null});n++;}});return out;};
   const people=[
     {key:'d1',name:'Ana R.',start_at:iso(t0-45*min),end_at:iso(t0+45*min),visibility:'routine',
-      routine:{source:'session',title:'Pierna A',color:'#22c55e',status:'in_progress',board_id:'b1',started_at:iso(t0-38*min),paused_at:null,paused_seconds:0,exercises:legs,overlay:[],sets:setsFor(legs,7)}},
+      routine:{source:'session',title:'Pierna A',color:'#22c55e',status:'in_progress',board_id:'b1',started_at:iso(t0-38*min),paused_at:null,paused_seconds:0,exercises:legs,overlay:[],sets:setsFor(legs,7)},
+      // Ana pasó su entreno a la pantalla: la tele sabe qué serie hace y cuánto le queda de descanso.
+      live:{focus_key:'c',focus_idx:0,rest_end_at:iso(t0+18000),rest_frozen_s:0,rest_total_s:20,paused:false,updated_at:iso(t0)}},
     {key:'d2',name:'Carlos M.',start_at:iso(t0-15*min),end_at:iso(t0+75*min),visibility:'routine',
       routine:{source:'session',title:'Empuje',color:'#2563eb',status:'in_progress',board_id:'b2',started_at:iso(t0-9*min),paused_at:null,paused_seconds:0,exercises:push,overlay:[],sets:setsFor(push,2)}},
     {key:'d3',name:'Sofía L.',start_at:iso(t0-80*min),end_at:iso(t0+10*min),visibility:'routine',
@@ -240,10 +261,20 @@ function makeDemo(){
 // Cada pocos segundos, la siguiente serie pendiente de quien está entrenando se palomea; al
 // terminar todo, vuelve a empezar.
 function advanceDemo(state){
-  const live=state.people.filter(p=>p.routine&&p.routine.status==='in_progress');
+  const nowMs=Date.now();
+  state.people.forEach(p=>{if(p.live)p.live.updated_at=new Date(nowMs).toISOString();});
+  // Quien transmite no avanza mientras descansa: así se ve la cuenta llegar a cero.
+  const live=state.people.filter(p=>p.routine&&p.routine.status==='in_progress'
+    &&!(p.live&&Date.parse(p.live.rest_end_at)>nowMs-3000));
   const p=live[Math.floor(Math.random()*live.length)];if(!p)return;
   const next=p.routine.sets.find(s=>!s.d);
   if(next)next.d=true;else p.routine.sets.forEach(s=>{s.d=false;});
+  if(p.live){
+    // Tras palomear: la siguiente serie es la que toca y arranca un descanso de 20 s.
+    const after=p.routine.sets.find(s=>!s.d);
+    p.live.focus_key=after?after.k:null;p.live.focus_idx=after?after.i:null;
+    p.live.rest_end_at=new Date(nowMs+20000).toISOString();p.live.rest_total_s=20;
+  }
   state.now=new Date().toISOString();
 }
 
@@ -366,6 +397,10 @@ function initTv(){
     }
     const st=statusOf(r);
     const pr=H.progress(r);
+    // Transmitiendo (fase 2): la serie que toca la dice el teléfono, no la primera pendiente.
+    const live=p.live&&typeof p.live==='object'?p.live:null;
+    let current=pr.current;
+    if(live&&live.focus_key){const i=pr.items.findIndex(it=>it.key===live.focus_key&&!it.replaced);if(i>=0)current=i;}
     const pct=pr.total?Math.round(pr.done/pr.total*100):0;
     const color=safeColor(r.color);
     const pillCls=st==='in_progress'?'on':st==='done'?'done':st==='paused'?'pause':'';
@@ -375,11 +410,12 @@ function initTv(){
     // y los que siguen.
     const items=pr.items;
     let from=0;
-    if(items.length>maxEx&&pr.current>0)from=Math.min(Math.max(0,pr.current-1),items.length-maxEx);
+    if(live&&st!=='done'&&current>=0)from=current+1; // el de ahora va en grande arriba: la lista es lo que sigue
+    else if(items.length>maxEx&&current>0)from=Math.min(Math.max(0,current-1),items.length-maxEx);
     const shown=items.slice(from,from+maxEx);
     const exs=shown.map((it,i)=>{
       const idx=from+i;
-      const cls=it.replaced?'swapped':idx===pr.current&&st!=='planned'?'now':it.done>=it.total&&it.total?'done':'';
+      const cls=it.replaced?'swapped':idx===current&&st!=='planned'?'now':it.done>=it.total&&it.total?'done':'';
       const dots=it.total<=8
         ?Array.from({length:it.total},(_,k)=>'<i'+(k<it.done?' class="d"':'')+'></i>').join('')
         :'<em>'+it.done+'/'+it.total+'</em>';
@@ -387,9 +423,27 @@ function initTv(){
       return '<li class="ex '+cls+'"><div class="n">'+esc(it.name||'—')+(sub?'<small>'+esc(sub)+'</small>':'')+'</div><div class="s">'+dots+'</div></li>';
     }).join('');
     const rest=items.length-(from+shown.length);
-    return '<article class="card" style="--c:'+color+'" data-rest="'+rest+'">'
-      +'<div class="c-top"><div style="min-width:0"><div class="c-name">'+esc(name)+'</div><div class="c-when">'+esc(when)+'</div></div>'+timer+'</div>'
-      +'<div class="c-routine"><b>'+esc(r.title||T.freeTraining)+'</b><span class="pill '+pillCls+'">'+esc(T.st[st])+'</span></div>'
+    // En vivo: el ejercicio y la serie de ahora en grande, y el descanso en lugar del cronómetro.
+    let nowHtml='',restHtml='',liveAttrs='';
+    if(live){
+      const it=items[current];
+      if(it&&st!=='done'){
+        const rows=H.setsByKey(r.sets)[it.key]||[];
+        const setIdx=live.focus_idx!=null?live.focus_idx:Math.min(it.done,Math.max(0,it.total-1));
+        const row=rows.find(x=>x.set_idx===setIdx);
+        const reps=(row&&row.reps_target)||it.reps||'';
+        const w=(row&&row.weight)||it.lastWeight;
+        const detail=[T.setOf(setIdx+1,Math.max(it.total,setIdx+1)),reps?(/^\d+$/.test(String(reps))?reps+' reps':reps):'',w?fmtKg(w)+' kg':''].filter(Boolean).join(' · ');
+        nowHtml='<div class="c-now"><div class="c-now-n">'+esc(it.name||'—')+'</div><div class="c-now-s">'+esc(detail)+'</div></div>';
+      }
+      restHtml='<div class="c-rest"><span class="lbl"></span><b></b><span class="rb"><i></i></span></div>';
+      liveAttrs=' data-live="1" data-upd="'+esc(live.updated_at||'')+'" data-restend="'+esc(live.rest_end_at||'')+'" data-frozen="'+(live.rest_frozen_s|0)+'" data-total="'+(live.rest_total_s|0)+'"';
+    }
+    const pill=live?'<span class="pill cast">'+esc(T.liveNow)+'</span>':'<span class="pill '+pillCls+'">'+esc(T.st[st])+'</span>';
+    return '<article class="card'+(live?' is-live':'')+'" style="--c:'+color+'" data-rest="'+rest+'" data-min="'+(live?0:1)+'"'+liveAttrs+'>'
+      +'<div class="c-top"><div style="min-width:0"><div class="c-name">'+esc(name)+'</div><div class="c-when">'+esc(when)+'</div></div>'+timer+restHtml+'</div>'
+      +'<div class="c-routine"><b>'+esc(r.title||T.freeTraining)+'</b>'+pill+'</div>'
+      +nowHtml
       +'<div class="c-prog"><div class="bar"><i style="width:'+pct+'%"></i></div>'
       +'<span class="c-count">'+esc(pr.total?T.sets(pr.done,pr.total):T.exercises(items.length))+'</span></div>'
       +'<ul class="exs">'+exs+'</ul><div class="ex-more"></div>'
@@ -404,7 +458,8 @@ function initTv(){
       let rest=+card.dataset.rest||0;
       const label=()=>{more.textContent=rest>0?t().more(rest):'';};
       label();
-      while(ul.children.length>1&&ul.scrollHeight>ul.clientHeight+1){ul.lastElementChild.remove();rest++;label();}
+      const min=card.dataset.min==null?1:+card.dataset.min;
+      while(ul.children.length>min&&ul.scrollHeight>ul.clientHeight+1){ul.lastElementChild.remove();rest++;label();}
     });
   }
   function laterHtml(list){
@@ -428,6 +483,28 @@ function initTv(){
       const s=new Intl.DateTimeFormat('en-US',{second:'2-digit',timeZone:'America/Mazatlan'}).format(now);
       big.innerHTML=esc(fmtTime(now))+'<span>'+esc(String(s).padStart(2,'0'))+'</span>';
     }
+    // Descanso de quien transmite: cuenta con la hora del servidor; congelado si está en pausa.
+    // Al llegar a cero dice «¡A la serie!» unos segundos.
+    document.querySelectorAll('#main .card[data-live]').forEach(card=>{
+      const T=t(),box=card.querySelector('.c-rest');if(!box)return;
+      const frozen=+card.dataset.frozen||0,total=+card.dataset.total||0,end=Date.parse(card.dataset.restend);
+      let left=null,label=T.rest;
+      if(frozen>0){left=frozen;label=T.restPaused;}
+      else if(end)left=(end-now)/1000;
+      const resting=left!=null&&left>-8;
+      card.classList.toggle('resting',resting);
+      if(resting){
+        const go=left<=0;
+        box.classList.toggle('go',go);
+        box.querySelector('.lbl').textContent=go?'':label;
+        box.querySelector('b').textContent=go?T.goSet:fmtDur(Math.ceil(left));
+        box.querySelector('.rb i').style.width=(go||!total?0:Math.max(0,Math.min(100,left/total*100)))+'%';
+      }
+      const upd=Date.parse(card.dataset.upd);
+      const stale=!!upd&&now-upd>90000;
+      card.classList.toggle('stale',stale);
+      const pill=card.querySelector('.pill.cast');if(pill)pill.textContent=stale?T.noSignal:T.liveNow;
+    });
     document.querySelectorAll('.c-timer').forEach(el=>{
       const start=Date.parse(el.dataset.start);
       if(!start){el.textContent='';return;}
@@ -525,7 +602,11 @@ const CONTROL_TEXT={
     noAdminSub:'Entra a HABIT con tu cuenta de admin en este mismo navegador y vuelve a abrir esta página.',
     failed:'No se pudo: ',turnedOn:'Pantalla encendida',turnedOff:'Pantalla apagada',langDone:'Idioma cambiado',
     reloading:'La tele se va a recargar',rotated:'Llave nueva: abre la dirección nueva en la tele',
-    copied:'Dirección copiada',copyManual:'Selecciónala y cópiala'},
+    copied:'Dirección copiada',copyManual:'Selecciónala y cópiala',
+    casting:'Transmitir entrenos',castOn:'Permitido',castOff:'Apagado',
+    castHelp:n=>'Con reserva en curso, un socio puede pasar su entreno en vivo a la tele desde la hoja de entreno (por ahora en HABIT Crew). Ahora transmiten: '+n+'.',
+    castOffHelp:'Nadie puede pasar su entreno a la tele. Apagarlo quita a quien esté transmitiendo.',
+    castOnDone:'Transmisiones permitidas',castOffDone:'Transmisiones apagadas'},
   en:{kicker:'Control',title:'Gym screen',screen:'Screen',on:'On',off:'Off',
     onHelp:'Members now see the option in Profile, and anyone with a booking is asked once whether they want to show up.',
     offHelp:'While it’s off, the app shows nothing to anyone and the TV only shows the time.',
@@ -539,7 +620,11 @@ const CONTROL_TEXT={
     noAdminSub:'Sign in to HABIT with your admin account in this same browser, then open this page again.',
     failed:'Couldn’t do it: ',turnedOn:'Screen on',turnedOff:'Screen off',langDone:'Language changed',
     reloading:'The TV will reload',rotated:'New key: open the new address on the TV',
-    copied:'Address copied',copyManual:'Select it and copy it'}
+    copied:'Address copied',copyManual:'Select it and copy it',
+    casting:'Live workouts',castOn:'Allowed',castOff:'Off',
+    castHelp:n=>'During their booking, a member can put their live workout on the TV from the workout sheet (HABIT Crew for now). Live right now: '+n+'.',
+    castOffHelp:'Nobody can put their workout on the TV. Turning it off removes whoever is live.',
+    castOnDone:'Live workouts allowed',castOffDone:'Live workouts off'}
 };
 function initControl(){
   const C=CONTROL_TEXT[/^en\b/i.test(navigator.language||'')?'en':'es'];
@@ -572,6 +657,8 @@ function initControl(){
     main.innerHTML='<div class="ctl">'
       +'<div class="box"><div class="row"><span>'+esc(C.screen)+'</span><span class="seg"><button data-c="mode" data-v="on" class="'+(on?'on':'')+'">'+esc(C.on)+'</button><button data-c="mode" data-v="off" class="'+(on?'':'on')+'">'+esc(C.off)+'</button></span></div>'
       +'<p>'+esc(on?C.onHelp:C.offHelp)+'</p></div>'
+      +(screen.casting==null?'':'<div class="box"><div class="row"><span>'+esc(C.casting)+'</span><span class="seg"><button data-c="casting" data-v="1" class="'+(screen.casting?'on':'')+'">'+esc(C.castOn)+'</button><button data-c="casting" data-v="0" class="'+(screen.casting?'':'on')+'">'+esc(C.castOff)+'</button></span></div>'
+      +'<p>'+esc(screen.casting?C.castHelp(screen.casts_now|0):C.castOffHelp)+'</p></div>')
       +'<div class="box"><div class="row"><span>'+esc(C.tvLang)+'</span><span class="seg"><button data-c="lang" data-v="es" class="'+(screen.lang==='es'?'on':'')+'">Español</button><button data-c="lang" data-v="en" class="'+(screen.lang==='en'?'on':'')+'">English</button></span></div></div>'
       +'<div class="box"><div class="row"><span>'+esc(C.address)+'</span></div>'
       +'<div class="url" id="tv-url">'+esc(tvUrl())+'</div>'
@@ -595,6 +682,7 @@ function initControl(){
     const c=b.dataset.c;
     if(c==='mode')configure({p_mode:b.dataset.v},b.dataset.v==='on'?C.turnedOn:C.turnedOff);
     else if(c==='lang')configure({p_lang:b.dataset.v},C.langDone);
+    else if(c==='casting')configure({p_casting:b.dataset.v==='1'},b.dataset.v==='1'?C.castOnDone:C.castOffDone);
     else if(c==='reload')configure({p_reload:true},C.reloading);
     else if(c==='rotate'){if(confirm(C.rotateAsk))configure({p_rotate_key:true},C.rotated);}
     else if(c==='copy'){

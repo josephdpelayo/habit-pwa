@@ -17,7 +17,16 @@ preferencia. Cambios respecto a este plan al construirla:
 - La pantalla nace **apagada**. Hasta que se encienda en el control, la app no enseña el ajuste
   ni invita a nadie.
 
-Las fases 2–4 siguen siendo plan.
+La **fase 2 está escrita** (25 nov): `migrations/153_gym_screen_casts.sql`, el botón «Pantalla»
+en la hoja de entreno de Crew y la tarjeta en vivo en la tele (y en `/pantalla?demo`). Se
+probó en producción dentro de una transacción revertida. Respecto al plan:
+- No hay `snapshot` libre: el teléfono manda solo la serie que toca, el descanso y la pausa, en
+  columnas. Las series y la rutina ya las tiene la base.
+- `gym_screen_casts` no se lee sin sesión: la tele la ve por `gym_screen_state`, y el
+  socio solo lee la suya.
+- El nombre lo pone `gym_screen_state` desde el perfil, como en la fase 1.
+
+Las fases 3–4 siguen siendo plan.
 
 **Decidido (Joseph, 24 nov):**
 - «Rutinas del día» son **las rutinas de quien reservó**, no un WOD del gym elegido por el

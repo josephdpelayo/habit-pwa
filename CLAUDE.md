@@ -1149,4 +1149,34 @@ personas solo se manda cuántas hay.
   idioma de la tele es `gym_screens.lang`.
 - **`/pantalla?demo`** (y `&lang=en`) enseña la tele con gente inventada (`makeDemo`) y palomea
   una serie cada 4 s (`advanceDemo`): no pide llave, no lee la base ni guarda nada. Sirve para
-  enseñarla mientras nadie haya activado su preferencia.
+  enseñarla mientras nadie haya activado su preferencia. Ana transmite en vivo, con descansos
+  de 20 s.
+
+**Fase 2 (25 nov 2026): pasar tu entreno a la pantalla** (migración 153). Lo que la base no
+tiene —**la serie que toca y el descanso**— lo manda el teléfono a `gym_screen_casts` (una fila
+por persona, escrita solo por `start_gym_cast` / `update_gym_cast` / `stop_gym_cast`).
+- **Reglas del servidor**: el entreno propio en curso y de hoy, una reserva corriendo
+  (`gym_screen_booking_end`: 10 min antes a 15 min después; un admin no la necesita), máx. 4
+  por pantalla (candado `pg_advisory_xact_lock`), y `gym_screens.casting` encendido. Errores como
+  códigos (`NO_BOOKING`, `SCREEN_OFF`, `SCREEN_FULL`, `NO_SESSION`) que traduce
+  `TEXT.castErr`. Transmitir **saca a la persona en la tele aunque su preferencia sea
+  `hidden`**, solo mientras transmite.
+- **Termina sola**: un trigger la borra cuando el entreno deja `in_progress`, y pg_cron
+  (`habit-gym-screen-casts`, cada 5 min) borra lo vencido. `expires_at` = el menor de (último
+  aviso + 20 min, fin de la reserva + 15 min): 20 min porque el teléfono se bloquea entre
+  series; la tele atenúa la tarjeta («Sin señal») a los 90 s sin noticias.
+- **El teléfono** (`habit-screen.js`, solo donde `CAST_IN` lo permite: hoy Crew; HABIT es la fase
+  3 y se enciende ahí sin tocar `app.html`) pone «Pantalla» en `.ws-bar` de la hoja de entreno,
+  explica la primera vez qué se verá (`habit_cast_ok` en localStorage), y cada segundo lee
+  `wsFocusSet`, `wsRestSec()`, `wsRestTotal`, `wsPausedAt`… y **escribe solo si cambió** (la firma
+  es la serie, el inicio del descanso y la pausa, no los segundos que corren; mín. 2 s entre
+  avisos, latido cada 60 s). El descanso va como segundos que faltan y el servidor sella
+  `rest_end_at`, así los relojes no tienen que coincidir. Sin sesión cargada (la app la
+  restaura unos segundos después de abrir) no hace nada: cerrar el entreno lo resuelve el
+  servidor. Sin la 153 no ofrece el botón (lee `gym_screens` sin `casting`).
+- **La tele**: la tarjeta de quien transmite va primero, con borde verde, «En vivo», el
+  ejercicio y la serie de ahora en grande (`c-now`), la lista con lo que sigue, y el descanso
+  en lugar del cronómetro, contado con la hora del servidor y con «¡A la serie!» al llegar a
+  cero. Las clases son `is-live` y `pill cast`: `.live` ya es la píldora del encabezado.
+- **Control**: «Transmitir entrenos» Permitido/Apagado (`gym_screen_configure(p_casting)`, firma
+  de seis argumentos: la 153 retira la de cinco); apagarlo quita a quien esté transmitiendo.
