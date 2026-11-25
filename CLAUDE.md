@@ -1147,3 +1147,6 @@ personas solo se manda cuántas hay.
   días o ya tiene fila: una cuenta solo de Crew no sale en la tele.
 - Textos de la tele, del control y del módulo en ES/EN (`HabitScreen.TEXT`, `CONTROL_TEXT`); el
   idioma de la tele es `gym_screens.lang`.
+- **`/pantalla?demo`** (y `&lang=en`) enseña la tele con gente inventada (`makeDemo`) y palomea
+  una serie cada 4 s (`advanceDemo`): no pide llave, no lee la base ni guarda nada. Sirve para
+  enseñarla mientras nadie haya activado su preferencia.

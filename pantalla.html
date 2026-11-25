@@ -207,12 +207,53 @@ function fmtDur(sec){
 }
 
 
+
+// ── Demostración: /pantalla?demo (y &lang=en) ────────────────────────────────
+// Datos inventados para enseñar cómo se ve la tele sin depender de quién reservó hoy: no
+// pide llave ni lee la base. Una serie se palomea cada pocos segundos para ver cómo se mueve.
+const DEMO=params.has('demo');
+const DEMO_LABEL={es:'Demostración',en:'Demo'};
+function makeDemo(){
+  const t0=Date.now(),iso=ms=>new Date(ms).toISOString(),min=60000;
+  const ex=(id,name,sets,reps,extra)=>Object.assign({id,name,sets:String(sets),reps},extra||{});
+  const legs=[ex('a','Sentadilla trasera',4,'6-8'),ex('b','Peso muerto rumano',3,'8-10'),ex('c','Zancada búlgara',3,'10'),
+    ex('d','Extensión de cuádriceps',3,'12'),ex('e','Curl femoral',3,'12'),ex('f','Elevación de talones',4,'15'),ex('g','Plancha',3,'40s',{repsType:'time'})];
+  const push=[ex('p1','Press banca',4,'8'),ex('p2','Press militar con mancuernas',3,'10'),ex('p3','Fondos en paralelas',3,'al fallo'),
+    ex('p4','Aperturas en polea',3,'12-15'),ex('p5','Extensión de tríceps con cuerda',3,'12')];
+  const pull=[ex('q1','Dominadas',4,'6'),ex('q2','Remo con barra',4,'8-10'),ex('q3','Jalón al pecho',3,'12'),ex('q4','Curl con barra',3,'10')];
+  const weights={a:[80,85,85,87.5],b:[60,60,62.5],c:[16,16,16],d:[45,45,50],e:[35,35,35],f:[60,60,60,60],p1:[50,55,55,57.5],p2:[18,18,20],p4:[12,12,12],p5:[20,20,22.5],q1:[0,0,0,0],q2:[50,50,55,55],q3:[45,45,50],q4:[25,25,27.5]};
+  const setsFor=(list,doneUpTo)=>{const out=[];let n=0;list.forEach(e=>{const k=e.id,c=+e.sets;for(let i=0;i<c;i++){out.push({k,i,d:n<doneUpTo,w:(weights[k]||[])[i]||null});n++;}});return out;};
+  const people=[
+    {key:'d1',name:'Ana R.',start_at:iso(t0-45*min),end_at:iso(t0+45*min),visibility:'routine',
+      routine:{source:'session',title:'Pierna A',color:'#22c55e',status:'in_progress',board_id:'b1',started_at:iso(t0-38*min),paused_at:null,paused_seconds:0,exercises:legs,overlay:[],sets:setsFor(legs,7)}},
+    {key:'d2',name:'Carlos M.',start_at:iso(t0-15*min),end_at:iso(t0+75*min),visibility:'routine',
+      routine:{source:'session',title:'Empuje',color:'#2563eb',status:'in_progress',board_id:'b2',started_at:iso(t0-9*min),paused_at:null,paused_seconds:0,exercises:push,overlay:[],sets:setsFor(push,2)}},
+    {key:'d3',name:'Sofía L.',start_at:iso(t0-80*min),end_at:iso(t0+10*min),visibility:'routine',
+      routine:{source:'session',title:'Tirón',color:'#a855f7',status:'done',board_id:'b3',started_at:iso(t0-75*min),completed_at:iso(t0-4*min),exercises:pull,overlay:[],sets:setsFor(pull,99)}},
+    {key:'d4',name:'Diego T.',start_at:iso(t0-5*min),end_at:iso(t0+85*min),visibility:'name',routine:null},
+    {key:'d5',name:'Lucía G.',start_at:iso(t0+55*min),end_at:iso(t0+145*min),visibility:'routine',
+      routine:{source:'plan',title:'Pierna B',color:'#f97316',status:'planned',board_id:'b4',exercises:legs,overlay:[],sets:[]}},
+    {key:'d6',name:'Mario P.',start_at:iso(t0+115*min),end_at:iso(t0+205*min),visibility:'name',routine:null}
+  ];
+  return {ok:true,mode:'on',name:'Demo',lang:params.get('lang')==='en'?'en':'es',now:iso(t0),hidden_now:1,people};
+}
+// Cada pocos segundos, la siguiente serie pendiente de quien está entrenando se palomea; al
+// terminar todo, vuelve a empezar.
+function advanceDemo(state){
+  const live=state.people.filter(p=>p.routine&&p.routine.status==='in_progress');
+  const p=live[Math.floor(Math.random()*live.length)];if(!p)return;
+  const next=p.routine.sets.find(s=>!s.d);
+  if(next)next.d=true;else p.routine.sets.forEach(s=>{s.d=false;});
+  state.now=new Date().toISOString();
+}
+
 // ═════════════════════════════════════════════════════════════════════════════
 // La tele
 // ═════════════════════════════════════════════════════════════════════════════
 function initTv(){
   let key=params.get('k');
-  if(key){store.set(KEY_STORE,key);}else key=store.get(KEY_STORE);
+  const demoState=DEMO?makeDemo():null;
+  if(key&&!DEMO){store.set(KEY_STORE,key);}else if(!DEMO)key=store.get(KEY_STORE);
   // La llave no se queda en la barra de direcciones a la vista de quien pase.
   if(params.has('k'))history.replaceState(null,'',location.pathname);
 
@@ -220,6 +261,12 @@ function initTv(){
   const serverNow=()=>new Date(Date.now()+skew);
 
   async function load(){
+    if(DEMO){
+      demoState.now=new Date().toISOString();
+      data=JSON.parse(JSON.stringify(demoState));skew=0;
+      if(data.lang!==lang){lang=data.lang;document.documentElement.lang=lang;}
+      view='ok';return;
+    }
     if(!key){view='key';data=null;return;}
     const{data:res,error}=await tv.rpc('gym_screen_state',{p_screen:SCREEN_ID,p_key:key});
     if(error){
@@ -281,7 +328,7 @@ function initTv(){
     $('title').textContent=fmtDay(now);
     const live=$('live');
     live.className='live'+(fetchOk?'':' warn');
-    live.querySelector('span').textContent=fetchOk?T.live:T.reconnecting;
+    live.querySelector('span').textContent=DEMO?DEMO_LABEL[lang]:fetchOk?T.live:T.reconnecting;
     $('fs').textContent=document.fullscreenElement?T.exitFullscreen:T.fullscreen;
     document.title='HABIT · '+T.inGym;
   }
@@ -398,7 +445,8 @@ function initTv(){
   },1000);
 
   // ── Realtime + respaldo ────────────────────────────────────────────────────
-  tv.channel('gym-screen-'+SCREEN_ID)
+  if(DEMO)setInterval(()=>{advanceDemo(demoState);refresh();},4000);
+  else tv.channel('gym-screen-'+SCREEN_ID)
     .on('postgres_changes',{event:'*',schema:'public',table:'gym_screen_pings',filter:'screen_id=eq.'+SCREEN_ID},payload=>{
       const n=payload&&payload.new&&payload.new.reload_nonce;
       if(n!=null&&nonce!=null&&n!==nonce){location.reload();return;}
@@ -406,7 +454,7 @@ function initTv(){
       scheduleRefresh();
     })
     .subscribe();
-  tv.from('gym_screen_pings').select('reload_nonce').eq('screen_id',SCREEN_ID).maybeSingle()
+  if(!DEMO)tv.from('gym_screen_pings').select('reload_nonce').eq('screen_id',SCREEN_ID).maybeSingle()
     .then(({data})=>{if(data)nonce=data.reload_nonce;});
   setInterval(refresh,POLL_MS);
 
