@@ -92,7 +92,10 @@
       rest: 'Descanso',
       restPaused: 'En pausa',
       goSet: '¡A la serie!',
-      setOf: (i, n) => 'Serie ' + i + ' de ' + n
+      setOf: (i, n) => 'Serie ' + i + ' de ' + n,
+      // La rutina del día (migración 156)
+      daily: 'Rutina del día',
+      dailyCount: (n) => n === 1 ? '1 ejercicio' : n + ' ejercicios'
     },
     en: {
       section: 'Gym screen',
@@ -154,7 +157,9 @@
       rest: 'Rest',
       restPaused: 'Paused',
       goSet: 'Next set!',
-      setOf: (i, n) => 'Set ' + i + ' of ' + n
+      setOf: (i, n) => 'Set ' + i + ' of ' + n,
+      daily: 'Workout of the day',
+      dailyCount: (n) => n === 1 ? '1 exercise' : n + ' exercises'
     }
   };
   const doc = global.document;
@@ -254,10 +259,43 @@
     return item.total + ' × ' + reps;
   }
 
+  // ── La demostración de cada ejercicio en la rutina del día ─────────────────
+  // El servidor manda las candidatas ya en orden (animación o GIF del catálogo, GIF del
+  // catálogo con el mismo nombre, videos del gym). Aquí se reconoce qué es cada una y se toma
+  // la primera que la tele sabe enseñar. Un enlace que no es ninguna de estas se salta.
+  function youtubeId(url) {
+    const m = String(url || '').match(/(?:youtube\.com\/(?:shorts\/|watch\?v=|embed\/|live\/)|youtu\.be\/)([A-Za-z0-9_-]{6,20})/);
+    return m ? m[1] : null;
+  }
+  function driveId(url) {
+    const m = String(url || '').match(/drive\.google\.com\/(?:file\/d\/|open\?id=|uc\?(?:export=\w+&)?id=)([A-Za-z0-9_-]{10,})/);
+    return m ? m[1] : null;
+  }
+  function mediaKindOf(url) {
+    const u = String(url || '').trim();
+    if (!/^(https?:\/\/|\/)/i.test(u)) return null;
+    const path = u.split(/[?#]/)[0];
+    if (/\.svg$/i.test(path)) return { kind: 'image', url: u, anim: true };
+    if (/\.(gif|webp|png|jpe?g)$/i.test(path)) return { kind: 'image', url: u };
+    if (/\.(mp4|webm|mov)$/i.test(path)) return { kind: 'video', url: u };
+    const yt = youtubeId(u);
+    if (yt) return { kind: 'youtube', id: yt };
+    const dr = driveId(u);
+    if (dr) return { kind: 'drive', id: dr };
+    return null;
+  }
+  function pickMedia(list) {
+    for (const url of Array.isArray(list) ? list : []) {
+      const m = mediaKindOf(url);
+      if (m) return m;
+    }
+    return null;
+  }
+
   function mazDs(date) { return new Date((date ? +date : Date.now()) - MAZ_OFFSET_MS).toISOString().slice(0, 10); }
   function addDays(ds, n) { const d = new Date(ds + 'T12:00:00Z'); d.setUTCDate(d.getUTCDate() + n); return d.toISOString().slice(0, 10); }
 
-  const api = { APP_GLOBALS, CAST_IN, SCREEN_ID, TEXT, T, lang, setsByKey, effectiveExercises, plannedSetCount, progress, targetLabel, mazDs, addDays };
+  const api = { APP_GLOBALS, CAST_IN, SCREEN_ID, TEXT, T, lang, setsByKey, effectiveExercises, plannedSetCount, progress, targetLabel, mazDs, addDays, youtubeId, driveId, mediaKindOf, pickMedia };
 
   // ── En las apps: el ajuste de Perfil y la invitación ─────────────────────
   // Solo donde hay app: la tele no tiene Perfil ni sesión de socio.

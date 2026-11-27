@@ -10,7 +10,7 @@
 <link rel="apple-touch-icon" sizes="180x180" href="/icons/icon-180.png">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@500;600;700;800;900&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="/habit-screen.js?v=20261125-1"></script>
+<script src="/habit-screen.js?v=20261127-1"></script>
 <!--
   La pantalla del gym (docs/PANTALLA_GYM.md, migración 152). Dos modos en el mismo archivo:
 
@@ -122,6 +122,25 @@ h1::first-letter{text-transform:uppercase}
 .c-rest .rb i{display:block;height:100%;background:var(--amber);border-radius:inherit;transition:width 1s linear}
 .c-rest.go .rb{visibility:hidden}
 
+/* ── Zonas de la tele ── */
+.pv,.dv{flex:1;min-height:0;display:flex;flex-direction:column;gap:clamp(10px,1.6vh,22px)}
+[hidden]{display:none!important}
+/* ── La rutina del día ── */
+.dv-head{display:flex;align-items:baseline;gap:clamp(10px,1.2vw,24px);min-width:0}
+.dv-k{flex:none;font-size:clamp(11px,1.7vh,22px);font-weight:900;letter-spacing:.2em;text-transform:uppercase;color:var(--c,var(--bl))}
+.dv-head h2{min-width:0;font-size:clamp(22px,4.4vh,60px);font-weight:900;line-height:1;text-transform:uppercase;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.dv-n{flex:none;margin-left:auto;font-size:clamp(11px,1.7vh,22px);font-weight:700;color:var(--gray)}
+.dv-grid{flex:1;min-height:0;display:grid;grid-template-columns:repeat(var(--cols,4),minmax(0,1fr));align-content:center;justify-items:center;gap:clamp(10px,1.2vw,26px)}
+.dt{margin:0;display:flex;flex-direction:column;align-items:center;gap:.4em;width:var(--mw,100%);min-width:0;font-size:var(--fs,18px)}
+.dt-m{position:relative;width:var(--mw,100%);height:var(--mh,auto);aspect-ratio:9/16;border-radius:clamp(10px,1.4vh,20px);overflow:hidden;background:var(--card2);box-shadow:inset 0 0 0 1px rgba(255,255,255,.05)}
+.dt-m iframe,.dt-m video,.dt-m img{position:absolute;inset:0;width:100%;height:100%;border:0;pointer-events:none}
+.dt-m video,.dt-m img.pic{object-fit:cover}
+.dt-m img.anim{object-fit:contain;padding:8%}
+.dt-ph{position:absolute;inset:0;display:grid;place-items:center;font-size:calc(var(--fs,18px)*3.2);font-weight:900;color:rgba(255,255,255,.08)}
+.dt-num{position:absolute;left:.45em;top:.45em;min-width:1.9em;height:1.9em;padding:0 .4em;border-radius:.6em;display:grid;place-items:center;background:var(--c,var(--blue));color:#fff;font-weight:900;font-size:calc(var(--fs,18px)*1.05);box-shadow:0 6px 18px rgba(0,0,0,.35)}
+.dt figcaption{width:100%;text-align:center;line-height:1.15;min-width:0}
+.dt figcaption b{display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden;font-weight:800;text-transform:uppercase;letter-spacing:.01em}
+.dt figcaption span{display:block;margin-top:.25em;font-weight:900;font-size:1.15em;color:var(--c,var(--bl));font-variant-numeric:tabular-nums}
 /* ── Sin nadie: el reloj grande ── */
 .empty{flex:1;min-height:0;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;gap:2vh}
 .big-clock{font-size:clamp(64px,min(18vw,26vh),420px);font-weight:900;line-height:.95;font-variant-numeric:tabular-nums;letter-spacing:-.03em}
@@ -153,6 +172,11 @@ body.idle .fs-btn{opacity:0;pointer-events:none}
   .grid{display:flex;flex-direction:column}
   .card{min-height:auto}
   .later{flex-wrap:wrap;white-space:normal}
+  .dv-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .dt,.dt-m{width:100%}
+  .dt-m{height:auto}
+  .dv-head{flex-wrap:wrap}
+  .dv-head h2{white-space:normal}
   .fs-btn{display:none}
 }
 @media (prefers-reduced-motion:reduce){*,*:before,*:after{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}}
@@ -173,6 +197,7 @@ body.control .stage{height:auto;min-height:100dvh;max-width:560px;margin:0 auto}
 .ctl .btn.ghost{background:var(--card2);color:var(--white)}
 .ctl .btn.danger{background:rgba(255,100,100,.14);color:var(--red)}
 .ctl .msg{font-size:13px;color:var(--green);min-height:1.2em}
+.ctl .sel{width:100%;background:var(--card2);color:var(--white);border:0;border-radius:12px;padding:12px;font:700 15px 'Inter',sans-serif}
 .ctl .msg.err{color:var(--red)}
 </style>
 </head>
@@ -193,7 +218,7 @@ body.control .stage{height:auto;min-height:100dvh;max-width:560px;margin:0 auto}
 <button class="fs-btn" id="fs" type="button"></button>
 
 <script>
-const PANTALLA_VERSION='20261125-1';
+const PANTALLA_VERSION='20261127-1';
 const SUPABASE_URL='https://pmpjteuqjusbiduevbwq.supabase.co';
 const SUPABASE_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBtcGp0ZXVxanVzYmlkdWV2YndxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc2OTI1NjUsImV4cCI6MjA5MzI2ODU2NX0.XbMzZoo2yqtrD8znLnyo_1zDfrdJAvAPj1lqGOyXnLw';
 const SCREEN_ID='main';
@@ -203,6 +228,8 @@ const KEY_STORE='habit_tv_key';
 const H=window.HabitScreen;
 
 const params=new URLSearchParams(location.search);
+// ?lite: la rutina del día con fotos en lugar de videos, para una tele que no aguante varios.
+const LITE=params.has('lite');
 const narrowMq=matchMedia('(max-width:760px),(orientation:portrait) and (max-width:1100px)');
 const CONTROL=params.has('control');
 const $=id=>document.getElementById(id);
@@ -232,6 +259,22 @@ function fmtDur(sec){
 // pide llave ni lee la base. Una serie se palomea cada pocos segundos para ver cómo se mueve.
 const DEMO=params.has('demo');
 const DEMO_LABEL={es:'Demostración',en:'Demo'};
+// ?demo=rutina: nadie en el gym, así que se ve la rutina del día.
+const DEMO_ROUTINE=DEMO&&params.get('demo')==='rutina';
+// La rutina del día de la demostración usa las figuras animadas del repo (skill-anim), que
+// no dependen de nadie; la tele real usa los videos del gym de la rutina básica que toca.
+function makeDemoDaily(){
+  const ex=(name,sets,reps,slug,extra)=>Object.assign({name,sets:String(sets),reps,media:['/skill-anim/'+slug+'.svg']},extra||{});
+  return {id:'demo',title:'Parada de manos · básica',color:'#2563eb',exercises:[
+    ex('Preparación de muñecas',1,'60s','preparacion-de-munecas',{repsType:'time'}),
+    ex('Encogimientos en pica',3,'10','encogimientos-en-pica'),
+    ex('Hollow hold',3,'30s','hollow-hold',{repsType:'time'}),
+    ex('Patadas de conejo',3,'8','patadas-de-conejo'),
+    ex('Patada a la pared',3,'6','patada-a-la-pared'),
+    ex('Parada de manos en pared',3,'30s','parada-de-manos-en-pared',{repsType:'time'}),
+    ex('Toques de hombro en pared',3,'10','toques-de-hombro-en-pared'),
+    ex('Caminata en pared',3,'4','caminata-en-pared')]};
+}
 function makeDemo(){
   const t0=Date.now(),iso=ms=>new Date(ms).toISOString(),min=60000;
   const ex=(id,name,sets,reps,extra)=>Object.assign({id,name,sets:String(sets),reps},extra||{});
@@ -256,7 +299,9 @@ function makeDemo(){
       routine:{source:'plan',title:'Pierna B',color:'#f97316',status:'planned',board_id:'b4',exercises:legs,overlay:[],sets:[]}},
     {key:'d6',name:'Mario P.',start_at:iso(t0+115*min),end_at:iso(t0+205*min),visibility:'name',routine:null}
   ];
-  return {ok:true,mode:'on',name:'Demo',lang:params.get('lang')==='en'?'en':'es',now:iso(t0),hidden_now:1,people};
+  // En ?demo=rutina nadie está en el gym todavía: solo quedan las reservas de más tarde.
+  const shown=DEMO_ROUTINE?people.filter(p=>Date.parse(p.start_at)>t0+10*min):people;
+  return {ok:true,mode:'on',name:'Demo',lang:params.get('lang')==='en'?'en':'es',now:iso(t0),hidden_now:DEMO_ROUTINE?0:1,people:shown};
 }
 // Cada pocos segundos, la siguiente serie pendiente de quien está entrenando se palomea; al
 // terminar todo, vuelve a empezar.
@@ -289,6 +334,19 @@ function initTv(){
   if(params.has('k'))history.replaceState(null,'',location.pathname);
 
   let data=null,view='loading',fetchOk=true,skew=0,nonce=null,peopleSig='';
+  // La rutina del día (migración 156): cambia una vez al día, así que se pide cada 10 min y
+  // no con cada aviso. Sin la 156 se queda en null y la tele enseña el reloj como antes.
+  let daily=DEMO?makeDemoDaily():null,dailyAt=0,dailySig='';
+  const DAILY_MS=10*60000;
+  async function loadDaily(){
+    if(DEMO||!key||Date.now()-dailyAt<DAILY_MS)return;
+    dailyAt=Date.now();
+    try{
+      const{data:res,error}=await tv.rpc('gym_screen_daily',{p_screen:SCREEN_ID,p_key:key});
+      if(error){daily=null;return;}
+      daily=res&&res.ok&&res.board&&Array.isArray(res.board.exercises)&&res.board.exercises.length?res.board:null;
+    }catch(_){dailyAt=0;}
+  }
   const serverNow=()=>new Date(Date.now()+skew);
 
   async function load(){
@@ -307,6 +365,7 @@ function initTv(){
     if(!res||res.ok===false){view='key';data=null;store.set(KEY_STORE,null);return;}
     skew=Date.parse(res.now)-Date.now();
     data=res;
+    if(res.mode!=='off')await loadDaily();
     if(res.lang&&res.lang!==lang){lang=res.lang;document.documentElement.lang=lang;}
     view=res.mode==='off'?'off':'ok';
   }
@@ -329,7 +388,7 @@ function initTv(){
     paintChrome();
     const main=$('main'),foot=$('foot');
     if(view!=='ok'){
-      peopleSig='';
+      peopleSig='';dailySig='';
       const T=t();
       const [title,sub]=view==='loading'?[T.loading,'']:view==='missing'?[T.missing,T.missingSub]
         :view==='key'?[T.badKey,T.badKeySub]:[T.off,T.offSub];
@@ -343,12 +402,18 @@ function initTv(){
     // «En el gym» desde 10 min antes de su reserva, como la puerta.
     const inGym=people.filter(p=>now>=p.start-10*60000&&now<p.end);
     const later=people.filter(p=>now<p.start-10*60000);
-    const sig=JSON.stringify([inGym.map(p=>p.key),later.map(p=>p.key),data.people]);
+    // Nadie en pantalla: la rutina del día ocupa el lugar del reloj grande.
+    const showDaily=!inGym.length&&!!(daily&&daily.exercises&&daily.exercises.length);
+    if(!$('pv'))main.innerHTML='<div class="pv" id="pv"></div><div class="dv" id="dv" hidden></div><div id="lv"></div>';
+    const sig=JSON.stringify([inGym.map(p=>p.key),later.map(p=>p.key),data.people,showDaily]);
     if(sig!==peopleSig){
       peopleSig=sig;
-      main.innerHTML=(inGym.length?gridHtml(inGym):emptyHtml(later.length))+(later.length?laterHtml(later):'');
+      $('pv').innerHTML=inGym.length?gridHtml(inGym):showDaily?'':emptyHtml(later.length);
+      $('pv').hidden=showDaily;
+      $('lv').innerHTML=later.length?laterHtml(later):'';
       fitCards();
     }
+    paintDaily(showDaily);
     tickTimers();
     const hidden=data.hidden_now|0;
     foot.textContent=hidden?t().hiddenNow(hidden):'';
@@ -362,6 +427,71 @@ function initTv(){
     live.querySelector('span').textContent=DEMO?DEMO_LABEL[lang]:fetchOk?T.live:T.reconnecting;
     $('fs').textContent=document.fullscreenElement?T.exitFullscreen:T.fullscreen;
     document.title='HABIT · '+T.inGym;
+  }
+  // ── La rutina del día: cada ejercicio en su cuadro, todos a la vista ───────
+  function paintDaily(show){
+    const dv=$('dv');if(!dv)return;
+    if(!show){if(dailySig){dv.innerHTML='';dailySig='';}dv.hidden=true;return;}
+    dv.hidden=false;
+    const sig=JSON.stringify(daily)+'|'+lang+'|'+LITE;
+    if(sig!==dailySig){dailySig=sig;dv.innerHTML=dailyHtml(daily);wireDailyMedia(dv);}
+    layoutDaily();
+  }
+  function dailyHtml(b){
+    const T=t(),list=b.exercises||[];
+    return '<div class="dv-head" style="--c:'+safeColor(b.color)+'"><span class="dv-k">'+esc(T.daily)+'</span>'
+      +'<h2>'+esc(b.title||'')+'</h2><span class="dv-n">'+esc(T.dailyCount(list.length))+'</span></div>'
+      +'<div class="dv-grid" style="--c:'+safeColor(b.color)+'">'+list.map((ex,i)=>{
+        const target=H.targetLabel({total:H.plannedSetCount(ex),reps:ex.reps||'',repsType:ex.repsType||''});
+        return '<figure class="dt"><div class="dt-m">'+mediaHtml(H.pickMedia(ex.media),i)+'<span class="dt-num">'+(i+1)+'</span></div>'
+          +'<figcaption><b>'+esc(ex.name||'')+'</b>'+(target?'<span>'+esc(target)+'</span>':'')+'</figcaption></figure>';
+      }).join('')+'</div>';
+  }
+  // Los videos del gym son YouTube Shorts verticales: van mudos, en bucle y sin controles,
+  // como un GIF. Con ?lite (para una tele que no aguante varios videos a la vez) va la foto.
+  function mediaHtml(m,i){
+    const ph='<div class="dt-ph">'+(i+1)+'</div>';
+    if(!m)return ph;
+    if(m.kind==='image')return '<img class="'+(m.anim?'anim':'pic')+'" src="'+esc(m.url)+'" alt="" decoding="async">';
+    if(m.kind==='video')return '<video src="'+esc(m.url)+'" autoplay muted loop playsinline preload="auto"></video>';
+    if(m.kind==='youtube'){
+      if(LITE)return '<img class="pic" src="https://i.ytimg.com/vi/'+esc(m.id)+'/hqdefault.jpg" alt="">';
+      const q='autoplay=1&mute=1&loop=1&playlist='+encodeURIComponent(m.id)+'&controls=0&modestbranding=1&playsinline=1&rel=0&disablekb=1&iv_load_policy=3&fs=0';
+      return '<iframe src="https://www.youtube-nocookie.com/embed/'+esc(m.id)+'?'+q+'" allow="autoplay; encrypted-media" tabindex="-1" title="" loading="eager"></iframe>';
+    }
+    // Drive no deja reproducir sin un toque: su foto.
+    if(m.kind==='drive')return '<img class="pic" src="https://drive.google.com/thumbnail?id='+esc(m.id)+'&sz=w640" alt="">';
+    return ph;
+  }
+  // Una foto o un GIF que no carga deja el número en su lugar, no un cuadro roto.
+  function wireDailyMedia(root){
+    root.querySelectorAll('.dt-m img,.dt-m video').forEach(el=>el.addEventListener('error',()=>{
+      const box=el.closest('.dt-m'),n=box&&box.querySelector('.dt-num');
+      el.remove();if(box&&!box.querySelector('.dt-ph'))box.insertAdjacentHTML('afterbegin','<div class="dt-ph">'+esc(n?n.textContent:'')+'</div>');
+    }));
+  }
+  // Cuántas filas y de qué tamaño para que todo quepa sin desplazar: cada cuadro es vertical
+  // (9:16, como los videos del gym) con su texto abajo. Gana el acomodo con el cuadro más grande.
+  function layoutDaily(){
+    const grid=document.querySelector('#dv .dv-grid');if(!grid)return;
+    if(narrowMq.matches){grid.style.removeProperty('--cols');return;}
+    const n=grid.children.length;if(!n)return;
+    const W=grid.clientWidth,Hh=grid.clientHeight,gap=Math.max(10,Math.min(26,innerWidth*.012));
+    let best=null;
+    for(let r=1;r<=4;r++){
+      const cols=Math.ceil(n/r),colW=(W-gap*(cols-1))/cols,rowH=(Hh-gap*(r-1))/r;
+      const cap=Math.max(52,Math.min(rowH*.3,colW*.42));
+      let mh=Math.min(colW*16/9,rowH-cap),mw=mh*9/16;
+      if(mw>colW){mw=colW;mh=mw*16/9;}
+      if(mh<=0)continue;
+      const fs=Math.max(12,Math.min(cap/3.1,colW*.11,40));
+      if(!best||mw*mh>best.mw*best.mh+1)best={cols,mw,mh,cap,fs};
+    }
+    if(!best)return;
+    grid.style.setProperty('--cols',best.cols);
+    grid.style.setProperty('--mw',Math.floor(best.mw)+'px');
+    grid.style.setProperty('--mh',Math.floor(best.mh)+'px');
+    grid.style.setProperty('--fs',Math.floor(best.fs)+'px');
   }
   function bigClockHtml(){return '<div class="big-clock" id="big-clock"></div>';}
   function emptyHtml(hasLater){
@@ -550,7 +680,7 @@ function initTv(){
   },30000);
 
   let resizeT=null;
-  const relayout=()=>{clearTimeout(resizeT);resizeT=setTimeout(()=>{peopleSig='';render();},200);};
+  const relayout=()=>{clearTimeout(resizeT);resizeT=setTimeout(()=>{peopleSig='';render();layoutDaily();},200);};
   addEventListener('resize',relayout);
   if(narrowMq.addEventListener)narrowMq.addEventListener('change',relayout);
 
@@ -606,7 +736,10 @@ const CONTROL_TEXT={
     casting:'Transmitir entrenos',castOn:'Permitido',castOff:'Apagado',
     castHelp:n=>'Con reserva en curso, un socio puede pasar su entreno en vivo a la tele desde la hoja de entreno (por ahora en HABIT Crew). Ahora transmiten: '+n+'.',
     castOffHelp:'Nadie puede pasar su entreno a la tele. Apagarlo quita a quien esté transmitiendo.',
-    castOnDone:'Transmisiones permitidas',castOffDone:'Transmisiones apagadas'},
+    castOnDone:'Transmisiones permitidas',castOffDone:'Transmisiones apagadas',
+    daily:'Rutina del día',dailyAuto:'Automática: rota las básicas',
+    dailyHelp:'Sale en la tele cuando no hay nadie en pantalla. En automático cambia cada día, una rutina básica tras otra.',
+    dailyToday:n=>'Hoy toca: '+n,dailyDone:'Rutina del día cambiada'},
   en:{kicker:'Control',title:'Gym screen',screen:'Screen',on:'On',off:'Off',
     onHelp:'Members now see the option in Profile, and anyone with a booking is asked once whether they want to show up.',
     offHelp:'While it’s off, the app shows nothing to anyone and the TV only shows the time.',
@@ -624,7 +757,10 @@ const CONTROL_TEXT={
     casting:'Live workouts',castOn:'Allowed',castOff:'Off',
     castHelp:n=>'During their booking, a member can put their live workout on the TV from the workout sheet (HABIT Crew for now). Live right now: '+n+'.',
     castOffHelp:'Nobody can put their workout on the TV. Turning it off removes whoever is live.',
-    castOnDone:'Live workouts allowed',castOffDone:'Live workouts off'}
+    castOnDone:'Live workouts allowed',castOffDone:'Live workouts off',
+    daily:'Workout of the day',dailyAuto:'Automatic: rotates the basic routines',
+    dailyHelp:'Shown on the TV when nobody is on screen. On automatic it changes every day, one basic routine after another.',
+    dailyToday:n=>'Today: '+n,dailyDone:'Workout of the day changed'}
 };
 function initControl(){
   const C=CONTROL_TEXT[/^en\b/i.test(navigator.language||'')?'en':'es'];
@@ -636,7 +772,7 @@ function initControl(){
   $('live').style.display='none';
   $('clock').style.display='none';
   const main=$('main');
-  let screen=null,msg='',msgErr=false;
+  let screen=null,msg='',msgErr=false,dailyOpts=null;
 
   async function load(){
     const{data:{session}}=await tv.auth.getSession();
@@ -647,7 +783,11 @@ function initControl(){
       if(/NOT_ADMIN/.test(error.message||''))return paintNoAdmin();
       return paintMsgOnly(C.readFail,error.message||'');
     }
-    screen=data;paint();
+    screen=data;
+    // Sin la 156 no hay rutina del día que elegir: la sección no sale.
+    const o=await tv.rpc('gym_screen_daily_options',{p_screen:SCREEN_ID});
+    dailyOpts=o.error?null:o.data;
+    paint();
   }
   function paintMsgOnly(title,sub){main.innerHTML='<div class="ctl"><h2>'+esc(title)+'</h2><p>'+esc(sub)+'</p></div>';}
   function paintNoAdmin(){paintMsgOnly(C.noAdmin,C.noAdminSub);}
@@ -659,6 +799,7 @@ function initControl(){
       +'<p>'+esc(on?C.onHelp:C.offHelp)+'</p></div>'
       +(screen.casting==null?'':'<div class="box"><div class="row"><span>'+esc(C.casting)+'</span><span class="seg"><button data-c="casting" data-v="1" class="'+(screen.casting?'on':'')+'">'+esc(C.castOn)+'</button><button data-c="casting" data-v="0" class="'+(screen.casting?'':'on')+'">'+esc(C.castOff)+'</button></span></div>'
       +'<p>'+esc(screen.casting?C.castHelp(screen.casts_now|0):C.castOffHelp)+'</p></div>')
+      +dailyBoxHtml()
       +'<div class="box"><div class="row"><span>'+esc(C.tvLang)+'</span><span class="seg"><button data-c="lang" data-v="es" class="'+(screen.lang==='es'?'on':'')+'">Español</button><button data-c="lang" data-v="en" class="'+(screen.lang==='en'?'on':'')+'">English</button></span></div></div>'
       +'<div class="box"><div class="row"><span>'+esc(C.address)+'</span></div>'
       +'<div class="url" id="tv-url">'+esc(tvUrl())+'</div>'
@@ -671,12 +812,26 @@ function initControl(){
       +'<div class="msg'+(msgErr?' err':'')+'" id="ctl-msg">'+esc(msg)+'</div>'
       +'</div>';
   }
+  function dailyBoxHtml(){
+    if(!dailyOpts)return '';
+    const list=dailyOpts.starters||[],today=list.find(b=>b.id===dailyOpts.today);
+    return '<div class="box"><div class="row"><span>'+esc(C.daily)+'</span></div>'
+      +'<select class="sel" data-c="daily"><option value="">'+esc(C.dailyAuto)+'</option>'
+      +list.map(b=>'<option value="'+esc(b.id)+'"'+(b.id===dailyOpts.fixed?' selected':'')+'>'+esc(b.name)+'</option>').join('')+'</select>'
+      +'<p>'+esc(C.dailyHelp)+(today?' '+esc(C.dailyToday(today.name))+'.':'')+'</p></div>';
+  }
   function note(text,err){msg=text;msgErr=!!err;const el=$('ctl-msg');if(el){el.textContent=text;el.className='msg'+(err?' err':'');}}
   async function configure(args,done){
     const{data,error}=await tv.rpc('gym_screen_configure',Object.assign({p_screen:SCREEN_ID},args));
     if(error){note(C.failed+(error.message||''),true);return;}
     screen=data;msg=done||'';msgErr=false;paint();
   }
+  main.addEventListener('change',async e=>{
+    const sel=e.target.closest('select[data-c="daily"]');if(!sel)return;
+    const{data,error}=await tv.rpc('gym_screen_set_daily',{p_screen:SCREEN_ID,p_board:sel.value||null});
+    if(error){note(C.failed+(error.message||''),true);return;}
+    dailyOpts=data;msg=C.dailyDone;msgErr=false;paint();
+  });
   main.addEventListener('click',async e=>{
     const b=e.target.closest('[data-c]');if(!b||!screen)return;
     const c=b.dataset.c;

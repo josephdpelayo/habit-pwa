@@ -1180,3 +1180,29 @@ por persona, escrita solo por `start_gym_cast` / `update_gym_cast` / `stop_gym_c
   cero. Las clases son `is-live` y `pill cast`: `.live` ya es la píldora del encabezado.
 - **Control**: «Transmitir entrenos» Permitido/Apagado (`gym_screen_configure(p_casting)`, firma
   de seis argumentos: la 153 retira la de cinco); apagarlo quita a quien esté transmitiendo.
+
+**La rutina del día (27 nov 2026, migración 156).** Joseph: mientras nadie esté en pantalla, la
+tele transmite la rutina del día —una de las básicas— con todos sus ejercicios a la vista, cada
+uno con su número, su demostración en movimiento y series × reps, como las teles de clase de un
+gym de circuito.
+- **Cuál**: `gym_screens.daily_board_id` si el admin fijó una en el control; si no,
+  `gym_screen_daily_board` rota las básicas (`is_starter`, del gym, no archivadas, con
+  ejercicios) un día a la vez en orden de nombre, contando días desde el 5 ene 2026: todas las
+  teles dan lo mismo sin guardar nada. `gym_screen_set_daily` sube `reload_nonce` para que la
+  tele la cambie al momento (si no, la pide cada 10 min).
+- **La tele la pide aparte** (`gym_screen_daily(screen, key)`, misma llave): no lleva datos de
+  nadie y cambia una vez al día. **No se repinta con cada aviso**: vive en su propia zona (`#dv`;
+  la gente en `#pv`, «Más tarde» en `#lv`) y solo se rehace si cambia la rutina, porque rehacer
+  los videos los reiniciaría. Al aparecer alguien en el gym, la zona se vacía (sin videos
+  corriendo detrás).
+- **La demostración de cada ejercicio**: el servidor manda las candidatas en orden y
+  `HabitScreen.pickMedia` toma la primera que sabe enseñar: animación o GIF/MP4 del catálogo del
+  ejercicio → GIF del catálogo con el mismo nombre o alias (`gym_screen_norm`) → los videos del
+  gym. **En nov 2026 ninguna básica tenía GIF**: todas traen los YouTube Shorts que grabó el gym
+  (FULL BODY, Drive), y esos van en un `iframe` de `youtube-nocookie` mudo, en bucle, sin
+  controles y sin eventos de cursor, como un GIF. Drive no reproduce sin un toque: va su foto.
+  `?lite` cambia los videos por su foto, para una tele que no aguante varios a la vez.
+- **Acomodo**: cuadros verticales 9:16 (la forma de los Shorts) con el texto abajo;
+  `layoutDaily` prueba de 1 a 4 filas y se queda con el cuadro más grande. `/pantalla?demo=rutina`
+  la enseña con las figuras de `skill-anim`. En el control, «Rutina del día»: Automática o una
+  de las básicas.

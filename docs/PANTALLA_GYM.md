@@ -26,6 +26,9 @@ probó en producción dentro de una transacción revertida. Respecto al plan:
   socio solo lee la suya.
 - El nombre lo pone `gym_screen_state` desde el perfil, como en la fase 1.
 
+**La rutina del día** (27 nov, migración 156): mientras nadie esté en pantalla, la tele enseña una
+rutina básica con todos sus ejercicios a la vista y la demostración de cada uno. Ver CLAUDE.md.
+
 Las fases 3–4 siguen siendo plan.
 
 **Decidido (Joseph, 24 nov):**

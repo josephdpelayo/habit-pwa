@@ -190,4 +190,28 @@ for (const k of ['focus_key', 'focus_idx', 'rest_end_at', 'rest_frozen_s', 'rest
   assert.ok(tvPage.includes(k), 'la tele usa ' + k);
 }
 
+// ── La rutina del día (migración 156) ────────────────────────────────────
+const sql156 = read('migrations/156_gym_screen_daily.sql');
+assert.deepEqual(H.pickMedia(['https://youtube.com/shorts/AUSCLBlE9tg?si=fQTkFNohFDpfo9Jn']), { kind: 'youtube', id: 'AUSCLBlE9tg' }, 'un Short del gym');
+assert.deepEqual(H.pickMedia(['https://www.youtube.com/watch?v=dZJETBH7mK4&t=3']), { kind: 'youtube', id: 'dZJETBH7mK4' });
+assert.deepEqual(H.pickMedia(['https://drive.google.com/file/d/1AbCdEfGhIjKlMnOpQr/view?usp=drive_link']), { kind: 'drive', id: '1AbCdEfGhIjKlMnOpQr' });
+assert.deepEqual(H.pickMedia(['texto suelto', '/skill-anim/hollow-hold.svg', 'https://youtu.be/xyzxyz12']), { kind: 'image', url: '/skill-anim/hollow-hold.svg', anim: true }, 'lo que no es medio se salta; manda el orden del servidor');
+assert.equal(H.pickMedia(['https://fitnessprogramer.com/x/Barbell-Squat.gif']).kind, 'image');
+assert.equal(H.pickMedia(['https://x.com/a.mp4?v=2']).kind, 'video');
+assert.equal(H.pickMedia([]), null);
+assert.equal(H.pickMedia(['javascript:alert(1)']), null, 'solo http(s) o rutas del sitio');
+for (const l of ['es', 'en']) assert.ok(H.TEXT[l].daily && H.TEXT[l].dailyCount(3).includes('3'), l + ': textos de la rutina del día');
+const anon156 = [...sql156.matchAll(/grant execute on function ([\w.]+)\([^)]*\) to ([^;]+);/g)].filter((m) => /\banon\b/.test(m[2])).map((m) => m[1]);
+assert.deepEqual(anon156, ['public.gym_screen_daily'], 'anon solo pide la rutina del día, con la llave de la tele');
+assert.ok(/v_screen\.access_key <> p_key/.test(sql156), 'la rutina del día pide la llave de la pantalla');
+for (const fn of ['gym_screen_norm', 'gym_screen_daily_board', 'gym_screen_daily', 'gym_screen_set_daily', 'gym_screen_daily_options']) {
+  assert.ok(new RegExp(`revoke all on function public\\.${fn}\\([^)]*\\) from public, anon, authenticated;`).test(sql156), fn + ' empieza sin permisos');
+}
+assert.ok(/b\.is_starter and b\.owner_id is null and b\.archived_at is null/.test(sql156), 'rota entre las básicas del gym');
+assert.ok(!/'note'|e->'note'|e->>'note'/.test(sql156), 'no manda las notas del coach');
+assert.ok(/reload_nonce = reload_nonce \+ 1/.test(sql156), 'cambiar la rutina recarga la tele al momento');
+assert.ok(tvPage.includes("tv.rpc('gym_screen_daily'"), 'la tele pide la rutina del día');
+assert.ok(/pointer-events:none/.test(tvPage), 'los videos no reaccionan a un cursor');
+assert.ok(tvPage.includes('youtube-nocookie.com/embed/'), 'YouTube sin cookies');
+
 console.log('check-screen: ok');
