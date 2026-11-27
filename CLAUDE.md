@@ -1206,3 +1206,19 @@ gym de circuito.
   `layoutDaily` prueba de 1 a 4 filas y se queda con el cuadro más grande. `/pantalla?demo=rutina`
   la enseña con las figuras de `skill-anim`. En el control, «Rutina del día»: Automática o una
   de las básicas.
+
+## Entrena con David: las clases las abre David (27 nov 2026, migración 157)
+
+Hasta la 155 cada día de clase con David era una migración (fechas en `david_pilot_is_day()`,
+horas `(14, 16, 18)` repetidas en cinco funciones y en `api/create-checkout-session.js`). Ahora
+**cada clase es una fila de `david_classes`** (`ds`, `start_idx`, `spots` = 3, `is_open`), y
+David —o cualquier `role = 'admin'`— la abre y la cierra en **Admin → Agenda**, arriba de la
+agenda del día (`renderDavidClassesAdmin`, RPCs `david_class_admin_day` / `david_class_set`).
+- **Abrir** bloquea su hora en `slot_blocks` (4 lugares, motivo «Entrena con David») y se niega
+  si ya hay socios reservados a esa hora o si se encima con otra clase del día.
+- **Cerrar** sin reservas ni pagos en curso borra la fila y libera esa hora; con reservas solo
+  deja de aceptar nuevas (las que hay siguen, se cancelan en la agenda como siempre, y el
+  trigger de la 147 devuelve el boleto). Un pago que ya estaba en Stripe se respeta.
+- **Cuesta 1 boleto** (antes 2): con mensualidad `im`/`gm` vigente no cuesta, con boleto se
+  descuenta uno, sin nada se paga una visita (`i1`, 110 MXN) en Stripe.
+- El sábado 28 nov quedó solo con 7 y 8 h; la hora de 9 a 10 volvió a la agenda.

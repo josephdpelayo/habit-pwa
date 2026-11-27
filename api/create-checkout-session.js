@@ -27,11 +27,11 @@ module.exports = async function handler(req, res) {
 
     const { davidDs, davidSlot, expectedAmount } = req.body || {};
     if (davidSlot !== undefined) {
+      // Una clase con David vale un boleto (una visita). Qué clases existen lo decide
+      // david_classes (migración 157): hold_david_pilot rechaza una que no esté abierta.
       const ticketPrice = getPlan('i1').price * 100;
-      const pilotDates = ['2026-11-16', '2026-11-17', '2026-11-18', '2026-11-19', '2026-11-20',
-        '2026-11-24', '2026-11-25', '2026-11-26', '2026-11-27', '2026-11-28'];
-      if (!pilotDates.includes(davidDs) || ![14, 16, 18].includes(davidSlot) ||
-          ![ticketPrice, ticketPrice * 2].includes(expectedAmount)) {
+      if (!/^\d{4}-\d{2}-\d{2}$/.test(String(davidDs || '')) || !Number.isInteger(davidSlot) ||
+          davidSlot < 0 || davidSlot > 46 || expectedAmount !== ticketPrice) {
         return res.status(400).json({ error: 'Horario o precio inválido' });
       }
       const { data: hold, error } = await supabase.rpc('hold_david_pilot', {
@@ -52,7 +52,7 @@ module.exports = async function handler(req, res) {
           price_data: {
             currency: 'mxn',
             unit_amount: hold.amount,
-            product_data: { name: 'HABIT - Entrena con David', description: 'Reserva equivalente a dos boletos de clase' },
+            product_data: { name: 'HABIT - Entrena con David', description: 'Reserva equivalente a un boleto de clase' },
           },
         }],
         metadata: { kind: 'david_pilot', hold_id: hold.id },

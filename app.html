@@ -6,12 +6,12 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="HABIT">
 <meta name="application-name" content="HABIT">
-<link rel="manifest" href="/manifest.json?v=20261127-1">
-<link rel="apple-touch-icon" sizes="120x120" href="/icons/icon-120.png?v=20261127-1">
-<link rel="apple-touch-icon" sizes="152x152" href="/icons/icon-152.png?v=20261127-1">
-<link rel="apple-touch-icon" sizes="167x167" href="/icons/icon-167.png?v=20261127-1">
-<link rel="apple-touch-icon" sizes="180x180" href="/icons/icon-180.png?v=20261127-1">
-<link rel="icon" type="image/png" sizes="32x32" href="/icons/icon-32.png?v=20261127-1">
+<link rel="manifest" href="/manifest.json?v=20261127-2">
+<link rel="apple-touch-icon" sizes="120x120" href="/icons/icon-120.png?v=20261127-2">
+<link rel="apple-touch-icon" sizes="152x152" href="/icons/icon-152.png?v=20261127-2">
+<link rel="apple-touch-icon" sizes="167x167" href="/icons/icon-167.png?v=20261127-2">
+<link rel="apple-touch-icon" sizes="180x180" href="/icons/icon-180.png?v=20261127-2">
+<link rel="icon" type="image/png" sizes="32x32" href="/icons/icon-32.png?v=20261127-2">
 <title>HABIT</title>
 <!-- Con id a propósito: scripts/check-training.js toma la primera etiqueta script sin
      atributos como el script principal de la app y la compila. -->
@@ -25,7 +25,7 @@
   var crew=/^\/crew(\/|$)/.test(location.pathname);
   window.HABIT_BRAND=crew?'crew':'gym';
   if(!crew)return;
-  var v='20261127-1';
+  var v='20261127-2';
   document.documentElement.classList.add('brand-crew');
   document.title='HABIT Crew';
   document.querySelectorAll('meta[name="apple-mobile-web-app-title"],meta[name="application-name"]')
@@ -40,12 +40,12 @@
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Share+Tech+Mono&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="/skandi-recovery.js?v=20261127-1"></script>
-<script src="/body-figure.js?v=20261127-1"></script>
-<script src="/habit-training.js?v=20261127-1"></script>
-<script src="/habit-share.js?v=20261127-1"></script>
-<script src="/habit-activity.js?v=20261127-1"></script>
-<script src="/habit-screen.js?v=20261127-1"></script>
+<script src="/skandi-recovery.js?v=20261127-2"></script>
+<script src="/body-figure.js?v=20261127-2"></script>
+<script src="/habit-training.js?v=20261127-2"></script>
+<script src="/habit-share.js?v=20261127-2"></script>
+<script src="/habit-activity.js?v=20261127-2"></script>
+<script src="/habit-screen.js?v=20261127-2"></script>
 <style>
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
 @media (prefers-reduced-motion:reduce){*,*:before,*:after{scroll-behavior:auto!important;animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}}
@@ -318,6 +318,18 @@ input,select,button,textarea{font-family:'Inter',sans-serif}
 .sb-grp{background:rgba(124,58,237,.15);color:#a78bfa}
 .coach-class-eyebrow{display:flex;align-items:center;gap:6px;font-size:10px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;color:#a78bfa;margin-bottom:6px}
 .coach-class-eyebrow svg{width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round;flex-shrink:0}
+.dc-admin{border-color:rgba(139,92,246,.35);background:rgba(139,92,246,.07)}
+.dc-admin-head{display:flex;justify-content:space-between;align-items:baseline;gap:8px;margin-bottom:10px}
+.dc-admin-title{font-size:15px;font-weight:700}
+.dc-admin-sub{font-size:11px;color:var(--gray)}
+.dc-row{display:grid;grid-template-columns:1fr auto;gap:10px;align-items:center;padding:10px 0;border-top:1px solid rgba(255,255,255,.06)}
+.dc-row:first-of-type{border-top:none}
+.dc-time{font-weight:700;font-size:14px}
+.dc-meta{font-size:11px;color:var(--gray);margin-top:3px;overflow-wrap:anywhere}
+.dc-empty{font-size:12px;color:var(--gray);padding:4px 0 10px}
+.dc-add{display:flex;gap:8px;margin-top:10px;align-items:center}
+.dc-add select{flex:1;min-width:0;min-height:38px}
+.dc-admin .btn-sm{min-height:38px}
 .coach-class-card{border:1px solid rgba(139,92,246,.35);background:rgba(139,92,246,.08);border-radius:10px;padding:8px;margin-bottom:8px}
 .coach-class-section{display:flex;align-items:baseline;justify-content:space-between;flex-wrap:wrap;gap:2px 8px;margin:0 1px 6px}
 .coach-class-title{font-size:14px;font-weight:750;color:var(--white);margin:0}
@@ -3444,6 +3456,7 @@ button{transition:transform .14s var(--ease-out),background-color .16s ease,colo
         <div><div class="admin-page-kicker">Operación</div><h2 class="admin-page-title">Agenda</h2><div class="admin-page-sub">Reservas, cupos y bloqueos</div></div>
       </div>
       <div class="admin-date-rail"><button class="admin-date-step" onclick="changeAdminDate(-1)" aria-label="Día anterior">‹</button><button class="admin-date-today" onclick="setAdminToday()">Hoy</button><input type="date" class="adm-date" id="adm-date" onchange="renderAdmSlots()"><button class="admin-date-step" onclick="changeAdminDate(1)" aria-label="Día siguiente">›</button></div>
+      <div id="adm-david-classes"></div>
       <div id="adm-slot-content"></div>
     </div>
 
@@ -4115,7 +4128,7 @@ const GYM_ONLY_VIEWS=['book','planes','historial','shop'];
 const GYM_APP_URL='/';
 document.querySelectorAll('.brand-name').forEach(el=>{el.textContent=BRAND_NAME;});
 const SUPABASE_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBtcGp0ZXVxanVzYmlkdWV2YndxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc2OTI1NjUsImV4cCI6MjA5MzI2ODU2NX0.XbMzZoo2yqtrD8znLnyo_1zDfrdJAvAPj1lqGOyXnLw';
-const APP_VERSION='20261127-1';
+const APP_VERSION='20261127-2';
 // La pierna va separada en cuádriceps, femorales y pantorrillas: la figura
 // corporal pinta esas tres regiones por separado y el motor de recuperación les
 // da ventanas de descanso distintas. 'Piernas' sigue reconociéndose al leer
@@ -7495,8 +7508,8 @@ function changeDay(delta){
 }
 function clearSel(){selStartIdx=null;selShort=false;renderBook();}
 
-const DAVID_PILOT_FIRST_DS='2026-11-16';
-const DAVID_PILOT_LAST_DS='2026-11-28';
+// Qué clases con David hay lo decide david_classes (migración 157): David las abre y
+// las cierra en Admin → Agenda. Cada clase cuesta un boleto, o una visita en Stripe.
 let davidPilotRequest=0;
 
 async function renderDavidPilot(ds){
@@ -7505,7 +7518,7 @@ async function renderDavidPilot(ds){
   const today=mazToday();
   if(panel.dataset.date!==ds)panel.hidden=true;
   panel.dataset.date=ds;
-  if(rescheduleBk||!sbUser||ds<today||ds<DAVID_PILOT_FIRST_DS||ds>DAVID_PILOT_LAST_DS){
+  if(rescheduleBk||!sbUser||ds<today){
     panel.hidden=true;
     return;
   }
@@ -7523,8 +7536,8 @@ async function renderDavidPilot(ds){
     return;
   }
   const prices=sessions.map(session=>session.amount===0
-    ? (session.credits_used===2?'2 boletos de clase':'Incluido en tu mensualidad')
-    : (session.credits_used===1?'1 boleto + ':'')+'$'+(session.amount/100)+' MXN');
+    ? (session.credits_used>0?'1 boleto de clase':'Incluido en tu mensualidad')
+    : '$'+(session.amount/100)+' MXN');
   const sharedPrice=prices.every(price=>price===prices[0])?prices[0]:'';
   panel.innerHTML='<div class="coach-class-card"><header class="coach-class-section">'+
     '<h3 class="coach-class-title">Entrena con David</h3>'+
@@ -7587,7 +7600,7 @@ async function renderInicioDavidPilot(){
   const el=document.getElementById('inicio-david-pilot');
   if(!el)return;
   el.innerHTML='';
-  if(!sbUser||mazToday()>DAVID_PILOT_LAST_DS)return;
+  if(!sbUser)return;
   const {data,error}=await sb.rpc('david_pilot_slots');
   if(error||!data?.length)return;
   const reserved=data.find(s=>s.reserved);
@@ -15811,9 +15824,84 @@ function setAdminAgendaView(view){
   document.querySelectorAll('.admin-agenda-panel').forEach(p=>p.classList.toggle('active',p.dataset.agendaPanel===adminAgendaView));
 }
 
+// Entrena con David (migración 157): David abre y cierra sus clases desde aquí, por día.
+// Una clase es de 60 min, 3 lugares y cuesta 1 boleto. Abrirla bloquea su hora en la
+// agenda; cerrarla sin reservas la quita y libera la hora; con reservas, solo deja de
+// aceptar nuevas (las que hay siguen, y se cancelan abajo como cualquier reserva).
+let davidClassesAdminRequest=0;
+async function renderDavidClassesAdmin(ds){
+  const el=document.getElementById('adm-david-classes');
+  if(!el)return;
+  const request=++davidClassesAdminRequest;
+  const {data,error}=await sb.rpc('david_class_admin_day',{p_ds:ds});
+  if(request!==davidClassesAdminRequest)return;
+  if(error){el.innerHTML='';console.warn('Clases con David:',error.message);return;}
+  const classes=data||[];
+  const now=Date.now();
+  const startsAt=idx=>Date.parse(ds+'T00:00:00Z')+(MAZ_UTC_OFFSET_H*60+idx*30)*60000;
+  const editable=idx=>startsAt(idx)>now;
+  const rows=classes.map(c=>{
+    const idx=Number(c.start_idx);
+    const time=fmtSlot(idx)+'–'+fmtSlot(idx+2);
+    const people=c.booked+'/'+c.spots+' reservado'+(c.booked===1?'':'s')
+      +(c.paying?' · '+c.paying+' pagando':'')
+      +(c.names&&c.names.length?' · '+c.names.map(esc).join(', '):'');
+    const badge=c.is_open?'<span class="badge bg-green" style="font-size:9px">Abierta</span>'
+      :'<span class="badge bg-gray" style="font-size:9px">Cerrada</span>';
+    const action=!editable(idx)?''
+      :c.is_open?'<button type="button" class="btn-sm bred" data-dc-close="'+idx+'">Cerrar</button>'
+      :'<button type="button" class="btn-sm bblue" data-dc-open="'+idx+'">Abrir</button>';
+    return '<div class="dc-row"><div><div class="dc-time">'+time+' '+badge+'</div><div class="dc-meta">'+people+'</div></div><div>'+action+'</div></div>';
+  }).join('');
+  const taken=new Set();
+  classes.forEach(c=>{const i=Number(c.start_idx);taken.add(i-1);taken.add(i);taken.add(i+1);});
+  const options=[];
+  for(let idx=12;idx<=42;idx++){
+    if(taken.has(idx)||!editable(idx))continue;
+    options.push('<option value="'+idx+'">'+fmtSlot(idx)+'–'+fmtSlot(idx+2)+'</option>');
+  }
+  el.innerHTML='<div class="admin-card dc-admin"><div class="dc-admin-head"><div class="dc-admin-title">Entrena con David</div>'
+    +'<div class="dc-admin-sub">60 min · 3 lugares · 1 boleto</div></div>'
+    +(rows||'<div class="dc-empty">No hay clases este día.</div>')
+    +(options.length?'<div class="dc-add"><select id="dc-new-idx" class="admin-select" aria-label="Hora de la clase">'+options.join('')+'</select>'
+      +'<button type="button" class="btn-sm bblue" data-dc-add>Abrir clase</button></div>':'')
+    +'</div>';
+  const run=async(idx,open,btn)=>{
+    btn.disabled=true;
+    try{
+      const {data:result,error}=await sb.rpc('david_class_set',{p_ds:ds,p_start_idx:idx,p_open:open});
+      if(error)throw error;
+      toast(result==='opened'?'Clase abierta: '+fmtSlot(idx)
+        :result==='closed'?'Clase cerrada a reservas nuevas':'Clase quitada; la hora vuelve a la agenda','ok');
+    }catch(e){
+      toast(e.message||'No se pudo guardar','err');
+    }finally{
+      renderAdmSlots();
+    }
+  };
+  el.querySelectorAll('[data-dc-close]').forEach(btn=>btn.onclick=async()=>{
+    const idx=Number(btn.dataset.dcClose);
+    const c=classes.find(x=>Number(x.start_idx)===idx);
+    const busy=(c?.booked||0)+(c?.paying||0);
+    const msg=busy
+      ?'La clase de '+fmtSlot(idx)+' ya tiene '+busy+' persona'+(busy===1?'':'s')+'. Se cierra a reservas nuevas y su lugar se respeta; si hay que cancelar, se hace abajo en la agenda. ¿Cerrarla?'
+      :'¿Cerrar la clase de '+fmtSlot(idx)+' del '+fmtDS(ds)+'? Se quita y la hora vuelve a la agenda normal.';
+    if(!await confirmSheet(msg,{danger:true,confirmLabel:'Cerrar clase'}))return;
+    run(idx,false,btn);
+  });
+  el.querySelectorAll('[data-dc-open]').forEach(btn=>btn.onclick=()=>run(Number(btn.dataset.dcOpen),true,btn));
+  const add=el.querySelector('[data-dc-add]');
+  if(add)add.onclick=async()=>{
+    const idx=Number(document.getElementById('dc-new-idx').value);
+    if(!await confirmSheet('¿Abrir Entrena con David el '+fmtDS(ds)+' de '+fmtSlot(idx)+' a '+fmtSlot(idx+2)+'? Esa hora se bloquea en la agenda para los demás socios.',{confirmLabel:'Abrir clase'}))return;
+    run(idx,true,add);
+  };
+}
+
 async function renderAdmSlots(){
   const ds=document.getElementById('adm-date').value||mazToday();
   const el=document.getElementById('adm-slot-content');
+  void renderDavidClassesAdmin(ds).catch(console.error);
   el.innerHTML='<div class="empty">Cargando...</div>';
   try{
     const[bookingRes,blockRes,waitRes]=await Promise.allSettled([
